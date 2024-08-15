@@ -27,7 +27,7 @@ local FontSetJustify = Addon.Font.SetJustify
 local Element = Addon.Elements.NewElement("Level")
 
 -- Called in processing event: NAME_PLATE_CREATED
-function Element.Create(tp_frame)
+function Element.PlateCreated(tp_frame)
   -- Level text is not shown in headline view, so anchoring it to the healthbar is ok
   local level_text = tp_frame.visual.Healthbar:CreateFontString(nil, "ARTWORK")
 

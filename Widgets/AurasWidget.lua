@@ -21,9 +21,9 @@ local tonumber = tonumber
 local BUFF_MAX_DISPLAY = BUFF_MAX_DISPLAY
 local GetFramerate = GetFramerate
 local DebuffTypeColor = DebuffTypeColor
-local UnitAuraBySlot, UnitAuraSlots = UnitAuraBySlot, UnitAuraSlots
-local GetAuraDataBySlot, GetAuraDataByAuraInstanceID = C_UnitAuras and C_UnitAuras.GetAuraDataBySlot, C_UnitAuras and C_UnitAuras.GetAuraDataByAuraInstanceID
 local UnitIsUnit = UnitIsUnit
+local GetAuraSlots = C_UnitAuras and C_UnitAuras.GetAuraSlots
+local GetAuraDataBySlot, GetAuraDataByAuraInstanceID = C_UnitAuras and C_UnitAuras.GetAuraDataBySlot, C_UnitAuras and C_UnitAuras.GetAuraDataByAuraInstanceID
 local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
@@ -33,7 +33,7 @@ local FontUpdateText = Addon.Font.UpdateText
 local AuraTriggerInitialize, AuraTriggerUpdateStyle, AuraTriggerCheckIfActive = Addon.Style.AuraTriggerInitialize, Addon.Style.AuraTriggerUpdateStyle, Addon.Style.AuraTriggerCheckIfActive
 local CUSTOM_GLOW_FUNCTIONS, CUSTOM_GLOW_WRAPPER_FUNCTIONS = Addon.CUSTOM_GLOW_FUNCTIONS, Addon.CUSTOM_GLOW_WRAPPER_FUNCTIONS
 local BackdropTemplate = Addon.BackdropTemplate
-local MODE_FOR_STYLE, ANCHOR_POINT_TEXT = Addon.MODE_FOR_STYLE, Addon.ANCHOR_POINT_TEXT
+local MODE_FOR_STYLE, AnchorFrameTo = Addon.MODE_FOR_STYLE, Addon.AnchorFrameTo
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -88,6 +88,43 @@ local LOC_DISORIENT = 7     -- Aura: Confuse
 local LOC_BANISH = 8
 local LOC_HORROR = 9
 
+-- Mechanic from Wowhead
+-- Asleep
+-- Banished
+-- Charmed
+-- Gripped
+-- Dazed
+-- Disarmed
+-- Disoriented
+local CC_DISTRACTED = 200 -- Distracted
+-- Snared
+-- Fleeing
+-- Frozen
+-- Horrified
+-- Incapacitated
+-- Interrupted
+-- Slowed
+-- Polymorphed
+-- Rooted
+-- Sapped
+-- Shackled
+-- Silenced
+-- Stunned
+-- Turned
+
+-- Not relevant:
+-- Bleeding
+-- Discovery
+-- Enraged
+-- Healing
+-- Invulnerable
+-- Invulnerable
+-- Mounted
+-- Infected
+-- Shielded
+-- Wounded
+
+
 -- Polymorph: Aura: Pacify & Silence
 -- Hex: Aura: Confuse
 
@@ -128,20 +165,33 @@ local CROWD_CONTROL_SPELLS_RETAIL = {
   -- Death Knight
   ---------------------------------------------------------------------------------------------------
 
-  [273977] = PC_SNARE,            -- Grip of the Dead (Talent)
+  [273977] = PC_SNARE,            -- Grip of the Dead
   [45524] = PC_SNARE,             -- Chains of Ice
   [111673] = LOC_CHARM,           -- Control Undead
-  --[77606] = LOC_CHARM,            -- Dark Simulacrum (Honor) -- no CC aura
-  [221562] = LOC_STUN,            -- Asphyxiate (Blood, Blizzard)
-  [47476] = CC_SILENCE,           -- Strangulate (Honor)
-  [108194] = LOC_STUN,            -- Asphyxiate (Unholy/Frost, Blizzard)
-  [207167] = LOC_DISORIENT,       -- Blinding Sleet (Talent, Blizzard)
-  [204085] = PC_ROOT,             -- Deathchill (Honor)
-  [204206] = PC_SNARE,            -- Chilled from Chill Streasek (Honor)
-  [233395] = PC_ROOT,             -- Frozen Center (Honor)
-  [279303] = PC_SNARE,            -- Frost Breath from Frostwyrm's Fury (Talent)
+  --[77606] = LOC_CHARM,            -- Dark Simulacrum -- no CC aura
+  [221562] = LOC_STUN,            -- Asphyxiate (Blizzard)
+  [108194] = LOC_STUN,            -- Asphyxiate (Blizzard)
+  [47476] = CC_SILENCE,           -- Strangulate
+  [207167] = LOC_DISORIENT,       -- Blinding Sleet (Blizzard)
+  [204085] = PC_ROOT,             -- Deathchill
+  [204206] = PC_SNARE,            -- Chilled from Chill Streasek
+  [233395] = PC_ROOT,             -- Frozen Center
+  [279303] = PC_SNARE,            -- Frost Breath from Frostwyrm's Fury
   --[211793] = PC_SNARE,            -- Remorseless Winter - not shown because uptime to high
-  [200646] = PC_SNARE,            -- Unholy Mutation (Honor)
+  [200646] = PC_SNARE,            -- Unholy Mutation
+  [204206] = PC_SNARE,            -- Chilled from Chill Streak
+  [444005] = PC_SNARE,            -- Chains of Ice from Rider's Champion
+  [208278] = PC_SNARE,            -- Debilitating Infestation
+  [143375] = PC_SNARE,            -- Tightening Grasp from Gorefiend's Grasp
+  [208278] = CC_SILENCE,          -- Tightening Grasp from Gorefiend's Grasp
+  [207171] = PC_ROOT,             -- Winter is Coming from Remorseless Winter
+  [287254] = LOC_STUN,            -- Dead of Winter from Remorseless Winter
+  -- TWW
+  [47528] = CC_SILENCE,           -- Mind Freeze
+  [392566] = PC_SNARE,            -- Enfeeble
+  [206930] = PC_SNARE,            -- Heart Strike
+  [454786] = PC_ROOT,             -- Chains of Ice with Ice Prison
+  [454787] = PC_ROOT,             -- Chains of Ice with Ice Prison
 
   ---------------------------------------------------------------------------------------------------
   -- Demon Hunter
@@ -159,11 +209,12 @@ local CROWD_CONTROL_SPELLS_RETAIL = {
   [198813] = PC_SNARE,             -- Vengeful Retreat
   [213405] = PC_SNARE,             -- Master of the Glaive (Talent)
   [211881] = LOC_STUN,             -- Fel Eruption (Talent, Blizzard)
+  [207488] = PC_SNARE,             -- Pinning Glare
 
   ---------------------------------------------------------------------------------------------------
   -- Evoker
   ---------------------------------------------------------------------------------------------------
-  [358385] = PC_ROOT,             -- Landslide
+  [355689] = PC_ROOT,             -- Landslide
   [351338] = CC_SILENCE,          -- Quell
   [372048] = CC_OTHER,            -- Oppressing Roar
   [357210] = LOC_STUN,            -- Deep Breath
@@ -173,13 +224,14 @@ local CROWD_CONTROL_SPELLS_RETAIL = {
   [378441] = LOC_STUN,            -- Time Stop
   [378441] = PC_SNARE,            -- Disintegrate
 
-
   ---------------------------------------------------------------------------------------------------
   -- Hunter
   ---------------------------------------------------------------------------------------------------
 
   [5116] = PC_DAZE,             -- Concussive Shot
   [3355] = LOC_INCAPACITATE,    -- Freezing Trap (Blizzard)
+  [212365] = LOC_INCAPACITATE,  -- Freezing Trap (Blizzard)
+  [203337] = LOC_INCAPACITATE,  -- Freezing Trap with Diamond Ice
   [24394] = LOC_STUN,           -- Intimidation (Blizzard)
   [117405] = PC_ROOT,           -- Binding Shot
   [117526] = PC_ROOT,           -- Binding Shot (Root)
@@ -192,30 +244,59 @@ local CROWD_CONTROL_SPELLS_RETAIL = {
   [212638] = PC_ROOT,           -- Tracker's Net
   [190927] = PC_ROOT,           -- Harpoon
   [195645] = PC_SNARE,          -- Wing Clip
-  [203337] = LOC_INCAPACITATE,  -- Freezing Trap with Diamond Ice
   --[187707] = CC_SILENCE,        -- Muzzle
+  [407032] = PC_DISARM,         -- Sticky Tar Bomb
+  [407031] = PC_DISARM,         -- Sticky Tar Bomb
+  [206755] = PC_SNARE,          -- Ranger's Net
+  [236699] = PC_SNARE,          -- Super Sticky Tar
+  [136634] = PC_ROOT,           -- Narrow Escape
+  [392061] = CC_SILENCE,        -- Wailing Arrow
+  [355596] = CC_SILENCE,        -- Wailing Arrow
+  -- Pet Abilities
+  [263446] = PC_SNARE,          -- Acid Spit (Pet)
+  [50433] = PC_SNARE,           -- Ankle Crack (Pet)
+  [288962] = PC_SNARE,          -- Blood Bolt (Pet)
+  [50285] = PC_SNARE,           -- Dust Cloud (Pet)
+  [54644] = PC_SNARE,           -- Frost Breath (Pet)
+  [263840] = PC_SNARE,          -- Furious Bite (Pet)
+  [263423] = PC_SNARE,          -- Lock Jaw (Pet)
+  [263841] = PC_SNARE,          -- Petrifying Gaze (Pet)
+  [50245] = PC_SNARE,           -- Pin (Pet)
+  [263852] = PC_SNARE,          -- Talon Rend (Pet)
+  [160065] = PC_SNARE,          -- Tendon Rip (Pet)
+  [1513] = LOC_FEAR,            -- Scare Beast (Pet)
+  [459690] = LOC_STUN,          -- Spearhead (Pet)
+  -- TWW
+  [459690] = LOC_STUN,          -- Spearhead
 
   ---------------------------------------------------------------------------------------------------
   -- Mage
   ---------------------------------------------------------------------------------------------------
 
-  [61780] = LOC_POLYMORPH,  -- Polymorph (Turkey)
-  [161353] = LOC_POLYMORPH, -- Polymorph (Polar Bear Cub)
-  [28272] = LOC_POLYMORPH,  -- Polymorph (Pig)
-  [28271] = LOC_POLYMORPH,  -- Polymorph (Turtle)
-  [161354] = LOC_POLYMORPH, -- Polymorph (Monkey)
-  [118] = LOC_POLYMORPH,    -- Polymorph (Sheep)
-  [126819] = LOC_POLYMORPH, -- Polymorph (Porcupine)
   [61305] = LOC_POLYMORPH,  -- Polymorph (Black Cat)
-  [61721] = LOC_POLYMORPH,  -- Polymorph (Rabbit)
+  [277792] = LOC_POLYMORPH, -- Polymorph (Bumblebee)
+  [277787] = LOC_POLYMORPH, -- Polymorph (Direhorn)
+  [391622] = LOC_POLYMORPH, -- Polymorph (Duck)
+  [321395] = LOC_POLYMORPH, -- Polymorph (Mawrat)
+  [161354] = LOC_POLYMORPH, -- Polymorph (Monkey)
+  [28272] = LOC_POLYMORPH,  -- Polymorph (Pig)
   [161372] = LOC_POLYMORPH, -- Polymorph (Peacock)
   [161355] = LOC_POLYMORPH, -- Polymorph (Penguin)
-  [277787] = LOC_POLYMORPH, -- Polymorph (Direhorn)
-  [277792] = LOC_POLYMORPH, -- Polymorph (Bumblebee)
+  [161353] = LOC_POLYMORPH, -- Polymorph (Polar Bear Cub)
+  [126819] = LOC_POLYMORPH, -- Polymorph (Porcupine)
+  [61721] = LOC_POLYMORPH,  -- Polymorph (Rabbit)
+  [118] = LOC_POLYMORPH,    -- Polymorph (Sheep)
+  [61780] = LOC_POLYMORPH,  -- Polymorph (Turkey)
+  [28271] = LOC_POLYMORPH,  -- Polymorph (Turtle)
+  -- TWW
+  [460392] = LOC_POLYMORPH, -- Polymorph (Mosswool)
+  [461489] = LOC_POLYMORPH, -- Polymorph (Proto Sheep)
+
   -- [2139] = CC_SILENCE,      -- Counterspell -- does not leave a debuff on target
   [122] = PC_ROOT,          -- Frost Nova (Blizzard)
   [82691] = LOC_STUN,       -- Ring of Frost (Talent, Blizzard)
   [31589] = PC_SNARE,       -- Slow
+  [288599] = PC_SNARE,      -- Greater Slow
   [236299] = PC_SNARE,      -- Arcane Barrage with Chrono Shift (Talent)
   [31661] = LOC_DISORIENT,  -- Dragon's Breath (Blizzard)
   [2120] = PC_SNARE,        -- Flamestrike
@@ -232,6 +313,7 @@ local CROWD_CONTROL_SPELLS_RETAIL = {
 
   [20066] = LOC_INCAPACITATE,   -- Repentance (Blizzard)
   [853] = LOC_STUN,             -- Hammer of Justice (Blizzard)
+  [405397] = LOC_STUN,          -- Hammer of Retribution
   [105421] = LOC_DISORIENT,     -- Blinding Light (Blizzard)
   --[96231] = CC_SILENCE,       -- Rebuke
   [31935] = CC_SILENCE,         -- Avenger's Shield (Blizzard)
@@ -240,7 +322,9 @@ local CROWD_CONTROL_SPELLS_RETAIL = {
   -- [205273] = PC_SNARE,       -- Wake of Ashes - from Artefact weapon
   [255937] = PC_SNARE,          -- Wake of Ashes - Talent
   [183218] = PC_SNARE,          -- Hand of Hindrance
+  [216444] = PC_SNARE,          -- Hand of Judgment
   [10326] = LOC_FEAR,           -- Turn Evil
+  [199566] = LOC_STUN,          -- Sense of Injustice from Shield of the Righteou
 
   ---------------------------------------------------------------------------------------------------
   -- Priest
@@ -257,6 +341,8 @@ local CROWD_CONTROL_SPELLS_RETAIL = {
   [64044] = LOC_STUN,           -- Psychic Horror (Blizzard)
   --[15407] = PC_SNARE,           -- Mind Flay - not shown as very high uptime
   [87204] = LOC_FEAR,           -- Sin and Punishment, fear effect after dispell of Vampiric Touch ?87204
+  [205364] = LOC_CHARM,         -- Dominate Mind
+  [323716] = CC_SILENCE,        -- Thoughtsteal
 
   ---------------------------------------------------------------------------------------------------
   -- Rogue
@@ -265,6 +351,7 @@ local CROWD_CONTROL_SPELLS_RETAIL = {
   [1833] = LOC_STUN,       -- Cheap Shot (Blizzard)
   [6770] = LOC_STUN,       -- Sap (Blizzard)
   [2094] = LOC_DISORIENT,  -- Blind
+  [427773] = LOC_DISORIENT,  -- Blind modified by talents
   [408] = LOC_STUN,        -- Kidney Shot (Blizzard)
   [212183] = LOC_STUN,     -- Smoke Bomb (Honor)
   [248744] = PC_SNARE,     -- Shiv (Honor)
@@ -275,19 +362,27 @@ local CROWD_CONTROL_SPELLS_RETAIL = {
   [185763] = PC_SNARE,     -- Pistol Shot
   [199804] = LOC_STUN,     -- Between the Eyes (Blizzard)
   [206760] = PC_SNARE,     -- Night Terrors
+  [199743] = LOC_CHARM,    -- Parley
+  [354812] = PC_SNARE,     -- Distracting Mirage: Slow
+  [196958] = LOC_STUN,     -- Strike from the Shadows
+  -- TWW  
+  [441587] = CC_DISTRACTED,     -- Distract - no aura available
+  [441662] = CC_DISTRACTED,     -- Distract - no aura available
 
   ---------------------------------------------------------------------------------------------------
   -- Shaman
   ---------------------------------------------------------------------------------------------------
 
-  [51514] = LOC_POLYMORPH,      -- Hex (Frog) (Blizzard)
-  [210873] = LOC_POLYMORPH,     -- Hex (Compy) (Blizzard)
-  [211004] = LOC_POLYMORPH,     -- Hex (Spider) (Blizzard)
-  [211010] = LOC_POLYMORPH,     -- Hex (Snake) (Blizzard)
   [211015] = LOC_POLYMORPH,     -- Hex (Cockroach) (Blizzard)
+  [210873] = LOC_POLYMORPH,     -- Hex (Compy) (Blizzard)
+  [51514] = LOC_POLYMORPH,      -- Hex (Frog) (Blizzard)
+  [309328] = LOC_POLYMORPH,     -- Hex (Living Honey) (Blizzard)
   [269352] = LOC_POLYMORPH,     -- Hex (Skeletal Hatchling) (Blizzard)
-  [277778] = LOC_POLYMORPH,     -- Hex (Zandalari Tendonripper) (Blizzard)
+  [211010] = LOC_POLYMORPH,     -- Hex (Snake) (Blizzard)
+  [211004] = LOC_POLYMORPH,     -- Hex (Spider) (Blizzard)
   [277784] = LOC_POLYMORPH,     -- Hex (Wicker Mongrel) (Blizzard)
+  [277778] = LOC_POLYMORPH,     -- Hex (Zandalari Tendonripper) (Blizzard)
+  
   [118905] = LOC_STUN,          -- Static Charge from Capacitor Totem
   -- [57994] = CC_SILENCE,         -- Wind Shear
   [3600] = PC_SNARE,            -- Earthbind Totem
@@ -300,6 +395,7 @@ local CROWD_CONTROL_SPELLS_RETAIL = {
   [197214] = LOC_INCAPACITATE,  -- Sundering
   -- [197385] = PC_SNARE,          -- Fury of Air - Not shown as too much uptime
   [64695] = PC_ROOT,            -- Earthgrab Totem (Blizzard)
+  [285515] = PC_ROOT,           -- Surge of Power
 
   ---------------------------------------------------------------------------------------------------
   -- Warlock
@@ -311,13 +407,19 @@ local CROWD_CONTROL_SPELLS_RETAIL = {
   [30283] = LOC_STUN,         -- Shadowfury (Blizzard)
   -- [19647] = LOC_STUN,         -- Spell Lock aura from Call Felhunter
   [1098] = LOC_CHARM,         -- Enslave Demon
-  [6358] = LOC_DISORIENT,     -- Seduction from Command Demon (Apply Aura: Stun) (Blizzard)
+  [6358] = LOC_SLEEP,         -- Seduction from Command Demon (Blizzard)
+  [261589] = LOC_SLEEP,       -- Seduction from Command Demon (Blizzard)
   [278350] = PC_SNARE,        -- Vile Taint
   [196364] = CC_SILENCE,      -- Unstable Affliction, silence effect after dispell of Unstable Affliction
   [213688] = LOC_STUN,        -- Fel Cleave aura from Call Fel Lord (Honor)
   [233582] = PC_SNARE,        -- Entrenched in Flame
   [5484] = LOC_FEAR,          -- Howl of Terror
   [22703] = LOC_STUN,         -- Infernal Awakening
+  [89766] = LOC_STUN,         -- Axe Toss
+  [115268] = LOC_SLEEP,       -- Mesmerize - Warlock Pet Shivarra
+  [1098] = LOC_SLEEP,         -- Subjugate Demon
+  [170995] = PC_SNARE,        -- Cripple Pet Ability
+  [170996] = PC_SNARE,        -- Debilitate Pet Ability
 
   ---------------------------------------------------------------------------------------------------
   -- Warrior
@@ -336,13 +438,17 @@ local CROWD_CONTROL_SPELLS_RETAIL = {
   -- [199042] = LOC_STUN,      -- Thunderstruck (PvP, Blizzard) -- Removed as CC as its uptime is to high.
   [199085] = LOC_STUN,      -- Warpath (PvP, Blizzard)
   [385954] = LOC_STUN,      -- Shield Charge
+  [376084] = LOC_STUN,      -- Champion's Spear
+  [376083] = LOC_STUN,      -- Champion's Spear
+  [237744] = LOC_STUN,      -- Warbringer
+  [213427] = LOC_STUN,      -- Warbringer
 
   ---------------------------------------------------------------------------------------------------
   -- Monk
   ---------------------------------------------------------------------------------------------------
 
   -- [116189] = PC_SNARE,      -- Provoke
-  [115078] = LOC_STUN,      -- Paralysis (Blizzard)se
+  [115078] = LOC_STUN,      -- Paralysis (Blizzard)
   -- [116705] = CC_SILENCE,    -- Spear Hand Strike
   [119381] = LOC_STUN,      -- Leg Sweep (Blizzard)
   [233759] = PC_DISARM,     -- Grapple Weapon
@@ -354,6 +460,12 @@ local CROWD_CONTROL_SPELLS_RETAIL = {
   [116095] = PC_SNARE,      -- Disable
   [123586] = PC_SNARE,      -- Flying Serpent Kick
   [324382] = PC_ROOT,       -- Clash
+  [118022] = PC_SNARE,      -- Dizzying Haze
+  [450342] = PC_SNARE,      -- Crashing Momentum
+  [232055] = LOC_STUN,      -- Fists of Fury
+  [120086] = LOC_STUN,      -- Fists of Fury
+  -- TWW
+  [450596] = PC_SNARE,      -- Spirit's Essence from Transcendence: Transfer
 
   ---------------------------------------------------------------------------------------------------
   -- Racial Traits and other specia sources
@@ -366,6 +478,178 @@ local CROWD_CONTROL_SPELLS_RETAIL = {
   [357214] = PC_SNARE,      -- Wing Buffet (Evoker)
   [368970] = PC_SNARE,      -- Tail Swipe (Evoker)
   [331866] = LOC_DISORIENT, -- Agent of Chaos (Venthyr Soulbind Ability)
+}
+
+local CROWD_CONTROL_SPELLS_CATA_CLASSIC = {
+  ---------------------------------------------------------------------------------------------------
+  -- Druid
+  ---------------------------------------------------------------------------------------------------
+
+  [5211] = LOC_STUN,                       -- Bash
+  [339] = PC_ROOT,                         -- Entangling Roots
+  [19975] = PC_ROOT,                       -- Entangling Roots - Triggered By: Nature's Grasp
+  [45334] = PC_ROOT,                       -- Feral Charge Effect - Triggered By: Feral Charge
+  [2637] = LOC_SLEEP,                      -- Hibernate
+  [9005] = LOC_STUN,                       -- Pounce
+  [2908] = PC_MODAGGRORANGE,               -- Soothe Animal
+  [33786] = LOC_BANISH,                    -- Cyclone
+  [22570] = LOC_STUN,                      -- Maim
+  [61391] = PC_DAZE,                       -- Typhoon
+  [81261] = CC_SILENCE,                    -- Solar Beam
+
+  ---------------------------------------------------------------------------------------------------
+  -- Death Knight
+  ---------------------------------------------------------------------------------------------------
+
+  [45524] = PC_SNARE,           -- Chains of Ice
+  [47476] = CC_SILENCE,         -- Strangulate
+  --[50040] = PC_SNARE,           -- Chilblains - not shown because uptime to high
+  --[55741] = PC_SNARE,           -- Desecration - Triggered by Desecration Rank 1 - not shown because uptime to high
+  --[68766] = PC_SNARE,           -- Desecration - Triggered by Desecration Rank 2 - not shown because uptime to high
+  [49203] = PC_ROOT,            -- Hungering Cold
+
+
+  ---------------------------------------------------------------------------------------------------
+  -- Hunter
+  ---------------------------------------------------------------------------------------------------
+
+  [25999] = PC_ROOT,                       -- Boar Charge - Triggered By: Charge
+  [7922] = LOC_STUN,                       -- Charge Stun - Triggered By: Charge
+  [5116] = PC_SNARE,                       -- Concussive Shot
+  [19306] = PC_ROOT,                       -- Counterattack
+  [19185] = PC_ROOT,                       -- Entrapment - Triggered By: Entrapment
+  [19410] = LOC_STUN,                      -- Improved Concussive Shot - Triggered By: Improved Concussive Shot
+  [24394] = LOC_STUN,                      -- Intimidation - Triggered By: Intimidation
+  [1513] = LOC_FEAR,                       -- Scare Beast
+  [19503] = LOC_DISORIENT,                 -- Scatter Shot
+  [2974] = PC_SNARE,                       -- Wing Clip
+  [19386] = LOC_SLEEP,                     -- Wyvern Sting
+  [3355] = LOC_INCAPACITATE,               -- Freezing Trap Effect
+  [13810] = PC_SNARE,                      -- Ice Trap
+  [34490] = CC_SILENCE,                    -- Silencing Shot
+  [90337] = LOC_DISORIENT,                 -- Bad Manner (Monkey pet "stun")
+
+  ---------------------------------------------------------------------------------------------------
+  -- Mage
+  ---------------------------------------------------------------------------------------------------
+
+  [6136] = PC_SNARE,                       -- Chilled - Triggered By: Frost Armor
+  [7321] = PC_SNARE,                       -- Chilled - Triggered By: Ice Armor
+  [120] = PC_SNARE,                        -- Cone of Cold
+  [2139] = CC_SILENCE,                      -- Counterspell
+  [18469] = CC_SILENCE,                     -- Counterspell - Silenced - Triggered By: Improved Counterspell
+  [122] = PC_ROOT,                         -- Frost Nova
+  [12355] = LOC_STUN,                      -- Impact - Triggered By: Impact
+  [118] = LOC_POLYMORPH,                   -- Polymorph
+  [28271] = LOC_POLYMORPH,                 -- Polymorph: Turtle
+  [28272] = LOC_POLYMORPH,                 -- Polymorph: Pig
+  [61305] = LOC_POLYMORPH,                 -- Polymorph: Black Cat
+  [61721] = LOC_POLYMORPH,                 -- Polymorph: Rabbit
+  [61780] = LOC_POLYMORPH,                 -- Polymorph: Turkey
+  [61025] = LOC_POLYMORPH,                 -- Polymorph: Serpent
+  [11113] = PC_DAZE,                       -- Blast Wave
+  [31661] = LOC_DISORIENT,                 -- Dragon's Breath
+  [31589] = PC_SNARE,                      -- Slow
+  -- Frostbolt - not added as it has 100% uptime
+  [44572] = LOC_STUN,                      -- Deep Freeze
+  [33395] = PC_ROOT,                       -- Freeze (Pet)
+  [96369] = LOC_STUN,       -- Ring of Frost
+
+  ---------------------------------------------------------------------------------------------------
+  -- Paladin
+  ---------------------------------------------------------------------------------------------------
+
+  [853] = LOC_STUN,                        -- Hammer of Justice
+  [20066] = LOC_INCAPACITATE,              -- Repentance
+  [20170] = LOC_STUN,                      -- Stun - Triggered By: Seal of Justice
+  [31935] = PC_DAZE,                       -- Avenger's Shield
+  [96231] = CC_SILENCE,                       -- Rebuke
+
+
+  ---------------------------------------------------------------------------------------------------
+  -- Priest
+  ---------------------------------------------------------------------------------------------------
+
+  [605] = LOC_CHARM,                       -- Mind Control
+  [453] = PC_MODAGGRORANGE,                -- Mind Soothe
+  [8122] = LOC_FEAR,                       -- Psychic Scream
+  [9484] = LOC_INCAPACITATE,               -- Shackle Undead
+  [15487] = LOC_SLEEP,                     -- Silence
+  [64044] = LOC_STUN,                      -- Psychic Horror
+
+  ---------------------------------------------------------------------------------------------------
+  -- Rogue
+  ---------------------------------------------------------------------------------------------------
+
+  [2094] = LOC_DISORIENT,                  -- Blind
+  [1833] = LOC_STUN,                       -- Cheap Shot
+  [1725] = LOC_DISORIENT,                  -- Distract
+  [1776] = LOC_INCAPACITATE,               -- Gouge
+  [18425] = LOC_SLEEP,                     -- Kick - Silenced - Triggered By: Improved Kick
+  [408] = LOC_STUN,                        -- Kidney Shot
+  [14251] = PC_DISARM,                     -- Riposte
+  [6770] = LOC_INCAPACITATE,               -- Sap
+  [1330] = CC_SILENCE,                     -- Garrote - Silence - Triggered By: Garrote
+  [26679] = PC_SNARE,                      -- Deadly Throw
+
+
+  ---------------------------------------------------------------------------------------------------
+  -- Shaman
+  ---------------------------------------------------------------------------------------------------
+
+  [51514] = LOC_POLYMORPH,      -- Hex (Frog) (Blizzard)
+  [8056] = PC_SNARE,            -- Frost Shock
+  [3600] = PC_SNARE,            -- Earthbind Totem
+  [64695] = PC_ROOT,            -- Earthgrab Totem (Blizzard)
+  [61882] = LOC_INCAPACITATE,            -- Earthquake
+  [76780] = LOC_INCAPACITATE,            -- Bind Elemental
+  [73682] = LOC_BANISH,                  -- Unleash Frost
+  
+
+  ---------------------------------------------------------------------------------------------------
+  -- Warlock
+  ---------------------------------------------------------------------------------------------------
+
+  [18118] = PC_SNARE,                      -- Aftermath - Triggered By: Aftermath
+  [710] = LOC_BANISH,                      -- Banish
+  [18223] = PC_SNARE,                      -- Curse of Exhaustion
+  [6789] = LOC_FEAR,                       -- Death Coil
+  [1098] = LOC_CHARM,                      -- Subjugate Demon
+  [5782] = LOC_FEAR,                       -- Fear
+  [5484] = LOC_FEAR,                       -- Howl of Terror
+  [1122] = LOC_STUN,                       -- Inferno
+  [6358] = LOC_CHARM,                      -- Seduction
+  [24259] = LOC_SLEEP,                     -- Spell Lock - Triggered By: Spell Lock
+  [30283] = LOC_STUN,                      -- Shadowfury
+  [43523] = LOC_SLEEP,                     -- Unstable Affliction - Triggered by: Dispell of Unstable Affliction
+
+
+  ---------------------------------------------------------------------------------------------------
+  -- Warrior
+  ---------------------------------------------------------------------------------------------------
+
+  [12809] = LOC_STUN,                      -- Concussion Blow
+  [676] = PC_DISARM,                       -- Disarm
+  [1715] = PC_SNARE,                       -- Hamstring
+  [23694] = PC_ROOT,                       -- Improved Hamstring - Triggered By: Improved Hamstring
+  [20253] = LOC_STUN,                      -- Intercept Stun - Triggered By: Intercept
+  [5246] = LOC_FEAR,                       -- Intimidating Shout
+  [20511] = LOC_FEAR,                      -- Intimidating Shout - Triggered By: Intimidating Shout
+  [18498] = LOC_SLEEP,                     -- Shield Bash - Silenced - Triggered By: Improved Shield Bash
+  [12323] = PC_SNARE,                      -- Piercing Howl
+  [46968] = LOC_STUN,                      -- Shockwave
+  [85388] = LOC_STUN,                      -- Throwdown
+
+
+  ---------------------------------------------------------------------------------------------------
+  -- Racial Traits
+  ---------------------------------------------------------------------------------------------------
+  [20549] = LOC_STUN,       -- War Stomp (Tauren)
+
+  ---------------------------------------------------------------------------------------------------
+  -- Weapons & Items
+  ---------------------------------------------------------------------------------------------------
+  [34510] = LOC_STUN,       -- Deep Thunder and Stormherald (Weapon)
 }
 
 local CROWD_CONTROL_SPELLS_WRATH_CLASSIC = {
@@ -1117,6 +1401,8 @@ elseif Addon.IS_TBC_CLASSIC then
   Widget.CROWD_CONTROL_SPELLS = CROWD_CONTROL_SPELLS_TBC_CLASSIC
 elseif Addon.IS_WRATH_CLASSIC then
   Widget.CROWD_CONTROL_SPELLS = CROWD_CONTROL_SPELLS_WRATH_CLASSIC
+elseif Addon.IS_CATA_CLASSIC then
+  Widget.CROWD_CONTROL_SPELLS = CROWD_CONTROL_SPELLS_CATA_CLASSIC
 else
   Widget.CROWD_CONTROL_SPELLS = CROWD_CONTROL_SPELLS_RETAIL
 end
@@ -1156,23 +1442,25 @@ local function AuraFrameOnLeave(self)
   AuraTooltip:Hide()
 end
 
-if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
-  AuraFrameOnEnter = function(self)
-    AuraTooltip:SetOwner(self, "ANCHOR_LEFT")
-    AuraTooltip:SetUnitAura(self:GetParent():GetParent().unit.unitid, self.AuraData.auraInstanceID, self:GetParent().Filter)
-  end
-else  
+-- SetUnitBuffByAuraInstanceID, SetUnitDebuffByAuraInstanceID: Dragonflight - Patch 10.0.0
+if Addon.IS_MAINLINE then
   AuraFrameOnEnter = function(self)
     AuraTooltip:SetOwner(self, "ANCHOR_LEFT")
 
-    if self:GetParent().Filter == "HELPFUL" then
-      AuraTooltip:SetUnitBuffByAuraInstanceID(self:GetParent():GetParent().unit.unitid, self.AuraData.auraInstanceID, self:GetParent().Filter)
+    -- I really think that SetUnit...ByAuraInstanceID does not the filter parameter, but still ...
+    if self.AuraData.effect == "HELPFUL" then
+      AuraTooltip:SetUnitBuffByAuraInstanceID(self:GetParent():GetParent().unit.unitid, self.AuraData.auraInstanceID, self.AuraData.effect)
     else
-      AuraTooltip:SetUnitDebuffByAuraInstanceID(self:GetParent():GetParent().unit.unitid, self.AuraData.auraInstanceID, self:GetParent().Filter)
+      AuraTooltip:SetUnitDebuffByAuraInstanceID(self:GetParent():GetParent().unit.unitid, self.AuraData.auraInstanceID, self.AuraData.effect)
     end
 
     -- Would show more information, but mainly about the spell, not the aura
     --AuraTooltip:SetSpellByID(self.AuraData.spellId)
+  end
+else  
+  AuraFrameOnEnter = function(self)
+    AuraTooltip:SetOwner(self, "ANCHOR_LEFT")
+    AuraTooltip:SetUnitAura(self:GetParent():GetParent().unit.unitid, self.AuraData.auraInstanceID, self.AuraData.effect)
   end
 end
 
@@ -1183,8 +1471,8 @@ end
 function Widget:GetColorForAura(aura)
 	local db = self.db
 
-  if aura.debuffType and db.ShowAuraType then
-    return DebuffTypeColor[aura.debuffType]
+  if aura.dispelName and db.ShowAuraType then
+    return DebuffTypeColor[aura.dispelName]
   elseif aura.effect == "HARMFUL" then
     return db.DefaultDebuffColor
   else
@@ -1235,14 +1523,56 @@ Widget.FILTER_FUNCTIONS = {
   Allow = FilterAllowlist,
 }
 
-if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
+if Addon.IS_MAINLINE then
+  function Widget:FilterFriendlyDebuffsBySpell(db, aura, AuraFilterFunction)
+    local show_aura = db.ShowAllFriendly or
+                      (db.ShowBlizzardForFriendly and (aura.nameplateShowAll or (aura.nameplateShowPersonal and aura.CastByPlayer))) or
+                      (db.ShowDispellable and aura.isStealable) or
+                      (db.ShowBoss and aura.isBossAura) or
+                      (aura.dispelName and db.FilterByType[self.AURA_TYPE[aura.dispelName]])
+
+    local spellfound = self.AuraFilterDebuffs[aura.name] or self.AuraFilterDebuffs[aura.spellId]
+
+    return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer)
+  end
+
+  function Widget:FilterEnemyDebuffsBySpell(db, aura, AuraFilterFunction)
+    local show_aura = db.ShowAllEnemy or
+                      (db.ShowOnlyMine and aura.CastByPlayer) or
+                      (db.ShowBlizzardForEnemy and (aura.nameplateShowAll or (aura.nameplateShowPersonal and aura.CastByPlayer)))
+
+    local spellfound = self.AuraFilterDebuffs[aura.name] or self.AuraFilterDebuffs[aura.spellId]
+
+    return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer, db.ShowOnlyMine)
+  end
+
+  function Widget:FilterFriendlyCrowdControlBySpell(db, aura, AuraFilterFunction)
+    local show_aura = db.ShowAllFriendly or
+                      (db.ShowBlizzardForFriendly and (aura.nameplateShowAll or (aura.nameplateShowPersonal and aura.CastByPlayer))) or
+                      (db.ShowDispellable and aura.isStealable) or
+                      (db.ShowBoss and aura.isBossAura)
+
+    local spellfound = self.AuraFilterCrowdControl[aura.name] or self.AuraFilterCrowdControl[aura.spellId]
+
+    return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer)
+  end
+
+  function Widget:FilterEnemyCrowdControlBySpell(db, aura, AuraFilterFunction)
+    local show_aura = db.ShowAllEnemy or
+                      (db.ShowBlizzardForEnemy and (aura.nameplateShowAll or (aura.nameplateShowPersonal and aura.CastByPlayer)))
+
+    local spellfound = self.AuraFilterCrowdControl[aura.name] or self.AuraFilterCrowdControl[aura.spellId]
+
+    return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer)
+  end  
+else
   -- ShowBlizzard... is not supported in Classic
   function Widget:FilterFriendlyDebuffsBySpell(db, aura, AuraFilterFunction)
     local show_aura = db.ShowAllFriendly or
       -- (db.ShowBlizzardForFriendly and (aura.nameplateShowAll or (aura.nameplateShowPersonal and aura.CastByPlayer))) or
       (db.ShowDispellable and aura.isStealable) or
       (db.ShowBoss and aura.isBossAura) or
-      (aura.debuffType and db.FilterByType[self.AURA_TYPE[aura.debuffType]])
+      (aura.dispelName and db.FilterByType[self.AURA_TYPE[aura.dispelName]])
 
     local spellfound = self.AuraFilterDebuffs[aura.name] or self.AuraFilterDebuffs[aura.spellId]
 
@@ -1279,48 +1609,6 @@ if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
 
     return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer)
   end
-else
-  function Widget:FilterFriendlyDebuffsBySpell(db, aura, AuraFilterFunction)
-    local show_aura = db.ShowAllFriendly or
-                      (db.ShowBlizzardForFriendly and (aura.nameplateShowAll or (aura.nameplateShowPersonal and aura.CastByPlayer))) or
-                      (db.ShowDispellable and aura.isStealable) or
-                      (db.ShowBoss and aura.isBossAura) or
-                      (aura.debuffType and db.FilterByType[self.AURA_TYPE[aura.debuffType]])
-
-    local spellfound = self.AuraFilterDebuffs[aura.name] or self.AuraFilterDebuffs[aura.spellId]
-
-    return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer)
-  end
-
-  function Widget:FilterEnemyDebuffsBySpell(db, aura, AuraFilterFunction)
-    local show_aura = db.ShowAllEnemy or
-                      (db.ShowOnlyMine and aura.CastByPlayer) or
-                      (db.ShowBlizzardForEnemy and (aura.nameplateShowAll or (aura.nameplateShowPersonal and aura.CastByPlayer)))
-
-    local spellfound = self.AuraFilterDebuffs[aura.name] or self.AuraFilterDebuffs[aura.spellId]
-
-    return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer, db.ShowOnlyMine)
-  end
-
-  function Widget:FilterFriendlyCrowdControlBySpell(db, aura, AuraFilterFunction)
-    local show_aura = db.ShowAllFriendly or
-                      (db.ShowBlizzardForFriendly and (aura.nameplateShowAll or (aura.nameplateShowPersonal and aura.CastByPlayer))) or
-                      (db.ShowDispellable and aura.isStealable) or
-                      (db.ShowBoss and aura.isBossAura)
-
-    local spellfound = self.AuraFilterCrowdControl[aura.name] or self.AuraFilterCrowdControl[aura.spellId]
-
-    return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer)
-  end
-
-  function Widget:FilterEnemyCrowdControlBySpell(db, aura, AuraFilterFunction)
-    local show_aura = db.ShowAllEnemy or
-                      (db.ShowBlizzardForEnemy and (aura.nameplateShowAll or (aura.nameplateShowPersonal and aura.CastByPlayer)))
-
-    local spellfound = self.AuraFilterCrowdControl[aura.name] or self.AuraFilterCrowdControl[aura.spellId]
-
-    return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer)
-  end
 end
 
 function Widget:FilterFriendlyBuffsBySpell(db, aura, AuraFilterFunction, unit)
@@ -1340,7 +1628,7 @@ function Widget:FilterEnemyBuffsBySpell(db, aura, AuraFilterFunction, unit)
     show_aura = false
   else
     show_aura = db.ShowAllEnemy or (db.ShowOnEnemyNPCs and unit.type == "NPC") or (db.ShowDispellable and aura.isStealable) or
-      (aura.debuffType == "Magic" and db.ShowMagic)
+      (aura.dispelName == "Magic" and db.ShowMagic)
   end
 
   --  local show_aura = db.ShowAllEnemy or (db.ShowOnEnemyNPCs and unit.type == "NPC") or (db.ShowDispellable and aura.isStealable)
@@ -1457,6 +1745,7 @@ end
 local UnitAuraWrapper
 local ProcessAllUnitAuras
 
+-- Defined here as it's used for configuration mode even in Mainline
 local function ProcessAllUnitAurasClassic(unitid, effect)
   local _
   local unit_auras = {}
@@ -1464,15 +1753,19 @@ local function ProcessAllUnitAurasClassic(unitid, effect)
   for i = 1, 40 do
     local aura = {}
 
-    aura.name, aura.icon, aura.applications, aura.debuffType, aura.duration, aura.expirationTime, aura.sourceUnit,
+    aura.name, aura.icon, aura.applications, aura.dispelName, aura.duration, aura.expirationTime, aura.sourceUnit,
       aura.isStealable, aura.nameplateShowPersonal, aura.spellId, aura.canApplyAura, aura.isBossAura, _, aura.nameplateShowAll =
       UnitAuraWrapper(unitid, i, effect)
 
     if aura.name then 
       aura.auraInstanceID = i
 
+      aura.duration = aura.duration or 0
+
       unit_auras[#unit_auras + 1] = aura
-      -- Addon.Logging.Debug("Aura:", aura.name, "=> ID:", aura.spellId)
+      -- if aura.sourceUnit == "player" then
+      --   Addon.Logging.Debug("Aura:", aura.name, "=> ID:", aura.spellId)
+      -- end
     else
       break
     end
@@ -1481,45 +1774,54 @@ local function ProcessAllUnitAurasClassic(unitid, effect)
   return unit_auras
 end
 
-if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then  
-  UnitAuraWrapper = UnitAura -- will be overwritten for Classic (but not for TBC or Wrath Classic)
-  ProcessAllUnitAuras = ProcessAllUnitAurasClassic
-else
+-- UnitAuraSlots: BfA - Patch 8.2.5 (2019-09-24): Added.
+-- C_UnitAuras.GetAuraSlots: DF - Patch 10.2.5 (2024-01-16): Deprecated. Replaced by C_UnitAuras.GetAuraSlots.
+if Addon.IS_MAINLINE then  
   ProcessAllUnitAuras = function(unitid, effect)
     local _
     local unit_auras = {}
 
+    local aura_max_display = (effect == "HARMFUL" and DEBUFF_MAX_DISPLAY) or BUFF_MAX_DISPLAY
+
+    -- AuraUtil.ForEachAura(unitid, effect, BUFF_MAX_DISPLAY, function(unit_aura_info)
+    --   unit_aura_info.duration = unit_aura_info.duration or 0
+    --   unit_auras[#unit_auras + 1] = unit_aura_info
+    --   -- Addon.Logging.Debug("Aura:", aura.name, "=> ID:", aura.spellId)
+    -- end, true)
+
+    -- AuraUtil.ForEachAura:
     local continuation_token
     repeat
-      -- continuationToken is the first return value of UnitAuraSltos
-      local slots = { UnitAuraSlots(unitid, effect, BUFF_MAX_DISPLAY, continuation_token) }
+      -- continuationToken is the first return value of UnitAuraSlots
+      local slots = { GetAuraSlots(unitid, effect, aura_max_display, continuation_token) }
       continuation_token = slots[1]
 
       for i = 2, #slots do
-        local aura = {}
-
-        aura.name, aura.icon, aura.applications, aura.debuffType, aura.duration, aura.expirationTime, aura.sourceUnit,
-          aura.isStealable, aura.nameplateShowPersonal, aura.spellId, aura.canApplyAura, aura.isBossAura, _, aura.nameplateShowAll =
-          UnitAuraBySlot(unitid, slots[i])
-      
-          local unit_aura_info = GetAuraDataBySlot(unitid, slots[i])   
-          if unit_aura_info then
-            aura.auraInstanceID = unit_aura_info.auraInstanceID
-            aura.UnitAuraInfo = unit_aura_info
-          end
-          
-          unit_auras[#unit_auras + 1] = aura
-          --Addon.Logging.Debug("Aura:", aura.name, "=> ID:", aura.spellId)
+        local unit_aura_info = GetAuraDataBySlot(unitid, slots[i])  
+        -- Without this check, there will be a Lua error when a priest mindcontrolls another player as 
+        -- unit_aura_info is nil here in this case
+        if unit_aura_info then
+          unit_aura_info.duration = unit_aura_info.duration or 0
+          unit_auras[#unit_auras + 1] = unit_aura_info
+          -- if unit_aura_info.sourceUnit == "player" then
+          --   Addon.Logging.Debug("Aura:", unit_aura_info.name, "=> ID:", unit_aura_info.spellId)
+          -- end
+        end
       end
-    until continuation_token == nil
+    until continuationToken == nil
 
     return unit_auras
   end
+else
+  UnitAuraWrapper = UnitAura -- will be overwritten for Classic (but not for TBC or Wrath Classic)
+  ProcessAllUnitAuras = ProcessAllUnitAurasClassic
 end
 
 local function IgnoreAuraUpdateForUnit(widget_frame, unit)
+  -- ! "Target Only" only supports the direct target, not action targets
+  local unit_is_target = UnitIsUnit("target", unit.unitid)
   if Widget.db.ShowTargetOnly then
-    if UnitIsUnit("target", unit.unitid) then
+    if unit_is_target then
       Widget.CurrentTarget = widget_frame
     elseif not Addon.ActiveAuraTriggers then
       -- Continue with aura scanning for non-target units if there are aura triggers that might change the nameplates style
@@ -1530,7 +1832,7 @@ local function IgnoreAuraUpdateForUnit(widget_frame, unit)
 
   AuraTriggerInitialize(unit)
 
-  widget_frame.HideAuras = not EnabledForStyle[unit.style] or (Widget.db.ShowTargetOnly and not unit.isTarget)  
+  widget_frame.HideAuras = not EnabledForStyle[unit.style] or (Widget.db.ShowTargetOnly and not unit_is_target)  
 end
 
 local function AuraGridUpdateForUnitNotNecessary(widget_frame, unit)
@@ -1727,17 +2029,6 @@ local function UnitAuraEventHandler(widget_frame, event, unitid, unit_aura_updat
   end
 end
 
--- For Classic: LibClassicDurations
-local function UnitBuffEventHandler(event, unitid)
-  local plate = GetNamePlateForUnit(unitid)
-  if plate and plate.TPFrame.Active then
-    local widget_frame = plate.TPFrame.widgets.Auras
-    if widget_frame.Active then
-      widget_frame.Widget:UpdateAuras(widget_frame, widget_frame:GetParent().unit)
-    end
-  end
-end
-
 -------------------------------------------------------------
 -- Widget Object Functions
 -------------------------------------------------------------
@@ -1751,7 +2042,7 @@ end
 --   -- aura.stacks => aura.applications
 --   -- aura.expiration => aura.expirationTime
 --   -- Fehlt: 
---   --   aura.debuffType
+--   --   aura.dispelName
   
 --   -- Neu:
 --   --   aura.isRaid
@@ -1905,8 +2196,8 @@ end
 
 --   -- * Using variable names from UNIT_AURA updatedAuraInfos here to avoid to much copying of variables
 --   -- TBC Classic, Retail:
---   -- name, icon, count, debuffType, duration, expirationTime, source, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, castByPlayer, nameplateShowAll, timeMod, ...
---   aura.name, aura.icon, aura.applications, aura.debuffType, aura.duration, aura.expirationTime, aura.sourceUnit,
+--   -- name, icon, count, dispelName, duration, expirationTime, source, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, castByPlayer, nameplateShowAll, timeMod, ...
+--   aura.name, aura.icon, aura.applications, aura.dispelName, aura.duration, aura.expirationTime, aura.sourceUnit,
 --     aura.isStealable, aura.nameplateShowPersonal, aura.spellId, aura.canApplyAura, aura.isBossAura, _, aura.nameplateShowAll =
 --     UnitAuraWrapper(unitid, slot)
   
@@ -2161,18 +2452,6 @@ end
 --   aura_grid.RowSpacing + aura_grid.AuraWidgetOffset)
 -- end
 
-local function AnchorFrameForMode(db, frame, anchor_to)
-  frame:ClearAllPoints()
-
-  local anchor = db.Anchor or "CENTER"
-  if db.InsideAnchor == false then
-    local anchor_point_text = ANCHOR_POINT_TEXT[anchor]
-    frame:SetPoint(anchor_point_text[2], anchor_to, anchor_point_text[1], db.HorizontalOffset or 0, db.VerticalOffset or 0)
-  else -- db.InsideAnchor not defined in settings or true
-    frame:SetPoint(anchor, anchor_to, anchor, db.HorizontalOffset or 0, db.VerticalOffset or 0)
-  end
-end
-
 function Widget:UpdatePositionAuraGrid(widget_frame, aura_type, unit_style)
   local db = self.db
 
@@ -2191,7 +2470,7 @@ function Widget:UpdatePositionAuraGrid(widget_frame, aura_type, unit_style)
   local anchor_to_db = db_aura_grid.AnchorTo
   local anchor_to = (anchor_to_db == "Healthbar" and aura_grid_frame:GetParent()) or widget_frame[anchor_to_db]
 
-  AnchorFrameForMode(db_aura_grid[MODE_FOR_STYLE[unit_style]], aura_grid_frame, anchor_to)
+  AnchorFrameTo(db_aura_grid[MODE_FOR_STYLE[unit_style]], aura_grid_frame, anchor_to)
   if aura_grid.IconMode and auras_no > 0 then
     local x_offset = 0
     if db_aura_grid.CenterAuras then
@@ -2935,23 +3214,10 @@ function Widget:OnEnable()
   self:SubscribeEvent("PLAYER_REGEN_DISABLED")
   -- LOSS_OF_CONTROL_ADDED
   -- LOSS_OF_CONTROL_UPDATE
-
-  if Addon.IS_CLASSIC then
-    UnitAuraWrapper = Addon.LibClassicDurations.UnitAuraWithBuffs
-
-    -- Add duration handling from LibClassicDurations
-    Addon.LibClassicDurations:Register("ThreatPlates")
-    -- NOTE: Enemy buff tracking won't start until you register UNIT_BUFF
-    Addon.LibClassicDurations.RegisterCallback(TidyPlatesThreat, "UNIT_BUFF", UnitBuffEventHandler)
-  end
 end
 
 function Widget:OnDisable()
   self:UnsubscribeAllEvents()
-
-  if Addon.IS_CLASSIC then
-    Addon.LibClassicDurations.UnregisterCallback(TidyPlatesThreat, "UNIT_BUFF")
-  end
 
   for _, plate in pairs(GetNamePlates()) do
     local tp_frame = plate and plate.TPFrame
@@ -3247,7 +3513,7 @@ local DEMO_AURA_ICONS = {
 
 local function GenerateDemoAuras()
   for no = 1, 40 do
-    -- aura.name, aura.icon, aura.applications, aura.debuffType, aura.duration, aura.expirationTime, aura.sourceUnit,
+    -- aura.name, aura.icon, aura.applications, aura.dispelName, aura.duration, aura.expirationTime, aura.sourceUnit,
     -- aura.isStealable, aura.nameplateShowPersonal, aura.spellId, aura.canApplyAura, aura.isBossAura, _, aura.nameplateShowAll =
     local random_name = tostring(math.random(1, 40))
 

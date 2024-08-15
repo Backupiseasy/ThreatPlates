@@ -52,7 +52,10 @@ local _G =_G
 local BNGetFriendInfo, BNGetFriendInfoByID = BNGetFriendInfo, BNGetFriendInfoByID -- For Classic
 local GetFriendAccountInfo, GetGameAccountInfoByID -- For Retail
 
-if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
+-- GetFriendAccountInfo and GetAccountInfoByID: BfA - Patch 8.2.5 (2019-09-24): Changed to C_BattleNet.GetFriendAccountInfo() and C_BattleNet.GetAccountInfoByID().
+if Addon.IS_MAINLINE then
+  GetFriendAccountInfo, GetGameAccountInfoByID = C_BattleNet.GetFriendAccountInfo, C_BattleNet.GetGameAccountInfoByID
+else
   local AccountInfo = {
     gameAccountInfo = {}
   }
@@ -90,8 +93,6 @@ if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
 
     return AccountInfo.gameAccountInfo
   end
-else
-  GetFriendAccountInfo, GetGameAccountInfoByID = C_BattleNet.GetFriendAccountInfo, C_BattleNet.GetGameAccountInfoByID
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -143,13 +144,17 @@ function Widget:GUILD_ROSTER_UPDATE()
     if numTotalGuildMembers < ListGuildMembersSize then
       ListGuildMembers = {}
     end
-
+    
+    local no_guild_members_with_info = 0
     for i = 1, numTotalGuildMembers do
       local name, rank, rankIndex, level, classDisplayName, zone, note, officernote, isOnline, _ = GetGuildRosterInfo(i)
-      ListGuildMembers[name] = ICON_GUILDMATE
+      if name then
+        ListGuildMembers[name] = ICON_GUILDMATE
+        no_guild_members_with_info = no_guild_members_with_info + 1
+      end
     end
 
-    ListGuildMembersSize = numTotalGuildMembers
+    ListGuildMembersSize = no_guild_members_with_info
 
     self:UpdateAllFramesWithPublish("ClassColorUpdate")
   end

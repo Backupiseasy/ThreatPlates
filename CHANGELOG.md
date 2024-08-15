@@ -1,3 +1,3 @@
 # @project-version@ (@build-time@)
 
-* Custom color for Name text now also supports transparency [Comment #6829]. 
+* Fixed a bug caused by incorrectly defined internal variables that affected other addons (e.g. the size of WeakAuras icons) [GH-538, comment #7371].

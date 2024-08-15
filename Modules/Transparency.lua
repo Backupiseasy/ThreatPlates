@@ -47,7 +47,7 @@ local function TransparencySituational(unit)
 	-- Do checks for situational transparency settings:
 	if unit.TargetMarkerIcon and db.toggle.MarkedA then
 		return db.alpha.Marked
-	elseif unit.isMouseover and not unit.isTarget and db.toggle.MouseoverUnitAlpha then
+	elseif unit.isMouseover and not Addon.UnitIsTarget(unit.unitid) and db.toggle.MouseoverUnitAlpha then
 		return db.alpha.MouseoverUnit
 	elseif unit.isCasting then
 		local unit_friendly = (unit.reaction == "FRIENDLY")
@@ -63,7 +63,7 @@ end
 
 local function TransparencyGeneral(unit)
   -- Target always has priority
-  if not unit.isTarget then
+  if not Addon.UnitIsTarget(unit.unitid) then
     -- Do checks for situational transparency settings:
     local tranparency = TransparencySituational(unit)
     if tranparency then
@@ -75,10 +75,11 @@ local function TransparencyGeneral(unit)
 	local db = Addon.db.profile.nameplate
 
   local target_alpha
-	if UnitExists("target") then
-    if unit.isTarget and db.toggle.TargetA then
+	if Addon.TargetUnitExists() then
+    local unit_is_target = Addon.UnitIsTarget(unit.unitid)
+    if unit_is_target and db.toggle.TargetA then
       target_alpha = db.alpha.Target
-    elseif not unit.isTarget and db.toggle.NonTargetA then
+    elseif not unit_is_target and db.toggle.NonTargetA then
       target_alpha = db.alpha.NonTarget
     end
 	elseif db.toggle.NoTargetA then
@@ -185,8 +186,7 @@ local ALPHA_FUNCTIONS = {
 }
 
 local function GetTransparency(unit)
-  local alpha = ALPHA_FUNCTIONS[unit.style](unit, unit.style)
-  return MathClamp(alpha, 0, 1)
+  return MathClamp(ALPHA_FUNCTIONS[unit.style](unit, unit.style), 0, 1)
 end
 
 local function UpdatePlate_SetAlphaWithFading(tp_frame, unit)
@@ -215,7 +215,7 @@ local function UpdatePlate_SetAlphaNoFading(tp_frame, unit)
 end
 
 local	function UpdatePlate_SetAlphaWithOcclusion(tp_frame, unit)
-  if not tp_frame:IsShown() or (tp_frame.IsOccluded and not unit.isTarget) then
+  if not tp_frame:IsShown() or (tp_frame.IsOccluded and not Addon.UnitIsTarget(unit.unitid)) then
     return
   end
 
@@ -290,7 +290,7 @@ local function SetOccludedTransparencyWithoutFadingOnUpdate(self, frame)
   end
 end
 
-function TransparencyModule.PlateUnitAdded(frame)
+function TransparencyModule.UpdateStyle(frame)
   AnimationStopFade(frame)
   frame:SetAlpha(0)
 
@@ -350,7 +350,7 @@ end
 
 -- Move UpdatePlate_SetAlpha to this file
 local function SituationalEvent(tp_frame)
-  if not tp_frame:IsShown() or (tp_frame.IsOccluded and not tp_frame.unit.isTarget) then
+  if not tp_frame:IsShown() or (tp_frame.IsOccluded and not Addon.UnitIsTarget(unit.unitid)) then
     return
   end
 
@@ -375,7 +375,7 @@ local function TargetGained(tp_frame)
   if db.toggle.NonTargetA then
     -- Update all non-target units
     for _, active_tp_frame in Addon:GetActiveThreatPlates() do
-      if not active_tp_frame.unit.isTarget then
+      if not Addon.UnitIsTarget(active_tp_frame.unit.unitid) then
         SituationalEvent(active_tp_frame)
       end
     end

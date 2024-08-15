@@ -9,7 +9,7 @@ local ADDON_NAME, Addon = ...
 
 -- Lua APIs
 local table_concat = table.concat
-local string_sub  = string.sub
+local string_sub  = Addon.LibUTF8.utf8sub
 
 -- WoW APIs
 
@@ -40,7 +40,7 @@ local Element = Addon.Elements.NewElement("Name")
 ---------------------------------------------------------------------------------------------------
 
 -- Called in processing event: NAME_PLATE_CREATED
-function Element.Create(tp_frame)
+function Element.PlateCreated(tp_frame)
   local name_text = tp_frame.visual.textframe:CreateFontString(nil, "ARTWORK")
   -- At least font must be set as otherwise it results in a Lua error when UnitAdded with SetText is called
   name_text:SetFont("Fonts\\FRIZQT__.TTF", 11)
@@ -110,6 +110,23 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
   name_text:Show()
 end
 
+local function UNIT_NAME_UPDATE(unitid)
+  local tp_frame = Addon:GetThreatPlateForUnit(unitid)
+  if tp_frame then
+    tp_frame.visual.NameText:SetText(tp_frame.unit.name)
+  end
+end
+
+local function ColorUpdate(tp_frame, color)
+  local name_text = tp_frame.visual.NameText
+
+  if not name_text:IsShown() then return end
+
+  if Settings[tp_frame.PlateStyle].Enabled then
+    name_text:SetTextColor(color.r, color.g, color.b, color.a)
+  end
+end
+
 function Element.UpdateSettings()
   Settings =  Addon.db.profile.Name
 
@@ -123,18 +140,12 @@ function Element.UpdateSettings()
   ModeSettings["NameMode"].Font.Width = Settings.HealthbarMode.Font.Width
   ModeSettings["NameMode"].Font.Height = Settings.HealthbarMode.Font.Height
 
+  SubscribeEvent(Element, "UNIT_NAME_UPDATE", UNIT_NAME_UPDATE)
+  SubscribeEvent(Element, "NameColorUpdate", ColorUpdate)
+
   -- Clear cache for texts as e.g., abbreviation mode might have changed
   wipe(TextCache)
 
   -- Update TargetArt widget as it depends on some settings here
   Addon.Widgets:UpdateSettings("TargetArt")
 end
-
-local function UNIT_NAME_UPDATE(unitid)
-  local tp_frame = Addon:GetThreatPlateForUnit(unitid)
-  if tp_frame then
-    tp_frame.visual.NameText:SetText(tp_frame.unit.name)
-  end
-end
-
-SubscribeEvent(Element, "UNIT_NAME_UPDATE", UNIT_NAME_UPDATE)

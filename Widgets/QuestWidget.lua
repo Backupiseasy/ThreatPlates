@@ -4,7 +4,7 @@
 local ADDON_NAME, Addon = ...
 local ThreatPlates = Addon.ThreatPlates
 
-local Widget = ((Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) and {}) or Addon.Widgets:NewWidget("Quest")
+local Widget = (not Addon.IS_MAINLINE and {}) or Addon.Widgets:NewWidget("Quest")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -575,7 +575,7 @@ function Widget:OnEnable()
   self:SubscribeEvent("GROUP_ROSTER_UPDATE")
   self:SubscribeEvent("GROUP_LEFT")
 
-  Addon.CVars:OverwriteProtected("showQuestTrackingTooltips", 1)
+  Addon.CVars:Overwrite("showQuestTrackingTooltips", 1)
 
   InCombat = InCombatLockdown()
   self:GROUP_ROSTER_UPDATE()

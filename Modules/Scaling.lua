@@ -15,8 +15,7 @@ local UnitExists = UnitExists
 -- ThreatPlates APIs
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 local Style = Addon.Style
-local TransparencyPlateUnitAdded = Addon.Transparency.PlateUnitAdded
-local ScalingPlateUnitAdded = Addon.Scaling.PlateUnitAdded
+local TransparencyModule, ScalingModule = Addon.Transparency, Addon.Scaling
 local AnimationScalePlate, AnimationStopScale, AnimationHidePlate = Addon.Animation.ScalePlate, Addon.Animation.StopScale, Addon.Animation.HidePlate
 local CVars = Addon.CVars
 local MathClamp = Addon.Clamp
@@ -45,7 +44,7 @@ local function ScaleSituational(unit)
 	-- Do checks for situational scale settings:
 	if unit.TargetMarkerIcon and db.toggle.MarkedS then
 		return db.scale.Marked
-	elseif unit.isMouseover and not unit.isTarget and db.toggle.MouseoverUnitScale then
+	elseif unit.isMouseover and not Addon.UnitIsTarget(unit.unitid) and db.toggle.MouseoverUnitScale then
 		return db.scale.MouseoverUnit
 	elseif unit.isCasting then
 		local unit_friendly = (unit.reaction == "FRIENDLY")
@@ -61,7 +60,7 @@ end
 
 local function ScaleGeneral(unit)
 	-- Target always has priority
-	if not unit.isTarget then
+	if not Addon.UnitIsTarget(unit.unitid) then
 		-- Do checks for situational scale settings:
 		local scale = ScaleSituational(unit)
 		if scale then
@@ -73,10 +72,11 @@ local function ScaleGeneral(unit)
 	local db = Addon.db.profile.nameplate
 
 	local target_scale
-	if UnitExists("target") then
-		if unit.isTarget and db.toggle.TargetS then
+	if Addon.TargetUnitExists() then
+		local unit_is_target = Addon.UnitIsTarget(unit.unitid)
+		if unit_is_target and db.toggle.TargetS then
 			target_scale = db.scale.Target
-		elseif not unit.isTarget and db.toggle.NonTargetS then
+		elseif not unit_is_target and db.toggle.NonTargetS then
 			target_scale = db.scale.NonTarget
 		end
 	elseif db.toggle.NoTargetS then
@@ -198,7 +198,7 @@ local function ScalePlateWithoutAnimation(frame, scale)
 	frame:SetScale(scale)
 end
 
-function ScalingModule.PlateUnitAdded(tp_frame)
+function ScalingModule.UpdateStyle(tp_frame)
   tp_frame.HidingScale = nil
 
 	AnimationStopScale(tp_frame)
@@ -218,8 +218,8 @@ function ScalingModule.HideNameplate(tp_frame)
         tp_frame.HidingScale = scale
       elseif tp_frame.HidingScale ~= -1 then
         -- Scale down stoppted and reversed - plate is no longer hiding
-        TransparencyPlateUnitAdded(tp_frame)
-        ScalingPlateUnitAdded(tp_frame)
+				TransparencyModule.UpdateStyle(tp_frame)
+				ScalingModule.UpdateStyle(tp_frame)
         tp_frame.HidingScale = -1
       end
     else -- scale >= CVAR_nameplateMinScale
@@ -273,7 +273,7 @@ local function TargetGained(tp_frame)
   if db.toggle.NonTargetS then
     -- Update all non-target units
 		for _, active_tp_frame in Addon:GetActiveThreatPlates() do
-      if not active_tp_frame.unit.isTarget then
+      if not Addon.UnitIsTarget(active_tp_frame.unit.unitid) then
 				ScalePlate(active_tp_frame, ui_scale * GetScale(active_tp_frame.unit))
       end
 		end

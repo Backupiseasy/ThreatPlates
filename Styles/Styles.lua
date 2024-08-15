@@ -13,10 +13,11 @@ local pairs = pairs
 
 -- WoW APIs
 local InCombatLockdown = InCombatLockdown
-local UnitPlayerControlled, UnitIsUnit = UnitPlayerControlled, UnitIsUnit
+local UnitIsDead, UnitPlayerControlled, UnitIsUnit = UnitIsDead, UnitPlayerControlled, UnitIsUnit
 local UnitIsOtherPlayersPet = UnitIsOtherPlayersPet
 local UnitIsBattlePet, UnitCreatureType = UnitIsBattlePet, UnitCreatureType
 local UnitCanAttack = UnitCanAttack
+local GetSpellInfo = Addon.GetSpellInfo
 
 -- ThreatPlates APIs
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
@@ -25,10 +26,11 @@ local ElementsUpdateStyle, ElementsUpdateSettings = Addon.Elements.UpdateStyle, 
 local TOTEMS = Addon.TOTEMS
 local GetUnitVisibility = Addon.GetUnitVisibility
 local Widgets = Addon.Widgets
-local TransparencyPlateUnitAdded = Addon.Transparency.PlateUnitAdded
-local ScalingPlateUnitAdded = Addon.Scaling.PlateUnitAdded
+local TransparencyModule, ScalingModule = Addon.Transparency, Addon.Scaling
 local ThreatShowFeedback = Addon.Threat.ShowFeedback
-local ColorPlateUnitAdded = Addon.Color.PlateUnitAdded
+
+local ColorModule = Addon.Color
+
 local ActiveTheme = Addon.Theme
 local NameTriggers, AuraTriggers, CastTriggers = Addon.Cache.CustomPlateTriggers.Name, Addon.Cache.CustomPlateTriggers.Aura, Addon.Cache.CustomPlateTriggers.Cast
 local NameWildcardTriggers, TriggerWildcardTests = Addon.Cache.CustomPlateTriggers.NameWildcard, Addon.Cache.TriggerWildcardTests
@@ -37,7 +39,7 @@ local CustomStylesForAllInstances, CustomStylesForCurrentInstance = Addon.Cache.
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
 -- List them here for Mikk's FindGlobals script
--- GLOBALS: GetSpellInfo, UnitIsTapDenied
+-- GLOBALS: UnitIsTapDenied
 
 ---------------------------------------------------------------------------------------------------
 -- Module Setup
@@ -48,7 +50,8 @@ local StyleModule = Addon.Style
 -- Wrapper functions for WoW Classic
 ---------------------------------------------------------------------------------------------------
 
-if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
+-- UnitIsBattlePet: Mists - Patch 5.1.0 (2012-11-27): Added.
+if not Addon.ExpansionIsAtLeast() then -- Mists
   UnitIsBattlePet = function(...) return false end
 end
 
@@ -90,6 +93,7 @@ local MAP_UNIT_TYPE_TO_TP_TYPE = {
   NeutralMinus     = "Minus",
 }
 
+-- TODO: Move these into MAP_UNIT_TYPE_TO_TP_TYPE, that should work as well (and change right side to target type)
 local REMAP_UNSUPPORTED_UNIT_TYPES = {
   NeutralTotem     = "FriendlyTotem",    -- When players are mind-controled, their totems turn neutral it seems (at least in Classic): https://www.curseforge.com/wow/addons/tidy-plates-threat-plates/issues/506
   NeutralGuardian  = "FriendlyGuardian",
@@ -97,10 +101,17 @@ local REMAP_UNSUPPORTED_UNIT_TYPES = {
 }
 
 local function GetUnitType(unit)
+  -- Minions are:
+  --   - totems: unit.TotemSettings
+  --   - guardians: unit is a player's pet
+  --   - pets: all other player controlled units
+  -- Not sure if there are other types of minions
   local unit_class
   -- not all combinations are possible in the game: Friendly Minus, Neutral Player/Totem/Pet
   if unit.type == "PLAYER" then
     unit_class = "Player"
+  elseif unit.classification == "minus" then
+    unit_class = "Minus"
   elseif unit.TotemSettings then
     unit_class = "Totem"
   elseif UnitIsOtherPlayersPet(unit.unitid) or UnitIsUnit(unit.unitid, "pet") then -- player pets are also considered guardians, so this check has priority
@@ -108,8 +119,6 @@ local function GetUnitType(unit)
     unit_class = "Pet"
   elseif UnitPlayerControlled(unit.unitid) then
     unit_class = "Guardian"
-  elseif unit.isMini then
-    unit_class = "Minus"
   else
     unit_class = "NPC"
   end
@@ -138,7 +147,7 @@ local function ShowUnit(unit)
   local show, headline_view = GetUnitType(unit)
 
   -- If a unit is targeted, show the nameplate if possible.
-  show = show or unit.isTarget
+  show = show or unit.IsSoftTarget
 
   if not show then return false, false, headline_view end
 
@@ -158,7 +167,7 @@ local function ShowUnit(unit)
     hide_unit_type = true
   end
 
-  if hide_unit_type and not unit.isTarget then
+  if hide_unit_type and not unit.IsSoftTarget then
     return show, hide_unit_type, headline_view
   end
 
@@ -176,7 +185,7 @@ local function ShowUnit(unit)
 --  end
 
   db = db_base.HeadlineView
-  if db.ForceHealthbarOnTarget and unit.isTarget then
+  if db.ForceHealthbarOnTarget and unit.IsSoftTarget then
     headline_view = false
   elseif db.ForceOutOfCombat and not InCombatLockdown() then
     headline_view = true
@@ -294,7 +303,7 @@ function StyleModule.AuraTriggerUpdateStyle(unit)
   -- is no longer there
   if Addon.ActiveAuraTriggers and (unit.CustomStyleAura or unit.PreviousCustomStyleAura) then 
     local tp_frame = Addon:GetThreatPlateForUnit(unit.unitid)
-    self:Update(tp_frame)
+    StyleModule.Update(tp_frame)
   end
 end
 
@@ -309,7 +318,7 @@ function StyleModule.AuraTriggerCheckIfActive(unit, aura_id, aura_name, aura_cas
     unit.CustomStyleAura = (unique_settings.showNameplate and "unique") or (unique_settings.ShowHeadlineView and "NameOnly-Unique") or "etotem"
     unit.CustomPlateSettingsAura = unique_settings
 
-    local _, _, icon = _G.GetSpellInfo(aura_id)
+    icon = GetSpellInfo(aura_id).iconID
     unique_settings.AutomaticIcon = icon
   end
 end
@@ -326,7 +335,7 @@ function StyleModule.CastTriggerCheckIfActive(unit, spell_id, spell_name)
     unit.CustomStyleCast = (unique_settings.showNameplate and "unique") or (unique_settings.ShowHeadlineView and "NameOnly-Unique") or "etotem"
     unit.CustomPlateSettingsCast = unique_settings
 
-    local _, _, icon = _G.GetSpellInfo(spell_id)
+    icon = GetSpellInfo(spell_id).iconID
     unique_settings.AutomaticIcon = icon
   end
 end
@@ -353,7 +362,7 @@ function StyleModule.SetStyle(unit)
 
   -- Nameplate is disabled in General - Visibility
   if not show then
-    return "empty", nil
+    return "empty"
   end
 
   -- Check if custom nameplate should be used for the unit:
@@ -365,7 +374,7 @@ function StyleModule.SetStyle(unit)
     style = unit.CustomStyleAura
     unit.CustomPlateSettings = unit.CustomPlateSettingsAura
   else
-  	style = self:ProcessNameTriggers(unit) or (headline_view and "NameOnly")
+  	style = StyleModule.ProcessNameTriggers(unit) or (headline_view and "NameOnly")
   end
 	  
   -- Dynamic enable checks for custom styles
@@ -386,21 +395,24 @@ function StyleModule.SetStyle(unit)
     end
   end
 
+  -- TODO: Probably could merge these three if-s into one if-elseif-statement
+  
   -- Hidden nameplates might be shown if a custom style is defined for them (Visibility - Hide Nameplates)
   if hide_unit_type and style ~= "unique" and style ~= "NameOnly-Unique" then
-    return "empty", nil
+    return "empty"
   end
 
-  -- if not style and Addon:ShowFeedback(unit) then
-  --   -- could call GetThreatStyle here, but that would at a tiny overhead
-  --   -- style tank/dps only used for hostile (enemy, neutral) NPCs
-  --   style = Addon.GetPlayerRole()
-  -- end
+  if (UnitIsDead(unit.unitid) and UnitIsUnit("softinteract", unit.unitid)) or unit.SoftInteractTargetIsDead then
+    -- We use IsDead to prevent the nameplate switching to healthbar view again shortly before disapearing
+    unit.SoftInteractTargetIsDead = true
+    return (unit.CustomPlateSettings and "NameOnly-Unique") or "NameOnly"
+  end
 
-  -- return style or "normal"
+  if not style and not UnitExists(unit.unitid) then
+    style = "etotem"
+  end
 
-  -- style should never be false here (only nil or "totem", ...)
-  return style or self:GetThreatStyle(unit)
+  return style or StyleModule.GetThreatStyle(unit)
 end
 
 ---------------------------------------------------------------------------------------------------------------------
@@ -423,12 +435,13 @@ local function UpdateNameplateStyle(tp_frame, style)
   -- Frame
   tp_frame:ClearAllPoints()
   tp_frame:SetPoint(style.frame.anchor, tp_frame.Parent, style.frame.anchor, style.frame.x, style.frame.y)
-  tp_frame:SetSize(style.healthbar.width, style.healthbar.height)
+  local style_healthbar = style.healthbar[tp_frame.unit.reaction]
+  tp_frame:SetSize(style_healthbar.width, style_healthbar.height)
 
   -- The following modules use the unit style, so it must be initialized before Module:PlateUnitAdded is called
-  ColorPlateUnitAdded(tp_frame)
-  TransparencyPlateUnitAdded(tp_frame)
-  ScalingPlateUnitAdded(tp_frame)
+  ColorModule.UpdateStyle(tp_frame)
+  TransparencyModule.UpdateStyle(tp_frame)
+  ScalingModule.UpdateStyle(tp_frame)
 
   ElementsUpdateStyle(tp_frame, style)
   Widgets:OnUnitAdded(tp_frame, tp_frame.unit)
@@ -449,7 +462,7 @@ end
 
 function StyleModule.PlateUnitAdded(tp_frame)
   -- Update with old_custom_style == nil and tp_frame.stylename == nil
-  SetNameplateStyle(tp_frame, self:SetStyle(tp_frame.unit))
+  SetNameplateStyle(tp_frame, StyleModule.SetStyle(tp_frame.unit))
 end
 
 function StyleModule.Update(tp_frame)
@@ -466,7 +479,7 @@ function StyleModule.Update(tp_frame)
 end
 
 function StyleModule.UpdateName(tp_frame)
-  local stylename = self:ProcessNameTriggers(tp_frame.unit)
+  local stylename = StyleModule.ProcessNameTriggers(tp_frame.unit)
 
   if stylename and tp_frame.stylename ~= stylename then
     SetNameplateStyle(tp_frame, stylename)

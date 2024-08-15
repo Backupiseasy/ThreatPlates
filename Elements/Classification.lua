@@ -44,7 +44,7 @@ local Element = Addon.Elements.NewElement("Classification")
 ---------------------------------------------------------------------------------------------------
 
 -- Called in processing event: NAME_PLATE_CREATED
-function Element.Create(tp_frame)
+function Element.PlateCreated(tp_frame)
   local healthbar = tp_frame.visual.Healthbar
 
   local skull_icon = healthbar:CreateTexture(nil, "OVERLAY", nil, 2)

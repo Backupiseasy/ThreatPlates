@@ -24,12 +24,7 @@ local _G =_G
 -- List them here for Mikk's FindGlobals script
 -- GLOBALS: CreateFrame, UnitHealth, UnitHealthMax, UnitGetTotalAbsorbs
 
-local IGNORED_STYLES = {
-  NameOnly = true,
-  ["NameOnly-Unique"] = true,
-  etotem = true,
-  empty= true,
-}
+local IGNORED_STYLES = Addon.IGNORED_STYLES_WITH_NAMEMODE
 
 ---------------------------------------------------------------------------------------------------
 -- Local variables
@@ -52,10 +47,9 @@ local Element = Addon.Elements.NewElement("Healthbar")
 ---------------------------------------------------------------------------------------------------
 local UpdateAbsorbs
 
-if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
-  -- Absorbs are not supported in (TBC) Classic
-  UpdateAbsorbs = function() end
-else
+-- UnitGetTotalAbsorbs: Mists - Patch 5.2.0 (2013-03-05): Added.
+-- UnitGetTotalHealAbsorbs: Mists - Patch 5.4.0 (2013-09-10): Added.
+if Addon.IS_MAINLINE then
   UpdateAbsorbs = function(tp_frame)
     local visual = tp_frame.visual
     local absorbbar = visual.Healthbar.Absorbs
@@ -213,6 +207,8 @@ else
       absorbbar:Hide()
     end
   end
+else
+  UpdateAbsorbs = function() end  
 end
 
 local function HideTargetUnit(healthbar)
@@ -288,7 +284,7 @@ end
 
 -- The event triggering this function is only subscribed for when target unit is enabled
 local function PlayerTargetLost(tp_frame)
-  if SettingsShowOnlyForTarget then
+  if SettingsShowOnlyForTarget and not Addon.UnitIsTarget(unit.unitid) then
     HideTargetUnit(tp_frame.visual.Healthbar)
   end
 end
@@ -297,9 +293,12 @@ end
 ---------------------------------------------------------------------------------------------------
 
 -- Called in processing event: NAME_PLATE_CREATED
-function Element.Create(tp_frame)
+function Element.PlateCreated(tp_frame)
   local healthbar = _G.CreateFrame("StatusBar", nil, tp_frame)
   healthbar:SetFrameLevel(tp_frame:GetFrameLevel() + 5)
+  -- ! Set the texture here; without a set texture, color changes with SetStatusBarColor will not be applied and
+  -- ! the set color will be lost
+  healthbar:SetStatusBarTexture("Interface\\RaidFrame\\Raid-Bar-Hp-Fill")
   --healthbar:Hide()
 
   local border = _G.CreateFrame("Frame", nil, healthbar, BackdropTemplate)
@@ -310,7 +309,7 @@ function Element.Create(tp_frame)
 
   healthbar.Background = healthbar:CreateTexture(nil, "ARTWORK")
 
-  if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) then
+  if Addon.IS_MAINLINE then
     local absorbs = healthbar:CreateTexture(nil, "ARTWORK", nil, 2)
     absorbs.Overlay = healthbar:CreateTexture(nil, "ARTWORK", nil, 3)
     absorbs.Overlay:SetTexture("Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Striped_Texture.tga", true, true)
@@ -395,8 +394,8 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
   local healthborder_style = style.healthborder
 
   healthbar:SetStatusBarTexture(healthbar_style.texture)
-  healthbar:SetSize(healthbar_style.width, healthbar_style.height)
   healthbar:ClearAllPoints()
+  healthbar:SetSize(healthbar_style[tp_frame.unit.reaction].width, healthbar_style[tp_frame.unit.reaction].height)
   healthbar:SetPoint(healthbar_style.anchor, tp_frame, healthbar_style.anchor, healthbar_style.x, healthbar_style.y)
 
   local background = healthbar.Background
@@ -410,7 +409,7 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
   border:SetPoint("TOPLEFT", healthbar, "TOPLEFT", - offset, offset)
   border:SetPoint("BOTTOMRIGHT", healthbar, "BOTTOMRIGHT", offset, - offset)
 
-  if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) then
+  if Addon.IS_MAINLINE then
     -- Absorbs
     healthbar.HealAbsorb:SetTexture(healthbar_style.texture, true, false)
 
@@ -479,8 +478,21 @@ local function UnitHealthbarUpdate(unitid)
   end
 end
 
+local function ColorUpdate(tp_frame, color)
+  local healthbar = tp_frame.visual.Healthbar
+
+  if not healthbar:IsShown() then return end
+
+  healthbar:SetStatusBarColor(color.r, color.g, color.b, 1)
+  if not SettingsHealthbar.BackgroundUseForegroundColor then
+    color = SettingsHealthbar.BackgroundColor
+  end
+  healthbar.Background:SetVertexColor(color.r, color.g, color.b, 1 - SettingsHealthbar.BackgroundOpacity)
+end
+
 function Element.UpdateSettings()
   Settings = Addon.db.profile.settings.healthbar
+  SettingsHealthbar = Addon.db.profile.Healthbar
 
   local db = Addon.db.profile.settings.healthborder
   BorderBackdrop.edgeFile = (db.show and ThreatPlates.Art .. db.texture) or nil
@@ -493,6 +505,8 @@ function Element.UpdateSettings()
   SettingsTargetUnit = Settings.TargetUnit
   SettingsTargetUnitHide = not SettingsTargetUnit.Show
   SettingsShowOnlyForTarget = SettingsTargetUnit.ShowOnlyForTarget
+
+  SubscribeEvent(Element, "HealthbarColorUpdate", ColorUpdate)
 
   if SettingsTargetUnit.Show then
     SubscribeEvent(Element, "UNIT_TARGET", UNIT_TARGET)
@@ -509,10 +523,14 @@ end
 
 SubscribeEvent(Element, "UNIT_MAXHEALTH", UnitMaxHealthUpdate)
 
-if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
-  SubscribeEvent(Element, "UNIT_HEALTH_FREQUENT", UnitHealthbarUpdate)
-else -- if Addon.IS_MAINLINE then
+if Addon.IS_MAINLINE then  
+  -- UNIT_HEALTH, UNIT_HEALTH_FREQUENT: 
+  --   Shadowlands Patch 9.0.1 (2020-10-13): Removed. Replaced by UNIT HEALTH which is no longer aggressively throttled.
+  --   Cataclysm Patch 4.0.6 (2011-02-08): Added.
   SubscribeEvent(Element, "UNIT_HEALTH", UnitHealthbarUpdate)
+    -- Absorbs should have been added with Mists
   SubscribeEvent(Element, "UNIT_ABSORB_AMOUNT_CHANGED", UnitHealthbarUpdate)
   SubscribeEvent(Element, "UNIT_HEAL_ABSORB_AMOUNT_CHANGED", UnitHealthbarUpdate)
+else
+  SubscribeEvent(Element, "UNIT_HEALTH_FREQUENT", UnitHealthbarUpdate)
 end

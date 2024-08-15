@@ -124,8 +124,11 @@ end
 ---------------------------------------------------------------------------------------------------
 
 -- Called in processing event: NAME_PLATE_CREATED
-function Element.Create(tp_frame)
+function Element.PlateCreated(tp_frame)
   local castbar = CreateFrame("StatusBar", nil, tp_frame)
+  -- ! Set the texture here; without a set texture, color changes with SetStatusBarColor will not be applied and
+  -- ! the set color will be lost
+  castbar:SetStatusBarTexture("Interface\\RaidFrame\\Raid-Bar-Hp-Fill")
   castbar:Hide()
 
   castbar.Border = CreateFrame("Frame", nil, castbar, BackdropTemplate)
@@ -312,7 +315,7 @@ local function TargetUpdate(tp_frame)
   local spell_text, spell_text_style = tp_frame.visual.SpellText, tp_frame.style.spelltext
 
   local target_offset_x, target_offset_y = 0, 0
-  if UnitIsUnit("target", tp_frame.unit.unitid) then
+  if Addon.UnitIsTarget(tp_frame.unit.unitid) then
     local db = Addon.db.profile.settings.castbar
     target_offset_x = db.x_target
     target_offset_y = db.y_target

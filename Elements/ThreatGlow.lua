@@ -67,7 +67,7 @@ end
 local Element = Addon.Elements.NewElement("ThreatGlow")
 
 -- Called in processing event: NAME_PLATE_CREATED
-function Element.Create(tp_frame)
+function Element.PlateCreated(tp_frame)
   local element_frame = CreateFrame("Frame", nil, tp_frame, BackdropTemplate)
   element_frame:SetFrameLevel(tp_frame:GetFrameLevel())
 
@@ -104,18 +104,18 @@ end
 --end
 
 function Element.UpdateStyle(tp_frame, style, plate_style)
-  if plate_style ~= "None" then
-    Element.PlateUnitAdded(tp_frame)
-  else
+  if plate_style == "None" then
     tp_frame.visual.ThreatGlow:Hide()
+  else
+    Element.PlateUnitAdded(tp_frame)
   end
 end
 
 function Element.ThreatUpdate(tp_frame, unit)
-  if tp_frame.PlateStyle ~= "None" then
-    Element.PlateUnitAdded(tp_frame)
-  else
+  if plate_style == "None" then
     tp_frame.visual.ThreatGlow:Hide()
+  else
+    Element.PlateUnitAdded(tp_frame)
   end
 end
 
@@ -125,5 +125,5 @@ function Element.UpdateSettings()
 
   TappedColor = db.ColorByReaction.TappedUnit
 
-  SubscribeEvent(Element, "ThreatColorUpdate", Element.ThreatUpdate)
+  SubscribeEvent(Element, "ThreatUpdate", Element.ThreatUpdate)
 end

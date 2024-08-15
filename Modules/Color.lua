@@ -18,7 +18,7 @@ local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
 local SubscribeEvent, PublishEvent,  UnsubscribeEvent = Addon.EventService.Subscribe, Addon.EventService.Publish, Addon.EventService.Unsubscribe
-local Style = Addon.Style
+local StyleModule = Addon.Style
 local RGB_P = Addon.RGB_P
 
 local _G =_G
@@ -32,18 +32,13 @@ local _G =_G
 local ColorModule = Addon.Color
 
 ---------------------------------------------------------------------------------------------------
--- Local variables
----------------------------------------------------------------------------------------------------
-local ColorByHealthIsEnabled = false
-local ShowQuestUnit
-
----------------------------------------------------------------------------------------------------
 -- Wrapper functions for WoW Classic
 ---------------------------------------------------------------------------------------------------
 
-if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
+-- Quest tooltips: not sure since when available
+if not Addon.IS_MAINLINE then
   -- Quest widget is not available in Classic
-  ShowQuestUnit = function(...) return false end
+  Addon.ShowQuestUnit = function(...) return false end
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -51,6 +46,87 @@ end
 ---------------------------------------------------------------------------------------------------
 
 local TRANPARENT_COLOR = Addon.RGB(0, 0, 0, 0)
+
+---------------------------------------------------------------------------------------------------
+-- Cached configuration settings (for performance reasons)
+---------------------------------------------------------------------------------------------------
+local ColorByHealthIsEnabled = false
+local SettingsBase, Settings, SettingsName
+local ColorByReaction, ColorByHealth
+local HealthbarColorFunctions = {}
+local NameCustomColor = {
+  HealthbarMode = {},
+  NameMode = {}
+}
+local ThreatColor = {}
+local NameColorFunctions = {
+  HealthbarMode = {},
+  NameMode = {},
+}
+local NameModeSettings = {
+  HealthbarMode = {},
+  NameMode = {},
+}
+
+---------------------------------------------------------------------------------------------------
+-- Color by health
+---------------------------------------------------------------------------------------------------
+
+local HealthColorCache = {}
+local CS = CreateFrame("ColorSelect")
+
+--GetSmudgeColorRGB function - from: https://www.wowinterface.com/downloads/info22536-ColorSmudge.html
+--arg1: color table in RGB {r=0,g=0,b=0}
+--arg2: color table in RGB {r=1,g=1,b=1}
+--arg3: percentage 0-100
+function CS:GetSmudgeColorRGB(colorA, colorB, perc)
+  perc = perc * 0.01
+
+  self:SetColorRGB(colorA.r,colorA.g,colorA.b)
+  local h1, s1, v1 = self:GetColorHSV()
+  self:SetColorRGB(colorB.r,colorB.g,colorB.b)
+  local h2, s2, v2 = self:GetColorHSV()
+  local h3 = floor(h1-(h1-h2) * perc)
+  if abs(h1-h2) > 180 then
+    local radius = (360-abs(h1-h2)) * perc
+    if h1 < h2 then
+      h3 = floor(h1-radius)
+      if h3 < 0 then
+        h3 = 360+h3
+      end
+    else
+      h3 = floor(h1+radius)
+      if h3 > 360 then
+        h3 = h3-360
+      end
+    end
+  end
+
+  local s3 = s1-(s1-s2) * perc
+  local v3 = v1-(v1-v2) * perc
+  self:SetColorHSV(h3, s3, v3)
+
+  return self:GetColorRGB()
+end
+
+local function GetColorByHealth(unit)
+  local health_pct = ceil(100 * unit.health / unit.healthmax)
+
+  local color = HealthColorCache[health_pct]
+  if not color then
+    color = RGB_P(CS:GetSmudgeColorRGB(ColorByHealth.Low, ColorByHealth.High, health_pct))
+    HealthColorCache[health_pct] = color
+  end
+
+  return color
+end
+
+-- Works as all functions using this function are triggerd by the NameColorChanged event
+ColorModule.GetColorByHealthDeficit = GetColorByHealth
+
+---------------------------------------------------------------------------------------------------
+-- Color by unit reaction 
+---------------------------------------------------------------------------------------------------
 
 local UNIT_COLOR_MAP = {
   FRIENDLY = { 
@@ -103,210 +179,35 @@ local UNIT_COLOR_MAP = {
   }
 }
 
----------------------------------------------------------------------------------------------------
--- Cached configuration settings (for performance reasons)
----------------------------------------------------------------------------------------------------
-local SettingsBase, Settings, SettingsName
-local ColorByReaction, ColorByHealth
-local HealthbarColorFunctions = {}
-local NameColorFunctions = {
-  HealthbarMode = {},
-  NameMode = {},
-}
-local NameCustomColor = {
-  HealthbarMode = {},
-  NameMode = {}
-}
-local ThreatColor = {}
-local NameModeSettings = {
-  HealthbarMode = {},
-  NameMode = {},
-}
-
----------------------------------------------------------------------------------------------------
--- ThreatPlates Frame functions to return the current color for healthbar/name based on settings
----------------------------------------------------------------------------------------------------
-
-local function GetCustomStyleColor(unit)
-  local unique_setting = unit.CustomPlateSettings
-  return (unique_setting and unique_setting.UseThreatColor and unit.CombatColor) or unit.CustomColor
-end
-
-local function GetUnitColorByHealth(tp_frame)
-  local unit = tp_frame.unit
-  return unit.SituationalColor or unit.HealthColor
-end
-
-local function GetUnitColorByReaction(tp_frame)
-  local unit = tp_frame.unit
-  return unit.SituationalColor or unit.CombatColor or unit.ReactionColor
-end
-
-local function GetUnitColorByClass(tp_frame)
-  local unit = tp_frame.unit
-  return unit.SituationalColor or unit.CombatColor or unit.ClassColor or unit.ReactionColor
-end
-
-local function GetUnitColorCustomPlate(tp_frame)
-  local unit = tp_frame.unit
-  return unit.SituationalColor or GetCustomStyleColor(unit)
-end
-
-local HEALTHBAR_COLOR_FUNCTIONS = {
-  REACTION = GetUnitColorByReaction,
-  CLASS = GetUnitColorByClass,
-  HEALTH = GetUnitColorByHealth,
-}
-
-local function GetUnitColorByHealthName(tp_frame)
-  local unit = tp_frame.unit
-  return unit.SituationalNameColor or unit.HealthColor
-end
-
-local function GetUnitColorByReactionName(tp_frame)
-  local unit = tp_frame.unit
-  return unit.SituationalNameColor or unit.CombatColor or unit.ReactionColor
-end
-
-local function GetUnitColorByClassName(tp_frame)
-  local unit = tp_frame.unit
-  return unit.SituationalNameColor or unit.CombatColor or unit.ClassColor or unit.ReactionColor
-end
-
-local function GetUnitColorCustomColorName(tp_frame)
-  local unit = tp_frame.unit
-  return unit.SituationalNameColor or NameCustomColor[tp_frame.PlateStyle][unit.reaction]
-end
-
-local function GetUnitColorCustomPlateName(tp_frame)
-  local unit = tp_frame.unit
-
-  if tp_frame.PlateStyle == "HealthbarMode" then
-    return NameColorFunctions.HealthbarMode[unit.reaction](tp_frame)
-  else
-    return unit.SituationalNameColor or GetCustomStyleColor(unit)
-  end
-end
-
-local NAME_COLOR_FUNCTIONS = {
-  REACTION = GetUnitColorByReactionName,
-  CLASS = GetUnitColorByClassName,
-  HEALTH = GetUnitColorByHealthName,
-  CUSTOM = GetUnitColorCustomColorName,
-}
-
----------------------------------------------------------------------------------------------------
--- Functions to set color for healthbar, name, and status text
----------------------------------------------------------------------------------------------------
-
-local function UpdatePlateColors(tp_frame)
-  local color
-
-  if tp_frame.style.healthbar.show then
-    -- When a nameplate is initalized, colors (e.g., unit.ReactionColor) are not yet defined, so GetHealthbarColor
-    -- returns nil
-    color = tp_frame:GetHealthbarColor() or TRANPARENT_COLOR
-
-    local healthbar = tp_frame.visual.Healthbar
-    healthbar:SetStatusBarColor(color.r, color.g, color.b, 1)
-
-    if not Settings.BackgroundUseForegroundColor then
-      color = Settings.BackgroundColor
-    end
-    healthbar.Background:SetVertexColor(color.r, color.g, color.b, 1 - Settings.BackgroundOpacity)
-  end
-
-  color = tp_frame:GetNameColor() or TRANPARENT_COLOR
-  if SettingsName[tp_frame.PlateStyle].Enabled then
-    tp_frame.visual.NameText:SetTextColor(color.r, color.g, color.b, color.a)
-  end
-  PublishEvent("NameColorUpdate", tp_frame, color)
-end
-
----------------------------------------------------------------------------------------------------
--- Color-colculating Functions
----------------------------------------------------------------------------------------------------
-
-local HealthColorCache = {}
-local CS = CreateFrame("ColorSelect")
-
---GetSmudgeColorRGB function - from: https://www.wowinterface.com/downloads/info22536-ColorSmudge.html
---arg1: color table in RGB {r=0,g=0,b=0}
---arg2: color table in RGB {r=1,g=1,b=1}
---arg3: percentage 0-100
-function CS:GetSmudgeColorRGB(colorA, colorB, perc)
-  perc = perc * 0.01
-
-  self:SetColorRGB(colorA.r,colorA.g,colorA.b)
-  local h1, s1, v1 = self:GetColorHSV()
-  self:SetColorRGB(colorB.r,colorB.g,colorB.b)
-  local h2, s2, v2 = self:GetColorHSV()
-  local h3 = floor(h1-(h1-h2) * perc)
-  if abs(h1-h2) > 180 then
-    local radius = (360-abs(h1-h2)) * perc
-    if h1 < h2 then
-      h3 = floor(h1-radius)
-      if h3 < 0 then
-        h3 = 360+h3
-      end
-    else
-      h3 = floor(h1+radius)
-      if h3 > 360 then
-        h3 = h3-360
-      end
-    end
-  end
-
-  local s3 = s1-(s1-s2) * perc
-  local v3 = v1-(v1-v2) * perc
-  self:SetColorHSV(h3, s3, v3)
-
-  return self:GetColorRGB()
-end
-
----------------------------------------------------------------------------------------------------
--- Functions to the the base color for a unit
----------------------------------------------------------------------------------------------------
-
-local function GetColorByHealth(unit)
-  local health_pct = ceil(100 * unit.health / unit.healthmax)
-
-  local health_color = HealthColorCache[health_pct]
-  if not health_color then
-    health_color = RGB_P(CS:GetSmudgeColorRGB(ColorByHealth.Low, ColorByHealth.High, health_pct))
-    HealthColorCache[health_pct] = health_color
-    --print ("Color: Adding color for", health_pct, "=>", Addon.Debug:ColorToString(health_color))
-  end
-
-  unit.HealthColor = health_color
-end
-
--- Works as all functions using this function are triggerd by the NameColorChanged event
-Addon.GetColorByHealthDeficit = function(unit)
-  return unit.HealthColor
-end
-
 local function GetColorByReaction(unit)
-    -- PvP coloring based on: https://wowpedia.fandom.com/wiki/PvP_flag
+  -- PvP coloring based on: https://wowpedia.fandom.com/wiki/PvP_flag
   -- Coloring for pets is the same as for the player controlling the pet
   local unit_type = (UnitPlayerControlled(unit.unitid) and "PLAYER") or unit.type
+  
+  local color
   -- * For players and their pets
   if unit_type == "PLAYER" then
     if ColorByReaction.IgnorePvPStatus or Addon.IsInPvPInstance then
-      unit.ReactionColor = (unit.reaction == "HOSTILE" and ColorByReaction.HostilePlayer) or ColorByReaction.FriendlyPlayer
+      color = (unit.reaction == "HOSTILE" and ColorByReaction.HostilePlayer) or ColorByReaction.FriendlyPlayer
     else
       local unit_is_pvp = UnitIsPVP(unit.unitid) or false
       local player_is_pvp = UnitIsPVP("player") or false
-      unit.ReactionColor = ColorByReaction[UNIT_COLOR_MAP[unit.reaction][unit_type][unit_is_pvp][player_is_pvp]]
+      color = ColorByReaction[UNIT_COLOR_MAP[unit.reaction][unit_type][unit_is_pvp][player_is_pvp]]
     end
   -- * From here: For NPCs (without pets)
   elseif not UnitCanAttack("player", unit.unitid) and unit.blue < 0.1 and unit.green > 0.5 and unit.green < 0.6 and unit.red > 0.9 then
     -- Handle non-attackable units with brown healtbars - currently, I know no better way to detect this.
-    unit.ReactionColor = ColorByReaction.UnfriendlyFaction
+    color = ColorByReaction.UnfriendlyFaction
   else
-    unit.ReactionColor = ColorByReaction[UNIT_COLOR_MAP[unit.reaction][unit_type]]
+    color = ColorByReaction[UNIT_COLOR_MAP[unit.reaction][unit_type]]
   end
+
+  return color
 end
+
+---------------------------------------------------------------------------------------------------
+-- Color by class
+---------------------------------------------------------------------------------------------------
 
 local function GetColorByClass(unit, plate_style)
   local color
@@ -326,20 +227,23 @@ local function GetColorByClass(unit, plate_style)
     end
   end
 
-  unit.ClassColor = color
+  return color
 end
+
+---------------------------------------------------------------------------------------------------
+-- Color for custom styles
+---------------------------------------------------------------------------------------------------
 
 local function GetCustomStyleColor(unit)
   local color
 
+  --  -- Threat System is should also be used for custom nameplate (in combat with thread system on)
+  --  if unique_setting and not unique_setting.UseThreatColor then
+  --    unit.CombatColor = nil
+  --    return nil
+  --  end
+  
   local unique_setting = unit.CustomPlateSettings
-
---  -- Threat System is should also be used for custom nameplate (in combat with thread system on)
---  if unique_setting and not unique_setting.UseThreatColor then
---    unit.CombatColor = nil
---    return nil
---  end
-
   if unique_setting and unique_setting.useColor then
     color = unique_setting.color
   else
@@ -349,233 +253,269 @@ local function GetCustomStyleColor(unit)
     end
   end
 
-  unit.CustomColor = color
+  return color
+end
+
+---------------------------------------------------------------------------------------------------
+-- Color by threat
+---------------------------------------------------------------------------------------------------
+
+-- Threat System is OP, player is in combat, style is tank or dps
+local function GetCombatColor(unit)
+  -- For styles normal, totem, empty, no threat feedback i shown
+  -- Style custom is handled by the part below
+  local style = (unit.CustomPlateSettings and StyleModule.GetThreatStyle(unit)) or unit.style
+
+  local color
+  if style == "dps" or style == "tank" then
+    color = ThreatColor[style][unit.ThreatLevel]
+  end
 
   return color
 end
 
-function ColorModule.GetThreatColor(unit)
-  return unit.CombatColor
-end
+ColorModule.GetThreatColor = GetCombatColor
 
--- Threat System is OP, player is in combat, style is tank or dps
-local function SetCombatColor(unit)
-  -- For styles normal, totem, empty, no threat feedback i shown
-  -- Style custom is handled by the part below
-  local style = (unit.CustomPlateSettings and Style:GetThreatStyle(unit)) or unit.style
-
-  if style == "dps" or style == "tank" then
-    unit.CombatColor = ThreatColor[style][unit.ThreatLevel]
-  else
-    unit.CombatColor = nil
-  end
-end
+---------------------------------------------------------------------------------------------------
+-- Color by situation
+---------------------------------------------------------------------------------------------------
 
 ---- Sitational Color - Order is: target, target marked, tapped, quest)
---local function GetSituationalColorHealthbar(unit, plate_style)
---  -- Not situational coloring for totems (currently)
---  if unit.TotemSettings then return end
---
---  local color
---  -- NameModeSettings.HealthbarMode.UseTargetColoring = SettingsBase.targetWidget.ModeHPBar
---  if unit.isTarget and SettingsBase.targetWidget.ModeHPBar then
---    color = SettingsBase.targetWidget.HPBarColor
---  else
---    local use_target_mark_color
---    if unit.CustomPlateSettings then
---      use_target_mark_color = unit.TargetMarkerIcon and unit.CustomPlateSettings.allowMarked
---    else
---      use_target_mark_color = unit.TargetMarkerIcon and Settings.UseRaidMarkColoring
---    end
---
---    if use_target_mark_color then
---      color = SettingsBase.settings.raidicon.hpMarked[unit.TargetMarkerIcon]
---    elseif unit.IsTapDenied then
---      color = ColorByReaction.TappedUnit
---    elseif Addon:ShowQuestUnit(unit) and Addon:IsPlayerQuestUnit(unit) then
---      -- Unit is quest target
---      color = SettingsBase.questWidget.HPBarColor
---    end
---  end
---
---  unit.SituationalColor = color
---end
---
----- Sitational Color - Order is: target, target marked, tapped, quest)
---local function GetSituationalColorName(unit, plate_style)
---  -- Not situational coloring for totems (currently)
---  if unit.TotemSettings then return end
---
---  local mode_settings = NameModeSettings[plate_style]
---
---  local color
---  if unit.isTarget and mode_settings.UseTargetColoring then
---    color = SettingsBase.targetWidget.HPBarColor
---  else
---    local use_target_mark_color
---    if unit.CustomPlateSettings then
---      use_target_mark_color = unit.TargetMarkerIcon and unit.CustomPlateSettings.allowMarked
---    else
---      use_target_mark_color = unit.TargetMarkerIcon and mode_settings.UseRaidMarkColoring
---    end
---
---    if use_target_mark_color then
---      color = SettingsBase.settings.raidicon.hpMarked[unit.TargetMarkerIcon]
---    elseif unit.IsTapDenied and tp_frame.PlateStyle == "NameMode" then
---      color = ColorByReaction.TappedUnit
---    end
---  end
---
---  unit.SituationalNameColor = color
---end
-
--- Sitational Color - Order is: target, target marked, tapped, quest)
-local function GetSituationalColor(unit, plate_style)
+local function GetSituationalColorForHealthbar(unit, plate_style)
   -- Not situational coloring for totems (currently)
   if unit.TotemSettings then return end
 
-  local healthbar_color, name_color
-
-  local mode_settings = NameModeSettings[plate_style]
-  if unit.isTarget then
-    -- NameModeSettings.HealthbarMode.UseTargetColoring = SettingsBase.targetWidget.ModeHPBar
-    healthbar_color = NameModeSettings.HealthbarMode.UseTargetColoring and SettingsBase.targetWidget.HPBarColor
-    name_color = mode_settings.UseTargetColoring and SettingsBase.targetWidget.HPBarColor
-  elseif unit.IsFocus then
-    healthbar_color = NameModeSettings.HealthbarMode.UseFocusColoring and SettingsBase.FocusWidget.HPBarColor
-    name_color = mode_settings.UseFocusColoring and SettingsBase.FocusWidget.HPBarColor
-  end
-
-  ShowQuestUnit = ShowQuestUnit or Addon.ShowQuestUnit
-
-  if not healthbar_color then
+  local color
+  -- NameModeSettings.HealthbarMode.UseTargetColoring = SettingsBase.targetWidget.ModeHPBar
+  if unit.isTarget and SettingsBase.targetWidget.ModeHPBar then
+    color = SettingsBase.targetWidget.HPBarColor
+  elseif unit.IsFocus and SettingsBase.FocusWidget.ModeHPBar then
+    color = SettingsBase.FocusWidget.HPBarColor
+  else
     local use_target_mark_color
-    if unit.CustomPlateSettings then
-      use_target_mark_color = unit.TargetMarkerIcon and unit.CustomPlateSettings.allowMarked
-    else
-      use_target_mark_color = unit.TargetMarkerIcon and Settings.UseRaidMarkColoring
+    if unit.TargetMarkerIcon then
+      if unit.CustomPlateSettings then
+        use_target_mark_color = unit.CustomPlateSettings.allowMarked
+      else
+        use_target_mark_color = Settings.UseRaidMarkColoring
+      end
     end
 
     if use_target_mark_color then
-      healthbar_color = SettingsBase.settings.raidicon.hpMarked[unit.TargetMarkerIcon]
+      color = SettingsBase.settings.raidicon.hpMarked[unit.TargetMarkerIcon]
     elseif unit.IsTapDenied then
-      healthbar_color = ColorByReaction.TappedUnit
-    elseif ShowQuestUnit(unit) and Addon:IsPlayerQuestUnit(unit) then
-      healthbar_color = SettingsBase.questWidget.HPBarColor
+      color = ColorByReaction.TappedUnit
+    elseif Addon.ShowQuestUnit(unit) and Addon:IsPlayerQuestUnit(unit) then
+      color = SettingsBase.questWidget.HPBarColor
     end
   end
 
-  if not name_color then
+  return color
+end
+
+-- Sitational Color - Order is: target, target marked, tapped, quest)
+local function GetSituationalColorForName(unit, plate_style)
+  -- Not situational coloring for totems (currently)
+  if unit.TotemSettings then return end
+
+  local color
+  if unit.isTarget and SettingsBase.targetWidget.ModeNames then
+    color = SettingsBase.targetWidget.HPBarColor
+  elseif unit.IsFocus and SettingsBase.FocusWidget.ModeNames then
+    color = SettingsBase.FocusWidget.HPBarColor
+  else
     local use_target_mark_color
-    if unit.CustomPlateSettings then
-      use_target_mark_color = unit.TargetMarkerIcon and unit.CustomPlateSettings.allowMarked
-    else
-      use_target_mark_color = unit.TargetMarkerIcon and mode_settings.UseRaidMarkColoring
+    if unit.TargetMarkerIcon then
+      if unit.CustomPlateSettings then
+        use_target_mark_color = unit.CustomPlateSettings.allowMarked
+      else
+        use_target_mark_color = SettingsName[plate_style].UseRaidMarkColoring
+      end
     end
 
     if use_target_mark_color then
-      name_color = SettingsBase.settings.raidicon.hpMarked[unit.TargetMarkerIcon]
+      color = SettingsBase.settings.raidicon.hpMarked[unit.TargetMarkerIcon]
     elseif unit.IsTapDenied and plate_style == "NameMode" then
-      name_color = ColorByReaction.TappedUnit
+      color = ColorByReaction.TappedUnit
     end
   end
 
-  unit.SituationalColor = healthbar_color
-  unit.SituationalNameColor = name_color
+  return color
 end
+
+---------------------------------------------------------------------------------------------------
+-- ThreatPlates Frame functions to return the current color for healthbar/name based on settings
+---------------------------------------------------------------------------------------------------
+
+local function GetUnitColorByCustomStyle(unit)
+  local unique_setting = unit.CustomPlateSettings
+  return (unique_setting and unique_setting.UseThreatColor and GetCombatColor(unit)) or GetCustomStyleColor(unit)
+end
+
+local function GetUnitColorByHealth(tp_frame)
+  local unit = tp_frame.unit
+  return GetSituationalColorForHealthbar(unit, tp_frame.PlateStyle) or GetColorByHealth(unit)
+end
+
+local function GetUnitColorByReaction(tp_frame)
+  local unit = tp_frame.unit
+  return GetSituationalColorForHealthbar(unit, tp_frame.PlateStyle) or GetCombatColor(unit) or GetColorByReaction(unit)
+end
+
+local function GetUnitColorByClass(tp_frame)
+  local unit = tp_frame.unit
+  local plate_style = tp_frame.PlateStyle
+  return GetSituationalColorForHealthbar(unit, plate_style) or GetCombatColor(unit) or GetColorByClass(unit, plate_style) or GetColorByReaction(unit)
+end
+
+local function GetUnitColorCustomPlate(tp_frame)
+  local unit = tp_frame.unit
+  return GetSituationalColorForHealthbar(unit, tp_frame.PlateStyle) or GetUnitColorByCustomStyle(unit)
+end
+
+local HEALTHBAR_COLOR_FUNCTIONS = {
+  REACTION = GetUnitColorByReaction,
+  CLASS = GetUnitColorByClass,
+  HEALTH = GetUnitColorByHealth,
+}
+
+local function GetUnitColorByHealthName(tp_frame)
+  local unit = tp_frame.unit
+  return GetSituationalColorForName(unit, tp_frame.PlateStyle) or GetColorByHealth(unit)
+end
+
+local function GetUnitColorByReactionName(tp_frame)
+  local unit = tp_frame.unit
+  return GetSituationalColorForName(unit, tp_frame.PlateStyle) or GetCombatColor(unit) or GetColorByReaction(unit)
+end
+
+local function GetUnitColorByClassName(tp_frame)
+  local unit = tp_frame.unit
+  local plate_style = tp_frame.PlateStyle
+  return GetSituationalColorForName(unit, plate_style) or GetCombatColor(unit) or GetColorByClass(unit, plate_style) or GetColorByReaction(unit)
+end
+
+local function GetUnitColorCustomColorName(tp_frame)
+  local unit = tp_frame.unit
+  return GetSituationalColorForName(unit, tp_frame.PlateStyle) or NameCustomColor[tp_frame.PlateStyle][unit.reaction]
+end
+
+local function GetUnitColorCustomPlateName(tp_frame)
+  local unit = tp_frame.unit
+
+  if tp_frame.PlateStyle == "HealthbarMode" then
+    return NameColorFunctions.HealthbarMode[unit.reaction](tp_frame)
+  else
+    return GetSituationalColorForName(unit, tp_frame.PlateStyle) or GetUnitColorByCustomStyle(unit)
+  end
+end
+
+local NAME_COLOR_FUNCTIONS = {
+  REACTION = GetUnitColorByReactionName,
+  CLASS = GetUnitColorByClassName,
+  HEALTH = GetUnitColorByHealthName,
+  CUSTOM = GetUnitColorCustomColorName,
+}
 
 ---------------------------------------------------------------------------------------------------
 -- Core module code
 ---------------------------------------------------------------------------------------------------
 
+---------------------------------------------------------------------------------------------------
+-- Functions to set color for healthbar, name, and status text
+---------------------------------------------------------------------------------------------------
+
+local function UpdatePlateColors(tp_frame)
+  -- When a nameplate is initalized, colors (e.g., unit.ReactionColor) are not yet defined, so GetHealthbarColor
+  -- returns nil
+  -- local color = tp_frame:GetHealthbarColor() or TRANPARENT_COLOR
+
+  -- local healthbar = tp_frame.visual.Healthbar
+  -- healthbar:SetStatusBarColor(color.r, color.g, color.b, 1)
+  -- if not Settings.BackgroundUseForegroundColor then
+  --   color = Settings.BackgroundColor
+  -- end
+  -- healthbar.Background:SetVertexColor(color.r, color.g, color.b, 1 - Settings.BackgroundOpacity)
+
+  -- color = tp_frame:GetNameColor() or TRANPARENT_COLOR
+  -- if SettingsName[tp_frame.PlateStyle].Enabled then
+  --   tp_frame.visual.NameText:SetTextColor(color.r, color.g, color.b, color.a)
+  -- end
+
+  -- When a nameplate is initalized, colors (e.g., unit.ReactionColor) are not yet defined, so GetHealthbarColor
+  -- returns nil
+  tp_frame.HealthbarColor = tp_frame:GetHealthbarColor() or TRANPARENT_COLOR
+  PublishEvent("HealthbarColorUpdate", tp_frame, tp_frame.HealthbarColor)
+
+  tp_frame.NameColor = tp_frame:GetNameColor() or TRANPARENT_COLOR
+  PublishEvent("NameColorUpdate", tp_frame, tp_frame.NameColor)
+end
+
+
 -- Called in processing event: NAME_PLATE_UNIT_ADDED
 function ColorModule.PlateUnitAdded(tp_frame)
   if tp_frame.PlateStyle == "None" then return end
   
-  local unit = tp_frame.unit
-
-  --GetSituationalColorHealthbar(unit, tp_frame.PlateStyle)
-  --GetSituationalColorName(unit, tp_frame.PlateStyle)
-  GetSituationalColor(unit, tp_frame.PlateStyle)
-
-  -- Not sure if this checks are 100% correct, might be just easier to initialize all colors anyway
-  --if tp_frame.GetHealthbarColor == GetUnitColorByHealth or tp_frame.GetNameColor == GetUnitColorByHealthName or unit.CustomColor then
-  if ColorByHealthIsEnabled or unit.CustomColor then
-    GetColorByHealth(unit)
-  end
-
-  if not (tp_frame.GetHealthbarColor == GetUnitColorByHealth and tp_frame.GetNameColor == GetUnitColorByHealthName) then
---    print ("Unit:", unit.name)
-    GetColorByReaction(unit)
-    GetColorByClass(unit, tp_frame.PlateStyle)
---    print ("  Reaction:", Addon.Debug:ColorToString(unit.ReactionColor))
---    print ("  Class:", Addon.Debug:ColorToString(unit.ClassColor))
-  end
-
-  SetCombatColor(unit)
-
   UpdatePlateColors(tp_frame)
   --print ("Unit:", unit.name, "-> Updating Plate Colors:", Addon.Debug:ColorToString(tp_frame:GetHealthbarColor()))
 end
 
-local function UNIT_HEALTH(unitid)
-  local plate = GetNamePlateForUnit(unitid)
-  local tp_frame = plate and plate.TPFrame
-  if tp_frame and tp_frame.Active and tp_frame.PlateStyle ~= "None" then
-    --print ("Color - UNIT_HEALTH:", unitid)
+-- Called in processing event: UpdateStyle in Nameplate.lua
+function ColorModule.UpdateStyle(tp_frame, style)
+  if tp_frame.PlateStyle == "None" then return end
 
-    GetColorByHealth(tp_frame.unit)
+  local unit = tp_frame.unit
+
+  local unique_setting = unit.CustomPlateSettings
+  local totem_settings = unit.TotemSettings
+
+  if (unique_setting and unique_setting.useColor) or (totem_settings and totem_settings.ShowHPColor) then
+    tp_frame.GetHealthbarColor = GetUnitColorCustomPlate
+    tp_frame.GetNameColor = GetUnitColorCustomPlateName
+  else
+    tp_frame.GetHealthbarColor = HealthbarColorFunctions[unit.reaction]
+    tp_frame.GetNameColor = NameColorFunctions[tp_frame.PlateStyle][unit.reaction]
+  end
+
+  UpdatePlateColors(tp_frame)
+end
+
+local function UNIT_HEALTH(unitid)
+  local tp_frame = Addon:GetThreatPlateForUnit(unitid)
+  if tp_frame and tp_frame.PlateStyle ~= "None" then
     UpdatePlateColors(tp_frame)
   end
 end
 
-local function CombatUpdate(tp_frame)
-  if tp_frame.PlateStyle ~= "None" then
-    SetCombatColor(tp_frame.unit)
-    UpdatePlateColors(tp_frame)
+local function ThreatUpdate(tp_frame)
+  if tp_frame.PlateStyle == "None" then return end
 
-    PublishEvent("ThreatColorUpdate", tp_frame)
-  end
+  UpdatePlateColors(tp_frame)
+end
+
+local function IsColorByHealth(tp_frame)
+  return tp_frame.GetHealthbarColor == GetUnitColorByHealth and tp_frame.GetNameColor == GetUnitColorByHealth
 end
 
 local function FactionUpdate(tp_frame)
+  if tp_frame.PlateStyle == "None" or IsColorByHealth(tp_frame) then return end
+
   -- Only update reaction color if color mode ~= "HEALTH" for healthbar and name
-  if tp_frame.PlateStyle ~= "None" and not (tp_frame.GetHealthbarColor == GetUnitColorByHealth and tp_frame.GetNameColor == GetUnitColorByHealth) then
-      local unit = tp_frame.unit
-
-      -- Tapped is detected by a UNIT_FACTION event (I think), but handled as a situational color change
-      -- Update situational color if unit is now tapped or was tapped
-      if unit.IsTapDenied or unit.SituationalColor == ColorByReaction.TappedUnit then
-        --GetSituationalColorHealthbar(unit, tp_frame.PlateStyle)
-        --GetSituationalColorName(unit, tp_frame.PlateStyle)
-        GetSituationalColor(unit, tp_frame.PlateStyle)
-      end
-
-      GetColorByReaction(unit)
-      UpdatePlateColors(tp_frame)
-
-      --print ("Color - ReactionUpdate:", tp_frame.unit.unitid)
-  end
+  UpdatePlateColors(tp_frame)
 end
 
 local function SituationalColorUpdate(tp_frame)
-  if tp_frame.PlateStyle ~= "None" then
-    --GetSituationalColorHealthbar(unit, tp_frame.PlateStyle)
-    --GetSituationalColorName(unit, tp_frame.PlateStyle)
-    GetSituationalColor(tp_frame.unit, tp_frame.PlateStyle)
-    UpdatePlateColors(tp_frame)
+  if tp_frame.PlateStyle == "None" then return end
 
-    --print ("Color - Situational Update:", tp_frame.unit.name .. "(" .. tp_frame.unit.unitid .. ") =>", tp_frame.unit.SituationalColor)
-  end
+  UpdatePlateColors(tp_frame)
 end
 
 local function ClassColorUpdate(tp_frame)
+  if tp_frame.PlateStyle == "None" or IsColorByHealth(tp_frame) then return end
+
   -- Only update reaction color if color mode ~= "HEALTH" for healthbar and name
-  if tp_frame.PlateStyle ~= "None" and not (tp_frame.GetHealthbarColor == GetUnitColorByHealth and tp_frame.GetNameColor == GetUnitColorByHealth) then
-      -- No tapped unit detection necessary as this event only fires for player nameplates (which cannot be tapped, I hope)
-      GetColorByClass(tp_frame.unit, tp_frame.PlateStyle)
-      UpdatePlateColors(tp_frame)
-  end
+  -- No tapped unit detection necessary as this event only fires for player nameplates (which cannot be tapped, I hope)
+  UpdatePlateColors(tp_frame)
 end
 
 function ColorModule.UpdateSettings()
@@ -608,12 +548,12 @@ function ColorModule.UpdateSettings()
   ColorByReaction = SettingsBase.ColorByReaction
   ColorByHealth = SettingsBase.ColorByHealth
 
-  NameModeSettings.HealthbarMode.UseTargetColoring = SettingsBase.targetWidget.ModeNames
-  NameModeSettings.HealthbarMode.UseFocusColoring = SettingsBase.FocusWidget.ModeNames
-  NameModeSettings.HealthbarMode.UseRaidMarkColoring = SettingsName.HealthbarMode.UseRaidMarkColoring
-  NameModeSettings.NameMode.UseTargetColoring = SettingsBase.targetWidget.ModeNames
-  NameModeSettings.NameMode.UseFocusColoring = SettingsBase.FocusWidget.ModeNames
-  NameModeSettings.NameMode.UseRaidMarkColoring = SettingsName.NameMode.UseRaidMarkColoring
+  -- NameModeSettings.HealthbarMode.UseTargetColoring = SettingsBase.targetWidget.ModeNames
+  -- NameModeSettings.HealthbarMode.UseFocusColoring = SettingsBase.FocusWidget.ModeNames
+  -- NameModeSettings.HealthbarMode.UseRaidMarkColoring = SettingsName.HealthbarMode.UseRaidMarkColoring
+  -- NameModeSettings.NameMode.UseTargetColoring = SettingsBase.targetWidget.ModeNames
+  -- NameModeSettings.NameMode.UseFocusColoring = SettingsBase.FocusWidget.ModeNames
+  -- NameModeSettings.NameMode.UseRaidMarkColoring = SettingsName.NameMode.UseRaidMarkColoring
 
   for style, settings in pairs(Addon.db.profile.settings) do
     -- there are several subentries unter settings. Only use style subsettings like unique, normal, dps, ...
@@ -627,7 +567,7 @@ function ColorModule.UpdateSettings()
     not (Settings.FriendlyUnitMode == "HEALTH" and Settings.EnemyUnitMode == "HEALTH" and
       SettingsName.HealthbarMode.FriendlyUnitMode == "HEALTH" and SettingsName.HealthbarMode.EnemyUnitMode == "HEALTH" and
       SettingsName.NameMode.FriendlyUnitMode == "HEALTH" and SettingsName.NameMode.EnemyUnitMode == "HEALTH") then
-    SubscribeEvent(ColorModule, "ThreatUpdate", CombatUpdate)
+    SubscribeEvent(ColorModule, "ThreatUpdate", ThreatUpdate)
   else
     UnsubscribeEvent(ColorModule, "ThreatUpdate")
   end
@@ -649,10 +589,10 @@ function ColorModule.UpdateSettings()
   else
     ColorByHealthIsEnabled = false
 
-    if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
-      UnsubscribeEvent(ColorModule, "UNIT_HEALTH_FREQUENT", UNIT_HEALTH)
-    else
+    if Addon.IS_MAINLINE then
       UnsubscribeEvent(ColorModule, "UNIT_HEALTH", UNIT_HEALTH)
+    else
+      UnsubscribeEvent(ColorModule, "UNIT_HEALTH_FREQUENT", UNIT_HEALTH)
     end
   end
 

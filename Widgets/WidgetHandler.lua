@@ -225,7 +225,7 @@ function WidgetHandler:NewWidget(widget_name)
       local tp_frame = Addon:GetThreatPlateForUnit(unitid)
       if tp_frame then
         local widget_frame = tp_frame.widgets[self.Name]
-        if widget_frame.Active then
+        if widget_frame and widget_frame.Active then
           return widget_frame
         end
       end
@@ -370,7 +370,7 @@ end
 function WidgetHandler:OnUnitAdded(tp_frame, unit)
   local plate_widgets = tp_frame.widgets
 
-  if unit.isTarget then
+  if unit.IsSoftTarget then
     for _, widget in pairs(self.EnabledTargetWidgets) do
       widget:OnTargetUnitAdded(tp_frame, unit)
     end
@@ -412,7 +412,7 @@ function WidgetHandler:OnUnitRemoved(tp_frame, unit)
   --    end
   --  end
 
-  if unit.isTarget then
+  if unit.IsSoftTarget then
     for _, widget in pairs(self.EnabledTargetWidgets) do
       widget:OnTargetUnitRemoved()
     end
@@ -492,7 +492,7 @@ end
 
 -- Currently only working for target-only widgets
 --function Addon:WidgetsModeChanged(tp_frame, unit)
---  if unit.isTarget then
+--  if unit.IsSoftTarget then
 --    for _, widget in pairs(EnabledTargetWidgets) do
 --      widget:OnModeChange(tp_frame, unit)
 --    end

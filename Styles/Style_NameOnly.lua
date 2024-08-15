@@ -14,8 +14,6 @@ local function Create(name)
   local theme = {
 
     frame = {
-      width = db.frame.width,
-      height = db.frame.height,
       x = db.frame.x,
       y = db.frame.y,
       anchor = "CENTER",
@@ -24,12 +22,22 @@ local function Create(name)
     healthbar = {
       texture = EMPTY_TEXTURE,
       backdrop = EMPTY_TEXTURE,
-      height = 10,
-      width = 120,
       x = 0,
       y = 0,
       anchor = "CENTER",
       show = false,
+      HOSTILE = {
+        height = 10,
+        width = 120,
+      },
+      NEUTRAL = {
+        height = 10,
+        width = 120,
+      },
+      FRIENDLY = {
+        height = 10,
+        width = 120, 
+      },     
     },
 
     healthborder = {

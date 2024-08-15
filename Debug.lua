@@ -95,10 +95,9 @@ Addon.Debug.PrintUnit = function(unitid)
 		local tp_frame = plate.TPFrame
 		local unit = tp_frame and tp_frame.unit
 
-		if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC and not Addon.IS_WRATH_CLASSIC then
+		if Addon.IS_MAINLINE then
 			Addon.Logging.Debug("  UnitNameplateShowsWidgetsOnly = ", UnitNameplateShowsWidgetsOnly(unitid))
 		end
-
     Addon.Logging.Debug("  Reaction = ", UnitReaction("player", unitid))
     local r, g, b, a = UnitSelectionColor(unitid, true)
     Addon.Logging.Debug("  SelectionColor: r =", ceil(r * 255), ", g =", ceil(g * 255), ", b =", ceil(b * 255), ", a =", ceil(a * 255))
@@ -118,7 +117,7 @@ Addon.Debug.PrintUnit = function(unitid)
 		Addon.Logging.Debug("    Player is UnitIsOwnerOrControllerOfUnit =", UnitIsOwnerOrControllerOfUnit("player", unitid))
 		Addon.Logging.Debug("    Player Pet =", UnitIsUnit(unitid, "pet"))
     Addon.Logging.Debug("    IsOtherPlayersPet =", UnitIsOtherPlayersPet(unitid))
-		if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC and not Addon.IS_WRATH_CLASSIC then
+		if Addon.IS_MAINLINE then
 			Addon.Logging.Debug("    IsBattlePet =", UnitIsBattlePet(unitid))
 		end
 		Addon.Logging.Debug("  -- PvP ---------------------------------")

@@ -104,10 +104,6 @@ local INTERNAL_EVENTS = {
   -- Payload:
   --   tp_frame: Frame (table), Nilable = false
   --   color: Color (table), Nilable = false
-  NameColorUpdate = true,
-  -- Event: SituationalColorUpdate
-  --   Fired when the situational color (e.g., target, target mark) must be re-evaluated
-  --   Event(frame)
   SituationalColorUpdate = true, -- Curently: Updates for Quest (Unit Color) and
   -- Event: ClassColorUpdate
   --   Fired when the class color of a unit must be re-evaluated
@@ -117,10 +113,16 @@ local INTERNAL_EVENTS = {
   --   Fires when a nameplate should apply a custom style
   --   Event(frame)
   -- CustomStyleUpdate = true
-  -- Event: ThreatColorUpdate
+  ThreatColorUpdate = true,
   --   Fired when the threat-based color of a unit must be re-evaluated
   --   Event(frame)
-  ThreatColorUpdate = true
+
+  NameColorUpdate = true,
+  -- Parameters: TPFrame, color
+  --   Fired when the situational color (e.g., target, target mark) must be re-evaluated
+  --   Event(frame)
+  HealthbarColorUpdate = true,
+  -- Parameters: TPFrame, color
 }
 
 ---------------------------------------------------------------------------------------------------

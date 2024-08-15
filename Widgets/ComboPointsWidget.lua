@@ -15,11 +15,11 @@ local floor = floor
 local tostring, string_format = tostring, string.format
 
 -- WoW APIs
-local GetTime = GetTime
+local GetTime, tContains = GetTime, tContains
 local UnitCanAttack = UnitCanAttack
 local UnitPower, UnitPowerMax, GetComboPoints, GetRuneCooldown, GetRuneType = UnitPower, UnitPowerMax, GetComboPoints, GetRuneCooldown, GetRuneType
 local GetUnitChargedPowerPoints, GetPowerRegenForPowerType = GetUnitChargedPowerPoints, GetPowerRegenForPowerType
-local GetSpellInfo = GetSpellInfo
+local GetSpellInfo = Addon.GetSpellInfo
 local GetShapeshiftFormID = GetShapeshiftFormID
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local InCombatLockdown = InCombatLockdown
@@ -224,11 +224,28 @@ local SettingsCooldown, ShowCooldownDuration, OnUpdateCooldownDuration
 ---------------------------------------------------------------------------------------------------
 -- Combo Points Widget Functions
 ---------------------------------------------------------------------------------------------------
-if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
+
+-- GetSpecialization: Mists - Patch 5.0.4 (2012-08-28): Replaced GetPrimaryTalentTree.
+if Addon.IS_MAINLINE then
+    function Widget:DetermineUnitPower()
+      local power_type = UNIT_POWER[PlayerClass]
+      if power_type then
+        power_type = power_type[_G.GetSpecialization()] or power_type
+      end
+  
+      if power_type and power_type.Name then
+        self.PowerType = power_type.PowerType
+        self.UnitPowerMax = UnitPowerMax("player", self.PowerType)
+      else
+        self.PowerType = nil
+        self.UnitPowerMax = 0
+      end
+    end  
+else
   -- This should not be necessary as in Classic only Rogues and Druids had combo points
   if PlayerClass == "ROGUE" or PlayerClass == "DRUID" then
     UnitPower = function(unitToken , powerType)
-      return GetComboPoints("player", "target")
+      return GetComboPoints("player", "anyenemy")
     end
   elseif PlayerClass == "DEATHKNIGHT" then
     -- Deathknight is only available after Wrath, so no check for this version necessary
@@ -243,6 +260,7 @@ if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
       return _G.GetRuneCooldown(GET_RUNE_COOLDOWN_MAPPING[rune_id])
     end
 
+    -- GetRuneType: This API only exists in Wrath Classic and Classic Era.
     GetRuneType = function(rune_id)
       return _G.GetRuneType(GET_RUNE_COOLDOWN_MAPPING[rune_id])
     end
@@ -250,21 +268,6 @@ if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
 
   function Widget:DetermineUnitPower()
     local power_type = UNIT_POWER[PlayerClass]
-
-    if power_type and power_type.Name then
-      self.PowerType = power_type.PowerType
-      self.UnitPowerMax = UnitPowerMax("player", self.PowerType)
-    else
-      self.PowerType = nil
-      self.UnitPowerMax = 0
-    end
-  end
-else
-  function Widget:DetermineUnitPower()
-    local power_type = UNIT_POWER[PlayerClass]
-    if power_type then
-      power_type = power_type[_G.GetSpecialization()] or power_type
-    end
 
     if power_type and power_type.Name then
       self.PowerType = power_type.PowerType
@@ -752,7 +755,7 @@ local function EventHandler(event, unitid, power_type)
   -- UNIT_POWER_FREQUENT is only registred for Evoker, so no need to check here
   -- if event == "UNIT_POWER_FREQUENT" and not WATCH_POWER_TYPES[power_type] then return end
   
-  local plate = GetNamePlateForUnit("target")
+  local plate = GetNamePlateForUnit("anyenemy")
   if plate then -- not necessary, prerequisite for IsShown(): plate.TPFrame.Active and
     local widget = Widget
     local widget_frame = WidgetFrame
@@ -764,7 +767,7 @@ end
 
 local function EventHandlerEvoker(event, unitid, power_type)
   -- Only UNIT_POWER_FREQUENT is registred for Evoker, so no need to check here anything
-  local plate = GetNamePlateForUnit("target")
+  local plate = GetNamePlateForUnit("anyenemy")
   if plate and WidgetFrame:IsShown() then -- not necessary, prerequisite for IsShown(): plate.TPFrame.Active and
     Widget:UpdateUnitResource(WidgetFrame)
   else
@@ -772,10 +775,11 @@ local function EventHandlerEvoker(event, unitid, power_type)
   end
 end
 
--- Arguments of ACTIVE_TALENT_GROUP_CHANGED (curr, prev) always seemt to be 1, 1
+-- Arguments of ACTIVE_TALENT_GROUP_CHANGED (curr, prev) always seem to be 1, 1
 function Widget:ACTIVE_TALENT_GROUP_CHANGED(...)
   -- ACTIVE_TALENT_GROUP_CHANGED fires twice, so prevent that InitializeWidget is called twice (does not hurt,
   -- but is not necesary either
+  -- GetSpecialization: Mists - Patch 5.0.4 (2012-08-28): Replaced GetPrimaryTalentTree.
   local current_spec = _G.GetSpecialization()
   if ActiveSpec ~= current_spec then
     -- Player switched to a spec that has combo points
@@ -805,16 +809,16 @@ function Widget:UNIT_MAXPOWER(unitid, power_type)
 end
 
 function Widget:PLAYER_TARGET_CHANGED()
-  local plate = GetNamePlateForUnit("target")
-
-  local tp_frame = plate and plate.TPFrame
-  if tp_frame and tp_frame.Active then
+  local tp_frame = Addon:GetThreatPlateForUnit("anyenemy")
+  if tp_frame then
     self:OnTargetUnitAdded(tp_frame, tp_frame.unit)
   else
     WidgetFrame:Hide()
     WidgetFrame:SetParent(nil)
   end
 end
+
+Widget.PLAYER_SOFT_ENEMY_CHANGED = Widget.PLAYER_TARGET_CHANGED
 
 function Widget:PLAYER_ENTERING_WORLD()
   -- From KuiNameplates: Update icons after zoning to workaround UnitPowerMax returning 0 when
@@ -843,7 +847,11 @@ function Widget:IsEnabled()
   local db = Addon.db.profile.ComboPoints
   local enabled = db.ON or db.ShowInHeadlineView
 
-  if enabled and not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) then
+  -- ACTIVE_TALENT_GROUP_CHANGED: WotLK - Patch 3.2.0 (2009-08-04): Added.
+  -- Other possibility for Classic: PLAYER_TALENT_UPDATE, CHARACTER_POINTS_CHANGED
+  -- No need to use it for Classic, as GetSpecialization is not available there and CPs don't change between first 
+  -- and second spec.
+  if enabled and Addon.IS_MAINLINE then
     -- Register ACTIVE_TALENT_GROUP_CHANGED here otherwise it won't be registered when an spec is active that does not have combo points.
     -- If you then switch to a spec with talent points, the widget won't be enabled.
     self:SubscribeEvent("ACTIVE_TALENT_GROUP_CHANGED")
@@ -866,18 +874,19 @@ end
 function Widget:OnEnable()
   self:SubscribeEvent("PLAYER_ENTERING_WORLD")
   self:SubscribeEvent("PLAYER_TARGET_CHANGED")
+  self:SubscribeEvent("PLAYER_SOFT_ENEMY_CHANGED")
   self:SubscribeUnitEvent("UNIT_MAXPOWER", "player")
   
+
   if PlayerClass == "EVOKER" then
     -- Using UNIT_POWER_FREQUENT seems to reduce some lags with essence updates that are 
     -- otherwise happening compared to Blizzard essences (Blizzard_ClassNameplateBar uses this also)
     self:SubscribeUnitEvent("UNIT_POWER_FREQUENT", "player", EventHandlerEvoker)
   else
-    if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
-      self:SubscribeUnitEvent("UNIT_POWER_FREQUENT", "player", EventHandler)
-    else
-      self:SubscribeUnitEvent("UNIT_POWER_UPDATE", "player", EventHandler)
-      self:SubscribeUnitEvent("UNIT_DISPLAYPOWER", "player", EventHandler)
+    self:SubscribeUnitEvent("UNIT_POWER_UPDATE", "player", EventHandler)
+    self:SubscribeUnitEvent("UNIT_DISPLAYPOWER", "player", EventHandler)
+    -- UNIT_POWER_POINT_CHARGE: Shadowlands Patch 9.0.1 (2020-10-13): Added.
+    if Addon.IS_MAINLINE then
       self:SubscribeUnitEvent("UNIT_POWER_POINT_CHARGE", "player", EventHandler)
     end
 
@@ -887,7 +896,7 @@ function Widget:OnEnable()
     elseif PlayerClass == "DEATHKNIGHT" then
       -- Never registered for Classic, as there is no Death Knight class
       self:SubscribeEvent("RUNE_POWER_UPDATE", EventHandler)
-      if Addon.IS_WRATH_CLASSIC then
+      if Addon.ExpansionIsClassicAndAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) then
         self:SubscribeEvent("RUNE_TYPE_UPDATE", EventHandler)
       end
     end
@@ -899,21 +908,21 @@ end
 function Widget:OnDisable()
   self:UnsubscribeEvent("PLAYER_ENTERING_WORLD")
   self:UnsubscribeEvent("PLAYER_TARGET_CHANGED")
+  self:UnsubscribeEvent("PLAYER_SOFT_ENEMY_CHANGED")
   self:UnsubscribeEvent("UNIT_MAXPOWER")
+
   
-  self:UnSubscribeEvent("UNIT_POWER_FREQUENT")
-  if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) then
-    self:UnSubscribeEvent("UNIT_POWER_UPDATE")
-    self:UnSubscribeEvent("UNIT_DISPLAYPOWER")
-    self:UnSubscribeEvent("UNIT_POWER_POINT_CHARGE")
+  self:UnsubscribeEvent("UNIT_POWER_FREQUENT")
+  self:UnsubscribeEvent("UNIT_POWER_UPDATE")
+  self:UnsubscribeEvent("UNIT_DISPLAYPOWER")
+  if Addon.IS_MAINLINE then
+    self:UnsubscribeEvent("UNIT_POWER_POINT_CHARGE")
   end
   
-  self:UnSubscribeEvent("UPDATE_SHAPESHIFT_FORM")
-  if Addon.IS_WRATH_CLASSIC or Addon.IS_MAINLINE then
-    self:UnSubscribeEvent("RUNE_POWER_UPDATE")
-  end
-  if Addon.IS_WRATH_CLASSIC then
-    self:UnSubscribeEvent("RUNE_TYPE_UPDATE")
+  self:UnsubscribeEvent("UPDATE_SHAPESHIFT_FORM")
+  self:UnsubscribeEvent("RUNE_POWER_UPDATE")
+  if Addon.ExpansionIsAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) then
+    self:UnsubscribeEvent("RUNE_TYPE_UPDATE")
   end
 
   -- Disable ACTIVE_TALENT_GROUP_CHANGED only if the widget is completely disabled, not if just the
@@ -928,7 +937,7 @@ end
 
 function Widget:EnabledForStyle(style, unit)
   -- Unit can get attackable at some point in time (e.g., after a roleplay sequence
-  -- if not UnitCanAttack("player", "target") then return false end
+  -- if not UnitCanAttack("player", "anyenemy") then return false end
 
   if (style == "NameOnly" or style == "NameOnly-Unique") then
     return self.db.ShowInHeadlineView and self.ShowInShapeshiftForm -- a little bit of a hack, logically would be better checked in OnTargetUnitAdded
@@ -962,10 +971,12 @@ end
 function Widget:OnTargetUnitAdded(tp_frame, unit)
   local widget_frame = WidgetFrame
 
-  if UnitCanAttack("player", "target") and self:EnabledForStyle(unit.style, unit) then
+  -- unit.isTarget or unit.IsSoftEnemytarget: should not be necessary here,
+  -- as soft interact (unless enemies) and friend targets cannot be attacked
+  if UnitCanAttack("player", unit.unitid) and self:EnabledForStyle(unit.style, unit) then
     widget_frame:SetParent(tp_frame)
     widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 7)
-
+    
     widget_frame:ClearAllPoints()
     -- Updates based on settings / unit style
     local db = self.db
@@ -974,7 +985,7 @@ function Widget:OnTargetUnitAdded(tp_frame, unit)
     else
       widget_frame:SetPoint("CENTER", tp_frame, "CENTER", db.x, db.y)
     end
-
+    
     self:UpdateUnitResource(widget_frame)
 
     widget_frame:Show()
@@ -1000,7 +1011,7 @@ end
 
 local function UpdateTexture(texture, texture_path, resource_index)
   if Widget.db.Style == "Blizzard" then
-    if Addon.IS_WRATH_CLASSIC and PlayerClass == "DEATHKNIGHT" then
+    if Addon.ExpansionIsClassicAndAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) and PlayerClass == "DEATHKNIGHT" then
       local texture_data = texture_path.RuneType
       texture:SetTexture(texture_data[resource_index])
       texture:SetAlpha(texture_data.Alpha or 1)
@@ -1169,14 +1180,15 @@ function Widget:UpdateSettings()
     end
   end
 
-  if not (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) then
+  -- GetSpecialization: Mists - Patch 5.0.4 (2012-08-28): Replaced GetPrimaryTalentTree.
+  if Addon.IS_MAINLINE then
     ActiveSpec = _G.GetSpecialization()
   end
 
   -- Some of this could be configured outside of UpdateSettings, as it does not change based on settings, but for easier maintenance
   -- I am configuring everything here
   if PlayerClass == "DEATHKNIGHT" then
-    if Addon.IS_WRATH_CLASSIC then
+    if Addon.ExpansionIsClassicAndAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) then
       GetRuneStatus = GetRuneStateWrath
       UpdateRuneStatusActive = UpdateRuneStatusActiveWrath
       UpdateRuneStatusInactive = UpdateRuneStatusInactiveWrath
@@ -1205,8 +1217,8 @@ function Widget:UpdateSettings()
     OnUpdateCooldownDuration = OnUpdateWidgetEssence
   elseif PlayerClass == "ROGUE" then
     -- Check for spell Echoing Reprimand: (IDs) 312954, 323547, 323560, 323558, 323559
-    local name = GetSpellInfo(323560) -- Get localized name for Echoing Reprimand
-    if GetSpellInfo(name) then
+    local name = GetSpellInfo(323560).name -- Get localized name for Echoing Reprimand
+    if name and GetSpellInfo(name) then
       self.UpdateUnitResource = self.UpdateComboPointsRogueWithAnimacharge
     else
       self.UpdateUnitResource = self.UpdateComboPoints

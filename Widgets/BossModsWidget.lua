@@ -18,6 +18,7 @@ local GetTime = GetTime
 local tremove = tremove
 
 -- ThreatPlates APIs
+local L = Addon.ThreatPlates.L
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -76,7 +77,7 @@ local function CreateAuraTexture(frame, index)
   local time = frame:CreateFontString(nil, "OVERLAY") -- Duration Text
 
   time:SetJustifyH("CENTER")
-  time:SetJustifyV("CENTER")
+  time:SetJustifyV("MIDDLE")
   time:SetShadowOffset(1, -1)
   aura.Time = time
 
@@ -206,11 +207,13 @@ local function BossMod_ShowNameplateAura(msg, is_guid, unit, aura_texture, durat
   if no_auras == 0 then
     local tp_frame = Addon:GetThreatPlateForGUID(guid)
     if tp_frame then
-      local widget_frame = tp_frame.widgets["BossMods"]
-      UpdateFrameWithAuras(widget_frame, GUIDAuraList[guid])
+      local widget_frame = tp_frame.widgets.BossMods
+      if widget_frame and widget_frame.Active then
+        UpdateFrameWithAuras(widget_frame, GUIDAuraList[guid])
 
-      widget_frame.LastUpdate = 0.5 -- to show the update immediately
-      widget_frame:Show()
+        widget_frame.LastUpdate = 0.5 -- to show the update immediately
+        widget_frame:Show()
+      end
     end
   end
 end
@@ -354,15 +357,16 @@ end
 local EnabledConfigMode = false
 function Addon:ConfigBossModsWidget()
   if not EnabledConfigMode then
-    local guid = _G.UnitGUID("target")
-    if guid then
-      BossMod_ShowNameplateAura("Configuration Mode", true, guid, GetSpellTexture(241600), nil, false, true, {1, 1, 0.5, 1})
-      BossMod_ShowNameplateAura("Configuration Mode", true, guid, GetSpellTexture(207327), 7, false, true, {0, 0, 1, 1})
-      BossMod_ShowNameplateAura("Configuration Mode", true, guid, GetSpellTexture(236513), 60)
+    local tp_frame = Widget:GetThreatPlateForUnit("target")
+    if tp_frame then
+      local guid = _G.UnitGUID("target")
+      BossMod_ShowNameplateAura("Configuration Mode", true, guid, GetSpellTexture(6603), nil, false, true, {1, 1, 0.5, 1})
+      BossMod_ShowNameplateAura("Configuration Mode", true, guid, GetSpellTexture(7620), 7, false, true, {0, 0, 1, 1})
+      BossMod_ShowNameplateAura("Configuration Mode", true, guid, GetSpellTexture(818), 60)
 
       EnabledConfigMode = true
     else
-      Addon.Logging.Warning(L["Please select a target unit to enable configuration mode."])
+      Addon.Logging.Warning(L["Please select a target unit with a nameplate to enable configuration mode."])
     end
   else
     BossMod_DisableHostileNameplates()

@@ -944,7 +944,7 @@ local function MigrateCustomStylesToV3(profile_name, profile)
 
         -- Set automatic icon detection for all existing custom nameplates to false
         unique_unit.UseAutomaticIcon = false
-        unique_unit.icon = GetValueOrDefault(unique_unit.icon, (Addon.IS_CLASSIC and "Spell_nature_spiritwolf.blp") or "spell_shadow_shadowfiend.blp")
+        unique_unit.icon = GetValueOrDefault(unique_unit.icon, "spell_shadow_shadowfiend.blp")
       end
     end
   end
@@ -967,7 +967,7 @@ local function MigrateSpelltextPosition(profile_name, profile)
     if DatabaseEntryExists(profile, { "settings", "spelltext", "y" } ) then
       profile.settings.castbar.SpellNameText.VerticalOffset = profile.settings.spelltext.y + 15
       profile.settings.spelltext = profile.settings.spelltext or {}
-      profile.settings.spelltext.vertical = GetValueOrDefault(profile.settings.spelltext.vertical, "CENTER")
+      profile.settings.spelltext.vertical = GetValueOrDefault(profile.settings.spelltext.vertical, "MIDDLE")
     end
 
     DatabaseEntryDelete(profile, { "settings", "spelltext", "x" })
@@ -1265,6 +1265,54 @@ local function MigrateFontFlagsNONE(_, profile)
   MigrateFontFlagsEntry(profile, { "settings", "spelltext", })
 end
 
+local function MigrateSetJustifyVCENTER(_, profile)
+  local function MigrateVerticalAlignmentEntry(profile_to_migrate, keys)
+    if DatabaseEntryExists(profile_to_migrate, keys) then
+      for i, key in ipairs(keys) do
+        profile_to_migrate = profile_to_migrate[key]
+      end
+      
+      if profile_to_migrate.vertical == "CENTER" then
+        profile_to_migrate.vertical = "MIDDLE"
+      end
+      if profile_to_migrate.VerticalAlignment == "CENTER" then
+        profile_to_migrate.VerticalAlignment = "MIDDLE"
+      end
+    end
+  end
+
+  -- Setting vertical
+  MigrateVerticalAlignmentEntry(profile, { "HeadlineView", "name", })
+  MigrateVerticalAlignmentEntry(profile, { "HeadlineView", "customtext", })
+  MigrateVerticalAlignmentEntry(profile, { "settings", "name", })
+  MigrateVerticalAlignmentEntry(profile, { "settings", "level", })
+  MigrateVerticalAlignmentEntry(profile, { "settings", "customtext", })
+  MigrateVerticalAlignmentEntry(profile, { "settings", "spelltext", })
+  -- Setting VerticalAlignment
+  MigrateVerticalAlignmentEntry(profile, { "arenaWidget", "NumberText", "Font"})
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "Debuffs", "ModeIcon", "Duration", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "Debuffs", "ModeIcon", "StackCount", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "Debuffs", "ModeBar", "Label", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "Debuffs", "ModeBar", "Duration", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "Debuffs", "ModeBar", "StackCount", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "Buffs", "ModeIcon", "Duration", "Font"})
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "Buffs", "ModeIcon", "StackCount", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "Buffs", "ModeBar", "Label", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "Buffs", "ModeBar", "Duration", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "Buffs", "ModeBar", "StackCount", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "CrowdControl", "ModeIcon", "Duration", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "CrowdControl", "ModeIcon", "StackCount", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "CrowdControl", "ModeBar", "Label", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "CrowdControl", "ModeBar", "Duration", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "CrowdControl", "ModeBar", "StackCount", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "threatWidget", "ThreatPercentage", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "ExperienceWidget", "RankText", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "ExperienceWidget", "ExperienceText", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "settings", "healthbar", "TargetUnit", "Font", })
+  MigrateVerticalAlignmentEntry(profile, { "settings", "castbar", "CastTimeText", "Font", })
+  MigrateVerticalAlignmentEntry(profile, { "settings", "castbar", "CastTarget", "Font", })
+end
+
 ---------------------------------------------------------------------------------------------------
 -- Main migration function & settings
 ---------------------------------------------------------------------------------------------------
@@ -1353,7 +1401,7 @@ local MIGRATION_FUNCTIONS_BY_VERSION = {
     { Type = "Migrate", Name = "Custom Styles", Function = MigrateCustomStyles, NoDefaultProfile = true },
   },
   ["10.2.1"] = {
-    { Type = "Migrate", Name = "Disable Show Blizzard Auras", Function = DisableShowBlizzardAurasForClassic, Version = (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) },
+    { Type = "Migrate", Name = "Disable Show Blizzard Auras", Function = DisableShowBlizzardAurasForClassic, Version = WOW_USES_CLASSIC_NAMEPLATES },
   },
   ["10.3.0-beta2"] = {
     { Type = "Migrate", Name = "Auras Widget V2", Function = MigrateAurasWidgetV2, NoDefaultProfile = true },
@@ -1435,6 +1483,9 @@ local MIGRATION_FUNCTIONS_BY_VERSION = {
   },
   ["11.1.25"] = {
     { Type = "Migrate", Name = "Font Flag NONE", Function = MigrateFontFlagsNONE, NoDefaultProfile = true },
+  },
+  ["12.0.4"] = {
+    { Type = "Migrate", Name = "JustifyV CENTER", Function = MigrateSetJustifyVCENTER, NoDefaultProfile = true },
   },
 }
 

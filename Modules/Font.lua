@@ -45,7 +45,25 @@ local DefaultSystemFonts = {
 }
 
 ---------------------------------------------------------------------------------------------------
--- Module code
+-- UI utility functions
+---------------------------------------------------------------------------------------------------
+
+function Addon.AnchorFrameTo(db, frame, parent_frame)
+  frame:ClearAllPoints()
+
+  local anchor = db.Anchor or "CENTER"
+  if db.InsideAnchor == false then
+    local anchor_point_text = ANCHOR_POINT_TEXT[anchor]
+    frame:SetPoint(anchor_point_text[2], parent_frame, anchor_point_text[1], db.HorizontalOffset or 0, db.VerticalOffset or 0)
+  else -- db.InsideAnchor not defined in settings or true
+    frame:SetPoint(anchor, parent_frame, anchor, db.HorizontalOffset or 0, db.VerticalOffset or 0)
+  end
+end
+
+local AnchorFrameTo = Addon.AnchorFrameTo
+
+---------------------------------------------------------------------------------------------------
+-- Element code
 ---------------------------------------------------------------------------------------------------
 
 function FontModule.SetJustify(font_string, horz, vert)
@@ -75,21 +93,17 @@ local function UpdateTextFont(font, db)
     font:SetTextColor(db.Color.r, db.Color.g, db.Color.b, db.Transparency or 1)
   end
 
-  FontModule.SetJustify(font, db.HorizontalAlignment or "CENTER", db.VerticalAlignment or "CENTER")
+  FontModule.SetJustify(font, db.HorizontalAlignment or "CENTER", db.VerticalAlignment or "MIDDLE")
+
+  -- Set text to nil to enforce text string update, otherwise updates to justification will not take effect
+  local text = font:GetText()
+  font:SetText(nil)
+  font:SetText(text)
 end
 
 function FontModule.UpdateText(parent, font, db)
   UpdateTextFont(font, db.Font)
-
-  local anchor = db.Anchor or "CENTER"
-
-  font:ClearAllPoints()
-  if db.InsideAnchor == false then
-    local anchor_point_text = ANCHOR_POINT_TEXT[anchor]
-    font:SetPoint(anchor_point_text[2], parent, anchor_point_text[1], db.HorizontalOffset or 0, db.VerticalOffset or 0)
-  else -- db.InsideAnchor not defined in settings or true
-    font:SetPoint(anchor, parent, anchor, db.HorizontalOffset or 0, db.VerticalOffset or 0)
-  end
+  AnchorFrameTo(db, font, parent)
 end
 
 function FontModule.UpdateTextSize(parent, font, db)

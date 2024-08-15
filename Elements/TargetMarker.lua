@@ -57,7 +57,7 @@ function Element.TargetMarkerUpdate(tp_frame)
 end
 
 -- Called in processing event: NAME_PLATE_CREATED
-function Element.Create(tp_frame)
+function Element.PlateCreated(tp_frame)
   local target_marker = tp_frame.visual.textframe:CreateTexture(nil, "OVERLAY", nil, 7)
   target_marker:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
   tp_frame.visual.TargetMarker = target_marker

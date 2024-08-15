@@ -9,8 +9,6 @@ local function Create(name)
   local theme = {
 
     frame = {
-      width = db.frame.width,
-      height = db.frame.height,
       x = db.frame.x,
       y = db.frame.y,
       anchor = "CENTER",
@@ -19,12 +17,22 @@ local function Create(name)
     healthbar = {
       texture = Addon.LibSharedMedia:Fetch('statusbar', db.healthbar.texture),
       backdrop = Addon.LibSharedMedia:Fetch('statusbar', db.healthbar.backdrop, true),
-      width = db.healthbar.width,
-      height = db.healthbar.height,
       x = 0,
       y = 0,
       anchor = "CENTER",
       show = true,
+      HOSTILE = {
+        width = db.healthbar.width,
+        height = db.healthbar.height,
+      },
+      NEUTRAL = {
+        width = db.healthbar.width,
+        height = db.healthbar.height,
+      },
+      FRIENDLY = {
+        width = (Addon.WOW_USES_CLASSIC_NAMEPLATES and db.healthbar.width) or db.healthbar.widthFriend,
+        height = (Addon.WOW_USES_CLASSIC_NAMEPLATES and db.healthbar.height) or db.healthbar.heightFriend,  
+      },
     },
 
     healthborder = {

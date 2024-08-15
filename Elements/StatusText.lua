@@ -23,11 +23,14 @@ local RGB = Addon.RGB
 local FontUpdateText = Addon.Font.UpdateText
 local TransliterateCyrillicLetters = Addon.Localization.TransliterateCyrillicLetters
 local L = Addon.L
+local ColorModule = Addon.Color
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
 -- List them here for Mikk's FindGlobals script
 -- GLOBALS: UnitClassification, UnitGetTotalAbsorbs
+
+local LineNoOfNPCRole
 
 local COLOR_ROLE = RGB(255, 255, 255, .7)
 local COLOR_GUILD = RGB(178, 178, 229, .7)
@@ -47,6 +50,7 @@ if not Addon.IS_MAINLINE then
     lines = {
       [1] = {},
       [2] = {},
+      [3] = {},      
     }
   }
 
@@ -57,6 +61,7 @@ if not Addon.IS_MAINLINE then
 
     TooltipScannerData.lines[1].leftText = _G[ScannerName.."TextLeft1"]:GetText()
     TooltipScannerData.lines[2].leftText = _G[ScannerName.."TextLeft2"]:GetText()
+    TooltipScannerData.lines[3].leftText = _G[ScannerName .. "TextLeft3"]:GetText()
 
     return TooltipScannerData
   end
@@ -107,15 +112,16 @@ local function GetUnitSubtitle(unit)
 	if not subtitle then
 		local tooltip_data = C_TooltipInfo_GetUnit(unit.unitid)
     if tooltip_data then
-      if #tooltip_data.lines >= 2 then 
+      -- If colorbind mode is enabled, additional information (reputation) is shown in the tooltip
+      -- before the NPC information (line 3 instead of line 2)      
+      if #tooltip_data.lines >= LineNoOfNPCRole then 
         name = tooltip_data.lines[1].leftText
 
         if name then name = gsub( gsub( (name), "|c........", "" ), "|r", "" ) else return end	-- Strip color escape sequences: "|c"
         if name ~= UnitName(unit.unitid) then return end	-- Avoid caching information for the wrong unit
 
         -- Tooltip Format Priority: Faction, Description, Level
-        local tooltip_subtitle = tooltip_data.lines[2].leftText or ""
-
+        local tooltip_subtitle = tooltip_data.lines[LineNoOfNPCRole].leftText or ""
         if string.match(tooltip_subtitle, UNIT_LEVEL_TEMPLATE) then
           subtitle = ""
         else
@@ -163,7 +169,7 @@ local function GetLevelDescription(unit)
   return description, GetLevelColor
 end
 
--- return ceil(100 * (unit.health / unit.healthmax)) .. "%", GetColorByHealthDeficit(unit)
+-- return ceil(100 * (unit.health / unit.healthmax)) .. "%", ColorModule.GetColorByHealthDeficit()(unit)
 local function TextHealthPercentColored(unit)
   local text_health, text_absorbs, color = "", "", GetRoleColor
 
@@ -228,7 +234,7 @@ local function TextHealthPercentColored(unit)
     end
 
     text_health = HpAmt .. HpMax .. HpPct
-    color = Addon.GetColorByHealthDeficit
+    color = ColorModule.GetColorByHealthDeficit(unit)
   end
 
   if text_health and text_absorbs then
@@ -240,10 +246,11 @@ end
 
 -- Role, Guild or Level
 local function TextRoleGuildLevel(unit)
-  local description, color
+  local color = GetRoleColor
+  local description
 
   if unit.type == "NPC" then
-    description, color = GetUnitSubtitle(unit)
+    description = GetUnitSubtitle(unit)
   elseif unit.type == "PLAYER" then
     description = GetGuildInfo(unit.unitid)
     color = GetGuildColor
@@ -259,10 +266,11 @@ local function TextRoleGuildLevel(unit)
 end
 
 local function TextRoleGuild(unit)
-  local description, color
+  local color = GetRoleColor
+  local description
 
   if unit.type == "NPC" then
-    description, color = GetUnitSubtitle(unit)
+    description = GetUnitSubtitle(unit)
   elseif unit.type == "PLAYER" then
     description = GetGuildInfo(unit.unitid)
     color = GetGuildColor
@@ -275,15 +283,15 @@ end
 
 -- NPC Role
 local function TextNPCRole(unit)
-  local description, color
+  local description
 
   if unit.type == "NPC" then
-    description, color = GetUnitSubtitle(unit)
+    description = GetUnitSubtitle(unit)
   end
 
   description = TransliterateCyrillicLetters(description)
 
-  return description, color
+  return description, GetRoleColor
 end
 
 -- Guild, Role, Level, Health
@@ -323,7 +331,7 @@ local Element = Addon.Elements.NewElement("StatusText")
 ---------------------------------------------------------------------------------------------------
 
 -- Called in processing event: NAME_PLATE_CREATED
-function Element.Create(tp_frame)
+function Element.PlateCreated(tp_frame)
   local status_text = tp_frame.visual.textframe:CreateFontString(nil, "ARTWORK")
   -- At least font must be set as otherwise it results in a Lua error when UnitAdded with SetText is called
   status_text:SetFont("Fonts\\FRIZQT__.TTF", 11)
@@ -336,6 +344,7 @@ local function SetStatusText(tp_frame)
   local unit = tp_frame.unit
     
   local status_text_func = StatusTextFunc[tp_frame.PlateStyle][unit.reaction]
+
   local status_text, color
   if status_text_func then
     local subtext, color_func = status_text_func(unit)
@@ -435,12 +444,14 @@ function Element.UpdateSettings()
     Truncate = function(value) return value end
   end
 
-  if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
-    ShowAbsorbs = false
-  else
+  if Addon.IS_MAINLINE then
     ShowAbsorbs = Settings.AbsorbsAmount or Settings.AbsorbsPercentage
+  else
+    ShowAbsorbs = false
   end
   ShowHealth = Settings.amount or Settings.percent
+
+  LineNoOfNPCRole = (Addon.CVars:GetAsBool("colorblindMode") and 3) or 2
 
   StatusTextFunc["HealthbarMode"]["FRIENDLY"] = STATUS_TEXT_REFERENCE[SettingsStatusText.HealthbarMode.FriendlySubtext]
   StatusTextFunc["HealthbarMode"]["HOSTILE"] = STATUS_TEXT_REFERENCE[SettingsStatusText.HealthbarMode.EnemySubtext]

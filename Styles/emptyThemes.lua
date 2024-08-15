@@ -8,8 +8,6 @@ local function Create(name)
 	local theme = {
 
 		frame = {
-			width = db.frame.width,
-			height = db.frame.height,
 			x = db.frame.x,
 			y = db.frame.y,
 			anchor = "CENTER",
@@ -18,13 +16,23 @@ local function Create(name)
 		healthbar = {
 			texture = EMPTY_TEXTURE,
 			backdrop = EMPTY_TEXTURE,
-			width = 120,
-			height = 10,
 			x = 0,
 			y = 0,
 			anchor = "CENTER",
 			orientation = "HORIZONTAL",
 			show = false,
+			HOSTILE = {
+				width = 120,
+				height = 10,
+      },
+      NEUTRAL = {
+				width = 120,
+				height = 10,
+      },
+      FRIENDLY = {
+				width = 120,
+				height = 10,
+      },
 		},
 
 		healthborder = {
@@ -157,7 +165,7 @@ end
 
 local themeList = {
 	"empty",
-	"etotem",
+	"etotem", -- Now, used for nameplates with certain widgets, but no healthbar and name
 }
 
 do

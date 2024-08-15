@@ -175,8 +175,8 @@ function Widget:OnUnitAdded(widget_frame, unit)
     anchor_frame = visual.Healthbar.Border
     -- For healthbar, the Border glow should be shown above the healthbar (border is -1 framelevel)
     frame_level_offset = (glow_highlight.Type == "Button" and 1) or 0
-  elseif glow_frame == "Castbar" and style.castbar.show then
-    anchor_frame = visual.castbar.Border
+  elseif glow_frame == "Castbar" and style.Castbar.show then
+    anchor_frame = visual.Castbar.Border
   elseif glow_frame == "Icon" and show_icon then
     anchor_frame = widget_frame
   end

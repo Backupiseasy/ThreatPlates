@@ -1,4 +1,4 @@
-﻿---------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
 -- Main file for addon Threat Plates
 ---------------------------------------------------------------------------------------------------
 local _, Addon = ...
@@ -14,7 +14,7 @@ local tonumber, select, pairs = tonumber, select, pairs
 -- WoW APIs
 local SetNamePlateFriendlyClickThrough = C_NamePlate.SetNamePlateFriendlyClickThrough
 local SetNamePlateEnemyClickThrough = C_NamePlate.SetNamePlateEnemyClickThrough
-local IsAddOnLoaded = GetCVar, IsAddOnLoaded
+local GetCVar, IsAddOnLoaded = GetCVar, C_AddOns.IsAddOnLoaded
 local C_NamePlate, Lerp =  C_NamePlate, Lerp
 local C_Timer_After = C_Timer.After
 local NamePlateDriverFrame = NamePlateDriverFrame
@@ -50,32 +50,24 @@ Addon.PlayerIsInCombat = false
 -- Functions different depending on WoW version
 ---------------------------------------------------------------------------------------------------
 
--- Copied from ElvUI:
-local function CalculateSynchedNameplateSize()
-  local db = Addon.db.profile.settings
+if Addon.WOW_USES_CLASSIC_NAMEPLATES then
+  local function CalculateSynchedNameplateSize()
+    local db = Addon.db.profile.settings
+  
+    local width = db.healthbar.width
+    local height = db.healthbar.height
+    if db.frame.SyncWithHealthbar then
+      width = width + 6
+      height = height + 22
+    end
 
-  local width = db.frame.width
-  local height = db.frame.height
-  if db.frame.SyncWithHealthbar then
-    -- this wont taint like NamePlateDriverFrame:SetBaseNamePlateSize
-
-    -- The default size of Threat Plates healthbars is based on large nameplates with these defaults:
-    --   NamePlateVerticalScale = 1.7
-    --   NamePlateVerticalScale = 1.4
-    local zeroBasedScale = 0.7  -- tonumber(GetCVar("NamePlateVerticalScale")) - 1.0
-    local horizontalScale = 1.4 -- tonumber(GetCVar("NamePlateVerticalScale"))
-
-    width = (db.healthbar.width - 10) * horizontalScale
-    height = (db.healthbar.height + 35) * Lerp(1.0, 1.25, zeroBasedScale)
-
+    -- Update values in settings, so that the options dialog (clickable area) shows the correct values
     db.frame.width = width
     db.frame.height = height
+  
+    return width, height
   end
 
-  return width, height
-end
-
-if Addon.WOW_USES_CLASSIC_NAMEPLATES then
   Addon.SetBaseNamePlateSize = function(self)
     local db = self.db.profile
 
@@ -92,35 +84,61 @@ if Addon.WOW_USES_CLASSIC_NAMEPLATES then
 
     Addon:ConfigClickableArea(false)
   end
-else
-  local function SetNameplatesToDefaultSize()
-    if NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
-      C_NamePlate.SetNamePlateFriendlySize(154, 64)
+else 
+  local function CalculateSynchedNameplateSize(width_key, height_key)
+    local width, height
+    
+    local db = Addon.db.profile.settings
+    if db.frame.SyncWithHealthbar then
+      -- This functions were interpolated from ratio of the clickable area and the Blizzard nameplate healthbar
+      -- for various sizes
+      width = db.healthbar[width_key] + 24.5
+      height = (db.healthbar[height_key] + 11.4507) / 0.347764  
     else
-      C_NamePlate.SetNamePlateFriendlySize(110, 45)
+      width = db.frame[width_key]
+      height = db.frame[height_key]
+    end
+  
+    -- Update values in settings, so that the options dialog (clickable area) shows the correct values
+    db.frame[width_key] = width
+    db.frame[height_key] = height
+
+    return width, height
+  end
+
+  local function CalculateSynchedNameplateSizeForEnemy()
+    return CalculateSynchedNameplateSize("width", "height")
+  end
+
+  local function CalculateSynchedNameplateSizeForFriend()
+    return CalculateSynchedNameplateSize("widthFriend", "heightFriend")
+  end
+
+  local function SetNameplatesToDefaultSize(nameplate_size_func)
+    if NamePlateDriverFrame:IsUsingLargerNamePlateStyle() then
+      nameplate_size_func(154, 64)
+    else
+      nameplate_size_func(110, 45)
     end
   end
 
   Addon.SetBaseNamePlateSize = function(self)
     local db = self.db.profile
 
-    local width, height
     if CVars:GetAsBool("nameplateShowOnlyNames") then
       -- The clickable area of friendly nameplates will be set to zero so that they don't interfere with enemy nameplates stacking (not in Classic or TBC Classic).
       C_NamePlate.SetNamePlateFriendlySize(0.1, 0.1)    
     elseif db.ShowFriendlyBlizzardNameplates or self.IsInPvEInstance then
-      SetNameplatesToDefaultSize()
+      SetNameplatesToDefaultSize(C_NamePlate.SetNamePlateFriendlySize)
     else
-      width, height = CalculateSynchedNameplateSize()
+      local width, height = CalculateSynchedNameplateSizeForFriend()
       C_NamePlate.SetNamePlateFriendlySize(width, height)
     end
 
     if db.ShowEnemyBlizzardNameplates then
-      SetNameplatesToDefaultSize()
+      SetNameplatesToDefaultSize(C_NamePlate.SetNamePlateEnemySize)
     else
-      if not width then
-        width, height = CalculateSynchedNameplateSize()
-      end
+      local width, height = CalculateSynchedNameplateSizeForEnemy()
       C_NamePlate.SetNamePlateEnemySize(width, height)
     end
     
@@ -191,7 +209,7 @@ end
 function Addon:CheckForFirstStartUp()
   local db = self.db.global
 
-  if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC and not Addon.IS_WRATH_CLASSIC then
+  if Addon.IS_MAINLINE then
     local spec_roles = self.db.char.spec
     if #spec_roles ~= GetNumSpecializations() then
       for i = 1, GetNumSpecializations() do
@@ -313,11 +331,6 @@ function TidyPlatesThreat:OnInitialize()
   Addon.LoadLibraryMasque() -- Masque support
   Addon.LoadLibraryDogTag() -- LibDogTag support
 
-  if Addon.IS_CLASSIC then
-    Addon.LibClassicDurations = LibStub("LibClassicDurations")
-    Addon.LibClassicCasterino = LibStub("LibClassicCasterino-ThreatPlates")
-  end
-
   local RegisterCallback = db.RegisterCallback
   RegisterCallback(Addon, 'OnProfileChanged', 'ProfChange')
   RegisterCallback(Addon, 'OnProfileCopied', 'ProfChange')
@@ -328,18 +341,6 @@ function TidyPlatesThreat:OnInitialize()
   Addon.LibSharedMedia.RegisterCallback(Addon, "LibSharedMedia_SetGlobal", "MediaUpdate" )
   Addon.LibSharedMedia.RegisterCallback(Addon, "LibSharedMedia_Registered", "MediaUpdate" )
   
-  -- Register callsbacks for spellcasting library
-  if Addon.IS_CLASSIC then
-    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_START", Addon.UNIT_SPELLCAST_START)
-    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_DELAYED", Addon.UnitSpellcastMidway) -- only for player
-    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_STOP", Addon.UNIT_SPELLCAST_STOP)
-    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_FAILED", Addon.UNIT_SPELLCAST_STOP)
-    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_INTERRUPTED", Addon.UNIT_SPELLCAST_INTERRUPTED)
-    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_START", Addon.UNIT_SPELLCAST_CHANNEL_START)
-    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_UPDATE", Addon.UnitSpellcastMidway) -- only for player
-    Addon.LibClassicCasterino.RegisterCallback(self,"UNIT_SPELLCAST_CHANNEL_STOP", Addon.UNIT_SPELLCAST_CHANNEL_STOP)
-  end
-
   -- Setup Interface panel options
   local app_name = ThreatPlates.ADDON_NAME
   local dialog_name = app_name .. " Dialog"
@@ -357,7 +358,7 @@ function TidyPlatesThreat:OnInitialize()
   Addon:EnableEvents()
 
   if not Addon.WOW_USES_CLASSIC_NAMEPLATES then
-    CVars:OverwriteBoolProtected("nameplateResourceOnTarget", Addon.db.profile.PersonalNameplate.ShowResourceOnTarget)
+    CVars:OverwriteBool("nameplateResourceOnTarget", Addon.db.profile.PersonalNameplate.ShowResourceOnTarget)
   end
 
   -- Get updates for CVar changes (e.g, for large nameplates, nameplage scale and alpha)
@@ -392,9 +393,10 @@ function TidyPlatesThreat:ToggleNameplateModeFriendlyUnits()
 
   db.Visibility.FriendlyPlayer.UseHeadlineView = not db.Visibility.FriendlyPlayer.UseHeadlineView
   db.Visibility.FriendlyNPC.UseHeadlineView = not db.Visibility.FriendlyNPC.UseHeadlineView
-  db.Visibility.FriendlyTotem.UseHeadlineView = not db.Visibility.FriendlyTotem.UseHeadlineView
-  db.Visibility.FriendlyGuardian.UseHeadlineView = not db.Visibility.FriendlyGuardian.UseHeadlineView
+  -- db.Visibility.FriendlyMinion.UseHeadlineView = not db.Visibility.FriendlyTotem.UseHeadlineView
   db.Visibility.FriendlyPet.UseHeadlineView = not db.Visibility.FriendlyPet.UseHeadlineView
+  db.Visibility.FriendlyGuardian.UseHeadlineView = not db.Visibility.FriendlyGuardian.UseHeadlineView
+  db.Visibility.FriendlyTotem.UseHeadlineView = not db.Visibility.FriendlyTotem.UseHeadlineView
   db.Visibility.FriendlyMinus.UseHeadlineView = not db.Visibility.FriendlyMinus.UseHeadlineView
 
   Addon:ForceUpdate()
@@ -414,9 +416,10 @@ function TidyPlatesThreat:ToggleNameplateModeEnemyUnits()
 
   db.Visibility.EnemyPlayer.UseHeadlineView = not db.Visibility.EnemyPlayer.UseHeadlineView
   db.Visibility.EnemyNPC.UseHeadlineView = not db.Visibility.EnemyNPC.UseHeadlineView
-  db.Visibility.EnemyTotem.UseHeadlineView = not db.Visibility.EnemyTotem.UseHeadlineView
-  db.Visibility.EnemyGuardian.UseHeadlineView = not db.Visibility.EnemyGuardian.UseHeadlineView
+  -- db.Visibility.EnemyMinion.UseHeadlineView = not db.Visibility.EnemyPet.UseHeadlineView
   db.Visibility.EnemyPet.UseHeadlineView = not db.Visibility.EnemyPet.UseHeadlineView
+  db.Visibility.EnemyGuardian.UseHeadlineView = not db.Visibility.EnemyGuardian.UseHeadlineView
+  db.Visibility.EnemyTotem.UseHeadlineView = not db.Visibility.EnemyTotem.UseHeadlineView
   db.Visibility.EnemyMinus.UseHeadlineView = not db.Visibility.EnemyMinus.UseHeadlineView
 
   Addon:ForceUpdate()

@@ -22,7 +22,7 @@ local GetPartyAssignment = GetPartyAssignment
 -- ThreatPlates APIs
 local THREAT_REFERENCE = Addon.THREAT_REFERENCE
 local SubscribeEvent, PublishEvent,  UnsubscribeEvent = Addon.EventService.Subscribe, Addon.EventService.Publish, Addon.EventService.Unsubscribe
-local Style, Color = Addon.Style, Addon.Color
+local StyleModule = Addon.Style
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -49,7 +49,8 @@ local ThreatModule = Addon.Threat
 -- Wrapper functions for WoW Classic
 ---------------------------------------------------------------------------------------------------
 
-if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
+if not Addon.IS_MAINLINE then
+  -- UnitGroupRolesAssigned does still not seem to work in Classic
   UnitGroupRolesAssigned = function(target_unit)
     return (GetPartyAssignment("MAINTANK", target_unit) and "TANK") or "NONE"
   end
@@ -61,7 +62,7 @@ end
 local CreatureCache = {}
 
 local Settings
-local ShowOffTank, ShowInstancesOnly
+local ShowOffTank, ShowInstancesOnly, UseThreatTable, UseHeuristicInInstances
 
 ---------------------------------------------------------------------------------------------------
 -- Returns if the unit is tanked by another tank or pet (not by the player character,
@@ -174,7 +175,7 @@ local function UpdateThreatStatus(unit)
 end
   
 local function UpdateThreatStatusHeuristic(unit)
-  if unit.InCombat and Addon.PlayerIsInCombat and (not ThreatModule.UseThreatTable or (ThreatModule.UseHeuristicInInstances and Addon.IsInPvEInstance)) then
+  if unit.InCombat and Addon.PlayerIsInCombat and (not UseThreatTable or (UseHeuristicInInstances and Addon.IsInPvEInstance)) then
     local threat_level
     
     local target_unit = unit.unitid .. "target"
@@ -196,7 +197,7 @@ end
 local function UpdateThreatLevel(tp_frame, unit, threat_level)
   if threat_level == nil or threat_level ~= unit.ThreatLevel then
     unit.ThreatLevel = threat_level
-    Style:Update(tp_frame)
+    StyleModule.Update(tp_frame)
     PublishEvent("ThreatUpdate", tp_frame, unit)
   end
 end
@@ -227,7 +228,7 @@ local function UpdateHeuristic(tp_frame)
   
   -- Only assume that the unit is out of combat, when it is not on any unit's threat table
   if not unit.HasThreatTable then
-    if self.UseThreatTable or (self.UseHeuristicInInstances and not Addon.IsInPvEInstance) or not InCombatLockdown() then
+    if UseThreatTable or (UseHeuristicInInstances and not Addon.IsInPvEInstance) or not InCombatLockdown() then
       if unit.ThreatLevel then      
         UpdateThreatLevel(tp_frame, unit, nil)
       end
@@ -281,7 +282,7 @@ local function UnubscribeThreatHeuristicEvents()
 end
 
 local function RegisterEventsforThreatHeuristic()
-  --self.UseHeuristicInInstances is true as this function is only enabled in this case
+  --UseHeuristicInInstances is true as this function is only enabled in this case
   if IsInInstance() then
     SubscribeThreatHeuristicEvents()
   else
@@ -292,18 +293,18 @@ end
 function ThreatModule.UpdateSettings()
   Settings = Addon.db.profile.threat
 
-  self.UseThreatTable = Settings.UseThreatTable
-  self.UseHeuristicInInstances = Settings.UseHeuristicInInstances
+  UseThreatTable = Settings.UseThreatTable
+  UseHeuristicInInstances = Settings.UseHeuristicInInstances
   ShowOffTank = Settings.toggle.OffTank
   ShowInstancesOnly = Settings.toggle.InstancesOnly
 
   -- SubscribeEvent(ThreatModule, "UNIT_THREAT_SITUATION_UPDATE", function(unitid) end)
 
   -- If heuristic is enabled in general (not self.UseThreatTable), then we don't need PLAYER_ENTERING_WORLD
-  if not self.UseThreatTable then
+  if not UseThreatTable then
     SubscribeThreatHeuristicEvents()
     UnsubscribeEvent(ThreatModule, "PLAYER_ENTERING_WORLD", RegisterEventsforThreatHeuristic)
-  elseif self.UseHeuristicInInstances then
+  elseif UseHeuristicInInstances then
     SubscribeEvent(ThreatModule, "PLAYER_ENTERING_WORLD", RegisterEventsforThreatHeuristic)
   else
     UnubscribeThreatHeuristicEvents()

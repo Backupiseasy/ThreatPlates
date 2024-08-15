@@ -35,10 +35,7 @@ local BACKDROP = {
 ---------------------------------------------------------------------------------------------------
 -- Cached configuration settings
 ---------------------------------------------------------------------------------------------------
-local TargetHighlightEnabledForStyle = {
-  etotem = false,
-  empty = false
-}
+local TargetHighlightEnabledForStyle = {}
 
 ---------------------------------------------------------------------------------------------------
 -- Local variables
@@ -88,7 +85,7 @@ MouseoverHighlightFrame:Hide()
 ---------------------------------------------------------------------------------------------------
 
 -- Called in processing event: NAME_PLATE_CREATED
-function Element.Create(tp_frame)
+function Element.PlateCreated(tp_frame)
   -- Highlight for healthbar
 
   local healthbar = tp_frame.visual.Healthbar

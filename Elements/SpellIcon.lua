@@ -28,7 +28,7 @@ local Element = Addon.Elements.NewElement("SpellIcon")
 ---------------------------------------------------------------------------------------------------
 
 -- Called in processing event: NAME_PLATE_CREATED
-function Element.Create(tp_frame)
+function Element.PlateCreated(tp_frame)
   local spell_icon = tp_frame.visual.Castbar:CreateTexture(nil, "OVERLAY", nil, 7)
 
   tp_frame.visual.SpellIcon = spell_icon
