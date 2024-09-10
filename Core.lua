@@ -113,11 +113,13 @@ else
   Addon.SetBaseNamePlateSize = function(self)
     local db = self.db.profile
 
-    if CVars:GetAsBool("nameplateShowOnlyNames") then
-      -- The clickable area of friendly nameplates will be set to zero so that they don't interfere with enemy nameplates stacking (not in Classic or TBC Classic).
-      C_NamePlate.SetNamePlateFriendlySize(0.1, 0.1)    
-    elseif db.ShowFriendlyBlizzardNameplates or self.IsInPvEInstance then
-      SetNameplatesToDefaultSize(C_NamePlate.SetNamePlateFriendlySize)
+    if db.ShowFriendlyBlizzardNameplates or self.IsInPvEInstance then
+      if CVars:GetAsBool("nameplateShowOnlyNames") then
+        -- The clickable area of friendly nameplates will be set to zero so that they don't interfere with enemy nameplates stacking (not in Classic or TBC Classic).
+        C_NamePlate.SetNamePlateFriendlySize(0.1, 0.1)    
+      else
+        SetNameplatesToDefaultSize(C_NamePlate.SetNamePlateFriendlySize)
+      end
     else
       local width, height = CalculateSynchedNameplateSizeForFriend()
       C_NamePlate.SetNamePlateFriendlySize(width, height)
