@@ -8033,6 +8033,11 @@ local function CustomPlateUpdateEntry(index)
   options.args.Custom.args["#" .. index].name = CustomPlateGetSlotName(index)
   options.args.Custom.args["#" .. index].args.Header.name = Addon.CustomPlateGetHeaderName(index)
 
+  -- Check for empty trigger value and don't update anything in that case (except the above)
+  local custom_plate = db.uniqueSettings[index]
+  local trigger_value = custom_plate.Trigger[custom_plate.Trigger.Type].Input
+  if trigger_value == nil or trigger_value == "" then return end
+
   CustomPlateSetIcon(index) -- Executes UpdateSpecial()
 end
 
