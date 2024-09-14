@@ -1,4 +1,7 @@
 # @project-version@ (@build-time@)
 
-* Fixed list of Shaman totems for TWW - added Totem of Wrath and Stone Bulwark Totem and removed non-existent totems [GH-550].
-* Fixed a bug that prevented totems with a spell rank from being recognised correctly in WoW Classic.
+* Fixed a bug that caused the target and combo points widget on (soft-)target unit to be hidden when a (soft-)target unit died [GH-528, GH-554].
+* Fixed a bug that caused nameplates to be shown at a lower position when Only Names was enabled.
+* Fixed a Lua error that occurred when defining a custom style with an empty trigger value. 
+* Fixed spell ID for CC Aura Banish (Warlock) in WoW Classic SoD [Comment #7414].
+* Updated integrated libraries (Ace3 Release-r1349).

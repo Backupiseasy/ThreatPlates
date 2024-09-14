@@ -404,7 +404,7 @@ function WidgetHandler:OnUnitRemoved(tp_frame, unit)
 
   if unit.IsSoftTarget then
     for _, widget in pairs(self.EnabledTargetWidgets) do
-      widget:OnTargetUnitRemoved()
+      widget:OnTargetUnitRemoved(tp_frame, unit)
     end
   end
 
