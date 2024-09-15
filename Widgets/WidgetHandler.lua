@@ -324,12 +324,12 @@ function WidgetHandler:DisableWidget(widget_name)
     self.EnabledTargetWidgets[widget_name] = nil
 
     widget:OnDisable()
-    widget:OnTargetUnitRemoved()
+    widget:OnTargetUnitRemoved(tp_frame, tp_frame.unit)
   elseif widget.FocusOnly then
     self.EnabledFocusWidget = nil
 
     widget:OnDisable()
-    widget:OnFocusUnitRemoved()
+    widget:OnFocusUnitRemoved(tp_frame, tp_frame.unit)
   else
     local widget = self.EnabledWidgets[widget_name]
 
@@ -409,7 +409,7 @@ function WidgetHandler:OnUnitRemoved(tp_frame, unit)
   end
 
   if unit.IsFocus and self.EnabledFocusWidget then
-    self.EnabledFocusWidget:OnFocusUnitRemoved()
+    self.EnabledFocusWidget:OnFocusUnitRemoved(tp_frame, unit)
   end
 
   local plate_widgets = tp_frame.widgets
