@@ -148,7 +148,7 @@ end]]
   OnFocusUnitRemoved = {
     FunctionExample = [[
 -- Example for function OnFocusUnitRemoved:
-function(tp_frame, unit)
+function()
   -- ...
 end]]
   },
@@ -550,7 +550,7 @@ function Widget:OnUnitRemoved(widget_frame, unit)
   end
 
   if unit.IsFocus then
-    ProcessEvent("OnFocusUnitRemoved", widget_frame, unit)
+    ProcessEvent("OnFocusUnitRemoved")
   end
 
   --widget_frame:SetShown(unit.CustomPlateSettings or next(ScriptsForAllPlates))
