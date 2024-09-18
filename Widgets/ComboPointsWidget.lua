@@ -755,19 +755,17 @@ local function EventHandler(event, unitid, power_type)
   -- if event == "UNIT_POWER_FREQUENT" and not WATCH_POWER_TYPES[power_type] then return end
   
   local plate = GetNamePlateForUnit("anyenemy")
-  if plate then -- not necessary, prerequisite for IsShown(): plate.TPFrame.Active and
-    local widget = Widget
-    local widget_frame = widget.WidgetFrame
-    if widget_frame:IsShown() then
-      widget:UpdateUnitResource(widget_frame)
-    end
+  -- not necessary, prerequisite for IsShown(): plate.TPFrame.Active and
+  if plate and Widget.WidgetFrame:IsShown() then
+    Widget:UpdateUnitResource(Widget.WidgetFrame)
   end
 end
 
 local function EventHandlerEvoker(event, unitid, power_type)
   -- Only UNIT_POWER_FREQUENT is registred for Evoker, so no need to check here anything
   local plate = GetNamePlateForUnit("anyenemy")
-  if plate and Widget.WidgetFrame:IsShown() then -- not necessary, prerequisite for IsShown(): plate.TPFrame.Active and
+  -- not necessary, prerequisite for IsShown(): plate.TPFrame.Active and
+  if plate and Widget.WidgetFrame:IsShown() then
     Widget:UpdateUnitResource(Widget.WidgetFrame)
   else
     UpdateEssenceBlizzardWhenHidden(Widget, Widget.WidgetFrame)
@@ -807,13 +805,17 @@ function Widget:UNIT_MAXPOWER(unitid, power_type)
   end
 end
 
+local function HideWidgetFrame(widget_frame)
+  widget_frame:Hide()
+  widget_frame:SetParent(nil)
+end
+
 function Widget:PLAYER_TARGET_CHANGED()
   local tp_frame = self:GetThreatPlateForUnit("anyenemy")
   if tp_frame then
     self:OnTargetUnitAdded(tp_frame, tp_frame.unit)
   else
-    self.WidgetFrame:Hide()
-    self.WidgetFrame:SetParent(nil)
+    HideWidgetFrame(self.WidgetFrame)
   end
 end
 
@@ -833,8 +835,7 @@ function Widget:UPDATE_SHAPESHIFT_FORM()
   if self.ShowInShapeshiftForm then
     self:PLAYER_TARGET_CHANGED()
   else
-    self.WidgetFrame:Hide()
-    self.WidgetFrame:SetParent(nil)
+    HideWidgetFrame(self.WidgetFrame)
   end
 end
 
@@ -923,8 +924,7 @@ function Widget:OnDisable()
     self:UnregisterEvent("RUNE_TYPE_UPDATE")
   end
 
-  self.WidgetFrame:Hide()
-  self.WidgetFrame:SetParent(nil)
+  HideWidgetFrame(self.WidgetFrame)
 end
 
 function Widget:EnabledForStyle(style, unit)
@@ -962,15 +962,17 @@ end
 
 function Widget:OnTargetUnitAdded(tp_frame, unit)
   -- OnTargetUnitAdded and OnTargetUnitRemoved are called for all target units including soft-target units. 
-  -- But this widget only works for target or soft-enemy. So, we need to stop processing for other soft-target units here.
-  if not UnitIsUnit("anyenemy", unit.unitid) or not UnitCanAttack("player", unit.unitid) then return end
-  
-  -- Unit is target or soft-enemy target here:
-  -- Combo points widget can only be shown once, either on the target or on the soft-enemy target. 
-  -- Show the widget if the current target attackable or, if the current target is not attackable, if the
-  -- current soft-enemy is attackable.
-  if unit.IsSoftEnemyTarget and UnitCanAttack("player", "target") then return end
+  -- But the combo points widget can only be shown once and can only be shown on either the target or on the soft-enemy target unit. 
+  -- So, process (and show the widget) only if
+  --   - the unit is the current target or
+  --   - the unit is the current soft-enemy target and the current target cannot be attacked
+  if not (unit.isTarget or (unit.IsSoftEnemyTarget and not UnitCanAttack("player", "target"))) or 
+      not UnitCanAttack("player", unit.unitid) then 
+    return       
+  end
+  --if not unit.isTarget and (not unit.IsSoftEnemyTarget or UnitCanAttack("player", "target")) then return end
 
+  --if not UnitCanAttack("player", unit.unitid) then return end
 
   local widget_frame = self.WidgetFrame
   
@@ -991,8 +993,7 @@ function Widget:OnTargetUnitAdded(tp_frame, unit)
 
     widget_frame:Show()
   else
-    widget_frame:Hide()
-    widget_frame:SetParent(nil)
+    HideWidgetFrame(self.WidgetFrame)
   end
 end
 
@@ -1001,8 +1002,7 @@ function Widget:OnTargetUnitRemoved(tp_frame, unit)
   -- Only hide the widget if the nameplate for the unit is removed that shows the widget
   if tp_frame ~= self.WidgetFrame:GetParent() then return end
   
-  self.WidgetFrame:Hide()
-  self.WidgetFrame:SetParent(nil)
+  HideWidgetFrame(self.WidgetFrame)
 end
 
 local function UpdateTexturePosition(texture, resource_index)
