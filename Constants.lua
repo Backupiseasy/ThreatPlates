@@ -1542,10 +1542,19 @@ ThreatPlates.DEFAULT_SETTINGS = {
     BossModsWidget = {
       ON = true,
       ShowInHeadlineView = true,
-      x = 0,
-      y = 66,
-      x_hv = 0,
-      y_hv = 40,
+      AnchorTo = "Healthbar",
+      HealthbarMode = {
+        Anchor = "RIGHT",
+        InsideAnchor = false,
+        HorizontalOffset = 14,
+        VerticalOffset = 0,
+      },
+      NameMode = {
+        Anchor = "RIGHT",
+        InsideAnchor = false,
+        HorizontalOffset = 14,
+        VerticalOffset = 0,
+      },
       scale = 40,
       AuraSpacing = 4,
       Font = Addon.DEFAULT_FONT,
@@ -1554,6 +1563,31 @@ ThreatPlates.DEFAULT_SETTINGS = {
       -- TODO: add font flags like for custom text
       --ShowTrackingLine = true, -- Removed in 9.1.9
       --TrackingLineThickness = 4  -- Removed in 9.1.9
+      ShowTimers = true,
+      ShowAuras = true,
+      Glow = {
+        Priority = "Important",
+        Type = "Pixel",
+        CustomColor = false,
+        Color = { 0.95, 0.95, 0.32, 1 },
+      },
+      LabelText = {
+        Show = true,
+        Anchor = "LEFT",
+        InsideAnchor = true,
+        HorizontalOffset = 1,
+        VerticalOffset = 0,
+        Font = {
+          Typeface = Addon.DEFAULT_FONT,
+          Size = 9,
+          Transparency = 1,
+          -- Color = RGB(255, 255, 255), -- Color is set by the BossMods addon
+          flags = "",
+          Shadow = true,
+          HorizontalAlignment = "LEFT",
+          VerticalAlignment = "MIDDLE",
+        }
+      },
     },
     ExperienceWidget = {
       ON = false,
