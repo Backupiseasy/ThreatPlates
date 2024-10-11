@@ -80,142 +80,128 @@ local HEALER_SPELLS_RETAIL = {
   ----------
   [2060] = "PRIEST",     -- Heal
   [14914] = "PRIEST",    -- Holy Fire
+  [527] = "PRIEST",      -- Purify
   --
-  --[2050] = "PRIEST",     -- Holy Word: Serenity
-  [596] = "PRIEST",      -- Prayer of Healing
+  [2050] = "PRIEST",     -- Holy Word: Serenity
+  [34861] = "PRIEST",    -- Holy Word: Sanctify
   --[47788] = "PRIEST",    -- Guardian Spirit
   --[88625] = "PRIEST",    -- Holy Word: Chastise
-  --[34861] = "PRIEST",    -- Holy Word: Sanctify
+  [596] = "PRIEST",      -- Prayer of Healing
   [204883] = "PRIEST",   -- Circle of Healing
-  --[372616] = "PRIEST",   -- Empyreal Blaze
   --[64843] = "PRIEST",    -- Divine Hymn
   --[64901] = "PRIEST",    -- Symbol of Hope
   --[200183] = "PRIEST",   -- Apotheosis
   --[265202] = "PRIEST",   -- Holy Word: Salvation
   --[372835] = "PRIEST",   -- Lightwell
-  --
-  --[197268] = "PRIEST",   -- Ray of Hope
-  [289666] = "PRIEST",   -- Greater Heal
-  --[328530] = "PRIEST",   -- Divine Ascension
-  --[213610] = "PRIEST",   -- Holy Ward
-  --[197268] = "PRIEST",   -- Ray of Hope
-
-
+  
   -- Discipline Priest
   ----------
   [47540] = "PRIEST",  -- Penance
   --
-  [194509] = "PRIEST", -- Power Word: Radiance
-  --[33206] = "PRIEST", -- Pain Suppression
-  [214621] = "PRIEST", -- Schism
-  [129250] = "PRIEST", -- Power Word: Solace
+  [194509] = "PRIEST",  -- Power Word: Radiance
+  --[33206] = "PRIEST",   -- Pain Suppression
+  --[271466] = "PRIEST",  -- Luminous Barrier
   --[62618] = "PRIEST", -- Power Word: Barrier
-  [204197] = "PRIEST", -- Purge of the Wicked
-  --[47536] = "PRIEST",  -- Rapture
-  [314867] = "PRIEST",  -- Shadow Covenant
-  --[373178] = "PRIEST",  -- Light's Wrath
+  [204197] = "PRIEST",  -- Purge of the Wicked
+  --[47536] = "PRIEST",   -- Rapture
+  --[421543] = "PRIEST",  -- Ultimate Penitence
+  --[246287] = "PRIEST",  -- Evangelism
   --[123040] = "PRIEST",  -- Mindbender
-  --
-  --[197871] = "PRIEST",   -- Dark Archangel
-  --[197862] = "PRIEST",   -- Archangel
 
-  -- Druid (The affinity traits on the other specs makes this difficult)
+
+  -- Druid
   ---------
-  [33763] = "DRUID", -- Lifebloom
-  --[17116] = "DRUID", -- Nature's Swiftness
-  [102351] = "DRUID", -- Cnenarion Ward
-  [33763] = "DRUID", -- Nourish
-  [81262] = "DRUID", -- Efflorescence
-  --[740] = "DRUID", -- Tranquility
-  --[102342] = "DRUID", -- Ironbark
-  --[203651] = "DRUID", -- Overgrowth
-  --[33891] = "DRUID", -- Incarnation: Tree of Life
-  --[391528] = "DRUID", -- Convoke the Spirits
-  [391888] = "DRUID", -- Adaptive Swarm -- Shared with Feral
-  --[197721] = "DRUID", -- Flourish
-  [392160] = "DRUID", -- Invigorate
+  [18562] = "DRUID",   -- Swiftmend
+  [212040] = "DRUID",  -- Revitalize
   --
-
+  [33763] = "DRUID",   -- Lifebloom
+  [132158] = "DRUID",  -- Nature's Swiftness
+  --[102351] = "DRUID",  -- Cenarion Ward
+  [145205] = "DRUID",  -- Efflorescence
+  --[740] = "DRUID",     -- Tranquilit
+  --[102342] = "DRUID",  -- Ironbark
+  --[50464] = "DRUID",   -- Nourish
+  --[102693] = "DRUID",  -- Grove Guardians
+  --[203651] = "DRUID",  -- Overgrowth
+  --[33891] = "DRUID",   -- Incarnation: Tree of Life
+  --[391528] = "DRUID",  -- Convoke the Spirits
+  --[392160] = "DRUID",  -- Invigorate
+  --[197721] = "DRUID",  -- Flourish
+  
 
   -- Shaman
   ---------
-  [61295] = "SHAMAN",  -- Riptide
-  [77472] = "SHAMAN",  -- Healing Wave
-  [73920] = "SHAMAN",  -- Healing Rain
-  --[383009] = "SHAMAN",  -- Stormkeeper
-  --[52127] = "SHAMAN",  -- Water Shield
-  --[98008] = "SHAMAN", -- Spirit Link Totem
-  --[157153] = "SHAMAN", -- Cloudburst Totem
-  --[108280] = "SHAMAN",  -- Healing Tide Totem
-  --[16190] = "SHAMAN", -- Mana Tide Totem
-  [73685] = "SHAMAN",  -- Unleash Life
-  --[198838] = "SHAMAN",  -- Earthen Wall Totem
-  --[207399] = "SHAMAN",  -- Ancestral Protection Totem
-  --[375982] = "SHAMAN", -- Primordial Wave
-  [207778] = "SHAMAN", -- Downpour
-  --[382029] = "SHAMAN", -- Ever-Rising Tide -- was only in Beta available
-  --[114052] = "SHAMAN", -- Ascendance
-  --[197995] = "SHAMAN", -- Wellspring
+  [77130] = "SHAMAN",  -- Purify Spirit
+  [52127] = "SHAMAN",  -- Water Shield
   --
+  [61295] = "SHAMAN",  -- Riptide
+  [73920] = "SHAMAN",  -- Healing Rain
+  [77472] = "SHAMAN",  -- Healing Wave
+  --[98008] = "SHAMAN",  -- Spirit Link Totem
+  --[157153] = "SHAMAN", -- Cloudburst Totem
+  --[108280] = "SHAMAN", -- Healing Tide Totem
+  --[16190] = "SHAMAN",  -- Mana Tide Totem
+  --[73685] = "SHAMAN",  -- Unleash Life
+  --[198838] = "SHAMAN", -- Earthen Wall Totem
+  --[207399] = "SHAMAN", -- Ancestral Protection Totem
+  --[382021] = "SHAMAN", -- Earthliving Weapon
+  --[114052] = "SHAMAN", -- Ascendance
+  --[375982] = "SHAMAN", -- Primordial Wave
+  --[197995] = "SHAMAN", -- Wellspring
+
 
   -- Paladin
   ----------
-  [275773] = "PALADIN", -- Judgment
+  [4987] = "PALADIN", -- Cleanse
+  [82326] = "PALADIN", -- Holy Light
+  [53563] = "PALADIN", -- Beacon of Light
   --
   [20473] = "PALADIN", -- Holy Shock
-  [82326] = "PALADIN", -- Holy Light
   [85222] = "PALADIN", -- Light of Dawn
-  [223306] = "PALADIN", -- Bestow Faith
   --[31821] = "PALADIN", -- Aura Mastery
-  [214202] = "PALADIN", -- Rule of Law
-  [210294] = "PALADIN", -- Divine Favor
-  --[114158] = "PALADIN", -- Light's Hammer
-  [114165] = "PALADIN", -- Holy Prism
-  --[183998] = "PALADIN", -- Licht des Märtyrers ??? Holy or all Paladins
-  --[304971] = "PALADIN", -- Divine Toll  ??? Holy or all Paladins
-  --[216331] = "PALADIN", -- Avenging Crusader
+  --[114165] = "PALADIN", -- Holy Prism
+  --[148039] = "PALADIN", -- Barrier of Faith
+  --[414273] = "PALADIN", -- Hand of Divinity
+  [156910] = "PALADIN", -- Beacon of Faith
+  [200025] = "PALADIN", -- Beacon of Virtue
   --[384376] = "PALADIN", -- Avenging Wrath ??? Holy or all Paladins
-  [148039] = "PALADIN", -- Barrier of Faith
+  --[216331] = "PALADIN", -- Avenging Crusader
+  --[200652] = "PALADIN", -- Tyr's Deliverance
   --[388007] = "PALADIN", -- Blessing of Summer
 
 
   -- Monk
   ---------
+  [115450] = "MONK", -- Detox
+  --
   [124682] = "MONK", -- Envelopping Mist
-  [191837] = "MONK", -- Essence Font
+  [116680] = "MONK", -- Thunder Focus Tea
   [115151] = "MONK", -- Renewing Mist
   --[116849] = "MONK", -- Life Cocoon
-  [116680] = "MONK", -- Thunder Focus Tea
+  [115294] = "MONK", -- Mana Tea
+  --[197908] = "MONK", -- Mana Tea
   --[115310] = "MONK", -- Revival
   --[388615] = "MONK", -- Restoral
-  --[198898] = "MONK", -- Song of Chi-Ji
-  [124081] = "MONK", -- Zen Pulse
-  --[122281] = "MONK", -- Healing Elixir
   --[325197] = "MONK", -- Invoke Chi-Ji, the Red Crane
   --[322118] = "MONK", -- Invoke Yu'lon, the Jade Serpent
-  --[196725] = "MONK", -- Refreshing Jade Wind
-  --[197908] = "MONK", -- Mana Tea
-  --[388193] = "MONK", -- Faeline Stomp
-  --[386276] = "MONK", -- Bonedust Brew
-  --
-  [209584] = "MONK", -- Zen Focus Tea
-  [205234] = "MONK", -- Healing Sphere
-
+  --[388193] = "MONK", -- Jadefire Stomp
+  --[399491] = "MONK", -- Sheilun's Gift
 
   -- Evoker - Preservation
   ---------
+  [360823] = "EVOKER", -- Naturalize
+  --
   [364343] = "EVOKER", -- Echo
   [382614] = "EVOKER", -- Dream Breath
+  --[355936] = "EVOKER", -- Dream Breath
   [366155] = "EVOKER", -- Reversion
   --[366155] = "EVOKER", -- Rewind
   [382731] = "EVOKER", -- Spiritbloom
   --[357170] = "EVOKER", -- Time Dilation
   --[370960] = "EVOKER", -- Emerald Communion
-  [373861] = "EVOKER", -- Temporal Anomaly  
+  --[373861] = "EVOKER", -- Temporal Anomaly  
   --[359816] = "EVOKER", -- Dream Flight
   --[370537] = "EVOKER", -- Stasis  
-  --
-  --[377509] = "EVOKER", -- Dream Projection
 }
 
 local HEALER_SPELLS_CATA = {
