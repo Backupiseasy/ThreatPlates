@@ -17,6 +17,8 @@ local pairs = pairs
 local UnitExists = UnitExists
 local IsInInstance = IsInInstance
 local IsInBrawl = C_PvP.IsInBrawl
+local UnitIsUnit = UnitIsUnit
+local UnitInParty = UnitInParty
 local MAX_ARENA_ENEMIES = MAX_ARENA_ENEMIES or 5 -- MAX_ARENA_ENEMIES is not defined in Wrath Clasic
 
 -- ThreatPlates APIs
@@ -79,6 +81,26 @@ local function GetUnitArenaNumber(guid)
   -- If the arena id of this unit is aleady known, don't update the list. Otherweise check for new arena players/pets
   -- GetArenaOpponents()
   --return ArenaID[guid]
+end
+
+local function GetFrameSortNumber(unitId)
+  local fs = FrameSortApi and FrameSortApi.v2
+
+  if not fs then
+      -- framesort not installed
+    return nil
+  end
+
+  -- get an ordered list of units by their visual position
+  local units = UnitInParty(unitId) and fs.Sorting:GetFriendlyUnits() or fs.Sorting:GetEnemyUnits()
+
+  for frameNumber, unit in ipairs(units) do
+    if UnitIsUnit(unitId, unit) then
+      return frameNumber
+    end
+  end
+
+  return nil
 end
 
 function Widget:PLAYER_ENTERING_WORLD()
@@ -203,13 +225,20 @@ function Widget:OnUnitAdded(widget_frame, unit)
   end
 
   local arena_no = GetUnitArenaNumber(unit.guid)
+
   if not arena_no then
     widget_frame:Hide()
     return
   end
-  widget_frame.Random = arena_no
 
   local settings = SettingsByTeam[unit.reaction]
+
+  if settings.UseFrameSort then
+    local fsNumber = GetFrameSortNumber(unit.unitid)
+    arena_no = fsNumber or arena_no
+  end
+
+  widget_frame.Random = arena_no
 
   if settings.ShowOrb then
     local icon_color = settings.OrbColors[arena_no]
@@ -218,7 +247,6 @@ function Widget:OnUnitAdded(widget_frame, unit)
   else
     widget_frame.Icon:Hide()
   end
-  
 
   if settings.ShowNumber then
     local number_color = settings.NumberColors[arena_no]
@@ -255,6 +283,7 @@ function Widget:UpdateSettings()
   SettingsByTeam.HOSTILE.ShowOrb = Settings.ShowOrb
   SettingsByTeam.HOSTILE.ShowNumber = Settings.ShowNumber
   SettingsByTeam.HOSTILE.HideName = Settings.HideName
+  SettingsByTeam.HOSTILE.UseFrameSort = Settings.UseFrameSort
   SettingsByTeam.HOSTILE.OrbColors = Settings.colors
   SettingsByTeam.HOSTILE.NumberColors = Settings.numColors
   SettingsByTeam.FRIENDLY = Settings.Allies

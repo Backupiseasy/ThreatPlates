@@ -2358,6 +2358,12 @@ local function CreateArenaWidgetOptions()
                 type = "toggle",
                 arg = {"arenaWidget", "Allies", "HideName"},
               },
+              UseFrameSort = {
+                name = L["Use FrameSort"],
+                order = 30,
+                type = "toggle",
+                arg = {"arenaWidget", "Allies", "UseFrameSort"},
+              },
               Colors = {
                 name = L["Colors"],
                 type = "group",
@@ -2489,6 +2495,12 @@ local function CreateArenaWidgetOptions()
                 order = 20,
                 type = "toggle",
                 arg = {"arenaWidget", "HideName"},
+              },
+              UseFrameSort = {
+                name = L["Use FrameSort"],
+                order = 30,
+                type = "toggle",
+                arg = {"arenaWidget", "UseFrameSort"},
               },
               Colors = {
                 name = L["Colors"],
