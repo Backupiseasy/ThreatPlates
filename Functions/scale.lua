@@ -8,10 +8,13 @@ local ThreatPlates = Addon.ThreatPlates
 -- Lua APIs
 
 -- WoW APIs
-local UnitExists = UnitExists
 
 -- ThreatPlates APIs
 local GetThreatSituation = Addon.GetThreatSituation
+
+---------------------------------------------------------------------------------------------------
+-- Local variables
+---------------------------------------------------------------------------------------------------
 
 local function ScaleSituational(unit)
 	local db = Addon.db.profile.nameplate
@@ -19,7 +22,7 @@ local function ScaleSituational(unit)
 	-- Do checks for situational scale settings:
 	if unit.isMarked and db.toggle.MarkedS then
 		return db.scale.Marked
-	elseif unit.isMouseover and not unit.isTarget and db.toggle.MouseoverUnitScale then
+	elseif unit.isMouseover and not Addon.UnitIsTarget(unit.unitid) and db.toggle.MouseoverUnitScale then
 		return db.scale.MouseoverUnit
 	elseif unit.isCasting then
 		local unit_friendly = (unit.reaction == "FRIENDLY")
@@ -35,7 +38,7 @@ end
 
 local function ScaleGeneral(unit)
 	-- Target always has priority
-	if not unit.isTarget then
+	if not Addon.UnitIsTarget(unit.unitid) then
 		-- Do checks for situational scale settings:
 		local scale = ScaleSituational(unit)
 		if scale then
@@ -47,10 +50,11 @@ local function ScaleGeneral(unit)
 	local db = Addon.db.profile.nameplate
 
 	local target_scale
-	if UnitExists("target") then
-		if unit.isTarget and db.toggle.TargetS then
+	if Addon.TargetUnitExists() then
+		local unit_is_target = Addon.UnitIsTarget(unit.unitid)
+		if unit_is_target and db.toggle.TargetS then
 			target_scale = db.scale.Target
-		elseif not unit.isTarget and db.toggle.NonTargetS then
+		elseif not unit_is_target and db.toggle.NonTargetS then
 			target_scale = db.scale.NonTarget
 		end
 	elseif db.toggle.NoTargetS then

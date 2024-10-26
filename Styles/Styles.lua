@@ -7,10 +7,11 @@ local ThreatPlates = Addon.ThreatPlates
 
 -- WoW APIs
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
-local UnitIsPlayer, UnitPlayerControlled, UnitIsUnit = UnitIsPlayer, UnitPlayerControlled, UnitIsUnit
+local UnitIsDead, UnitPlayerControlled, UnitIsUnit = UnitIsDead, UnitPlayerControlled, UnitIsUnit
 local UnitIsOtherPlayersPet = UnitIsOtherPlayersPet
 local UnitIsBattlePet, UnitCreatureType = UnitIsBattlePet, UnitCreatureType
 local UnitCanAttack = UnitCanAttack
+local GetSpellInfo = Addon.GetSpellInfo
 
 -- ThreatPlates APIs
 local TOTEMS = Addon.TOTEMS
@@ -23,13 +24,14 @@ local UpdateCustomStyleAfterAuraTrigger = Addon.UpdateCustomStyleAfterAuraTrigge
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
 -- List them here for Mikk's FindGlobals script
--- GLOBALS: GetSpellInfo, UnitIsTapDenied
+-- GLOBALS: UnitIsTapDenied
 
 ---------------------------------------------------------------------------------------------------
 -- Wrapper functions for WoW Classic
 ---------------------------------------------------------------------------------------------------
 
-if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
+-- UnitIsBattlePet: Mists - Patch 5.1.0 (2012-11-27): Added.
+if not Addon.ExpansionIsAtLeast() then -- Mists
   UnitIsBattlePet = function(...) return false end
 end
 
@@ -71,6 +73,7 @@ local MAP_UNIT_TYPE_TO_TP_TYPE = {
   NeutralMinus     = "Minus",
 }
 
+-- TODO: Move these into MAP_UNIT_TYPE_TO_TP_TYPE, that should work as well (and change right side to target type)
 local REMAP_UNSUPPORTED_UNIT_TYPES = {
   NeutralTotem     = "FriendlyTotem",    -- When players are mind-controled, their totems turn neutral it seems (at least in Classic): https://www.curseforge.com/wow/addons/tidy-plates-threat-plates/issues/506
   NeutralGuardian  = "FriendlyGuardian",
@@ -78,10 +81,17 @@ local REMAP_UNSUPPORTED_UNIT_TYPES = {
 }
 
 local function GetUnitType(unit)
+  -- Minions are:
+  --   - totems: unit.TotemSettings
+  --   - guardians: unit is a player's pet
+  --   - pets: all other player controlled units
+  -- Not sure if there are other types of minions
   local unit_class
   -- not all combinations are possible in the game: Friendly Minus, Neutral Player/Totem/Pet
   if unit.type == "PLAYER" then
     unit_class = "Player"
+  elseif unit.classification == "minus" then
+    unit_class = "Minus"
   elseif unit.TotemSettings then
     unit_class = "Totem"
   elseif UnitIsOtherPlayersPet(unit.unitid) or UnitIsUnit(unit.unitid, "pet") then -- player pets are also considered guardians, so this check has priority
@@ -89,8 +99,6 @@ local function GetUnitType(unit)
     unit_class = "Pet"
   elseif UnitPlayerControlled(unit.unitid) then
     unit_class = "Guardian"
-  elseif unit.isMini then
-    unit_class = "Minus"
   else
     unit_class = "NPC"
   end
@@ -119,7 +127,7 @@ local function ShowUnit(unit)
   local show, headline_view = GetUnitType(unit)
 
   -- If a unit is targeted, show the nameplate if possible.
-  show = show or unit.isTarget
+  show = show or unit.IsSoftTarget
 
   if not show then return false, false, headline_view end
 
@@ -139,7 +147,7 @@ local function ShowUnit(unit)
     hide_unit_type = true
   end
 
-  if hide_unit_type and not unit.isTarget then
+  if hide_unit_type and not unit.IsSoftTarget then
     return show, hide_unit_type, headline_view
   end
 
@@ -157,7 +165,7 @@ local function ShowUnit(unit)
 --  end
 
   db = db_base.HeadlineView
-  if db.ForceHealthbarOnTarget and unit.isTarget then
+  if db.ForceHealthbarOnTarget and unit.IsSoftTarget then
     headline_view = false
   elseif db.ForceOutOfCombat and not InCombatLockdown() then
     headline_view = true
@@ -293,7 +301,7 @@ function Addon.UnitStyle_AuraTrigger_CheckIfActive(unit, aura_id, aura_name, aur
     unit.CustomStyleAura = (unique_settings.showNameplate and "unique") or (unique_settings.ShowHeadlineView and "NameOnly-Unique") or "etotem"
     unit.CustomPlateSettingsAura = unique_settings
 
-    local _, _, icon = _G.GetSpellInfo(aura_id)
+    icon = GetSpellInfo(aura_id).iconID
     unique_settings.AutomaticIcon = icon
   end
 end
@@ -310,7 +318,7 @@ function Addon.UnitStyle_CastTrigger_CheckIfActive(unit, spell_id, spell_name)
     unit.CustomStyleCast = (unique_settings.showNameplate and "unique") or (unique_settings.ShowHeadlineView and "NameOnly-Unique") or "etotem"
     unit.CustomPlateSettingsCast = unique_settings
 
-    local _, _, icon = _G.GetSpellInfo(spell_id)
+    icon = GetSpellInfo(spell_id).iconID
     unique_settings.AutomaticIcon = icon
   end
 end
@@ -337,7 +345,7 @@ function Addon:SetStyle(unit)
 
   -- Nameplate is disabled in General - Visibility
   if not show then
-    return "empty", nil
+    return "empty"
   end
 
   -- Check if custom nameplate should be used for the unit:
@@ -371,15 +379,27 @@ function Addon:SetStyle(unit)
     end
   end
 
+  -- TODO: Probably could merge these three if-s into one if-elseif-statement
+  
   -- Hidden nameplates might be shown if a custom style is defined for them (Visibility - Hide Nameplates)
   if hide_unit_type and style ~= "unique" and style ~= "NameOnly-Unique" then
-    return "empty", nil
+    return "empty"
   end
 
-  if not style and Addon:ShowThreatFeedback(unit) then
-    -- could call GetThreatStyle here, but that would at a tiny overhead
-    -- style tank/dps only used for hostile (enemy, neutral) NPCs
-    style = (Addon:PlayerRoleIsTank() and "tank") or "dps"
+  if (UnitIsDead(unit.unitid) and UnitIsUnit("softinteract", unit.unitid)) or unit.SoftInteractTargetIsDead then
+    -- We use IsDead to prevent the nameplate switching to healthbar view again shortly before disapearing
+    unit.SoftInteractTargetIsDead = true
+    return (unit.CustomPlateSettings and "NameOnly-Unique") or "NameOnly"
+  end
+
+  if not style then
+    if not UnitExists(unit.unitid) then
+      style = "etotem"
+    elseif Addon:ShowThreatFeedback(unit) then
+      -- could call GetThreatStyle here, but that would at a tiny overhead
+      -- style tank/dps only used for hostile (enemy, neutral) NPCs
+      style = (Addon:PlayerRoleIsTank() and "tank") or "dps"
+    end
   end
 
   return style or "normal"

@@ -11,11 +11,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # we first have to clone the AddOn project, this is a required step
+      # First, clone the addon repository
       - name: Clone project
-        uses: actions/checkout@v1
-        # note: checkout@v2 breaks git history, so generating a changelog and
-        # file naming for non-tagged builds will not work properly
+        uses: actions/checkout@v4
 
       - name: Update Build Date in release changelog
         run: sed -i "s/@build-time@/`date +%Y-%m-%d`/" CHANGELOG.md
@@ -33,7 +31,7 @@ jobs:
           WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
           #WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
 
-      - name: Create Classic Package
+      - name: Create Vaniella Package
         uses: BigWigsMods/packager@v2
         with:
           args: -e -l -n "ThreatPlates-{project-version}{classic}" -g classic
@@ -43,7 +41,7 @@ jobs:
           WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
           #WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
 
-      # - name: Create BCC Classic Package
+      # - name: Create TBC Classic Package
       #   uses: BigWigsMods/packager@v2
       #   with:
       #     args: -e -l -n "ThreatPlates-{project-version}{classic}" -g bcc
@@ -53,15 +51,26 @@ jobs:
       #     WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
       #     #WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
 
-      - name: Create Wrath Classic Package
+      # - name: Create Wrath Classic Package
+      #   uses: BigWigsMods/packager@v2
+      #   with:
+      #     args: -e -l -n "ThreatPlates-{project-version}{classic}" -g wrath
+      #   env:
+      #     CF_API_KEY: ${{ secrets.CF_API_KEY }}
+      #     GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
+      #     WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
+      #     #WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
+
+      - name: Create Cata Classic Package
         uses: BigWigsMods/packager@v2
         with:
-          args: -e -l -n "ThreatPlates-{project-version}{classic}" -g wrath
+          args: -e -l -n "ThreatPlates-{project-version}{classic}" -g cata
         env:
           CF_API_KEY: ${{ secrets.CF_API_KEY }}
           GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
           WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
           #WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
+  
 
 #      - name: Send Status to Discord
 #        uses: nebularg/actions-discord-webhook@v1

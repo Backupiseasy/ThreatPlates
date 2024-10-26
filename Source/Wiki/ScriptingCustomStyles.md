@@ -156,7 +156,7 @@ List of interrupts with silence duration, thanks to bambziqt for this list.
       
       local time = frame:CreateFontString(nil, "OVERLAY") -- Duration Text
       time:SetJustifyH("CENTER")
-      time:SetJustifyV("CENTER")
+      time:SetJustifyV("MIDDLE")
       time:SetShadowOffset(1, -1)
       time:SetShadowColor(0, 0, 0, 1)
       time:SetFont("Fonts\\FRIZQT__.TTF", 14, "OUTLINE")

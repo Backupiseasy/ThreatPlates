@@ -1,4 +1,4 @@
-## Interface: 100100
+## Interface: 110005
 
 ## Title: Threat Plates
 ## Version: @project-version@
@@ -8,6 +8,9 @@
 ## Notes-esMX: Placas Identificativas de Amenaza
 ## Author: Suicidal Katt, Blacksalsify
 ## SavedVariables: ThreatPlatesDB
+
+## AddonCompartmentFunc: TidyPlatesThreat_OnAddonCompartmentClick
+## IconTexture: Interface\Addons\TidyPlates_ThreatPlates\Artwork\Logo.tga
 
 ## RequiredDeps:
 ## OptionalDeps: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate, LibDualSpec-1.0

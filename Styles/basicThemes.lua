@@ -9,8 +9,6 @@ local function Create(name)
   local theme = {
 
     frame = {
-      width = db.frame.width,
-      height = db.frame.height,
       x = db.frame.x,
       y = db.frame.y,
       anchor = "CENTER",
@@ -25,6 +23,14 @@ local function Create(name)
       y = 0,
       anchor = "CENTER",
       show = true,
+    },
+
+    healthbarFriendly = {
+      width = (Addon.WOW_USES_CLASSIC_NAMEPLATES and db.healthbar.width) or db.healthbar.widthFriend,
+      height = (Addon.WOW_USES_CLASSIC_NAMEPLATES and db.healthbar.height) or db.healthbar.heightFriend,
+      x = 0,
+      y = 0,
+      anchor = "CENTER",
     },
 
     healthborder = {

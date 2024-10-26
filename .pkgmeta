@@ -23,7 +23,6 @@ externals:
   Libs/AceSerializer-3.0: https://repos.wowace.com/wow/ace3/trunk/AceSerializer-3.0
   Libs/AceGUI-3.0-SharedMediaWidgets: https://repos.curseforge.com/wow/ace-gui-3-0-shared-media-widgets/trunk/AceGUI-3.0-SharedMediaWidgets
 
-
   Libs/LibCustomGlow-1.0: https://github.com/Stanzilla/LibCustomGlow
   Libs/LibDeflate:
     url: https://github.com/SafeteeWoW/LibDeflate
@@ -32,12 +31,9 @@ externals:
   # Only for Mainline
   Libs/LibDualSpec-1.0: https://repos.wowace.com/wow/libdualspec-1-0
 
-  # Only for Classic
-  Libs/LibClassicDurations: https://repos.curseforge.com/wow/libclassicdurations
-
 embedded-libraries:
-  # - LibClassicCasterino
   # - ForAllIndentsAndPurposes
+  # - UTF8
 
 enable-nolib-creation: no
 
@@ -60,8 +56,9 @@ ignore:
   - README.md
   - TidyPlates_ThreatPlates.iml
   - TidyPlates_ThreatPlates-Mainline.toc
-  - TidyPlates_ThreatPlates-Classic.toc
-  - TidyPlates_ThreatPlates-BCC.toc
+  - TidyPlates_ThreatPlates-Vanilla.toc
+  - TidyPlates_ThreatPlates-TBC.toc
   - TidyPlates_ThreatPlates-Wrath.toc
+  - TidyPlates_ThreatPlates-Cata.toc
 
 move-folders:

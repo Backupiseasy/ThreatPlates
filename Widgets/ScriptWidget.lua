@@ -134,7 +134,7 @@ end]]
   OnTargetUnitRemoved = {
     FunctionExample = [[
 -- Example for function OnTargetUnitRemoved:
-function()
+function(tp_frame, unit)
   -- ...
 end]]
   },
@@ -530,7 +530,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
   InitializeNonScriptTriggerScripts(widget_frame, unit)
   ProcessEvent("OnUnitAdded", widget_frame, unit)
 
-  if unit.isTarget then
+  if unit.IsSoftTarget then
     ProcessEvent("OnTargetUnitAdded", widget_frame, unit)
   end
 
@@ -545,12 +545,12 @@ end
 function Widget:OnUnitRemoved(widget_frame, unit)
   ProcessEvent("OnUnitRemoved", widget_frame, unit)
 
-  if unit.isTarget then
-    ProcessEvent("OnTargetUnitRemoved", widget_frame, unit)
+  if unit.IsSoftTarget then
+    ProcessEvent("OnTargetUnitRemoved", tp_frame, unit)
   end
 
   if unit.IsFocus then
-    ProcessEvent("OnFocusUnitRemoved", widget_frame, unit)
+    ProcessEvent("OnFocusUnitRemoved")
   end
 
   --widget_frame:SetShown(unit.CustomPlateSettings or next(ScriptsForAllPlates))

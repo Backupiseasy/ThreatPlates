@@ -24,6 +24,9 @@ Addon.CVars = {}
 local CVars = Addon.CVars
 
 local COMBAT_PROTECTED = {
+  -- Miscellaneous
+  uiScale = true,
+  -- Nameplate CVars
   nameplateLargeBottomInset = true,
   nameplateLargeTopInset = true,
   nameplateMaxAlpha = true,
@@ -40,7 +43,7 @@ local COMBAT_PROTECTED = {
   nameplateSelectedAlpha = true,
   nameplateNotSelectedAlpha = true,
   nameplateTargetBehindMaxDistance = true,
-  -- Nameplate CVars
+  -- Nameplate Visibility CVars
   nameplateShowAll = true,
   nameplateShowFriends = true,
   nameplateShowEnemies = true,
@@ -54,6 +57,19 @@ local COMBAT_PROTECTED = {
   nameplateShowFriendlyNPCs = true,
   nameplateShowFriendlyPets = true,
   nameplateShowFriendlyTotems = true,
+  nameplateShowOnlyNames = true,
+  -- Soft Target CVars
+  SoftTargetForce = true,
+  SoftTargetEnemy = true,
+  SoftTargetNameplateEnemy = true,
+  SoftTargetIconEnemy = true,
+  SoftTargetNameplateFriend = true,
+  SoftTargetIconFriend = true,
+  SoftTargetInteract = true,
+  SoftTargetNameplateInteract = true,
+  SoftTargetIconInteract = true,
+  SoftTargetIconGameObject = true,
+  SoftTargetLowPriorityIcons = true,
   -- Name CVars
   UnitNameFriendlyPlayerName = true,
   UnitNameFriendlyPetName = true,
@@ -78,7 +94,7 @@ function CVars:Initialize(cvar, value)
 
   -- ! The CVar nameplateShowOnlyNames is not persistently stored by WoW, so we have to restore its value
   -- ! after every login/reloading the UI.
-  self:SetBoolProtected("nameplateShowOnlyNames", Addon.db.profile.BlizzardSettings.Names.ShowOnlyNames)
+  self:SetBool("nameplateShowOnlyNames", Addon.db.profile.BlizzardSettings.Names.ShowOnlyNames)
 
   -- Sync internal settings with Blizzard CVars
   -- SetCVar("ShowClassColorInNameplate", 1)
@@ -114,12 +130,43 @@ local function SetConsoleVariable(cvar, value)
 end
 
 function CVars:Set(cvar, value)
-  SetConsoleVariable(cvar, value)
+  if COMBAT_PROTECTED[cvar] then
+    Addon:CallbackWhenOoC(function()
+      SetConsoleVariable(cvar, value)
+    end, L["Unable to change the following console variable while in combat: "] .. cvar .. ". ")
+  else
+    SetConsoleVariable(cvar, value)
+  end
+end
+
+function CVars:SetBool(cvar, value)
+  self:Set(cvar, (value and 1) or 0)
 end
 
 function CVars:SetToDefault(cvar)
-  _G.SetCVar(cvar, GetCVarDefault(cvar))
-  Addon.db.profile.CVarsBackup[cvar] = nil
+  if COMBAT_PROTECTED[cvar] then
+    Addon:CallbackWhenOoC(function()
+      _G.SetCVar(cvar, GetCVarDefault(cvar))
+      Addon.db.profile.CVarsBackup[cvar] = nil
+    end, L["Unable to change the following console variable while in combat: "] .. cvar .. ". ")
+  else
+    _G.SetCVar(cvar, GetCVarDefault(cvar))
+    Addon.db.profile.CVarsBackup[cvar] = nil
+  end
+end
+
+function CVars:Overwrite(cvar, value)
+  if COMBAT_PROTECTED[cvar] then
+    Addon:CallbackWhenOoC(function()
+      _G.SetCVar(cvar, value)
+    end, L["Unable to change the following console variable while in combat: "] .. cvar .. ". ")
+  else
+    _G.SetCVar(cvar, value)
+  end
+end
+
+function CVars:OverwriteBool(cvar, value)
+  self:Overwrite(cvar, (value and 1) or 0)
 end
 
 function CVars:RestoreFromProfile(cvar)
@@ -140,6 +187,10 @@ end
 --  end
 --end
 
+function CVars:Get(cvar)
+  return GetCVar(cvar)
+end
+
 function CVars:GetAsNumber(cvar)
   local value = GetCVar(cvar)
   local numeric_value = tonumber(value)
@@ -157,45 +208,33 @@ function CVars:GetAsBool(cvar)
 end
 
 ---------------------------------------------------------------------------------------------------
--- Set CVars in a safe way when in combat
+-- 
 ---------------------------------------------------------------------------------------------------
 
-function CVars:SetProtected(cvar, value)
-  if COMBAT_PROTECTED[cvar] then
-    Addon:CallbackWhenOoC(function()
-      SetConsoleVariable(cvar, value)
-    end, L["Unable to change the following console variable while in combat: "] .. cvar .. ". ")
-  else
-    SetConsoleVariable(cvar, value)
+-- From addon: AdvancedInterfaceOptions
+function CVars:CVarExists(cvar)
+	return not not select(2, pcall(function() return addon.GetCVarInfo(cvar) end))
+end
+
+local RESET_TO_DEFAULT = {
+  "nameplateOtherTopInset", "nameplateOtherBottomInset", "nameplateLargeTopInset", "nameplateLargeBottomInset",
+  "nameplateMotion", "nameplateMotionSpeed", "nameplateOverlapH", "nameplateOverlapV",
+  "nameplateMaxDistance", "nameplateTargetBehindMaxDistance",
+  "nameplateShowOnlyNames", 
+  "clampTargetNameplateToScreen",
+  "nameplateResourceOnTarget",
+  -- "nameplateGlobalScale" -- Reset it to 1, if it get's somehow corrupted
+  -- Action Target
+  "SoftTargetEnemy", "SoftTargetNameplateEnemy", "SoftTargetIconEnemy",
+  "SoftTargetFriend", "SoftTargetNameplateFriend", "SoftTargetIconFriend",
+  "SoftTargetInteract", "SoftTargetNameplateInteract", "SoftTargetIconInteract",
+  "SoftTargetIconGameObject", "SoftTargetLowPriorityIcons",
+}
+
+function CVars:ResetToDefaults()
+  for k, v in pairs(RESET_TO_DEFAULT) do
+    if self:CVarExists(k) then
+      self:SetToDefault(v)
+    end
   end
-end
-
-function CVars:SetBoolProtected(cvar, value)
-  self:SetProtected(cvar, (value and 1) or 0)
-end
-
-function CVars:SetToDefaultProtected(cvar)
-  if COMBAT_PROTECTED[cvar] then
-    Addon:CallbackWhenOoC(function()
-      _G.SetCVar(cvar, GetCVarDefault())
-      Addon.db.profile.CVarsBackup[cvar] = nil
-    end, L["Unable to change the following console variable while in combat: "] .. cvar .. ". ")
-  else
-    _G.SetCVar(cvar, GetCVarDefault())
-    Addon.db.profile.CVarsBackup[cvar] = nil
-  end
-end
-
-function CVars:OverwriteProtected(cvar, value)
-  if COMBAT_PROTECTED[cvar] then
-    Addon:CallbackWhenOoC(function()
-      _G.SetCVar(cvar, value)
-    end, L["Unable to change the following console variable while in combat: "] .. cvar .. ". ")
-  else
-    _G.SetCVar(cvar, value)
-  end
-end
-
-function CVars:OverwriteBoolProtected(cvar, value)
-  self:OverwriteProtected(cvar, (value and 1) or 0)
 end

@@ -30,7 +30,29 @@ local _G =_G
 -- Global functions for accessing the configuration
 ---------------------------------------------------------------------------------------------------
 
-if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
+-- GetSpecialization: Mists - Patch 5.0.4 (2012-08-28): Replaced GetPrimaryTalentTree.
+if Addon.IS_MAINLINE then
+  local PLAYER_ROLE_BY_SPEC = ThreatPlates.SPEC_ROLES[Addon.PlayerClass]
+
+  function Addon:PlayerRoleIsTank()
+    local db = Addon.db
+    if db.profile.optionRoleDetectionAutomatic then
+      return PLAYER_ROLE_BY_SPEC[_G.GetSpecialization()] or false
+    else
+      return db.char.spec[_G.GetSpecialization()]
+    end
+  end
+
+  -- Sets the role of the index spec or the active spec to tank (value = true) or dps/healing
+  function Addon:SetRole(value,index)
+    if index then
+      Addon.db.char.spec[index] = value
+    else
+      Addon.db.char.spec[_G.GetSpecialization()] = value
+    end
+  end
+else
+  -- GetShapeshiftFormID: not sure when removed
   local GetShapeshiftFormID = GetShapeshiftFormID
   local BEAR_FORM, DIRE_BEAR_FORM = BEAR_FORM, 8
 
@@ -48,6 +70,16 @@ if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
     end,
     DEATHKNIGHT = function()
       return Addon.PlayerIsTank
+    end,
+    -- Tanks in WoW Classic Season of Discovery:
+    SHAMAN = function()
+      return Addon.PlayerIsTank
+    end,
+    WARLOCK = function()
+      return Addon.PlayerIsTank
+    end,
+    ROGUE = function()
+      return Addon.PlayerIsTank -- Set in CoreEvents:RUNE_UPDATED() and CoreEvents:PLAYER_EQUIPMENT_CHANGED()
     end,
     DEFAULT = function()
       return false
@@ -68,26 +100,6 @@ if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
   -- Sets the role of the index spec or the active spec to tank (value = true) or dps/healing
   function Addon:SetRole(value)
     Addon.db.char.spec[1] = value
-  end
-else
-  local PLAYER_ROLE_BY_SPEC = ThreatPlates.SPEC_ROLES[Addon.PlayerClass]
-
-  function Addon:PlayerRoleIsTank()
-    local db = Addon.db
-    if db.profile.optionRoleDetectionAutomatic then
-      return PLAYER_ROLE_BY_SPEC[_G.GetSpecialization()] or false
-    else
-      return db.char.spec[_G.GetSpecialization()]
-    end
-  end
-
-  -- Sets the role of the index spec or the active spec to tank (value = true) or dps/healing
-  function Addon:SetRole(value,index)
-    if index then
-      Addon.db.char.spec[index] = value
-    else
-      Addon.db.char.spec[_G.GetSpecialization()] = value
-    end
   end
 end
 
@@ -1006,7 +1018,7 @@ local function MigrateCustomStylesToV3(profile_name, profile)
 
         -- Set automatic icon detection for all existing custom nameplates to false
         unique_unit.UseAutomaticIcon = false
-        unique_unit.icon = GetValueOrDefault(unique_unit.icon, (Addon.IS_CLASSIC and "Spell_nature_spiritwolf.blp") or "spell_shadow_shadowfiend.blp")
+        unique_unit.icon = GetValueOrDefault(unique_unit.icon, "spell_shadow_shadowfiend.blp")
       end
     end
   end
@@ -1029,7 +1041,7 @@ local function MigrateSpelltextPosition(profile_name, profile)
     if DatabaseEntryExists(profile, { "settings", "spelltext", "y" } ) then
       profile.settings.castbar.SpellNameText.VerticalOffset = profile.settings.spelltext.y + 15
       profile.settings.spelltext = profile.settings.spelltext or {}
-      profile.settings.spelltext.vertical = GetValueOrDefault(profile.settings.spelltext.vertical, "CENTER")
+      profile.settings.spelltext.vertical = GetValueOrDefault(profile.settings.spelltext.vertical, "MIDDLE")
     end
 
     DatabaseEntryDelete(profile, { "settings", "spelltext", "x" })
@@ -1255,7 +1267,6 @@ local function MigrateThreatValue(_, profile)
 
   if DatabaseEntryExists(profile, { "threatWidget", "ThreatPercentage" } ) then
     profile.threatWidget.ThreatPercentage.ShowInGroups = GetValueOrDefault(profile.threatWidget.ThreatPercentage.OnlyInGroups, default_profile.threatWidget.ThreatPercentage.OnlyInGroups)
-    print (profile.threatWidget.ThreatPercentage.Show)
     if profile.threatWidget.ThreatPercentage.Show == false then
       profile.threatWidget.ThreatPercentage.ShowAlways = false -- is also the default value
       profile.threatWidget.ThreatPercentage.ShowInGroups = false
@@ -1265,6 +1276,97 @@ local function MigrateThreatValue(_, profile)
 
   DatabaseEntryDelete(profile, { "threatWidget", "ThreatPercentage", "Show" })
   DatabaseEntryDelete(profile, { "threatWidget", "ThreatPercentage", "OnlyInGroups" })
+end
+
+local function MigrateFontFlagsNONE(_, profile)
+  local function MigrateFontFlagsEntry(profile_to_migrate, keys)
+    if DatabaseEntryExists(profile_to_migrate, keys) then
+      for i, key in ipairs(keys) do
+        profile_to_migrate = profile_to_migrate[key]
+      end
+  
+      if profile_to_migrate.flags == "NONE" then
+        profile_to_migrate.flags = ""
+      end
+    end
+  end
+
+  MigrateFontFlagsEntry(profile, { "arenaWidget", "NumberText", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "Debuffs", "ModeIcon", "Duration", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "Debuffs", "ModeIcon", "StackCount", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "Debuffs", "ModeBar", "Label", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "Debuffs", "ModeBar", "Duration", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "Debuffs", "ModeBar", "StackCount", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "Buffs", "ModeIcon", "Duration", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "Buffs", "ModeIcon", "StackCount", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "Buffs", "ModeBar", "Label", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "Buffs", "ModeBar", "Duration", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "Buffs", "ModeBar", "StackCount", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "CrowdControl", "ModeIcon", "Duration", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "CrowdControl", "ModeIcon", "StackCount", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "CrowdControl", "ModeBar", "Label", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "CrowdControl", "ModeBar", "Duration", "Font", })
+  MigrateFontFlagsEntry(profile, { "AuraWidget", "CrowdControl", "ModeBar", "StackCount", "Font", })  
+  MigrateFontFlagsEntry(profile, { "threatWidget", "ThreatPercentage", "Font", })
+  MigrateFontFlagsEntry(profile, { "ComboPoints", "RuneCooldown", "Font", })
+  MigrateFontFlagsEntry(profile, { "ComboPoints", "EssenceCooldown", "Font", })
+  MigrateFontFlagsEntry(profile, { "ExperienceWidget", "RankText", "Font", })
+  MigrateFontFlagsEntry(profile, { "ExperienceWidget", "ExperienceText", "Font", })
+  MigrateFontFlagsEntry(profile, { "BlizzardSettings", "Names", "Font", })
+  MigrateFontFlagsEntry(profile, { "settings", "healthbar", "TargetUnit", "Font", })
+  MigrateFontFlagsEntry(profile, { "settings", "castbar", "CastTarget", "Font", })
+  MigrateFontFlagsEntry(profile, { "settings", "name", })
+  MigrateFontFlagsEntry(profile, { "settings", "level", })
+  MigrateFontFlagsEntry(profile, { "settings", "customtext", })
+  MigrateFontFlagsEntry(profile, { "settings", "spelltext", })
+end
+
+local function MigrateSetJustifyVCENTER(profile_name, profile)
+  local function MigrateVerticalAlignmentEntry(profile_to_migrate, keys)
+    if DatabaseEntryExists(profile_to_migrate, keys) then
+      for i, key in ipairs(keys) do
+        profile_to_migrate = profile_to_migrate[key]
+      end
+      
+      if profile_to_migrate.vertical == "CENTER" then
+        profile_to_migrate.vertical = "MIDDLE"
+      end
+      if profile_to_migrate.VerticalAlignment == "CENTER" then
+        profile_to_migrate.VerticalAlignment = "MIDDLE"
+      end
+    end
+  end
+
+  -- Setting vertical
+  MigrateVerticalAlignmentEntry(profile, { "HeadlineView", "name", })
+  MigrateVerticalAlignmentEntry(profile, { "HeadlineView", "customtext", })
+  MigrateVerticalAlignmentEntry(profile, { "settings", "name", })
+  MigrateVerticalAlignmentEntry(profile, { "settings", "level", })
+  MigrateVerticalAlignmentEntry(profile, { "settings", "customtext", })
+  MigrateVerticalAlignmentEntry(profile, { "settings", "spelltext", })
+  -- Setting VerticalAlignment
+  MigrateVerticalAlignmentEntry(profile, { "arenaWidget", "NumberText", "Font"})
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "Debuffs", "ModeIcon", "Duration", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "Debuffs", "ModeIcon", "StackCount", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "Debuffs", "ModeBar", "Label", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "Debuffs", "ModeBar", "Duration", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "Debuffs", "ModeBar", "StackCount", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "Buffs", "ModeIcon", "Duration", "Font"})
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "Buffs", "ModeIcon", "StackCount", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "Buffs", "ModeBar", "Label", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "Buffs", "ModeBar", "Duration", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "Buffs", "ModeBar", "StackCount", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "CrowdControl", "ModeIcon", "Duration", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "CrowdControl", "ModeIcon", "StackCount", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "CrowdControl", "ModeBar", "Label", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "CrowdControl", "ModeBar", "Duration", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "AuraWidget", "CrowdControl", "ModeBar", "StackCount", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "threatWidget", "ThreatPercentage", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "ExperienceWidget", "RankText", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "ExperienceWidget", "ExperienceText", "Font" })
+  MigrateVerticalAlignmentEntry(profile, { "settings", "healthbar", "TargetUnit", "Font", })
+  MigrateVerticalAlignmentEntry(profile, { "settings", "castbar", "CastTimeText", "Font", })
+  MigrateVerticalAlignmentEntry(profile, { "settings", "castbar", "CastTarget", "Font", })
 end
 
 local TEST_FUNCTIONS = {
@@ -1327,11 +1429,13 @@ local DEPRECATED_SETTINGS = {
   { "CVarsBackup", "nameplateGlobalScale" },  -- Removed in 10.1.8
   { MigrationCustomPlatesV1, NoDefaultProfile = true, "10.2.0"},
   { MigrateCustomStyles, NoDefaultProfile = true, "10.2.0", CleanupDatabase = true },
-  { DisableShowBlizzardAurasForClassic, "10.2.1", Version = (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) },
+  { DisableShowBlizzardAurasForClassic, "10.2.1", Version = Addon.WOW_USES_CLASSIC_NAMEPLATES },
   { MigrateAurasWidgetV2, "10.3.0-beta2", NoDefaultProfile = true , CleanupDatabase = true },
   { "AuraWidget", "scale" },  -- Removed in 10.3.0
   { MigrateFixAurasCyclicAnchoring, "10.3.1", NoDefaultProfile = true, CleanupDatabase = true },
   { MigrateThreatValue, "10.3.6", NoDefaultProfile = true, CleanupDatabase = true },
+  { MigrateFontFlagsNONE, "11.1.25", NoDefaultProfile = true, CleanupDatabase = true },
+  { MigrateSetJustifyVCENTER,  "12.0.4", NoDefaultProfile = true, CleanupDatabase = true },
 }
 
 local function MigrateDatabase(current_version)

@@ -12,7 +12,7 @@ local ipairs = ipairs
 -- ThreatPlates APIs
 local Font = Addon.Font
 local BackdropTemplate = Addon.BackdropTemplate
-local MODE_FOR_STYLE, ANCHOR_POINT_TEXT = Addon.MODE_FOR_STYLE, Addon.ANCHOR_POINT_TEXT
+local MODE_FOR_STYLE, AnchorFrameTo = Addon.MODE_FOR_STYLE, Addon.AnchorFrameTo
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -98,17 +98,9 @@ end
 local function UpdatePositioning(self, unit, db)
   db = db[MODE_FOR_STYLE[unit.style]]
 
-  self:ClearAllPoints()
+  AnchorFrameTo(db, self, self:GetParent())
+  
   self.Background:ClearAllPoints()
-
-  local anchor = db.Anchor or "CENTER"
-  if db.InsideAnchor == false then
-    local anchor_point_text = ANCHOR_POINT_TEXT[anchor]
-    self:SetPoint(anchor_point_text[2], self:GetParent(), anchor_point_text[1], db.HorizontalOffset or 0, db.VerticalOffset or 0)
-  else -- db.InsideAnchor not defined in settings or true
-    self:SetPoint(anchor, self:GetParent(), anchor, db.HorizontalOffset or 0, db.VerticalOffset or 0)
-  end
-
   self.Background:SetPoint("TOPLEFT", self:GetStatusBarTexture(), "TOPRIGHT")
   self.Background:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT")
 end
