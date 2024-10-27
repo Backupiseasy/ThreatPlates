@@ -22,6 +22,9 @@ local GetCVar, GetCVarBool, GetCVarDefault = GetCVar, GetCVarBool, GetCVarDefaul
 local UnitsExists, UnitName = UnitsExists, UnitName
 local GameTooltip = GameTooltip
 local GetSpellInfo = Addon.GetSpellInfo
+local GetAddOnEnableState = (C_AddOns and C_AddOns.GetAddonEnableState)
+    -- classic's GetAddonEnableState and retail's C_AddOns have their parameters swapped
+    or function(name, character) return GetAddOnEnableState(character, name) end
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -2363,6 +2366,7 @@ local function CreateArenaWidgetOptions()
                 order = 30,
                 type = "toggle",
                 arg = {"arenaWidget", "Allies", "UseFrameSort"},
+                hidden = function() return GetAddOnEnableState("FrameSort", UnitName("player")) == 0 end,
               },
               Colors = {
                 name = L["Colors"],
@@ -2501,6 +2505,7 @@ local function CreateArenaWidgetOptions()
                 order = 30,
                 type = "toggle",
                 arg = {"arenaWidget", "UseFrameSort"},
+                hidden = function() return GetAddOnEnableState("FrameSort", UnitName("player")) == 0 end,
               },
               Colors = {
                 name = L["Colors"],
