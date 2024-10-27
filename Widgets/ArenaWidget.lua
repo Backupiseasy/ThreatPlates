@@ -19,7 +19,11 @@ local IsInInstance = IsInInstance
 local IsInBrawl = C_PvP.IsInBrawl
 local UnitIsUnit = UnitIsUnit
 local UnitInParty = UnitInParty
+local UnitName = UnitName
 local MAX_ARENA_ENEMIES = MAX_ARENA_ENEMIES or 5 -- MAX_ARENA_ENEMIES is not defined in Wrath Clasic
+local GetAddOnEnableState = (C_AddOns and C_AddOns.GetAddonEnableState)
+    -- classic's GetAddonEnableState and retail's C_AddOns have their parameters swapped
+    or function(name, character) return GetAddOnEnableState(character, name) end
 
 -- ThreatPlates APIs
 local Font = Addon.Font
@@ -84,10 +88,15 @@ local function GetUnitArenaNumber(guid)
 end
 
 local function GetFrameSortNumber(unitId)
+  if GetAddOnEnableState("FrameSort", UnitName("player")) == 0 then
+    -- framesort not installed
+    return nil
+  end
+
   local fs = FrameSortApi and FrameSortApi.v2
 
   if not fs then
-      -- framesort not installed
+    -- they are using an ancient unsupported version of FrameSort that doesn't have API support
     return nil
   end
 
