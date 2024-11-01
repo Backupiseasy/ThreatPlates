@@ -21,7 +21,7 @@ local UnitIsUnit = UnitIsUnit
 local UnitInParty = UnitInParty
 local UnitName = UnitName
 local MAX_ARENA_ENEMIES = MAX_ARENA_ENEMIES or 5 -- MAX_ARENA_ENEMIES is not defined in Wrath Clasic
-local GetAddOnEnableState = (C_AddOns and C_AddOns.GetAddonEnableState)
+local GetAddOnEnableState = (C_AddOns and C_AddOns.GetAddOnEnableState)
     -- classic's GetAddonEnableState and retail's C_AddOns have their parameters swapped
     or function(name, character) return GetAddOnEnableState(character, name) end
 

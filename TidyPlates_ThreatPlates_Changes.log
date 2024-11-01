@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+12.1.0 (2024-11-01)
+------------------------------------------------------
+* Added FrameSort support for Arena widget (by Verubato) [GH-560].
+
+------------------------------------------------------
 12.0.10 (2024-10-18)
 ------------------------------------------------------
 * Fixed several bugs that caused the target and Combo Points widget on (soft-)target units to disappear when a (soft-)target unit died [GH-528, GH-554, Comment #7442, #7444].

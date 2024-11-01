@@ -22,7 +22,7 @@ local GetCVar, GetCVarBool, GetCVarDefault = GetCVar, GetCVarBool, GetCVarDefaul
 local UnitsExists, UnitName = UnitsExists, UnitName
 local GameTooltip = GameTooltip
 local GetSpellInfo = Addon.GetSpellInfo
-local GetAddOnEnableState = (C_AddOns and C_AddOns.GetAddonEnableState)
+local GetAddOnEnableState = (C_AddOns and C_AddOns.GetAddOnEnableState)
     -- classic's GetAddonEnableState and retail's C_AddOns have their parameters swapped
     or function(name, character) return GetAddOnEnableState(character, name) end
 
