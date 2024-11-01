@@ -327,37 +327,38 @@ local function GetScriptEnvironment(custom_style)
           Style = custom_style,
           Profile = Addon.db.profile
         },
-        API = {
-          Data = {
-            CrowdControlAuras = Addon.Widgets.Widgets.Auras.CROWD_CONTROL_SPELLS,
-            StealthDetectionAuras = Addon.Data.StealthDetectionAuras,
-            StealthDetectionUnits = Addon.Data.StealthDetectionUnits,
-            -- Totems = Addon.Data.Totems
-          },
-          --Init = {
-          --  InitTotemData = Addon.InitializeTotemInformation -- Not sure if this works ...
-          --},
-          Logging = {
-            Info = Addon.Logging.Info,
-            Warning = Addon.Logging.Warning,
-            Error = Addon.Logging.Error,
-            Debug = Addon.Logging.Debug,
-          },
-          Widgets = {
-            CreateStatusBar = Addon.CreateStatusbar,
-            -- CreateText = Addon.CreateText,
-          }
-          --Util = {
-            -- HEX2RGB
-            -- CopyTable
-            -- MergeIntoTable
-            -- ConcatTables
-            -- PrintTable
-          --},
-          --Debug = {}
-          -- LibCustomGlow?
+        Data = {
+          CrowdControlAuras = Addon.Widgets.Widgets.Auras.CROWD_CONTROL_SPELLS,
+          StealthDetectionAuras = Addon.Data.StealthDetectionAuras,
+          StealthDetectionUnits = Addon.Data.StealthDetectionUnits,
+          -- Totems = Addon.Data.Totems
         },
-      }
+        --Init = {
+        --  InitTotemData = Addon.InitializeTotemInformation -- Not sure if this works ...
+        --},
+        Logging = {
+          Info = Addon.Logging.Info,
+          Warning = Addon.Logging.Warning,
+          Error = Addon.Logging.Error,
+          Debug = Addon.Logging.Debug,
+        },
+        Widgets = {
+          CreateStatusBar = Addon.CreateStatusbar,
+          -- CreateText = Addon.CreateText,
+        },
+        --Util = {
+          -- HEX2RGB
+          -- CopyTable
+          -- MergeIntoTable
+          -- ConcatTables
+          -- PrintTable
+        --},
+        --Debug = {}
+        -- LibCustomGlow?
+        v1 = {
+          Icons = Addon.IconTextures,
+        }
+      },
     }
     ScriptEnvironmentByStyle[custom_style] = script_environment
   end

@@ -590,7 +590,8 @@ function Widget:OnUnitAdded(widget_frame, unit)
       widget_frame:SetPoint(db.anchor, widget_frame:GetParent(), db.x, db.y)
     end
   
-    widget_frame.Icon:SetTexture("Interface\\Icons\\Achievement_Guild_DoctorIsIn")
+    -- Selecting the icon here allows to select a unit specific icon, e.g.show a different icons for different healer specs
+    widget_frame.Icon:SetTexture(Addon:GetIconTexture("HealerTracker", unit.unitid))
     
     widget_frame:Show()
   else

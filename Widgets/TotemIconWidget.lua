@@ -18,8 +18,6 @@ local _G =_G
 -- List them here for Mikk's FindGlobals script
 -- GLOBALS: CreateFrame
 
-local PATH = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\"
-
 ---------------------------------------------------------------------------------------------------
 -- Widget functions for creation and update
 ---------------------------------------------------------------------------------------------------
@@ -69,7 +67,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
   -- not used: db[totem_id].ShowIcon
   widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
   widget_frame:SetSize(db.scale, db.scale)
-  widget_frame.Icon:SetTexture(PATH .. totem_settings.Style .. "\\" .. totem_settings.Icon)
+  widget_frame.Icon:SetTexture(Addon:GetIconTexture("Totems", totem_settings.SpellID, unit.unitid))
 
   widget_frame:Show()
 end

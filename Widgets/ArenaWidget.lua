@@ -30,12 +30,10 @@ local _G =_G
 ---------------------------------------------------------------------------------------------------
 -- Constants and local variables
 ---------------------------------------------------------------------------------------------------
-local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ArenaWidget\\"
-local ICON_TEXTURE = PATH .. "BG"
-
 local InArena = false
 local PlayerGUIDToNumber = {}
 --local ArenaID = {}
+local OrbTexture
 
 ---------------------------------------------------------------------------------------------------
 -- Cached configuration settings
@@ -168,7 +166,6 @@ function Widget:Create(tp_frame)
 
   widget_frame.Icon = widget_frame:CreateTexture(nil, "ARTWORK")
   widget_frame.Icon:SetAllPoints(widget_frame)
-  widget_frame.Icon:SetTexture(ICON_TEXTURE)
 
   widget_frame.NumText = widget_frame:CreateFontString(nil, "ARTWORK")
 
@@ -245,7 +242,9 @@ function Widget:UpdateLayout(widget_frame)
   -- Updates based on settings
   widget_frame:SetPoint("CENTER", widget_frame:GetParent(), Settings.x, Settings.y)
   widget_frame:SetSize(Settings.scale, Settings.scale)
-
+  
+  widget_frame.Icon:SetTexture(OrbTexture)
+  
   Font:UpdateText(widget_frame, widget_frame.NumText, Settings.NumberText)
 end
 
@@ -258,6 +257,8 @@ function Widget:UpdateSettings()
   SettingsByTeam.HOSTILE.OrbColors = Settings.colors
   SettingsByTeam.HOSTILE.NumberColors = Settings.numColors
   SettingsByTeam.FRIENDLY = Settings.Allies
+
+  OrbTexture = Addon:GetIconTexture("Arena")
 
   -- If the widget is enabled when in an arena, PLAYER_ENTERING_WORLD was already fired, so we have to update
   -- call it manually

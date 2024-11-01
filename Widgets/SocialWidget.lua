@@ -32,13 +32,7 @@ local C_FriendList_ShowFriends, C_FriendList_GetNumOnlineFriends = C_FriendList.
 local C_FriendList_GetFriendInfo = C_FriendList.GetFriendInfo
 
 -- ThreatPlates APIs
-local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\SocialWidget\\"
-local ICON_FRIEND = PATH .. "friendicon"
-local ICON_GUILDMATE = PATH .. "guildicon"
---local ICON_BNET_FRIEND = "Interface\\FriendsFrame\\PlusManz-BattleNet"
-local ICON_BNET_FRIEND = PATH .. "BattleNetFriend"
-local ICON_FACTION_HORDE = PATH .. "hordeicon" -- "Interface\\ICONS\\inv_bannerpvp_01"
-local ICON_FACTION_ALLIANCE = PATH .. "allianceicon" -- "Interface\\ICONS\\inv_bannerpvp_02",
+local GetIconTexture = Addon.GetIconTexture
 
 local ListGuildMembers = {}
 local ListFriends = {}
@@ -121,7 +115,7 @@ function Widget:FRIENDLIST_UPDATE()
     for i = 1, friendsOnline do
       local name, _ = C_FriendList_GetFriendInfo(i)
       if name then
-        ListFriends[name] = ICON_FRIEND
+        ListFriends[name] = GetIconTexture("Social", "Friend")
         no_friends = no_friends + 1
       end
     end
@@ -144,7 +138,7 @@ function Widget:GUILD_ROSTER_UPDATE()
     for i = 1, numTotalGuildMembers do
       local name, rank, rankIndex, level, classDisplayName, zone, note, officernote, isOnline, _ = GetGuildRosterInfo(i)
       if name then
-        ListGuildMembers[name] = ICON_GUILDMATE
+        ListGuildMembers[name] = GetIconTexture("Social", "GuildMember")
         no_guild_members_with_info = no_guild_members_with_info + 1
       end
     end
@@ -169,7 +163,7 @@ function Widget:BN_CONNECTED()
 
       -- Realm seems to be "" for realms from a different WoW version (Retail/Classic/...)
       if game_account_info.isOnline and game_account_info.clientProgram == BNET_CLIENT_WOW and game_account_info.characterName and game_account_info.realmName ~= "" then
-        ListBnetFriends[GetFullName(game_account_info.characterName, game_account_info.realmName)] = ICON_BNET_FRIEND
+        ListBnetFriends[GetFullName(game_account_info.characterName, game_account_info.realmName)] = GetIconTexture("Social", "BattleNetFriend")
       end
     end
 
@@ -183,7 +177,7 @@ function Widget:BN_FRIEND_ACCOUNT_ONLINE(friend_id, _)
   local game_account_info = GetGameAccountInfoByID(friend_id)
 
   if game_account_info and game_account_info.isOnline and game_account_info.clientProgram == BNET_CLIENT_WOW and game_account_info.characterName and game_account_info.realmName ~= "" then
-    ListBnetFriends[GetFullName(game_account_info.characterName, game_account_info.realmName)] = ICON_BNET_FRIEND
+    ListBnetFriends[GetFullName(game_account_info.characterName, game_account_info.realmName)] = GetIconTexture("Social", "BattleNetFriend")
     self:UpdateAllFramesAndNameplateColor()
   end
 end
@@ -306,9 +300,9 @@ function Widget:UpdateFrame(widget_frame, unit)
     -- faction can be nil, e.g., for Pandarians that not yet have choosen a faction
     local faction = UnitFactionGroup(unit.unitid)
     if faction == "Horde" then
-      faction_texture = ICON_FACTION_HORDE
+      faction_texture = GetIconTexture("Social", "Horde", unit.unitid)
     elseif faction == "Alliance" then
-      faction_texture = ICON_FACTION_ALLIANCE
+      faction_texture = GetIconTexture("Social", "Alliance", unit.unitid)
     end
   end
 
@@ -385,7 +379,7 @@ function Widget:PrintDebug()
     Addon.Logging.Debug("  " .. tostring(i) .. ":", game_account_info.clientProgram, game_account_info.characterName, game_account_info.realmName, game_account_info.isOnline)
     if game_account_info.isOnline and game_account_info.clientProgram == BNET_CLIENT_WOW and game_account_info.characterName then
       Addon.Logging.Debug("    => Add:", GetFullName(game_account_info.characterName, game_account_info.realmName))
-      ListBnetFriends[GetFullName(game_account_info.characterName, game_account_info.realmName)] = ICON_BNET_FRIEND
+      ListBnetFriends[GetFullName(game_account_info.characterName, game_account_info.realmName)] = GetIconTexture("Social", "BattleNetFriend")
     end
   end
 end

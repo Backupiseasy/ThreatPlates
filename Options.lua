@@ -348,6 +348,114 @@ local function AddImportExportOptions(options_profiles)
   }
 end
 
+-------------------------------------------------------------------------------
+-- Icon constants and functions (including API interface to scripts)
+-------------------------------------------------------------------------------
+
+local IconTexturesByOptions = {
+  Arena = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ArenaWidget\\BG",
+  Classes = {},
+  HealerTracker = "Interface\\Icons\\Achievement_Guild_DoctorIsIn",
+  Quest = {
+    Highlight = nil,
+    KillObjective = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\QuestWidget\\kill",
+    LootObjective = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\QuestWidget\\loot",  
+  },
+  Social = {
+    Alliance = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\SocialWidget\\allianceicon",
+    Horde = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\SocialWidget\\hordeicon",
+    Friend = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\SocialWidget\\friendicon",
+    BattleNetFriend = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\SocialWidget\\BattleNetFriend", -- "Interface\\FriendsFrame\\PlusManz-BattleNet"
+    GuildMember = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\SocialWidget\\guildicon"
+  },
+  Stealth = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\StealthWidget\\stealthicon",
+  Totems = {},
+  -- UnitClassification = {
+  --   Rare = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\default",
+  --   Elite = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\default-elite",
+  --   RareElite = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\default-rareelite",
+  --   Boss = "Interface\\TargetingFrame\\UI-TargetingFrame-Skull",
+  -- }
+}
+
+Addon.IconTextures = {}
+setmetatable(Addon.IconTextures, { __index = IconTexturesByOptions })
+
+-- local function GetIconTextureFromBaseEntry(icon_source, ...)
+--   if type(icon_source) == "function" then
+--     -- local call_ok, return_value = pcall(icon_source, ...)
+--     -- if not call_ok then
+--     --   Addon.Logging.Error(string_format(L["Error in event script '%s' of custom style '%s': %s"], event, Addon.CustomPlateGetHeaderName(custom_style), return_value))
+--     -- end
+
+--     -- return return_value
+
+--     return icon_source(...)
+--   end
+
+--   return icon_source
+-- end
+
+-- function Addon:GetIconTexture(icon_id, optional_sub_icon_id, ...)
+--   local icon_source = Addon.IconTextures[icon_id]
+
+--   if type(icon_source) == "table" then
+--     return GetIconTextureFromBaseEntry(icon_source[optional_sub_icon_id], ...)
+--   end
+
+--   return GetIconTextureFromBaseEntry(icon_source, optional_sub_icon_id, ...)
+-- end
+
+function Addon:GetIconTexture(icon_id, optional_sub_icon_id, ...)
+  local icon_source = Addon.IconTextures[icon_id]
+  
+  if type(icon_source) == "table" then
+    return icon_source[optional_sub_icon_id]
+  end
+
+  return icon_source
+end
+
+
+local function UpdateQuestIconTexture(icon_texture, options_path)
+  IconTexturesByOptions.Quest.Highlight = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\QuestWidget\\" .. icon_texture
+  if options_path then
+    options_path.args.Widgets.args.QuestWidget.args.ModeIcon.args.Texture.args.Preview.image = IconTexturesByOptions.Quest.Highlight
+  end
+end
+
+local function UpdateClassIconTextures(class_theme, options_path)
+  local class_list = t.CopyTable(CLASS_SORT_ORDER)
+  sort(class_list)
+  for i, class in ipairs(class_list) do
+    IconTexturesByOptions.Classes[class] = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ClassIconWidget\\" .. class_theme .. "\\" .. class
+    if options_path then
+      options_path.args.Widgets.args.ClassIconWidget.args.Textures.args["Prev" .. i].image = IconTexturesByOptions.Classes[class]
+    end
+  end
+end
+
+local function UpdateTotemIconTexture(totem_style, totem_info, options_path)
+  IconTexturesByOptions.Totems[totem_info.SpellID] = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\" .. totem_style .. "\\" .. totem_info.Icon
+  if options_path then
+    options_path.args.Totems.args[totem_info.Name].args.Textures.args.Icon.image = IconTexturesByOptions.Totems[totem_info.SpellID]
+  end
+end
+
+local function UpdateTotemIconTextures(totem_settings, options_path)
+  for _, totem_info in pairs(Addon.TotemInformation) do
+    UpdateTotemIconTexture(totem_settings[totem_info.ID].Style, totem_info, options_path)
+  end
+end
+
+function Addon:InitializeIconTextures(options_path)
+  local db = self.db.profile
+
+  UpdateQuestIconTexture(db.questWidget.IconTexture, options_path)
+  UpdateClassIconTextures(db.classWidget.theme, options)
+  UpdateTotemIconTextures(db.totemSettings, options)
+end
+
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
@@ -2610,8 +2718,8 @@ end
                 type = "select",
                 order = 10,
                 set = function(info, val)
+                  UpdateQuestIconTexture(val, options)
                   SetValue(info, val)
-                  options.args.Widgets.args.QuestWidget.args.ModeIcon.args.Texture.args.Preview.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\QuestWidget\\" .. db.questWidget.IconTexture;
                 end,
                 values = { QUESTICON = L["Blizzard"], SKULL = L["Skull"] },
                 arg = { "questWidget", "IconTexture" },
@@ -2620,7 +2728,7 @@ end
                 name = L["Preview"],
                 order = 20,
                 type = "execute",
-                image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\QuestWidget\\" .. db.questWidget.IconTexture,
+                image = Addon:GetIconTexture("Quest", "Highlight"),
               },
               PlayerColor = {
                 name = L["Color"],
@@ -3987,10 +4095,9 @@ local function CreateAuraAreaLayoutOptions(pos, widget_info)
       return values
     end,
     set = function(info, val)
-      if val ~= "Healthbar" and db.AuraWidget[val].AnchorTo == widget_info then
+      local call_ok, return_value = pcall(SetValueWidget, info, val)
+      if not call_ok then
         Addon.Logging.Error(L["Cyclic anchoring of aura areas to each other is not possible."], string.format(L["%s already anchored to %s."], val, widget_info))
-      else
-        SetValueWidget(info, val)
       end
     end,
     arg = { "AuraWidget", widget_info, "AnchorTo" }
@@ -8926,8 +9033,9 @@ CreateCustomNameplateEntry = function(index)
                     custom_style.Scripts.Event = nil
                   end
 
-                  Addon:InitializeCustomNameplates()
-                  Addon.Widgets:UpdateSettings("Script")
+                  --Addon:InitializeCustomNameplates()
+                  --Addon.Widgets:UpdateSettings("Script")
+                  UpdateSpecial()
 
                   frame:Hide()
                   Addon.LibAceConfigDialog:Open(t.ADDON_NAME)
@@ -9375,8 +9483,8 @@ local function CreateTotemOptions()
               order = 1,
               width = "full",
               set = function(info, val)
+                UpdateTotemIconTexture(val, totem_info, options)
                 SetValue(info, val)
-                options.args.Totems.args[totem_info.Name].args.Textures.args.Icon.image = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\" .. db.totemSettings[totem_info.ID].Style .. "\\" .. totem_info.Icon;
               end,
               values = { normal = "Normal", special = "Special" },
               arg = { "totemSettings", totem_info.ID, "Style" },
@@ -11066,8 +11174,6 @@ local function CreateOptionsTable()
     }
   end
   
-  local class_list = t.CopyTable(CLASS_SORT_ORDER)
-  sort(class_list)
   local ClassOpts = {
     Style = {
       name = "Style",
@@ -11075,10 +11181,8 @@ local function CreateOptionsTable()
       type = "select",
       width = "full",
       set = function(info, val)
+        UpdateClassIconTextures(val, options)
         SetValue(info, val)
-        for i, class in ipairs(class_list) do
-          options.args.Widgets.args.ClassIconWidget.args.Textures.args["Prev" .. i].image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ClassIconWidget\\" .. db.classWidget.theme .. "\\" .. class
-        end
       end,
       values = { 
         default = L["Default"], 
@@ -11092,6 +11196,8 @@ local function CreateOptionsTable()
       arg = { "classWidget", "theme" },
     },
   };
+  local class_list = t.CopyTable(CLASS_SORT_ORDER)
+  sort(class_list)
   for i, class in ipairs(class_list) do
     ClassOpts["Prev" .. i] = {
       name = class,
@@ -11165,15 +11271,6 @@ function Addon:ProfChange()
 
     local base = options.args.Widgets.args
     base.TargetArtWidget.args.Indicator.args.Texture.args.Preview.image = path .. "TargetArtWidget\\" .. db.targetWidget.theme;
-    local class_list = t.CopyTable(CLASS_SORT_ORDER)
-    sort(class_list)
-    for i, class in ipairs(class_list) do
-      base.ClassIconWidget.args.Textures.args["Prev" .. i].image = path .. "ClassIconWidget\\" .. db.classWidget.theme .. "\\" .. class
-    end
-
-    if Addon.IS_MAINLINE then
-      base.QuestWidget.args.ModeIcon.args.Texture.args.Preview.image = path .. "QuestWidget\\" .. db.questWidget.IconTexture
-    end
 
     local threat_path = path .. "ThreatWidget\\" .. db.threat.art.theme .. "\\"
     base = options.args.ThreatOptions.args.Textures.args.Options.args
@@ -11182,9 +11279,7 @@ function Addon:ProfChange()
     base.PrevMed.image = threat_path .. "MEDIUM"
     base.PrevHigh.image = threat_path .. "LOW"
 
-    for _, totem_info in pairs(Addon.TotemInformation) do
-      options.args.Totems.args[totem_info.Name].args.Textures.args.Icon.image = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\" .. db.totemSettings[totem_info.ID].Style .. "\\" .. totem_info.Icon
-    end
+    Addon:InitializeIconTextures(options_path)
 
     CreateCustomNameplatesGroup()
   end
