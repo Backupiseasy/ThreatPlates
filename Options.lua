@@ -692,7 +692,7 @@ local MAP_OPTION_TO_WIDGET = {
   ArenaWidget = "Arena",
   ExperienceWidget = "Experience",
   ThreatPercentage = "Threat",
-  HealerTrackerWidget = "HealerTracker"  
+  HealerTrackerWidget = "HealerTracker"
 }
 
 local function GetWidgetName(info)
@@ -1022,10 +1022,6 @@ local function GetTransparencyEntryDefault(pos, setting, func_disabled)
   return GetTransparencyEntry(L["Transparency"], pos, setting, func_disabled)
 end
 
-local function GetTransparencyEntryWidget(pos, setting, func_disabled)
-  return GetTransparencyEntry(L["Transparency"], pos, { setting, "alpha" }, func_disabled)
-end
-
 local function GetTransparencyEntryThreat(name, pos, setting, func_disabled)
   return GetTransparencyEntry(name, pos, setting, func_disabled, true)
 end
@@ -1035,6 +1031,10 @@ local function GetTransparencyEntryWidgetNew(pos, setting, func_disabled)
   entry.set = function(info, val) SetValueWidget(info, abs(val - 1)) end
 
   return entry
+end
+
+local function GetTransparencyEntryWidget(pos, setting, func_disabled)
+  return GetTransparencyEntryWidgetNew(pos, { setting, "alpha" }, func_disabled)
 end
 
 local function GetPlacementEntry(name, pos, setting)
