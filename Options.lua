@@ -2366,7 +2366,7 @@ local function CreateArenaWidgetOptions()
                 order = 30,
                 type = "toggle",
                 arg = {"arenaWidget", "Allies", "UseFrameSort"},
-                hidden = function() return GetAddOnEnableState("FrameSort", UnitName("player")) == 0 end,
+                disabled = function() return GetAddOnEnableState("FrameSort", UnitName("player")) == 0 end,
               },
               Colors = {
                 name = L["Colors"],
@@ -2505,7 +2505,7 @@ local function CreateArenaWidgetOptions()
                 order = 30,
                 type = "toggle",
                 arg = {"arenaWidget", "UseFrameSort"},
-                hidden = function() return GetAddOnEnableState("FrameSort", UnitName("player")) == 0 end,
+                disabled = function() return GetAddOnEnableState("FrameSort", UnitName("player")) == 0 end,
               },
               Colors = {
                 name = L["Colors"],
