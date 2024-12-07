@@ -969,11 +969,19 @@ function Widget:Create()
 end
 
 function Widget:OnTargetUnitAdded(tp_frame, unit)
-  local widget_frame = WidgetFrame
+  -- OnTargetUnitAdded and OnTargetUnitRemoved are called for all target units including soft-target units. 
+  -- But this widget only works for target or soft-enemy. So, we need to stop processing for other soft-target units here.
+  if not UnitIsUnit("anyenemy", unit.unitid) or not UnitCanAttack("player", unit.unitid) then return end
+  
+  -- Unit is target or soft-enemy target here:
+  -- Combo points widget can only be shown once, either on the target or on the soft-enemy target. 
+  -- Show the widget if the current target attackable or, if the current target is not attackable, if the
+  -- current soft-enemy is attackable.
+  if unit.IsSoftEnemyTarget and UnitCanAttack("player", "target") then return end
 
-  -- unit.isTarget or unit.IsSoftEnemytarget: should not be necessary here,
-  -- as soft interact (unless enemies) and friend targets cannot be attacked
-  if UnitCanAttack("player", unit.unitid) and self:EnabledForStyle(unit.style, unit) then
+  local widget_frame = WidgetFrame
+  
+  if self:EnabledForStyle(unit.style, unit) then
     widget_frame:SetParent(tp_frame)
     widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 7)
     
@@ -995,8 +1003,13 @@ function Widget:OnTargetUnitAdded(tp_frame, unit)
   end
 end
 
-function Widget:OnTargetUnitRemoved()
+function Widget:OnTargetUnitRemoved(tp_frame, unit)
+  -- OnTargetUnitAdded and OnTargetUnitRemoved are called for all target units including soft-target units. 
+  -- Only hide the widget if the nameplate for the unit is removed that shows the widget
+  if tp_frame ~= WidgetFrame:GetParent() then return end
+  
   WidgetFrame:Hide()
+  WidgetFrame:SetParent(nil)
 end
 
 local function UpdateTexturePosition(texture, resource_index)

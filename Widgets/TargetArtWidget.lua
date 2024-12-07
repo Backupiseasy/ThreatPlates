@@ -251,6 +251,11 @@ local function GetTargetTextureY(db_name, db_statustext)
   end
 end
 
+local function HideWidgetFrame(widget_frame)
+  widget_frame:Hide()
+  widget_frame:SetParent(nil)
+end
+
 ---------------------------------------------------------------------------------------------------
 -- Event handling
 ---------------------------------------------------------------------------------------------------
@@ -300,12 +305,10 @@ local function PlayerTargetChanged(target_unitid)
 
       widget_frame:Show()
     else
-      widget_frame:Hide()
-      widget_frame:SetParent(nil)
+      HideWidgetFrame(widget_frame)
     end
   else
-    widget_frame:Hide()
-    widget_frame:SetParent(nil)
+    HideWidgetFrame(widget_frame)
   end
 end
 
@@ -456,19 +459,26 @@ function Widget:OnTargetUnitAdded(tp_frame, unit)
   elseif unit.IsSoftFriendTarget then    
     PlayerTargetChanged("softfriend")
   else
-    self:OnTargetUnitRemoved()
+    HideWidgetFrame(TargetHighlightFrames.target)
+    HideWidgetFrame(TargetHighlightFrames.softfriend)
+    HideWidgetFrame(TargetHighlightFrames.softenemy)
+    HideWidgetFrame(TargetHighlightFrames.softinteract)
   end
 end
 
-function Widget:OnTargetUnitRemoved()
-  TargetHighlightFrames.target:Hide()
-  TargetHighlightFrames.target:SetParent(nil)
-  TargetHighlightFrames.softfriend:Hide()
-  TargetHighlightFrames.softfriend:SetParent(nil)
-  TargetHighlightFrames.softenemy:Hide()
-  TargetHighlightFrames.softenemy:SetParent(nil)
-  TargetHighlightFrames.softinteract:Hide()
-  TargetHighlightFrames.softinteract:SetParent(nil)
+function Widget:OnTargetUnitRemoved(tp_frame, unit)
+  if unit.isTarget then    
+    HideWidgetFrame(TargetHighlightFrames.target)
+  end
+  if unit.IsSoftInteractTarget then
+    HideWidgetFrame(TargetHighlightFrames.softfriend)
+  end
+  if unit.IsSoftEnemyTarget then        
+    HideWidgetFrame(TargetHighlightFrames.softenemy)
+  end
+  if unit.IsSoftFriendTarget then    
+    HideWidgetFrame(TargetHighlightFrames.softinteract)
+  end
 end
 
 function Widget:UpdateLayout()
@@ -531,8 +541,7 @@ function FocusWidget:PLAYER_FOCUS_CHANGED()
   if tp_frame and tp_frame.Active then
     self:OnFocusUnitAdded(tp_frame, tp_frame.unit)
   else
-    FocusWidgetFrame:Hide()
-    FocusWidgetFrame:SetParent(nil)
+    HideWidgetFrame(FocusWidgetFrame)
   end
 end
 
@@ -626,7 +635,7 @@ function FocusWidget:OnFocusUnitAdded(tp_frame, unit)
 end
 
 function FocusWidget:OnFocusUnitRemoved()
-  FocusWidgetFrame:Hide()
+  HideWidgetFrame(FocusWidgetFrame)
 end
 
 function FocusWidget:UpdateLayout()

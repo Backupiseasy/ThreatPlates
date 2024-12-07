@@ -1,7 +1,33 @@
 ------------------------------------------------------
+12.0.10 (2024-09-14)
+------------------------------------------------------
+* Fixed a bug that caused the target and combo points widget on (soft-)target unit to be hidden when a (soft-)target unit died [GH-528, GH-554].
+* Fixed a bug that caused nameplates to be shown at a lower position when Only Names was enabled.
+* Fixed a Lua error that occurred when defining a custom style with an empty trigger value. 
+* Fixed spell ID for CC Aura Banish (Warlock) in WoW Classic SoD [Comment #7414].
+* Updated integrated libraries (Ace3 Release-r1349).
+
+------------------------------------------------------
+12.0.9 (2024-07-15)
+------------------------------------------------------
+* Fixed list of Shaman totems for TWW - added Totem of Wrath and Stone Bulwark Totem and removed non-existent totems [GH-550].
+* Fixed a bug that prevented totems with a spell rank from being recognised correctly in WoW Classic.
+
+------------------------------------------------------
+12.0.8 (2024-07-15)
+------------------------------------------------------
+* Fixed Lua errors caused by bugfixes for API changes in WoW Mainline Patch 11.0.2 not working in WoW Classic.
+* Fixed a error bug when loading LibDogTag for custom status text due to API changes in Patch 11.0.2 [GH-549].
+
+------------------------------------------------------
+12.0.7 (2024-07-15)
+------------------------------------------------------
+* Fixed a Lua bug with configuration mode for castbars and BossMods widget due to API changes in Patch 11.0.2 [GH-314].
+
+------------------------------------------------------
 12.0.6 (2024-07-14)
 ------------------------------------------------------
-* Fixed a Lua bug in Stealth widget due to API changes in Path 11.0.2 [GH-544].
+* Fixed a Lua bug in Stealth widget due to API changes in Patch 11.0.2 [GH-544].
 
 ------------------------------------------------------
 12.0.5 (2024-07-14)
@@ -13,7 +39,7 @@
 ------------------------------------------------------
 * Fixed a bug that prevented CVars from being reset to their default value in General - Blizzard Settings.
 * Fixed a bug that prevented rogues with Just a Flesh Wund rune from being recognised as tanks in WoW Classic SoD.
-* Fixed some bugs due to API changes in Path 11.0.2. 
+* Fixed some bugs due to API changes in Patch 11.0.2. 
 * Updated TOC version for Patch 11.0.2 for WoW Mainline.
 
 ------------------------------------------------------

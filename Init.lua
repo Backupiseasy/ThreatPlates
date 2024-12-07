@@ -11,6 +11,7 @@ local string, floor = string, floor
 
 -- WoW APIs
 local UnitIsUnit, UnitClass, UnitExists = UnitIsUnit, UnitClass, UnitExists
+local LoadAddOn = C_AddOns and C_AddOns.LoadAddOn or _G.LoadAddOn
 
 -- ThreatPlates APIs
 local UnitDetailedThreatSituation = UnitDetailedThreatSituation

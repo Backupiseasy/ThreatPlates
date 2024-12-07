@@ -332,7 +332,12 @@ function Widget:OnTargetUnitAdded(tp_frame, unit)
 end
 
 function Widget:OnTargetUnitRemoved()
+  -- OnTargetUnitAdded and OnTargetUnitRemoved are called for all target units including soft-target units. 
+  -- Only hide the widget if the nameplate for the unit is removed that shows the widget
+  if tp_frame ~= WidgetFrame:GetParent() then return end
+  
   WidgetFrame:Hide()
+  WidgetFrame:SetParent(nil)
 end
 
 function Widget:UpdateLayout()

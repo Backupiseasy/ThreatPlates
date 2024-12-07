@@ -12,7 +12,7 @@ local string_format = string.format
 
 -- WoW APIs
 local CreateFrame = CreateFrame
-local GetSpellTexture = GetSpellTexture
+local GetSpellTexture = C_Spell and C_Spell.GetSpellTexture or _G.GetSpellTexture -- Retail now uses C_Spell.GetSpellTexture
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local UnitIsUnit = UnitIsUnit
 

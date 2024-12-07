@@ -296,16 +296,11 @@ ThreatPlates.NAME_ABBREVIATION = {
     { SpellID = 192058,  ID = "T2", GroupColor = "b8d1ff", Icon = "spell_nature_brilliance" },	         -- Capacitor Totem
     { SpellID = 192077,  ID = "T3", GroupColor = "b8d1ff", Icon = "ability_shaman_windwalktotem" },		   -- Wind Rush Totem
     { SpellID = 383013,  ID = "T4", GroupColor = "b8d1ff", Icon = "spell_nature_poisoncleansingtotem" }, -- Poison Cleansing Totem
-    { SpellID = 383019,  ID = "T5", GroupColor = "b8d1ff", Icon = "ability_shaman_tranquilmindtotem" },	 -- Tranquil Air Totem
     { SpellID = 5394,	   ID = "T7", GroupColor = "b8d1ff", Icon = "inv_spear_04" },		                   -- Healing Stream Totem
-    { SpellID = 383017,  ID = "T8", GroupColor = "b8d1ff", Icon = "ability_shaman_stoneskintotem" },	   -- Stoneskin Totem
-    { SpellID = 343226,  ID = "T9", GroupColor = "ff8f8f", Icon ="spell_fire_elemental_totem" }, 	       -- Fire Elemental Totem
-    { SpellID = 392915,  ID = "T10", GroupColor = "b8d1ff", Icon = "inv_spear_04" },		                 -- Healing Stream Totem
-    { SpellID = 392916,  ID = "T11", GroupColor = "b8d1ff", Icon = "inv_spear_04" },		                 -- Healing Stream Totem
+    { SpellID = 108270,  ID = "T8", GroupColor = "b8d1ff", Icon = "ability_shaman_stonebulwark" },	     -- Stone Bulwark Totem
     -- Elemental
-    { SpellID = 192222, ID = "E1", GroupColor = "2b76ff", Icon = "spell_shaman_spewlava" }, 	-- Liquid Magma Totem
+    { SpellID = 192222, ID = "E1", GroupColor = "2b76ff", Icon = "spell_shaman_spewlava" }, 	           -- Liquid Magma Totem
     -- Enhancement
-    { SpellID = 8512,   ID = "H1", GroupColor = "ffb31f", Icon = "spell_nature_windfury" },	  -- Windfury Totem
     -- Restoration
     { SpellID = 157153,  ID = "R1", GroupColor = "4c9900", Icon = "ability_shaman_condensationtotem" },		-- Cloudburst Totem
     { SpellID = 108280,  ID = "R4", GroupColor = "4c9900", Icon = "ability_shaman_healingtide" },		      -- Healing Tide Totem
@@ -314,19 +309,24 @@ ThreatPlates.NAME_ABBREVIATION = {
     { SpellID = 98008,   ID = "R5", GroupColor = "4c9900", Icon = "spell_shaman_spiritlink" },	          -- Spirit Link Totem
     { SpellID = 207399,  ID = "R6", GroupColor = "4c9900", Icon = "spell_nature_reincarnation" },		      -- Ancestral Protection Totem
     { SpellID = 16191,   ID = "R7", GroupColor = "4c9900", Icon = "ability_shaman_manatidetotem" },       -- Mana Tide Totem
-    { SpellID = 343182,  ID = "R8", GroupColor = "4c9900", Icon = "ability_shaman_manatidetotem" },       -- Mana Tide Totem
     -- Hero talent totems
-    { SpellID = 444995,  ID = "W1", GroupColor = "ffff00", Icon = "ability_shaman_totemcooldownrefund" }, -- Surging Totem
-    { SpellID = 445034,  ID = "W2", GroupColor = "ffff00", Icon = "spell_fire_searingtotem" },            -- Lively Totems
+    { SpellID = 444995,  ID = "W1", GroupColor = "ffff00", Icon = "inv_ability_totemicshaman_surgingtotem" }, -- Surging Totem
+    { SpellID = 445034,  ID = "W2", GroupColor = "ffff00", Icon = "spell_fire_searingtotem" },             -- Lively Totems
+    { SpellID = 461242, ID = "F1", GroupColor = "ff8f8f", Icon ="spell_fire_searingtotem", }, 	           -- Searing Totem, summmoned by Lively Totems
 
     -- Totems from PVP talents
     { SpellID = 204331, ID = "P1", GroupColor = "8a2be2", Icon = "spell_nature_wrathofair_totem" },	-- Counterstrike Totem
-    { SpellID = 204330, ID = "P2", GroupColor = "8a2be2", Icon = "spell_fire_totemofwrath" },	      -- Skyfury Totem
     { SpellID = 204336, ID = "P4", GroupColor = "8a2be2", Icon = "spell_nature_groundingtotem" },	  -- Grounding Totem
     { SpellID = 355580, ID = "P5", GroupColor = "8a2be2", Icon = "spell_shaman_stormtotem"},	      -- Static Field Totem
+    { SpellID = 460697, ID = "P6", GroupColor = "8a2be2", Icon = "shaman_pvp_skyfurytotem"},	      -- Totem of Wrath
   
     -- Totems from other sources
     { SpellID = 324386, ID = "O1", GroupColor = "00ffff", Icon = "ability_bastion_shaman" },	  -- Vesper Totem (Kyrian Covenant)
+
+    -- Not existent in TWW:
+    -- { SpellID = 383019,  ID = "T5", GroupColor = "b8d1ff", Icon = "ability_shaman_tranquilmindtotem" },	 -- Tranquil Air Totem
+    -- { SpellID = 204330, ID = "P2", GroupColor = "8a2be2", Icon = "spell_fire_totemofwrath" },	      -- Skyfury Totem
+    -- { SpellID = 8512,   ID = "H1", GroupColor = "ffb31f", Icon = "spell_nature_windfury" },	  -- Windfury Totem
   }
 
   local TOTEM_DATA_CATA_CLASSIC = {
@@ -491,7 +491,7 @@ function Addon:InitializeTotemInformation()
       Addon.TOTEMS[name] = totem_data.ID
 
       -- Add totem ranks for WoW Classic
-      if Addon.ExpansionIsAtLeast(LE_EXPANSION_CATACLYSM) then
+      if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
         for rank = 1, (totem_data.Ranks or 1) - 1  do
           Addon.TOTEMS[name .. TOTEM_RANKS_CLASSIC[rank]] = totem_data.ID
         end
