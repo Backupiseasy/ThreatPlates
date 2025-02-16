@@ -22,7 +22,7 @@ local GetTime, tContains = GetTime, tContains
 local UnitCanAttack = UnitCanAttack
 local UnitPower, UnitPowerMax, GetComboPoints, GetRuneCooldown, GetRuneType = UnitPower, UnitPowerMax, GetComboPoints, GetRuneCooldown, GetRuneType
 local GetUnitChargedPowerPoints, GetPowerRegenForPowerType = GetUnitChargedPowerPoints, GetPowerRegenForPowerType
-local GetSpellInfo = Addon.GetSpellInfo
+local GetSpellInfo, IsSpellUsable = Addon.GetSpellInfo, C_Spell and C_Spell.IsSpellUsable
 local GetShapeshiftFormID = GetShapeshiftFormID
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local InCombatLockdown = InCombatLockdown
@@ -317,6 +317,18 @@ end
 ---------------------------------------------------------------------------------------------------
 -- Rogue Combo Points: Anima Charges (Shadowlands)
 ---------------------------------------------------------------------------------------------------
+
+local function UpdateComboPointsFunctionForRogues()
+  -- Check for spell Supercharge: 470398 -- added with 11.0.5
+  -- Check for spell Echoing Reprimand: 323547
+  if IsPlayerSpell(470347) or IsSpellUsable(323547) then
+    Widget.UpdateUnitResource = Widget.UpdateComboPointsRogueWithAnimacharge
+  else
+    Widget.UpdateUnitResource = Widget.UpdateComboPoints
+  end
+
+  Widget.Colors.AnimaCharge = Widget.db.ColorBySpec.ROGUE.Animacharge
+end
 
 function Widget:UpdateComboPointsRogueWithAnimacharge(widget_frame)
   local points = UnitPower("player", self.PowerType) or 0
@@ -790,15 +802,47 @@ local function EventHandlerEvoker(event, unitid, power_type)
   end
 end
 
+local function UpdateWidgetAfterTalentChange()
+  Widget:DetermineUnitPower()
+
+  -- Optimization, not really necessary
+  if not Widget.PowerType then return end
+
+  -- GetSpecialization: Mists - Patch 5.0.4 (2012-08-28): Replaced GetPrimaryTalentTree.
+  if Addon.IS_MAINLINE then
+    ActiveSpec = _G.GetSpecialization()
+  end
+
+  if PlayerClass == "ROGUE" then
+    UpdateComboPointsFunctionForRogues()
+  end
+
+  -- Update the widget if it was already created (not true for immediately after Reload UI or if it was never enabled
+  -- in this since last Reload UI)
+  if Widget.WidgetFrame then
+    Widget:PLAYER_TARGET_CHANGED()
+  end
+end
+
+-- ACTIVE_TALENT_GROUP_CHANGED fires twice, so prevent that InitializeWidget is called twice (does not hurt,
+-- but is not necesary either
+-- For Rogues, the availability of spells is checked, but this information is not available when this event
+-- fires the first time, so in this case the widget is updated every time this event fires
+--
 -- Arguments of ACTIVE_TALENT_GROUP_CHANGED (curr, prev) always seem to be 1, 1
 function Widget:ACTIVE_TALENT_GROUP_CHANGED(...)
-  -- ACTIVE_TALENT_GROUP_CHANGED fires twice, so prevent that InitializeWidget is called twice (does not hurt,
-  -- but is not necesary either
   -- GetSpecialization: Mists - Patch 5.0.4 (2012-08-28): Replaced GetPrimaryTalentTree.
   local current_spec = _G.GetSpecialization()
-  if ActiveSpec ~= current_spec then
+  if ActiveSpec ~= current_spec or PlayerClass == "ROGUE" then
     -- Player switched to a spec that has combo points
     ActiveSpec = current_spec
+    self.WidgetHandler:InitializeWidget("ComboPoints")
+  end
+end
+
+-- This does not fire when the specialization is changed
+function Widget:TRAIT_CONFIG_UPDATED(configID)
+  if PlayerClass == "ROGUE" then
     self.WidgetHandler:InitializeWidget("ComboPoints")
   end
 end
@@ -1233,15 +1277,7 @@ function Widget:UpdateSettings()
     ShowCooldownDuration = SettingsCooldown.Show
     OnUpdateCooldownDuration = OnUpdateWidgetEssence
   elseif PlayerClass == "ROGUE" then
-    -- Check for spell Echoing Reprimand: (IDs) 312954, 323547, 323560, 323558, 323559
-    local name = GetSpellInfo(323560).name -- Get localized name for Echoing Reprimand
-    if name and GetSpellInfo(name) then
-      self.UpdateUnitResource = self.UpdateComboPointsRogueWithAnimacharge
-    else
-      self.UpdateUnitResource = self.UpdateComboPoints
-    end
-
-    self.Colors.AnimaCharge = colors.Animacharge
+    UpdateComboPointsFunctionForRogues()
   else
     self.UpdateUnitResource = self.UpdateComboPoints
   end
