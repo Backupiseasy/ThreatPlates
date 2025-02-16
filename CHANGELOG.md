@@ -1,3 +1,3 @@
 # @project-version@ (@build-time@)
 
-* Updated TOC version for Patch 4.4.1 for Cataclysm Classic.
+* Updated TOC version for Patch 1.15.6 for WoW Classic.
