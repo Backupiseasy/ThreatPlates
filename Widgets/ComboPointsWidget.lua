@@ -319,6 +319,8 @@ end
 ---------------------------------------------------------------------------------------------------
 
 local function UpdateComboPointsFunctionForRogues()
+  if PlayerClass ~= "ROGUE" then return end
+
   -- Check for spell Supercharge: 470398 -- added with 11.0.5
   -- Check for spell Echoing Reprimand: 323547
   if IsPlayerSpell(470347) or IsSpellUsable(323547) then
@@ -811,9 +813,6 @@ local function UpdateWidgetAfterTalentChange()
   -- GetSpecialization: Mists - Patch 5.0.4 (2012-08-28): Replaced GetPrimaryTalentTree.
   if Addon.IS_MAINLINE then
     ActiveSpec = _G.GetSpecialization()
-  end
-
-  if PlayerClass == "ROGUE" then
     UpdateComboPointsFunctionForRogues()
   end
 
@@ -913,6 +912,8 @@ function Widget:PLAYER_ENTERING_WORLD()
   -- From KuiNameplates: Update icons after zoning to workaround UnitPowerMax returning 0 when
   -- zoning into/out of instanced PVP, also in timewalking dungeons
   self:DetermineUnitPower()
+  UpdateComboPointsFunctionForRogues()
+
   self:UpdateLayout()
 end
 
