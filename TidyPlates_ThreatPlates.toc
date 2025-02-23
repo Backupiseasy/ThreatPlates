@@ -3,7 +3,7 @@
 ## Interface-Vanilla: 11506
 ## Interface-TBC: 20504
 ## Interface-Wrath: 30402
-## Interface-Cata: 40401
+## Interface-Cata: 40402
 
 ## Title: Threat Plates
 ## Version: @project-version@
