@@ -944,6 +944,7 @@ function Widget:IsEnabled()
     -- Register ACTIVE_TALENT_GROUP_CHANGED here otherwise it won't be registered when an spec is active that does not have combo points.
     -- If you then switch to a spec with talent points, the widget won't be enabled.
     self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
+    self:RegisterEvent("TRAIT_CONFIG_UPDATED")    
   end
 
   self:DetermineUnitPower()
