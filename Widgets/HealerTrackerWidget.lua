@@ -12,11 +12,13 @@ local Widget = Addon.Widgets:NewWidget("HealerTracker")
 -- Lua APIs
 
 -- WoW APIs
-local IsInInstance = IsInInstance
+local IsInInstance, InCombatLockdown = IsInInstance, InCombatLockdown
+local UnitIsPVP, UnitIsPVPSanctuary = UnitIsPVP, UnitIsPVPSanctuary
 local GetUnitName = GetUnitName
 local RequestBattlefieldScoreData, GetNumBattlefieldScores, GetBattlefieldScore = RequestBattlefieldScoreData, GetNumBattlefieldScores, GetBattlefieldScore
 local CombatLogGetCurrentEventInfo = CombatLogGetCurrentEventInfo
 local NotifyInspect, CanInspect, ClearInspectPlayer, GetInspectSpecialization = NotifyInspect, CanInspect, ClearInspectPlayer, GetInspectSpecialization
+local C_Timer_After = C_Timer.After
 
 -- ThreatPlates APIs
 local PlatesByGUID = Addon.PlatesByGUID
@@ -411,9 +413,11 @@ end
 ---------------------------------------------------------------------------------------------------
 -- Variables
 ---------------------------------------------------------------------------------------------------
-local HealerByName = {}
-local HealerByGUID = {}
---local IsBattleground
+local UnitIsHealer = {}
+local UnitGUIDByName = {}
+local PlayerIsInBattleground = false
+local CheckPvPStateIsEnabled = false
+local CombatLogParsingIsEnabled = false
 local BattlefieldScoreDataRequestPending = false
 local DebugHealerInfoSource = {}
 
@@ -421,9 +425,7 @@ local DebugHealerInfoSource = {}
 -- Functions
 ---------------------------------------------------------------------------------------------------
 
-local function RegisterHealerByGUID(unit_guid, unit_is_healer)
-  HealerByGUID[unit_guid] = unit_is_healer
-
+local function UpdateNameplateByGUID(unit_guid)
   local plate = PlatesByGUID[unit_guid]
   if plate and plate.TPFrame.Active then
     local widget_frame = plate.TPFrame.widgets[Widget.Name]
@@ -441,10 +443,14 @@ function Widget:UPDATE_BATTLEFIELD_SCORE()
   --look at the scoreboard and assign healers from there
   for i = 1, GetNumBattlefieldScores() do
     local name, _, _, _, _, _, _, _, _, _, _, _, _, _, _, talentSpec = GetBattlefieldScore(i)
-    
-    --HealerByName[name] = HEALER_SPECS[talentSpec] ~= nil
-    if HealerByName[name] == nil then
-      HealerByName[name] = HEALER_SPECS[talentSpec] ~= nil
+    if UnitIsHealer[name] == nil then
+      local is_healer_spec = HEALER_SPECS[talentSpec]
+      UnitIsHealer[name] = (is_healer_spec and "HEALER") or "DPS"
+
+      local unit_guid = UnitGUIDByName[unit_name]
+      if unit_guid and is_healer_spec then
+        UpdateNameplateByGUID(unit_guid)
+      end
     end
   end
 
@@ -467,37 +473,79 @@ end
 --   ClearInspectPlayer()
 -- end
 
---triggered when enter and leave instances
-function Widget:PLAYER_ENTERING_WORLD()
-  HealerByName = {}
-  HealerByGUID = {}
+-- Combat log parsing for spells is enabled 
+--   in battlegrounds (but not in other instances) or
+--   in world PvP, i.e, the player has PvP enabled
+-- For efficiency reasons, combat log parsing will be disabled in 
+--   sanctuaries
+--   when leaving combat with a delay of 5 min
+function Widget:COMBAT_LOG_EVENT_UNFILTERED(...)
+  local _, combatevent, _, sourceGUID, _, _, _, _, _, _, _, spellid = CombatLogGetCurrentEventInfo()
+  if sourceGUID and SPELL_EVENTS[combatevent] and not UnitIsHealer[sourceGUID] and HEALER_SPELLS[spellid] then
+    UnitIsHealer[sourceGUID] = "HEALER"
 
-  -- local _, instance_type = IsInInstance()
-  -- if instance_type == "pvp" then
-  --   --IsBattleground = true
-    
-  --   self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-  --   -- if Addon.IS_MAINLINE then
-  --   --   self:RegisterEvent("INSPECT_READY")
-  --   -- end
-  -- else
-  --   --IsBattleground = false
-    
-  --   self:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-  --   -- if Addon.IS_MAINLINE then
-  --   --   self:UnregisterEvent("INSPECT_READY")
-  --   -- end
-  -- end
+    UpdateNameplateByGUID(sourceGUID)
+
+    --local _, combatevent, _, sourceGUID, sourceName, _, _, _, _, _, _, spellid = CombatLogGetCurrentEventInfo()
+    --DebugHealerInfoSource[sourceGUID] = { Name = sourceName, Source = "COMBATLOG"}
+  end
 end
 
-function Widget:COMBAT_LOG_EVENT_UNFILTERED(...)
-  local _, combatevent, _, sourceGUID, sourceName, _, _, _, _, _, _, spellid = CombatLogGetCurrentEventInfo()
-  --local _, combatevent, _, sourceGUID, _, _, _, _, _, _, _, spellid = CombatLogGetCurrentEventInfo()
+function Widget:PLAYER_ENTERING_WORLD()
+  UnitIsHealer = {}
 
-  if sourceGUID and SPELL_EVENTS[combatevent] and not HealerByGUID[sourceGUID] and HEALER_SPELLS[spellid] then
-    RegisterHealerByGUID(sourceGUID, true)
+  local in_instance, instance_type = IsInInstance()
+  PlayerIsInBattleground = (instance_type == "pvp")
+  PlayerIsInWorldPvPArea = (instance_type == "none")
 
-    --DebugHealerInfoSource[sourceGUID] = { Name = sourceName, Source = "COMBATLOG"}
+  if PlayerIsInBattleground then
+    self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+  else
+    self:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+  end
+end
+
+-- PLAYER_REGEN_* is only enabled when PvP is enabled for the player
+function Widget:PLAYER_REGEN_DISABLED()
+  -- Enable/disable combat log parsing for spell detection when entering combat only
+  -- in world PvP.
+  if CombatLogParsingIsEnabled or not PlayerIsInWorldPvPArea or UnitIsPVPSanctuary("player") then return end
+
+  Widget:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+  CombatLogParsingIsEnabled = true
+end
+
+local function DisableCombatLogParsing()
+  Widget:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+  CombatLogParsingIsEnabled = false
+end
+
+function Widget:PLAYER_REGEN_ENABLED()
+  if not CombatLogParsingIsEnabled then return end
+
+  C_Timer_After(360, function()
+    if not InCombatLockdown() then
+      DisableCombatLogParsing()
+    end
+  end)
+end
+
+function Widget:PLAYER_FLAGS_CHANGED(unitid)
+  -- This function is only registered for the player unit, so no need to check
+  -- unitid here
+  if UnitIsPVP("player") then
+    if not CheckPvPStateIsEnabled then
+      self:RegisterEvent("PLAYER_REGEN_ENABLED")
+      self:RegisterEvent("PLAYER_REGEN_DISABLED")
+      CheckPvPStateIsEnabled = true
+    end
+  else
+    if CheckPvPStateIsEnabled then
+      self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+      self:UnregisterEvent("PLAYER_REGEN_DISABLED")
+      DisableCombatLogParsing()
+      CheckPvPStateIsEnabled = false
+    end
   end
 end
 
@@ -510,13 +558,11 @@ function Widget:Create(tp_frame)
   local frame = _G.CreateFrame("Frame", nil, tp_frame)
   frame:Hide()
 
-  -- Custom Code III
-  --------------------------------------
   frame:SetFrameLevel(tp_frame:GetFrameLevel() + 7)
   frame.Icon = frame:CreateTexture(nil, "OVERLAY")
   frame.Icon:SetAllPoints(frame)
-  --------------------------------------
-  -- End Custom Code
+
+  self:UpdateLayout(frame)
 
   return frame
 end
@@ -527,20 +573,22 @@ function Widget:IsEnabled()
 end
 
 function Widget:OnEnable()
+  self:RegisterEvent("PLAYER_ENTERING_WORLD")
+  self:RegisterUnitEvent("PLAYER_FLAGS_CHANGED", "player")
+
   -- We could register/unregister this when entering/leaving the battlefield, but as it only fires when
   -- in a bg, that does not really matter
-  self:RegisterEvent("PLAYER_ENTERING_WORLD")
-  self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+  -- We don't need to register this for Classic, as GetBattlefieldScore does not return talentSpec information
   if Addon.IS_MAINLINE then
-    -- We don't need to register this for Classic, as GetBattlefieldScore does not return talentSpec information
     self:RegisterEvent("UPDATE_BATTLEFIELD_SCORE")
   end
+
+  -- It seems that PLAYER_FLAGS_CHANGED does not fire when loggin in/reloading the UI, so we need to call it
+  -- directly here to initialize combat log parsing.
+  self:PLAYER_FLAGS_CHANGED("player")
 end
 
 function Widget:EnabledForStyle(style, unit)
-  -- Deathknights can be picked up as 'healers' thanks to Dark Simulacrum, so just ignore them.
-  if unit.type ~= "PLAYER" or not HEALER_CLASSES[unit.class] then return false end
-
   if (style == "NameOnly" or style == "NameOnly-Unique") then
     return Addon.db.profile.healerTracker.ShowInHeadlineView
   elseif style ~= "etotem" then
@@ -548,58 +596,74 @@ function Widget:EnabledForStyle(style, unit)
   end
 end
 
-function Widget:OnUnitAdded(widget_frame, unit)
-  -- if not IsBattleground then
-  --   widget_frame:Hide()
-  --   return
-  -- end
-
-  -- HealerByGUID or HealerByName
-  --    true:  Healer
-  --    false: No healer
-  --    nil:   Not yet checked
-  local unit_is_healer = HealerByGUID[unit.guid]
-  if unit_is_healer == nil then
-    -- Healer identified via scoreboard?
-    unit_is_healer = HealerByName[GetUnitName(unit.unitid, true)]
-    if unit_is_healer == nil then
-      -- if CanInspect(unit.unitid) then
-      --   NotifyInspect(unit.unitid)    
-      -- end
-
-      if not BattlefieldScoreDataRequestPending then 
-        BattlefieldScoreDataRequestPending = true
-        RequestBattlefieldScoreData()
+local PlayerRoleIsHealer
+  
+if Addon.IS_MAINLINE then
+  PlayerRoleIsHealer = function(unit)
+    local is_healer
+  
+    if PlayerIsInBattleground then
+      local unit_name = GetUnitName(unit.unitid, true)
+      is_healer = UnitIsHealer[unit_name]
+  
+      if not is_healer then
+        -- Healer is not yet known from battlefield score board, so store it's guid so that we later, when the
+        -- healer is found in the battlefield score board, the healer's namemplate can be updated
+        UnitGUIDByName[unit_name] = unit.guid
+  
+        if not BattlefieldScoreDataRequestPending then 
+          BattlefieldScoreDataRequestPending = true
+          RequestBattlefieldScoreData()
+        end
       end
-    else
-      HealerByGUID[unit.guid] = unit_is_healer
-      
-      --DebugHealerInfoSource[unit.guid] = { Name = unit.name, Source = "SCOREBOARD"}
     end
+  
+    is_healer = is_healer or UnitIsHealer[unit.guid]
+
+    return is_healer == "HEALER"
+  end  
+else
+  PlayerRoleIsHealer = function(unit)
+    return UnitIsHealer[unit.guid] == "HEALER"
   end
+end
 
-  if unit_is_healer then
+function Widget:OnUnitAdded(widget_frame, unit)
+  -- Deathknights can be picked up as 'healers' thanks to Dark Simulacrum, so just ignore them.
+  if unit.type ~= "PLAYER" or not HEALER_CLASSES[unit.class] then return end
+
+  -- Don't check for UnitIsPvP or UnitIsPVPSanctuary here as this widget is not updated when PvP status changes
+  -- or the player enters a sanctuary. 
+  if not PlayerIsInBattleground and not PlayerIsInWorldPvPArea then return end
+
+  --DebugHealerInfoSource[unit.guid] = { Name = GetUnitName(unit.unitid, true), Source = GetUnitName(unit.unitid, true) and "SCOREBOARD" or "SPELL"}
+  if PlayerRoleIsHealer(unit) then
     local db = Addon.db.profile.healerTracker
-
-    widget_frame:SetSize(db.scale, db.scale)
-    widget_frame:SetAlpha(db.alpha)
-
     if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
       widget_frame:SetPoint(db.anchor, widget_frame:GetParent(), db.x_hv, db.y_hv)
     else
       widget_frame:SetPoint(db.anchor, widget_frame:GetParent(), db.x, db.y)
     end
   
-    widget_frame.Icon:SetTexture("Interface\\Icons\\Achievement_Guild_DoctorIsIn")
-    
     widget_frame:Show()
   else
     widget_frame:Hide()
   end
 end
 
+function Widget:UpdateLayout(widget_frame)
+  local db = Addon.db.profile.healerTracker
+
+  widget_frame:SetSize(db.scale, db.scale)
+  widget_frame:SetAlpha(db.alpha)
+
+  widget_frame.Icon:SetTexture("Interface\\Icons\\Achievement_Guild_DoctorIsIn")
+end
+
 function Widget:PrintDebug()
   Addon.Logging.Debug(Widget.Name .. ":")
+  Addon.Logging.Debug("    World PvP:", PlayerIsInWorldPvPArea and UnitIsPVP("player") and not UnitIsPVPSanctuary("player"))
+  Addon.Logging.Debug("    Combatlog Partsing enabled:", CombatLogParsingIsEnabled)
   for guid, info in pairs(DebugHealerInfoSource) do
     Addon.Logging.Debug("    ", info.Name, "(", guid, ")", "=>", info.Source)
   end

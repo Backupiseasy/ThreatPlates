@@ -691,7 +691,8 @@ local MAP_OPTION_TO_WIDGET = {
   FocusWidget = "Focus",
   ArenaWidget = "Arena",
   ExperienceWidget = "Experience",
-  ThreatPercentage = "Threat"
+  ThreatPercentage = "Threat",
+  HealerTrackerWidget = "HealerTracker"  
 }
 
 local function GetWidgetName(info)
@@ -2667,6 +2668,7 @@ local function CreateHealerTrackerWidgetOptions()
     name = L["Healer Tracker"],
     order = 60,
     type = "group",
+    set = SetValueWidget,
     args = {
       Enable = GetEnableEntry(L["Enable Healer Tracker Widget"], L["This widget shows players that are healers."], "healerTracker", true, function(info, val) SetValuePlain(info, val); Addon.Widgets:InitializeWidget("HealerTracker") end),
       Layout = {
