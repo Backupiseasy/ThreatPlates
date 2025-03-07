@@ -1,4 +1,38 @@
 ﻿------------------------------------------------------
+12.1.0 (2025-03-07)
+------------------------------------------------------
+* Fixed a bug that caused widgets to not update when transparency settings were changed.
+* Improved performance of Healer Tracker widget by limiting combat log parsing for spell detection to battlegrounds and world PvP (during combat only).
+* Added FrameSort support to the Arena widget [PR GH-560].
+
+------------------------------------------------------
+12.0.16 (2025-02-26)
+------------------------------------------------------
+* Updated TOC version for Patch 11.1.0 for WoW Mainline.
+
+------------------------------------------------------
+12.0.15 (2025-02-23)
+------------------------------------------------------
+* Fixed a bug that caused supercharged combo points to not be displayed in the Combo Points widget [GH-567].
+* Updated TOC version for Patch 4.4.2 for WoW Cataclysm Classic.
+
+------------------------------------------------------
+12.0.14 (2025-02-16)
+------------------------------------------------------
+* Updated TOC version for Patch 1.15.6 for WoW Classic.
+
+------------------------------------------------------
+12.0.13 (2024-12-20)
+------------------------------------------------------
+* Updated TOC version for Patch 11.0.7 for WoW Mainline and Path 1.15.5 for WoW Classic.
+* Updated integrated libraries (LibDualSpec-1.0 v1.0.4-3-gc60c916-alpha).
+
+------------------------------------------------------
+12.0.12 (2024-11-01)
+------------------------------------------------------
+* Updated TOC version for Patch 4.4.1 for Cataclysm Classic.
+
+------------------------------------------------------
 12.0.11 (2024-10-23)
 ------------------------------------------------------
 * Updated TOC version for Patch 11.0.5 for WoW Mainline.

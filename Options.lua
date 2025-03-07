@@ -22,6 +22,9 @@ local GetCVar, GetCVarBool, GetCVarDefault = GetCVar, GetCVarBool, GetCVarDefaul
 local UnitsExists, UnitName = UnitsExists, UnitName
 local GameTooltip = GameTooltip
 local GetSpellInfo = Addon.GetSpellInfo
+local GetAddOnEnableState = (C_AddOns and C_AddOns.GetAddOnEnableState)
+    -- classic's GetAddonEnableState and retail's C_AddOns have their parameters swapped
+    or function(name, character) return GetAddOnEnableState(character, name) end
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -691,7 +694,8 @@ local MAP_OPTION_TO_WIDGET = {
   FocusWidget = "Focus",
   ArenaWidget = "Arena",
   ExperienceWidget = "Experience",
-  ThreatPercentage = "Threat"
+  ThreatPercentage = "Threat",
+  HealerTrackerWidget = "HealerTracker"
 }
 
 local function GetWidgetName(info)
@@ -1021,10 +1025,6 @@ local function GetTransparencyEntryDefault(pos, setting, func_disabled)
   return GetTransparencyEntry(L["Transparency"], pos, setting, func_disabled)
 end
 
-local function GetTransparencyEntryWidget(pos, setting, func_disabled)
-  return GetTransparencyEntry(L["Transparency"], pos, { setting, "alpha" }, func_disabled)
-end
-
 local function GetTransparencyEntryThreat(name, pos, setting, func_disabled)
   return GetTransparencyEntry(name, pos, setting, func_disabled, true)
 end
@@ -1034,6 +1034,10 @@ local function GetTransparencyEntryWidgetNew(pos, setting, func_disabled)
   entry.set = function(info, val) SetValueWidget(info, abs(val - 1)) end
 
   return entry
+end
+
+local function GetTransparencyEntryWidget(pos, setting, func_disabled)
+  return GetTransparencyEntryWidgetNew(pos, { setting, "alpha" }, func_disabled)
 end
 
 local function GetPlacementEntry(name, pos, setting)
@@ -2358,6 +2362,13 @@ local function CreateArenaWidgetOptions()
                 type = "toggle",
                 arg = {"arenaWidget", "Allies", "HideName"},
               },
+              UseFrameSort = {
+                name = L["Use FrameSort"],
+                order = 30,
+                type = "toggle",
+                arg = {"arenaWidget", "Allies", "UseFrameSort"},
+                disabled = function() return GetAddOnEnableState("FrameSort", UnitName("player")) == 0 end,
+              },
               Colors = {
                 name = L["Colors"],
                 type = "group",
@@ -2489,6 +2500,13 @@ local function CreateArenaWidgetOptions()
                 order = 20,
                 type = "toggle",
                 arg = {"arenaWidget", "HideName"},
+              },
+              UseFrameSort = {
+                name = L["Use FrameSort"],
+                order = 30,
+                type = "toggle",
+                arg = {"arenaWidget", "UseFrameSort"},
+                disabled = function() return GetAddOnEnableState("FrameSort", UnitName("player")) == 0 end,
               },
               Colors = {
                 name = L["Colors"],
@@ -2667,6 +2685,7 @@ local function CreateHealerTrackerWidgetOptions()
     name = L["Healer Tracker"],
     order = 60,
     type = "group",
+    set = SetValueWidget,
     args = {
       Enable = GetEnableEntry(L["Enable Healer Tracker Widget"], L["This widget shows players that are healers."], "healerTracker", true, function(info, val) SetValuePlain(info, val); Addon.Widgets:InitializeWidget("HealerTracker") end),
       Layout = {
