@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+12.2.0 (2025-03-07)
+------------------------------------------------------
+* Added metadata to show Threat Plates in "Unit Frames" addon category.
+
+------------------------------------------------------
 12.1.0 (2025-03-07)
 ------------------------------------------------------
 * Fixed a bug that caused widgets to not update when transparency settings were changed.
