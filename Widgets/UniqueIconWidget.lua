@@ -195,9 +195,7 @@ end
 
 function Widget:UpdateLayout(widget_frame)
   -- As there can be several custom styles with different glow effects be active on a unit, we have to stop all here
-  Addon.LibCustomGlow["ButtonGlow_Stop"](widget_frame.Highlight)
-  Addon.LibCustomGlow["PixelGlow_Stop"](widget_frame.Highlight)
-  Addon.LibCustomGlow["AutoCastGlow_Stop"](widget_frame.Highlight)
+  CUSTOM_GLOW_WRAPPER_FUNCTIONS.Glow_Stop(widget_frame.Highlight)
 
   -- Update the style as custom nameplates might have been changed and some units no longer
   -- may be unique

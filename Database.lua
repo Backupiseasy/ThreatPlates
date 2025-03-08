@@ -1369,6 +1369,25 @@ local function MigrateSetJustifyVCENTER(profile_name, profile)
   MigrateVerticalAlignmentEntry(profile, { "settings", "castbar", "CastTarget", "Font", })
 end
 
+local function MigrateAnchorsForWidgets(profile_name, profile)
+  if DatabaseEntryExists(profile, { "BossModsWidget" }) then
+    local default_profile = ThreatPlates.DEFAULT_SETTINGS.profile
+
+    profile.BossModsWidget.HealthbarMode = profile.BossModsWidget.HealthbarMode or {}
+    profile.BossModsWidget.NameMode = profile.BossModsWidget.NameMode or {}
+
+    profile.BossModsWidget.HealthbarMode.HorizontalOffset = GetValueOrDefault(profile.BossModsWidget.x, default_profile.BossModsWidget.HealthbarMode.HorizontalOffset)
+    profile.BossModsWidget.HealthbarMode.VerticalOffset = GetValueOrDefault(profile.BossModsWidget.y, default_profile.BossModsWidget.HealthbarMode.VerticalOffset)
+    profile.BossModsWidget.NameMode.HorizontalOffset = GetValueOrDefault(profile.BossModsWidget.x_hv, default_profile.BossModsWidget.NameMode.HorizontalOffset)
+    profile.BossModsWidget.NameMode.VerticalOffset = GetValueOrDefault(profile.BossModsWidget.y_hv, default_profile.BossModsWidget.NameMode.VerticalOffset)
+
+    DatabaseEntryDelete(profile, { "BossModsWidget", "x" })
+    DatabaseEntryDelete(profile, { "BossModsWidget", "y" })
+    DatabaseEntryDelete(profile, { "BossModsWidget", "x_hv" })
+    DatabaseEntryDelete(profile, { "BossModsWidget", "y_hv" })
+  end
+end
+
 local TEST_FUNCTIONS = {
   MigrateFixAurasCyclicAnchoring = MigrateFixAurasCyclicAnchoring
 }
@@ -1435,7 +1454,8 @@ local DEPRECATED_SETTINGS = {
   { MigrateFixAurasCyclicAnchoring, "10.3.1", NoDefaultProfile = true, CleanupDatabase = true },
   { MigrateThreatValue, "10.3.6", NoDefaultProfile = true, CleanupDatabase = true },
   { MigrateFontFlagsNONE, "11.1.25", NoDefaultProfile = true, CleanupDatabase = true },
-  { MigrateSetJustifyVCENTER,  "12.0.4", NoDefaultProfile = true, CleanupDatabase = true },
+  { MigrateSetJustifyVCENTER, "12.0.4", NoDefaultProfile = true, CleanupDatabase = true },
+  { MigrateAnchorsForWidgets, "12.2.0", NoDefaultProfile = true, CleanupDatabase = true },
 }
 
 local function MigrateDatabase(current_version)
@@ -1446,7 +1466,6 @@ local function MigrateDatabase(current_version)
   local profile_table = Addon.db.profiles
   for index, entry in ipairs(DEPRECATED_SETTINGS) do
     local action = entry[1]
-
     if type(action) == "function" then
       if entry.Version == nil or entry.Version == true then
         local max_version = entry[2]

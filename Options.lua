@@ -695,7 +695,8 @@ local MAP_OPTION_TO_WIDGET = {
   ArenaWidget = "Arena",
   ExperienceWidget = "Experience",
   ThreatPercentage = "Threat",
-  HealerTrackerWidget = "HealerTracker"
+  HealerTrackerWidget = "HealerTracker",
+  BossModsWidget = "BossMods"
 }
 
 local function GetWidgetName(info)
@@ -3876,19 +3877,132 @@ local function CreateBossModsWidgetOptions()
   local entry = {
     name = L["Boss Mods"],
     type = "group",
+    childGroups = "tab",
     order = 30,
+    set = SetValueWidget,
     args = {
       Enable = GetEnableEntry(L["Enable Boss Mods Widget"], L["This widget shows auras from boss mods on your nameplates (since patch 7.2, hostile nameplates only in instances and raids)."], "BossModsWidget", true, function(info, val) SetValuePlain(info, val); Addon.Widgets:InitializeWidget("BossMods") end),
-      Aura = {
-        name = L["Aura Icon"],
+      Appearance = {
+        name = L["Appearance"],
         type = "group",
         order = 10,
-        inline = true,
+        inline = false,
         args = {
+          Enable = {
+            name = L["Enable"],
+            type = "group",
+            order = 10,
+            inline = true,
+            args = {          
+              ShowNameplateAuras = {
+                type = "toggle",
+                order = 10,
+                name = L["Auras"],
+                arg = { "BossModsWidget",  "ShowAuras" }
+              },
+              ShowTimers = {
+                type = "toggle",
+                order = 20,
+                name = L["Timers"],
+                arg = { "BossModsWidget",  "ShowTimers" }
+              },
+            },            
+          },
+          Glow = {
+            name = L["Highlight for Expiring Icons"],
+            type = "group",
+            order = 15,
+            inline = true,
+            args = {
+              Priority = {
+                name = L["Priority"],
+                type = "select",
+                order = 10,
+                values = {
+                  None = L["None"],
+                  Important = L["Important"],
+                  All = L["All"],
+                },
+                desc = L["Only highlight expiring alerts with the selected priority."],
+                arg = { "BossModsWidget",  "Glow", "Priority" },
+              },
+              GlowType = {
+                name = L["Glow Type"],
+                type = "select",
+                values = Addon.GLOW_TYPES,
+                order = 20,
+                arg = { "BossModsWidget",  "Glow", "Type" },
+              },
+              GlowColorEnable = {
+                name = L["Glow Color"],
+                type = "toggle",
+                order = 30,
+                arg = { "BossModsWidget", "Glow", "CustomColor" },
+              },
+              GlowColor = {
+                name = L["Color"],
+                type = "color",
+                order = 40,
+                hasAlpha = true,
+                set = function(info, r, g, b, a)
+                  local color = db.BossModsWidget.Glow.Color
+                  color[1], color[2], color[3], color[4] = r, g, b, a
+                  Addon.Widgets:UpdateSettings("BossMods")
+                end,
+                get = function(info)
+                  local color = db.BossModsWidget.Glow.Color
+                  return unpack(color)
+                end,
+                arg = { "BossModsWidget", "Glow", "Color" },
+              },
+            }
+          },
+          Config = {
+            name = L["Configuration Mode"],
+            order = 30,
+            type = "group",
+            inline = true,
+            args = {
+              Toggle = {
+                name = L["Toggle on Target"],
+                type = "execute",
+                order = 1,
+                width = "full",
+                func = function() Addon:ConfigBossModsWidget() end,
+              },
+            },
+          },  
+        },
+      },
+      Layout ={
+        name = L["Layout"],
+        type = "group",
+        order = 15,
+        inline = false,
+        args = {
+          Positioning = GetFramePositioningEntry(20, { "BossModsWidget" }),
+        }
+      },
+      Aura = {
+        name = L["Icon"],
+        type = "group",
+        order = 20,
+        inline = false,
+        args = {
+          Layout = {
+            name = L["Layout"],
+            order = 10,
+            type = "group",
+            inline = true,
+            args = {
+              Size = GetSizeEntry(L["Size"], 10, {"BossModsWidget",  "scale" } ),
+              Spacing = { name = L["Spacing"], order = 20, type = "range", min = 0, max = 100, step = 1, arg = { "BossModsWidget", "AuraSpacing" }, },
+            },
+          },
           Font = {
             name = L["Font"],
             type = "group",
-            order = 10,
+            order = 20,
             inline = true,
             args = {
               Font = { name = L["Typeface"], type = "select", order = 10, dialogControl = "LSM30_Font", values = AceGUIWidgetLSMlists.font, arg = { "BossModsWidget", "Font" }, },
@@ -3896,36 +4010,19 @@ local function CreateBossModsWidgetOptions()
               FontColor = {	name = L["Color"], type = "color",	order = 30,	get = GetColor,	set = SetColorWidget,	arg = {"BossModsWidget", "FontColor"},	hasAlpha = false, },
             },
           },
-          Layout = {
-            name = L["Layout"],
-            order = 20,
-            type = "group",
-            inline = true,
-            args = {
-              Size = GetSizeEntry(L["Size"], 10, {"BossModsWidget",  "scale" } ),
-              Spacing = { name = L["Spacing"], order = 20, type = "range", min = 0, max = 100, step = 1, arg = { "BossModsWidget", "AuraSpacing" }, },
-            },
-          } ,
         },
       },
-      Placement = GetPlacementEntryWidget(30, "BossModsWidget", true),
-      Config = {
-        name = L["Configuration Mode"],
-        order = 40,
-        type = "group",
-        inline = true,
-        args = {
-          Toggle = {
-            name = L["Toggle on Target"],
-            type = "execute",
-            order = 1,
-            width = "full",
-            func = function() Addon:ConfigBossModsWidget() end,
-          },
-        },
-      },
+      Label = GetTextEntry(L["Label"], 30, { "BossModsWidget", "LabelText" } )
     },
   }
+
+  -- entry.args.Layout.args.Positioning.args.AnchorTo = {
+  --   name = L["Anchor to"],
+  --   order = 1,
+  --   type = "select",
+  --   values = { Healthbar = L["Healthbar"], Buffs = L["Buffs"], Debuffs = L["Debuffs"], CrowdControl = L["Crowd Control"] },
+  --   arg = { "BossModsWidget",  "AnchorTo" }
+  -- }
 
   return entry
 end
