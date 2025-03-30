@@ -175,7 +175,7 @@ TidyPlatesThreatDBM = true
 
 function TidyPlatesThreat.SupportsFeature(feature)
 	if feature == "DMBAuras" or feature == "DMBTimers" then 
-		return Addon.Widgets.BossMods:IsEnabled()
+		return Addon.Widgets.Widgets.BossMods:IsEnabled()
 	end
 
 	return false
