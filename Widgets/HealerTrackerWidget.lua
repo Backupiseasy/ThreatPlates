@@ -634,7 +634,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
 
   -- Don't check for UnitIsPvP or UnitIsPVPSanctuary here as this widget is not updated when PvP status changes
   -- or the player enters a sanctuary. 
-  if not PlayerIsInBattleground and not PlayerIsInWorldPvPArea then return end
+  if not Addon.IsInPvPInstance and not PlayerIsInWorldPvPArea then return end
 
   --DebugHealerInfoSource[unit.guid] = { Name = GetUnitName(unit.unitid, true), Source = GetUnitName(unit.unitid, true) and "SCOREBOARD" or "SPELL"}
   if PlayerRoleIsHealer(unit) then
@@ -662,7 +662,10 @@ end
 
 function Widget:PrintDebug()
   Addon.Logging.Debug(Widget.Name .. ":")
-  Addon.Logging.Debug("    World PvP:", PlayerIsInWorldPvPArea and UnitIsPVP("player") and not UnitIsPVPSanctuary("player"))
+  Addon.Logging.Debug("    Arena or BG:", Addon.IsInPvPInstance)  
+  Addon.Logging.Debug("    BG:", PlayerIsInBattleground)
+  Addon.Logging.Debug("    World PvP:", PlayerIsInWorldPvPArea)
+  Addon.Logging.Debug("    World PvP w/o PvP or Sanctuary:", PlayerIsInWorldPvPArea and UnitIsPVP("player") and not UnitIsPVPSanctuary("player"))
   Addon.Logging.Debug("    Combatlog Partsing enabled:", CombatLogParsingIsEnabled)
   for guid, info in pairs(DebugHealerInfoSource) do
     Addon.Logging.Debug("    ", info.Name, "(", guid, ")", "=>", info.Source)
