@@ -6,7 +6,7 @@ https://www.wowace.com/projects/libbuttonglow-1-0
 -- luacheck: globals CreateFromMixins ObjectPoolMixin CreateTexturePool CreateFramePool
 
 local MAJOR_VERSION = "LibCustomGlow-1.0"
-local MINOR_VERSION = 20
+local MINOR_VERSION = 21
 if not LibStub then error(MAJOR_VERSION .. " requires LibStub.") end
 local lib, oldversion = LibStub:NewLibrary(MAJOR_VERSION, MINOR_VERSION)
 if not lib then return end
@@ -736,7 +736,9 @@ end
 
 function lib.ButtonGlow_Stop(r)
     if r._ButtonGlow then
-        if r._ButtonGlow.animIn:IsPlaying() then
+        if r._ButtonGlow.animOut:IsPlaying() then
+            -- Do nothing the animOut finishing will release
+        elseif r._ButtonGlow.animIn:IsPlaying() then
             r._ButtonGlow.animIn:Stop()
             ButtonGlowPool:Release(r._ButtonGlow)
         elseif r:IsVisible() then
