@@ -629,7 +629,7 @@ if Addon.IS_MAINLINE then
         end
       end
       
-      -- Fallback: check if unit role is known from combat log parsing
+      -- Fallback: check if unit role is known from combat log parsing or spec (in arenas)
       is_healer = UnitIsHealer[unit.guid]
     end
 
