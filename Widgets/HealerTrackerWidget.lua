@@ -525,7 +525,7 @@ function Widget:PLAYER_REGEN_ENABLED()
 end
 
 local ArenaUnitIdToNumber = {}
-for i = 1, MAX_ARENA_ENEMIES do
+for i = 1, (MAX_ARENA_ENEMIES or 5) do
   ArenaUnitIdToNumber["arena" .. i] = i
 end
 
