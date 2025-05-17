@@ -422,6 +422,7 @@ end
 -- Variables
 ---------------------------------------------------------------------------------------------------
 local UnitIsHealer = {}
+local UnitGUIDByName = {}
 local PlayerIsInBattleground = false
 local PlayerIsInWorldPvPArea = false
 local CheckPvPStateIsEnabled = false
@@ -485,6 +486,7 @@ end
 
 function Widget:PLAYER_ENTERING_WORLD()
   UnitIsHealer = {}
+  UnitGUIDByName = {}
 
   local in_instance, instance_type = IsInInstance()
   PlayerIsInBattleground = (instance_type == "pvp")
