@@ -4,3 +4,4 @@
 * Added support for DBM cooldown icons to BossMods widget.
 * Added metadata to show Threat Plates in "Unit Frames" addon category.
 * Updated integrated libraries (LibSharedMedia-3.0 v11.1.0, LibDualSpec-1.0 v1.26.0).
+* Updated TOC version for Patch 1.15.7 for WoW Classic.
