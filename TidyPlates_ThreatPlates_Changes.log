@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+12.1.2 (2025-05-17)
+------------------------------------------------------
+* Updated integrated library LibCustomGlow to 1.0.4-4-gdc135fe-alpha to fix Lua error "Attempted to release inactive object" [GH-579, GH-578, Comment #7592].
+
+------------------------------------------------------
 12.1.1 (2025-04-23)
 ------------------------------------------------------
 * Updated TOC version for Patch 11.1.5 for WoW Mainline.
