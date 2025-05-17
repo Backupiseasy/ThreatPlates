@@ -29,7 +29,7 @@ local UnitIsPVP, UnitIsPVPSanctuary = UnitIsPVP, UnitIsPVPSanctuary
 local GetUnitName = GetUnitName
 local RequestBattlefieldScoreData, GetNumBattlefieldScores, GetBattlefieldScore = RequestBattlefieldScoreData, GetNumBattlefieldScores, GetBattlefieldScore
 local CombatLogGetCurrentEventInfo = CombatLogGetCurrentEventInfo
-local GetNumArenaOpponentSpecs, GetArenaOpponentSpec = GetNumArenaOpponentSpecs, GetArenaOpponentSpec
+local GetArenaOpponentSpec = GetArenaOpponentSpec
 local C_Timer_After = C_Timer.After
 
 -- ThreatPlates APIs
@@ -54,6 +54,7 @@ local HEALER_SPECIALIZATION_ID = {
   [257] = "Holy Priest",
   [65] = "Holy Paladin",
   [256] = "Discipline Priest",
+  [1468] = "Preservation Evoker",
 }
 
 -- Store localized names for specializations for parsing the battleground score
@@ -421,9 +422,6 @@ end
 -- Variables
 ---------------------------------------------------------------------------------------------------
 local UnitIsHealer = {}
-local UnitGUIDByName = {}
-local UnitGUIDToNumber = {}
-local PlayerIsInArena = false
 local PlayerIsInBattleground = false
 local PlayerIsInWorldPvPArea = false
 local CheckPvPStateIsEnabled = false
@@ -487,11 +485,8 @@ end
 
 function Widget:PLAYER_ENTERING_WORLD()
   UnitIsHealer = {}
-  UnitGUIDByName = {}
-  UnitGUIDToNumber = {} 
 
   local in_instance, instance_type = IsInInstance()
-  PlayerIsInArena = (instance_type == "arena")
   PlayerIsInBattleground = (instance_type == "pvp")
   PlayerIsInWorldPvPArea = (instance_type == "none")
 
