@@ -23,8 +23,9 @@ local UnitsExists, UnitName = UnitsExists, UnitName
 local GameTooltip = GameTooltip
 local GetSpellInfo = Addon.GetSpellInfo
 local GetAddOnEnableState = (C_AddOns and C_AddOns.GetAddOnEnableState)
-    -- classic's GetAddonEnableState and retail's C_AddOns have their parameters swapped
-    or function(name, character) return GetAddOnEnableState(character, name) end
+-- classic's GetAddonEnableState and retail's C_AddOns have their parameters swapped
+or function(name, character) return GetAddOnEnableState(character, name) end
+local GetSpecializationInfo = C_SpecializationInfo and C_SpecializationInfo.GetSpecializationInfo or _G.GetSpecializationInfo
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -1961,17 +1962,17 @@ local function CreateComboPointsWidgetOptions()
                 type = "select",
                 order = 10,
                 values = {
-                  DEATHKNIGHT = (Addon.ExpansionIsAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) and L["Death Knight"]) or nil,
+                  DEATHKNIGHT = (Addon.ExpansionIsAtLeastWrath and L["Death Knight"]) or nil,
                   DRUID = L["Druid"],
                   EVOKER = (Addon.ExpansionIsAtLeast(LE_EXPANSION_DRAGONFLIGHT) and L["Evoker"]) or nil,
                   -- Arcane Charge as a resource mechanic was introduced with Patch 7.0.3 (Legion)
                   MAGE = (Addon.ExpansionIsAtLeast(LE_EXPANSION_LEGION) and L["Arcane Mage"]) or nil,
-                  MONK = (Addon.ExpansionIsAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA)  and L["Windwalker Monk"]) or nil,
+                  MONK = (Addon.ExpansionIsAtLeastMists  and L["Windwalker Monk"]) or nil,
                   -- Holy Power was introduced with Patch 4.0.1 (Cataclysm)
-                  PALADIN = (Addon.ExpansionIsAtLeast(LE_EXPANSION_CATACLYSM)  and L["Paladin"]) or nil,
+                  PALADIN = (AAddon.ExpansionIsAtLeastCata  and L["Paladin"]) or nil,
                   ROGUE = L["Rogue"],
                   -- Soul Shard as a resource mechanic was introduced with Path 4.0.1 (Cataclysm)
-                  WARLOCK = (Addon.ExpansionIsAtLeast(LE_EXPANSION_CATACLYSM)  and L["Warlock"]) or nil,
+                  WARLOCK = (Addon.ExpansionIsAtLeastCata  and L["Warlock"]) or nil,
                 },
                 arg = { "ComboPoints", "Specialization" },
               },
@@ -3212,7 +3213,7 @@ local function CreateExperienceWidgetOptions()
     type = "group",
     order = 54,
     childGroups = "tab",
-    hidden = function() return not Addon.IS_MAINLINE end,
+    hidden = function() return not Addon.ExpansionIsAtLeast(LE_EXPANSION_BATTLE_FOR_AZEROTH) end,
     set = SetValueWidget,
     args = {
       Enable = GetEnableEntry(
@@ -4993,7 +4994,7 @@ local function CreateAurasWidgetOptions()
                     end,
                     arg = { "AuraWidget", "Debuffs", "ShowBlizzardForFriendly" },
                     disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly end,
-                    hidden = function() return not Addon.IS_MAINLINE end
+                    hidden = function() return not Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER end
                   },
                   Dispellable = {
                     name = L["Dispellable"],
@@ -5139,7 +5140,7 @@ local function CreateAurasWidgetOptions()
                     end,
                     arg = { "AuraWidget", "Debuffs", "ShowBlizzardForEnemy" },
                     disabled = function() return not db.AuraWidget.Debuffs.ShowEnemy end,
-                    hidden = function() return not Addon.IS_MAINLINE end
+                    hidden = function() return not Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER end
                   },
                 },
               },
@@ -5237,7 +5238,7 @@ local function CreateAurasWidgetOptions()
                     end,
                     arg = { "AuraWidget", "CrowdControl", "ShowBlizzardForFriendly" },
                     disabled = function() return not db.AuraWidget.CrowdControl.ShowFriendly end,
-                    hidden = function() return not Addon.IS_MAINLINE end
+                    hidden = function() return not Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER end
                   },
                   Dispellable = {
                     name = L["Dispellable"],
@@ -5293,7 +5294,7 @@ local function CreateAurasWidgetOptions()
                     end,
                     arg = { "AuraWidget", "CrowdControl", "ShowAllEnemy" },
                     disabled = function() return not db.AuraWidget.CrowdControl.ShowEnemy end,
-                    hidden = function() return not Addon.IS_MAINLINE end
+                    hidden = function() return not Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER end
                   },
                   Blizzard = {
                     name = L["Blizzard"],
@@ -5307,7 +5308,7 @@ local function CreateAurasWidgetOptions()
                     end,
                     arg = { "AuraWidget", "CrowdControl", "ShowBlizzardForEnemy" },
                     disabled = function() return not db.AuraWidget.CrowdControl.ShowEnemy end,
-                    hidden = function() return not Addon.IS_MAINLINE end
+                    hidden = function() return not Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER end
                   },
                 },
               },
@@ -6082,7 +6083,7 @@ local function CreateBlizzardSettings()
                 order = 10,
                 type = "range",
                 min = 0,
-                max = (Addon.IS_CLASSIC  and 20) or (Addon.IS_TBC_CLASSIC and 41) or (Addon.IS_WRATH_CLASSIC and 41) or (Addon.IS_CATA_CLASSIC and 41) or 100,
+                max = (Addon.IS_CLASSIC  and 20) or (Addon.IS_TBC_CLASSIC and 41) or (Addon.IS_WRATH_CLASSIC and 41) or (Addon.IS_CATA_CLASSIC and 41) or (Addon.IS_MISTS_CLASSIC and 41) or 100,
                 step = 1,
                 width = "double",
                 desc = L["The max distance to show nameplates."],
@@ -6666,14 +6667,14 @@ local function CreateHealthbarOptions()
                 order = 29,
                 type = "toggle",
                 arg = { "settings", "healthbar", "ShowHealAbsorbs" },
-                hidden = function() return not Addon.IS_MAINLINE end, -- Absorbs were added with Mists
+                hidden = function() return not Addon.WOW_FEATURE_ABSORBS end, -- Absorbs were added with Mists
               },
               ShowAbsorbs = {
                 name = L["Absorbs"],
                 order = 30,
                 type = "toggle",
                 arg = { "settings", "healthbar", "ShowAbsorbs" },
-                hidden = function() return not Addon.IS_MAINLINE end, -- Absorbs were added with Mists
+                hidden = function() return not Addon.WOW_FEATURE_ABSORBS end, -- Absorbs were added with Mists
               },
               ShowMouseoverHighlight = {
                 type = "toggle",
@@ -6798,7 +6799,7 @@ local function CreateHealthbarOptions()
                 order = 90,
                 type = "group",
                 inline = true,
-                hidden = function() return not Addon.IS_MAINLINE end, -- Absorbs were added with Mists
+                hidden = function() return not Addon.WOW_FEATURE_ABSORBS end, -- Absorbs were added with Mists
                 args = {
                   AbsorbColor = {
                     name = L["Color"],
@@ -10298,7 +10299,7 @@ local function CreateOptionsTable()
                       type = "group",
                       inline = true,
                       set = SetThemeValue,
-                      hidden = function() return not Addon.IS_MAINLINE end, -- Absorbs were added with Mists
+                      hidden = function() return not Addon.WOW_FEATURE_ABSORBS end, -- Absorbs were added with Mists
                       args = {
                         EnableAmount = {
                           name = L["Amount"],
@@ -11021,7 +11022,7 @@ local function CreateOptionsTable()
               desc = L["Set the roles your specs represent."],
               disabled = function() return not db.threat.ON end,
               order = 70,
-              args = (Addon.IS_MAINLINE and CreateSpecRolesRetail()) or CreateSpecRolesClassic(),
+              args = (Addon.ExpansionIsAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA) and CreateSpecRolesRetail()) or CreateSpecRolesClassic(),
             },
           },
         },

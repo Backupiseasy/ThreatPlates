@@ -252,7 +252,7 @@ elseif Addon.IS_TBC_CLASSIC then
 
   -- UnitNameplateShowsWidgetsOnly: SL - Patch 9.0.1 (2020-10-13): Added.
   UnitNameplateShowsWidgetsOnly = function() return false end
-elseif Addon.IS_WRATH_CLASSIC or Addon.IS_CATA_CLASSIC then
+elseif Addon.ExpansionIsBetween(LE_EXPANSION_WRATH_OF_THE_LICH_KING, LE_EXPANSION_LEGION) then
   GetNameForNameplate = function(plate) return plate:GetName() end
   UnitCastingInfo = _G.UnitCastingInfo
   -- UnitNameplateShowsWidgetsOnly: SL - Patch 9.0.1 (2020-10-13): Added.
@@ -1349,8 +1349,8 @@ end
 function CoreEvents:NAME_PLATE_CREATED(plate)
   OnNewNameplate(plate)
 
-  -- NamePlateDriverFrame.AcquireUnitFrame is not used in Classic
-  if not Addon.IS_MAINLINE and plate.UnitFrame then
+  -- NamePlateDriverFrame.AcquireUnitFrame is not used in Classic before Mists
+  if not Addon.ExpansionIsAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA) and plate.UnitFrame then
     NamePlateDriverFrame_AcquireUnitFrame(nil, plate)
   end
 
@@ -1860,7 +1860,7 @@ end
 -- Only registered for player unit-
 local TANK_AURA_SPELL_IDs = {
   [20468] = true, [20469] = true, [20470] = true, [25780] = true, -- Paladin Righteous Fury
-  [48263] = true,   -- Deathknight Frost Presence
+  [48263] = true,   -- Deathknight Blood Presence
   [407627] = true,  -- Paladin Righteous Fury (Season of Discovery)
   [408680] = true,  -- Shaman Way of Earth (Season of Discovery)
   [403789] = true,  -- Warlock Metamorphosis (Season of Discovery)
@@ -1910,30 +1910,28 @@ CoreEvents.UNIT_SPELLCAST_CHANNEL_STOP = UNIT_SPELLCAST_CHANNEL_STOP
 -- UNIT_SPELLCAST_INTERRUPTED - handled by COMBAT_LOG_EVENT_UNFILTERED / SPELL_INTERRUPT as it's the only way to find out the interruptorom
 -- UNIT_SPELLCAST_SENT
 
-if Addon.IS_MAINLINE then
-  CoreEvents.UNIT_SPELLCAST_INTERRUPTIBLE = UnitSpellcastMidway
-  CoreEvents.UNIT_SPELLCAST_NOT_INTERRUPTIBLE = UnitSpellcastMidway
-
+if Addon.ExpansionIsAtLeast(LE_EXPANSION_DRAGONFLIGHT) then
   CoreEvents.UNIT_SPELLCAST_EMPOWER_START = UNIT_SPELLCAST_CHANNEL_START
   CoreEvents.UNIT_SPELLCAST_EMPOWER_UPDATE = UnitSpellcastMidway
   CoreEvents.UNIT_SPELLCAST_EMPOWER_STOP = UNIT_SPELLCAST_CHANNEL_STOP
 end
 
--- UNIT_HEALTH, UNIT_HEALTH_FREQUENT: 
---   Shadowlands Patch 9.0.1 (2020-10-13): Removed. Replaced by UNIT HEALTH which is no longer aggressively throttled.
---   Cataclysm Patch 4.0.6 (2011-02-08): Added.
-if Addon.IS_MAINLINE then
-  CoreEvents.UNIT_HEALTH = UNIT_HEALTH
+if Addon.ExpansionIsAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA) then
+  CoreEvents.UNIT_SPELLCAST_INTERRUPTIBLE = UnitSpellcastMidway
+  CoreEvents.UNIT_SPELLCAST_NOT_INTERRUPTIBLE = UnitSpellcastMidway
 
+  -- UNIT_HEALTH, UNIT_HEALTH_FREQUENT: 
+  --   Shadowlands Patch 9.0.1 (2020-10-13): Removed. Replaced by UNIT HEALTH which is no longer aggressively throttled.
+  --   Cataclysm Patch 4.0.6 (2011-02-08): Added.
+  CoreEvents.UNIT_HEALTH = UNIT_HEALTH
+else
+  CoreEvents.UNIT_HEALTH_FREQUENT = UNIT_HEALTH
+end
+
+if Addon.WOW_FEATURE_ABSORBS then
   -- Absorbs should have been added with Mists
   CoreEvents.UNIT_ABSORB_AMOUNT_CHANGED = UNIT_ABSORB_AMOUNT_CHANGED
   CoreEvents.UNIT_HEAL_ABSORB_AMOUNT_CHANGED = UNIT_HEAL_ABSORB_AMOUNT_CHANGED
-
-  -- CoreEvents.PLAYER_SOFT_FRIEND_CHANGED = PLAYER_SOFT_FRIEND_CHANGED
-  -- CoreEvents.PLAYER_SOFT_ENEMY_CHANGED = PLAYER_SOFT_ENEMY_CHANGED
-  -- CoreEvents.PLAYER_SOFT_INTERACT_CHANGED = PLAYER_SOFT_INTERACT_CHANGED
-else
-  CoreEvents.UNIT_HEALTH_FREQUENT = UNIT_HEALTH
 end
 
 if Addon.ExpansionIsAtLeast(LE_EXPANSION_BURNING_CRUSADE) then
@@ -1960,8 +1958,8 @@ CoreEvents.UNIT_TARGET = UNIT_TARGET
 -- Do this after events are registered, otherwise UNIT_AURA would be registered as a general event, not only as
 -- an unit event.
 local ENABLE_UNIT_AURA_FOR_CLASS = {
-  PALADIN = Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC or Addon.IS_CATA_CLASSIC,
-  DEATHKNIGHT = Addon.IS_WRATH_CLASSIC or Addon.IS_CATA_CLASSIC,
+  PALADIN = Addon.ExpansionIsBetween(LE_EXPANSION_CLASSIC, LE_EXPANSION_LEGION),
+  DEATHKNIGHT = Addon.ExpansionIsBetween(LE_EXPANSION_WRATH_OF_THE_LICH_KING, LE_EXPANSION_LEGION),
   -- For Season of Discovery
   SHAMAN = Addon.IS_CLASSIC_SOD,
   WARLOCK = Addon.IS_CLASSIC_SOD,

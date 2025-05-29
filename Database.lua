@@ -16,6 +16,7 @@ local math_min = math.min
 -- WoW APIs
 local GetCVar = GetCVar
 local UnitClass = UnitClass
+local GetSpecialization = C_SpecializationInfo and C_SpecializationInfo.GetSpecialization or _G.GetSpecialization
 
 -- ThreatPlates APIs
 local L = ThreatPlates.L
@@ -31,15 +32,15 @@ local _G =_G
 ---------------------------------------------------------------------------------------------------
 
 -- GetSpecialization: Mists - Patch 5.0.4 (2012-08-28): Replaced GetPrimaryTalentTree.
-if Addon.IS_MAINLINE then
+if Addon.ExpansionIsAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA)  then
   local PLAYER_ROLE_BY_SPEC = ThreatPlates.SPEC_ROLES[Addon.PlayerClass]
 
   function Addon:PlayerRoleIsTank()
     local db = Addon.db
     if db.profile.optionRoleDetectionAutomatic then
-      return PLAYER_ROLE_BY_SPEC[_G.GetSpecialization()] or false
+      return PLAYER_ROLE_BY_SPEC[GetSpecialization()] or false
     else
-      return db.char.spec[_G.GetSpecialization()]
+      return db.char.spec[GetSpecialization()]
     end
   end
 
@@ -48,7 +49,7 @@ if Addon.IS_MAINLINE then
     if index then
       Addon.db.char.spec[index] = value
     else
-      Addon.db.char.spec[_G.GetSpecialization()] = value
+      Addon.db.char.spec[GetSpecialization()] = value
     end
   end
 else

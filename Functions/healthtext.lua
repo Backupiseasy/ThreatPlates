@@ -366,7 +366,7 @@ function Addon:UpdateConfigurationStatusText()
   end
   
   -- Absorbs: Mists - Added
-  if Addon.IS_MAINLINE then
+  if Addon.WOW_FEATURE_ABSORBS then
     ShowAbsorbs = Settings.AbsorbsAmount or Settings.AbsorbsPercentage
   else
     ShowAbsorbs = false

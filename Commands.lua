@@ -1,4 +1,4 @@
-﻿local ADDON_NAME, Addon = ...
+local ADDON_NAME, Addon = ...
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -158,16 +158,16 @@ local function ChatCommandDebug(cmd_list)
 				table.remove(input, i)
 				Addon.Logging.Debug("Removing", i)
 			end
-		end
+		end			
 	elseif command == "version" then
 		print("Mainline:", Addon.IS_MAINLINE)
 		print("Classic:", Addon.IS_CLASSIC)
 		print("Classic SoD:", Addon.IS_CLASSIC_SOD)
-		print("Classic Cata:", Addon.IS_CATA_CLASSIC)
-		print("Classic and at least Cata:", Addon.ExpansionIsClassicAndAtLeast(LE_EXPANSION_CATACLYSM))
-		print("Classic and at least MoP:", Addon.ExpansionIsClassicAndAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA))
-		print("At least Cata:", Addon.ExpansionIsAtLeast(LE_EXPANSION_CATACLYSM))
+		print("Classic Mists:", Addon.IS_MISTS_CLASSIC)
 		print("At least MoP:", Addon.ExpansionIsAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA))
+		Addon.Logging.Debug("WOW_USES_CLASSIC_NAMEPLATES:", Addon.WOW_USES_CLASSIC_NAMEPLATES)
+	elseif command == "mists" then
+		print("PlayerRoleIsTank:", Addon:PlayerRoleIsTank())
 	else
 		Addon.Logging.Error(L["Unknown option: "] .. command)
 		PrintHelp()

@@ -29,28 +29,41 @@ Addon.IS_CLASSIC_SOD = (Addon.IS_CLASSIC and (select(4, GetBuildInfo()) >= 11500
 Addon.IS_TBC_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_BURNING_CRUSADE)
 Addon.IS_WRATH_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_WRATH_OF_THE_LICH_KING)
 Addon.IS_CATA_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_CATACLYSM)
+Addon.IS_MISTS_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_MISTS_OF_PANDARIA)
 Addon.IS_MAINLINE = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
 -- Addon.IS_TBC_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC and LE_EXPANSION_LEVEL_CURRENT == LE_EXPANSION_BURNING_CRUSADE)
 -- Addon.IS_WRATH_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC and LE_EXPANSION_LEVEL_CURRENT == LE_EXPANSION_WRATH_OF_THE_LICH_KING)
-Addon.WOW_USES_CLASSIC_NAMEPLATES = (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC or Addon.IS_CATA_CLASSIC)
--- ? Addon.WOW_FEATURE_ABSORBS
 
-Addon.ExpansionIsClassicAndAtLeast = function(expansion_id)
-	-- Method does not exist which means that this is the most recent / highest WoW version (Mainline) 
-	-- so we have to return true
-	-- Method exists, so this is a Classic WoW version, but as the expansion id is unknown, the expansion is 
-	-- an older one, so we have to return false
-	if Addon.IS_MAINLINE or not GetClassicExpansionLevel or not expansion_id then
-		return false
-	else
+-- For Mainline, this always returns true. 
+Addon.ExpansionIsAtLeast = function(expansion_id)
+	if Addon.IS_MAINLINE then 
+		return true 
+	elseif not expansion_id then 
+		-- Expansion id is unknown (not sure if that can ever happen), so the expansion is an older one: return false
+		return false 
+	else			
+		-- GetClassicExpansionLevel should be defined here as version is not mainline
 		return GetClassicExpansionLevel() >= expansion_id
 	end
 end
 
--- For Mainline, this always returns true. 
-Addon.ExpansionIsAtLeast = function(expansion_id)
-	return Addon.IS_MAINLINE or Addon.ExpansionIsClassicAndAtLeast(expansion_id)
+Addon.ExpansionIsBetween = function(expansion_id_start, expansion_id_end)
+	if GetClassicExpansionLevel then
+		local classic_expansion_level = GetClassicExpansionLevel()
+		return classic_expansion_level >= expansion_id_start and classic_expansion_level <= expansion_id_end
+	else
+		return false
+	end
 end
+
+Addon.WOW_USES_CLASSIC_NAMEPLATES = not Addon.ExpansionIsAtLeast(LE_EXPANSION_LEGION)
+-- Absorbs bug in Mists: https://github.com/Stanzilla/WoWUIBugs/issues/736
+Addon.WOW_FEATURE_ABSORBS =  Addon.IS_MAINLINE -- Addon.ExpansionIsAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA)
+Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER =  not Addon.WOW_USES_CLASSIC_NAMEPLATES
+
+Addon.ExpansionIsAtLeastWrath = Addon.ExpansionIsAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING)
+Addon.ExpansionIsAtLeastCata = Addon.ExpansionIsAtLeast(LE_EXPANSION_CATACLYSM)
+Addon.ExpansionIsAtLeastMists = Addon.ExpansionIsAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA)
 
 ---------------------------------------------------------------------------------------------------
 -- Libraries
@@ -136,7 +149,14 @@ Addon.Debug = {}
 if Addon.IS_MAINLINE then
 	Addon.UnitDetailedThreatSituationWrapper = UnitDetailedThreatSituation
 	Addon.IsSoloShuffle = C_PvP.IsSoloShuffle
-	Addon.GetSpellInfo = C_Spell.GetSpellInfo 
+	Addon.GetSpellInfo = C_Spell.GetSpellInfo
+elseif Addon.IS_MISTS_CLASSIC then
+	Addon.UnitDetailedThreatSituationWrapper = UnitDetailedThreatSituation
+	
+	-- Not available in Mists Classic
+	Addon.IsSoloShuffle = function() return false end
+
+	Addon.GetSpellInfo = C_Spell.GetSpellInfo
 else
   Addon.UnitDetailedThreatSituationWrapper = function(source, target)
     local is_tanking, status, threatpct, rawthreatpct, threat_value = UnitDetailedThreatSituation(source, target)

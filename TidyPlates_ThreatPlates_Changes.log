@@ -1,5 +1,10 @@
-﻿------------------------------------------------------
-12.2.0 (2025-05-29)
+------------------------------------------------------
+12.3.0 (2025-05-29)
+------------------------------------------------------
+* Added support for WoW Mists of Pandaria Classic [GH-582].
+
+------------------------------------------------------
+12.2.0 (2025-05-24)
 ------------------------------------------------------
 * HealerTracker widget has been improved so that it now works in arenas too (only for WoW Mainline) [Comment #7565].
 * Added support for DBM cooldown icons to BossMods widget.

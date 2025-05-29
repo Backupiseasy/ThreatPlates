@@ -1,7 +1,7 @@
 local ADDON_NAME, Addon = ...
 local ThreatPlates = Addon.ThreatPlates
 
-local Widget = (not Addon.IS_MAINLINE and {}) or Addon.Widgets:NewWidget("Experience")
+local Widget = (Addon.ExpansionIsAtLeast(LE_EXPANSION_BATTLE_FOR_AZEROTH) and Addon.Widgets:NewWidget("Experience")) or {}
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants

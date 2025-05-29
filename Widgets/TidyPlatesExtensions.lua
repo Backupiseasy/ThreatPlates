@@ -231,7 +231,7 @@ local function UpdateExtensions(tp_frame, unitid, style)
             absorbbar.overlay:Hide()
           end
         else
-          absorbbar:Hide()
+          absorbbarcore:Hide()
           absorbbar.overlay:Hide()
         end
       end
@@ -245,7 +245,7 @@ end
 
 -- UnitGetTotalAbsorbs: Mists - Patch 5.2.0 (2013-03-05): Added.
 -- UnitGetTotalHealAbsorbs: Mists - Patch 5.4.0 (2013-09-10): Added.
-if Addon.IS_MAINLINE then
+if Addon.WOW_FEATURE_ABSORBS then
   Addon.CreateExtensions = CreateExtensions
   Addon.UpdateExtensions = UpdateExtensions
 else
