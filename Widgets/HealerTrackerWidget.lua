@@ -6,12 +6,15 @@
 --     - combat log parsing => UnitIsHealer[GUID]
 --   Battleground: 
 --     - combat log parsing => UnitIsHealer[GUID]
---     - BG scoreboard      => UnitIsHealer[name]
+--     - BG scoreboard      => UnitIsHealer[name] (GetSpecializationInfoByID since WoD)
 --   Arena:
---     - opponent spec      => UnitIsHealer["arena" .. i]
+--     - opponent spec      => UnitIsHealer[GUID] (GetArenaOpponentSpec since MoP)
 --
 --  Lookup for healers when showing the nameplate:
 --    name => GUID
+--
+-- TODO: use combat log parsing in Classic arenas (as specs are not available in Classic currently)
+-- TODO: add option to enable HealerTracker by instance type
 -----------------------
 local ADDON_NAME, Addon = ...
 
@@ -524,8 +527,9 @@ function Widget:PLAYER_REGEN_ENABLED()
   end)
 end
 
+-- MAX_ARENA_ENEMIES is not defined in Classic
 local ArenaUnitIdToNumber = {}
-for i = 1, MAX_ARENA_ENEMIES do
+for i = 1, (MAX_ARENA_ENEMIES or 5) do
   ArenaUnitIdToNumber["arena" .. i] = i
 end
 
@@ -590,9 +594,14 @@ function Widget:OnEnable()
   
   -- We could register/unregister this when entering/leaving the battlefield, but as it only fires when
   -- in a bg, that does not really matter
-  -- We don't need to register this for Classic, as GetBattlefieldScore does not return talentSpec information
+  -- We don't need to register this for Classic, as GetBattlefieldScore does not return talentSpec information  
   if Addon.IS_MAINLINE then
     self:RegisterEvent("UPDATE_BATTLEFIELD_SCORE")
+  end
+
+  -- ARENA_OPPONENT_UPDATE uses a player spec to determine its role. 
+  -- API function GetArenaOpponentSpec was added in 5.0.4
+  if Addon.ExpansionIsAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA) then
     self:RegisterEvent("ARENA_OPPONENT_UPDATE")
   end
 

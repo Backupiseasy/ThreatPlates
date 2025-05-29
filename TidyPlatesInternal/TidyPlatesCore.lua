@@ -1574,6 +1574,8 @@ local function UNIT_HEALTH(event, unitid)
     -- If the unit is dead, update the style (and switch to headline view)
     if UnitIsDead(unitid) then
       plate.UpdateMe = true
+      tp_frame:Hide()
+      tp_frame.Active = false 
     end
   end
 

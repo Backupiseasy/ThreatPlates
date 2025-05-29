@@ -386,12 +386,6 @@ function Addon:SetStyle(unit)
     return "empty"
   end
 
-  if (UnitIsDead(unit.unitid) and UnitIsUnit("softinteract", unit.unitid)) or unit.SoftInteractTargetIsDead then
-    -- We use IsDead to prevent the nameplate switching to healthbar view again shortly before disapearing
-    unit.SoftInteractTargetIsDead = true
-    return (unit.CustomPlateSettings and "NameOnly-Unique") or "NameOnly"
-  end
-
   if not style then
     if not UnitExists(unit.unitid) then
       style = "etotem"

@@ -640,7 +640,15 @@ local function CurrentVersionIsOlderThan(current_version, max_version)
     return current_version_no < max_version_no
   end
 end
-Addon.CurrentVersionIsOlderThan = CurrentVersionIsOlderThan
+
+local CurrentVersion = VersionToNumber(Addon.ThreatPlates.Meta("version"))
+
+function TidyPlatesThreat:VersionIsAtLeast(min_version)
+  if CurrentVersion == 0 then return true end -- Always return true in development (version = "@project-version@")
+
+  local min_version_no, _ = VersionToNumber(min_version)
+  return min_version_no > 0 and CurrentVersion >= min_version_no
+end
 
 local function DatabaseEntryExists(db, keys)
   for index = 1, #keys do
