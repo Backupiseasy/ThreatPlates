@@ -173,14 +173,6 @@ end
 -- Global for DBM to differentiate between Threat Plates and Tidy Plates: Threat
 TidyPlatesThreatDBM = true
 
-function TidyPlatesThreat.SupportsFeature(feature)
-	if feature == "DMBAuras" or feature == "DMBTimers" then 
-		return Addon.Widgets.Widgets.BossMods:IsEnabled()
-	end
-
-	return false
-end
-
 ---------------------------------------------------------------------------------------------------
 -- Aura Highlighting
 ---------------------------------------------------------------------------------------------------
