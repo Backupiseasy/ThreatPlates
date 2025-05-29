@@ -602,7 +602,6 @@ function Widget:OnEnable()
   -- ARENA_OPPONENT_UPDATE uses a player spec to determine its role. 
   -- API function GetArenaOpponentSpec was added in 5.0.4
   if Addon.ExpansionIsAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA) then
-    print("Registering for ARENA_OPPONENT_UPDATE")
     self:RegisterEvent("ARENA_OPPONENT_UPDATE")
   end
 
