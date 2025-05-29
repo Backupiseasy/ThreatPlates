@@ -317,42 +317,26 @@ local TOTEM_DATA_RETAIL = {
 
 local TOTEM_DATA_MISTS_CLASSIC = {
   -- Baseline Totems
-  { SpellID = 108269,  ID = "B2", GroupColor = "b8d1ff", Icon = "spell_nature_brilliance" },	              -- Capacitor Totem
-  { SpellID = 2484,   ID = "E4", GroupColor = "8B4513", Icon ="spell_nature_strengthofearthtotem02" },      -- Earthbind Totem
-  { SpellID = 8177,   ID = "A5", GroupColor = "ffb31f", Icon ="spell_nature_groundingtotem" },          		-- Grounding Totem    
-  { SpellID = 5394,  ID = "W1", GroupColor = "b8d1ff", Icon ="inv_spear_04" },	            	              -- Healing Stream Totem
-  { SpellID = 8190, ID = "F4", GroupColor = "ff8f8f", Icon ="spell_fire_selfdestruct" }, 	                  -- Magma Totem
-  { SpellID = 3599, ID = "F1", GroupColor = "ff8f8f", Icon ="spell_fire_searingtotem", }, 	                -- Searing Totem
-  { SpellID = 120668, ID = "F1", GroupColor = "ff8f8f", Icon ="ability_shaman_tranquilmindtotem", }, 	      -- Stormlash Totem
-  { SpellID = 8143,    ID = "E5", GroupColor = "8B4513", Icon ="spell_nature_tremortotem" },	              -- Tremor Totem
+  { SpellID = 108269,  ID = "B1", GroupColor = "8b4513", Icon = "spell_nature_brilliance" },	              -- Capacitor Totem
+  { SpellID = 2484,    ID = "B2", GroupColor = "8b4513", Icon ="spell_nature_strengthofearthtotem02" },     -- Earthbind Totem
+  { SpellID = 8177,    ID = "B3", GroupColor = "8b4513", Icon ="spell_nature_groundingtotem" },          		-- Grounding Totem    
+  { SpellID = 5394,    ID = "B4", GroupColor = "8b4513", Icon ="inv_spear_04" },	            	            -- Healing Stream Totem
+  { SpellID = 8190,    ID = "B5", GroupColor = "8b4513", Icon ="spell_fire_selfdestruct" }, 	              -- Magma Totem
+  { SpellID = 3599,    ID = "B6", GroupColor = "8b4513", Icon ="spell_fire_searingtotem", }, 	              -- Searing Totem
+  { SpellID = 120668,  ID = "B7", GroupColor = "8b4513", Icon ="ability_shaman_tranquilmindtotem", }, 	    -- Stormlash Totem
+  { SpellID = 8143,    ID = "B8", GroupColor = "8b4513", Icon ="spell_nature_tremortotem" },	              -- Tremor Totem
+  { SpellID = 108280,  ID = "b9", GroupColor = "8b4513", Icon = "ability_shaman_healingtide" },		-- Healing Tide Totem
+
   -- Elemental
   -- Enhancement
   -- Restoration
-  { SpellID = 98008,   ID = "R5", GroupColor = "4c9900", Icon = "spell_shaman_spiritlink" },	              -- Spirit Link Totem
-  { SpellID = 16190,  ID = "W4", GroupColor = "b8d1ff", Icon ="spell_frost_summonwaterelemental" },		      -- Mana Tide Totem
+  { SpellID = 98008,   ID = "R1", GroupColor = "4c9900", Icon = "spell_shaman_spiritlink" },	              -- Spirit Link Totem
+  { SpellID = 16190,   ID = "R2", GroupColor = "4c9900", Icon ="spell_frost_summonwaterelemental" },		    -- Mana Tide Totem
 
   -- Totems from talents
-  { SpellID = 8143,    ID = "T1", GroupColor = "b8d1ff", Icon = "spell_nature_tremortotem" },	         -- Tremor Totem
-
-  -- Earth Totems
-  --{ SpellID = 8075,   ID = "E1", GroupColor = "8B4513", Icon ="spell_nature_earthbindtotem", },	            -- Strength of Earth Totem
-  --{ SpellID = 8071,   ID = "E2", GroupColor = "8B4513", Icon ="spell_nature_stoneskintotem" },	            -- Stoneskin Totem
-  --{ SpellID = 5730,   ID = "E3", GroupColor = "8B4513", Icon ="spell_nature_stoneclawtotem" },	            -- Stoneclaw Totem
-  --{ SpellID = 2062,    ID = "E6", GroupColor = "8B4513", Icon ="spell_nature_earthelemental_totem" },	      -- Earth Elemental Totem
-
-  -- Fire Totems
-  --{ SpellID = 8227, ID = "F5", GroupColor = "ff8f8f", Icon ="spell_nature_guardianward" }, 	                -- Flametongue Totem
-  --{ SpellID = 2894, ID = "F6", GroupColor = "ff8f8f", Icon ="spell_fire_elemental_totem" }, 	              -- Fire Elemental Totem
-
-  -- Air Totems
-  --{ SpellID = 8512,  ID = "A4", GroupColor = "ffb31f", Icon ="spell_nature_windfury" },	                 	  -- Windfury Totem
-  --{ SpellID = 3738,  ID = "A8", GroupColor = "ffb31f", Icon ="spell_nature_slowingtotem" },		              -- Wrath of Air Totem
-  --{ SpellID = 98008,  ID = "A9", GroupColor = "4c9900", Icon = "spell_shaman_spiritlink" },	      	        -- Spirit Link Totem
-
-  -- Water Totems
-  --{ SpellID = 5675,  ID = "W2", GroupColor = "b8d1ff", Icon ="spell_nature_manaregentotem" },               -- Mana Spring Totem
-  --{ SpellID = 8184,  ID = "W3", GroupColor = "b8d1ff", Icon ="spell_fireresistancetotem_01" },	            -- Elemental Resistance Totem
-  --{ SpellID = 87718,  ID = "W6", GroupColor = "b8d1ff", Icon ="spell_nature_brilliance" },	                -- Totem of Tranquil Mind
+  { SpellID = 108270,  ID = "T1", GroupColor = "b8d1ff", Icon = "ability_shaman_stonebulwark" },	          -- Stone Bulwark Totem
+  { SpellID = 51485,   ID = "T2", GroupColor = "b8d1ff", Icon = "spell_nature_stranglevines" },		          -- Earthgrab Totem
+  { SpellID = 108273,  ID = "T3", GroupColor = "b8d1ff", Icon = "ability_shaman_windwalktotem" },		        -- Windwalk Totem
 }
 
 local TOTEM_DATA_CATA_CLASSIC = {

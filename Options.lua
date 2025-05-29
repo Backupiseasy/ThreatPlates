@@ -1969,7 +1969,7 @@ local function CreateComboPointsWidgetOptions()
                   MAGE = (Addon.ExpansionIsAtLeast(LE_EXPANSION_LEGION) and L["Arcane Mage"]) or nil,
                   MONK = (Addon.ExpansionIsAtLeastMists  and L["Windwalker Monk"]) or nil,
                   -- Holy Power was introduced with Patch 4.0.1 (Cataclysm)
-                  PALADIN = (AAddon.ExpansionIsAtLeastCata  and L["Paladin"]) or nil,
+                  PALADIN = (Addon.ExpansionIsAtLeastCata  and L["Paladin"]) or nil,
                   ROGUE = L["Rogue"],
                   -- Soul Shard as a resource mechanic was introduced with Path 4.0.1 (Cataclysm)
                   WARLOCK = (Addon.ExpansionIsAtLeastCata  and L["Warlock"]) or nil,
