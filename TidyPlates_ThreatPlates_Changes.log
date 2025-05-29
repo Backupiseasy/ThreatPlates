@@ -1,4 +1,15 @@
 ﻿------------------------------------------------------
+12.2.0 (2025-05-29)
+------------------------------------------------------
+* HealerTracker widget has been improved so that it now works in arenas too (only for WoW Mainline) [Comment #7565].
+* Added support for DBM cooldown icons to BossMods widget.
+* Nameplates now will be immediately hidden when a mob dies similar to WoW default nameplates [GH-529, GH-576].
+* Unfriendly reaction color will also be used for attackable unfriendly units.
+* Added metadata to show Threat Plates in "Unit Frames" addon category.
+* Updated TOC version for Patch 1.15.7 for WoW Classic.
+* Updated integrated libraries (LibSharedMedia-3.0 v11.1.0, LibDualSpec-1.0 v1.26.0).
+
+------------------------------------------------------
 12.1.2 (2025-05-17)
 ------------------------------------------------------
 * Updated integrated library LibCustomGlow to 1.0.4-4-gdc135fe-alpha to fix Lua error "Attempted to release inactive object" [GH-579, GH-578, Comment #7592].
@@ -62,7 +73,7 @@
 12.0.9 (2024-07-15)
 ------------------------------------------------------
 * Fixed list of Shaman totems for TWW - added Totem of Wrath and Stone Bulwark Totem and removed non-existent totems [GH-550].
-* Fixed a bug that prevented totems with a spell rank from being recognised correctly in WoW Classic.
+* Fixed a bug that prevented totems with a spell rank from being recognized correctly in WoW Classic.
 
 ------------------------------------------------------
 12.0.8 (2024-07-15)
@@ -89,7 +100,7 @@
 12.0.4 (2024-07-14)
 ------------------------------------------------------
 * Fixed a bug that prevented CVars from being reset to their default value in General - Blizzard Settings.
-* Fixed a bug that prevented rogues with Just a Flesh Wund rune from being recognised as tanks in WoW Classic SoD.
+* Fixed a bug that prevented rogues with Just a Flesh Wound rune from being recognized as tanks in WoW Classic SoD.
 * Fixed some bugs due to API changes in Patch 11.0.2. 
 * Updated TOC version for Patch 11.0.2 for WoW Mainline.
 

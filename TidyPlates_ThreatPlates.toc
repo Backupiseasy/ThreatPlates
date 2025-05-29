@@ -1,6 +1,6 @@
 ## Interface: 110105
 ## Interface-Retail: 110105
-## Interface-Vanilla: 11506
+## Interface-Vanilla: 11507
 ## Interface-TBC: 20504
 ## Interface-Wrath: 30402
 ## Interface-Cata: 40402
@@ -16,6 +16,14 @@
 
 ## AddonCompartmentFunc: TidyPlatesThreat_OnAddonCompartmentClick
 ## IconTexture: Interface\Addons\TidyPlates_ThreatPlates\Artwork\Logo.tga
+## Category: Unit Frames
+## Category-deDE: Einheitenfenster
+
+## X-Category: Unit Frames
+## X-Website: https://wow.curseforge.com/projects/tidy-plates-threat-plates
+## X-Curse-Project-ID: 21217
+## X-WoWI-ID: 15749
+## X-Wago-ID: RqGZkkNd
 
 ## RequiredDeps:
 #@version-retail@
@@ -38,10 +46,6 @@
 ## OptionalDeps: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate, LibDualSpec-1.0
 ## X-Embeds: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate, LibDualSpec-1.0
 #@end-version-cata@
-## X-Website: https://wow.curseforge.com/projects/tidy-plates-threat-plates
-## X-Curse-Project-ID: 21217
-## X-WoWI-ID: 15749
-## X-Wago-ID: RqGZkkNd
 
 ## X-License: GNU General Public License
 ## X-Credits: danltiger (for Tidy Plates), Tosaido (for quest handling code from QuestMobs)

@@ -276,8 +276,12 @@ local function GetColorByReaction(unit)
       color = db[UNIT_COLOR_MAP[unit.reaction][unit_type][unit_is_pvp][player_is_pvp]]
     end
   -- * From here: For NPCs (without pets)
-  elseif not UnitCanAttack("player", unit.unitid) and unit.blue < 0.1 and unit.green > 0.5 and unit.green < 0.6 and unit.red > 0.9 then
-    -- Handle non-attackable units with brown healtbars - currently, I know no better way to detect this.
+  elseif unit.blue < 0.1 and unit.green > 0.5 and unit.green < 0.6 and unit.red > 0.9 then
+    -- Unfriendly NPCs are shown with a brown healthbar color. 
+    -- These NPCs can have a UnitReaction of 3 (neutral) or 4 (hostile), e.g., Addled Enforcer in The Ringing Deeps.
+    -- Checking for UnitReaction("player", unit.unitid) == 3 will not work reliably.
+    -- Before TWW, I thought that only non-attackable units are shown in brown, but in TWW there are now 
+    -- also attackable unfriendly NPCs with brown healthbars. 
     color = db.UnfriendlyFaction
   else
     color = db[UNIT_COLOR_MAP[unit.reaction][unit_type]]

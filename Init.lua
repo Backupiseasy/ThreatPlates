@@ -80,8 +80,6 @@ local L = ThreatPlates.L
 -- Define AceAddon TidyPlatesThreat
 ---------------------------------------------------------------------------------------------------
 TidyPlatesThreat = LibStub("AceAddon-3.0"):NewAddon("TidyPlatesThreat", "AceConsole-3.0", "AceEvent-3.0")
--- Global for DBM to differentiate between Threat Plates and Tidy Plates: Threat
-TidyPlatesThreatDBM = true
 
 -- Returns if the currently active spec is tank (true) or dps/heal (false)
 Addon.PlayerClass = select(2, UnitClass("player"))
@@ -168,6 +166,13 @@ else
 	end
 end
 
+--------------------------------------------------------------------------------------------------
+-- Compatibility with other addons 
+---------------------------------------------------------------------------------------------------
+
+-- Global for DBM to differentiate between Threat Plates and Tidy Plates: Threat
+TidyPlatesThreatDBM = true
+
 ---------------------------------------------------------------------------------------------------
 -- Aura Highlighting
 ---------------------------------------------------------------------------------------------------
@@ -183,6 +188,14 @@ local function Wrapper_AutoCastGlow_Start(frame, color, framelevel)
 	Addon.LibCustomGlow.AutoCastGlow_Start(frame, color, nil, nil, nil, nil, nil, nil, framelevel)
 end
 
+-- As there can be several custom styles with different glow effects be active on a unit, we have to stop all here
+local function Wrapper__PixelGlow_Stop(highlight_frame)
+  Addon.LibCustomGlow.ButtonGlow_Stop(highlight_frame)
+  Addon.LibCustomGlow.PixelGlow_Stop(highlight_frame)
+  Addon.LibCustomGlow.AutoCastGlow_Stop(highlight_frame)
+	highlight_frame:Hide()
+end
+
 Addon.CUSTOM_GLOW_FUNCTIONS = {
 	Button = { "ButtonGlow_Start", "ButtonGlow_Stop", 8 },
 	Pixel = { "PixelGlow_Start", "PixelGlow_Stop", 3 },
@@ -193,6 +206,7 @@ Addon.CUSTOM_GLOW_WRAPPER_FUNCTIONS = {
 	ButtonGlow_Start = Wrapper_ButtonGlow_Start,
 	PixelGlow_Start = Wrapper_PixelGlow_Start,
 	AutoCastGlow_Start = Wrapper_AutoCastGlow_Start,
+	Glow_Stop = Wrapper__PixelGlow_Stop,
 }
 
 --------------------------------------------------------------------------------------------------
