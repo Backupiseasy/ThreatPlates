@@ -231,7 +231,7 @@ local function UpdateExtensions(tp_frame, unitid, style)
             absorbbar.overlay:Hide()
           end
         else
-          absorbbarcore:Hide()
+          absorbbar:Hide()
           absorbbar.overlay:Hide()
         end
       end

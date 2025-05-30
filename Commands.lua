@@ -1,4 +1,4 @@
-local ADDON_NAME, Addon = ...
+﻿local ADDON_NAME, Addon = ...
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -166,6 +166,8 @@ local function ChatCommandDebug(cmd_list)
 		print("Classic Mists:", Addon.IS_MISTS_CLASSIC)
 		print("At least MoP:", Addon.ExpansionIsAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA))
 		Addon.Logging.Debug("WOW_USES_CLASSIC_NAMEPLATES:", Addon.WOW_USES_CLASSIC_NAMEPLATES)
+		Addon.Logging.Debug("WOW_FEATURE_ABSORBS:", Addon.WOW_FEATURE_ABSORBS)
+		Addon.Logging.Debug("WOW_FEATURE_BLIZZARD_AURA_FILTER:", Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER)
 	elseif command == "mists" then
 		print("PlayerRoleIsTank:", Addon:PlayerRoleIsTank())
 	else

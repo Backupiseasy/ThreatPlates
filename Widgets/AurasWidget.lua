@@ -1945,10 +1945,9 @@ local function ProcessAllUnitAurasClassic(unitid, effect)
       aura.duration = aura.duration or 0
 
       unit_auras[#unit_auras + 1] = aura
-      if aura.sourceUnit == "player" then
-        Addon.Logging.Debug("Aura:", aura.name, "=> ID:", aura.spellId)
-        --print("  =>", UnitAuraWrapper(unitid, i, effect))
-      end
+      -- if aura.sourceUnit == "player" then
+      --   Addon.Logging.Debug("Aura:", aura.name, "=> ID:", aura.spellId)
+      -- end
     else
       break
     end
