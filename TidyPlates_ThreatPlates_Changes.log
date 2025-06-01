@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+12.2.1 (2025-06-01)
+------------------------------------------------------
+* Fixed a bug that prevented nameplates from reappearing after a Hunter's Feign Death had ended [GH-583].
+
+------------------------------------------------------
 12.2.0 (2025-05-29)
 ------------------------------------------------------
 * HealerTracker widget has been improved so that it now works in arenas too (only for WoW Mainline) [Comment #7565].

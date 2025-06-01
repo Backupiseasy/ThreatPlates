@@ -386,6 +386,15 @@ function Addon:SetStyle(unit)
     return "empty"
   end
 
+  -- Hide the nameplate when the unit is dead. Otherwise, the empty healthbar will be shown until the nameplate is
+  -- removed. There will also be a short animation (the nameplate moving down) before it is removed. 
+  -- To avoid this glitch, we just set the nameplate style to empty. 
+  -- We cannot hide the nameplate here (or in UNIT_HEALTH), as this interferes with Hunter's Feign Death ability.
+  -- This results in the nameplate not being shown again if Feign Death ends [GH-583].
+  if UnitIsDead(unit.unitid) then
+    return "empty"
+  end
+
   if not style then
     if not UnitExists(unit.unitid) then
       style = "etotem"
