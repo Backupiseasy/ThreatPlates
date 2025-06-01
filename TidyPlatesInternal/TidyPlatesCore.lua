@@ -1553,7 +1553,7 @@ function CoreEvents:UPDATE_MOUSEOVER_UNIT()
 end
 
 local function UNIT_HEALTH(event, unitid)
-  -- Skip special unitids (they are updated via their nameplate unitid) and personal nameplate
+-- Skip special unitids (they are updated via their nameplate unitid) and personal nameplate
   if IGNORED_UNITIDS[unitid] or UnitIsUnit("player", unitid) then return end
 
   local plate = GetNamePlateForUnit(unitid)
@@ -1571,11 +1571,9 @@ local function UNIT_HEALTH(event, unitid)
       Addon.UpdateExtensions(plate.TPFrame, unitid, plate.TPFrame.stylename)
     end
 
-    -- If the unit is dead, update the style (and switch to headline view)
+    -- If the unit is dead, hide the nameplate by setting the style to empty (see Styles.lua)
     if UnitIsDead(unitid) then
       plate.UpdateMe = true
-      tp_frame:Hide()
-      tp_frame.Active = false 
     end
   end
 
