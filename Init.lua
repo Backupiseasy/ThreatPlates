@@ -47,12 +47,23 @@ Addon.ExpansionIsAtLeast = function(expansion_id)
 	end
 end
 
+-- Does not work for expansion_id_start = LE_EXPANSION_CLASSIC
 Addon.ExpansionIsBetween = function(expansion_id_start, expansion_id_end)
 	if GetClassicExpansionLevel then
 		local classic_expansion_level = GetClassicExpansionLevel()
 		return classic_expansion_level >= expansion_id_start and classic_expansion_level <= expansion_id_end
 	else
 		return false
+	end
+end
+
+Addon.GetExpansionLevel = function ()
+	if Addon.IS_MAINLINE then
+		return "MAINLINE"
+	elseif Addon.IS_CLASSIC then
+		return LE_EXPANSION_CLASSIC
+	else
+		return GetClassicExpansionLevel()
 	end
 end
 
@@ -64,6 +75,19 @@ Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER =  not Addon.WOW_USES_CLASSIC_NAMEPLATES
 Addon.ExpansionIsAtLeastWrath = Addon.ExpansionIsAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING)
 Addon.ExpansionIsAtLeastCata = Addon.ExpansionIsAtLeast(LE_EXPANSION_CATACLYSM)
 Addon.ExpansionIsAtLeastMists = Addon.ExpansionIsAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA)
+
+---------------------------------------------------------------------------------------------------
+-- Constants with different values in different expansions
+---------------------------------------------------------------------------------------------------
+
+Addon.NAMEPLATE_MAX_DISTANCE_MAX_VALUE = {
+  [LE_EXPANSION_CLASSIC] = 20,
+  [LE_EXPANSION_BURNING_CRUSADE] = 41,
+  [LE_EXPANSION_WRATH_OF_THE_LICH_KING] = 41,
+  [LE_EXPANSION_CATACLYSM] = 41,
+  [LE_EXPANSION_MISTS_OF_PANDARIA] = 41,
+  MAINLINE = 100,
+}
 
 ---------------------------------------------------------------------------------------------------
 -- Libraries
