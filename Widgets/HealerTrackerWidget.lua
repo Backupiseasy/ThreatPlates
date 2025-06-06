@@ -242,7 +242,6 @@ local HEALER_SPELLS_BY_EXPANSION = {
 
     -- Druid
     ---------
-    [81262] = "DRUID",  -- Efflorescence
     [145518] = "DRUID", -- Genesis
     [33763] = "DRUID",  -- Lifebloom
     [88423] = "DRUID",  -- Nature's Cure
