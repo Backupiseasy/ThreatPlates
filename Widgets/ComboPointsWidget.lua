@@ -26,6 +26,7 @@ local GetSpellInfo, IsSpellUsable = Addon.GetSpellInfo, C_Spell and C_Spell.IsSp
 local GetShapeshiftFormID = GetShapeshiftFormID
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local InCombatLockdown = InCombatLockdown
+local GetSpecialization = C_SpecializationInfo and C_SpecializationInfo.GetSpecialization or _G.GetSpecialization
 
 -- ThreatPlates APIs
 local RGB = Addon.ThreatPlates.RGB
@@ -228,11 +229,11 @@ local SettingsCooldown, ShowCooldownDuration, OnUpdateCooldownDuration
 ---------------------------------------------------------------------------------------------------
 
 -- GetSpecialization: Mists - Patch 5.0.4 (2012-08-28): Replaced GetPrimaryTalentTree.
-if Addon.IS_MAINLINE then
+if Addon.ExpansionIsAtLeastMists then
     function Widget:DetermineUnitPower()
       local power_type = UNIT_POWER[PlayerClass]
       if power_type then
-        power_type = power_type[_G.GetSpecialization()] or power_type
+        power_type = power_type[GetSpecialization()] or power_type
       end
   
       if power_type and power_type.Name then
@@ -811,8 +812,8 @@ local function UpdateWidgetAfterTalentChange()
   if not Widget.PowerType then return end
 
   -- GetSpecialization: Mists - Patch 5.0.4 (2012-08-28): Replaced GetPrimaryTalentTree.
-  if Addon.IS_MAINLINE then
-    ActiveSpec = _G.GetSpecialization()
+  if Addon.ExpansionIsAtLeastMists then
+    ActiveSpec = GetSpecialization()
     UpdateComboPointsFunctionForRogues()
   end
 
@@ -831,7 +832,7 @@ end
 -- Arguments of ACTIVE_TALENT_GROUP_CHANGED (curr, prev) always seem to be 1, 1
 function Widget:ACTIVE_TALENT_GROUP_CHANGED(...)
   -- GetSpecialization: Mists - Patch 5.0.4 (2012-08-28): Replaced GetPrimaryTalentTree.
-  local current_spec = _G.GetSpecialization()
+  local current_spec = GetSpecialization()
   if ActiveSpec ~= current_spec or PlayerClass == "ROGUE" then
     -- Player switched to a spec that has combo points
     ActiveSpec = current_spec
@@ -940,11 +941,11 @@ function Widget:IsEnabled()
   -- Other possibility for Classic: PLAYER_TALENT_UPDATE, CHARACTER_POINTS_CHANGED
   -- No need to use it for Classic, as GetSpecialization is not available there and CPs don't change between first 
   -- and second spec.
-  if enabled and Addon.IS_MAINLINE then
+  if enabled and Addon.ExpansionIsAtLeastMists then
     -- Register ACTIVE_TALENT_GROUP_CHANGED here otherwise it won't be registered when an spec is active that does not have combo points.
     -- If you then switch to a spec with talent points, the widget won't be enabled.
-    self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
-    self:RegisterEvent("TRAIT_CONFIG_UPDATED")    
+    self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")  -- Added in patch 3.2.0 / 1.14.4
+    self:RegisterEvent("TRAIT_CONFIG_UPDATED") -- Added in patch 10.0.0 / 1.14.4
   end
 
   self:DetermineUnitPower()
@@ -985,7 +986,7 @@ function Widget:OnEnable()
     elseif PlayerClass == "DEATHKNIGHT" then
       -- Never registered for Classic, as there is no Death Knight class
       self:RegisterEvent("RUNE_POWER_UPDATE", EventHandler)
-      if Addon.ExpansionIsClassicAndAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) then
+      if Addon.ExpansionIsBetween(LE_EXPANSION_WRATH_OF_THE_LICH_KING, LE_EXPANSION_LEGION) then
         self:RegisterEvent("RUNE_TYPE_UPDATE", EventHandler)
       end
     end
@@ -1004,13 +1005,14 @@ function Widget:OnDisable()
   self:UnregisterEvent("UNIT_POWER_FREQUENT")
   self:UnregisterEvent("UNIT_POWER_UPDATE")
   self:UnregisterEvent("UNIT_DISPLAYPOWER")
+  -- UNIT_POWER_POINT_CHARGE: Shadowlands Patch 9.0.1 (2020-10-13): Added.
   if Addon.IS_MAINLINE then
     self:UnregisterEvent("UNIT_POWER_POINT_CHARGE")
   end
   
   self:UnregisterEvent("UPDATE_SHAPESHIFT_FORM")
   self:UnregisterEvent("RUNE_POWER_UPDATE")
-  if Addon.ExpansionIsAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) then
+  if Addon.ExpansionIsAtLeastWrath then
     self:UnregisterEvent("RUNE_TYPE_UPDATE")
   end
 
@@ -1085,7 +1087,7 @@ end
 
 local function UpdateTexture(texture, texture_path, resource_index)
   if Widget.db.Style == "Blizzard" then
-    if Addon.ExpansionIsClassicAndAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) and PlayerClass == "DEATHKNIGHT" then
+    if Addon.ExpansionIsBetween(LE_EXPANSION_WRATH_OF_THE_LICH_KING, LE_EXPANSION_LEGION) and PlayerClass == "DEATHKNIGHT" then
       local texture_data = texture_path.RuneType
       texture:SetTexture(texture_data[resource_index])
       texture:SetAlpha(texture_data.Alpha or 1)
@@ -1244,14 +1246,14 @@ function Widget:UpdateSettings()
   end
 
   -- GetSpecialization: Mists - Patch 5.0.4 (2012-08-28): Replaced GetPrimaryTalentTree.
-  if Addon.IS_MAINLINE then
-    ActiveSpec = _G.GetSpecialization()
+  if Addon.ExpansionIsAtLeastMists then
+    ActiveSpec = GetSpecialization()
   end
 
   -- Some of this could be configured outside of UpdateSettings, as it does not change based on settings, but for easier maintenance
   -- I am configuring everything here
   if PlayerClass == "DEATHKNIGHT" then
-    if Addon.ExpansionIsClassicAndAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) then
+    if Addon.ExpansionIsBetween(LE_EXPANSION_WRATH_OF_THE_LICH_KING, LE_EXPANSION_LEGION) then
       GetRuneStatus = GetRuneStateWrath
       UpdateRuneStatusActive = UpdateRuneStatusActiveWrath
       UpdateRuneStatusInactive = UpdateRuneStatusInactiveWrath

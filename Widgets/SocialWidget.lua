@@ -54,7 +54,7 @@ local BNGetFriendInfo, BNGetFriendInfoByID = BNGetFriendInfo, BNGetFriendInfoByI
 local GetFriendAccountInfo, GetGameAccountInfoByID -- For Retail
 
 -- GetFriendAccountInfo and GetAccountInfoByID: BfA - Patch 8.2.5 (2019-09-24): Changed to C_BattleNet.GetFriendAccountInfo() and C_BattleNet.GetAccountInfoByID().
-if Addon.IS_MAINLINE then
+if Addon.ExpansionIsAtLeastMists then
   GetFriendAccountInfo, GetGameAccountInfoByID = C_BattleNet.GetFriendAccountInfo, C_BattleNet.GetGameAccountInfoByID
 else
   local AccountInfo = {

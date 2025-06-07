@@ -158,16 +158,20 @@ local function ChatCommandDebug(cmd_list)
 				table.remove(input, i)
 				Addon.Logging.Debug("Removing", i)
 			end
-		end
+		end			
 	elseif command == "version" then
-		print("Mainline:", Addon.IS_MAINLINE)
-		print("Classic:", Addon.IS_CLASSIC)
-		print("Classic SoD:", Addon.IS_CLASSIC_SOD)
-		print("Classic Cata:", Addon.IS_CATA_CLASSIC)
-		print("Classic and at least Cata:", Addon.ExpansionIsClassicAndAtLeast(LE_EXPANSION_CATACLYSM))
-		print("Classic and at least MoP:", Addon.ExpansionIsClassicAndAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA))
-		print("At least Cata:", Addon.ExpansionIsAtLeast(LE_EXPANSION_CATACLYSM))
-		print("At least MoP:", Addon.ExpansionIsAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA))
+		Addon.Logging.Debug("Expansion Level:", Addon.GetExpansionLevel())
+		Addon.Logging.Debug("Mainline:", Addon.IS_MAINLINE)
+		Addon.Logging.Debug("Classic:", Addon.IS_CLASSIC)
+		Addon.Logging.Debug("Classic SoD:", Addon.IS_CLASSIC_SOD)
+		Addon.Logging.Debug("Classic Mists:", Addon.IS_MISTS_CLASSIC)
+		Addon.Logging.Debug("At least MoP:", Addon.ExpansionIsAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA))
+		Addon.Logging.Debug("WOW_USES_CLASSIC_NAMEPLATES:", Addon.WOW_USES_CLASSIC_NAMEPLATES)
+		Addon.Logging.Debug("WOW_FEATURE_ABSORBS:", Addon.WOW_FEATURE_ABSORBS)
+		Addon.Logging.Debug("WOW_FEATURE_BLIZZARD_AURA_FILTER:", Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER)
+		Addon.Logging.Debug("NAMEPLATE_MAX_DISTANCE_MAX_VALUE:", Addon.NAMEPLATE_MAX_DISTANCE_MAX_VALUE[Addon.GetExpansionLevel()])
+	elseif command == "mists" then
+		print("PlayerRoleIsTank:", Addon:PlayerRoleIsTank())
 	else
 		Addon.Logging.Error(L["Unknown option: "] .. command)
 		PrintHelp()
