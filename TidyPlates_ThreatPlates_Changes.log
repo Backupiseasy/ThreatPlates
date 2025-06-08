@@ -1,7 +1,7 @@
 ﻿------------------------------------------------------
 12.1.0 (2024-11-01)
 ------------------------------------------------------
-* Added an option to 
+* Extended the scripting API to change most of the icon textures used in Threat Plates. More documentation can be found here: https://github.com/Backupiseasy/ThreatPlates/wiki/Scripts-%E2%80%90-Icon-Textures.
 
 ------------------------------------------------------
 12.0.12 (2024-11-01)
@@ -28,7 +28,7 @@
 12.0.9 (2024-07-15)
 ------------------------------------------------------
 * Fixed list of Shaman totems for TWW - added Totem of Wrath and Stone Bulwark Totem and removed non-existent totems [GH-550].
-* Fixed a bug that prevented totems with a spell rank from being recognised correctly in WoW Classic.
+* Fixed a bug that prevented totems with a spell rank from being recognized correctly in WoW Classic.
 
 ------------------------------------------------------
 12.0.8 (2024-07-15)

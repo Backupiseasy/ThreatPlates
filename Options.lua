@@ -353,74 +353,112 @@ end
 -------------------------------------------------------------------------------
 
 local IconTexturesByOptions = {
-  Arena = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ArenaWidget\\BG",
-  Classes = {},
-  HealerTracker = "Interface\\Icons\\Achievement_Guild_DoctorIsIn",
-  Quest = {
-    Highlight = nil,
-    KillObjective = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\QuestWidget\\kill",
-    LootObjective = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\QuestWidget\\loot",  
-  },
-  Social = {
-    Alliance = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\SocialWidget\\allianceicon",
-    Horde = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\SocialWidget\\hordeicon",
-    Friend = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\SocialWidget\\friendicon",
-    BattleNetFriend = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\SocialWidget\\BattleNetFriend", -- "Interface\\FriendsFrame\\PlusManz-BattleNet"
-    GuildMember = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\SocialWidget\\guildicon"
-  },
-  Stealth = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\StealthWidget\\stealthicon",
-  Totems = {},
-  -- UnitClassification = {
-  --   Rare = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\default",
-  --   Elite = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\default-elite",
-  --   RareElite = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\default-rareelite",
-  --   Boss = "Interface\\TargetingFrame\\UI-TargetingFrame-Skull",
-  -- }
+  ["Arena"] = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ArenaWidget\\BG",
+  -- Class.<CLASS_NAME>, e.g. Class.DRUID
+  -- ComboPoint.<NO>.On, e.g., ComboPoint.1.On
+  -- ComboPoint.<NO>.Off, e.g., ComboPoint.1.Off
+  -- FocusHighlight.Center|Left|Right
+  ["Quest.Highlight"] = nil,
+  ["Quest.KillObjective"] = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\QuestWidget\\kill",
+  ["Quest.LootObjective"] = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\QuestWidget\\loot",  
+  ["HealerTracker"] = "Interface\\Icons\\Achievement_Guild_DoctorIsIn",
+  -- Social.* does not support tex coords
+  ["Social.Alliance"] = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\SocialWidget\\allianceicon",
+  ["Social.Horde"] = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\SocialWidget\\hordeicon",
+  ["Social.Friend"] = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\SocialWidget\\friendicon",
+  ["Social.BattleNetFriend"] = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\SocialWidget\\BattleNetFriend", -- "Interface\\FriendsFrame\\PlusManz-BattleNet"
+  ["Social.GuildMember"] = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\SocialWidget\\guildicon",
+  ["Stealth"] = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\StealthWidget\\stealthicon",
+  -- TargetHighlight.Center|Left|Right
+  -- TargetMarker.<NAME>, e.g., TargetMarker.SKULL 
+  -- Totem.<SPELL_ID>, e.g., 
+  ["UnitClassification.Rare"] = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\default",
+  ["UnitClassification.Boss"] = "Interface\\TargetingFrame\\UI-TargetingFrame-Skull",
 }
 
-Addon.IconTextures = {}
-setmetatable(Addon.IconTextures, { __index = IconTexturesByOptions })
+local TARGET_MARKER_TEXTURES = {
+  ["STAR"] = { x = 0, y =0 },
+  ["CIRCLE"] = { x = 0.25, y = 0 },
+  ["DIAMOND"] = { x = 0.5, y = 0 },
+  ["TRIANGLE"] = { x = 0.75, y = 0},
+  ["MOON"] = { x = 0, y = 0.25},
+  ["SQUARE"] = { x = .25, y = 0.25},
+  ["CROSS"] = { x = .5, y = 0.25},
+  ["SKULL"] = { x = .75, y = 0.25},
+  ["GREEN_FLAG"] = { x = 0.5, y = 0.75 },
+  ["MURLOC"] = { x = 0.75, y = 0.75 },
+}
 
--- local function GetIconTextureFromBaseEntry(icon_source, ...)
---   if type(icon_source) == "function" then
---     -- local call_ok, return_value = pcall(icon_source, ...)
---     -- if not call_ok then
---     --   Addon.Logging.Error(string_format(L["Error in event script '%s' of custom style '%s': %s"], event, Addon.CustomPlateGetHeaderName(custom_style), return_value))
---     -- end
-
---     -- return return_value
-
---     return icon_source(...)
---   end
-
---   return icon_source
--- end
-
--- function Addon:GetIconTexture(icon_id, optional_sub_icon_id, ...)
---   local icon_source = Addon.IconTextures[icon_id]
-
---   if type(icon_source) == "table" then
---     return GetIconTextureFromBaseEntry(icon_source[optional_sub_icon_id], ...)
---   end
-
---   return GetIconTextureFromBaseEntry(icon_source, optional_sub_icon_id, ...)
--- end
-
-function Addon:GetIconTexture(icon_id, optional_sub_icon_id, ...)
-  local icon_source = Addon.IconTextures[icon_id]
-  
-  if type(icon_source) == "table" then
-    return icon_source[optional_sub_icon_id]
-  end
-
-  return icon_source
+for target_marker, tex_coords in pairs(TARGET_MARKER_TEXTURES) do
+  IconTexturesByOptions["TargetMarker." .. target_marker] = { "Interface\\TargetingFrame\\UI-RaidTargetingIcons", tex_coords.x, tex_coords.x + 0.25, tex_coords.y, tex_coords.y + 0.25 }
 end
 
+Addon.IconTextures = setmetatable( {}, { __index = IconTexturesByOptions })
+
+function Addon:GetIconTexture(icon_id, ...)
+  local icon_source = Addon.IconTextures[icon_id]
+
+  if type(icon_source) == "function" then
+    -- Environment for this function is set in ScriptWidget when setting it for icon_id
+    local call_ok, return_value = pcall(icon_source, ...)
+    if call_ok then
+      return return_value
+    else
+      -- If the function call failed, we log the error and return nothing
+      Addon.Logging.Error(string.format(L["Error executing icon texture function for %s:"], icon_id), return_value)
+    end
+  else
+    return icon_source
+  end
+end
+
+function Addon:UpdateIconTexture(icon, texture_info)
+  if type(texture_info) == "table" then
+    icon:SetTexture(texture_info.Texture) -- ?  or EMPTY_TEXTURE
+
+    local tex_coords = texture_info.TexCoords
+    if tex_coords then
+      icon:SetTexCoord(tex_coords[1] or 0, tex_coords[2] or 1, tex_coords[3] or 0, tex_coords[4] or 1)
+    end
+
+    local color = texture_info.Color
+    if color then
+      icon:SetDesaturated(true)
+      icon:SetVertexColor(color.r or 1, color.g or 1, color.b or 1, color.a or 1)
+    end
+
+    if texture_info.Alpha then
+      icon:SetAlpha(texture_info.Alpha)
+    end
+    
+    if texture_info.Desaturated then
+      icon:SetDesaturated(texture_info.Desaturated)
+    end
+  else
+    icon:SetTexture(texture_info) -- ?  or EMPTY_TEXTURE
+  end
+end
+
+function Addon:SetIconTexture(icon, icon_id, ...)
+  local texture_info = Addon:GetIconTexture(icon_id, ...)
+  if not texture_info then return end
+  
+  Addon:UpdateIconTexture(icon, texture_info)
+end
+
+local function UpdateUnitClassificationIconTextures(style, options_path)
+  IconTexturesByOptions["UnitClassification.Rare"] = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\" .. style
+  if options_path then
+    options_path.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewRare.image = IconTexturesByOptions["UnitClassification.Rare"]
+    options_path.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewElite.image = string.gsub(IconTexturesByOptions["UnitClassification.Rare"], style, "elite-" .. style)
+    options_path.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewRareElite.image = string.gsub(IconTexturesByOptions["UnitClassification.Rare"], style, "rareelite-" .. style)
+  end
+end
 
 local function UpdateQuestIconTexture(icon_texture, options_path)
-  IconTexturesByOptions.Quest.Highlight = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\QuestWidget\\" .. icon_texture
+  IconTexturesByOptions["Quest.Highlight"] = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\QuestWidget\\" .. icon_texture
   if options_path then
-    options_path.args.Widgets.args.QuestWidget.args.ModeIcon.args.Texture.args.Preview.image = IconTexturesByOptions.Quest.Highlight
+    options_path.args.Widgets.args.QuestWidget.args.ModeIcon.args.Texture.args.Preview.image = IconTexturesByOptions["Quest.Highlight"]
   end
 end
 
@@ -428,17 +466,17 @@ local function UpdateClassIconTextures(class_theme, options_path)
   local class_list = t.CopyTable(CLASS_SORT_ORDER)
   sort(class_list)
   for i, class in ipairs(class_list) do
-    IconTexturesByOptions.Classes[class] = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ClassIconWidget\\" .. class_theme .. "\\" .. class
+    IconTexturesByOptions["Class." .. class] = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ClassIconWidget\\" .. class_theme .. "\\" .. class
     if options_path then
-      options_path.args.Widgets.args.ClassIconWidget.args.Textures.args["Prev" .. i].image = IconTexturesByOptions.Classes[class]
+      options_path.args.Widgets.args.ClassIconWidget.args.Textures.args["Prev" .. i].image = IconTexturesByOptions["Class." .. class]
     end
   end
 end
 
 local function UpdateTotemIconTexture(totem_style, totem_info, options_path)
-  IconTexturesByOptions.Totems[totem_info.SpellID] = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\" .. totem_style .. "\\" .. totem_info.Icon
+  IconTexturesByOptions["Totem." .. tostring(totem_info.SpellID)] = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\" .. totem_style .. "\\" .. totem_info.Icon
   if options_path then
-    options_path.args.Totems.args[totem_info.Name].args.Textures.args.Icon.image = IconTexturesByOptions.Totems[totem_info.SpellID]
+    options_path.args.Totems.args[totem_info.Name].args.Textures.args.Icon.image = IconTexturesByOptions["Totem." .. tostring(totem_info.SpellID)]
   end
 end
 
@@ -448,12 +486,45 @@ local function UpdateTotemIconTextures(totem_settings, options_path)
   end
 end
 
+local function SetTargetArtIconTexture(icon_id, style, tex_coords)
+  IconTexturesByOptions[icon_id] = {
+    Texture = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\" .. style,
+    TexCoords = tex_coords,
+  }
+end
+local function UpdateTargetArtIconTexture(style, options_path)
+  -- This also sets these icon ids unsed for the selected style, but they are not used it that case, so it does not matter
+  SetTargetArtIconTexture("TargetHighlight.Center", style, { 0, 1, 0, 1 })
+  SetTargetArtIconTexture("TargetHighlight.Left", style, { 0, 1, 0, 1 })
+  SetTargetArtIconTexture("TargetHighlight.Right", style, { 1, 0, 0, 1 })
+
+  if options_path then
+    options.args.Widgets.args.TargetArtWidget.args.Indicator.args.Texture.args.Preview.image = IconTexturesByOptions["TargetHighlight.Center"].Texture
+  end
+end
+
+local function UpdateFocusArtIconTexture(style, options_path)
+  -- This also sets these icon ids unsed for the selected style, but they are not used it that case, so it does not matter
+  SetTargetArtIconTexture("FocusHighlight.Center", style, { 0, 1, 0, 1 })
+  SetTargetArtIconTexture("FocusHighlight.Left", style, { 0, 1, 0, 1 })
+  SetTargetArtIconTexture("FocusHighlight.Right", style, { 1, 0, 0, 1 })
+
+  if options_path then
+    options.args.Widgets.args.FocusWidget.args.Texture.args.Preview.image = IconTexturesByOptions["FocusHighlight.Center"].Texture
+  end
+end
+
 function Addon:InitializeIconTextures(options_path)
   local db = self.db.profile
 
+  --wipe(Addon.IconTextures)
+
+  UpdateUnitClassificationIconTextures(db.settings.eliteicon.theme, options_path)
   UpdateQuestIconTexture(db.questWidget.IconTexture, options_path)
   UpdateClassIconTextures(db.classWidget.theme, options)
   UpdateTotemIconTextures(db.totemSettings, options)
+  UpdateTargetArtIconTexture(db.targetWidget.theme, options_path)
+  UpdateFocusArtIconTexture(db.FocusWidget.theme, options_path)
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -2728,7 +2799,7 @@ end
                 name = L["Preview"],
                 order = 20,
                 type = "execute",
-                image = Addon:GetIconTexture("Quest", "Highlight"),
+                image = IconTexturesByOptions["Quest.Highlight"],
               },
               PlayerColor = {
                 name = L["Color"],
@@ -2844,7 +2915,7 @@ local function CreateTargetArtWidgetOptions()
                 name = L["Preview"],
                 order = 10,
                 type = "execute",
-                image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\" .. db.targetWidget.theme,
+                image = IconTexturesByOptions["TargetHighlight.Center"].Texture,
                 imageWidth = 64,
                 imageHeight = 64,
               },
@@ -2853,8 +2924,8 @@ local function CreateTargetArtWidgetOptions()
                 type = "select",
                 order = 20,
                 set = function(info, val)
+                  UpdateTargetArtIconTexture(val, options)
                   SetValueWidget(info, val)
-                  options.args.Widgets.args.TargetArtWidget.args.Indicator.args.Texture.args.Preview.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\" .. db.targetWidget.theme;
                 end,
                 values = Addon.TARGET_TEXTURES,
                 arg = { "targetWidget", "theme" },
@@ -3545,7 +3616,7 @@ local function CreateFocusWidgetOptions()
             name = L["Preview"],
             order = 10,
             type = "execute",
-            image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\" .. db.FocusWidget.theme,
+            image = IconTexturesByOptions["FocusHighlight.Center"].Texture,
             imageWidth = 64,
             imageHeight = 64,
           },
@@ -3554,8 +3625,8 @@ local function CreateFocusWidgetOptions()
             type = "select",
             order = 20,
             set = function(info, val)
+              UpdateFocusArtIconTexture(val, options)
               SetValueWidget(info, val)
-              options.args.Widgets.args.FocusWidget.args.Texture.args.Preview.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\" .. db.FocusWidget.theme
             end,
             values = Addon.TARGET_TEXTURES,
             arg = { "FocusWidget", "theme" },
@@ -8942,8 +9013,7 @@ CreateCustomNameplateEntry = function(index)
                 custom_style.Scripts.Event = nil
               end
 
-              Addon:InitializeCustomNameplates()
-              Addon.Widgets:UpdateSettings("Script")
+              UpdateSpecial()
             end,
             get = function(info)
               return CustomPlateGetExampleForEventScript(db.uniqueSettings[index], db.uniqueSettings[index].Scripts.Function)
@@ -9034,7 +9104,6 @@ CreateCustomNameplateEntry = function(index)
                   end
 
                   --Addon:InitializeCustomNameplates()
-                  --Addon.Widgets:UpdateSettings("Script")
                   UpdateSpecial()
 
                   frame:Hide()
@@ -10406,9 +10475,7 @@ local function CreateOptionsTable()
                       values = { default = "Default", stddragon = "Blizzard Dragon", skullandcross = "Skull and Crossbones", lion = "Lions", wolf = "Wolves", necro = "Necrolord", fae = "Night Fae", venthyr = "Venthyr", kyrian = "Kyrian", alliance = "Alliance", horde = "Horde" },
                       set = function(info, val)
                         SetThemeValue(info, val)
-                        options.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewRare.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\" .. val
-                        options.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewElite.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\" .. "elite-" .. val
-                        options.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewRareElite.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\" .. "rareelite-" .. val
+                        UpdateUnitClassificationIconTextures(val, options)
                         Addon:ForceUpdate()
                       end,
                       arg = { "settings", "eliteicon", "theme" },
@@ -10417,19 +10484,19 @@ local function CreateOptionsTable()
                       name = L["Preview Rare"],
                       type = "execute",
                       order = 20,
-                      image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\" .. db.settings.eliteicon.theme,
+                      image = IconTexturesByOptions["UnitClassification.Rare"],
                     },
                     PreviewElite = {
                       name = L["Preview Elite"],
                       type = "execute",
                       order = 30,
-                      image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\" .. "elite-" .. db.settings.eliteicon.theme,
+                      image = string.gsub(IconTexturesByOptions["UnitClassification.Rare"], db.settings.eliteicon.theme, "elite-" .. db.settings.eliteicon.theme),
                     },
                     PreviewRareElite = {
                       name = L["Preview Rare Elite"],
                       type = "execute",
                       order = 40,
-                      image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\" .. "rareelite-" .. db.settings.eliteicon.theme,
+                      image = string.gsub(IconTexturesByOptions["UnitClassification.Rare"], db.settings.eliteicon.theme, "rareelite-" .. db.settings.eliteicon.theme),
                     },
                   },
                 },
@@ -11265,10 +11332,6 @@ function Addon:ProfChange()
 
   -- Update options stuff after profile change
   if options then
-    options.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewRare.image = path .. "EliteArtWidget\\" .. db.settings.eliteicon.theme
-    options.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewElite.image = path .. "EliteArtWidget\\" .. "elite-" .. db.settings.eliteicon.theme
-    options.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewElite.image = path .. "EliteArtWidget\\" .. "rareelite-" .. db.settings.eliteicon.theme
-
     local base = options.args.Widgets.args
     base.TargetArtWidget.args.Indicator.args.Texture.args.Preview.image = path .. "TargetArtWidget\\" .. db.targetWidget.theme;
 
@@ -11278,8 +11341,6 @@ function Addon:ProfChange()
     base.PrevLow.image = threat_path .. "HIGH"
     base.PrevMed.image = threat_path .. "MEDIUM"
     base.PrevHigh.image = threat_path .. "LOW"
-
-    Addon:InitializeIconTextures(options_path)
 
     CreateCustomNameplatesGroup()
   end

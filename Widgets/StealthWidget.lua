@@ -174,7 +174,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
   widget_frame:SetAlpha(db.alpha)
 
   -- Updates based on unit status
-  widget_frame.Icon:SetTexture(Addon:GetIconTexture("Stealth", unit.unitid))
+  Addon:SetIconTexture(widget_frame.Icon, "Stealth" , unit.unitid)
 
   widget_frame:Show()
 end

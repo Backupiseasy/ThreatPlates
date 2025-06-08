@@ -59,20 +59,6 @@ local IGNORED_UNITIDS = {
   -- any/softinteract does not seem to be necessary here
 }
 
--- Raid Icon Reference
-local RaidIconCoordinate = {
-  ["STAR"] = { x = 0, y =0 },
-  ["CIRCLE"] = { x = 0.25, y = 0 },
-  ["DIAMOND"] = { x = 0.5, y = 0 },
-  ["TRIANGLE"] = { x = 0.75, y = 0},
-  ["MOON"] = { x = 0, y = 0.25},
-  ["SQUARE"] = { x = .25, y = 0.25},
-  ["CROSS"] = { x = .5, y = 0.25},
-  ["SKULL"] = { x = .75, y = 0.25},
-  ["GREEN_FLAG"] = { x = 0.5, y = 0.75 },
-  ["MURLOC"] = { x = 0.75, y = 0.75 },
-}
-
 local CASTBAR_INTERRUPT_HOLD_TIME = Addon.CASTBAR_INTERRUPT_HOLD_TIME
 local ON_UPDATE_INTERVAL = Addon.ON_UPDATE_PER_FRAME
 local PLATE_FADE_IN_TIME = Addon.PLATE_FADE_IN_TIME
@@ -994,21 +980,9 @@ do
 
 	-- UpdateIndicator_RaidIcon
 	function UpdateIndicator_RaidIcon()
-    --    if unit.isMarked and RaidIconCoordinate[unit.raidIcon] == nil then
-    --      ThreatPlates.DEBUG("UpdateIndicator_RaidIcon:", unit.unitid, "- isMarked:", unit.isMarked, "/ raidIcon:", unit.raidIcon)
-    --      ThreatPlates.DEBUG("UpdateIndicator_RaidIcon: RaidIconCoordinate:", RaidIconCoordinate[unit.raidIcon])
-    --    end
-
     if (unit.isMarked and style.raidicon.show) or ShouldShowMentorIcon(unit.raidIcon) then
-      local iconCoord = RaidIconCoordinate[unit.raidIcon]
-      if iconCoord then
-        -- ! Maybe use SetRaidTargetIconTexture(icon, index) - then we don't need SetTexCoord anymore
-        -- SetRaidTargetIconTexture(visual.raidicon, GetRaidTargetIndex(unit.unitid));
-        visual.raidicon:Show()
-        visual.raidicon:SetTexCoord(iconCoord.x, iconCoord.x + 0.25, iconCoord.y,  iconCoord.y + 0.25)
-      else
-        visual.raidicon:Hide()
-      end
+      Addon:SetIconTexture(visual.raidicon, "TargetMarker." .. unit.raidIcon)
+      visual.raidicon:Show()
     else
       visual.raidicon:Hide()
     end
@@ -2059,11 +2033,6 @@ do
     -- "threatborder", "castborder", "castnostop", "eliteicon", "target", "raidicon" 
   }
 
-	local texturegroup = {
-    "skullicon", "spellicon",
-    -- "highlight", threatborder, "castborder", "castnostop", "eliteicon", "target"
-  }
-
 	-- UpdateStyle:
 	function UpdateStyle()
 		local index
@@ -2110,12 +2079,8 @@ do
     end
 
     -- Texture
-    for index = 1, #texturegroup do
-      local objectname = texturegroup[index]
-      local object, objectstyle = visual[objectname], style[objectname]
-
-      SetTextureGroupObject(object, objectstyle)
-    end
+    SetTextureGroupObject(visual.spellicon, style.spellicon)
+    Addon:SetIconTexture(visual.skullicon, "UnitClassification.Boss")
     Addon:Element_Mouseover_Configure(visual.Highlight, style.highlight)
 
     -- Show certain elements, don't change anything else
@@ -2127,8 +2092,6 @@ do
 
     -- Raid Icon Texture
     SetAnchorGroupObject(visual.raidicon, style.raidicon, extended)
-    SetTextureGroupObject(visual.raidicon, style.raidicon)
-    --visual.raidicon:SetTexture(style.raidicon.texture)
     -- TOODO: does not really work with ForceUpdate() as isMarked is not set there (no call to UpdateUnitCondition)
     visual.raidicon:SetShown((unit.isMarked and style.raidicon.show) or ShouldShowMentorIcon(unit.raidIcon))
 
@@ -2163,7 +2126,7 @@ do
     if style.eliteicon and style.eliteicon.show then
       SetAnchorGroupObject(visual.eliteicon, style.eliteicon, extended)
     end
-    SetTextureGroupObject(visual.eliteicon, style.eliteicon)
+    Addon:SetIconTexture(visual.eliteicon, "UnitClassification.Rare")
     UpdateIndicator_EliteIcon()
 
 		if not unit.isBoss then visual.skullicon:Hide() end

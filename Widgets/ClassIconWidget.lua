@@ -88,16 +88,8 @@ function Widget:OnUnitAdded(widget_frame, unit)
       widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
     end
 
-    -- Updates based on settings
     widget_frame:SetSize(db.scale, db.scale)
-
-    -- Updates based on unit status
-    widget_frame.Icon:SetTexture(Addon:GetIconTexture("Classes", unit.class, unit.unitid))
-
-    -- if Masque then
-    -- 	group = Masque:Group("TidyPlatesThreat")
-    -- 	group:ReSkin(frame)
-    -- end
+    Addon:SetIconTexture(widget_frame.Icon, "Class." .. unit.class, unit.unitid)
 
     widget_frame:Show()
   else

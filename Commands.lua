@@ -131,6 +131,7 @@ local function ChatCommandDebug(cmd_list)
 		if widget_name then
 			local widget = Addon.Widgets.Widgets[widget_name]
 			if widget then 
+				Addon.Logging.Debug(widget_name .. ":")
 				widget:PrintDebug(cmd_list[3])
 			end
 		end

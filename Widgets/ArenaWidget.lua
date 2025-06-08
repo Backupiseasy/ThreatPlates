@@ -33,7 +33,6 @@ local _G =_G
 local InArena = false
 local PlayerGUIDToNumber = {}
 --local ArenaID = {}
-local OrbTexture
 
 ---------------------------------------------------------------------------------------------------
 -- Cached configuration settings
@@ -243,7 +242,7 @@ function Widget:UpdateLayout(widget_frame)
   widget_frame:SetPoint("CENTER", widget_frame:GetParent(), Settings.x, Settings.y)
   widget_frame:SetSize(Settings.scale, Settings.scale)
   
-  widget_frame.Icon:SetTexture(OrbTexture)
+  Addon:SetIconTexture(widget_frame.Icon, "Arena")
   
   Font:UpdateText(widget_frame, widget_frame.NumText, Settings.NumberText)
 end
@@ -257,8 +256,6 @@ function Widget:UpdateSettings()
   SettingsByTeam.HOSTILE.OrbColors = Settings.colors
   SettingsByTeam.HOSTILE.NumberColors = Settings.numColors
   SettingsByTeam.FRIENDLY = Settings.Allies
-
-  OrbTexture = Addon:GetIconTexture("Arena")
 
   -- If the widget is enabled when in an arena, PLAYER_ENTERING_WORLD was already fired, so we have to update
   -- call it manually

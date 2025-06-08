@@ -261,8 +261,14 @@ function WidgetHandler:InitializeWidget(widget_name)
 end
 
 function WidgetHandler:InitializeAllWidgets()
+  -- Initialize the script widget first, so that it is available for all other widgets, especially
+  -- things done in OnEnable
+  self:InitializeWidget("Script")
+
   for widget_name, _ in pairs(self.Widgets) do
-    self:InitializeWidget(widget_name)
+    if widget_name ~= "Script" then
+      self:InitializeWidget(widget_name)
+    end
   end
 end
 

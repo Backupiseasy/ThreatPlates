@@ -327,38 +327,54 @@ local function GetScriptEnvironment(custom_style)
           Style = custom_style,
           Profile = Addon.db.profile
         },
-        Data = {
-          CrowdControlAuras = Addon.Widgets.Widgets.Auras.CROWD_CONTROL_SPELLS,
-          StealthDetectionAuras = Addon.Data.StealthDetectionAuras,
-          StealthDetectionUnits = Addon.Data.StealthDetectionUnits,
-          -- Totems = Addon.Data.Totems
+        API = {
+          v1 = {
+            SetTextureForIcon = function(icon_id, icon_source)
+              --local allow_types = { string = true, number = true, table = true}
+              --if allow_types[type(icon_source)] then
+              -- if type(icon_source) ~= "string" and type(icon_source) ~= "number" and type(icon_source) ~= "table" then
+              --   Addon.Logging.Error(string_format(L["Error in custom style '%s': only numbers and strings are allowed as icon sources for function SetIcon."], Addon.CustomPlateGetHeaderName(custom_style)))
+              --   return
+              -- end
+
+              if icon_id and icon_source then
+                if type(icon_source) == "function" then
+                  setfenv(icon_source, setmetatable({}, ScriptEnvironment))
+                end
+                Addon.IconTextures[icon_id] = icon_source
+              end
+            end,
+          },          
+          Data = {
+            CrowdControlAuras = Addon.Widgets.Widgets.Auras.CROWD_CONTROL_SPELLS,
+            StealthDetectionAuras = Addon.Data.StealthDetectionAuras,
+            StealthDetectionUnits = Addon.Data.StealthDetectionUnits,
+            -- Totems = Addon.Data.Totems
+          },
+          --Init = {
+          --  InitTotemData = Addon.InitializeTotemInformation -- Not sure if this works ...
+          --},
+          Logging = {
+            Info = Addon.Logging.Info,
+            Warning = Addon.Logging.Warning,
+            Error = Addon.Logging.Error,
+            Debug = Addon.Logging.Debug,
+          },
+          Widgets = {
+            CreateStatusBar = Addon.CreateStatusbar,
+            -- CreateText = Addon.CreateText,
+          },
+          --Util = {
+            -- HEX2RGB
+            -- CopyTable
+            -- MergeIntoTable
+            -- ConcatTables
+            -- PrintTable
+          --},
+          --Debug = {}
+          -- LibCustomGlow?
         },
-        --Init = {
-        --  InitTotemData = Addon.InitializeTotemInformation -- Not sure if this works ...
-        --},
-        Logging = {
-          Info = Addon.Logging.Info,
-          Warning = Addon.Logging.Warning,
-          Error = Addon.Logging.Error,
-          Debug = Addon.Logging.Debug,
-        },
-        Widgets = {
-          CreateStatusBar = Addon.CreateStatusbar,
-          -- CreateText = Addon.CreateText,
-        },
-        --Util = {
-          -- HEX2RGB
-          -- CopyTable
-          -- MergeIntoTable
-          -- ConcatTables
-          -- PrintTable
-        --},
-        --Debug = {}
-        -- LibCustomGlow?
-        v1 = {
-          Icons = Addon.IconTextures,
-        }
-      },
+      }
     }
     ScriptEnvironmentByStyle[custom_style] = script_environment
   end

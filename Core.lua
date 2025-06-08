@@ -273,6 +273,7 @@ function Addon:ReloadTheme()
   Addon:InitializeIconTextures()
   Addon:UpdateConfigurationStatusText()
   Addon:InitializeCustomNameplates()
+  Addon:InitializeIconTextures()
   Addon.Widgets:InitializeAllWidgets()
 
   -- Update existing nameplates as certain settings may have changed that are not covered by ForceUpdate()
