@@ -11329,6 +11329,15 @@ function TidyPlatesThreat:ConfigTableChanged(event, app_name)
   end
 end
 
+function TidyPlatesThreat:OpenOptionsDialog(group)
+  RegisterOptionsTable()
+  Addon.LibAceConfigDialog:Open(t.ADDON_NAME)
+
+  if group == "BossMods" then
+    Addon.LibAceConfigDialog:SelectGroup(t.ADDON_NAME, "Widgets", "BossModsWidget")
+  end
+end
+
 function Addon:OpenOptions()
   HideUIPanel(SettingsPanel)
   HideUIPanel(GameMenuFrame)

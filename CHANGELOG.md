@@ -1,3 +1,4 @@
 # @project-version@ (@build-time@)
 
-* Fixed a bug that prevented nameplates from reappearing after a Hunter's Feign Death had ended [GH-583].
+* Fixed a bug that caused BossMods widget to fail to hide aura or timer icons immediately when disabled in the options.
+* Added function TidyPlatesThreat:OpenOptionsDialog to open the Threat Plates options dialog from other addons.
