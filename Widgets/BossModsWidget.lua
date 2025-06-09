@@ -379,6 +379,18 @@ local function RemoveAlertForUnit(id)
   UpdateWidgetFrame(alert.GUID)
 end
 
+local function RemoveAllActiveAlerts(alert_type)
+  local alerts_for_type = GetAlertsForType(alert_type)
+  for guid, alerts_for_unit in pairs(alerts_for_type) do
+    for id, alert in pairs(alerts_for_unit) do
+      TimersByID[alert.ID] = nil
+    end
+    alerts_for_type[guid] = nil
+
+    SortAlerts(guid)
+    UpdateWidgetFrame(guid)
+  end
+end
 
 -- DBM:FireEvent("bossmods_ShowNameplateAura", isGUID, unit, currentTexture, duration, desaturate, addLine, lineColor)
 local function BossMods_ShowNameplateAura(msg, is_guid, unit, aura_texture, duration, desaturate, addLine, lineColor)
@@ -408,11 +420,7 @@ local function BossMods_DisableHostileNameplates()
   AurasAreEnabled = false
 
   -- Cleanup, widget frame will be hidden on next update cycle, including with cleanup of all script handlers
-  for guid in pairs(AurasForUnit) do
-    AurasForUnit[guid] = {}
-    SortAlerts(guid)
-    UpdateWidgetFrame(guid)
-  end
+  RemoveAllActiveAlerts("Aura")
 end
 
 local function BossMods_TestModStarted(event, timer)
@@ -627,6 +635,9 @@ function Widget:UpdateSettings()
       DBM:UnregisterCallback('BossMod_HideNameplateAura', BossMods_HideNameplateAura)
       DBM:UnregisterCallback('BossMod_DisableFriendlyNameplates', BossMods_EnableHostileNameplates)
       DBM:UnregisterCallback('BossMod_DisableHostileNameplates', BossMods_DisableHostileNameplates)
+
+      -- Delete all currently active auras
+      RemoveAllActiveAlerts("Aura")
     end
 
     if Settings.ShowTimers then
@@ -657,6 +668,9 @@ function Widget:UpdateSettings()
       DBM:UnregisterCallback('DBM_TimerPause', BossMods_TimerPause)
       DBM:UnregisterCallback('DBM_TimerResume', BossMods_TimerResume)
       DBM:UnregisterCallback('DBM_TimerStop', BossMods_TimerStop)
+
+      -- Delete all currently active timers
+      RemoveAllActiveAlerts("Timer")
     end
   end
 end
