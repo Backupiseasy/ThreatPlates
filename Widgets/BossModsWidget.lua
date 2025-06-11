@@ -80,6 +80,7 @@ local function InitiateIconFrame(icon_frame, alert, remaining_time)
   end
 
   icon_frame.Icon:SetTexture(alert.Texture)
+  icon_frame.Icon:SetTexCoord(.10, 1-.07, .12, 1-.12) -- remove borders from default icons
 
   icon_frame.Label:SetText(alert.Label)
   local color = alert.Color
