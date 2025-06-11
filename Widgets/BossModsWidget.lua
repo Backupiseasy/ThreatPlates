@@ -43,6 +43,13 @@ local DefaultGlowColor
 local UPDATE_INTERVAL = 0.1
 local COLOR_TRANSPARENT = RGB(0, 0, 0, 0) -- opaque
 
+--------------------------------------------------------------------------------------------------
+-- Compatibility with other addons 
+---------------------------------------------------------------------------------------------------
+
+-- Global for DBM to differentiate between Threat Plates and Tidy Plates: Threat
+TidyPlatesThreatDBM = true
+
 ---------------------------------------------------------------------------------------------------
 -- Boss Mods Widget Functions
 ---------------------------------------------------------------------------------------------------
@@ -535,6 +542,17 @@ function Widget:IsEnabled()
   local db = Addon.db.profile.BossModsWidget
   return db.ON or db.ShowInHeadlineView
 end
+
+function Widget:OnEnable()
+  TidyPlatesThreatDBM = true
+end
+
+function Widget:OnDisable()
+  TidyPlatesThreatDBM = false
+  
+  self:UnregisterAllEvents()
+end
+
 
 function Widget:Create(tp_frame)
   local widget_frame = _G.CreateFrame("Frame", nil, tp_frame)

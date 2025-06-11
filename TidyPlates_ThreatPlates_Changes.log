@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+12.2.3 (2025-06-11)
+------------------------------------------------------
+* Improved DBM integration for BossMods widget so that DBM's own aura and timer icons are shown when BossMods widget is disabled.
+
+------------------------------------------------------
 12.2.2 (2025-06-09)
 ------------------------------------------------------
 * Fixed a bug that caused BossMods widget to fail to hide aura or timer icons immediately when disabled in the options.
