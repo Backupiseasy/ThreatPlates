@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+12.2.3 (2025-06-18)
+------------------------------------------------------
+* Updated TOC version for Patch 11.1.7 for WoW Mainline.
+
+------------------------------------------------------
 12.2.2 (2025-06-09)
 ------------------------------------------------------
 * Fixed a bug that caused BossMods widget to fail to hide aura or timer icons immediately when disabled in the options.
