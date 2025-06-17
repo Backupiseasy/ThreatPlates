@@ -1,4 +1,4 @@
 # @project-version@ (@build-time@)
 
-* Fixed a bug that caused BossMods widget to fail to hide aura or timer icons immediately when disabled in the options.
-* Added function TidyPlatesThreat:OpenOptionsDialog to open the Threat Plates options dialog from other addons.
+* Fixed a bug in the script editor that caused updates to script code to be applied to the wrong custom style.
+* Fixed a bug that prevented some nameplate UI elements from being updated when script code was updated.
