@@ -8952,8 +8952,7 @@ CreateCustomNameplateEntry = function(index)
                 custom_style.Scripts.Event = nil
               end
 
-              Addon:InitializeCustomNameplates()
-              Addon.Widgets:UpdateSettings("Script")
+              UpdateSpecial()
             end,
             get = function(info)
               return CustomPlateGetExampleForEventScript(db.uniqueSettings[index], db.uniqueSettings[index].Scripts.Function)
@@ -9029,7 +9028,7 @@ CreateCustomNameplateEntry = function(index)
                     val = nil
                   end
 
-                  local custom_style = db.uniqueSettings[index]
+                  local custom_style = db.uniqueSettings[Addon.ScriptEditor.SelectedIndex]
                   if custom_style.Scripts.Function == "WoWEvent" then
                     custom_style.Scripts.Code.Events[custom_style.Scripts.Event] = val
                   elseif custom_style.Scripts.Function == "Legacy" then
@@ -9043,9 +9042,7 @@ CreateCustomNameplateEntry = function(index)
                     custom_style.Scripts.Event = nil
                   end
 
-                  Addon:InitializeCustomNameplates()
-                  Addon.Widgets:UpdateSettings("Script")
-
+                  UpdateSpecial()
                   frame:Hide()
                   Addon.LibAceConfigDialog:Open(t.ADDON_NAME)
                 end
@@ -9058,6 +9055,7 @@ CreateCustomNameplateEntry = function(index)
                 label = "Event: " .. db.uniqueSettings[index].Scripts.Function
               end
               Addon.ScriptEditor.Editor:SetLabel(label)
+              Addon.ScriptEditor.SelectedIndex = index
 
               Addon.ScriptEditor.Editor:SetText(CustomPlateGetExampleForEventScript(db.uniqueSettings[index], db.uniqueSettings[index].Scripts.Function))
 
@@ -11327,6 +11325,15 @@ function TidyPlatesThreat:ConfigTableChanged(event, app_name)
   if app_name == t.ADDON_NAME then
     RegisterOptionsTable()
     CreateCustomNameplatesGroup()
+  end
+end
+
+function TidyPlatesThreat:OpenOptionsDialog(group)
+  RegisterOptionsTable()
+  Addon.LibAceConfigDialog:Open(t.ADDON_NAME)
+
+  if group == "BossMods" then
+    Addon.LibAceConfigDialog:SelectGroup(t.ADDON_NAME, "Widgets", "BossModsWidget")
   end
 end
 
