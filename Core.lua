@@ -300,7 +300,7 @@ function Addon:CheckForFirstStartUp()
     Addon.db.char.welcome = true
 
     -- GetNumSpecializations: Mists - Patch 5.0.4 (2012-08-28): Replaced GetNumTalentTabs.
-    if Addon.ExpansionIsAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA) then
+    if Addon.ExpansionIsAtLeastMists then
       -- initialize roles for all available specs (level > 10) or set to default (dps/healing)
       for index=1, GetNumSpecializations() do
         local id, spec_name, description, icon, background, role = GetSpecializationInfo(index)

@@ -32,7 +32,7 @@ local _G =_G
 ---------------------------------------------------------------------------------------------------
 
 -- GetSpecialization: Mists - Patch 5.0.4 (2012-08-28): Replaced GetPrimaryTalentTree.
-if Addon.ExpansionIsAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA)  then
+if Addon.ExpansionIsAtLeastMists  then
   local PLAYER_ROLE_BY_SPEC = ThreatPlates.SPEC_ROLES[Addon.PlayerClass]
 
   function Addon:PlayerRoleIsTank()

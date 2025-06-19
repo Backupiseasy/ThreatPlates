@@ -31,7 +31,7 @@ local _G =_G
 ---------------------------------------------------------------------------------------------------
 
 -- UnitIsBattlePet: Mists - Patch 5.1.0 (2012-11-27): Added.
-if not Addon.ExpansionIsAtLeast() then -- Mists
+if not Addon.ExpansionIsAtLeastMists then -- Mists
   UnitIsBattlePet = function(...) return false end
 end
 
