@@ -1350,7 +1350,7 @@ function CoreEvents:NAME_PLATE_CREATED(plate)
   OnNewNameplate(plate)
 
   -- NamePlateDriverFrame.AcquireUnitFrame is not used in Classic before Mists
-  if not Addon.ExpansionIsAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA) and plate.UnitFrame then
+  if not Addon.ExpansionIsAtLeastMists and plate.UnitFrame then
     NamePlateDriverFrame_AcquireUnitFrame(nil, plate)
   end
 
@@ -1910,13 +1910,13 @@ CoreEvents.UNIT_SPELLCAST_CHANNEL_STOP = UNIT_SPELLCAST_CHANNEL_STOP
 -- UNIT_SPELLCAST_INTERRUPTED - handled by COMBAT_LOG_EVENT_UNFILTERED / SPELL_INTERRUPT as it's the only way to find out the interruptorom
 -- UNIT_SPELLCAST_SENT
 
-if Addon.ExpansionIsAtLeast(LE_EXPANSION_DRAGONFLIGHT) then
+if Addon.ExpansionIsAtLeastDF then
   CoreEvents.UNIT_SPELLCAST_EMPOWER_START = UNIT_SPELLCAST_CHANNEL_START
   CoreEvents.UNIT_SPELLCAST_EMPOWER_UPDATE = UnitSpellcastMidway
   CoreEvents.UNIT_SPELLCAST_EMPOWER_STOP = UNIT_SPELLCAST_CHANNEL_STOP
 end
 
-if Addon.ExpansionIsAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA) then
+if Addon.ExpansionIsAtLeastMists then
   CoreEvents.UNIT_SPELLCAST_INTERRUPTIBLE = UnitSpellcastMidway
   CoreEvents.UNIT_SPELLCAST_NOT_INTERRUPTIBLE = UnitSpellcastMidway
 
@@ -1934,7 +1934,7 @@ if Addon.WOW_FEATURE_ABSORBS then
   CoreEvents.UNIT_HEAL_ABSORB_AMOUNT_CHANGED = UNIT_HEAL_ABSORB_AMOUNT_CHANGED
 end
 
-if Addon.ExpansionIsAtLeast(LE_EXPANSION_BURNING_CRUSADE) then
+if Addon.ExpansionIsAtLeastTBC then
   CoreEvents.PLAYER_FOCUS_CHANGED = PLAYER_FOCUS_CHANGED
 end
 
