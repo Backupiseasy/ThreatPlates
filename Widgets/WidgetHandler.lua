@@ -62,13 +62,14 @@ end
 WidgetHandler.EventHandlerFrame = _G.CreateFrame("Frame", nil, WorldFrame)
 WidgetHandler.EventHandlerFrame:SetScript("OnEvent", EventHandler)
 
-local function RegisterEvent(widget, event, func)
+local function RegisterEvent(widget, event, func, min_expansion)
   if not WidgetHandler.RegisteredEventsByWidget[event] then
     WidgetHandler.RegisteredEventsByWidget[event] = {}
   end
 
   WidgetHandler.RegisteredEventsByWidget[event][widget] = func or true
-  WidgetHandler.EventHandlerFrame:RegisterEvent(event)
+  Addon:RegisterEvent(WidgetHandler.EventHandlerFrame, event, min_expansion)
+  --WidgetHandler.EventHandlerFrame:RegisterEvent(event)
 end
 
 local function RegisterUnitEvent(widget, event, unitid, func)
@@ -519,3 +520,9 @@ end
 --    end
 --  end
 --end
+
+function Addon:DebugWidgetHandler()
+  for event, _ in pairs(WidgetHandler.RegisteredEventsByWidget) do
+    Addon.Logging.Debug("    Event:", event)
+  end
+end

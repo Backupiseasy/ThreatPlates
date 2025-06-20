@@ -127,9 +127,16 @@ local function ChatCommandDebug(cmd_list)
 	elseif command == "cache" then
 		Addon.Debug.PrintCaches()
 	elseif command == "debug" then
-		local widget_name = cmd_list[2]
-		if widget_name then
-			local widget = Addon.Widgets.Widgets[widget_name]
+		local component_name = cmd_list[2]
+		if not component_name then return end
+
+		Addon.Logging.Debug(component_name .. ":")
+		if component_name == "WidgetHandler" then
+			Addon:DebugWidgetHandler()
+		elseif component_name == "Compatibility" then
+			Addon:DebugCompatibility()
+		else
+			local widget = Addon.Widgets.Widgets[component_name]
 			if widget then 
 				widget:PrintDebug(cmd_list[3])
 			end

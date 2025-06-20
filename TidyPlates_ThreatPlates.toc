@@ -59,6 +59,7 @@ Libs\Libs.xml
 Locales\Locales.xml
 
 Init.lua
+Compatibility.lua
 Localization.lua
 CVarsManager.lua
 Media.lua
