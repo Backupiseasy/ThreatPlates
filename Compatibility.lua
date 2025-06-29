@@ -27,6 +27,7 @@ local WOW_EVENTS = {
   BN_FRIEND_ACCOUNT_ONLINE = true,
   COMBAT_LOG_EVENT_UNFILTERED = true,
   FRIENDLIST_UPDATE = true,
+  GUILD_ROSTER_UPDATE = true,
   GROUP_LEFT = true,
   GROUP_ROSTER_UPDATE = true,   -- Added in 5.0.4 / 1.13.2, also can be registered in Cata Classic
   NAME_PLATE_CREATED = true,
@@ -37,6 +38,7 @@ local WOW_EVENTS = {
   PLAYER_ENTERING_WORLD = true,
   RUNE_UPDATED = Addon.IS_CLASSIC_SOD, -- Only needed for Rogue rune detection in SoD Classic
   PLAYER_FLAGS_CHANGED = true,
+  PLAYER_FOCUS_CHANGED = Addon.ExpansionIsAtLeastTBC,
   PLAYER_LOGIN = true,
   PLAYER_REGEN_DISABLED = true,
   PLAYER_REGEN_ENABLED = true,
@@ -91,7 +93,11 @@ local WOW_EVENTS = {
   UPDATE_UI_WIDGET = true, -- Added in 8.0.1 / 1.13.2
 }
 
+--local DebugUnknowEvents = {}
+
 function Addon:ExpansionSupportsEvent(event, register_for_current_expansion)
+  -- if WOW_EVENTS[event] == nil then DebugUnknowEvents[event] = true end
+
   return register_for_current_expansion ~= false and WOW_EVENTS[event]
 end
 
@@ -121,13 +127,20 @@ end
 
 function Addon:DebugCompatibility()
   local frame = CreateFrame("Frame")
-  print("=>", Addon.IS_CLASSIC_SOD)
+  
   for event, is_supported in pairs(WOW_EVENTS) do
     local success, result = pcall(frame.RegisterEvent, frame, event)
     if not success then
       Addon.Logging.Debug("    ", event .. ": FAILED =>", (not WOW_EVENTS[event] and "CORRECT") or "ERROR")
     elseif not WOW_EVENTS[event] then
       Addon.Logging.Debug("    ", event .. ": OK => DISABLED")      
+    end
+  end
+
+  if DebugUnknowEvents then
+    Addon.Logging.Debug("    Failed Events")      
+    for event, _ in pairs(DebugUnknowEvents) do
+      Addon.Logging.Debug("      =>", event)      
     end
   end
 end
