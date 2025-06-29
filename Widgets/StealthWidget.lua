@@ -21,8 +21,6 @@ local _G =_G
 -- List them here for Mikk's FindGlobals script
 -- GLOBALS: CreateFrame
 
-local STEALTH_ICON_TEXTURE = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\StealthWidget\\stealthicon"
-
 local DETECTION_AURAS = {
   [18950] = true, -- Invisibility and Stealth Detection - not really sure if necessary as aura is hidden
   [34709] = true, -- Shadow Sight
@@ -176,7 +174,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
   widget_frame:SetAlpha(db.alpha)
 
   -- Updates based on unit status
-  widget_frame.Icon:SetTexture(STEALTH_ICON_TEXTURE)
+  Addon:SetIconTexture(widget_frame.Icon, "Stealth" , unit.unitid)
 
   widget_frame:Show()
 end

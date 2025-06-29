@@ -18,7 +18,6 @@ local _G =_G
 -- List them here for Mikk's FindGlobals script
 -- GLOBALS: CreateFrame
 
-local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ClassIconWidget\\"
 -- local Masque = LibStub("Masque", true)
 -- local group
 
@@ -89,16 +88,8 @@ function Widget:OnUnitAdded(widget_frame, unit)
       widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
     end
 
-    -- Updates based on settings
     widget_frame:SetSize(db.scale, db.scale)
-
-    -- Updates based on unit status
-    widget_frame.Icon:SetTexture(PATH .. db.theme .."\\" .. unit.class)
-
-    -- if Masque then
-    -- 	group = Masque:Group("TidyPlatesThreat")
-    -- 	group:ReSkin(frame)
-    -- end
+    Addon:SetIconTexture(widget_frame.Icon, "Class." .. unit.class, unit.unitid)
 
     widget_frame:Show()
   else

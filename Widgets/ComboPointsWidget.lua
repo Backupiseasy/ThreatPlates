@@ -190,7 +190,8 @@ local TEXTURE_INFO = {
       IconHeight = 16,
       TexCoord = { 0, 1, 0, 1 }
     },
-  }
+  },
+  Script = {}
 }
 
 local DEATHKNIGHT_COLORS = {
@@ -326,6 +327,10 @@ local function UpdateComboPointsFunctionForRogues()
   -- Check for spell Echoing Reprimand: 323547
   if IsPlayerSpell(470347) or IsSpellUsable(323547) then
     Widget.UpdateUnitResource = Widget.UpdateComboPointsRogueWithAnimacharge
+
+    TEXTURE_INFO.Script["ComboPoint.Charged.On"]  = Addon:GetIconTexture("ComboPoint.Charged.On")
+    TEXTURE_INFO.Script["ComboPoint.Charged.Off"] = Addon:GetIconTexture("ComboPoint.Charged.Off")
+    TEXTURE_INFO.Script.IsEnabled = TEXTURE_INFO.Script.IsEnabled and TEXTURE_INFO.Script["ComboPoint.Charged.On"] ~= nil and TEXTURE_INFO.Script["ComboPoint.Charged.Off"] ~= nil
   else
     Widget.UpdateUnitResource = Widget.UpdateComboPoints
   end
@@ -346,9 +351,6 @@ function Widget:UpdateComboPointsRogueWithAnimacharge(widget_frame)
     local cp_texture, cp_texture_off, cp_color
 
     local charged_points = GetUnitChargedPowerPoints("player")
-    -- for i = 1, #charged_points do
-    --   widget_frame.ComboPoints[charged_points[i].MarkAsCharged = true
-    -- end
 
     for i = 1, self.UnitPowerMax do
       cp_texture = widget_frame.ComboPoints[i]
@@ -357,7 +359,10 @@ function Widget:UpdateComboPointsRogueWithAnimacharge(widget_frame)
       local point_is_chared = charged_points and tContains(charged_points, i)
       if point_is_chared then
         cp_texture.IsCharged = true
-        if self.db.Style == "Blizzard" then
+        if TEXTURE_INFO.Script.IsEnabled then
+          Addon:UpdateIconTexture(cp_texture, TEXTURE_INFO.Script["ComboPoint.Charged.On"])
+          Addon:UpdateIconTexture(cp_texture_off, TEXTURE_INFO.Script["ComboPoint.Charged.Off"])
+        elseif self.db.Style == "Blizzard" then
           cp_texture:SetAtlas("ClassOverlay-ComboPoint-Kyrian")
           cp_texture_off:SetAtlas("ClassOverlay-ComboPoint-Off-Kyrian")
         else
@@ -366,7 +371,10 @@ function Widget:UpdateComboPointsRogueWithAnimacharge(widget_frame)
         end
       elseif cp_texture.IsCharged then
         cp_texture.IsCharged = false
-        if self.db.Style == "Blizzard" then
+        if TEXTURE_INFO.Script.IsEnabled then
+          Addon:UpdateIconTexture(cp_texture, TEXTURE_INFO.Script["ComboPoint." .. tostring(i) .. ".On"])
+          Addon:UpdateIconTexture(cp_texture_off, TEXTURE_INFO.Script["ComboPoint." .. tostring(i) .. ".Off"])
+        elseif self.db.Style == "Blizzard" then
           cp_texture:SetAtlas("ClassOverlay-ComboPoint")
           cp_texture_off:SetAtlas("ClassOverlay-ComboPoint-Off")
         else
@@ -393,8 +401,6 @@ function Widget:UpdateComboPointsRogueWithAnimacharge(widget_frame)
       end
     end
   end
-
-  --cp_texture.MarkAsCharged = false
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -445,13 +451,13 @@ local RUNE_TEXTURES = TEXTURE_INFO.Blizzard.DEATHKNIGHT
 
 local function UpdateRuneStatusActiveWrath(cp_texture, cp_texture_off, rune_id)
   local rune_type = GetRuneType(rune_id)
-  if Widget.db.Style == "Blizzard" then
-    cp_texture:SetTexture(RUNE_TEXTURES.Texture.RuneType[rune_type])
-    cp_texture_off:SetTexture(RUNE_TEXTURES.TextureOff.RuneType[rune_type])
-  else
+  if Widget.db.Style ~= "Blizzard" or TEXTURE_INFO.Script.IsEnabled then
     local cp_color = (rune_type == RUNETYPE_DEATH and Widget.Colors.DeathRune) or Widget.Colors[rune_id][rune_id]
     cp_texture:SetVertexColor(cp_color.r, cp_color.g, cp_color.b)
     cp_texture_off:SetVertexColor(cp_color.r, cp_color.g, cp_color.b)
+  else
+    cp_texture:SetTexture(RUNE_TEXTURES.Texture.RuneType[rune_type])
+    cp_texture_off:SetTexture(RUNE_TEXTURES.TextureOff.RuneType[rune_type])
   end
 end
 
@@ -1077,10 +1083,12 @@ local function UpdateTexturePosition(texture, resource_index)
   texture:SetPoint("LEFT", Widget.WidgetFrame, "LEFT", (Widget.WidgetFrame:GetWidth() / Widget.UnitPowerMax) * (resource_index-1) + (scaled_spacing / 2), 0)
 end
 
-local function UpdateTexture(texture, texture_path, resource_index)
-  if Widget.db.Style == "Blizzard" then
+local function UpdateTexture(cp_status, texture, texture_path, resource_index)
+  if TEXTURE_INFO.Script.IsEnabled then
+    Addon:UpdateIconTexture(texture, TEXTURE_INFO.Script["ComboPoint." .. tostring(resource_index) .. "." .. cp_status])
+  elseif Widget.db.Style == "Blizzard" then
     if Addon.ExpansionIsBetween(LE_EXPANSION_WRATH_OF_THE_LICH_KING, LE_EXPANSION_LEGION) and PlayerClass == "DEATHKNIGHT" then
-      local texture_data = texture_path.RuneType
+      local texture_data = texture_path.RuneTypes
       texture:SetTexture(texture_data[resource_index])
       texture:SetAlpha(texture_data.Alpha or 1)
       texture:SetVertexColor(1, 1, 1)
@@ -1094,11 +1102,13 @@ local function UpdateTexture(texture, texture_path, resource_index)
     else
       texture:SetAtlas(texture_path)
     end
+    texture:SetTexCoord(unpack(Widget.TexCoord)) -- obj:SetTexCoord(left,right,top,bottom)
   else
     texture:SetTexture(texture_path)
+    texture:SetTexCoord(unpack(Widget.TexCoord)) -- obj:SetTexCoord(left,right,top,bottom)
+    --Addon:UpdateIconTexture(texture, texture_path, unpack(Widget.TexCoord))   
   end
 
-  texture:SetTexCoord(unpack(Widget.TexCoord)) -- obj:SetTexCoord(left,right,top,bottom)
   UpdateTexturePosition(texture, resource_index)
 end
 
@@ -1129,8 +1139,8 @@ local function CreateResourceTextureStandard(widget_frame, resource_index)
     widget_frame.ComboPointsOff[resource_index] = resource_off_texture
   end
 
-  UpdateTexture(resource_texture, Widget.Texture, resource_index)
-  UpdateTexture(resource_off_texture, Widget.TextureOff, resource_index)
+  UpdateTexture("On", resource_texture, Widget.Texture, resource_index)
+  UpdateTexture("Off", resource_off_texture, Widget.TextureOff, resource_index)
 end
 
 local function CreateResourceTextureEssence(widget_frame, resource_index)
@@ -1221,10 +1231,23 @@ function Widget:UpdateSettings()
   self.Texture = texture_info.Texture
   self.TextureOff = texture_info.TextureOff
 
+  local script_texture_info = TEXTURE_INFO.Script
+  
+  script_texture_info.IsEnabled = true
+  local texture_cp_on = Addon:GetIconTexture("ComboPoint.On")
+  local texture_cp_off = Addon:GetIconTexture("ComboPoint.Off")  
+  
   local colors = self.db.ColorBySpec[PlayerClass]
   for current_cp = 1, #colors do
-    for cp_no = 1, #colors do
+    local icon_id_cp_on = "ComboPoint." .. tostring(current_cp) .. ".On"
+    local icon_id_cp_off = "ComboPoint." .. tostring(current_cp) .. ".Off"
+    
+    script_texture_info[icon_id_cp_on]  = Addon:GetIconTexture(icon_id_cp_on) or texture_cp_on
+    script_texture_info[icon_id_cp_off] = Addon:GetIconTexture(icon_id_cp_off) or texture_cp_off
 
+    script_texture_info.IsEnabled = script_texture_info.IsEnabled and script_texture_info[icon_id_cp_on] ~= nil and script_texture_info[icon_id_cp_off] ~= nil
+
+    for cp_no = 1, #colors do
       self.Colors[current_cp] = self.Colors[current_cp] or {}
       if self.db.Style == "Blizzard" then
         self.Colors[current_cp][cp_no] = self.Colors.Neutral
@@ -1285,3 +1308,18 @@ function Widget:UpdateSettings()
     self:PLAYER_TARGET_CHANGED()
   end
 end 
+
+function Widget:PrintDebug()
+  Addon.Logging.Debug("    Textures:", TEXTURE_INFO.Script.IsEnabled ~= nil and "ENABLED" or "DISABLED")
+  local lines = {}
+  for icon_id, texture_info in pairs(TEXTURE_INFO.Script) do
+    if icon_id ~= "IsEnabled" then
+      local texture = (type(texture_info) == "table" and texture_info.Texture) or texture_info
+      lines[#lines + 1] = "      " .. icon_id .. " =>" .. tostring(texture)
+    end
+  end
+  sort(lines)
+  for _, line in ipairs(lines) do
+    Addon.Logging.Debug(line)
+  end
+end

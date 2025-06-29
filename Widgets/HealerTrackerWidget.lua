@@ -709,6 +709,9 @@ function Widget:OnUnitAdded(widget_frame, unit)
       widget_frame:SetPoint(db.anchor, widget_frame:GetParent(), db.x, db.y)
     end
   
+    -- Selecting the icon here allows to select a unit specific icon, e.g.show a different icons for different healer specs
+    Addon:SetIconTexture(widget_frame.Icon, "HealerTracker", unit.unitid)
+    
     widget_frame:Show()
   else
     widget_frame:Hide()

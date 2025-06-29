@@ -263,8 +263,10 @@ function Addon:ReloadTheme()
 
   -- Recreate all TidyPlates styles for ThreatPlates("normal", "dps", "tank", ...) - required, if theme style settings were changed
   Addon:SetThemes()
+  Addon:InitializeIconTextures()
   Addon:UpdateConfigurationStatusText()
   Addon:InitializeCustomNameplates()
+  Addon:InitializeIconTextures()
   Addon.Widgets:InitializeAllWidgets()
 
   -- Update existing nameplates as certain settings may have changed that are not covered by ForceUpdate()
