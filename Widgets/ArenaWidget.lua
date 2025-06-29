@@ -216,10 +216,7 @@ end
 
 function Widget:OnEnable()
   self:RegisterEvent("PLAYER_ENTERING_WORLD")
-  -- BfA Patch 8.2.0 (2019-06-25): Added.
-  if Addon.IS_MAINLINE then
-    self:RegisterEvent("PVP_MATCH_ACTIVE")
-  end
+  self:RegisterEvent("PVP_MATCH_ACTIVE")
 
   self:PLAYER_ENTERING_WORLD()
 end

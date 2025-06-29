@@ -1964,9 +1964,9 @@ local function CreateComboPointsWidgetOptions()
                 values = {
                   DEATHKNIGHT = (Addon.ExpansionIsAtLeastWrath and L["Death Knight"]) or nil,
                   DRUID = L["Druid"],
-                  EVOKER = (Addon.ExpansionIsAtLeast(LE_EXPANSION_DRAGONFLIGHT) and L["Evoker"]) or nil,
+                  EVOKER = (Addon.ExpansionIsAtLeastDF and L["Evoker"]) or nil,
                   -- Arcane Charge as a resource mechanic was introduced with Patch 7.0.3 (Legion)
-                  MAGE = (Addon.ExpansionIsAtLeast(LE_EXPANSION_LEGION) and L["Arcane Mage"]) or nil,
+                  MAGE = (Addon.ExpansionIsAtLeastLegion and L["Arcane Mage"]) or nil,
                   MONK = (Addon.ExpansionIsAtLeastMists  and L["Windwalker Monk"]) or nil,
                   -- Holy Power was introduced with Patch 4.0.1 (Cataclysm)
                   PALADIN = (Addon.ExpansionIsAtLeastCata  and L["Paladin"]) or nil,
@@ -2099,7 +2099,7 @@ local function CreateComboPointsWidgetOptions()
                 end,
                 hasAlpha = false,
                 -- Charged Combo Points were introduced with Battle for Azerorth  
-                hidden = function() return db.ComboPoints.Specialization ~= "ROGUE" or not Addon.ExpansionIsAtLeast(LE_EXPANSION_BATTLE_FOR_AZEROTH) end
+                hidden = function() return db.ComboPoints.Specialization ~= "ROGUE" or not Addon.ExpansionIsAtLeastBfA end
               },
               ColorDeathrune = {
                 name = L["Death Rune"],
@@ -2115,7 +2115,7 @@ local function CreateComboPointsWidgetOptions()
                 end,
                 hasAlpha = false,
                 -- Deathrunes were available from Wrath to WoD
-                hidden = function() return db.ComboPoints.Specialization ~= "DEATHKNIGHT" or Addon.ExpansionIsAtLeast(LE_EXPANSION_LEGION) end
+                hidden = function() return db.ComboPoints.Specialization ~= "DEATHKNIGHT" or Addon.ExpansionIsAtLeastLegion end
               },
             },
           },
@@ -2146,14 +2146,14 @@ local function CreateComboPointsWidgetOptions()
         type = "group",
         order = 30,
         inline = false,
-        hidden = function() return not Addon.ExpansionIsAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) end,
+        hidden = function() return not Addon.ExpansionIsAtLeastWrath end,
         args = {
           RuneCooldown= {
             name = L["Death Knigh Rune Cooldown"],
             order = 70,
             type = "group",
             inline = true,
-            hidden = function() return not Addon.ExpansionIsAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) end,
+            hidden = function() return not Addon.ExpansionIsAtLeastWrath end,
             args = {
               Enable = {
                 name = L["Enable"],
@@ -2169,7 +2169,7 @@ local function CreateComboPointsWidgetOptions()
             order = 80,
             type = "group",
             inline = true,
-            hidden = function() return not Addon.ExpansionIsAtLeast(LE_EXPANSION_DRAGONFLIGHT) end,
+            hidden = function() return not Addon.ExpansionIsAtLeastDF end,
             args = {
               Enable = {
                 name = L["Enable"],
@@ -3213,7 +3213,7 @@ local function CreateExperienceWidgetOptions()
     type = "group",
     order = 54,
     childGroups = "tab",
-    hidden = function() return not Addon.ExpansionIsAtLeast(LE_EXPANSION_BATTLE_FOR_AZEROTH) end,
+    hidden = function() return not Addon.ExpansionIsAtLeastBfA end,
     set = SetValueWidget,
     args = {
       Enable = GetEnableEntry(
@@ -11020,7 +11020,7 @@ local function CreateOptionsTable()
               desc = L["Set the roles your specs represent."],
               disabled = function() return not db.threat.ON end,
               order = 70,
-              args = (Addon.ExpansionIsAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA) and CreateSpecRolesRetail()) or CreateSpecRolesClassic(),
+              args = (Addon.ExpansionIsAtLeastMists and CreateSpecRolesRetail()) or CreateSpecRolesClassic(),
             },
           },
         },
@@ -11222,7 +11222,7 @@ local function CreateOptionsTable()
   options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(Addon.db)
   options.args.profiles.order = 10000
 
-  if Addon.ExpansionIsAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) then
+  if Addon.ExpansionIsAtLeastWrath then
     -- Add dual-spec support
     local LibDualSpec = LibStub("LibDualSpec-1.0", true)
     LibDualSpec:EnhanceDatabase(Addon.db, t.ADDON_NAME)

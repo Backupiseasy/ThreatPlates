@@ -69,12 +69,16 @@ end
 
 Addon.WOW_USES_CLASSIC_NAMEPLATES = not Addon.ExpansionIsAtLeast(LE_EXPANSION_LEGION)
 -- Absorbs bug in Mists: https://github.com/Stanzilla/WoWUIBugs/issues/736
-Addon.WOW_FEATURE_ABSORBS =  Addon.IS_MAINLINE -- Addon.ExpansionIsAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA)
+Addon.WOW_FEATURE_ABSORBS =  Addon.ExpansionIsAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA)
 Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER =  not Addon.WOW_USES_CLASSIC_NAMEPLATES
 
+Addon.ExpansionIsAtLeastTBC = Addon.ExpansionIsAtLeast(LE_EXPANSION_BURNING_CRUSADE)
 Addon.ExpansionIsAtLeastWrath = Addon.ExpansionIsAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING)
 Addon.ExpansionIsAtLeastCata = Addon.ExpansionIsAtLeast(LE_EXPANSION_CATACLYSM)
 Addon.ExpansionIsAtLeastMists = Addon.ExpansionIsAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA)
+Addon.ExpansionIsAtLeastLegion = Addon.ExpansionIsAtLeast(LE_EXPANSION_LEGION)
+Addon.ExpansionIsAtLeastBfA = Addon.ExpansionIsAtLeast(LE_EXPANSION_BATTLE_FOR_AZEROTH)
+Addon.ExpansionIsAtLeastDF = Addon.ExpansionIsAtLeast(LE_EXPANSION_DRAGONFLIGHT)
 
 ---------------------------------------------------------------------------------------------------
 -- Constants with different values in different expansions
