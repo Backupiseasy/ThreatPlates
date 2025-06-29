@@ -35,7 +35,7 @@ local WOW_EVENTS = {
   PLAYER_CONTROL_GAINED = true,
   PLAYER_CONTROL_LOST = true,
   PLAYER_ENTERING_WORLD = true,
-  PLAYER_EQUIPMENT_CHANGED = true,
+  RUNE_UPDATED = Addon.IS_CLASSIC_SOD, -- Only needed for Rogue rune detection in SoD Classic
   PLAYER_FLAGS_CHANGED = true,
   PLAYER_LOGIN = true,
   PLAYER_REGEN_DISABLED = true,
@@ -53,7 +53,7 @@ local WOW_EVENTS = {
   RAID_TARGET_UPDATE = true,
   RUNE_POWER_UPDATE = Addon.ExpansionIsAtLeastWrath,
   RUNE_TYPE_UPDATE = Addon.ExpansionIsBetween(LE_EXPANSION_WRATH_OF_THE_LICH_KING, LE_EXPANSION_LEGION),
-  RUNE_UPDATED = true,
+  RUNE_UPDATED = Addon.IS_CLASSIC_SOD, -- Only needed for Rogue rune detection in SoD Classic
   TRAIT_CONFIG_UPDATED = Addon.ExpansionIsAtLeastCata, 
   UI_SCALE_CHANGED = true,
   UNIT_ABSORB_AMOUNT_CHANGED = Addon.WOW_FEATURE_ABSORBS,       -- Absorbs should have been added with Mists
@@ -121,6 +121,7 @@ end
 
 function Addon:DebugCompatibility()
   local frame = CreateFrame("Frame")
+  print("=>", Addon.IS_CLASSIC_SOD)
   for event, is_supported in pairs(WOW_EVENTS) do
     local success, result = pcall(frame.RegisterEvent, frame, event)
     if not success then
