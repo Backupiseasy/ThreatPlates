@@ -69,7 +69,7 @@ end
 
 Addon.WOW_USES_CLASSIC_NAMEPLATES = not Addon.ExpansionIsAtLeast(LE_EXPANSION_LEGION)
 -- Absorbs bug in Mists: https://github.com/Stanzilla/WoWUIBugs/issues/736
-Addon.WOW_FEATURE_ABSORBS =  Addon.IS_MAINLINE -- Addon.ExpansionIsAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA)
+Addon.WOW_FEATURE_ABSORBS =  Addon.ExpansionIsAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA)
 Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER =  not Addon.WOW_USES_CLASSIC_NAMEPLATES
 
 Addon.ExpansionIsAtLeastTBC = Addon.ExpansionIsAtLeast(LE_EXPANSION_BURNING_CRUSADE)

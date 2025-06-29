@@ -1338,11 +1338,9 @@ function CoreEvents:PLAYER_ENTERING_WORLD()
   -- ARENA_OPPONENT_UPDATE is also fired in BGs, at least in Classic, so it's only enabled when solo shuffles
   -- are available (as it's currently only needed for these kind of arenas)
   if Addon.IsSoloShuffle() then
-    CoreEvents.ARENA_OPPONENT_UPDATE = ARENA_OPPONENT_UPDATE
-    TidyPlatesCore:RegisterEvent("ARENA_OPPONENT_UPDATE")
+    Addon:RegisterEvent(TidyPlatesCore, "ARENA_OPPONENT_UPDATE")
   else
-    TidyPlatesCore:UnregisterEvent("ARENA_OPPONENT_UPDATE")
-    CoreEvents.ARENA_OPPONENT_UPDATE = nil
+    Addon:UnregisterEvent(TidyPlatesCore, "ARENA_OPPONENT_UPDATE")
   end
 end
 
@@ -1910,33 +1908,20 @@ CoreEvents.UNIT_SPELLCAST_CHANNEL_STOP = UNIT_SPELLCAST_CHANNEL_STOP
 -- UNIT_SPELLCAST_INTERRUPTED - handled by COMBAT_LOG_EVENT_UNFILTERED / SPELL_INTERRUPT as it's the only way to find out the interruptorom
 -- UNIT_SPELLCAST_SENT
 
-if Addon.ExpansionIsAtLeastDF then
-  CoreEvents.UNIT_SPELLCAST_EMPOWER_START = UNIT_SPELLCAST_CHANNEL_START
-  CoreEvents.UNIT_SPELLCAST_EMPOWER_UPDATE = UnitSpellcastMidway
-  CoreEvents.UNIT_SPELLCAST_EMPOWER_STOP = UNIT_SPELLCAST_CHANNEL_STOP
-end
+CoreEvents.UNIT_SPELLCAST_EMPOWER_START = UNIT_SPELLCAST_CHANNEL_START
+CoreEvents.UNIT_SPELLCAST_EMPOWER_UPDATE = UnitSpellcastMidway
+CoreEvents.UNIT_SPELLCAST_EMPOWER_STOP = UNIT_SPELLCAST_CHANNEL_STOP
 
-if Addon.ExpansionIsAtLeastMists then
-  CoreEvents.UNIT_SPELLCAST_INTERRUPTIBLE = UnitSpellcastMidway
-  CoreEvents.UNIT_SPELLCAST_NOT_INTERRUPTIBLE = UnitSpellcastMidway
+CoreEvents.UNIT_SPELLCAST_INTERRUPTIBLE = UnitSpellcastMidway
+CoreEvents.UNIT_SPELLCAST_NOT_INTERRUPTIBLE = UnitSpellcastMidway
 
-  -- UNIT_HEALTH, UNIT_HEALTH_FREQUENT: 
-  --   Shadowlands Patch 9.0.1 (2020-10-13): Removed. Replaced by UNIT HEALTH which is no longer aggressively throttled.
-  --   Cataclysm Patch 4.0.6 (2011-02-08): Added.
-  CoreEvents.UNIT_HEALTH = UNIT_HEALTH
-else
-  CoreEvents.UNIT_HEALTH_FREQUENT = UNIT_HEALTH
-end
+CoreEvents.UNIT_HEALTH = UNIT_HEALTH
+CoreEvents.UNIT_HEALTH_FREQUENT = UNIT_HEALTH
 
-if Addon.WOW_FEATURE_ABSORBS then
-  -- Absorbs should have been added with Mists
-  CoreEvents.UNIT_ABSORB_AMOUNT_CHANGED = UNIT_ABSORB_AMOUNT_CHANGED
-  CoreEvents.UNIT_HEAL_ABSORB_AMOUNT_CHANGED = UNIT_HEAL_ABSORB_AMOUNT_CHANGED
-end
+CoreEvents.UNIT_ABSORB_AMOUNT_CHANGED = UNIT_ABSORB_AMOUNT_CHANGED
+CoreEvents.UNIT_HEAL_ABSORB_AMOUNT_CHANGED = UNIT_HEAL_ABSORB_AMOUNT_CHANGED
 
-if Addon.ExpansionIsAtLeastTBC then
-  CoreEvents.PLAYER_FOCUS_CHANGED = PLAYER_FOCUS_CHANGED
-end
+CoreEvents.PLAYER_FOCUS_CHANGED = PLAYER_FOCUS_CHANGED
 
 CoreEvents.PLAYER_SOFT_FRIEND_CHANGED = PLAYER_SOFT_FRIEND_CHANGED
 CoreEvents.PLAYER_SOFT_ENEMY_CHANGED = PLAYER_SOFT_ENEMY_CHANGED
@@ -1951,7 +1936,9 @@ CoreEvents.PLAYER_CONTROL_GAINED = WorldConditionChanged
 -- Registration of Blizzard Events
 TidyPlatesCore:SetFrameStrata("TOOLTIP") 	-- When parented to WorldFrame, causes OnUpdate handler to run close to last
 TidyPlatesCore:SetScript("OnEvent", EventHandler)
-for eventName in pairs(CoreEvents) do TidyPlatesCore:RegisterEvent(eventName) end
+for eventName in pairs(CoreEvents) do
+  Addon:RegisterEvent(TidyPlatesCore, eventName)
+end
 
 CoreEvents.UNIT_TARGET = UNIT_TARGET
 
@@ -1967,7 +1954,7 @@ local ENABLE_UNIT_AURA_FOR_CLASS = {
 }
 if ENABLE_UNIT_AURA_FOR_CLASS[Addon.PlayerClass] then
   CoreEvents.UNIT_AURA = UNIT_AURA
-  TidyPlatesCore:RegisterUnitEvent("UNIT_AURA", "player")
+  Addon:RegisterUnitEvent(TidyPlatesCore, "UNIT_AURA", "player")
   -- UNIT_AURA does not seem to be fired after login (even when buffs are active)
   UNIT_AURA()
 end
@@ -2292,10 +2279,11 @@ function Addon:ForceUpdate()
 
   SettingsTargetUnitHide = not db.settings.healthbar.TargetUnit.Show
   SettingsShowOnlyForTarget = db.settings.healthbar.TargetUnit.ShowOnlyForTarget
+  
   if SettingsTargetUnitHide then
-    TidyPlatesCore:UnregisterEvent("UNIT_TARGET")
+    Addon:UnregisterEvent(TidyPlatesCore, "UNIT_TARGET")
   else
-    TidyPlatesCore:RegisterEvent("UNIT_TARGET")
+    Addon:RegisterEvent(TidyPlatesCore, "UNIT_TARGET")
   end
 
   SettingsShowOnlyNames = CVars:GetAsBool("nameplateShowOnlyNames") and Addon.db.profile.BlizzardSettings.Names.Enabled

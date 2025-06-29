@@ -643,12 +643,10 @@ function Widget:OnEnable()
 
   -- We could register/unregister this when entering/leaving the battlefield, but as it only fires when
   -- in a bg, that does not really matter
-  if Addon.ExpansionIsAtLeastMists then
-    -- Before Mists, UPDATE_BATTLEFIELD_SCORE will not work, as GetBattlefieldScore does not return talentSpec information.
-    self:RegisterEvent("UPDATE_BATTLEFIELD_SCORE")
-    -- Before Mists, ARENA_OPPONENT_UPDATE will not work, as it uses a player's spec to determine its role. 
-    self:RegisterEvent("ARENA_OPPONENT_UPDATE")
-  end
+  -- Before Mists, UPDATE_BATTLEFIELD_SCORE will not work, as GetBattlefieldScore does not return talentSpec information.
+  self:RegisterEvent("UPDATE_BATTLEFIELD_SCORE", Addon.ExpansionIsAtLeastMists)
+  -- Before Mists, ARENA_OPPONENT_UPDATE will not work, as it uses a player's spec to determine its role. 
+  self:RegisterEvent("ARENA_OPPONENT_UPDATE", Addon.ExpansionIsAtLeastMists)
 
   -- It seems that PLAYER_FLAGS_CHANGED does not fire when loggin in/reloading the UI, so we need to call it
   -- directly here to initialize combat log parsing.
