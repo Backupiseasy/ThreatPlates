@@ -941,11 +941,13 @@ function Widget:IsEnabled()
   -- Other possibility for Classic: PLAYER_TALENT_UPDATE, CHARACTER_POINTS_CHANGED
   -- No need to use it for Classic, as GetSpecialization is not available there and CPs don't change between first 
   -- and second spec.
-  if enabled and Addon.ExpansionIsAtLeastMists then
+  if enabled then
     -- Register ACTIVE_TALENT_GROUP_CHANGED here otherwise it won't be registered when an spec is active that does not have combo points.
     -- If you then switch to a spec with talent points, the widget won't be enabled.
-    self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")  -- Added in patch 3.2.0 / 1.14.4
-    self:RegisterEvent("TRAIT_CONFIG_UPDATED") -- Added in patch 10.0.0 / 1.14.4
+    -- ACTIVE_TALENT_GROUP_CHANGED requires dual spec which was added with Wrath
+    -- TRAIT_CONFIG_UPDATED is only required for detecting enabling/disabling Rogue talent Supercharger
+    self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", Addon.ExpansionIsAtLeastMists)  -- Added in patch 3.2.0 / 1.14.4
+    self:RegisterEvent("TRAIT_CONFIG_UPDATED", Addon.ExpansionIsAtLeastMists) -- Added in patch 10.0.0 / 1.14.4
   end
 
   self:DetermineUnitPower()
@@ -975,10 +977,7 @@ function Widget:OnEnable()
   else
     self:RegisterUnitEvent("UNIT_POWER_UPDATE", "player", EventHandler)
     self:RegisterUnitEvent("UNIT_DISPLAYPOWER", "player", EventHandler)
-    -- UNIT_POWER_POINT_CHARGE: Shadowlands Patch 9.0.1 (2020-10-13): Added.
-    if Addon.IS_MAINLINE then
-      self:RegisterUnitEvent("UNIT_POWER_POINT_CHARGE", "player", EventHandler)
-    end
+    self:RegisterUnitEvent("UNIT_POWER_POINT_CHARGE", "player", EventHandler)
 
     if PlayerClass == "DRUID" then
       self:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
@@ -986,9 +985,7 @@ function Widget:OnEnable()
     elseif PlayerClass == "DEATHKNIGHT" then
       -- Never registered for Classic, as there is no Death Knight class
       self:RegisterEvent("RUNE_POWER_UPDATE", EventHandler)
-      if Addon.ExpansionIsBetween(LE_EXPANSION_WRATH_OF_THE_LICH_KING, LE_EXPANSION_LEGION) then
-        self:RegisterEvent("RUNE_TYPE_UPDATE", EventHandler)
-      end
+      self:RegisterEvent("RUNE_TYPE_UPDATE", EventHandler)
     end
   end
 
@@ -1005,16 +1002,11 @@ function Widget:OnDisable()
   self:UnregisterEvent("UNIT_POWER_FREQUENT")
   self:UnregisterEvent("UNIT_POWER_UPDATE")
   self:UnregisterEvent("UNIT_DISPLAYPOWER")
-  -- UNIT_POWER_POINT_CHARGE: Shadowlands Patch 9.0.1 (2020-10-13): Added.
-  if Addon.IS_MAINLINE then
-    self:UnregisterEvent("UNIT_POWER_POINT_CHARGE")
-  end
+  self:UnregisterEvent("UNIT_POWER_POINT_CHARGE")
   
   self:UnregisterEvent("UPDATE_SHAPESHIFT_FORM")
   self:UnregisterEvent("RUNE_POWER_UPDATE")
-  if Addon.ExpansionIsAtLeastWrath then
-    self:UnregisterEvent("RUNE_TYPE_UPDATE")
-  end
+  self:UnregisterEvent("RUNE_TYPE_UPDATE")
 
   HideWidgetFrame(self.WidgetFrame)
 end

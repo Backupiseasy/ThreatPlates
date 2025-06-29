@@ -209,13 +209,13 @@ local EVENTS = {
 
 local function EnableEvents()
   for i = 1, #EVENTS do
-    TidyPlatesThreat:RegisterEvent(EVENTS[i])
+    Addon:RegisterEvent(TidyPlatesThreat, EVENTS[i])
   end
 end
 
 local function DisableEvents()
   for i = 1, #EVENTS do
-    TidyPlatesThreat:UnregisterEvent(EVENTS[i])
+    Addon:UnregisterEvent(TidyPlatesThreat, EVENTS[i])
   end
 end
 

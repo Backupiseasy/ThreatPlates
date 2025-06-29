@@ -62,17 +62,20 @@ end
 WidgetHandler.EventHandlerFrame = _G.CreateFrame("Frame", nil, WorldFrame)
 WidgetHandler.EventHandlerFrame:SetScript("OnEvent", EventHandler)
 
-local function RegisterEvent(widget, event, func, min_expansion)
+local function RegisterEvent(widget, event, func, register_for_current_expansion)
+  if not Addon:ExpansionSupportsEvent(event, register_for_current_expansion) then return end
+
   if not WidgetHandler.RegisteredEventsByWidget[event] then
     WidgetHandler.RegisteredEventsByWidget[event] = {}
-  end
+  end  
 
   WidgetHandler.RegisteredEventsByWidget[event][widget] = func or true
   Addon:RegisterEvent(WidgetHandler.EventHandlerFrame, event, min_expansion)
-  --WidgetHandler.EventHandlerFrame:RegisterEvent(event)
 end
 
-local function RegisterUnitEvent(widget, event, unitid, func)
+local function RegisterUnitEvent(widget, event, unitid, func, register_for_current_expansion)
+  if not Addon:ExpansionSupportsEvent(event, register_for_current_expansion) then return end
+
   if not widget.EventHandlerFrame then
     widget.EventHandlerFrame = _G.CreateFrame("Frame", nil, WorldFrame)
     widget.EventHandlerFrame.Widget = widget
@@ -84,6 +87,8 @@ local function RegisterUnitEvent(widget, event, unitid, func)
 end
 
 local function UnregisterEvent(widget, event)
+  if not Addon:ExpansionSupportsEvent(event) then return end
+
   if WidgetHandler.RegisteredEventsByWidget[event] then
     WidgetHandler.RegisteredEventsByWidget[event][widget] = nil
 
@@ -104,6 +109,8 @@ local function UnregisterAllEvents(widget)
   end
 
   -- Also remove all remaining registered unit events (that are not in RegisteredEventsByWidget)
+  if not Addon:ExpansionSupportsEvent(event) then return end
+
   for event, _ in pairs(widget.RegistedUnitEvents) do
     widget.EventHandlerFrame:UnregisterEvent(event)
   end
