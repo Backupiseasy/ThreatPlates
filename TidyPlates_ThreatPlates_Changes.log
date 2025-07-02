@@ -1,5 +1,5 @@
 ﻿------------------------------------------------------
-12.3.0 (2025-07-01)
+12.3.0 (2025-07-02)
 ------------------------------------------------------
 * Added support for WoW Mists of Pandaria Classic [GH-582].
 * Extended the scripting API to change most of the icon textures used in Threat Plates. More documentation can be found here: https://github.com/Backupiseasy/ThreatPlates/wiki/Scripts-%E2%80%90-Icon-Textures.
