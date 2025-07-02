@@ -4,7 +4,7 @@
 local ADDON_NAME, Addon = ...
 local ThreatPlates = Addon.ThreatPlates
 
-local FocusWidget = (not Addon.IS_CLASSIC and Addon.Widgets:NewFocusWidget("Focus")) or {}
+local FocusWidget = (Addon.ExpansionIsAtLeastTBC and Addon.Widgets:NewFocusWidget("Focus")) or {}
 local Widget = Addon.Widgets:NewTargetWidget("TargetArt")
 
 ---------------------------------------------------------------------------------------------------
@@ -175,15 +175,14 @@ local function UpdateSideTexture(db, widget_frame, texture_frame)
   local left_texture, right_texture = texture_frame.LeftTexture, texture_frame.RightTexture
 
   local r, g, b, a = GetHighlightColor(widget_frame)
-  left_texture:SetTexture(ART_PATH .. db.theme)
-  left_texture:SetTexCoord(0, 1, 0, 1)
+  Addon:SetIconTexture(left_texture, widget_frame.Type .. ".Left")
   left_texture:SetVertexColor(r, g, b, a)
   left_texture:SetSize(db.Size, db.Size)
   left_texture:ClearAllPoints()
+
   left_texture:SetPoint("RIGHT", widget_frame, "LEFT", db.HorizontalOffset, db.VerticalOffset)
 
-  right_texture:SetTexture(ART_PATH .. db.theme)
-  right_texture:SetTexCoord(1, 0, 0, 1)
+  Addon:SetIconTexture(right_texture, widget_frame.Type .. ".Right")
   right_texture:SetVertexColor(r, g, b, a)
   right_texture:SetSize(db.Size, db.Size)
   right_texture:ClearAllPoints()
@@ -197,9 +196,9 @@ end
 local function UpdateCenterTexture(db, widget_frame, texture_frame)
   local left_texture, right_texture = texture_frame.LeftTexture, texture_frame.RightTexture
 
-  left_texture:SetTexture(ART_PATH .. db.theme)
-  left_texture:SetTexCoord(0, 1, 0, 1)
+  Addon:SetIconTexture(left_texture, widget_frame.Type .. ".Center")
   left_texture:SetVertexColor(GetHighlightColor(widget_frame))
+  
   left_texture:SetSize(db.Size, db.Size)
   left_texture:ClearAllPoints()
   left_texture:SetPoint("CENTER", widget_frame, "CENTER", db.HorizontalOffset, db.VerticalOffset)
@@ -344,6 +343,7 @@ local function CreateTargetHighlightFrame(target_unitid)
     widget_frame:Hide()
 
     widget_frame.TargetUnitID = target_unitid
+    widget_frame.Type = "TargetHighlight"
 
     local healthbar_mode_frame = _G.CreateFrame("Frame", nil, widget_frame, BackdropTemplate)
     healthbar_mode_frame:SetFrameLevel(widget_frame:GetFrameLevel())
@@ -538,7 +538,8 @@ function FocusWidget:Create()
     FocusWidgetFrame = widget_frame
     
     widget_frame.TargetUnitID = "focus"
-    
+    widget_frame.Type = "FocusHighlight"
+
     -- Focus highlight textures should be shown behind target highlight textures
     local healthbar_mode_frame = _G.CreateFrame("Frame", nil, widget_frame, BackdropTemplate)
     healthbar_mode_frame:SetFrameLevel(widget_frame:GetFrameLevel())

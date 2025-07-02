@@ -10,6 +10,7 @@ local Widget = Addon.Widgets:NewWidget("TotemIcon")
 ---------------------------------------------------------------------------------------------------
 
 -- WoW APIs
+local tostring = tostring
 
 -- ThreatPlates APIs
 
@@ -17,8 +18,6 @@ local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
 -- List them here for Mikk's FindGlobals script
 -- GLOBALS: CreateFrame
-
-local PATH = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\"
 
 ---------------------------------------------------------------------------------------------------
 -- Widget functions for creation and update
@@ -69,7 +68,16 @@ function Widget:OnUnitAdded(widget_frame, unit)
   -- not used: db[totem_id].ShowIcon
   widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
   widget_frame:SetSize(db.scale, db.scale)
-  widget_frame.Icon:SetTexture(PATH .. totem_settings.Style .. "\\" .. totem_settings.Icon)
+  Addon:SetIconTexture(widget_frame.Icon, "Totem." .. tostring(totem_settings.SpellID), unit.unitid)
 
   widget_frame:Show()
+end
+
+function Widget:PrintDebug()
+  Addon.Logging.Debug(Widget.Name .. ":")
+  for icon_id, icon_ in pairs (getmetatable(Addon.IconTextures).__index) do
+    if icon_id:sub(1, 6) == "Totem." then
+      Addon.Logging.Debug("    ", icon_id .. ":", icon_source)
+    end
+  end 
 end

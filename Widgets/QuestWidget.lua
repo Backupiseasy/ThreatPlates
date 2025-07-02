@@ -4,7 +4,7 @@
 local ADDON_NAME, Addon = ...
 local ThreatPlates = Addon.ThreatPlates
 
-local Widget = (not Addon.IS_MAINLINE and {}) or Addon.Widgets:NewWidget("Quest")
+local Widget = (Addon.IS_MAINLINE and Addon.Widgets:NewWidget("Quest")) or {}
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -574,7 +574,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
   ICON_COLORS[1] = db.ColorPlayerQuest
   ICON_COLORS[2] = db.ColorGroupQuest
 
-  widget_frame.Icon:SetTexture(ICON_PATH .. db.IconTexture)
+  Addon:SetIconTexture(widget_frame.Icon, "Quest.Highlight", unit.unitid)
   widget_frame.Icon:SetAllPoints()
 
   self:UpdateFrame(widget_frame, unit)
@@ -604,15 +604,15 @@ function Widget:UpdateFrame(widget_frame, unit)
         text = current.numFulfilled .. '%'
 
         if unit.reaction ~= "FRIENDLY" then
-          widget_frame.Text.TypeTexture:SetTexture(ICON_PATH .. "kill")
+          Addon:SetIconTexture(widget_frame.Text.TypeTexture, "Quest.KillObjective", unit.unitid)
         end
       else
         text = current.numFulfilled .. '/' .. current.numRequired
 
         if current.type == "monster" then
-          widget_frame.Text.TypeTexture:SetTexture(ICON_PATH .. "kill")
+          Addon:SetIconTexture(widget_frame.Text.TypeTexture, "Quest.KillObjective", unit.unitid)
         elseif current.type == "item" then
-          widget_frame.Text.TypeTexture:SetTexture(ICON_PATH .. "loot")
+          Addon:SetIconTexture(widget_frame.Text.TypeTexture, "Quest.LootObjective", unit.unitid)
         end
       end
 

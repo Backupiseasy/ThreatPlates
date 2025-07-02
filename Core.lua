@@ -16,6 +16,8 @@ local GetCVar, IsAddOnLoaded = GetCVar, C_AddOns.IsAddOnLoaded
 local C_NamePlate, Lerp =  C_NamePlate, Lerp
 local C_Timer_After = C_Timer.After
 local NamePlateDriverFrame = NamePlateDriverFrame
+local GetSpecialization = C_SpecializationInfo and C_SpecializationInfo.GetSpecialization or _G.GetSpecialization
+local GetSpecializationInfo = C_SpecializationInfo and C_SpecializationInfo.GetSpecializationInfo or _G.GetSpecializationInfo
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -144,15 +146,6 @@ end
 -- Global configs and funtions
 ---------------------------------------------------------------------------------------------------
 
-function Addon:SpecName()
-  local _,name,_,_,_,role = GetSpecializationInfo(GetSpecialization(false,false,1),nil,false)
-  if name then
-    return name
-  else
-    return L["Undetermined"]
-  end
-end
-
 local tankRole = L["|cff00ff00tanking|r"]
 local dpsRole = L["|cffff0000dpsing / healing|r"]
 
@@ -216,13 +209,13 @@ local EVENTS = {
 
 local function EnableEvents()
   for i = 1, #EVENTS do
-    TidyPlatesThreat:RegisterEvent(EVENTS[i])
+    Addon:RegisterEvent(TidyPlatesThreat, EVENTS[i])
   end
 end
 
 local function DisableEvents()
   for i = 1, #EVENTS do
-    TidyPlatesThreat:UnregisterEvent(EVENTS[i])
+    Addon:UnregisterEvent(TidyPlatesThreat, EVENTS[i])
   end
 end
 
@@ -272,6 +265,7 @@ function Addon:ReloadTheme()
   Addon:SetThemes()
   Addon:UpdateConfigurationStatusText()
   Addon:InitializeCustomNameplates()
+  Addon:InitializeIconTextures()
   Addon.Widgets:InitializeAllWidgets()
 
   -- Update existing nameplates as certain settings may have changed that are not covered by ForceUpdate()
@@ -307,7 +301,7 @@ function Addon:CheckForFirstStartUp()
     Addon.db.char.welcome = true
 
     -- GetNumSpecializations: Mists - Patch 5.0.4 (2012-08-28): Replaced GetNumTalentTabs.
-    if Addon.IS_MAINLINE then
+    if Addon.ExpansionIsAtLeastMists then
       -- initialize roles for all available specs (level > 10) or set to default (dps/healing)
       for index=1, GetNumSpecializations() do
         local id, spec_name, description, icon, background, role = GetSpecializationInfo(index)

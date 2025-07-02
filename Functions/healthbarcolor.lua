@@ -35,13 +35,15 @@ local _G =_G
 -- Wrapper functions for WoW Classic
 ---------------------------------------------------------------------------------------------------
 
--- Quest tooltips: not sure since when available
-if not Addon.IS_MAINLINE then -- 
-  -- UnitGroupRolesAssigned does still not seem to work in Classic
+if Addon.ExpansionIsAtLeastMists then
+  -- UnitGroupRolesAssigned does still not seem to work in Classic before Mists
   UnitGroupRolesAssigned = function(target_unit)
     return (GetPartyAssignment("MAINTANK", target_unit) and "TANK") or "NONE"
   end
+end
 
+-- Quest tooltips: not sure since when available
+if not Addon.IS_MAINLINE then -- 
   -- Quest widget is not available in Classic
   ShowQuestUnit = function(...) return false end
 end

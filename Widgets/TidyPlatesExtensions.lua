@@ -245,7 +245,7 @@ end
 
 -- UnitGetTotalAbsorbs: Mists - Patch 5.2.0 (2013-03-05): Added.
 -- UnitGetTotalHealAbsorbs: Mists - Patch 5.4.0 (2013-09-10): Added.
-if Addon.IS_MAINLINE then
+if Addon.WOW_FEATURE_ABSORBS then
   Addon.CreateExtensions = CreateExtensions
   Addon.UpdateExtensions = UpdateExtensions
 else

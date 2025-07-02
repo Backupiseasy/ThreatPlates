@@ -4,6 +4,7 @@
 ## Interface-TBC: 20504
 ## Interface-Wrath: 30402
 ## Interface-Cata: 40402
+## Interface-Mists: 50500
 
 ## Title: Threat Plates
 ## Version: @project-version@
@@ -46,6 +47,10 @@
 ## OptionalDeps: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate, LibDualSpec-1.0
 ## X-Embeds: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate, LibDualSpec-1.0
 #@end-version-cata@
+#@version-mists@
+## OptionalDeps: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate, LibDualSpec-1.0
+## X-Embeds: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate, LibDualSpec-1.0
+#@end-version-mists@
 
 ## X-License: GNU General Public License
 ## X-Credits: danltiger (for Tidy Plates), Tosaido (for quest handling code from QuestMobs)
@@ -54,6 +59,7 @@ Libs\Libs.xml
 Locales\Locales.xml
 
 Init.lua
+Compatibility.lua
 Localization.lua
 CVarsManager.lua
 Media.lua

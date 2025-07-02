@@ -23,8 +23,9 @@ local UnitsExists, UnitName = UnitsExists, UnitName
 local GameTooltip = GameTooltip
 local GetSpellInfo = Addon.GetSpellInfo
 local GetAddOnEnableState = (C_AddOns and C_AddOns.GetAddOnEnableState)
-    -- classic's GetAddonEnableState and retail's C_AddOns have their parameters swapped
-    or function(name, character) return GetAddOnEnableState(character, name) end
+-- classic's GetAddonEnableState and retail's C_AddOns have their parameters swapped
+or function(name, character) return GetAddOnEnableState(character, name) end
+local GetSpecializationInfo = C_SpecializationInfo and C_SpecializationInfo.GetSpecializationInfo or _G.GetSpecializationInfo
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -349,6 +350,185 @@ local function AddImportExportOptions(options_profiles)
       func = function() ShowImportFrame() end
     },
   }
+end
+
+-------------------------------------------------------------------------------
+-- Icon constants and functions (including API interface to scripts)
+-------------------------------------------------------------------------------
+
+local IconTexturesByOptions = {
+  ["Arena"] = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ArenaWidget\\BG",
+  -- Class.<CLASS_NAME>, e.g. Class.DRUID
+  -- ComboPoint.<NO>.On, e.g., ComboPoint.1.On
+  -- ComboPoint.<NO>.Off, e.g., ComboPoint.1.Off
+  -- FocusHighlight.Center|Left|Right
+  ["Quest.Highlight"] = nil,
+  ["Quest.KillObjective"] = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\QuestWidget\\kill",
+  ["Quest.LootObjective"] = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\QuestWidget\\loot",  
+  ["HealerTracker"] = "Interface\\Icons\\Achievement_Guild_DoctorIsIn",
+  -- Social.* does not support tex coords
+  ["Social.Alliance"] = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\SocialWidget\\allianceicon",
+  ["Social.Horde"] = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\SocialWidget\\hordeicon",
+  ["Social.Friend"] = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\SocialWidget\\friendicon",
+  ["Social.BattleNetFriend"] = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\SocialWidget\\BattleNetFriend", -- "Interface\\FriendsFrame\\PlusManz-BattleNet"
+  ["Social.GuildMember"] = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\SocialWidget\\guildicon",
+  ["Stealth"] = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\StealthWidget\\stealthicon",
+  -- TargetHighlight.Center|Left|Right
+  -- TargetMarker.<NAME>, e.g., TargetMarker.SKULL 
+  -- Totem.<SPELL_ID>, e.g., 
+  ["UnitClassification.Rare"] = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\default",
+  ["UnitClassification.Boss"] = "Interface\\TargetingFrame\\UI-TargetingFrame-Skull",
+}
+
+local TARGET_MARKER_TEXTURES = {
+  ["STAR"] = { x = 0, y =0 },
+  ["CIRCLE"] = { x = 0.25, y = 0 },
+  ["DIAMOND"] = { x = 0.5, y = 0 },
+  ["TRIANGLE"] = { x = 0.75, y = 0},
+  ["MOON"] = { x = 0, y = 0.25},
+  ["SQUARE"] = { x = .25, y = 0.25},
+  ["CROSS"] = { x = .5, y = 0.25},
+  ["SKULL"] = { x = .75, y = 0.25},
+  ["GREEN_FLAG"] = { x = 0.5, y = 0.75 },
+  ["MURLOC"] = { x = 0.75, y = 0.75 },
+}
+
+for target_marker, tex_coords in pairs(TARGET_MARKER_TEXTURES) do
+  IconTexturesByOptions["TargetMarker." .. target_marker] = { "Interface\\TargetingFrame\\UI-RaidTargetingIcons", tex_coords.x, tex_coords.x + 0.25, tex_coords.y, tex_coords.y + 0.25 }
+end
+
+Addon.IconTextures = setmetatable( {}, { __index = IconTexturesByOptions })
+
+function Addon:GetIconTexture(icon_id, ...)
+  local icon_source = Addon.IconTextures[icon_id]
+
+  if type(icon_source) == "function" then
+    -- Environment for this function is set in ScriptWidget when setting it for icon_id
+    local call_ok, return_value = pcall(icon_source, ...)
+    if call_ok then
+      return return_value
+    else
+      -- If the function call failed, we log the error and return nothing
+      Addon.Logging.Error(string.format(L["Error executing icon texture function for %s:"], icon_id), return_value)
+    end
+  else
+    return icon_source
+  end
+end
+
+function Addon:UpdateIconTexture(icon, texture_info)
+  if type(texture_info) == "table" then
+    icon:SetTexture(texture_info.Texture) -- ?  or EMPTY_TEXTURE
+
+    local tex_coords = texture_info.TexCoords
+    if tex_coords then
+      icon:SetTexCoord(tex_coords[1] or 0, tex_coords[2] or 1, tex_coords[3] or 0, tex_coords[4] or 1)
+    end
+
+    local color = texture_info.Color
+    if color then
+      icon:SetDesaturated(true)
+      icon:SetVertexColor(color.r or 1, color.g or 1, color.b or 1, color.a or 1)
+    end
+
+    if texture_info.Alpha then
+      icon:SetAlpha(texture_info.Alpha)
+    end
+    
+    if texture_info.Desaturated then
+      icon:SetDesaturated(texture_info.Desaturated)
+    end
+  else
+    icon:SetTexture(texture_info) -- ?  or EMPTY_TEXTURE
+  end
+end
+
+function Addon:SetIconTexture(icon, icon_id, ...)
+  local texture_info = Addon:GetIconTexture(icon_id, ...)
+  if not texture_info then return end
+  
+  Addon:UpdateIconTexture(icon, texture_info)
+end
+
+local function UpdateUnitClassificationIconTextures(style, options_path)
+  IconTexturesByOptions["UnitClassification.Rare"] = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\" .. style
+  if options_path then
+    options_path.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewRare.image = IconTexturesByOptions["UnitClassification.Rare"]
+    options_path.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewElite.image = string.gsub(IconTexturesByOptions["UnitClassification.Rare"], style, "elite-" .. style)
+    options_path.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewRareElite.image = string.gsub(IconTexturesByOptions["UnitClassification.Rare"], style, "rareelite-" .. style)
+  end
+end
+
+local function UpdateQuestIconTexture(icon_texture, options_path)
+  IconTexturesByOptions["Quest.Highlight"] = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\QuestWidget\\" .. icon_texture
+  if options_path then
+    options_path.args.Widgets.args.QuestWidget.args.ModeIcon.args.Texture.args.Preview.image = IconTexturesByOptions["Quest.Highlight"]
+  end
+end
+
+local function UpdateClassIconTextures(class_theme, options_path)
+  local class_list = t.CopyTable(CLASS_SORT_ORDER)
+  sort(class_list)
+  for i, class in ipairs(class_list) do
+    IconTexturesByOptions["Class." .. class] = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ClassIconWidget\\" .. class_theme .. "\\" .. class
+    if options_path then
+      options_path.args.Widgets.args.ClassIconWidget.args.Textures.args["Prev" .. i].image = IconTexturesByOptions["Class." .. class]
+    end
+  end
+end
+
+local function UpdateTotemIconTexture(totem_style, totem_info, options_path)
+  IconTexturesByOptions["Totem." .. tostring(totem_info.SpellID)] = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\" .. totem_style .. "\\" .. totem_info.Icon
+  if options_path then
+    options_path.args.Totems.args[totem_info.Name].args.Textures.args.Icon.image = IconTexturesByOptions["Totem." .. tostring(totem_info.SpellID)]
+  end
+end
+
+local function UpdateTotemIconTextures(totem_settings, options_path)
+  for _, totem_info in pairs(Addon.TotemInformation) do
+    UpdateTotemIconTexture(totem_settings[totem_info.ID].Style, totem_info, options_path)
+  end
+end
+
+local function SetTargetArtIconTexture(icon_id, style, tex_coords)
+  IconTexturesByOptions[icon_id] = {
+    Texture = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\" .. style,
+    TexCoords = tex_coords,
+  }
+end
+local function UpdateTargetArtIconTexture(style, options_path)
+  -- This also sets these icon ids unsed for the selected style, but they are not used it that case, so it does not matter
+  SetTargetArtIconTexture("TargetHighlight.Center", style, { 0, 1, 0, 1 })
+  SetTargetArtIconTexture("TargetHighlight.Left", style, { 0, 1, 0, 1 })
+  SetTargetArtIconTexture("TargetHighlight.Right", style, { 1, 0, 0, 1 })
+
+  if options_path then
+    options.args.Widgets.args.TargetArtWidget.args.Indicator.args.Texture.args.Preview.image = IconTexturesByOptions["TargetHighlight.Center"].Texture
+  end
+end
+
+local function UpdateFocusArtIconTexture(style, options_path)
+  -- This also sets these icon ids unsed for the selected style, but they are not used it that case, so it does not matter
+  SetTargetArtIconTexture("FocusHighlight.Center", style, { 0, 1, 0, 1 })
+  SetTargetArtIconTexture("FocusHighlight.Left", style, { 0, 1, 0, 1 })
+  SetTargetArtIconTexture("FocusHighlight.Right", style, { 1, 0, 0, 1 })
+
+  if options_path then
+    options.args.Widgets.args.FocusWidget.args.Texture.args.Preview.image = IconTexturesByOptions["FocusHighlight.Center"].Texture
+  end
+end
+
+function Addon:InitializeIconTextures(options_path)
+  local db = self.db.profile
+
+  --wipe(Addon.IconTextures)
+
+  UpdateUnitClassificationIconTextures(db.settings.eliteicon.theme, options_path)
+  UpdateQuestIconTexture(db.questWidget.IconTexture, options_path)
+  UpdateClassIconTextures(db.classWidget.theme, options)
+  UpdateTotemIconTextures(db.totemSettings, options)
+  UpdateTargetArtIconTexture(db.targetWidget.theme, options_path)
+  UpdateFocusArtIconTexture(db.FocusWidget.theme, options_path)
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -1961,17 +2141,17 @@ local function CreateComboPointsWidgetOptions()
                 type = "select",
                 order = 10,
                 values = {
-                  DEATHKNIGHT = (Addon.ExpansionIsAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) and L["Death Knight"]) or nil,
+                  DEATHKNIGHT = (Addon.ExpansionIsAtLeastWrath and L["Death Knight"]) or nil,
                   DRUID = L["Druid"],
-                  EVOKER = (Addon.ExpansionIsAtLeast(LE_EXPANSION_DRAGONFLIGHT) and L["Evoker"]) or nil,
+                  EVOKER = (Addon.ExpansionIsAtLeastDF and L["Evoker"]) or nil,
                   -- Arcane Charge as a resource mechanic was introduced with Patch 7.0.3 (Legion)
-                  MAGE = (Addon.ExpansionIsAtLeast(LE_EXPANSION_LEGION) and L["Arcane Mage"]) or nil,
-                  MONK = (Addon.ExpansionIsAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA)  and L["Windwalker Monk"]) or nil,
+                  MAGE = (Addon.ExpansionIsAtLeastLegion and L["Arcane Mage"]) or nil,
+                  MONK = (Addon.ExpansionIsAtLeastMists  and L["Windwalker Monk"]) or nil,
                   -- Holy Power was introduced with Patch 4.0.1 (Cataclysm)
-                  PALADIN = (Addon.ExpansionIsAtLeast(LE_EXPANSION_CATACLYSM)  and L["Paladin"]) or nil,
+                  PALADIN = (Addon.ExpansionIsAtLeastCata  and L["Paladin"]) or nil,
                   ROGUE = L["Rogue"],
                   -- Soul Shard as a resource mechanic was introduced with Path 4.0.1 (Cataclysm)
-                  WARLOCK = (Addon.ExpansionIsAtLeast(LE_EXPANSION_CATACLYSM)  and L["Warlock"]) or nil,
+                  WARLOCK = (Addon.ExpansionIsAtLeastCata  and L["Warlock"]) or nil,
                 },
                 arg = { "ComboPoints", "Specialization" },
               },
@@ -2098,7 +2278,7 @@ local function CreateComboPointsWidgetOptions()
                 end,
                 hasAlpha = false,
                 -- Charged Combo Points were introduced with Battle for Azerorth  
-                hidden = function() return db.ComboPoints.Specialization ~= "ROGUE" or not Addon.ExpansionIsAtLeast(LE_EXPANSION_BATTLE_FOR_AZEROTH) end
+                hidden = function() return db.ComboPoints.Specialization ~= "ROGUE" or not Addon.ExpansionIsAtLeastBfA end
               },
               ColorDeathrune = {
                 name = L["Death Rune"],
@@ -2114,7 +2294,7 @@ local function CreateComboPointsWidgetOptions()
                 end,
                 hasAlpha = false,
                 -- Deathrunes were available from Wrath to WoD
-                hidden = function() return db.ComboPoints.Specialization ~= "DEATHKNIGHT" or Addon.ExpansionIsAtLeast(LE_EXPANSION_LEGION) end
+                hidden = function() return db.ComboPoints.Specialization ~= "DEATHKNIGHT" or Addon.ExpansionIsAtLeastLegion end
               },
             },
           },
@@ -2145,14 +2325,14 @@ local function CreateComboPointsWidgetOptions()
         type = "group",
         order = 30,
         inline = false,
-        hidden = function() return not Addon.ExpansionIsAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) end,
+        hidden = function() return not Addon.ExpansionIsAtLeastWrath end,
         args = {
           RuneCooldown= {
             name = L["Death Knigh Rune Cooldown"],
             order = 70,
             type = "group",
             inline = true,
-            hidden = function() return not Addon.ExpansionIsAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) end,
+            hidden = function() return not Addon.ExpansionIsAtLeastWrath end,
             args = {
               Enable = {
                 name = L["Enable"],
@@ -2168,7 +2348,7 @@ local function CreateComboPointsWidgetOptions()
             order = 80,
             type = "group",
             inline = true,
-            hidden = function() return not Addon.ExpansionIsAtLeast(LE_EXPANSION_DRAGONFLIGHT) end,
+            hidden = function() return not Addon.ExpansionIsAtLeastDF end,
             args = {
               Enable = {
                 name = L["Enable"],
@@ -2629,8 +2809,8 @@ end
                 type = "select",
                 order = 10,
                 set = function(info, val)
+                  UpdateQuestIconTexture(val, options)
                   SetValue(info, val)
-                  options.args.Widgets.args.QuestWidget.args.ModeIcon.args.Texture.args.Preview.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\QuestWidget\\" .. db.questWidget.IconTexture;
                 end,
                 values = { QUESTICON = L["Blizzard"], SKULL = L["Skull"] },
                 arg = { "questWidget", "IconTexture" },
@@ -2639,7 +2819,7 @@ end
                 name = L["Preview"],
                 order = 20,
                 type = "execute",
-                image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\QuestWidget\\" .. db.questWidget.IconTexture,
+                image = IconTexturesByOptions["Quest.Highlight"],
               },
               PlayerColor = {
                 name = L["Color"],
@@ -2756,7 +2936,7 @@ local function CreateTargetArtWidgetOptions()
                 name = L["Preview"],
                 order = 10,
                 type = "execute",
-                image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\" .. db.targetWidget.theme,
+                image = IconTexturesByOptions["TargetHighlight.Center"].Texture,
                 imageWidth = 64,
                 imageHeight = 64,
               },
@@ -2765,8 +2945,8 @@ local function CreateTargetArtWidgetOptions()
                 type = "select",
                 order = 20,
                 set = function(info, val)
+                  UpdateTargetArtIconTexture(val, options)
                   SetValueWidget(info, val)
-                  options.args.Widgets.args.TargetArtWidget.args.Indicator.args.Texture.args.Preview.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\" .. db.targetWidget.theme;
                 end,
                 values = Addon.TARGET_TEXTURES,
                 arg = { "targetWidget", "theme" },
@@ -3212,7 +3392,7 @@ local function CreateExperienceWidgetOptions()
     type = "group",
     order = 54,
     childGroups = "tab",
-    hidden = function() return not Addon.IS_MAINLINE end,
+    hidden = function() return not Addon.ExpansionIsAtLeastBfA end,
     set = SetValueWidget,
     args = {
       Enable = GetEnableEntry(
@@ -3457,7 +3637,7 @@ local function CreateFocusWidgetOptions()
             name = L["Preview"],
             order = 10,
             type = "execute",
-            image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\" .. db.FocusWidget.theme,
+            image = IconTexturesByOptions["FocusHighlight.Center"].Texture,
             imageWidth = 64,
             imageHeight = 64,
           },
@@ -3466,8 +3646,8 @@ local function CreateFocusWidgetOptions()
             type = "select",
             order = 20,
             set = function(info, val)
+              UpdateFocusArtIconTexture(val, options)
               SetValueWidget(info, val)
-              options.args.Widgets.args.FocusWidget.args.Texture.args.Preview.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\" .. db.FocusWidget.theme
             end,
             values = Addon.TARGET_TEXTURES,
             arg = { "FocusWidget", "theme" },
@@ -4103,10 +4283,9 @@ local function CreateAuraAreaLayoutOptions(pos, widget_info)
       return values
     end,
     set = function(info, val)
-      if val ~= "Healthbar" and db.AuraWidget[val].AnchorTo == widget_info then
+      local call_ok, return_value = pcall(SetValueWidget, info, val)
+      if not call_ok then
         Addon.Logging.Error(L["Cyclic anchoring of aura areas to each other is not possible."], string.format(L["%s already anchored to %s."], val, widget_info))
-      else
-        SetValueWidget(info, val)
       end
     end,
     arg = { "AuraWidget", widget_info, "AnchorTo" }
@@ -4993,7 +5172,7 @@ local function CreateAurasWidgetOptions()
                     end,
                     arg = { "AuraWidget", "Debuffs", "ShowBlizzardForFriendly" },
                     disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly end,
-                    hidden = function() return not Addon.IS_MAINLINE end
+                    hidden = function() return not Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER end
                   },
                   Dispellable = {
                     name = L["Dispellable"],
@@ -5139,7 +5318,7 @@ local function CreateAurasWidgetOptions()
                     end,
                     arg = { "AuraWidget", "Debuffs", "ShowBlizzardForEnemy" },
                     disabled = function() return not db.AuraWidget.Debuffs.ShowEnemy end,
-                    hidden = function() return not Addon.IS_MAINLINE end
+                    hidden = function() return not Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER end
                   },
                 },
               },
@@ -5237,7 +5416,7 @@ local function CreateAurasWidgetOptions()
                     end,
                     arg = { "AuraWidget", "CrowdControl", "ShowBlizzardForFriendly" },
                     disabled = function() return not db.AuraWidget.CrowdControl.ShowFriendly end,
-                    hidden = function() return not Addon.IS_MAINLINE end
+                    hidden = function() return not Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER end
                   },
                   Dispellable = {
                     name = L["Dispellable"],
@@ -5293,7 +5472,7 @@ local function CreateAurasWidgetOptions()
                     end,
                     arg = { "AuraWidget", "CrowdControl", "ShowAllEnemy" },
                     disabled = function() return not db.AuraWidget.CrowdControl.ShowEnemy end,
-                    hidden = function() return not Addon.IS_MAINLINE end
+                    hidden = function() return not Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER end
                   },
                   Blizzard = {
                     name = L["Blizzard"],
@@ -5307,7 +5486,7 @@ local function CreateAurasWidgetOptions()
                     end,
                     arg = { "AuraWidget", "CrowdControl", "ShowBlizzardForEnemy" },
                     disabled = function() return not db.AuraWidget.CrowdControl.ShowEnemy end,
-                    hidden = function() return not Addon.IS_MAINLINE end
+                    hidden = function() return not Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER end
                   },
                 },
               },
@@ -6082,7 +6261,7 @@ local function CreateBlizzardSettings()
                 order = 10,
                 type = "range",
                 min = 0,
-                max = (Addon.IS_CLASSIC  and 20) or (Addon.IS_TBC_CLASSIC and 41) or (Addon.IS_WRATH_CLASSIC and 41) or (Addon.IS_CATA_CLASSIC and 41) or 100,
+                max = Addon.NAMEPLATE_MAX_DISTANCE_MAX_VALUE[Addon.GetExpansionLevel()],
                 step = 1,
                 width = "double",
                 desc = L["The max distance to show nameplates."],
@@ -6666,14 +6845,14 @@ local function CreateHealthbarOptions()
                 order = 29,
                 type = "toggle",
                 arg = { "settings", "healthbar", "ShowHealAbsorbs" },
-                hidden = function() return not Addon.IS_MAINLINE end, -- Absorbs were added with Mists
+                hidden = function() return not Addon.WOW_FEATURE_ABSORBS end, -- Absorbs were added with Mists
               },
               ShowAbsorbs = {
                 name = L["Absorbs"],
                 order = 30,
                 type = "toggle",
                 arg = { "settings", "healthbar", "ShowAbsorbs" },
-                hidden = function() return not Addon.IS_MAINLINE end, -- Absorbs were added with Mists
+                hidden = function() return not Addon.WOW_FEATURE_ABSORBS end, -- Absorbs were added with Mists
               },
               ShowMouseoverHighlight = {
                 type = "toggle",
@@ -6798,7 +6977,7 @@ local function CreateHealthbarOptions()
                 order = 90,
                 type = "group",
                 inline = true,
-                hidden = function() return not Addon.IS_MAINLINE end, -- Absorbs were added with Mists
+                hidden = function() return not Addon.WOW_FEATURE_ABSORBS end, -- Absorbs were added with Mists
                 args = {
                   AbsorbColor = {
                     name = L["Color"],
@@ -9489,8 +9668,8 @@ local function CreateTotemOptions()
               order = 1,
               width = "full",
               set = function(info, val)
+                UpdateTotemIconTexture(val, totem_info, options)
                 SetValue(info, val)
-                options.args.Totems.args[totem_info.Name].args.Textures.args.Icon.image = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\" .. db.totemSettings[totem_info.ID].Style .. "\\" .. totem_info.Icon;
               end,
               values = { normal = "Normal", special = "Special" },
               arg = { "totemSettings", totem_info.ID, "Style" },
@@ -10296,7 +10475,7 @@ local function CreateOptionsTable()
                       type = "group",
                       inline = true,
                       set = SetThemeValue,
-                      hidden = function() return not Addon.IS_MAINLINE end, -- Absorbs were added with Mists
+                      hidden = function() return not Addon.WOW_FEATURE_ABSORBS end, -- Absorbs were added with Mists
                       args = {
                         EnableAmount = {
                           name = L["Amount"],
@@ -10412,9 +10591,7 @@ local function CreateOptionsTable()
                       values = { default = "Default", stddragon = "Blizzard Dragon", skullandcross = "Skull and Crossbones", lion = "Lions", wolf = "Wolves", necro = "Necrolord", fae = "Night Fae", venthyr = "Venthyr", kyrian = "Kyrian", alliance = "Alliance", horde = "Horde" },
                       set = function(info, val)
                         SetThemeValue(info, val)
-                        options.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewRare.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\" .. val
-                        options.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewElite.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\" .. "elite-" .. val
-                        options.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewRareElite.image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\" .. "rareelite-" .. val
+                        UpdateUnitClassificationIconTextures(val, options)
                         Addon:ForceUpdate()
                       end,
                       arg = { "settings", "eliteicon", "theme" },
@@ -10423,19 +10600,19 @@ local function CreateOptionsTable()
                       name = L["Preview Rare"],
                       type = "execute",
                       order = 20,
-                      image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\" .. db.settings.eliteicon.theme,
+                      image = IconTexturesByOptions["UnitClassification.Rare"],
                     },
                     PreviewElite = {
                       name = L["Preview Elite"],
                       type = "execute",
                       order = 30,
-                      image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\" .. "elite-" .. db.settings.eliteicon.theme,
+                      image = string.gsub(IconTexturesByOptions["UnitClassification.Rare"], db.settings.eliteicon.theme, "elite-" .. db.settings.eliteicon.theme),
                     },
                     PreviewRareElite = {
                       name = L["Preview Rare Elite"],
                       type = "execute",
                       order = 40,
-                      image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\EliteArtWidget\\" .. "rareelite-" .. db.settings.eliteicon.theme,
+                      image = string.gsub(IconTexturesByOptions["UnitClassification.Rare"], db.settings.eliteicon.theme, "rareelite-" .. db.settings.eliteicon.theme),
                     },
                   },
                 },
@@ -11019,7 +11196,7 @@ local function CreateOptionsTable()
               desc = L["Set the roles your specs represent."],
               disabled = function() return not db.threat.ON end,
               order = 70,
-              args = (Addon.IS_MAINLINE and CreateSpecRolesRetail()) or CreateSpecRolesClassic(),
+              args = (Addon.ExpansionIsAtLeastMists and CreateSpecRolesRetail()) or CreateSpecRolesClassic(),
             },
           },
         },
@@ -11180,8 +11357,6 @@ local function CreateOptionsTable()
     }
   end
   
-  local class_list = t.CopyTable(CLASS_SORT_ORDER)
-  sort(class_list)
   local ClassOpts = {
     Style = {
       name = "Style",
@@ -11189,10 +11364,8 @@ local function CreateOptionsTable()
       type = "select",
       width = "full",
       set = function(info, val)
+        UpdateClassIconTextures(val, options)
         SetValue(info, val)
-        for i, class in ipairs(class_list) do
-          options.args.Widgets.args.ClassIconWidget.args.Textures.args["Prev" .. i].image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ClassIconWidget\\" .. db.classWidget.theme .. "\\" .. class
-        end
       end,
       values = { 
         default = L["Default"], 
@@ -11206,6 +11379,8 @@ local function CreateOptionsTable()
       arg = { "classWidget", "theme" },
     },
   };
+  local class_list = t.CopyTable(CLASS_SORT_ORDER)
+  sort(class_list)
   for i, class in ipairs(class_list) do
     ClassOpts["Prev" .. i] = {
       name = class,
@@ -11221,7 +11396,7 @@ local function CreateOptionsTable()
   options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(Addon.db)
   options.args.profiles.order = 10000
 
-  if Addon.ExpansionIsAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) then
+  if Addon.ExpansionIsAtLeastWrath then
     -- Add dual-spec support
     local LibDualSpec = LibStub("LibDualSpec-1.0", true)
     LibDualSpec:EnhanceDatabase(Addon.db, t.ADDON_NAME)
@@ -11273,21 +11448,8 @@ function Addon:ProfChange()
 
   -- Update options stuff after profile change
   if options then
-    options.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewRare.image = path .. "EliteArtWidget\\" .. db.settings.eliteicon.theme
-    options.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewElite.image = path .. "EliteArtWidget\\" .. "elite-" .. db.settings.eliteicon.theme
-    options.args.NameplateSettings.args.EliteIcon.args.Texture.args.PreviewElite.image = path .. "EliteArtWidget\\" .. "rareelite-" .. db.settings.eliteicon.theme
-
     local base = options.args.Widgets.args
     base.TargetArtWidget.args.Indicator.args.Texture.args.Preview.image = path .. "TargetArtWidget\\" .. db.targetWidget.theme;
-    local class_list = t.CopyTable(CLASS_SORT_ORDER)
-    sort(class_list)
-    for i, class in ipairs(class_list) do
-      base.ClassIconWidget.args.Textures.args["Prev" .. i].image = path .. "ClassIconWidget\\" .. db.classWidget.theme .. "\\" .. class
-    end
-
-    if Addon.IS_MAINLINE then
-      base.QuestWidget.args.ModeIcon.args.Texture.args.Preview.image = path .. "QuestWidget\\" .. db.questWidget.IconTexture
-    end
 
     local threat_path = path .. "ThreatWidget\\" .. db.threat.art.theme .. "\\"
     base = options.args.ThreatOptions.args.Textures.args.Options.args
@@ -11295,10 +11457,6 @@ function Addon:ProfChange()
     base.PrevLow.image = threat_path .. "HIGH"
     base.PrevMed.image = threat_path .. "MEDIUM"
     base.PrevHigh.image = threat_path .. "LOW"
-
-    for _, totem_info in pairs(Addon.TotemInformation) do
-      options.args.Totems.args[totem_info.Name].args.Textures.args.Icon.image = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\" .. db.totemSettings[totem_info.ID].Style .. "\\" .. totem_info.Icon
-    end
 
     CreateCustomNameplatesGroup()
   end

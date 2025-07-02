@@ -59,20 +59,6 @@ local IGNORED_UNITIDS = {
   -- any/softinteract does not seem to be necessary here
 }
 
--- Raid Icon Reference
-local RaidIconCoordinate = {
-  ["STAR"] = { x = 0, y =0 },
-  ["CIRCLE"] = { x = 0.25, y = 0 },
-  ["DIAMOND"] = { x = 0.5, y = 0 },
-  ["TRIANGLE"] = { x = 0.75, y = 0},
-  ["MOON"] = { x = 0, y = 0.25},
-  ["SQUARE"] = { x = .25, y = 0.25},
-  ["CROSS"] = { x = .5, y = 0.25},
-  ["SKULL"] = { x = .75, y = 0.25},
-  ["GREEN_FLAG"] = { x = 0.5, y = 0.75 },
-  ["MURLOC"] = { x = 0.75, y = 0.75 },
-}
-
 local CASTBAR_INTERRUPT_HOLD_TIME = Addon.CASTBAR_INTERRUPT_HOLD_TIME
 local ON_UPDATE_INTERVAL = Addon.ON_UPDATE_PER_FRAME
 local PLATE_FADE_IN_TIME = Addon.PLATE_FADE_IN_TIME
@@ -252,7 +238,7 @@ elseif Addon.IS_TBC_CLASSIC then
 
   -- UnitNameplateShowsWidgetsOnly: SL - Patch 9.0.1 (2020-10-13): Added.
   UnitNameplateShowsWidgetsOnly = function() return false end
-elseif Addon.IS_WRATH_CLASSIC or Addon.IS_CATA_CLASSIC then
+elseif Addon.ExpansionIsBetween(LE_EXPANSION_WRATH_OF_THE_LICH_KING, LE_EXPANSION_LEGION) then
   GetNameForNameplate = function(plate) return plate:GetName() end
   UnitCastingInfo = _G.UnitCastingInfo
   -- UnitNameplateShowsWidgetsOnly: SL - Patch 9.0.1 (2020-10-13): Added.
@@ -994,21 +980,9 @@ do
 
 	-- UpdateIndicator_RaidIcon
 	function UpdateIndicator_RaidIcon()
-    --    if unit.isMarked and RaidIconCoordinate[unit.raidIcon] == nil then
-    --      ThreatPlates.DEBUG("UpdateIndicator_RaidIcon:", unit.unitid, "- isMarked:", unit.isMarked, "/ raidIcon:", unit.raidIcon)
-    --      ThreatPlates.DEBUG("UpdateIndicator_RaidIcon: RaidIconCoordinate:", RaidIconCoordinate[unit.raidIcon])
-    --    end
-
     if (unit.isMarked and style.raidicon.show) or ShouldShowMentorIcon(unit.raidIcon) then
-      local iconCoord = RaidIconCoordinate[unit.raidIcon]
-      if iconCoord then
-        -- ! Maybe use SetRaidTargetIconTexture(icon, index) - then we don't need SetTexCoord anymore
-        -- SetRaidTargetIconTexture(visual.raidicon, GetRaidTargetIndex(unit.unitid));
-        visual.raidicon:Show()
-        visual.raidicon:SetTexCoord(iconCoord.x, iconCoord.x + 0.25, iconCoord.y,  iconCoord.y + 0.25)
-      else
-        visual.raidicon:Hide()
-      end
+      Addon:SetIconTexture(visual.raidicon, "TargetMarker." .. unit.raidIcon)
+      visual.raidicon:Show()
     else
       visual.raidicon:Hide()
     end
@@ -1338,19 +1312,17 @@ function CoreEvents:PLAYER_ENTERING_WORLD()
   -- ARENA_OPPONENT_UPDATE is also fired in BGs, at least in Classic, so it's only enabled when solo shuffles
   -- are available (as it's currently only needed for these kind of arenas)
   if Addon.IsSoloShuffle() then
-    CoreEvents.ARENA_OPPONENT_UPDATE = ARENA_OPPONENT_UPDATE
-    TidyPlatesCore:RegisterEvent("ARENA_OPPONENT_UPDATE")
+    Addon:RegisterEvent(TidyPlatesCore, "ARENA_OPPONENT_UPDATE")
   else
-    TidyPlatesCore:UnregisterEvent("ARENA_OPPONENT_UPDATE")
-    CoreEvents.ARENA_OPPONENT_UPDATE = nil
+    Addon:UnregisterEvent(TidyPlatesCore, "ARENA_OPPONENT_UPDATE")
   end
 end
 
 function CoreEvents:NAME_PLATE_CREATED(plate)
   OnNewNameplate(plate)
 
-  -- NamePlateDriverFrame.AcquireUnitFrame is not used in Classic
-  if not Addon.IS_MAINLINE and plate.UnitFrame then
+  -- NamePlateDriverFrame.AcquireUnitFrame is not used in Classic before Mists
+  if not Addon.ExpansionIsAtLeastMists and plate.UnitFrame then
     NamePlateDriverFrame_AcquireUnitFrame(nil, plate)
   end
 
@@ -1858,7 +1830,7 @@ end
 -- Only registered for player unit-
 local TANK_AURA_SPELL_IDs = {
   [20468] = true, [20469] = true, [20470] = true, [25780] = true, -- Paladin Righteous Fury
-  [48263] = true,   -- Deathknight Frost Presence
+  [48263] = true,   -- Deathknight Blood Presence
   [407627] = true,  -- Paladin Righteous Fury (Season of Discovery)
   [408680] = true,  -- Shaman Way of Earth (Season of Discovery)
   [403789] = true,  -- Warlock Metamorphosis (Season of Discovery)
@@ -1908,35 +1880,20 @@ CoreEvents.UNIT_SPELLCAST_CHANNEL_STOP = UNIT_SPELLCAST_CHANNEL_STOP
 -- UNIT_SPELLCAST_INTERRUPTED - handled by COMBAT_LOG_EVENT_UNFILTERED / SPELL_INTERRUPT as it's the only way to find out the interruptorom
 -- UNIT_SPELLCAST_SENT
 
-if Addon.IS_MAINLINE then
-  CoreEvents.UNIT_SPELLCAST_INTERRUPTIBLE = UnitSpellcastMidway
-  CoreEvents.UNIT_SPELLCAST_NOT_INTERRUPTIBLE = UnitSpellcastMidway
+CoreEvents.UNIT_SPELLCAST_EMPOWER_START = UNIT_SPELLCAST_CHANNEL_START
+CoreEvents.UNIT_SPELLCAST_EMPOWER_UPDATE = UnitSpellcastMidway
+CoreEvents.UNIT_SPELLCAST_EMPOWER_STOP = UNIT_SPELLCAST_CHANNEL_STOP
 
-  CoreEvents.UNIT_SPELLCAST_EMPOWER_START = UNIT_SPELLCAST_CHANNEL_START
-  CoreEvents.UNIT_SPELLCAST_EMPOWER_UPDATE = UnitSpellcastMidway
-  CoreEvents.UNIT_SPELLCAST_EMPOWER_STOP = UNIT_SPELLCAST_CHANNEL_STOP
-end
+CoreEvents.UNIT_SPELLCAST_INTERRUPTIBLE = UnitSpellcastMidway
+CoreEvents.UNIT_SPELLCAST_NOT_INTERRUPTIBLE = UnitSpellcastMidway
 
--- UNIT_HEALTH, UNIT_HEALTH_FREQUENT: 
---   Shadowlands Patch 9.0.1 (2020-10-13): Removed. Replaced by UNIT HEALTH which is no longer aggressively throttled.
---   Cataclysm Patch 4.0.6 (2011-02-08): Added.
-if Addon.IS_MAINLINE then
-  CoreEvents.UNIT_HEALTH = UNIT_HEALTH
+CoreEvents.UNIT_HEALTH = UNIT_HEALTH
+CoreEvents.UNIT_HEALTH_FREQUENT = UNIT_HEALTH
 
-  -- Absorbs should have been added with Mists
-  CoreEvents.UNIT_ABSORB_AMOUNT_CHANGED = UNIT_ABSORB_AMOUNT_CHANGED
-  CoreEvents.UNIT_HEAL_ABSORB_AMOUNT_CHANGED = UNIT_HEAL_ABSORB_AMOUNT_CHANGED
+CoreEvents.UNIT_ABSORB_AMOUNT_CHANGED = UNIT_ABSORB_AMOUNT_CHANGED
+CoreEvents.UNIT_HEAL_ABSORB_AMOUNT_CHANGED = UNIT_HEAL_ABSORB_AMOUNT_CHANGED
 
-  -- CoreEvents.PLAYER_SOFT_FRIEND_CHANGED = PLAYER_SOFT_FRIEND_CHANGED
-  -- CoreEvents.PLAYER_SOFT_ENEMY_CHANGED = PLAYER_SOFT_ENEMY_CHANGED
-  -- CoreEvents.PLAYER_SOFT_INTERACT_CHANGED = PLAYER_SOFT_INTERACT_CHANGED
-else
-  CoreEvents.UNIT_HEALTH_FREQUENT = UNIT_HEALTH
-end
-
-if Addon.ExpansionIsAtLeast(LE_EXPANSION_BURNING_CRUSADE) then
-  CoreEvents.PLAYER_FOCUS_CHANGED = PLAYER_FOCUS_CHANGED
-end
+CoreEvents.PLAYER_FOCUS_CHANGED = PLAYER_FOCUS_CHANGED
 
 CoreEvents.PLAYER_SOFT_FRIEND_CHANGED = PLAYER_SOFT_FRIEND_CHANGED
 CoreEvents.PLAYER_SOFT_ENEMY_CHANGED = PLAYER_SOFT_ENEMY_CHANGED
@@ -1951,15 +1908,17 @@ CoreEvents.PLAYER_CONTROL_GAINED = WorldConditionChanged
 -- Registration of Blizzard Events
 TidyPlatesCore:SetFrameStrata("TOOLTIP") 	-- When parented to WorldFrame, causes OnUpdate handler to run close to last
 TidyPlatesCore:SetScript("OnEvent", EventHandler)
-for eventName in pairs(CoreEvents) do TidyPlatesCore:RegisterEvent(eventName) end
+for eventName in pairs(CoreEvents) do
+  Addon:RegisterEvent(TidyPlatesCore, eventName)
+end
 
 CoreEvents.UNIT_TARGET = UNIT_TARGET
 
 -- Do this after events are registered, otherwise UNIT_AURA would be registered as a general event, not only as
 -- an unit event.
 local ENABLE_UNIT_AURA_FOR_CLASS = {
-  PALADIN = Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC or Addon.IS_CATA_CLASSIC,
-  DEATHKNIGHT = Addon.IS_WRATH_CLASSIC or Addon.IS_CATA_CLASSIC,
+  PALADIN = Addon.ExpansionIsBetween(LE_EXPANSION_CLASSIC, LE_EXPANSION_LEGION),
+  DEATHKNIGHT = Addon.ExpansionIsBetween(LE_EXPANSION_WRATH_OF_THE_LICH_KING, LE_EXPANSION_LEGION),
   -- For Season of Discovery
   SHAMAN = Addon.IS_CLASSIC_SOD,
   WARLOCK = Addon.IS_CLASSIC_SOD,
@@ -1967,7 +1926,7 @@ local ENABLE_UNIT_AURA_FOR_CLASS = {
 }
 if ENABLE_UNIT_AURA_FOR_CLASS[Addon.PlayerClass] then
   CoreEvents.UNIT_AURA = UNIT_AURA
-  TidyPlatesCore:RegisterUnitEvent("UNIT_AURA", "player")
+  Addon:RegisterUnitEvent(TidyPlatesCore, "UNIT_AURA", "player")
   -- UNIT_AURA does not seem to be fired after login (even when buffs are active)
   UNIT_AURA()
 end
@@ -2059,11 +2018,6 @@ do
     -- "threatborder", "castborder", "castnostop", "eliteicon", "target", "raidicon" 
   }
 
-	local texturegroup = {
-    "skullicon", "spellicon",
-    -- "highlight", threatborder, "castborder", "castnostop", "eliteicon", "target"
-  }
-
 	-- UpdateStyle:
 	function UpdateStyle()
 		local index
@@ -2110,12 +2064,8 @@ do
     end
 
     -- Texture
-    for index = 1, #texturegroup do
-      local objectname = texturegroup[index]
-      local object, objectstyle = visual[objectname], style[objectname]
-
-      SetTextureGroupObject(object, objectstyle)
-    end
+    SetTextureGroupObject(visual.spellicon, style.spellicon)
+    Addon:SetIconTexture(visual.skullicon, "UnitClassification.Boss")
     Addon:Element_Mouseover_Configure(visual.Highlight, style.highlight)
 
     -- Show certain elements, don't change anything else
@@ -2127,8 +2077,6 @@ do
 
     -- Raid Icon Texture
     SetAnchorGroupObject(visual.raidicon, style.raidicon, extended)
-    SetTextureGroupObject(visual.raidicon, style.raidicon)
-    --visual.raidicon:SetTexture(style.raidicon.texture)
     -- TOODO: does not really work with ForceUpdate() as isMarked is not set there (no call to UpdateUnitCondition)
     visual.raidicon:SetShown((unit.isMarked and style.raidicon.show) or ShouldShowMentorIcon(unit.raidIcon))
 
@@ -2163,7 +2111,7 @@ do
     if style.eliteicon and style.eliteicon.show then
       SetAnchorGroupObject(visual.eliteicon, style.eliteicon, extended)
     end
-    SetTextureGroupObject(visual.eliteicon, style.eliteicon)
+    Addon:SetIconTexture(visual.eliteicon, "UnitClassification.Rare")
     UpdateIndicator_EliteIcon()
 
 		if not unit.isBoss then visual.skullicon:Hide() end
@@ -2292,10 +2240,11 @@ function Addon:ForceUpdate()
 
   SettingsTargetUnitHide = not db.settings.healthbar.TargetUnit.Show
   SettingsShowOnlyForTarget = db.settings.healthbar.TargetUnit.ShowOnlyForTarget
+  
   if SettingsTargetUnitHide then
-    TidyPlatesCore:UnregisterEvent("UNIT_TARGET")
+    Addon:UnregisterEvent(TidyPlatesCore, "UNIT_TARGET")
   else
-    TidyPlatesCore:RegisterEvent("UNIT_TARGET")
+    Addon:RegisterEvent(TidyPlatesCore, "UNIT_TARGET")
   end
 
   SettingsShowOnlyNames = CVars:GetAsBool("nameplateShowOnlyNames") and Addon.db.profile.BlizzardSettings.Names.Enabled
