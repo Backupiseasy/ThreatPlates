@@ -70,7 +70,19 @@ local UNIT_POWER = {
     },
   },
   MONK = {
+    [1] = Addon.ExpansionIsBetween(LE_EXPANSION_MISTS_OF_PANDARIA, LE_EXPANSION_LEGION) and {
+      PowerType = Enum.PowerType.Chi,
+      Name = "CHI",
+    },
+    [2] = Addon.ExpansionIsBetween(LE_EXPANSION_MISTS_OF_PANDARIA, LE_EXPANSION_LEGION) and {
+      PowerType = Enum.PowerType.Chi,
+      Name = "CHI",
+    },
     [3] = {
+      PowerType = Enum.PowerType.Chi,
+      Name = "CHI",
+    },
+    [5] = Addon.ExpansionIsBetween(LE_EXPANSION_MISTS_OF_PANDARIA, LE_EXPANSION_LEGION) and {
       PowerType = Enum.PowerType.Chi,
       Name = "CHI",
     }
