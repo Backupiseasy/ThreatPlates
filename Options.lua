@@ -2752,7 +2752,7 @@ end
     name = L["Quest"],
     order = 100,
     type = "group",
-    hidden = function() return not Addon.IS_MAINLINE end,
+    hidden = function() return not Addon.ExpansionIsAtLeastMists end,
     args = {
       Enable = GetEnableEntry(L["Enable Quest Widget"], L["This widget shows a quest icon above unit nameplates or colors the nameplate healthbar of units that are involved with any of your current quests."], "questWidget", true,
         function(info, val)

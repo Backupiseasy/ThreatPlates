@@ -1,3 +1,3 @@
 # @project-version@ (@build-time@)
 
-* Fixed a bug that was preventing target markers from being shown (GH-587).
+* Enabled Quest widget for Mists Classic as quest tooltips are now available there.

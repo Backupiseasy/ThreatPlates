@@ -510,7 +510,7 @@ end
 function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
   local db = Addon.db.profile.questWidget
   -- showQuestTrackingTooltips: not sure when introduced
-  if Addon.IS_MAINLINE then
+  if Addon.ExpansionIsAtLeastMists then
     if db.ON or db.ShowInHeadlineView then
       CVars:Set("showQuestTrackingTooltips", 1)
     else
