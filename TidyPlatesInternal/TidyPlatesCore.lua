@@ -981,6 +981,7 @@ do
 	-- UpdateIndicator_RaidIcon
 	function UpdateIndicator_RaidIcon()
     if (unit.isMarked and style.raidicon.show) or ShouldShowMentorIcon(unit.raidIcon) then
+      local texttureinfo 
       Addon:SetIconTexture(visual.raidicon, "TargetMarker." .. unit.raidIcon)
       visual.raidicon:Show()
     else

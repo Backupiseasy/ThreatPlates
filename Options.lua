@@ -394,7 +394,10 @@ local TARGET_MARKER_TEXTURES = {
 }
 
 for target_marker, tex_coords in pairs(TARGET_MARKER_TEXTURES) do
-  IconTexturesByOptions["TargetMarker." .. target_marker] = { "Interface\\TargetingFrame\\UI-RaidTargetingIcons", tex_coords.x, tex_coords.x + 0.25, tex_coords.y, tex_coords.y + 0.25 }
+  IconTexturesByOptions["TargetMarker." .. target_marker] = { 
+    Texture = "Interface\\TargetingFrame\\UI-RaidTargetingIcons", 
+    TexCoords = { tex_coords.x, tex_coords.x + 0.25, tex_coords.y, tex_coords.y + 0.25 }
+  }
 end
 
 Addon.IconTextures = setmetatable( {}, { __index = IconTexturesByOptions })
