@@ -4,7 +4,9 @@
 local ADDON_NAME, Addon = ...
 local ThreatPlates = Addon.ThreatPlates
 
-local Widget = (Addon.ExpansionIsAtLeastMists and Addon.Widgets:NewWidget("Quest")) or {}
+if not Addon.ExpansionIsAtLeastMists then return end
+
+local Widget = Addon.Widgets:NewWidget("Quest")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants

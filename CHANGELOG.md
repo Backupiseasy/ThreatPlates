@@ -1,3 +1,3 @@
 # @project-version@ (@build-time@)
 
-* Enabled Quest widget for Mists Classic as quest tooltips are now available there.
+* Fixed a Lua error in WoW Classic that occurred because the Quest widget was not disabled correctly (GH-588).
