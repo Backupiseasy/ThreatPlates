@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+12.3.5 (2025-07-04)
+------------------------------------------------------
+* Fixed a bug in the Quest widget that prevented Quest indicators from being displayed in localizations where quest progress was shown to the left of the quest objective (e.g. in English) [Comment ##7657].
+
+------------------------------------------------------
 12.3.4 (2025-07-04)
 ------------------------------------------------------
 * Fixed a Lua error in WoW Classic that occurred because the Quest widget was not disabled correctly [GH-588, Comment #7655].

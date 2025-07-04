@@ -14,6 +14,7 @@ local Widget = Addon.Widgets:NewWidget("Quest")
 
 -- Lua APIs
 local string, tonumber, pairs = string, tonumber, pairs
+local string_match = string.match
 
 -- WoW APIs
 local InCombatLockdown, IsInInstance = InCombatLockdown, IsInInstance
@@ -45,7 +46,6 @@ local Font
 
 local FONT_SCALING = 0.3
 local TEXTURE_SCALING = 0.5
-local ICON_PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\QuestWidget\\"
 
 ---------------------------------------------------------------------------------------------------
 -- Local variables
@@ -144,20 +144,42 @@ local OBJECTIVE_GOAL_ALIGNMENT = {
 
 -- Set correct regexps for current expansion and locale
 local RegexpForExpansion = OBJECTIVE_PARSER_REGEXP_BY_EXPANSION[Addon.GetExpansionLevel()]
-local RegexpAlignment = OBJECTIVE_GOAL_ALIGNMENT[GetLocale()]
 
-local RegexpDefault = (RegexpAlignment == "LEFT" and RegexpForExpansion.LEFT) or RegexpForExpansion.RIGHT
-local RegexpBackup = (RegexpAlignment == "LEFT" and RegexpForExpansion.RIGHT) or RegexpForExpansion.LEFT
+-- local RegexpAlignment = OBJECTIVE_GOAL_ALIGNMENT[GetLocale()]
+-- local RegexpDefault = (RegexpAlignment == "LEFT" and RegexpForExpansion.LEFT) or RegexpForExpansion.RIGHT
+-- local RegexpBackup = (RegexpAlignment == "LEFT" and RegexpForExpansion.RIGHT) or RegexpForExpansion.LEFT
 
-local function QuestObjectiveParser(text)
-  local objective_name, current, goal = string.match(text, RegexpDefault)
+-- local function QuestObjectiveParser(text)
+--   local objective_name, current, goal = string_match(text, RegexpDefault)
+
+--   if not objective_name then
+--     current, goal, objective_name = string_match(text, RegexpBackup)
+--   end
+
+--   return objective_name, current, goal
+-- end
+
+local QUEST_OBJECTIVE_PARSER_LEFT = function(text)
+  local current, goal, objective_name = string_match(text, RegexpForExpansion.LEFT)
 
   if not objective_name then
-    current, goal, objective_name = string.match(text, RegexpBackup)
+    objective_name, current, goal = string_match(text, RegexpForExpansion.RIGHT)
   end
 
   return objective_name, current, goal
 end
+
+local QUEST_OBJECTIVE_PARSER_RIGHT = function(text)
+  local objective_name, current, goal = string_match(text, RegexpForExpansion.RIGHT)
+
+  if not objective_name then
+    current, goal, objective_name = string_match(text, "^(%d+)/(%d+)( .*)$")
+  end
+
+  return objective_name, current, goal
+end
+
+local QuestObjectiveParser = (RegexpAlignment == "LEFT" and QUEST_OBJECTIVE_PARSER_LEFT) or QUEST_OBJECTIVE_PARSER_RIGHT
 
 ---------------------------------------------------------------------------------------------------
 -- Quest Functions
@@ -195,7 +217,7 @@ function IsQuestUnit(unit)
 
       -- Check if area / progress quest
       if string.find(text, "%%") then
-        objective_name, current, goal = string.match(text, "^(.*) %(?(%d+)%%%)?$")
+        objective_name, current, goal = string_match(text, "^(.*) %(?(%d+)%%%)?$")
         objective_type = "area"
         --print ("  ", unit.name, "=> ", "Area: <" .. text .. ">", objective_name, current, goal)
       else
@@ -767,7 +789,7 @@ function Widget:PrintDebug(command)
         Addon.Logging.Debug("    => Objective:", text)
         -- Check if area / progress quest
         if string.find(text, "%%") then
-          objective_name, current, goal = string.match(text, "^(.*) %(?(%d+)%%%)?$")
+          objective_name, current, goal = string_match(text, "^(.*) %(?(%d+)%%%)?$")
           objective_type = "area"
           Addon.Logging.Debug("    => Area: <" .. text .. ">", objective_name, current, goal)
         else
