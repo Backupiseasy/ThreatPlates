@@ -1,24 +1,14 @@
-tag 4e9de3ba5e839c2a367923cf6cb9fcbd9334ae9e v1.26.0
+tag 4e7ef4037538ba67c119d1fb5b49aed52b4d806e v1.27.0
 Author:	Kyle Buller <bullerk@gmail.com>
-Date:	Fri May 16 21:29:27 2025 -0500
+Date:	Thu Jul 3 06:45:41 2025 -0500
 
-Tagging as v1.26.0
+Tagging as v1.27.0
 
-commit 2ae6c12c4d0fffdca45e100dd0d4c8b5e1e83b1b
+commit 70bd5fb2d2935280111630ffe47aa799aee7b420
 Author: Kyle Buller <bullerk@gmail.com>
-Date:   Fri May 16 21:22:02 2025 -0500
+Date:   Thu Jul 3 06:42:44 2025 -0500
 
-    Bump TOCs
-
-commit e54387bee68fa2fd39a5c3be1a7beb6508b8fd3e
-Author: Kyle Buller <bullerk@gmail.com>
-Date:   Fri May 16 21:21:49 2025 -0500
-
-    Add support for Mists of Pandaria Classic
-
-commit 4f7845439afd38ee34ba5284e3f520cc7db76b45
-Author: Kyle Buller <bullerk@gmail.com>
-Date:   Fri May 16 21:20:28 2025 -0500
-
-    C_SpecializationInfo is in all versions
+    Fix support for Mists of Pandaria Classic
+    
+    Fixes #6
 
