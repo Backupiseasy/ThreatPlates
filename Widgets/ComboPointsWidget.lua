@@ -70,7 +70,19 @@ local UNIT_POWER = {
     },
   },
   MONK = {
+    [1] = Addon.ExpansionIsBetween(LE_EXPANSION_MISTS_OF_PANDARIA, LE_EXPANSION_LEGION) and {
+      PowerType = Enum.PowerType.Chi,
+      Name = "CHI",
+    },
+    [2] = Addon.ExpansionIsBetween(LE_EXPANSION_MISTS_OF_PANDARIA, LE_EXPANSION_LEGION) and {
+      PowerType = Enum.PowerType.Chi,
+      Name = "CHI",
+    },
     [3] = {
+      PowerType = Enum.PowerType.Chi,
+      Name = "CHI",
+    },
+    [5] = Addon.ExpansionIsBetween(LE_EXPANSION_MISTS_OF_PANDARIA, LE_EXPANSION_LEGION) and {
       PowerType = Enum.PowerType.Chi,
       Name = "CHI",
     }
@@ -1310,7 +1322,7 @@ function Widget:UpdateSettings()
 end 
 
 function Widget:PrintDebug()
-  Addon.Logging.Debug("    Textures:", TEXTURE_INFO.Script.IsEnabled ~= nil and "ENABLED" or "DISABLED")
+  Addon.Logging.Debug("    Textures:", TEXTURE_INFO.Script.IsEnabled and "ENABLED" or "DISABLED")
   local lines = {}
   for icon_id, texture_info in pairs(TEXTURE_INFO.Script) do
     if icon_id ~= "IsEnabled" then

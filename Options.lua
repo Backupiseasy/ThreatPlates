@@ -394,7 +394,10 @@ local TARGET_MARKER_TEXTURES = {
 }
 
 for target_marker, tex_coords in pairs(TARGET_MARKER_TEXTURES) do
-  IconTexturesByOptions["TargetMarker." .. target_marker] = { "Interface\\TargetingFrame\\UI-RaidTargetingIcons", tex_coords.x, tex_coords.x + 0.25, tex_coords.y, tex_coords.y + 0.25 }
+  IconTexturesByOptions["TargetMarker." .. target_marker] = { 
+    Texture = "Interface\\TargetingFrame\\UI-RaidTargetingIcons", 
+    TexCoords = { tex_coords.x, tex_coords.x + 0.25, tex_coords.y, tex_coords.y + 0.25 }
+  }
 end
 
 Addon.IconTextures = setmetatable( {}, { __index = IconTexturesByOptions })
@@ -2749,14 +2752,11 @@ end
     name = L["Quest"],
     order = 100,
     type = "group",
-    hidden = function() return not Addon.IS_MAINLINE end,
+    hidden = function() return not Addon.ExpansionIsAtLeastMists end,
     args = {
       Enable = GetEnableEntry(L["Enable Quest Widget"], L["This widget shows a quest icon above unit nameplates or colors the nameplate healthbar of units that are involved with any of your current quests."], "questWidget", true,
         function(info, val)
           SetValue(info, val) -- SetValue because nameplate healthbars must be updated (if healthbar mode is enabled)
-          if db.questWidget.ON or db.questWidget.ShowInHeadlineView then
-            SetCVar("showQuestTrackingTooltips", 1)
-          end
           Addon.Widgets:InitializeWidget("Quest")
         end),
       Visibility = { type = "group",	order = 10,	name = L["Visibility"], inline = true,

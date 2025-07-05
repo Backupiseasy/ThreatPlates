@@ -1,5 +1,35 @@
 ﻿------------------------------------------------------
-12.3.0 (2025-07-01)
+12.3.6 (2025-07-05)
+------------------------------------------------------
+* Updated integrated library LibDualSpec to v1.27.0 to fix a Lua error that occurred when hovering over the dual spec options in the 'Profile' tab of the options.
+
+------------------------------------------------------
+12.3.5 (2025-07-04)
+------------------------------------------------------
+* Fixed a bug in the Quest widget that prevented Quest indicators from being displayed in localizations where quest progress was shown to the left of the quest objective (e.g. in English) [Comment ##7657].
+
+------------------------------------------------------
+12.3.4 (2025-07-04)
+------------------------------------------------------
+* Fixed a Lua error in WoW Classic that occurred because the Quest widget was not disabled correctly [GH-588, Comment #7655].
+
+------------------------------------------------------
+12.3.3 (2025-07-03)
+------------------------------------------------------
+* Enabled Quest widget for Mists Classic as quest tooltips are now available there.
+
+------------------------------------------------------
+12.3.2 (2025-07-03)
+------------------------------------------------------
+* Fixed a bug that was preventing target markers from being shown [GH-587].
+
+------------------------------------------------------
+12.3.1 (2025-07-02)
+------------------------------------------------------
+* Fixed a bug that was preventing the display of Chi points for Monks in the Combo Points widget.
+
+------------------------------------------------------
+12.3.0 (2025-07-02)
 ------------------------------------------------------
 * Added support for WoW Mists of Pandaria Classic [GH-582].
 * Extended the scripting API to change most of the icon textures used in Threat Plates. More documentation can be found here: https://github.com/Backupiseasy/ThreatPlates/wiki/Scripts-%E2%80%90-Icon-Textures.

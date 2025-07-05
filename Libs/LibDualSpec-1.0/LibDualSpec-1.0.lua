@@ -34,7 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -- Only load in Classic Era on Season of Discovery and Anniversary realms
 if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC and C_Seasons.GetActiveSeason() ~= 2 and C_Seasons.GetActiveSeason() ~= 11 and C_Seasons.GetActiveSeason() ~= 12 then return end
 
-local MAJOR, MINOR = "LibDualSpec-1.0", 26
+local MAJOR, MINOR = "LibDualSpec-1.0", 27
 assert(LibStub, MAJOR.." requires LibStub")
 local lib, minor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end
@@ -343,7 +343,7 @@ for i = 1, numSpecs do
 			return lib.currentSpec == specIndex and L_CURRENT:format(specNames[specIndex]) or specNames[specIndex]
 		end,
 		desc = not isRetail and function(info)
-			if GetTalentTabInfo then -- Pre-5.0
+			if ClassicExpansionAtMost(LE_EXPANSION_CATACLYSM) then -- Pre-5.0
 				local specIndex = tonumber(info[#info]:sub(-1))
 				local highPointsSpentIndex = nil
 				for treeIndex = 1, 3 do

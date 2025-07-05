@@ -16,7 +16,7 @@ local _G =_G
 -- GLOBALS: 
 
 ---------------------------------------------------------------------------------------------------
--- Compatibility between retail and classic versions of WoW
+-- Register events available in an expansion centrally
 ---------------------------------------------------------------------------------------------------
 
 local WOW_EVENTS = {
@@ -143,4 +143,61 @@ function Addon:DebugCompatibility()
       Addon.Logging.Debug("      =>", event)      
     end
   end
+end
+
+---------------------------------------------------------------------------------------------------
+-- Tooltip handling
+---------------------------------------------------------------------------------------------------
+
+-- C_TooltipInfo.GetUnit was added in 10.0.2
+if Addon.ExpansionIsAtLeastDF then
+  Addon.C_TooltipInfo_GetUnit_NPCRole = C_TooltipInfo.GetUnit
+  Addon.C_TooltipInfo_GetUnit_Quest = C_TooltipInfo.GetUnit
+else
+  local ScannerName = "ThreatPlates_Tooltip_Subtext"
+  local TooltipScanner = CreateFrame( "GameTooltip", ScannerName , nil, "GameTooltipTemplate" ) -- Tooltip name cannot be nil
+  TooltipScanner:SetOwner( WorldFrame, "ANCHOR_NONE" )
+
+  local TooltipScannerData = {
+    lines = {
+      [1] = {},
+      [2] = {},
+      [3] = {},
+      [4] = {},
+      [5] = {},
+    }
+  }
+
+  local function CreateLineData(line, with_color)
+    local line_id = ScannerName .. "TextLeft" .. tostring(line)
+
+    TooltipScannerData.lines[line].leftText = _G[line_id]:GetText()
+    if with_color then
+      TooltipScannerData.lines[line].leftColor = RGB_P(_G[line_id]:GetTextColor())
+    end
+  end
+
+  -- Compatibility functions for tooltips in WoW Classic
+  Addon.C_TooltipInfo_GetUnit_NPCRole = function(unitid)
+    TooltipScanner:ClearLines()
+		TooltipScanner:SetUnit(unitid)
+
+    CreateLineData(1) 
+    CreateLineData(2)
+    CreateLineData(3)
+    
+    return TooltipScannerData
+  end
+
+  Addon.C_TooltipInfo_GetUnit_Quest = function(unitid)
+    TooltipScanner:ClearLines()
+		TooltipScanner:SetUnit(unitid)
+
+    CreateLineData(3, true)
+    CreateLineData(4, true)
+    CreateLineData(5, true)
+    
+    return TooltipScannerData
+  end
+
 end

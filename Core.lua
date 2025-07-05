@@ -263,7 +263,6 @@ function Addon:ReloadTheme()
 
   -- Recreate all TidyPlates styles for ThreatPlates("normal", "dps", "tank", ...) - required, if theme style settings were changed
   Addon:SetThemes()
-  Addon:InitializeIconTextures()
   Addon:UpdateConfigurationStatusText()
   Addon:InitializeCustomNameplates()
   Addon:InitializeIconTextures()
@@ -509,17 +508,7 @@ end
 -- Fired when the player enters the world, reloads the UI, enters/leaves an instance or battleground, or respawns at a graveyard.
 -- Also fires any other time the player sees a loading screen
 function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
-  local db = Addon.db.profile.questWidget
-  -- showQuestTrackingTooltips: not sure when introduced
-  if Addon.IS_MAINLINE then
-    if db.ON or db.ShowInHeadlineView then
-      CVars:Set("showQuestTrackingTooltips", 1)
-    else
-      CVars:RestoreFromProfile("showQuestTrackingTooltips")
-    end
-  end
-
-  db = Addon.db.profile.Automation
+  local db = Addon.db.profile.Automation
   local isInstance, instance_type = IsInInstance()
 
   --Addon.IsInInstance = isInstance
