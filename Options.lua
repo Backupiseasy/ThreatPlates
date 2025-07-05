@@ -2757,9 +2757,6 @@ end
       Enable = GetEnableEntry(L["Enable Quest Widget"], L["This widget shows a quest icon above unit nameplates or colors the nameplate healthbar of units that are involved with any of your current quests."], "questWidget", true,
         function(info, val)
           SetValue(info, val) -- SetValue because nameplate healthbars must be updated (if healthbar mode is enabled)
-          if db.questWidget.ON or db.questWidget.ShowInHeadlineView then
-            SetCVar("showQuestTrackingTooltips", 1)
-          end
           Addon.Widgets:InitializeWidget("Quest")
         end),
       Visibility = { type = "group",	order = 10,	name = L["Visibility"], inline = true,
