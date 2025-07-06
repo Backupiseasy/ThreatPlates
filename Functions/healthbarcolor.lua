@@ -12,7 +12,8 @@ local abs = abs
 -- WoW APIs
 local UnitIsConnected, UnitCanAttack, UnitIsPVP = UnitIsConnected, UnitCanAttack, UnitIsPVP
 local UnitIsPlayer, UnitPlayerControlled = UnitIsPlayer, UnitPlayerControlled
-local UnitThreatSituation, UnitIsUnit, UnitExists, UnitGroupRolesAssigned = UnitThreatSituation, UnitIsUnit, UnitExists, UnitGroupRolesAssigned
+local UnitThreatSituation, UnitIsUnit, UnitExists = UnitThreatSituation, UnitIsUnit, UnitExists
+local UnitGroupRolesAssignedWrapper = UnitGroupRolesAssigned
 local IsInInstance = IsInInstance
 -- WoW Classic APIs:
 local GetPartyAssignment = GetPartyAssignment
@@ -37,8 +38,8 @@ local _G =_G
 
 if not Addon.ExpansionIsAtLeastMists then
   -- UnitGroupRolesAssigned does still not seem to work in Classic before Mists
-  UnitGroupRolesAssigned = function(target_unit)
-    return (GetPartyAssignment("MAINTANK", target_unit) and "TANK") or "NONE"
+  UnitGroupRolesAssignedWrapper = function(target_unit)
+    return (GetPartyAssignment("MAINTANK", target_unit) and "TANK") or _G.UnitGroupRolesAssigned(target_unit) or "NONE"
   end
 end
 
@@ -173,13 +174,13 @@ local function GetThreatSituation(unit, style, enable_off_tank)
         local target_threat_situation = UnitThreatSituation(target_unit, unit.unitid) or 0
         if target_threat_situation > 1 then
           -- Target unit does tank unit, so check if target unit is a tank or an tank-like pet/guardian
-          if ("TANK" == UnitGroupRolesAssigned(target_unit) and not UnitIsUnit("player", target_unit)) or UnitIsUnit(target_unit, "pet") or IsOffTankCreature(target_unit) then
+          if ("TANK" == UnitGroupRolesAssignedWrapper(target_unit) and not UnitIsUnit("player", target_unit)) or UnitIsUnit(target_unit, "pet") or IsOffTankCreature(target_unit) then
             unit.IsOfftanked = true
           else
             -- Reset "unit.IsOfftanked"
             -- Target unit does tank unit, but is not a tank or a tank-like pet/guardian
             unit.IsOfftanked = false
-          end
+          end          
         end
       end
     end
