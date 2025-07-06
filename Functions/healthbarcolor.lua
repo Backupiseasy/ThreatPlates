@@ -35,7 +35,7 @@ local _G =_G
 -- Wrapper functions for WoW Classic
 ---------------------------------------------------------------------------------------------------
 
-if Addon.ExpansionIsAtLeastMists then
+if not Addon.ExpansionIsAtLeastMists then
   -- UnitGroupRolesAssigned does still not seem to work in Classic before Mists
   UnitGroupRolesAssigned = function(target_unit)
     return (GetPartyAssignment("MAINTANK", target_unit) and "TANK") or "NONE"
