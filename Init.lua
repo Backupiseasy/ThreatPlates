@@ -268,13 +268,13 @@ Addon.LoadOnDemandLibraries = function()
 	if db.HeadlineView.FriendlySubtext == "CUSTOM" or db.HeadlineView.EnemySubtext == "CUSTOM" or db.settings.customtext.FriendlySubtext == "CUSTOM" or db.settings.customtext.EnemySubtext == "CUSTOM" then
 		if Addon.LibDogTag == nil then
 			LoadAddOn("LibDogTag-3.0")
-			Addon.LibDogTag = LibStub("LibDogTag-3.0", true)
+			Addon.LibDogTag = LibStub:GetLibrary("LibDogTag-3.0", true)
 			if not Addon.LibDogTag then
 				Addon.LibDogTag = false
 				Addon.Logging.Error(L["Custom status text requires LibDogTag-3.0 to function."])
 			else
 				LoadAddOn("LibDogTag-Unit-3.0")
-			  if not LibStub("LibDogTag-Unit-3.0", true) then
+			  if not LibStub:GetLibrary("LibDogTag-Unit-3.0", true) then
 					Addon.LibDogTag = false
 					Addon.Logging.Error(L["Custom status text requires LibDogTag-Unit-3.0 to function."])
 				elseif not Addon.LibDogTag.IsLegitimateUnit or not Addon.LibDogTag.IsLegitimateUnit["nameplate1"] then

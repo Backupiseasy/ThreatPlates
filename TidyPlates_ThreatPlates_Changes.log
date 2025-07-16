@@ -1,7 +1,9 @@
-﻿------------------------------------------------------
+﻿
+------------------------------------------------------
 12.3.10 (2025-07-16)
 ------------------------------------------------------
 * Fixed a bug in Quest widget that prevented the healthbar of quest units from being highlighted in the quest color.
+* If LibDualSpec cannot be loaded for any reason, an error message will be printed to the chat instead of a Lua error being thrown.
 
 ------------------------------------------------------
 12.3.9 (2025-07-06)
