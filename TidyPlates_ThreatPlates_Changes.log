@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+12.3.10 (2025-07-16)
+------------------------------------------------------
+* Fixed a bug in Quest widget that prevented the healthbar of quest units from being highlighted in the quest color.
+
+------------------------------------------------------
 12.3.9 (2025-07-06)
 ------------------------------------------------------
 * Fixed a Lua error that prevented the combo points widget from displaying Death Knight runes in Mists Classic [GH-592].
