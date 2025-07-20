@@ -1,3 +1,4 @@
 # @project-version@ (@build-time@)
 
-* Updated integrated library LibDualSpec to v1.27.0 to fix a Lua error that occurred when hovering over the dual spec options in the 'Profile' tab of the options.
+* Fixed a bug in Quest widget that prevented the healthbar of quest units from being highlighted in the quest color.
+* If LibDualSpec cannot be loaded for any reason, an error message will be printed to the chat instead of a Lua error being thrown.

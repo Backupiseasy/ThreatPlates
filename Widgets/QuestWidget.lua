@@ -219,11 +219,8 @@ function IsQuestUnit(unit)
       if string.find(text, "%%") then
         objective_name, current, goal = string_match(text, "^(.*) %(?(%d+)%%%)?$")
         objective_type = "area"
-        --print ("  ", unit.name, "=> ", "Area: <" .. text .. ">", objective_name, current, goal)
       else
-        -- Standard x/y /pe quest
         objective_name, current, goal = QuestObjectiveParser(text)
-        --print ("  ", unit.name, "=> ", "Standard: <" .. text .. ">", objective_name, current, goal, "|")
       end
 
       if objective_name then
@@ -241,8 +238,6 @@ function IsQuestUnit(unit)
         local quest_objective
         if quest then
           quest_objective = quest.Objectives[objective_name]
-        --else
-        --  print ("<< Quest No Cached >> =>", quest_title)
         end
 
         -- A unit may be target of more than one quest, the quest indicator should be show if at least one quest is not completed.
@@ -761,12 +756,11 @@ function Widget:PrintDebug(command)
     local tooltip_data = C_TooltipInfo_GetUnit("target")
     for i = 3, #tooltip_data.lines do
       local line = tooltip_data.lines[i]
-
       local text = line.leftText
       local text_r, text_g, text_b = line.leftColor.r, line.leftColor.g, line.leftColor.b
 
       Addon.Logging.Debug("=== Line:", text)
-      if text_r > 0.99 and text_g > 0.82 and text_b == 0 then
+      if text_r > 0.99 and text_g > 0.8 and text_b == 0 then
         -- A line with this color is either the quest title or a player name (if on a group quest, but always after the quest title)
         -- if quest_title_found then
         --   quest_player = (text == PlayerName)
@@ -819,8 +813,10 @@ function Widget:PrintDebug(command)
 
           -- A unit may be target of more than one quest, the quest indicator should be show if at least one quest is not completed.
           if current and goal then
-            if current == goal then
-              Addon.Logging.Debug("  => Finished!")
+            if (current ~= goal) then
+              Addon.Logging.Debug("    => Quest:", objective_name, "- Current:", current, "- Goal:", goal, "- Type:", objective_type)
+            else
+              Addon.Logging.Debug("    => Finished!")
             end
           end
         end

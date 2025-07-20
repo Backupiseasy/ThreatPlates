@@ -14,7 +14,7 @@ local Widget = Addon.Widgets:NewTargetWidget("ComboPoints")
 
 -- Lua APIs
 local unpack, type, sort = unpack, type, sort
-local floor, min = floor, min
+local floor = floor
 local tostring, string_format = tostring, string.format
 
 -- WoW APIs
@@ -22,9 +22,8 @@ local GetTime, tContains = GetTime, tContains
 local UnitCanAttack = UnitCanAttack
 local UnitPower, UnitPowerMax, GetComboPoints, GetRuneCooldown, GetRuneType = UnitPower, UnitPowerMax, GetComboPoints, GetRuneCooldown, GetRuneType
 local GetUnitChargedPowerPoints, GetPowerRegenForPowerType = GetUnitChargedPowerPoints, GetPowerRegenForPowerType
-local GetSpellInfo, IsSpellUsable = Addon.GetSpellInfo, C_Spell and C_Spell.IsSpellUsable
+local IsSpellUsable = C_Spell and C_Spell.IsSpellUsable
 local GetShapeshiftFormID = GetShapeshiftFormID
-local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local InCombatLockdown = InCombatLockdown
 local GetSpecialization = C_SpecializationInfo and C_SpecializationInfo.GetSpecialization or _G.GetSpecialization
 
@@ -241,44 +240,47 @@ local SettingsCooldown, ShowCooldownDuration, OnUpdateCooldownDuration
 -- Combo Points Widget Functions
 ---------------------------------------------------------------------------------------------------
 
+-- Deathknight is only available after Wrath, so no check for this version necessary
+if PlayerClass == "DEATHKNIGHT" and Addon.ExpansionIsBetween(LE_EXPANSION_WRATH_OF_THE_LICH_KING, LE_EXPANSION_LEGION) then
+  -- Deathknight is only available after Wrath, so no check for this version necessary
+  UnitPowerMax = function(unitToken , powerType)
+    return 6
+  end
+
+  -- Fix the wrong ordering of GetRuneCooldown (blood/unholy/frost) compared to UI display (blood/frost/unholy)
+  local GET_RUNE_COOLDOWN_MAPPING = { 1, 2, 5, 6, 3, 4 }
+
+  GetRuneCooldown = function(rune_id)
+    return _G.GetRuneCooldown(GET_RUNE_COOLDOWN_MAPPING[rune_id])
+  end
+
+  -- GetRuneType: This API only exists until Legion
+  GetRuneType = function(rune_id)
+    return _G.GetRuneType(GET_RUNE_COOLDOWN_MAPPING[rune_id])
+  end
+end
+
 -- GetSpecialization: Mists - Patch 5.0.4 (2012-08-28): Replaced GetPrimaryTalentTree.
 if Addon.ExpansionIsAtLeastMists then
-    function Widget:DetermineUnitPower()
-      local power_type = UNIT_POWER[PlayerClass]
-      if power_type then
-        power_type = power_type[GetSpecialization()] or power_type
-      end
-  
-      if power_type and power_type.Name then
-        self.PowerType = power_type.PowerType
-        self.UnitPowerMax = UnitPowerMax("player", self.PowerType)
-      else
-        self.PowerType = nil
-        self.UnitPowerMax = 0
-      end
-    end  
+  function Widget:DetermineUnitPower()
+    local power_type = UNIT_POWER[PlayerClass]
+    if power_type then
+      power_type = power_type[GetSpecialization()] or power_type
+    end
+
+    if power_type and power_type.Name then
+      self.PowerType = power_type.PowerType
+      self.UnitPowerMax = UnitPowerMax("player", self.PowerType)
+    else
+      self.PowerType = nil
+      self.UnitPowerMax = 0
+    end
+  end  
 else
   -- This should not be necessary as in Classic only Rogues and Druids had combo points
   if PlayerClass == "ROGUE" or PlayerClass == "DRUID" then
     UnitPower = function(unitToken , powerType)
       return GetComboPoints("player", "anyenemy")
-    end
-  elseif PlayerClass == "DEATHKNIGHT" then
-    -- Deathknight is only available after Wrath, so no check for this version necessary
-    UnitPowerMax = function(unitToken , powerType)
-      return 6
-    end
-
-    -- Fix the wrong ordering of GetRuneCooldown (blood/unholy/frost) compared to UI display (blood/frost/unholy)
-    local GET_RUNE_COOLDOWN_MAPPING = { 1, 2, 5, 6, 3, 4 }
-
-    GetRuneCooldown = function(rune_id)
-      return _G.GetRuneCooldown(GET_RUNE_COOLDOWN_MAPPING[rune_id])
-    end
-
-    -- GetRuneType: This API only exists in Wrath Classic and Classic Era.
-    GetRuneType = function(rune_id)
-      return _G.GetRuneType(GET_RUNE_COOLDOWN_MAPPING[rune_id])
     end
   end
 
@@ -1322,6 +1324,7 @@ function Widget:UpdateSettings()
 end 
 
 function Widget:PrintDebug()
+  Addon.Logging.Debug("    Power Type:", self.PowerType, "( Max:", self.UnitPowerMax, ")")
   Addon.Logging.Debug("    Textures:", TEXTURE_INFO.Script.IsEnabled and "ENABLED" or "DISABLED")
   local lines = {}
   for icon_id, texture_info in pairs(TEXTURE_INFO.Script) do

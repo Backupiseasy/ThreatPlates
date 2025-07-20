@@ -40,8 +40,8 @@
 -- end
 -- @class file
 -- @name AceDB-3.0.lua
--- @release $Id: AceDB-3.0.lua 1361 2025-05-17 12:20:39Z nevcairiel $
-local ACEDB_MAJOR, ACEDB_MINOR = "AceDB-3.0", 31
+-- @release $Id: AceDB-3.0.lua 1364 2025-07-05 16:01:08Z nevcairiel $
+local ACEDB_MAJOR, ACEDB_MINOR = "AceDB-3.0", 33
 local AceDB = LibStub:NewLibrary(ACEDB_MAJOR, ACEDB_MINOR)
 
 if not AceDB then return end -- No upgrade needed
@@ -360,7 +360,7 @@ local function logoutHandler(frame, event)
 
 			-- cleanup sections that are empty without defaults
 			local sv = rawget(db, "sv")
-			for section in pairs(db.keys) do
+			for section in pairs(rawget(db, "keys")) do
 				if rawget(sv, section) then
 					-- global is special, all other sections have sub-entrys
 					-- also don't delete empty profiles on main dbs, only on namespaces
@@ -385,6 +385,12 @@ local function logoutHandler(frame, event)
 			local namespaces = rawget(sv, "namespaces")
 			if namespaces then
 				for name in pairs(namespaces) do
+					-- cleanout empty profiles table, if still present
+					if namespaces[name].profiles and not next(namespaces[name].profiles) then
+						namespaces[name].profiles = nil
+					end
+
+					-- remove entire namespace, if needed
 					if not next(namespaces[name]) then
 						namespaces[name] = nil
 					end
