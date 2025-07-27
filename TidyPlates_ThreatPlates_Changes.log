@@ -1,4 +1,9 @@
-﻿
+﻿------------------------------------------------------
+12.4.0 (2025-07-29)
+------------------------------------------------------
+* In the BossMods widget, the borders around the icons are now removed automatically.
+* Improved DBM integration for BossMods widget so that DBM's own aura and timer icons are shown when BossMods widget is disabled.
+
 ------------------------------------------------------
 12.3.10 (2025-07-16)
 ------------------------------------------------------
