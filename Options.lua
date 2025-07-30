@@ -8204,30 +8204,28 @@ end
 local function CustomPlateGetIcon(index)
   local _, icon
 
-  if db.uniqueSettings[index].UseAutomaticIcon then
-    icon = db.uniqueSettings[index].icon
+  local custom_plate = db.uniqueSettings[index]  
+  if custom_plate.UseAutomaticIcon then
+    icon = custom_plate.icon
   else
-    local spell_id = db.uniqueSettings[index].SpellID
-    if spell_id then
-      icon = GetSpellInfo(spell_id).iconID
-    else
-      icon = db.uniqueSettings[index].icon
-      if type(icon) == "string" and not icon:find("\\") and not icon:sub(-4) == ".blp" then
-        -- Maybe a spell name
-        icon = GetSpellInfo(spell_id).iconID
-      end
-    end
-  end
+    local spell_id = custom_plate.SpellID
+    local spell_name = custom_plate.SpellName    
 
-  if type(icon) == "string" and icon:sub(-4) == ".blp" then
-    icon = "Interface\\Icons\\" .. icon
+    if spell_id or spell_name then
+      icon = GetSpellInfo(spell_id or spell_name).iconID
+    elseif custom_plate.icon:sub(-4) == ".blp" then
+      icon = "Interface\\Icons\\" .. custom_plate.icon
+    elseif custom_plate.icon:find("\\") then
+      icon = custom_plate.icon
+    end
   end
 
   return icon
 end
 
 local function CustomPlateSetIcon(index, icon_location)
-  local _, icon
+  -- Default icon is ? when icon_location is invalid
+  local icon = "INV_Misc_QuestionMark.blp"
 
   local custom_plate = db.uniqueSettings[index]
   if custom_plate.UseAutomaticIcon then
@@ -8235,37 +8233,43 @@ local function CustomPlateSetIcon(index, icon_location)
     if spell_info then
       icon = spell_info.iconID
     end
-  elseif not icon_location then
+  elseif not icon_location or icon_location:len() < 1 then
+    -- reset to original value when no input is provided
     icon = custom_plate.icon
+  elseif icon_location:sub(-4) == ".blp" then
+    -- Blizzard icon provided    
+    icon = icon_location
+  elseif icon_location:find("\\") then
+    -- User defined path to icon
+    icon = icon_location
   else
+    -- may be either spell id, spell name, or icon id
     custom_plate.SpellID = nil
     custom_plate.SpellName = nil
 
-    local spell_id = tonumber(icon_location)
-    if spell_id then -- no string, so val should be a spell ID
-      local spell_info = GetSpellInfo(spell_id)
+    local icon_id = tonumber(icon_location)
+    if icon_id then
+      -- icon_location is a number could be a spell id or icon id
+      local spell_info = GetSpellInfo(icon_id)
       if spell_info then
         icon = spell_info.iconID
-        custom_plate.SpellID = spell_id
+        custom_plate.SpellID = icon_id
       else
-        icon = spell_id -- Set icon to spell_id == icon_location, so that the value gets stored
-        Addon.Logging.Error("Invalid spell ID for custom nameplate icon: " .. icon_location)
+        -- may be an aura or unit id (unable to validate)
+        icon = icon_id 
       end
     else
-      icon_location = tostring(icon_location)
-      local spell_info = GetSpellInfo(spell_id)
+      -- icon_location is a string (spell name) and must be in spellbook
+      local spell_info = GetSpellInfo(icon_location)
       if spell_info then
         icon = spell_info.iconID
-        custom_plate.SpellName = icon_location
+        custom_plate.SpellName = icon_locations
+      -- else unable to lookup units or auras by name
       end
-      icon = icon or icon_location
     end
   end
 
-  if not icon or (type(icon) == "string" and icon:len() == 0) then
-    icon = "INV_Misc_QuestionMark.blp"
-  end
-
+  -- Set the icon in db.uniqueSettings and retrieve via GetIcon
   custom_plate.icon = icon
   options.args.Custom.args["#" .. index].args.Icon.args.Icon.image = CustomPlateGetIcon(index)
 
