@@ -130,6 +130,8 @@ L["About"] = "Acerca de"
 L["Absolut Transparency"] = "Transparencia absoluta"
 L["Absorbs"] = "Absorbe"
 L["Absorbs Text"] = "Absorbe Texto"
+--[[Translation missing --]]
+L["Action Target"] = "Action Target"
 L["Add black outline."] = "Añade contorno negro."
 L["Add thick black outline."] = "Añade contorno negro grueso."
 L["Adding legacy custom nameplate for %s ..."] = "Añadiendo placa identificativa personalizada legada para %s ..."
@@ -146,10 +148,14 @@ L["All on NPCs"] = "Todos los PNJs"
 L["Allies"] = "Allies"
 L["Allow"] = "Permitir"
 --[[Translation missing --]]
+L["Allow action target selection while player has a locked target."] = "Allow action target selection while player has a locked target."
+--[[Translation missing --]]
 L["Allow soft target selection while player has a locked target."] = "Allow soft target selection while player has a locked target."
 L["Alpha"] = "Alfa"
 L["Alpha multiplier of nameplates for occluded units."] = "Multiplicador alfa de placas identificativas para unidades ocluidas."
 L["Always"] = "Siempre"
+--[[Translation missing --]]
+L["Always do action targeting"] = "Always do action targeting"
 --[[Translation missing --]]
 L["Always do soft targeting"] = "Always do soft targeting"
 L["Always Show Nameplates"] = "Siempre mostrar placas identificativas"
@@ -200,6 +206,8 @@ L["Automatic Icon"] = "Icono automático"
 L["Automation"] = "Automatización"
 --[[Translation missing --]]
 L["Auto-set Target"] = "Auto-set Target"
+--[[Translation missing --]]
+L["Auto-set target to match action target"] = "Auto-set target to match action target"
 --[[Translation missing --]]
 L["Auto-set target to match soft target"] = "Auto-set target to match soft target"
 --[[Translation missing --]]
@@ -436,13 +444,25 @@ L["Enable Threat Transparency"] = "Habilitar Transparencia de Amenaza"
 L["Enemies"] = "Enemies"
 --[[Translation missing --]]
 L["Enemy"] = "Enemy"
+--[[Translation missing --]]
+L["Enemy Bar Height"] = "Enemy Bar Height"
+--[[Translation missing --]]
+L["Enemy Bar Width"] = "Enemy Bar Width"
 L["Enemy Casting"] = "Lanzamiento de Enemigo"
+--[[Translation missing --]]
+L["Enemy Height"] = "Enemy Height"
 L["Enemy Name Color"] = "Color de Nombre de Enemigo"
 L["Enemy NPCs"] = "PNJs Enemigos"
 L["Enemy Players"] = "Jugadores Enemigos"
 L["Enemy Status Text"] = "Texto del Estado de Enemigo"
 L["Enemy Units"] = "Unidades Enemigas"
+--[[Translation missing --]]
+L["Enemy Width"] = "Enemy Width"
 L["Enter an icon's name (with the *.blp ending), a spell ID, a spell name or a full icon path (using '\\' to separate directory folders)."] = "Ingresa el nombre de un icono (con la terminación *.blp), una ID de hechizo, un nombre de hechizo o una ruta completa del icono (usando '\\' para separar carpetas de directorio)."
+--[[Translation missing --]]
+L["Error executing icon texture function for %s:"] = "Error executing icon texture function for %s:"
+--[[Translation missing --]]
+L["Error in custom style '%s': only numbers and strings are allowed as icon sources for function SetIcon."] = "Error in custom style '%s': only numbers and strings are allowed as icon sources for function SetIcon."
 L["Error in event script '%s' of custom style '%s': %s"] = "Error en el script de evento '%s' del estilo personalizado '%s':%s"
 L["Event Name"] = "Nombre de evento"
 L["Events with Script"] = "Eventos con scripts"
@@ -487,6 +507,14 @@ L["Frame Order"] = "Orden de marcos"
 L["Frequently Asked Questions"] = "Preguntas frecuentes"
 --[[Translation missing --]]
 L["Friend"] = "Friend"
+--[[Translation missing --]]
+L["Friend Bar Height"] = "Friend Bar Height"
+--[[Translation missing --]]
+L["Friend Bar Width"] = "Friend Bar Width"
+--[[Translation missing --]]
+L["Friend Height"] = "Friend Height"
+--[[Translation missing --]]
+L["Friend Width"] = "Friend Width"
 L["Friendly & Neutral Units"] = "Unidades amistosas y neutrales"
 L["Friendly Casting"] = "Lanzamiento de aliado"
 L["Friendly Name Color"] = "Color de nombre de aliado"
@@ -551,6 +579,8 @@ L["Hide on Attacked Units"] = "Ocultar por Unidades Atacadas"
 L["Hide the Blizzard default nameplates for friendly units in instances."] = "Oculta las placas identificativas predeterminadas de Blizzard para unidades aliadas en instancias."
 L["High Threat"] = "Alta Amenaza"
 L["Highlight"] = "Brillar"
+--[[Translation missing --]]
+L["Highlight for Expiring Icons"] = "Highlight for Expiring Icons"
 L["Highlight Mobs on Off-Tanks"] = "Brillar Mobs de Tanques Secundarios"
 L["Highlight Texture"] = "Brillar Textura"
 L["Horizontal Align"] = "Alinear Horizontal"
@@ -592,6 +622,8 @@ L["Import custom nameplate settings from a string. The custom namneplates will b
 L["Import Custom Nameplates"] = "Importar placas identificativas personalizadas"
 L["Import profile"] = "Importar perfil"
 L["Import/Export Profile"] = "Importar/Exportar perfil"
+--[[Translation missing --]]
+L["Important"] = "Important"
 L["In Combat"] = "En Combate"
 L["In combat, always show all combo points no matter if they are on or off. Off combo points are shown greyed-out."] = "En combate, siempre muestra todos los puntos de combate, sin importar si están habilitados o no. Los puntos de combate deshabilitados se muestran atenuados."
 L["In combat, use coloring, transparency, and scaling based on threat level as configured in the threat system. Custom settings are only used out of combat."] = "En combate, use colores, transparencias y escalas basadas en el nivel de amenaza configurado en el sistema de amenazas. La configuración personalizada solo se usa fuera de combate."
@@ -607,6 +639,8 @@ L["Instance IDs"] = "ID de estancia"
 L["Instances"] = "Instancias"
 --[[Translation missing --]]
 L["Interact"] = "Interact"
+--[[Translation missing --]]
+L["Interact Icon"] = "Interact Icon"
 L["Interrupt Overlay"] = "Interrumpir Superposición"
 L["Interrupt Shield"] = "Interrumpir Escudo"
 L["Interruptable"] = "Interrumpible"
@@ -636,6 +670,8 @@ L["Low Priority"] = "Low Priority"
 L["Low Threat"] = "Baja Amenaza"
 L["Magic"] = "Magia"
 L["Marked Immortal Guardian"] = "Guardián Inmortal Marcado"
+--[[Translation missing --]]
+L["Match appropriate action target to locked target."] = "Match appropriate action target to locked target."
 --[[Translation missing --]]
 L["Match appropriate soft target to locked target."] = "Match appropriate soft target to locked target."
 L["Max Alpha"] = "Alfa Máxima"
@@ -690,6 +726,8 @@ L["Neutral Units"] = "Unidades Neutrales"
 L["Neutral Units & Minions"] = "Unidades y Esbirros Neutrales"
 L["Never"] = "Nunca"
 L["New"] = "Nuevo"
+--[[Translation missing --]]
+L["No matching"] = "No matching"
 L["No Outline, Monochrome"] = "Sin Contorno, Monocromático"
 L["No Target"] = "No Hay Objetivo"
 L["No target found."] = "No se encuentra un objetivo."
@@ -722,6 +760,8 @@ L["On the left"] = "En la izquierda"
 L["One"] = "Uno"
 L["Only Alternate Power"] = "Solo alternar poder"
 L["Only for Target"] = "Solo para objetivo"
+--[[Translation missing --]]
+L["Only highlight expiring alerts with the selected priority."] = "Only highlight expiring alerts with the selected priority."
 L["Only In Combat"] = "Solo en combate"
 L["Only in Groups"] = "Solo en grupos"
 L["Only in Instances"] = "Solo en instancias"
@@ -763,6 +803,8 @@ L["Preview"] = "Vista previa"
 L["Preview Elite"] = "Vista Previa Élite"
 L["Preview Rare"] = "Vista Previa Rara"
 L["Preview Rare Elite"] = "Previsualizar élites raros"
+--[[Translation missing --]]
+L["Priority"] = "Priority"
 L["PvP Off"] = "JcJ desactivado"
 L["PvP Rank"] = "Rango JcJ"
 L["Quest"] = "Misión"
@@ -1046,7 +1088,7 @@ L["This option allows you to control whether threat affects the transparency of 
 L["This setting will disable threat scale for target marked, mouseover or casting units and instead use the general scale settings."] = "Esta configuración deshabilitará la escala de amenazas para las unidades marcadas como objetivo, pasar el ratón o lanzar y, en cambio, usará la configuración de escala general."
 L["This setting will disable threat transparency for target marked, mouseover or casting units and instead use the general transparency settings."] = "Esta configuración deshabilitará la transparencia de amenazas para las unidades marcadas con el objetivo, pasando el ratón o lanzando y en su lugar usará la configuración de transparencia general."
 --[[Translation missing --]]
-L["This settings changes CVars related to soft target and are not stored in the profile, but by WoW itself (character-specific settings)."] = "This settings changes CVars related to soft target and are not stored in the profile, but by WoW itself (character-specific settings)."
+L["This settings changes CVars related to action targeting and are not stored in the profile, but by WoW itself (character-specific settings)."] = "This settings changes CVars related to action targeting and are not stored in the profile, but by WoW itself (character-specific settings)."
 L["This widget highlights the nameplate of your current focus target by showing a border around the healthbar and by coloring the nameplate's healtbar and/or name with a custom color."] = "Este widget resalta la placa identificativa de su objetivo de enfoque actual mostrando un borde alrededor de la barra de salud y coloreando la barra de salud y/o el nombre de la placa identificativa con un color personalizado."
 L["This widget highlights the nameplate of your current target by showing a border around the healthbar and by coloring the nameplate's healtbar and/or name with a custom color."] = "Este widget resalta la placa de tu objetivo actual mostrando un borde alrededor de la barra de salud y coloreando la barra de salud y/o el nombre de la placa con un color personalizado."
 L["This widget shows a class icon on the nameplates of players."] = "Este artilugio muestra un icono de clase en las placas identificativas de los jugadores."
@@ -1079,6 +1121,8 @@ L["Threat Value Delta"] = "Valor de la amenaza Delta"
 L["Three"] = "Tres"
 L["Time Left"] = "Tiempo Restante"
 L["Time Text Offset"] = "Compensación de texto de tiempo"
+--[[Translation missing --]]
+L["Timers"] = "Timers"
 L["Title"] = "Título"
 L["Toggle"] = "Cambiar"
 L["Toggle Enemy Headline View"] = "Alternar Vista de Título de Enemigos"
@@ -1137,6 +1181,8 @@ L["Use a heuristic to detect if a mob is in combat with you, but only in instanc
 L["Use a striped texture for the absorbs overlay. Always enabled if full absorbs are shown."] = "Utiliza una textura rayada para la superposición de absorciones. Siempre habilitado si se muestran absorciones completas."
 L["Use Blizzard default nameplates for friendly nameplates and disable ThreatPlates for these units."] = "Utiliza las placas identificativas predeterminadas de Blizzard para placas identificativas de aliados y deshabilite las placas de amenaza para estas unidades."
 L["Use Blizzard default nameplates for neutral and enemy nameplates and disable ThreatPlates for these units."] = "Utiliza las placas identificativas predeterminadas de Blizzard para placas identificativas neutrales y enemigas y deshabilite las placas de amenaza para estas unidades."
+--[[Translation missing --]]
+L["Use FrameSort"] = "Use FrameSort"
 L["Use scale settings of Healthbar View also for Headline View."] = "Utilizar la configuración de escala de la Vista de barra de salud también para la Vista de Título."
 --[[Translation missing --]]
 L["Use target scale and transparency settings also for soft enemy target."] = "Use target scale and transparency settings also for soft enemy target."

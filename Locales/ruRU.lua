@@ -140,6 +140,8 @@ L["Absolut Transparency"] = "Полная прозрачность"
 L["Absorbs"] = "Поглощение"
 --[[Translation missing --]]
 L["Absorbs Text"] = "Absorbs Text"
+--[[Translation missing --]]
+L["Action Target"] = "Action Target"
 L["Add black outline."] = "Добавить чёрный контур."
 L["Add thick black outline."] = "Добавить тонкий чёрный контур."
 --[[Translation missing --]]
@@ -160,12 +162,16 @@ L["All on NPCs"] = "Всё на NPCs"
 L["Allies"] = "Allies"
 L["Allow"] = "Разрешить"
 --[[Translation missing --]]
+L["Allow action target selection while player has a locked target."] = "Allow action target selection while player has a locked target."
+--[[Translation missing --]]
 L["Allow soft target selection while player has a locked target."] = "Allow soft target selection while player has a locked target."
 L["Alpha"] = "Прозрачность"
 --[[Translation missing --]]
 L["Alpha multiplier of nameplates for occluded units."] = "Alpha multiplier of nameplates for occluded units."
 --[[Translation missing --]]
 L["Always"] = "Always"
+--[[Translation missing --]]
+L["Always do action targeting"] = "Always do action targeting"
 --[[Translation missing --]]
 L["Always do soft targeting"] = "Always do soft targeting"
 L["Always Show Nameplates"] = "Всегда показывать Nameplates"
@@ -230,6 +236,8 @@ L["Automatic Icon"] = "Automatic Icon"
 L["Automation"] = "Автоматизация"
 --[[Translation missing --]]
 L["Auto-set Target"] = "Auto-set Target"
+--[[Translation missing --]]
+L["Auto-set target to match action target"] = "Auto-set target to match action target"
 --[[Translation missing --]]
 L["Auto-set target to match soft target"] = "Auto-set target to match soft target"
 --[[Translation missing --]]
@@ -536,14 +544,26 @@ L["Enable Threat Transparency"] = "Прозрачность Угрозы"
 L["Enemies"] = "Enemies"
 --[[Translation missing --]]
 L["Enemy"] = "Enemy"
+--[[Translation missing --]]
+L["Enemy Bar Height"] = "Enemy Bar Height"
+--[[Translation missing --]]
+L["Enemy Bar Width"] = "Enemy Bar Width"
 L["Enemy Casting"] = "Враг произносящий заклинание"
+--[[Translation missing --]]
+L["Enemy Height"] = "Enemy Height"
 L["Enemy Name Color"] = "Цвет имени врага"
 L["Enemy NPCs"] = "Вражеские NPCs"
 L["Enemy Players"] = "Вражеский Игрок"
 L["Enemy Status Text"] = "Статус текст врага"
 L["Enemy Units"] = "Вражеская цель"
 --[[Translation missing --]]
+L["Enemy Width"] = "Enemy Width"
+--[[Translation missing --]]
 L["Enter an icon's name (with the *.blp ending), a spell ID, a spell name or a full icon path (using '\\' to separate directory folders)."] = "Enter an icon's name (with the *.blp ending), a spell ID, a spell name or a full icon path (using '\\' to separate directory folders)."
+--[[Translation missing --]]
+L["Error executing icon texture function for %s:"] = "Error executing icon texture function for %s:"
+--[[Translation missing --]]
+L["Error in custom style '%s': only numbers and strings are allowed as icon sources for function SetIcon."] = "Error in custom style '%s': only numbers and strings are allowed as icon sources for function SetIcon."
 --[[Translation missing --]]
 L["Error in event script '%s' of custom style '%s': %s"] = "Error in event script '%s' of custom style '%s': %s"
 --[[Translation missing --]]
@@ -609,6 +629,14 @@ L["Frame Order"] = "Порядок рамки"
 L["Frequently Asked Questions"] = "Frequently Asked Questions"
 --[[Translation missing --]]
 L["Friend"] = "Friend"
+--[[Translation missing --]]
+L["Friend Bar Height"] = "Friend Bar Height"
+--[[Translation missing --]]
+L["Friend Bar Width"] = "Friend Bar Width"
+--[[Translation missing --]]
+L["Friend Height"] = "Friend Height"
+--[[Translation missing --]]
+L["Friend Width"] = "Friend Width"
 L["Friendly & Neutral Units"] = "Дружественные и нейтральные цели"
 L["Friendly Casting"] = "Дружественный каст"
 L["Friendly Name Color"] = "Дружественный цвет имени"
@@ -687,6 +715,8 @@ L["High Threat"] = "Высокая угроза"
 --[[Translation missing --]]
 L["Highlight"] = "Highlight"
 --[[Translation missing --]]
+L["Highlight for Expiring Icons"] = "Highlight for Expiring Icons"
+--[[Translation missing --]]
 L["Highlight Mobs on Off-Tanks"] = "Highlight Mobs on Off-Tanks"
 --[[Translation missing --]]
 L["Highlight Texture"] = "Highlight Texture"
@@ -758,6 +788,8 @@ L["Import custom nameplate settings from a string. The custom namneplates will b
 L["Import Custom Nameplates"] = "Import Custom Nameplates"
 L["Import profile"] = "Импорт профиля"
 L["Import/Export Profile"] = "Импорт/экспорт профиля"
+--[[Translation missing --]]
+L["Important"] = "Important"
 L["In Combat"] = "В бою"
 --[[Translation missing --]]
 L["In combat, always show all combo points no matter if they are on or off. Off combo points are shown greyed-out."] = "In combat, always show all combo points no matter if they are on or off. Off combo points are shown greyed-out."
@@ -785,6 +817,8 @@ L["Instance IDs"] = "Instance IDs"
 L["Instances"] = "Instances"
 --[[Translation missing --]]
 L["Interact"] = "Interact"
+--[[Translation missing --]]
+L["Interact Icon"] = "Interact Icon"
 --[[Translation missing --]]
 L["Interrupt Overlay"] = "Interrupt Overlay"
 --[[Translation missing --]]
@@ -828,6 +862,8 @@ L["Low Priority"] = "Low Priority"
 L["Low Threat"] = "Низкая угроза"
 L["Magic"] = "Магия"
 L["Marked Immortal Guardian"] = "Marked Immortal Guardian"
+--[[Translation missing --]]
+L["Match appropriate action target to locked target."] = "Match appropriate action target to locked target."
 --[[Translation missing --]]
 L["Match appropriate soft target to locked target."] = "Match appropriate soft target to locked target."
 --[[Translation missing --]]
@@ -902,6 +938,8 @@ L["Neutral Units"] = "Нейтральные юниты"
 L["Neutral Units & Minions"] = "Нейтральные юниты & Миньоны"
 L["Never"] = "Никогда"
 L["New"] = "Новый"
+--[[Translation missing --]]
+L["No matching"] = "No matching"
 L["No Outline, Monochrome"] = "Нет контура, монохромный"
 L["No Target"] = "Нет цели"
 L["No target found."] = "Цель не найдена."
@@ -947,6 +985,8 @@ L["One"] = "Один"
 L["Only Alternate Power"] = "Только альтернативная энергия"
 --[[Translation missing --]]
 L["Only for Target"] = "Only for Target"
+--[[Translation missing --]]
+L["Only highlight expiring alerts with the selected priority."] = "Only highlight expiring alerts with the selected priority."
 --[[Translation missing --]]
 L["Only In Combat"] = "Only In Combat"
 --[[Translation missing --]]
@@ -1007,6 +1047,8 @@ L["Preview Elite"] = "Preview Elite"
 L["Preview Rare"] = "Preview Rare"
 --[[Translation missing --]]
 L["Preview Rare Elite"] = "Preview Rare Elite"
+--[[Translation missing --]]
+L["Priority"] = "Priority"
 --[[Translation missing --]]
 L["PvP Off"] = "PvP Off"
 --[[Translation missing --]]
@@ -1447,7 +1489,7 @@ L["This setting will disable threat scale for target marked, mouseover or castin
 --[[Translation missing --]]
 L["This setting will disable threat transparency for target marked, mouseover or casting units and instead use the general transparency settings."] = "This setting will disable threat transparency for target marked, mouseover or casting units and instead use the general transparency settings."
 --[[Translation missing --]]
-L["This settings changes CVars related to soft target and are not stored in the profile, but by WoW itself (character-specific settings)."] = "This settings changes CVars related to soft target and are not stored in the profile, but by WoW itself (character-specific settings)."
+L["This settings changes CVars related to action targeting and are not stored in the profile, but by WoW itself (character-specific settings)."] = "This settings changes CVars related to action targeting and are not stored in the profile, but by WoW itself (character-specific settings)."
 --[[Translation missing --]]
 L["This widget highlights the nameplate of your current focus target by showing a border around the healthbar and by coloring the nameplate's healtbar and/or name with a custom color."] = "This widget highlights the nameplate of your current focus target by showing a border around the healthbar and by coloring the nameplate's healtbar and/or name with a custom color."
 --[[Translation missing --]]
@@ -1506,6 +1548,8 @@ L["Three"] = "Три"
 L["Time Left"] = "Time Left"
 --[[Translation missing --]]
 L["Time Text Offset"] = "Time Text Offset"
+--[[Translation missing --]]
+L["Timers"] = "Timers"
 --[[Translation missing --]]
 L["Title"] = "Title"
 --[[Translation missing --]]
@@ -1607,6 +1651,8 @@ L["Use Blizzard default nameplates for friendly nameplates and disable ThreatPla
 --[[Translation missing --]]
 L["Use Blizzard default nameplates for neutral and enemy nameplates and disable ThreatPlates for these units."] = "Use Blizzard default nameplates for neutral and enemy nameplates and disable ThreatPlates for these units."
 --[[Translation missing --]]
+L["Use FrameSort"] = "Use FrameSort"
+--[[Translation missing --]]
 L["Use scale settings of Healthbar View also for Headline View."] = "Use scale settings of Healthbar View also for Headline View."
 --[[Translation missing --]]
 L["Use target scale and transparency settings also for soft enemy target."] = "Use target scale and transparency settings also for soft enemy target."
@@ -1665,7 +1711,7 @@ L["Vertical Spacing"] = "Вертикальное расстояние"
 L["Viper"] = "Змея"
 L["Visibility"] = "Отображение"
 L["Volatile Ooze"] = "Volatile Ooze"
-L["Warlock"] = "Варлок"
+L["Warlock"] = "Чернокнижник"
 L["Warning Glow for Threat"] = "Предупреждающее свечение для угроз"
 L["Water Elemental"] = "Водный элементаль"
 L["Web Wrap"] = "Кокон"
