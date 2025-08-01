@@ -8985,7 +8985,7 @@ CreateCustomNameplateEntry = function(index)
           Description = {
             type = "description",
             order = 5,
-            name = L["Enter an icon's name (with the *.blp ending), a spell ID, a spell name or a full icon path (using '\' to separate directory folders)."],
+            name = L["Enter an icon's name (with the *.blp ending), a spell ID, a spell name or a full icon path (using '\\' to separate directory folders)."],
             width = "full",
             hidden = function() return db.uniqueSettings[index].UseAutomaticIcon end
           },
