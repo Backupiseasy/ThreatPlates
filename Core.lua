@@ -6,7 +6,7 @@ local t = Addon.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local tonumber, pairs = tonumber, pairs
+local tonumber, tostring, pairs = tonumber, tostring, pairs
 
 -- WoW APIs
 local SetNamePlateFriendlyClickThrough = C_NamePlate.SetNamePlateFriendlyClickThrough
