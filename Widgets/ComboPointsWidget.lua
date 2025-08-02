@@ -19,7 +19,7 @@ local tostring, string_format = tostring, string.format
 
 -- WoW APIs
 local GetTime, tContains = GetTime, tContains
-local UnitCanAttack = UnitCanAttack
+local UnitCanAttack, UnitIsUnit = UnitCanAttack, UnitIsUnit
 local UnitPower, UnitPowerMax, GetComboPoints, GetRuneCooldown, GetRuneType = UnitPower, UnitPowerMax, GetComboPoints, GetRuneCooldown, GetRuneType
 local GetUnitChargedPowerPoints, GetPowerRegenForPowerType = GetUnitChargedPowerPoints, GetPowerRegenForPowerType
 local IsSpellUsable = C_Spell and C_Spell.IsSpellUsable
