@@ -40,6 +40,7 @@ local WOW_EVENTS = {
   PLAYER_FLAGS_CHANGED = true,
   PLAYER_FOCUS_CHANGED = Addon.ExpansionIsAtLeastTBC,
   PLAYER_LOGIN = true,
+  PLAYER_MAP_CHANGED = Addon.IS_MAINLINE, -- Added in 11.0.0 (TWW)
   PLAYER_REGEN_DISABLED = true,
   PLAYER_REGEN_ENABLED = true,
   PLAYER_SOFT_ENEMY_CHANGED = true,
@@ -97,29 +98,23 @@ local WOW_EVENTS = {
 
 function Addon:ExpansionSupportsEvent(event, register_for_current_expansion)
   -- if WOW_EVENTS[event] == nil then DebugUnknowEvents[event] = true end
-
   return register_for_current_expansion ~= false and WOW_EVENTS[event]
 end
 
 function Addon:RegisterEvent(event_handler_frame, event, register_for_current_expansion)
-  if not Addon:ExpansionSupportsEvent(event, register_for_current_expansion) then return end
-
-  if WOW_EVENTS[event] then
+  if Addon:ExpansionSupportsEvent(event, register_for_current_expansion) then 
     event_handler_frame:RegisterEvent(event)
   end
 end
 
-function Addon:RegisterUnitEvent(event_handler_frame, event, unit, register_for_current_expansion)
-  if not Addon:ExpansionSupportsEvent(event, register_for_current_expansion) then return end
-
-  if WOW_EVENTS[event] then
-    event_handler_frame:RegisterUnitEvent(event, unit)
+function Addon:RegisterUnitEvent(event_handler_frame, event, unitid, register_for_current_expansion)
+  if Addon:ExpansionSupportsEvent(event, register_for_current_expansion) then 
+    event_handler_frame:RegisterUnitEvent(event, unitid)
   end
 end
 
-function Addon:UnregisterEvent(event_handler_frame, event, register_for_current_expansion)
-  if not Addon:ExpansionSupportsEvent(event, register_for_current_expansion) then return end
-
+function Addon:UnregisterEvent(event_handler_frame, event)
+  -- Only need to check if event is known in the current expansion
   if WOW_EVENTS[event] then
     event_handler_frame:UnregisterEvent(event)
   end

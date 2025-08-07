@@ -6,7 +6,7 @@ local t = Addon.ThreatPlates
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local tonumber, pairs = tonumber, pairs
+local tonumber, tostring, pairs = tonumber, tostring, pairs
 
 -- WoW APIs
 local SetNamePlateFriendlyClickThrough = C_NamePlate.SetNamePlateFriendlyClickThrough
@@ -163,6 +163,7 @@ local EVENTS = {
   --"PLAYER_TALENT_UPDATE"
 
   "PLAYER_ENTERING_WORLD",
+  "PLAYER_MAP_CHANGED",
   --"PLAYER_LOGIN",
   --"PLAYER_LOGOUT",
   "PLAYER_REGEN_ENABLED",
@@ -555,6 +556,42 @@ function TidyPlatesThreat:PLAYER_ENTERING_WORLD()
   -- be bugged
   Addon:SetBaseNamePlateSize()
   Addon.Font:SetNamesFonts()
+end
+
+-- Instances without PLAYER_ENTERING_WORLD event on enter (or leave), hence "walk-in".
+-- Currently only delves; possibly there are more.
+-- To avoid redundant calls, make sure to only add instance IDs here that do not trigger the PLAYER_ENTERING_WORLD event.
+local WalkInInstances = {
+  -- Delves
+  ["2664"] = true, -- Fungal Folly
+  ["2679"] = true, -- Mycomancer Cavern
+  ["2680"] = true, -- Earthcrawl Mines
+  ["2681"] = true, -- Kriegval's Rest
+  ["2682"] = true, -- Zekvir's Lair ; TODO: check this one, if it behaves like the others
+  ["2683"] = true, -- The Waterworks
+  ["2684"] = true, -- The Dread Pit
+  ["2685"] = true, -- Skittering Breach
+  ["2686"] = true, -- Nightfall Sanctum
+  ["2687"] = true, -- The Sinkhole
+  ["2688"] = true, -- The Spiral Weave
+  ["2689"] = true, -- Tak-Rethan Abyss
+  ["2690"] = true, -- The Underkeep
+  ["2767"] = true, -- The Sinkhole
+  ["2768"] = true, -- Tak-Rethan Abyss
+  ["2815"] = true, -- Excavation Site 9
+  ["2826"] = true, -- Sidestreet Sluice
+  ["2836"] = true, -- Earthcrawl Mines
+}
+
+function TidyPlatesThreat:PLAYER_MAP_CHANGED(_, previousID, currentID)
+  if WalkInInstances[tostring(currentID)] or WalkInInstances[tostring(previousID)] then
+    -- The event fires very early, too early for GetInstanceInfo to retrieve the new ID.
+    -- A delay of `0` (aka next frame) seems to be enough in *many* cases, but sometimes not;
+    -- no idea what this depends on (server lag?); so using a delay like 1 or 3s is probably better.
+    -- A too long delay might cause trouble if the player starts combat immediately after entering/leaving the instance.
+    -- Note: Instead of delaying, we could also pass the ID as argument, but this would require various changes down the line.
+    C_Timer.After(3, TidyPlatesThreat.PLAYER_ENTERING_WORLD)
+  end
 end
 
 --function TidyPlatesThreat:PLAYER_LEAVING_WORLD()

@@ -151,6 +151,8 @@ L["About"] = "정보"
 L["Absolut Transparency"] = "절대 투명도"
 L["Absorbs"] = "흡수"
 L["Absorbs Text"] = "흡수 문자"
+--[[Translation missing --]]
+L["Action Target"] = "Action Target"
 L["Add black outline."] = "검은색 외곽선을 추가합니다."
 L["Add thick black outline."] = "두꺼운 검은색 외곽선을 추가합니다."
 --[[Translation missing --]]
@@ -169,11 +171,15 @@ L["All on NPCs"] = "모든 NPC"
 L["Allies"] = "Allies"
 L["Allow"] = "허용"
 --[[Translation missing --]]
+L["Allow action target selection while player has a locked target."] = "Allow action target selection while player has a locked target."
+--[[Translation missing --]]
 L["Allow soft target selection while player has a locked target."] = "Allow soft target selection while player has a locked target."
 L["Alpha"] = "투명도"
 --[[Translation missing --]]
 L["Alpha multiplier of nameplates for occluded units."] = "Alpha multiplier of nameplates for occluded units."
 L["Always"] = "항상"
+--[[Translation missing --]]
+L["Always do action targeting"] = "Always do action targeting"
 --[[Translation missing --]]
 L["Always do soft targeting"] = "Always do soft targeting"
 L["Always Show Nameplates"] = "이름표 항상 표시"
@@ -239,6 +245,8 @@ L["Automatic Icon"] = "자동 아이콘"
 L["Automation"] = "자동화"
 --[[Translation missing --]]
 L["Auto-set Target"] = "Auto-set Target"
+--[[Translation missing --]]
+L["Auto-set target to match action target"] = "Auto-set target to match action target"
 --[[Translation missing --]]
 L["Auto-set target to match soft target"] = "Auto-set target to match soft target"
 --[[Translation missing --]]
@@ -509,14 +517,26 @@ L["Enable Threat Transparency"] = "위협 수준 투명도 활성화"
 L["Enemies"] = "Enemies"
 --[[Translation missing --]]
 L["Enemy"] = "Enemy"
+--[[Translation missing --]]
+L["Enemy Bar Height"] = "Enemy Bar Height"
+--[[Translation missing --]]
+L["Enemy Bar Width"] = "Enemy Bar Width"
 L["Enemy Casting"] = "적 시전"
+--[[Translation missing --]]
+L["Enemy Height"] = "Enemy Height"
 L["Enemy Name Color"] = "적 이름 색상"
 L["Enemy NPCs"] = "적 NPC"
 L["Enemy Players"] = "적 플레이어"
 L["Enemy Status Text"] = "적 상태 문자"
 L["Enemy Units"] = "적 유닛"
 --[[Translation missing --]]
+L["Enemy Width"] = "Enemy Width"
+--[[Translation missing --]]
 L["Enter an icon's name (with the *.blp ending), a spell ID, a spell name or a full icon path (using '\\' to separate directory folders)."] = "Enter an icon's name (with the *.blp ending), a spell ID, a spell name or a full icon path (using '\\' to separate directory folders)."
+--[[Translation missing --]]
+L["Error executing icon texture function for %s:"] = "Error executing icon texture function for %s:"
+--[[Translation missing --]]
+L["Error in custom style '%s': only numbers and strings are allowed as icon sources for function SetIcon."] = "Error in custom style '%s': only numbers and strings are allowed as icon sources for function SetIcon."
 --[[Translation missing --]]
 L["Error in event script '%s' of custom style '%s': %s"] = "Error in event script '%s' of custom style '%s': %s"
 L["Event Name"] = "이벤트 이름"
@@ -576,6 +596,14 @@ L["Frame Order"] = "창 순서"
 L["Frequently Asked Questions"] = "Frequently Asked Questions"
 --[[Translation missing --]]
 L["Friend"] = "Friend"
+--[[Translation missing --]]
+L["Friend Bar Height"] = "Friend Bar Height"
+--[[Translation missing --]]
+L["Friend Bar Width"] = "Friend Bar Width"
+--[[Translation missing --]]
+L["Friend Height"] = "Friend Height"
+--[[Translation missing --]]
+L["Friend Width"] = "Friend Width"
 L["Friendly & Neutral Units"] = "아군 & 중립 유닛"
 L["Friendly Casting"] = "아군 시전"
 L["Friendly Name Color"] = "아군 이름 색상"
@@ -650,6 +678,8 @@ L["Hide on Attacked Units"] = "공격당한 유닛 숨기기"
 L["Hide the Blizzard default nameplates for friendly units in instances."] = "인스턴스에서 블리자드 기본 아군 이름표 숨기기"
 L["High Threat"] = "높은 위협 수준"
 L["Highlight"] = "강조"
+--[[Translation missing --]]
+L["Highlight for Expiring Icons"] = "Highlight for Expiring Icons"
 L["Highlight Mobs on Off-Tanks"] = "방어 중이지 않은 몹 강조"
 L["Highlight Texture"] = "강조 텍스쳐"
 L["Horizontal Align"] = "수평 조절"
@@ -699,6 +729,8 @@ L["Import custom nameplate settings from a string. The custom namneplates will b
 L["Import Custom Nameplates"] = "사용자 정의 이름표 가져오기"
 L["Import profile"] = "프로필 가져오기"
 L["Import/Export Profile"] = "프로필 가져오기/내보내기"
+--[[Translation missing --]]
+L["Important"] = "Important"
 L["In Combat"] = "전투 중"
 --[[Translation missing --]]
 L["In combat, always show all combo points no matter if they are on or off. Off combo points are shown greyed-out."] = "In combat, always show all combo points no matter if they are on or off. Off combo points are shown greyed-out."
@@ -720,6 +752,8 @@ L["Instance IDs"] = "인스턴스 ID"
 L["Instances"] = "인스턴스"
 --[[Translation missing --]]
 L["Interact"] = "Interact"
+--[[Translation missing --]]
+L["Interact Icon"] = "Interact Icon"
 L["Interrupt Overlay"] = "차단 오버레이"
 L["Interrupt Shield"] = "차단 방패"
 L["Interruptable"] = "차단 가능"
@@ -755,6 +789,8 @@ L["Low Priority"] = "Low Priority"
 L["Low Threat"] = "낮은 위협 수준"
 L["Magic"] = "마법"
 L["Marked Immortal Guardian"] = "표시된 불멸의 수호병"
+--[[Translation missing --]]
+L["Match appropriate action target to locked target."] = "Match appropriate action target to locked target."
 --[[Translation missing --]]
 L["Match appropriate soft target to locked target."] = "Match appropriate soft target to locked target."
 L["Max Alpha"] = "최대 투명도"
@@ -816,6 +852,8 @@ L["Neutral Units & Minions"] = "중립 유닛 & 하수인"
 L["Never"] = "Never"
 --[[Translation missing --]]
 L["New"] = "New"
+--[[Translation missing --]]
+L["No matching"] = "No matching"
 L["No Outline, Monochrome"] = "외곽선 없음, 모노크롬"
 L["No Target"] = "대상 없음"
 L["No target found."] = "대상을 찾을 수 없습니다."
@@ -854,6 +892,8 @@ L["One"] = "1"
 L["Only Alternate Power"] = "보조 마력만"
 --[[Translation missing --]]
 L["Only for Target"] = "Only for Target"
+--[[Translation missing --]]
+L["Only highlight expiring alerts with the selected priority."] = "Only highlight expiring alerts with the selected priority."
 L["Only In Combat"] = "전투 중에만"
 L["Only in Groups"] = "파티 중에만"
 L["Only in Instances"] = "인스턴스에서만"
@@ -900,6 +940,8 @@ L["Preview"] = "미리보기"
 L["Preview Elite"] = "정예 미리보기"
 L["Preview Rare"] = "희귀 미리보기"
 L["Preview Rare Elite"] = "희귀 정예 미리보기"
+--[[Translation missing --]]
+L["Priority"] = "Priority"
 L["PvP Off"] = "PvP 끔"
 L["PvP Rank"] = "PvP 등급"
 L["Quest"] = "퀘스트"
@@ -1265,7 +1307,7 @@ L["This option allows you to control whether threat affects the transparency of 
 L["This setting will disable threat scale for target marked, mouseover or casting units and instead use the general scale settings."] = "이 설정은 징표 대상, 마우스오버 또는 시전 중인 유닛에 위협 수준 크기 비율을 비활성하고 대신 기본 크기 비율 설정을 사용합니다."
 L["This setting will disable threat transparency for target marked, mouseover or casting units and instead use the general transparency settings."] = "이 설정은 징표 대상, 마우스오버 또는 시전 중인 유닛에 위협 수준 투명도를 비활성하고 대신 기본 투명도 설정을 사용합니다."
 --[[Translation missing --]]
-L["This settings changes CVars related to soft target and are not stored in the profile, but by WoW itself (character-specific settings)."] = "This settings changes CVars related to soft target and are not stored in the profile, but by WoW itself (character-specific settings)."
+L["This settings changes CVars related to action targeting and are not stored in the profile, but by WoW itself (character-specific settings)."] = "This settings changes CVars related to action targeting and are not stored in the profile, but by WoW itself (character-specific settings)."
 --[[Translation missing --]]
 L["This widget highlights the nameplate of your current focus target by showing a border around the healthbar and by coloring the nameplate's healtbar and/or name with a custom color."] = "This widget highlights the nameplate of your current focus target by showing a border around the healthbar and by coloring the nameplate's healtbar and/or name with a custom color."
 --[[Translation missing --]]
@@ -1311,6 +1353,8 @@ L["Threat Value Delta"] = "Threat Value Delta"
 L["Three"] = "3"
 L["Time Left"] = "남은 시간"
 L["Time Text Offset"] = "시간 문자 위치"
+--[[Translation missing --]]
+L["Timers"] = "Timers"
 L["Title"] = "제목"
 --[[Translation missing --]]
 L["Toggle"] = "Toggle"
@@ -1392,6 +1436,8 @@ L["Use a striped texture for the absorbs overlay. Always enabled if full absorbs
 L["Use Blizzard default nameplates for friendly nameplates and disable ThreatPlates for these units."] = "우호적 유닛에 ThreatPlates를 비활성하고 블리자드 기본 이름표를 사용합니다."
 --[[Translation missing --]]
 L["Use Blizzard default nameplates for neutral and enemy nameplates and disable ThreatPlates for these units."] = "Use Blizzard default nameplates for neutral and enemy nameplates and disable ThreatPlates for these units."
+--[[Translation missing --]]
+L["Use FrameSort"] = "Use FrameSort"
 L["Use scale settings of Healthbar View also for Headline View."] = "생명력바 보기의 크기 비율 설정을 헤드라인 보기에도 사용합니다."
 --[[Translation missing --]]
 L["Use target scale and transparency settings also for soft enemy target."] = "Use target scale and transparency settings also for soft enemy target."

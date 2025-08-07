@@ -43,6 +43,13 @@ local DefaultGlowColor
 local UPDATE_INTERVAL = 0.1
 local COLOR_TRANSPARENT = RGB(0, 0, 0, 0) -- opaque
 
+--------------------------------------------------------------------------------------------------
+-- Compatibility with other addons 
+---------------------------------------------------------------------------------------------------
+
+-- Global for DBM to differentiate between Threat Plates and Tidy Plates: Threat
+TidyPlatesThreatDBM = true
+
 ---------------------------------------------------------------------------------------------------
 -- Boss Mods Widget Functions
 ---------------------------------------------------------------------------------------------------
@@ -64,6 +71,7 @@ local function UpdateIconFrameLayout(widget_frame, icon_frame, index)
 
   -- Label Text
   Font:UpdateText(icon_frame, icon_frame.Label, Settings.LabelText)
+  icon_frame.Label:SetShown(Settings.LabelText.Show)
 end
 
 local function InitiateIconFrame(icon_frame, alert, remaining_time)
@@ -73,15 +81,15 @@ local function InitiateIconFrame(icon_frame, alert, remaining_time)
   end
 
   icon_frame.Icon:SetTexture(alert.Texture)
+  icon_frame.Icon:SetTexCoord(.10, 1-.07, .12, 1-.12) -- remove borders from default icons
 
-  icon_frame.Label:SetText(alert.Label)
-  local color = alert.Color
-  if color then
+  -- Color is only set for Aura alerts
+  local color = alert.Color or COLOR_TRANSPARENT
+  if icon_frame.Label:IsShown() then
+    icon_frame.Label:SetText(alert.Label)
     icon_frame.Label:SetTextColor(color.r, color.g, color.b, color.a)
-    icon_frame:SetBackdropBorderColor(color.r, color.g, color.b, color.a)
-  else
-    icon_frame:SetBackdropBorderColor(COLOR_TRANSPARENT.r, COLOR_TRANSPARENT.g, COLOR_TRANSPARENT.b, COLOR_TRANSPARENT.a)
   end
+  icon_frame:SetBackdropBorderColor(color.r, color.g, color.b, color.a)
 
   icon_frame:Show()
 end
@@ -535,6 +543,17 @@ function Widget:IsEnabled()
   local db = Addon.db.profile.BossModsWidget
   return db.ON or db.ShowInHeadlineView
 end
+
+function Widget:OnEnable()
+  TidyPlatesThreatDBM = true
+end
+
+function Widget:OnDisable()
+  TidyPlatesThreatDBM = false
+  
+  self:UnregisterAllEvents()
+end
+
 
 function Widget:Create(tp_frame)
   local widget_frame = _G.CreateFrame("Frame", nil, tp_frame)

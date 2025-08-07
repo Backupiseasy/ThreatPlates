@@ -8238,6 +8238,10 @@ local function CustomPlateSetIcon(index, icon_location)
   elseif not icon_location then
     icon = custom_plate.icon
   else
+    -- Syntax: 
+    --   Enter an icon's name (with the *.blp ending), 
+    --   a spell ID, a spell name or 
+    --   a full icon path (using '\' to separate directory folders)."],
     custom_plate.SpellID = nil
     custom_plate.SpellName = nil
 
@@ -8253,7 +8257,7 @@ local function CustomPlateSetIcon(index, icon_location)
       end
     else
       icon_location = tostring(icon_location)
-      local spell_info = GetSpellInfo(spell_id)
+      local spell_info = GetSpellInfo(icon_location)
       if spell_info then
         icon = spell_info.iconID
         custom_plate.SpellName = icon_location

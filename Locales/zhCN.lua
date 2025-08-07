@@ -136,6 +136,7 @@ L["About"] = "关于"
 L["Absolut Transparency"] = "绝对透明度"
 L["Absorbs"] = "吸收盾"
 L["Absorbs Text"] = "吸收盾文字"
+L["Action Target"] = "操作目标"
 L["Add black outline."] = "加上黑色外框。"
 L["Add thick black outline."] = "加上粗的黑色外框。"
 L["Adding legacy custom nameplate for %s ..."] = "正在为 %s 添加传统自定义血条..."
@@ -145,17 +146,17 @@ L["Additionally color the name based on the target mark if the unit is marked."]
 L["Additionally color the nameplate's healthbar or name based on the target mark if the unit is marked."] = "单位有标记图示时，依据图示类型额外调整血条或名字颜色。"
 L["Alignment"] = "对齐"
 L["All"] = "全部"
---[[Translation missing --]]
-L["All Minions"] = "All Minions"
+L["All Minions"] = "所有小怪"
 L["All on NPCs"] = "NPC 全部"
---[[Translation missing --]]
-L["Allies"] = "Allies"
+L["Allies"] = "盟友"
 L["Allow"] = "允许"
+L["Allow action target selection while player has a locked target."] = "允许在玩家已经锁定目标的情况下选择其他目标进行操作。"
 --[[Translation missing --]]
 L["Allow soft target selection while player has a locked target."] = "Allow soft target selection while player has a locked target."
 L["Alpha"] = "透明度"
 L["Alpha multiplier of nameplates for occluded units."] = "被遮挡单位的血条透明度。"
 L["Always"] = "总是"
+L["Always do action targeting"] = "始终进行目标操作选择"
 --[[Translation missing --]]
 L["Always do soft targeting"] = "Always do soft targeting"
 L["Always Show Nameplates"] = "总是显示血条"
@@ -203,8 +204,8 @@ L["Auto Sizing"] = "自动调整大小"
 L["Auto-Cast"] = "自动施放"
 L["Automatic Icon"] = "自动图示"
 L["Automation"] = "自动"
---[[Translation missing --]]
-L["Auto-set Target"] = "Auto-set Target"
+L["Auto-set Target"] = "自动设置目标"
+L["Auto-set target to match action target"] = "自动将目标设置为匹配操作目标"
 --[[Translation missing --]]
 L["Auto-set target to match soft target"] = "Auto-set target to match soft target"
 --[[Translation missing --]]
@@ -367,8 +368,7 @@ L["Delta Threat Value"] = "增量仇恨值"
 L["Detailed Percentage"] = "详细百分比"
 L["Determine your role (tank/dps/healing) automatically based on current spec."] = "根据当前天赋自动切换你的角色(坦克/输出/治疗)"
 L["Determine your role (tank/dps/healing) automatically based on current stance (Warrior) or form (Druid)."] = "自动根据目前的姿态 (战士) 或形态 (德鲁伊) 决定你的角色 (坦克/输出/治疗)"
---[[Translation missing --]]
-L["Determine your role (tank/dps/healing) automatically based on current stance, form, aura, presence, or rune."] = "Determine your role (tank/dps/healing) automatically based on current stance, form, aura, presence, or rune."
+L["Determine your role (tank/dps/healing) automatically based on current stance, form, aura, presence, or rune."] = "根据当前的姿态、形态、光环、姿态或符文自动确定你的角色（坦克/输出/治疗）。"
 L["Disable"] = "停用"
 L["Disable threat scale for target marked, mouseover or casting units."] = "停用被标记图示、鼠标指向或正在施法单位的仇恨值缩放大小变化。"
 L["Disable threat transparency for target marked, mouseover or casting units."] = "停用被标记图示、鼠标指向或正在施法单位的仇恨值透明度变化。"
@@ -434,17 +434,37 @@ L["Enable Threat Scale"] = "启用仇恨值缩放"
 L["Enable Threat System"] = "启用仇恨系统"
 L["Enable Threat Textures"] = "启用仇恨值材质"
 L["Enable Threat Transparency"] = "启用仇恨值透明度"
---[[Translation missing --]]
-L["Enemies"] = "Enemies"
---[[Translation missing --]]
-L["Enemy"] = "Enemy"
+L["Enemies"] = "敌方"
+L["Enemy"] = "敌人"
+L["Enemy Bar Height"] = [=[敌方血条高度
+
+
+
+
+
+
+]=]
+L["Enemy Bar Width"] = [=[敌方血条宽度
+
+
+
+
+
+
+]=]
 L["Enemy Casting"] = "敌方施法"
+L["Enemy Height"] = "敌方高度"
 L["Enemy Name Color"] = "敌方名字颜色"
 L["Enemy NPCs"] = "敌方 NPC"
 L["Enemy Players"] = "敌方玩家"
 L["Enemy Status Text"] = "敌方状态文字"
 L["Enemy Units"] = "敌方单位"
+L["Enemy Width"] = "敌方宽度"
 L["Enter an icon's name (with the *.blp ending), a spell ID, a spell name or a full icon path (using '\\' to separate directory folders)."] = "输入图示文件名称 (以*.blp结尾))、法术 ID、法术名称或完整的图示路径 (使用'\\'分隔目录资料夹)。"
+--[[Translation missing --]]
+L["Error executing icon texture function for %s:"] = "Error executing icon texture function for %s:"
+--[[Translation missing --]]
+L["Error in custom style '%s': only numbers and strings are allowed as icon sources for function SetIcon."] = "Error in custom style '%s': only numbers and strings are allowed as icon sources for function SetIcon."
 L["Error in event script '%s' of custom style '%s': %s"] = "自定义样式“%s”的事件脚本“%s”中出错：%s"
 L["Event Name"] = "事件名称"
 L["Events with Script"] = "包含脚本的事件"
@@ -473,8 +493,7 @@ L["Find a suitable icon based on the current trigger. For Unit triggers, the pre
 L["Five"] = "五"
 L["Flash Time"] = "闪烁时间"
 L["Flash When Expiring"] = "结束时闪烁"
---[[Translation missing --]]
-L["Focus"] = "Focus"
+L["Focus"] = "焦点"
 L["Focus Highlight"] = "焦点目标"
 L["Focus Only"] = "只有焦点目标"
 L["Font"] = "字体"
@@ -487,8 +506,13 @@ L["Format"] = "样式"
 L["Four"] = "四"
 L["Frame Order"] = "框架顺序"
 L["Frequently Asked Questions"] = "常见问题解答"
+L["Friend"] = "友方"
+L["Friend Bar Height"] = "友方血条高度"
+L["Friend Bar Width"] = "友方血条宽度"
 --[[Translation missing --]]
-L["Friend"] = "Friend"
+L["Friend Height"] = "Friend Height"
+--[[Translation missing --]]
+L["Friend Width"] = "Friend Width"
 L["Friendly & Neutral Units"] = "友方 & 中立单位"
 L["Friendly Casting"] = "友方施法"
 L["Friendly Name Color"] = "友方名字颜色"
@@ -506,8 +530,7 @@ L["Full Absorbs"] = "完整吸收盾"
 L["Full Health"] = "满血"
 L["Full Name"] = "全名"
 L["Function"] = "函数"
---[[Translation missing --]]
-L["Game Object"] = "Game Object"
+L["Game Object"] = "游戏物件"
 L["Gas Cloud"] = "毒气之云"
 L["General"] = "通用"
 L["General Colors"] = "通用颜色"
@@ -552,6 +575,8 @@ L["Hide on Attacked Units"] = "受单位攻击时隐藏"
 L["Hide the Blizzard default nameplates for friendly units in instances."] = "副本中隐藏暴雪自带的友方姓名版"
 L["High Threat"] = "高仇恨"
 L["Highlight"] = "显著标示"
+--[[Translation missing --]]
+L["Highlight for Expiring Icons"] = "Highlight for Expiring Icons"
 L["Highlight Mobs on Off-Tanks"] = "显著标记副坦克的怪"
 L["Highlight Texture"] = "显著标示材质"
 L["Horizontal Align"] = "水平定位"
@@ -591,6 +616,8 @@ L["Import custom nameplate settings from a string. The custom namneplates will b
 L["Import Custom Nameplates"] = "导入自定义血条"
 L["Import profile"] = "导入配置文件"
 L["Import/Export Profile"] = "导入/导出配置文件"
+--[[Translation missing --]]
+L["Important"] = "Important"
 L["In Combat"] = "战斗中"
 L["In combat, always show all combo points no matter if they are on or off. Off combo points are shown greyed-out."] = "战斗中不论是否获得连击点数都要显示出全部的连击点数，尚未获得的连击点数会显示为灰色。"
 L["In combat, use coloring, transparency, and scaling based on threat level as configured in the threat system. Custom settings are only used out of combat."] = "战斗中使用仇恨值系统中的设定，依据仇恨程度变化颜色、透明度和缩放大小。只有在非战斗中才使用自定义的设定。"
@@ -606,6 +633,8 @@ L["Instance IDs"] = "副本 ID"
 L["Instances"] = "副本"
 --[[Translation missing --]]
 L["Interact"] = "Interact"
+--[[Translation missing --]]
+L["Interact Icon"] = "Interact Icon"
 L["Interrupt Overlay"] = "无法打断条纹材质"
 L["Interrupt Shield"] = "无法打断盾牌图标"
 L["Interruptable"] = "可打断"
@@ -630,11 +659,12 @@ L["Living Ember"] = "燃烧的余烬"
 L["Living Inferno"] = "燃烧的炼狱火"
 L["Localization"] = "中文单位"
 L["Look and Feel"] = "外观和风格"
---[[Translation missing --]]
-L["Low Priority"] = "Low Priority"
+L["Low Priority"] = "低优先级"
 L["Low Threat"] = "低仇恨"
 L["Magic"] = "魔法"
 L["Marked Immortal Guardian"] = "被标记的不朽守护者"
+--[[Translation missing --]]
+L["Match appropriate action target to locked target."] = "Match appropriate action target to locked target."
 --[[Translation missing --]]
 L["Match appropriate soft target to locked target."] = "Match appropriate soft target to locked target."
 L["Max Alpha"] = "最大透明度"
@@ -643,16 +673,11 @@ L["Max Distance"] = "最远距离"
 L["Max Distance Behind Camera"] = "镜头后方的最远距离"
 L["Max Health"] = "最大血量"
 L["Medium Threat"] = "一般仇恨"
---[[Translation missing --]]
-L["Member 1"] = "Member 1"
---[[Translation missing --]]
-L["Member 2"] = "Member 2"
---[[Translation missing --]]
-L["Member 3"] = "Member 3"
---[[Translation missing --]]
-L["Member 4"] = "Member 4"
---[[Translation missing --]]
-L["Member 5"] = "Member 5"
+L["Member 1"] = "成员1"
+L["Member 2"] = "成员2"
+L["Member 3"] = "成员3"
+L["Member 4"] = "成员4"
+L["Member 5"] = "成员5"
 L["Metric Unit Symbols"] = "公制单位符号"
 --[[Translation missing --]]
 L["Middle"] = "Middle"
@@ -674,8 +699,7 @@ L["Movement Model"] = "血条排列类型"
 L["Muddy Crawfish"] = "沾泥龙虾"
 L["Mult for Occluded Units"] = "被挡住的单位"
 L["Name"] = "名字"
---[[Translation missing --]]
-L["Nameplate"] = "Nameplate"
+L["Nameplate"] = "姓名板"
 L["Nameplate Clickthrough"] = "血条穿透点击"
 L["Nameplate clickthrough cannot be changed while in combat."] = "战斗中无法更改血条穿透点击。"
 L["Nameplate Color"] = "姓名板颜色"
@@ -689,6 +713,7 @@ L["Neutral Units"] = "中立单位"
 L["Neutral Units & Minions"] = "中立单位 & 仆从"
 L["Never"] = "永不"
 L["New"] = "新增"
+L["No matching"] = "没有匹配的"
 L["No Outline, Monochrome"] = "无轮廓，单色"
 L["No Target"] = "没有目标"
 L["No target found."] = "未发现目标。"
@@ -721,6 +746,8 @@ L["On the left"] = "左侧"
 L["One"] = "一"
 L["Only Alternate Power"] = "只有首领战特殊能量"
 L["Only for Target"] = "只有当前目标"
+--[[Translation missing --]]
+L["Only highlight expiring alerts with the selected priority."] = "Only highlight expiring alerts with the selected priority."
 L["Only In Combat"] = "只有在战斗中"
 L["Only in Groups"] = "只在队伍中"
 L["Only in Instances"] = "只在副本内"
@@ -762,6 +789,8 @@ L["Preview"] = "预览"
 L["Preview Elite"] = "预览精英怪"
 L["Preview Rare"] = "预览稀有怪"
 L["Preview Rare Elite"] = "预览稀有精英"
+--[[Translation missing --]]
+L["Priority"] = "Priority"
 L["PvP Off"] = "PvP 关闭"
 L["PvP Rank"] = "PvP 等级"
 L["Quest"] = "任务"
@@ -910,8 +939,7 @@ L["Size"] = "大小"
 L["Skull"] = "骷髅"
 L["Skull Icon"] = "骷髅等级图标"
 L["Social"] = "社交"
---[[Translation missing --]]
-L["Soft Target"] = "Soft Target"
+L["Soft Target"] = "软目标"
 --[[Translation missing --]]
 L["Soft Target Icon"] = "Soft Target Icon"
 L["Sort A-Z"] = "排序 A-Z"
@@ -963,8 +991,7 @@ L["Tapped Units"] = "无效单位"
 L["Target"] = "目标"
 L["Target Highlight"] = "突出显示目标"
 L["Target Hightlight"] = "高亮显示目标"
---[[Translation missing --]]
-L["Target Locking"] = "Target Locking"
+L["Target Locking"] = "目标锁定"
 L["Target Marked"] = "显著标示目标"
 L["Target Marked Units"] = "标记图标的单位"
 L["Target Marker"] = "目标标记"
@@ -972,14 +999,12 @@ L["Target Markers"] = "标记图标"
 L["Target Offset X"] = "当前目标水平偏移"
 L["Target Offset Y"] = "当前目标垂直偏移"
 L["Target Only"] = "只有目标"
---[[Translation missing --]]
-L["Target Style"] = "Target Style"
+L["Target Style"] = "目标样式"
 L["Target-based Scale"] = "依据目标的缩放大小"
 L["Target-based Transparency"] = "依据目标的透明度"
 L["Target's Name"] = "目标的名字"
 L["Target's NPC ID"] = "目标 NPC 的ID"
---[[Translation missing --]]
-L["Targets you attack"] = "Targets you attack"
+L["Targets you attack"] = "你攻击的目标"
 L["Text Boundaries"] = "文字边框"
 L["Text Height"] = "文字高亮"
 L["Text Width"] = "文字的宽度"
@@ -1040,7 +1065,7 @@ L["This option allows you to control whether threat affects the transparency of 
 L["This setting will disable threat scale for target marked, mouseover or casting units and instead use the general scale settings."] = "这个设定会停用被标记目标、鼠标指向或正在施法单位的仇恨值缩放大小变化，改为使用一般的缩放大小设定。"
 L["This setting will disable threat transparency for target marked, mouseover or casting units and instead use the general transparency settings."] = "这个设定会停用被标记目标、鼠标指向或正在施法单位的仇恨值透明度变化，改为使用一般的透明度设定。"
 --[[Translation missing --]]
-L["This settings changes CVars related to soft target and are not stored in the profile, but by WoW itself (character-specific settings)."] = "This settings changes CVars related to soft target and are not stored in the profile, but by WoW itself (character-specific settings)."
+L["This settings changes CVars related to action targeting and are not stored in the profile, but by WoW itself (character-specific settings)."] = "This settings changes CVars related to action targeting and are not stored in the profile, but by WoW itself (character-specific settings)."
 L["This widget highlights the nameplate of your current focus target by showing a border around the healthbar and by coloring the nameplate's healtbar and/or name with a custom color."] = "这个部件会明显的标示出专注目标，在血条周围显示外框，并且使用自定义颜色来显示血条和名字。"
 L["This widget highlights the nameplate of your current target by showing a border around the healthbar and by coloring the nameplate's healtbar and/or name with a custom color."] = "这个套件会明显的标示出当前目标，在血条周围显示外框，并且使用自定义颜色来显示血条和名字。"
 L["This widget shows a class icon on the nameplates of players."] = "这个套件会在玩家的名条上显示职业图标。"
@@ -1073,6 +1098,8 @@ L["Threat Value Delta"] = "仇恨值增量"
 L["Three"] = "三"
 L["Time Left"] = "剩余时间"
 L["Time Text Offset"] = "时间文字偏移"
+--[[Translation missing --]]
+L["Timers"] = "Timers"
 L["Title"] = "头衔"
 L["Toggle"] = "开关"
 L["Toggle Enemy Headline View"] = "切换显示敌方名字检视"
@@ -1131,6 +1158,8 @@ L["Use a heuristic to detect if a mob is in combat with you, but only in instanc
 L["Use a striped texture for the absorbs overlay. Always enabled if full absorbs are shown."] = "使用条纹材质来显示吸收盾，吸收盾完整时一定会显示。"
 L["Use Blizzard default nameplates for friendly nameplates and disable ThreatPlates for these units."] = "友方玩家使用游戏内置的血条，不要使用ThreatPlates。"
 L["Use Blizzard default nameplates for neutral and enemy nameplates and disable ThreatPlates for these units."] = "中立和敌对单位使用游戏默认的姓名版，而不使用TPTP。"
+--[[Translation missing --]]
+L["Use FrameSort"] = "Use FrameSort"
 L["Use scale settings of Healthbar View also for Headline View."] = "血条检视的缩放大小设定也要套用到名字检视。"
 --[[Translation missing --]]
 L["Use target scale and transparency settings also for soft enemy target."] = "Use target scale and transparency settings also for soft enemy target."
