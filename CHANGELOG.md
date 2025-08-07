@@ -8,3 +8,4 @@
 * Fixed a bug affecting event registration compatibility across all versions of WoW.
 * In the BossMods widget, the borders around the icons are now removed automatically.
 * Improved DBM integration for BossMods widget so that DBM's own aura and timer icons are shown when BossMods widget is disabled.
+* Updated TOC version for Patch 11.2.0 for WoW Mainline.
