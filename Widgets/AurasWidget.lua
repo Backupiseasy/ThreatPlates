@@ -526,8 +526,12 @@ local CROWD_CONTROL_SPELLS_BY_EXPANSION = {
     [117405] = PC_ROOT,           -- Binding Shot
     [117526] = PC_ROOT,           -- Binding Shot (Root)
     [135299] = PC_SNARE,          -- Ice Trap
-    --[147362] = CC_SILENCE,        -- Counter Shot
+    --[147362] = CC_SILENCE,      -- Counter Shot
     [136634] = PC_ROOT,           -- Narrow Escape
+    [13809] = PC_SNARE            -- Ice Trap
+    [135373] = PC_ROOT            -- Entrapment, triggered from Ice Trap
+    [64803] = PC_ROOT             -- Entrapment, triggered from Snake Trap
+    [19503] = LOC_DISORIENT       -- Scatter Shot
     -- Pet Abilities
     [50433] = PC_SNARE,           -- Ankle Crack (Pet)
     [50285] = PC_SNARE,           -- Dust Cloud (Pet)
@@ -581,6 +585,7 @@ local CROWD_CONTROL_SPELLS_BY_EXPANSION = {
     --[96231] = CC_SILENCE,       -- Rebuke
     [31935] = CC_SILENCE,         -- Avenger's Shield (Blizzard)
     [10326] = LOC_FEAR,           -- Turn Evil
+    [105593] = LOC_STUN,           -- Fist of Justice
 
 
     ---------------------------------------------------------------------------------------------------
@@ -3783,5 +3788,28 @@ function Widget:ToggleConfigurationMode()
     Timer:Cancel()
 
     Addon:ForceUpdate()
+  end
+end
+
+local ProcessAllUnitAuras_NoDebug = ProcessAllUnitAuras
+
+function Widget:PrintDebug(command)
+  if command == "enable" then
+    Addon.Logging.Debug("    Debugging mode enabled.")
+    ProcessAllUnitAuras_NoDebug = ProcessAllUnitAuras
+    ProcessAllUnitAuras = function(unitid, effect)
+      local unit_auras = ProcessAllUnitAuras_NoDebug(unitid, effect)
+      
+      for k, aura in pairs(unit_auras) do
+        if aura.sourceUnit == "player" then
+          Addon.Logging.Debug("    Aura:", aura.name, "=> ID:", aura.spellId, "( Dispell:", aura.isStealable, ")")
+        end
+      end
+
+      return unit_auras
+    end
+  else
+    Addon.Logging.Debug("    Debugging mode disabled.")
+    ProcessAllUnitAuras = ProcessAllUnitAuras_NoDebug
   end
 end
