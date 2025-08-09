@@ -1986,7 +1986,7 @@ if Addon.IS_MAINLINE then
           -- end
         end
       end
-    until continuationToken == nil
+    until continuation_token == nil
 
     return unit_auras
   end

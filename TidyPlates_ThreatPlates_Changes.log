@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+12.4.1 (2025-08-10)
+------------------------------------------------------
+* Fixed a typo that prevented all auras from being processed in certain situations in WoW Mainline.
+
+------------------------------------------------------
 12.4.0 (2025-08-07)
 ------------------------------------------------------
 * Added support for enabling and disabling custom nameplates in instances by instance ID in Delves [GH-593].
