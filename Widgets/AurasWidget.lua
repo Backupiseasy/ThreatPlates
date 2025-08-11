@@ -528,10 +528,10 @@ local CROWD_CONTROL_SPELLS_BY_EXPANSION = {
     [135299] = PC_SNARE,          -- Ice Trap
     --[147362] = CC_SILENCE,      -- Counter Shot
     [136634] = PC_ROOT,           -- Narrow Escape
-    [13809] = PC_SNARE            -- Ice Trap
-    [135373] = PC_ROOT            -- Entrapment, triggered from Ice Trap
-    [64803] = PC_ROOT             -- Entrapment, triggered from Snake Trap
-    [19503] = LOC_DISORIENT       -- Scatter Shot
+    [13809] = PC_SNARE,           -- Ice Trap
+    [135373] = PC_ROOT,           -- Entrapment, triggered from Ice Trap
+    [64803] = PC_ROOT,            -- Entrapment, triggered from Snake Trap
+    [19503] = LOC_DISORIENT,      -- Scatter Shot
     -- Pet Abilities
     [50433] = PC_SNARE,           -- Ankle Crack (Pet)
     [50285] = PC_SNARE,           -- Dust Cloud (Pet)
