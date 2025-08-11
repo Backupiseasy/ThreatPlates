@@ -1,3 +1,3 @@
 # @project-version@ (@build-time@)
 
-* Fixed a typo that prevented all auras from being processed in certain situations in WoW Mainline.
+* Fixed a bug in the ComboPoints widget that prevented combo points from displaying correctly after a target switch [Comment #7712].
