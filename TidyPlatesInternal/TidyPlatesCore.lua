@@ -638,7 +638,7 @@ do
 
     Addon:UpdateUnitIdentity(unit, unitid)
 
-    unit.name = SetUnitAttributeName(unitid, unit.type)
+    unit.name, unit.basename = SetUnitAttributeName(unitid, unit.type)
     unit.isCasting = false
     unit.IsInterrupted = false
     visual.castbar.FlashTime = 0  -- Set FlashTime to 0 so that the castbar is actually hidden (see statusbar OnHide hook function OnHideCastbar)
