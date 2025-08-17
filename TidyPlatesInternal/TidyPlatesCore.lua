@@ -423,6 +423,8 @@ end
 
 local function SetUnitAttributeName(unitid, unit_type)
   local unit_name, realm = UnitName(unitid)
+  -- Let's preserve the unaltered name for the custom styles check…
+  local unit_basename = unit_name
 
   if unit_type == "PLAYER" then
     local db = Addon.db.profile.settings.name
@@ -435,8 +437,11 @@ local function SetUnitAttributeName(unitid, unit_type)
       unit_name = unit_name .. " - " .. realm
     end
   end
+  
+  -- …but only generate a new unit.basename field when needed
+  if unit_basename == unit_name then unit_basename = nil end
 
-  return unit_name
+  return unit_name, unit_basename
 end
 
 local function SetUnitAttributeTarget(unit)
