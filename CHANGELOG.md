@@ -1,3 +1,3 @@
 # @project-version@ (@build-time@)
 
-* Fixed a bug in the ComboPoints widget that prevented combo points from displaying correctly after a target switch [Comment #7712].
+* Fixed a bug that prevented the castbar from hiding reliably for non-interruptible casts after a stun [GH-599].
