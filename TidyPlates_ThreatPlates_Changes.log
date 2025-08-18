@@ -1,5 +1,21 @@
 ﻿------------------------------------------------------
-12.4.0 (2025-08-02)
+12.4.3 (2025-08-16)
+------------------------------------------------------
+* Fixed a bug that prevented the castbar from hiding reliably for non-interruptible casts after a stun [GH-599].
+
+------------------------------------------------------
+12.4.2 (2025-08-11)
+------------------------------------------------------
+* Fixed a bug in the ComboPoints widget that prevented combo points from displaying correctly after a target switch [Comment #7712].
+
+------------------------------------------------------
+12.4.1 (2025-08-11)
+------------------------------------------------------
+* Fixed a typo that prevented all auras from being processed in certain situations in WoW Mainline.
+* Added Fist of Justice (Paladin) and Scatter Shot, Ice Trap, Entrapment (triggered by Ice Trap and Snake Trap, Hunter) as a CC aura to the Auras widget [Comment #7706].
+
+------------------------------------------------------
+12.4.0 (2025-08-07)
 ------------------------------------------------------
 * Added support for enabling and disabling custom nameplates in instances by instance ID in Delves [GH-593].
 * Removed soft-target support for the Resource widgets resource update tracking for soft-targets is not currently supported by the WoW API. Additionally, resource updates for the current target were not working if soft-targeting was disabled in WoW [GH-590].
@@ -9,6 +25,7 @@
 * Fixed a bug affecting event registration compatibility across all versions of WoW.
 * In the BossMods widget, the borders around the icons are now removed automatically.
 * Improved DBM integration for BossMods widget so that DBM's own aura and timer icons are shown when BossMods widget is disabled.
+* Updated TOC version for Patch 11.2.0 for WoW Mainline.
 
 ------------------------------------------------------
 12.3.10 (2025-07-16)

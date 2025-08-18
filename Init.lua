@@ -76,6 +76,7 @@ Addon.ExpansionIsAtLeastTBC = Addon.ExpansionIsAtLeast(LE_EXPANSION_BURNING_CRUS
 Addon.ExpansionIsAtLeastWrath = Addon.ExpansionIsAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING)
 Addon.ExpansionIsAtLeastCata = Addon.ExpansionIsAtLeast(LE_EXPANSION_CATACLYSM)
 Addon.ExpansionIsAtLeastMists = Addon.ExpansionIsAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA)
+Addon.ExpansionIsAtLeastWoD = Addon.ExpansionIsAtLeast(LE_EXPANSION_WARLORDS_OF_DRAENOR)
 Addon.ExpansionIsAtLeastLegion = Addon.ExpansionIsAtLeast(LE_EXPANSION_LEGION)
 Addon.ExpansionIsAtLeastBfA = Addon.ExpansionIsAtLeast(LE_EXPANSION_BATTLE_FOR_AZEROTH)
 Addon.ExpansionIsAtLeastDF = Addon.ExpansionIsAtLeast(LE_EXPANSION_DRAGONFLIGHT)

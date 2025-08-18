@@ -277,13 +277,6 @@ if Addon.ExpansionIsAtLeastMists then
     end
   end  
 else
-  -- This should not be necessary as in Classic only Rogues and Druids had combo points
-  if PlayerClass == "ROGUE" or PlayerClass == "DRUID" then
-    UnitPower = function(unitToken , powerType)
-      return GetComboPoints("player", "anyenemy")
-    end
-  end
-
   function Widget:DetermineUnitPower()
     local power_type = UNIT_POWER[PlayerClass]
 
@@ -293,6 +286,16 @@ else
     else
       self.PowerType = nil
       self.UnitPowerMax = 0
+    end
+  end
+end
+
+-- WoD Patch 6.0.2 (2014-10-14): Combo Points for Feral Druids and Rogues are now shared across all targets, and are no longer lost when switching targets.
+if not Addon.ExpansionIsAtLeastWoD then
+  -- This should not be necessary as in Classic only Rogues and Druids had combo points
+  if PlayerClass == "ROGUE" or PlayerClass == "DRUID" then
+    UnitPower = function(unitToken , powerType)
+      return GetComboPoints("player", "anyenemy")
     end
   end
 end
