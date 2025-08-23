@@ -659,12 +659,23 @@ do
 		Addon.UpdateExtensions(extended, unitid, stylename)
 
     UNIT_TARGET("UNIT_TARGET", unitid) -- requires tp_frame.Active, which is set in SetNameplateVisibility
+
+    -- Check to see if there's a spell being cast
     -- Call this after the plate is shown as OnStartCasting checks if the plate is shown; if not, the castbar is hidden and
     -- nothing is updated
-    UpdateCastbar(plate, unitid)
+    if ShowCastBars then
+      if UnitCastingInfo(unitid) then
+        OnStartCasting(plate, unitid, false)
+      elseif UnitChannelInfo(unitid) then
+        OnStartCasting(plate, unitid, true)
+      else
+        visual.castbar:Hide()
+      end
+    end
  end
 
-	-- OnUpdateNameplate
+-- TODO: OnUpdateNameplate and OnHealthUpdate have exactle the same code => consolidate them	
+ -- OnUpdateNameplate
 	function OnUpdateNameplate(plate)
     -- Gather Information
     local unitid = PlatesVisible[plate]
@@ -1143,7 +1154,19 @@ do
       UpdateIndicator_CustomScale(extended, unit)
       UpdatePlate_Transparency(extended, unit)
     end
-  end    
+  end
+
+  -- function InitializeCastbar(plate, unitid)
+  --   if not ShowCastBars then return end
+    
+  --   if UnitCastingInfo(unitid) then
+  --     OnStartCasting(plate, unitid, false)
+  --   elseif UnitChannelInfo(unitid) then
+  --     OnStartCasting(plate, unitid, true)
+  --   else
+  --     visual.castbar:Hide()
+  --   end
+  -- end
   
   function UpdateCastbar(plate, unitid)
     if not ShowCastBars then return end
