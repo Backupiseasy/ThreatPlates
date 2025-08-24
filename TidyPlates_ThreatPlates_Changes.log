@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+12.6.0 (2025-08-16)
+------------------------------------------------------
+* Added cooldown swipe support to the BossMods widget [Comment #7694].
+
+------------------------------------------------------
 12.4.3 (2025-08-16)
 ------------------------------------------------------
 * Fixed a bug that prevented the castbar from hiding reliably for non-interruptible casts after a stun [GH-599].

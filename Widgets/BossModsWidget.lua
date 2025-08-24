@@ -72,6 +72,8 @@ local function UpdateIconFrameLayout(widget_frame, icon_frame, index)
   -- Label Text
   Font:UpdateText(icon_frame, icon_frame.Label, Settings.LabelText)
   icon_frame.Label:SetShown(Settings.LabelText.Show)
+
+  icon_frame.Cooldown:SetShownSwipe(Settings.ShowCooldownSpiral, true)
 end
 
 local function InitiateIconFrame(icon_frame, alert, remaining_time)
@@ -102,6 +104,8 @@ local function UpdateIconFrame(icon_frame, alert, remaining_time)
 
   if not remaining_time then return end
 
+  icon_frame.Cooldown:Set(alert.StartTime, alert.Duration)
+
   if remaining_time > 5 then
     remaining_time = floor(remaining_time)
   else
@@ -125,10 +129,14 @@ local function CreateIconFrame(widget_frame, index)
   local icon_frame = _G.CreateFrame("Button", nil, widget_frame, BackdropTemplate)
   icon_frame:EnableMouse(false)
   icon_frame:SetBackdrop({edgeFile = [[Interface\Buttons\WHITE8X8]], edgeSize = 1})
-
+  icon_frame:SetFrameLevel(widget_frame:GetFrameLevel())
+  
   icon_frame.Icon = icon_frame:CreateTexture(nil, "BORDER")
   icon_frame.Icon:SetPoint("TOPLEFT", icon_frame, "TOPLEFT", 1, -1)
   icon_frame.Icon:SetPoint("BOTTOMRIGHT", icon_frame, "BOTTOMRIGHT", -1, 1)
+
+  -- Requires widget_frame.Icon to be defined
+  icon_frame.Cooldown = Addon.CreateCooldown(icon_frame, true)
 
   local time = icon_frame:CreateFontString(nil, "OVERLAY") -- Duration Text
   time:SetJustifyH("CENTER")
