@@ -541,19 +541,11 @@ end
 
 function Widget:IsEnabled()
   local db = Addon.db.profile.BossModsWidget
+
+  TidyPlatesThreatDBM = db.ON or db.ShowInHeadlineView
+
   return db.ON or db.ShowInHeadlineView
 end
-
-function Widget:OnEnable()
-  TidyPlatesThreatDBM = true
-end
-
-function Widget:OnDisable()
-  TidyPlatesThreatDBM = false
-  
-  self:UnregisterAllEvents()
-end
-
 
 function Widget:Create(tp_frame)
   local widget_frame = _G.CreateFrame("Frame", nil, tp_frame)
