@@ -438,9 +438,6 @@ local function SetUnitAttributeName(unitid, unit_type)
     end
   end
   
-  -- …but only generate a new unit.basename field when needed
-  if unit_basename == unit_name then unit_basename = nil end
-
   return unit_name, unit_basename
 end
 
