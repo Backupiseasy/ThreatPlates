@@ -1,5 +1,11 @@
 ﻿------------------------------------------------------
-12.4.3 (2025-08-16)
+12.4.4 (2025-08-25)
+------------------------------------------------------
+* Fixed a bug that prevented the castbar from appearing after the nameplate was hidden while the unit was casting [GH-603, GH-GH-604].
+* Fixed a bug that prevented DBM from correctly determining whether the Threat Plates BossMods widget was enabled.
+
+------------------------------------------------------
+12.4.3 (2025-08-18)
 ------------------------------------------------------
 * Fixed a bug that prevented the castbar from hiding reliably for non-interruptible casts after a stun [GH-599].
 
