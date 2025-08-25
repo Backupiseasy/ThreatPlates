@@ -1,3 +1,3 @@
 # @project-version@ (@build-time@)
 
-* Fixed a bug that prevented the castbar from hiding reliably for non-interruptible casts after a stun [GH-599].
+* Name-based custom nameplates now also work with just a player's name. There is no longer a need to include title and realm [PR GH-602 by tflo].
