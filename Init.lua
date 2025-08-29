@@ -255,6 +255,54 @@ Addon.CUSTOM_GLOW_WRAPPER_FUNCTIONS = {
 	Glow_Stop = Wrapper__PixelGlow_Stop,
 }
 
+---------------------------------------------------------------------------------------------------
+-- Functions for cooldown handling incl. OmniCC support
+---------------------------------------------------------------------------------------------------
+
+local function SetShownCooldownSwipe(self, show_cooldown_swipe, hide_omnic_cc)
+  if show_cooldown_swipe then
+    self:SetDrawEdge(true)
+    self:SetDrawSwipe(true)
+  else
+    self:SetDrawEdge(false)
+    self:SetDrawSwipe(false)
+  end
+
+  -- Fix for OmnniCC cooldown numbers being shown on auras
+  if self.noCooldownCount ~= hide_omnic_cc then
+    self.noCooldownCount = hide_omnic_cc
+    -- Force an update on OmniCC cooldowns
+    self:Hide()
+    self:Show()
+  end
+end
+
+local function SetCooldown(self, start, duration)
+  if start and duration and start > 0 and duration > 0 then
+    self:SetCooldown(start, duration)
+  else
+    self:Clear()
+  end
+end
+
+Addon.CreateCooldown = function (parent, hide_omnic_cc)
+  -- When the cooldown shares the frameLevel of its parent, the icon texture can sometimes render
+  -- ontop of it. So it looks like it's not drawing a cooldown but it's just hidden by the icon.
+
+  local frame = _G.CreateFrame("Cooldown", nil, parent, "ThreatPlatesCooldownSwipe")
+  frame:SetAllPoints(parent.Icon)
+  frame:SetReverse(true)
+  frame:SetHideCountdownNumbers(true)
+	frame:SetFrameLevel(parent:GetFrameLevel())
+  
+	frame.noCooldownCount = hide_omnic_cc
+
+	frame.SetShownSwipe = SetShownCooldownSwipe
+	frame.Set = SetCooldown
+
+  return frame
+end
+
 --------------------------------------------------------------------------------------------------
 -- General Functions
 ---------------------------------------------------------------------------------------------------
