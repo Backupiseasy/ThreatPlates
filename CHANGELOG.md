@@ -1,4 +1,3 @@
 # @project-version@ (@build-time@)
 
-* Fixed a bug that prevented the castbar from appearing after the nameplate was hidden while the unit was casting [GH-603, GH-GH-604].
-* Fixed a bug that prevented DBM from correctly determining whether the Threat Plates BossMods widget was enabled.
+* Fixed a bug where internal variables were made global, which could cause issues with other addons [GH-608 by tflo].
