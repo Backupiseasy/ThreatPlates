@@ -415,6 +415,7 @@ local CROWD_CONTROL_SPELLS_BY_EXPANSION = {
     -- [57994] = CC_SILENCE,         -- Wind Shear
     [3600] = PC_SNARE,            -- Earthbind Totem
     [51490] = PC_SNARE,           -- Thunderstorm
+    [204408] = PC_SNARE,          -- Thunderstorm, triggerd by Traveling Storms
     [204399] = LOC_STUN,          -- Stun aura from Earthfury (Honor)
     [196840] = PC_SNARE,          -- Frost Shock
     [204437] = LOC_STUN,          -- Lightning Lasso (Honor)
@@ -2758,49 +2759,6 @@ function Widget:UpdateAuras(widget_frame, unit)
 end
 
 ---------------------------------------------------------------------------------------------------
--- Functions for cooldown handling incl. OmniCC support
----------------------------------------------------------------------------------------------------
-
-local function CreateCooldown(parent)
-  -- When the cooldown shares the frameLevel of its parent, the icon texture can sometimes render
-  -- ontop of it. So it looks like it's not drawing a cooldown but it's just hidden by the icon.
-
-  local cooldown_frame = _G.CreateFrame("Cooldown", nil, parent, "ThreatPlatesAuraWidgetCooldown")
-  cooldown_frame:SetAllPoints(parent.Icon)
-  cooldown_frame:SetReverse(true)
-  cooldown_frame:SetHideCountdownNumbers(true)
-  cooldown_frame.noCooldownCount = HideOmniCC
-
-  return cooldown_frame
-end
-
-local function UpdateCooldown(cooldown_frame, db)
-  if db.ShowCooldownSpiral then
-    cooldown_frame:SetDrawEdge(true)
-    cooldown_frame:SetDrawSwipe(true)
-  else
-    cooldown_frame:SetDrawEdge(false)
-    cooldown_frame:SetDrawSwipe(false)
-  end
-
-  -- Fix for OmnniCC cooldown numbers being shown on auras
-  if cooldown_frame.noCooldownCount ~= HideOmniCC then
-    cooldown_frame.noCooldownCount = HideOmniCC
-    -- Force an update on OmniCC cooldowns
-    cooldown_frame:Hide()
-    cooldown_frame:Show()
-  end
-end
-
-local function SetCooldown(cooldown_frame, duration, expiration)
-  if duration and expiration and duration > 0 and expiration > 0 then
-    cooldown_frame:SetCooldown(expiration - duration, duration + .25)
-  else
-    cooldown_frame:Clear()
-  end
-end
-
----------------------------------------------------------------------------------------------------
 -- Creation and update functions
 ---------------------------------------------------------------------------------------------------
 
@@ -3011,8 +2969,7 @@ local function CreateAuraFrameIconMode(self, parent)
   frame.Icon = frame:CreateTexture(nil, "ARTWORK", nil, -5)
   frame.Border = _G.CreateFrame("Frame", nil, frame, BackdropTemplate)
   frame.Border:SetFrameLevel(parent:GetFrameLevel())
-  frame.Cooldown = CreateCooldown(frame)
-  frame.Cooldown:SetFrameLevel(parent:GetFrameLevel())
+  frame.Cooldown = Addon.CreateCooldown(frame, HideOmniCC)
 
   frame.Highlight = _G.CreateFrame("Frame", nil, frame)
   frame.Highlight:SetFrameLevel(parent:GetFrameLevel())
@@ -3035,7 +2992,7 @@ end
 local function UpdateAuraFrameIconMode(self, frame)
   local db = self.db_widget
 
-  UpdateCooldown(frame.Cooldown, db)
+  frame.Cooldown:SetShownSwipe(db.ShowCooldownSpiral, HideOmniCC)
   if ShowDuration then
     frame.TimeLeft:Show()
   else
@@ -3117,8 +3074,8 @@ local function UpdateAuraInformationIconMode(self, aura_frame) -- texture, durat
       AuraHighlightStop(aura_frame.Highlight)
     end
   end
-
-  SetCooldown(aura_frame.Cooldown, duration, expiration)
+  
+  aura_frame.Cooldown:Set(expiration - duration, duration + .25)
   Animations:StopFlash(aura_frame)
 
   aura_frame:Show()
@@ -3176,8 +3133,7 @@ local function CreateAuraFrameBarMode(self, parent)
   frame.TimeText = frame.Statusbar:CreateFontString(nil, "OVERLAY")
   frame.TimeText:SetAllPoints(frame.Statusbar)
 
-  frame.Cooldown = CreateCooldown(frame)
-  frame.Cooldown:SetFrameLevel(parent:GetFrameLevel())
+  frame.Cooldown = Addon.CreateCooldown(frame, HideOmniCC)
 
   frame:Hide()
 
