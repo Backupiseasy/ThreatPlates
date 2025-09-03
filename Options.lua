@@ -4088,69 +4088,54 @@ local function CreateBossModsWidgetOptions()
               },
             },            
           },
-          Effects = {
-            name = L["Effects"],
+          Glow = {
+            name = L["Highlight for Expiring Icons"],
             type = "group",
             order = 15,
             inline = true,
             args = {
-              CooldownSpiral = {
-                name = L["Cooldown Spiral"],
-                type = "toggle",
+              Priority = {
+                name = L["Priority"],
+                type = "select",
                 order = 10,
-                desc = L["Show a cooldown swipe on the icon."],
-                arg = { "BossModsWidget", "ShowCooldownSpiral" },
-              },
-              Glow = {
-                name = L["Highlight for Expiring Icons"],
-                type = "group",
-                order = 15,
-                inline = true,
-                args = {
-                  Priority = {
-                    name = L["Priority"],
-                    type = "select",
-                    order = 10,
-                    values = {
-                      None = L["None"],
-                      Important = L["Important"],
-                      All = L["All"],
-                    },
-                    desc = L["Only highlight expiring alerts with the selected priority."],
-                    arg = { "BossModsWidget",  "Glow", "Priority" },
-                  },
-                  GlowType = {
-                    name = L["Glow Type"],
-                    type = "select",
-                    values = Addon.GLOW_TYPES,
-                    order = 20,
-                    arg = { "BossModsWidget",  "Glow", "Type" },
-                  },
-                  GlowColorEnable = {
-                    name = L["Glow Color"],
-                    type = "toggle",
-                    order = 30,
-                    arg = { "BossModsWidget", "Glow", "CustomColor" },
-                  },
-                  GlowColor = {
-                    name = L["Color"],
-                    type = "color",
-                    order = 40,
-                    hasAlpha = true,
-                    set = function(info, r, g, b, a)
-                      local color = db.BossModsWidget.Glow.Color
-                      color[1], color[2], color[3], color[4] = r, g, b, a
-                      Addon.Widgets:UpdateSettings("BossMods")
-                    end,
-                    get = function(info)
-                      local color = db.BossModsWidget.Glow.Color
-                      return unpack(color)
-                    end,
-                    arg = { "BossModsWidget", "Glow", "Color" },
-                  },
+                values = {
+                  None = L["None"],
+                  Important = L["Important"],
+                  All = L["All"],
                 },
+                desc = L["Only highlight expiring alerts with the selected priority."],
+                arg = { "BossModsWidget",  "Glow", "Priority" },
               },
-            },
+              GlowType = {
+                name = L["Glow Type"],
+                type = "select",
+                values = Addon.GLOW_TYPES,
+                order = 20,
+                arg = { "BossModsWidget",  "Glow", "Type" },
+              },
+              GlowColorEnable = {
+                name = L["Glow Color"],
+                type = "toggle",
+                order = 30,
+                arg = { "BossModsWidget", "Glow", "CustomColor" },
+              },
+              GlowColor = {
+                name = L["Color"],
+                type = "color",
+                order = 40,
+                hasAlpha = true,
+                set = function(info, r, g, b, a)
+                  local color = db.BossModsWidget.Glow.Color
+                  color[1], color[2], color[3], color[4] = r, g, b, a
+                  Addon.Widgets:UpdateSettings("BossMods")
+                end,
+                get = function(info)
+                  local color = db.BossModsWidget.Glow.Color
+                  return unpack(color)
+                end,
+                arg = { "BossModsWidget", "Glow", "Color" },
+              },
+            }
           },
           Config = {
             name = L["Configuration Mode"],

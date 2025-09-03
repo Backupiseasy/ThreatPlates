@@ -423,8 +423,6 @@ end
 
 local function SetUnitAttributeName(unitid, unit_type)
   local unit_name, realm = UnitName(unitid)
-  -- Let's preserve the unaltered name for the custom styles check…
-  local unit_basename = unit_name
 
   if unit_type == "PLAYER" then
     local db = Addon.db.profile.settings.name
@@ -437,8 +435,8 @@ local function SetUnitAttributeName(unitid, unit_type)
       unit_name = unit_name .. " - " .. realm
     end
   end
-  
-  return unit_name, unit_basename
+
+  return unit_name
 end
 
 local function SetUnitAttributeTarget(unit)
@@ -635,7 +633,7 @@ do
 
     Addon:UpdateUnitIdentity(unit, unitid)
 
-    unit.name, unit.basename = SetUnitAttributeName(unitid, unit.type)
+    unit.name = SetUnitAttributeName(unitid, unit.type)
     unit.isCasting = false
     unit.IsInterrupted = false
     visual.castbar.FlashTime = 0  -- Set FlashTime to 0 so that the castbar is actually hidden (see statusbar OnHide hook function OnHideCastbar)

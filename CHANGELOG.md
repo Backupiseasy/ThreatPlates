@@ -1,4 +1,4 @@
 # @project-version@ (@build-time@)
 
-* Name-based custom nameplates now also work with just a player's name. There is no longer a need to include title and realm [PR GH-602 by tflo].
-* Added cooldown swipe support to the BossMods widget [Comment #7694].
+* Fixed a bug that prevented the castbar from appearing after the nameplate was hidden while the unit was casting [GH-603, GH-GH-604].
+* Fixed a bug that prevented DBM from correctly determining whether the Threat Plates BossMods widget was enabled.
