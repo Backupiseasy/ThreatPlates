@@ -6994,7 +6994,7 @@ local function CreateHealthbarOptions()
                 width = "half",
                 desc = L["Use a custom color for the healthbar's border."],
                 set = function(info, val)
-                  SetThemeValue(info, not val)
+                  SetValue(info, not val)
                 end,
                 get = function(info, val)
                   return not GetValue(info, val)
@@ -8882,7 +8882,7 @@ CreateCustomNameplateEntry = function(index)
                 width = "half",
                 type = "toggle",
                 desc = L["Define a custom color for this border and overwrite any other color settings."],
-                arg = { "uniqueSettings", index, "useBorderColor" },
+                arg = { "uniqueSettings", index, "UseBorderColor" },
               },
               BorderColorSetting = {
                 name = L["Color"],
@@ -8890,7 +8890,7 @@ CreateCustomNameplateEntry = function(index)
                 width = "half",
                 type = "color",
                 disabled = function()
-                  return not db.uniqueSettings[index].useBorderColor
+                  return not db.uniqueSettings[index].UseBorderColor
                 end,
                 get = GetColor,
                 set = SetColor,

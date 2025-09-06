@@ -1773,7 +1773,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         showIcon = true,
         useStyle = true,
         useColor = true,
-        useBorderColor = false,
+        UseBorderColor = false,
         UseThreatColor = false,
         UseThreatGlow = false,
         allowMarked = true,
@@ -1791,7 +1791,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
           g = 1,
           b = 1,
         },
-        borderColor = { r = 0, g = 0, b = 0 },
+        BorderColor = { r = 0, g = 0, b = 0 },
         Scripts = {
           Type = "Standard",
           Function = "Create",
