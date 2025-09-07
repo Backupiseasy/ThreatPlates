@@ -415,6 +415,7 @@ local CROWD_CONTROL_SPELLS_BY_EXPANSION = {
     -- [57994] = CC_SILENCE,         -- Wind Shear
     [3600] = PC_SNARE,            -- Earthbind Totem
     [51490] = PC_SNARE,           -- Thunderstorm
+    [204408] = PC_SNARE,          -- Thunderstorm, triggerd by Traveling Storms
     [204399] = LOC_STUN,          -- Stun aura from Earthfury (Honor)
     [196840] = PC_SNARE,          -- Frost Shock
     [204437] = LOC_STUN,          -- Lightning Lasso (Honor)

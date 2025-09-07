@@ -301,7 +301,7 @@ function Addon.UnitStyle_AuraTrigger_CheckIfActive(unit, aura_id, aura_name, aur
     unit.CustomStyleAura = (unique_settings.showNameplate and "unique") or (unique_settings.ShowHeadlineView and "NameOnly-Unique") or "etotem"
     unit.CustomPlateSettingsAura = unique_settings
 
-    icon = GetSpellInfo(aura_id).iconID
+    local icon = GetSpellInfo(aura_id).iconID
     unique_settings.AutomaticIcon = icon
   end
 end
@@ -318,7 +318,7 @@ function Addon.UnitStyle_CastTrigger_CheckIfActive(unit, spell_id, spell_name)
     unit.CustomStyleCast = (unique_settings.showNameplate and "unique") or (unique_settings.ShowHeadlineView and "NameOnly-Unique") or "etotem"
     unit.CustomPlateSettingsCast = unique_settings
 
-    icon = GetSpellInfo(spell_id).iconID
+    local icon = GetSpellInfo(spell_id).iconID
     unique_settings.AutomaticIcon = icon
   end
 end

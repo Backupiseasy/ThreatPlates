@@ -96,9 +96,10 @@ local function OnSizeChangedCastbar(self, width, height)
   self.Spark:SetSize(3, self:GetHeight())
 end
 
-local function SetAllColors(self, rBar, gBar, bBar, aBar, rBackdrop, gBackdrop, bBackdrop, aBackdrop)
+local function SetAllColors(self, rBar, gBar, bBar, aBar, rBackdrop, gBackdrop, bBackdrop, aBackdrop, rBorder, gBorder, bBorder)
   self:SetStatusBarColor(rBar or 1, gBar or 1, bBar or 1, aBar or 1)
   self.Background:SetVertexColor(rBackdrop or 1, gBackdrop or 1, bBackdrop or 1, aBackdrop or 1)
+  self.Border:SetBackdropBorderColor(rBorder, gBorder, bBorder, 1)
 end
 
 local function SetHealthBarTexture(self, style)
@@ -120,7 +121,6 @@ local function SetStatusBarBackdropHealthbar(self, backdrop_texture, edge_textur
     edgeSize = edge_size,
     insets = { left = offset, right = offset, top = offset, bottom = offset },
   })
-  self.Border:SetBackdropBorderColor(0, 0, 0, 1)
 end
 
 local function SetEliteBorder(self, texture)
