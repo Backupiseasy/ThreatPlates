@@ -1590,6 +1590,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
       --TrackingLineThickness = 4  -- Removed in 9.1.9
       ShowTimers = true,
       ShowAuras = true,
+      ShowCooldownSpiral = false,
       Glow = {
         Priority = "Important",
         Type = "Pixel",

@@ -1,3 +1,3 @@
 # @project-version@ (@build-time@)
 
-* Fixed a bug in the ComboPoints widget that prevented combo points from displaying correctly after a target switch [Comment #7712].
+* Fixed a bug where internal variables were made global, which could cause issues with other addons [GH-608 by tflo].

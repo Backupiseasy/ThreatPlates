@@ -268,7 +268,7 @@ local UpdateIndicator_CustomScale, UpdateIndicator_CustomScaleText, UpdateIndica
 local UpdateIndicator_Level, UpdateIndicator_RaidIcon
 local UpdateIndicator_EliteIcon, UpdateIndicator_Name
 local UpdateIndicator_HealthBar
-local OnStartCasting, OnStopCasting, OnUpdateCastMidway
+local OnStartCasting, OnStopCasting, UpdateCastbar
 
 -- Event Functions
 local OnNewNameplate, OnShowNameplate, OnUpdateNameplate, OnResetNameplate
@@ -423,6 +423,8 @@ end
 
 local function SetUnitAttributeName(unitid, unit_type)
   local unit_name, realm = UnitName(unitid)
+  -- Let's preserve the unaltered name for the custom styles check…
+  local unit_basename = unit_name
 
   if unit_type == "PLAYER" then
     local db = Addon.db.profile.settings.name
@@ -435,8 +437,8 @@ local function SetUnitAttributeName(unitid, unit_type)
       unit_name = unit_name .. " - " .. realm
     end
   end
-
-  return unit_name
+  
+  return unit_name, unit_basename
 end
 
 local function SetUnitAttributeTarget(unit)
@@ -633,7 +635,7 @@ do
 
     Addon:UpdateUnitIdentity(unit, unitid)
 
-    unit.name = SetUnitAttributeName(unitid, unit.type)
+    unit.name, unit.basename = SetUnitAttributeName(unitid, unit.type)
     unit.isCasting = false
     unit.IsInterrupted = false
     visual.castbar.FlashTime = 0  -- Set FlashTime to 0 so that the castbar is actually hidden (see statusbar OnHide hook function OnHideCastbar)
@@ -659,12 +661,23 @@ do
 		Addon.UpdateExtensions(extended, unitid, stylename)
 
     UNIT_TARGET("UNIT_TARGET", unitid) -- requires tp_frame.Active, which is set in SetNameplateVisibility
+
+    -- Check to see if there's a spell being cast
     -- Call this after the plate is shown as OnStartCasting checks if the plate is shown; if not, the castbar is hidden and
     -- nothing is updated
-    OnUpdateCastMidway(plate, unitid)
+    if ShowCastBars then
+      if UnitCastingInfo(unitid) then
+        OnStartCasting(plate, unitid, false)
+      elseif UnitChannelInfo(unitid) then
+        OnStartCasting(plate, unitid, true)
+      else
+        visual.castbar:Hide()
+      end
+    end
  end
 
-	-- OnUpdateNameplate
+-- TODO: OnUpdateNameplate and OnHealthUpdate have exactle the same code => consolidate them	
+ -- OnUpdateNameplate
 	function OnUpdateNameplate(plate)
     -- Gather Information
     local unitid = PlatesVisible[plate]
@@ -673,7 +686,7 @@ do
 		--Addon:UpdateUnitIdentity(plate.TPFrame, unitid)
     Addon:UpdateUnitContext(unit, unitid)
     ProcessUnitChanges()
-    OnUpdateCastMidway(plate, unitid)
+    UpdateCastbar(plate, unitid)
 	end
 
 	-- OnHealthUpdate
@@ -686,7 +699,7 @@ do
 
       Addon:UpdateUnitCondition(unit, unitid)
       ProcessUnitChanges()
-      OnUpdateCastMidway(nameplate, unit.unitid)
+      UpdateCastbar(nameplate, unit.unitid)
 
       -- Fix a bug where the overlay for non-interruptible casts was shown even for interruptible casts when entering combat while the unit was already casting
       --    if unit.isCasting and visual.castbar:IsShown()then
@@ -1136,27 +1149,38 @@ do
     castbar.IsCasting = false
     castbar.IsChanneling = false
     unit.isCasting = false
-
+    
     if Addon.UnitStyle_CastTrigger_Reset(unit) then
       ProcessUnitChanges()
     else
       UpdateIndicator_CustomScale(extended, unit)
       UpdatePlate_Transparency(extended, unit)
     end
-  end    
-  
-  function OnUpdateCastMidway(plate, unitid)
-    if not ShowCastBars then return end
+  end
 
-    -- Check to see if there's a spell being cast
-    if UnitCastingInfo(unitid) then
-      OnStartCasting(plate, unitid, false)
-    elseif UnitChannelInfo(unitid) then
-      OnStartCasting(plate, unitid, true)
+  -- function InitializeCastbar(plate, unitid)
+  --   if not ShowCastBars then return end
+    
+  --   if UnitCastingInfo(unitid) then
+  --     OnStartCasting(plate, unitid, false)
+  --   elseif UnitChannelInfo(unitid) then
+  --     OnStartCasting(plate, unitid, true)
+  --   else
+  --     visual.castbar:Hide()
+  --   end
+  -- end
+  
+  function UpdateCastbar(plate, unitid)
+    if not ShowCastBars then return end
+    
+    local tp_frame = plate.TPFrame
+    if tp_frame.unit.isCasting then 
+      -- Check to see if there's a spell being cast
+      OnStartCasting(plate, unitid, tp_frame.visual.castbar.IsChanneling)
     else
       -- It would be better to check for IsInterrupted here and not hide it if that is true
       -- Not currently sure though, if that might work with the Hide() calls in OnStartCasting
-      visual.castbar:Hide()
+      tp_frame.visual.castbar:Hide()
     end
   end
 end -- End Indicator section
@@ -1590,7 +1614,7 @@ function CoreEvents:UNIT_THREAT_LIST_UPDATE(unitid)
       --        unit.threatSituation = ThreatReference[unit.threatValue]
       --        unit.isInCombat = _G.UnitAffectingCombat(unitid)
       --ProcessUnitChanges()
-      --OnUpdateCastMidway(nameplate, unit.unitid)
+      --UpdateCastbar(nameplate, unit.unitid)
     end
 
     -- UNIT_TARGET does not update correctly, so use this in in-combat situations as a work-around
@@ -1623,8 +1647,7 @@ local function UnitSpellcastMidway(event, unitid, ...)
 
   local plate = GetNamePlateForUnit(unitid)
   if plate then
-    UpdateReferences(plate)
-    OnUpdateCastMidway(plate, unitid)
+    OnStartCasting(plate, unitid, plate.TPFrame.visual.castbar.IsChanneling)
   end
 end
 
