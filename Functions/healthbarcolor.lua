@@ -399,22 +399,20 @@ function Addon:SetHealthbarColor(unit)
   end
 
   -- For simplicity, border color is uneffected by marks, threat, etc.
-  local border_r, border_g, border_b = 0, 0, 0  
+  local border_r, border_g, border_b  
   if style == "unique" then
     if unique_setting.UseBorderColor then
       -- 100% color values are not saved in the database
-      border_r = unique_setting.BorderColor.r or 1
-      border_g = unique_setting.BorderColor.g or 1
-      border_b = unique_setting.BorderColor.b or 1
+      local border_color = unique_setting.BorderColor
+      border_r, border_g, border_b = border_color.r or 1, border_color.g or 1, border_color.b or 1
+    else
+      border_r, border_g, border_b = 0, 0, 0  
     end
   elseif db_healthbar.BorderUseForegroundColor then
-    border_r = color_r
-    border_g = color_g
-    border_b = color_b
+    border_r, border_g, border_b = color_r, color_g, color_b
   else
-    border_r = db_healthbar.BorderColor.r or 1
-    border_g = db_healthbar.BorderColor.g or 1
-    border_b = db_healthbar.BorderColor.b or 1
+    local border_color = db_healthbar.BorderColor
+    border_r, border_g, border_b = border_color.r or 1, border_color.g or 1, border_color.b or 1
   end
 
   return color_r, color_g, color_b, nil, color_bg_r, color_bg_g, color_bg_b, bg_alpha, border_r, border_g, border_b

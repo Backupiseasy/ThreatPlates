@@ -6959,7 +6959,6 @@ local function CreateHealthbarOptions()
                 name = L["Custom"],
                 order = 60,
                 type = "toggle",
-                width = "half",
                 desc = L["Use a custom color for the healthbar's background."],
                 set = function(info, val)
                   SetThemeValue(info, not val)
@@ -6974,29 +6973,18 @@ local function CreateHealthbarOptions()
                 order = 70,
                 type = "color",
                 get = GetColor, set = SetColor, arg = {"settings", "healthbar", "BackgroundColor"},
-                width = "half",
                 disabled = function() return db.settings.healthbar.BackgroundUseForegroundColor end,
               },
-              BackgroundOpacity = {
-                name = L["Background Transparency"],
-                order = 80,
-                type = "range",
-                min = 0,
-                max = 1,
-                step = 0.01,
-                isPercent = true,
-                arg = { "settings", "healthbar", "BackgroundOpacity" },
-              },
-              Spacer2 = GetSpacerEntry(30),
+              Spacer2 = GetSpacerEntry(75),
               BorderColorText = {
                 type = "description",
-                order = 81,
+                order = 80,
                 width = "single",
                 name = L["Border Color:"],
               },
               BorderColorForegroundToggle = {
                 name = L["Same as Foreground"],
-                order = 82,
+                order = 81,
                 type = "toggle",
                 desc = L["Use the healthbar's foreground color also for the border."],
                 set = SetThemeValue,
@@ -7004,9 +6992,8 @@ local function CreateHealthbarOptions()
               },
               BorderColorCustomToggle = {
                 name = L["Custom"],
-                order = 83,
+                order = 82,
                 type = "toggle",
-                width = "half",
                 desc = L["Use a custom color for the healthbar's border."],
                 set = function(info, val)
                   SetValue(info, not val)
@@ -7018,15 +7005,25 @@ local function CreateHealthbarOptions()
               },
               BorderColorCustom = {
                 name = L["Color"],
-                order = 84,
+                order = 83,
                 type = "color",
                 get = GetColor, set = SetColor, arg = {"settings", "healthbar", "BorderColor"},
-                width = "half",
                 disabled = function() return db.settings.healthbar.BorderUseForegroundColor end,
+              },
+              Spacer3 = GetSpacerEntry(85),
+              BackgroundOpacity = {
+                name = L["Background Transparency"],
+                order = 90,
+                type = "range",
+                min = 0,
+                max = 1,
+                step = 0.01,
+                isPercent = true,
+                arg = { "settings", "healthbar", "BackgroundOpacity" },
               },
               AbsorbGroup = {
                 name = L["Absorbs"],
-                order = 90,
+                order = 100,
                 type = "group",
                 inline = true,
                 hidden = function() return not Addon.WOW_FEATURE_ABSORBS end, -- Absorbs were added with Mists
@@ -8863,7 +8860,6 @@ CreateCustomNameplateEntry = function(index)
               CustomColor = {
                 name = L["Healthbar"],
                 order = 1,
-                width = 0.75,
                 type = "toggle",
                 desc = L["Define a custom color for this nameplate and overwrite any other color settings."],
                 arg = { "uniqueSettings", index, "useColor" },
@@ -8871,7 +8867,6 @@ CreateCustomNameplateEntry = function(index)
               ColorSetting = {
                 name = L["Color"],
                 order = 2,
-                width = "half",
                 type = "color",
                 disabled = function()
                   return not db.uniqueSettings[index].useColor
@@ -8884,17 +8879,17 @@ CreateCustomNameplateEntry = function(index)
                 name = L["Color by Target Mark"],
                 order = 3,
                 type = "toggle",
-                width = "normal",
+                width = "double",
                 desc = L["Additionally color the nameplate's healthbar or name based on the target mark if the unit is marked."],
                 disabled = function()
                   return not db.uniqueSettings[index].useColor
                 end,
                 arg = { "uniqueSettings", index, "allowMarked" },
               },
+            Spacer0 = GetSpacerEntry(3.5),
               CustomBorderColor = {
                 name = L["Border"],
                 order = 4,
-                width = "half",
                 type = "toggle",
                 desc = L["Define a custom color for this border and overwrite any other color settings."],
                 arg = { "uniqueSettings", index, "UseBorderColor" },
@@ -8902,14 +8897,13 @@ CreateCustomNameplateEntry = function(index)
               BorderColorSetting = {
                 name = L["Color"],
                 order = 5,
-                width = "half",
                 type = "color",
                 disabled = function()
                   return not db.uniqueSettings[index].UseBorderColor
                 end,
                 get = GetColor,
                 set = SetColor,
-                arg = { "uniqueSettings", index, "borderColor" },
+                arg = { "uniqueSettings", index, "BorderColor" },
               },
               Spacer1 = GetSpacerEntry(10),
               CustomAlpha = {
