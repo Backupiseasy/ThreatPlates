@@ -1105,7 +1105,7 @@ local function UpdateTexture(cp_status, texture, texture_path, resource_index)
     Addon:UpdateIconTexture(texture, TEXTURE_INFO.Script["ComboPoint." .. tostring(resource_index) .. "." .. cp_status])
   elseif Widget.db.Style == "Blizzard" then
     if Addon.ExpansionIsBetween(LE_EXPANSION_WRATH_OF_THE_LICH_KING, LE_EXPANSION_LEGION) and PlayerClass == "DEATHKNIGHT" then
-      local texture_data = texture_path.RuneTypes
+      local texture_data = texture_path.RuneType
       texture:SetTexture(texture_data[resource_index])
       texture:SetAlpha(texture_data.Alpha or 1)
       texture:SetVertexColor(1, 1, 1)
@@ -1327,6 +1327,7 @@ function Widget:UpdateSettings()
 end 
 
 function Widget:PrintDebug()
+  Addon.Logging.Debug("    Active Spec:", ActiveSpec)
   Addon.Logging.Debug("    Power Type:", self.PowerType, "( Max:", self.UnitPowerMax, ")")
   Addon.Logging.Debug("    Textures:", TEXTURE_INFO.Script.IsEnabled and "ENABLED" or "DISABLED")
   local lines = {}
