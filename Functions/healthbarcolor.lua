@@ -398,7 +398,24 @@ function Addon:SetHealthbarColor(unit)
     color_bg_r, color_bg_g, color_bg_b, bg_alpha = color.r, color.g, color.b, 1 - db_healthbar.BackgroundOpacity
   end
 
-  return color_r, color_g, color_b, nil, color_bg_r, color_bg_g, color_bg_b, bg_alpha
+  -- For simplicity, border color is uneffected by marks, threat, etc.
+  local border_r, border_g, border_b  
+  if style == "unique" then
+    if unique_setting.UseBorderColor then
+      -- 100% color values are not saved in the database
+      local border_color = unique_setting.BorderColor
+      border_r, border_g, border_b = border_color.r or 1, border_color.g or 1, border_color.b or 1
+    else
+      border_r, border_g, border_b = 0, 0, 0  
+    end
+  elseif db_healthbar.BorderUseForegroundColor then
+    border_r, border_g, border_b = color_r, color_g, color_b
+  else
+    local border_color = db_healthbar.BorderColor
+    border_r, border_g, border_b = border_color.r or 1, border_color.g or 1, border_color.b or 1
+  end
+
+  return color_r, color_g, color_b, nil, color_bg_r, color_bg_g, color_bg_b, bg_alpha, border_r, border_g, border_b
 end
 
 ThreatPlates.GetColorByHealthDeficit = GetColorByHealthDeficit
