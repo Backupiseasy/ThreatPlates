@@ -1026,8 +1026,8 @@ L["Left-to-right"] = "Esquerda para direita"
 L["Legacy custom nameplate %s already exists. Skipping it."] = "Legacy custom nameplate %s already exists. Skipping it."
 --[[Translation missing --]]
 L["Less-Than Arrow"] = "Less-Than Arrow"
-L["Level"] = "Nível"
 L["Level "] = "Nível"
+L["Level"] = "Nível"
 --[[Translation missing --]]
 L["Level ??"] = "Level ??"
 L["Level Text"] = "Texto do nível"
