@@ -563,11 +563,11 @@ end
 -- To avoid redundant calls, make sure to only add instance IDs here that do not trigger the PLAYER_ENTERING_WORLD event.
 local WalkInInstances = {
   -- Delves
+  -- TWW Vanilla
   ["2664"] = true, -- Fungal Folly
   ["2679"] = true, -- Mycomancer Cavern
   ["2680"] = true, -- Earthcrawl Mines
   ["2681"] = true, -- Kriegval's Rest
-  ["2682"] = true, -- Zekvir's Lair ; TODO: check this one, if it behaves like the others
   ["2683"] = true, -- The Waterworks
   ["2684"] = true, -- The Dread Pit
   ["2685"] = true, -- Skittering Breach
@@ -578,9 +578,15 @@ local WalkInInstances = {
   ["2690"] = true, -- The Underkeep
   ["2767"] = true, -- The Sinkhole
   ["2768"] = true, -- Tak-Rethan Abyss
+  ["2836"] = true, -- Earthcrawl Mines
+  ["2682"] = true, -- Zekvir's Lair; boss delve
+  -- TWW Undermine
   ["2815"] = true, -- Excavation Site 9
   ["2826"] = true, -- Sidestreet Sluice
-  ["2836"] = true, -- Earthcrawl Mines
+  ["2831"] = true, -- Demolition Dome; boss delve
+  -- TWW Karesh
+  ["2803"] = true, -- Archival Assault
+  ["2951"] = true, -- Voidrazor Sanctuary; boss delve
 }
 
 function TidyPlatesThreat:PLAYER_MAP_CHANGED(_, previousID, currentID)
