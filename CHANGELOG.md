@@ -1,3 +1,4 @@
 # @project-version@ (@build-time@)
 
-* Added an option to change the healthbar border color [GH-600 by PolyBadger].
+* Updated TOC version for Patch 5.5.1 for WoW Mists Classic [PR GH-611 by Adal4].
+* Updated list of instance IDs of Delves for custom nameplates [PR GH-612 by tflo].
