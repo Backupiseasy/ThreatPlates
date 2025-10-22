@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+12.6.2 (2025-10-24)
+------------------------------------------------------
+* Fixed a bug that prevented turning the camera while the right mouse button was held down and the cursor was hovering over an aura with aura tooltips enabled [Comment #7764].
+
+------------------------------------------------------
 12.6.1 (2025-10-07)
 ------------------------------------------------------
 * Updated list of instance IDs of Delves for custom nameplates [PR GH-612 by tflo].

@@ -1,5 +1,3 @@
 # @project-version@ (@build-time@)
 
-* Updated list of instance IDs of Delves for custom nameplates [PR GH-612 by tflo].
-* Updated TOC version for Patch 11.2.5 for WoW Mainline.
-* Updated TOC version for Patch 5.5.1 for WoW Mists Classic [PR GH-611 by Adal4].
+* Fixed a bug that prevented turning the camera while the right mouse button was held down and the cursor was hovering over an aura with aura tooltips enabled [Comment #7764].
