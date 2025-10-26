@@ -3000,6 +3000,7 @@ local function UpdateAuraFrameIconMode(self, frame)
   end
 
   -- Add tooltips to icons
+
   if db.ShowTooltips then
     frame:SetScript("OnEnter", AuraFrameOnEnter)
     frame:SetScript("OnLeave", AuraFrameOnLeave)
@@ -3007,6 +3008,10 @@ local function UpdateAuraFrameIconMode(self, frame)
     frame:SetScript("OnEnter", nil)
     frame:SetScript("OnLeave", nil)
   end
+  -- Setting the OnEnter/Leave, OnMouseDown/Up script automatically implies EnableMouse(true)
+  -- And with that, right clicking and moving the camera does not work anymore when hovering over an aura.
+  frame:EnableMouse(false)
+  frame:SetMouseMotionEnabled(true)
 
   db = self.db
 
@@ -3143,7 +3148,7 @@ end
 local function UpdateAuraFrameBarMode(self, frame)
   local db = self.db_widget
 
-  UpdateCooldown(frame.Cooldown, db)
+  frame.Cooldown:SetShownSwipe(db.ShowCooldownSpiral, HideOmniCC)
   if ShowDuration then
     frame.TimeText:Show()
   else
@@ -3158,6 +3163,10 @@ local function UpdateAuraFrameBarMode(self, frame)
     frame:SetScript("OnEnter", nil)
     frame:SetScript("OnLeave", nil)
   end
+  -- Setting the OnEnter/Leave, OnMouseDown/Up script automatically implies EnableMouse(true)
+  -- And with that, right clicking and moving the camera does not work anymore when hovering over an aura.
+  frame:EnableMouse(false)
+  frame:SetMouseMotionEnabled(true)
 
   db = self.db
   local font = Addon.LibSharedMedia:Fetch('font', db.Font)
@@ -3265,7 +3274,7 @@ local function UpdateAuraInformationBarMode(self, aura_frame) -- texture, durati
   -- Highlight Coloring
   aura_frame.Statusbar:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
 
-  SetCooldown(aura_frame.Cooldown, duration, expiration)
+  aura_frame.Cooldown:Set(duration, expiration)
   Animations:StopFlash(aura_frame)
 
   aura_frame:Show()
