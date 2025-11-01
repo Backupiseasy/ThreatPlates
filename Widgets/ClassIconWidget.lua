@@ -19,7 +19,8 @@ local _G =_G
 -- List them here for Mikk's FindGlobals script
 -- GLOBALS: CreateFrame
 
-local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ClassIconWidget\\"
+-- local Masque = LibStub("Masque", true)
+-- local group
 
 ---------------------------------------------------------------------------------------------------
 -- Cached configuration settings
@@ -89,7 +90,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
     end
 
     widget_frame:SetSize(db.scale, db.scale)
-    widget_frame.Icon:SetIconTexture(PATH .. db.theme .."\\" .. unit.class)
+    Addon:SetIconTexture(widget_frame.Icon, "Class." .. unit.class, unit.unitid)
 
     widget_frame:Show()
   else

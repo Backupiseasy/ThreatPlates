@@ -1,4 +1,4 @@
-local ADDON_NAME, Addon = ...
+﻿local ADDON_NAME, Addon = ...
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -125,12 +125,21 @@ local function ChatCommandDebug(cmd_list)
 	elseif command == "cache" then
 		Addon.Debug.PrintCaches()
 	elseif command == "debug" then
-		local widget_name = cmd_list[2]
-		if widget_name then
-			local widget = Addon.Widgets.Widgets[widget_name]
-			if widget then 
-				widget:PrintDebug(cmd_list[3])
-			end
+		local component_name = cmd_list[2]
+		if not component_name then return end
+
+		Addon.Logging.Debug(component_name .. ":")
+		local widget = Addon.Widgets.Widgets[component_name]
+		if widget then 
+			widget:PrintDebug(cmd_list[3])
+		elseif component_name == "WidgetHandler" then
+			Addon:DebugWidgetHandler()
+		elseif component_name == "Compatibility" then
+			Addon:DebugCompatibility()
+		elseif component_name == "EventService" then
+			Addon:PrintEventService()
+		elseif component_name == "Color" then 
+			Addon.Color.PrintDebug()
 		end
 	elseif command == "custom-styles" then
 		for k, v in pairs(Addon.db.profile.uniqueSettings) do
@@ -156,7 +165,18 @@ local function ChatCommandDebug(cmd_list)
 				table.remove(input, i)
 				Addon.Logging.Debug("Removing", i)
 			end
-		end
+		end			
+	elseif command == "version" then
+		Addon.Logging.Debug("Expansion Level:", Addon.GetExpansionLevel())
+		Addon.Logging.Debug("Mainline:", Addon.IS_MAINLINE)
+		Addon.Logging.Debug("Classic:", Addon.IS_CLASSIC)
+		Addon.Logging.Debug("Classic SoD:", Addon.IS_CLASSIC_SOD)
+		Addon.Logging.Debug("Classic Mists:", Addon.IS_MISTS_CLASSIC)
+		Addon.Logging.Debug("At least MoP:", Addon.ExpansionIsAtLeastMists)
+		Addon.Logging.Debug("WOW_USES_CLASSIC_NAMEPLATES:", Addon.WOW_USES_CLASSIC_NAMEPLATES)
+		Addon.Logging.Debug("WOW_FEATURE_ABSORBS:", Addon.WOW_FEATURE_ABSORBS)
+		Addon.Logging.Debug("WOW_FEATURE_BLIZZARD_AURA_FILTER:", Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER)
+		Addon.Logging.Debug("NAMEPLATE_MAX_DISTANCE_MAX_VALUE:", Addon.NAMEPLATE_MAX_DISTANCE_MAX_VALUE[Addon.GetExpansionLevel()])
 	elseif command == "combat" and Addon.DEBUG then
 		--Addon.Logging.Info("|cff89F559Threat Plates|r: Event publishing overview:")
 		if not plate then return end

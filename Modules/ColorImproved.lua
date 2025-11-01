@@ -35,17 +35,6 @@ local ColorModule = Addon.Color
 -- Local variables
 ---------------------------------------------------------------------------------------------------
 local ColorByHealthIsEnabled = false
-local ShowQuestUnit
-
----------------------------------------------------------------------------------------------------
--- Wrapper functions for WoW Classic
----------------------------------------------------------------------------------------------------
-
--- Quest tooltips: not sure since when available
-if not Addon.IS_MAINLINE then
-  -- Quest widget is not available in Classic
-  ShowQuestUnit = function(...) return false end
-end
 
 ---------------------------------------------------------------------------------------------------
 -- Constants

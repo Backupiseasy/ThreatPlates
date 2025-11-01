@@ -1,12 +1,14 @@
-tag 83f5d1251166a2bf44a782acbc10ed0a01420131 v1.24.0
+tag 4e7ef4037538ba67c119d1fb5b49aed52b4d806e v1.27.0
 Author:	Kyle Buller <bullerk@gmail.com>
-Date:	Wed Jul 10 02:16:07 2024 -0500
+Date:	Thu Jul 3 06:45:41 2025 -0500
 
-Tagging as v1.24.0
+Tagging as v1.27.0
 
-commit e0da0f71030bc52fd07cdaf56543c139fdc09276
+commit 70bd5fb2d2935280111630ffe47aa799aee7b420
 Author: Kyle Buller <bullerk@gmail.com>
-Date:   Wed Jul 10 01:46:35 2024 -0500
+Date:   Thu Jul 3 06:42:44 2025 -0500
 
-    Add support for Wrath Classic (China)
+    Fix support for Mists of Pandaria Classic
+    
+    Fixes #6
 

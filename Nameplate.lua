@@ -1,4 +1,4 @@
-2local ADDON_NAME, Addon = ...
+local ADDON_NAME, Addon = ...
 
 ---------------------------------------------------------------------------------------------------------------------
 -- Variables and References
@@ -242,7 +242,7 @@ elseif Addon.IS_TBC_CLASSIC then
 
   -- UnitNameplateShowsWidgetsOnly: SL - Patch 9.0.1 (2020-10-13): Added.
   UnitNameplateShowsWidgetsOnly = function() return false end
-elseif Addon.IS_WRATH_CLASSIC or Addon.IS_CATA_CLASSIC then
+elseif Addon.ExpansionIsBetween(LE_EXPANSION_WRATH_OF_THE_LICH_KING, LE_EXPANSION_LEGION) then
   GetNameForNameplate = function(plate) return plate:GetName() end
   UnitCastingInfo = _G.UnitCastingInfo
   -- UnitNameplateShowsWidgetsOnly: SL - Patch 9.0.1 (2020-10-13): Added.
@@ -362,6 +362,8 @@ end
 local function SetUnitAttributeName(unit, unitid)
   -- Can be UNKNOWNOBJECT => UNIT_NAME_UPDATE
   local unit_name, realm = UnitName(unitid)
+  -- Let's preserve the unaltered name for the custom styles check…
+  unit.basename = unit_name
 
   if unit.type == "PLAYER" then
     local db = Addon.db.profile.Name.HealthbarMode
@@ -452,7 +454,7 @@ local function SetUnitAttributes(unit, unitid)
   SetUnitAttributeHealth(unit, unitid)
   
   -- Casting => UNIT_SPELLCAST_*
-  -- Initialized in OnUpdateCastMidway in OnShowNameplate, but only when unit is currently casting
+  -- Initialized in OnStartCasting in OnShowNameplate, but only when unit is currently casting
   unit.isCasting = false
   unit.IsInterrupted = false
   
@@ -568,14 +570,12 @@ local function OnStartCasting(tp_frame, unitid, channeled, event_spellid)
   castbar:Show()
 end
 
-local function OnUpdateCastMidway(tp_frame, unitid)
+local function UpdateCastbar(tp_frame, unitid)
   if not ShowCastBars then return end
 
-  -- Check to see if there's a spell being cast
-  if UnitCastingInfo(unitid) then
-    OnStartCasting(tp_frame, unitid, false)
-  elseif UnitChannelInfo(unitid) then
-    OnStartCasting(tp_frame, unitid, true)
+  if tp_frame.unit.isCasting then 
+    -- Check to see if there's a spell being cast
+    OnStartCasting(tp_frame, unitid, tp_frame.visual.Castbar.IsChanneling)
   else
     -- It would be better to check for IsInterrupted here and not hide it if that is true
     -- Not currently sure though, if that might work with the Hide() calls in OnStartCasting
@@ -740,7 +740,7 @@ local function HandlePlateUnitAdded(plate, unitid)
 
   -- Call this after the plate is shown as OnStartCasting checks if the plate is shown; if not, the castbar is hidden and
   -- nothing is updated
-  OnUpdateCastMidway(tp_frame, unitid)
+  UpdateCastbar(tp_frame, unitid)
 end
 
 --------------------------------------------------------------------------------------------------------------
@@ -1038,18 +1038,8 @@ local PVP_INSTANCE_TYPES = {
 -- Fired when the player enters the world, reloads the UI, enters/leaves an instance or battleground, or respawns at a graveyard.
 -- Also fires any other time the player sees a loading screen
 function Addon:PLAYER_ENTERING_WORLD(initialLogin, reloadingUI)
-  local db = Addon.db.profile.questWidget
-  if Addon.IS_MAINLINE then
-    if db.ON or db.ShowInHeadlineView then
-      self.CVars:Set("showQuestTrackingTooltips", 1)
-      --_G.SetCVar("showQuestTrackingTooltips", 1)
-    else
-      self.CVars:RestoreFromProfile("showQuestTrackingTooltips")
-    end
-  end
-
   -- This code must be executed every time the player enters a instance (dungeon, raid, ...)
-  db = Addon.db.profile.Automation
+  local db = Addon.db.profile.Automation
   
   local is_in_instance, instance_type = IsInInstance()
   Addon.IsInInstance = is_in_instance
@@ -1101,10 +1091,54 @@ function Addon:PLAYER_ENTERING_WORLD(initialLogin, reloadingUI)
   Addon:SetBaseNamePlateSize()
   SetNamesFonts()
 
+  -- ARENA_OPPONENT_UPDATE is also fired in BGs, at least in Classic, so it's only enabled when solo shuffles
+  -- are available (as it's currently only needed for these kind of arenas)
   if Addon.IsSoloShuffle() then
     RegisterEvent("ARENA_OPPONENT_UPDATE")
   else
     UnregisterEvent("ARENA_OPPONENT_UPDATE")
+  end
+end
+
+-- Instances without PLAYER_ENTERING_WORLD event on enter (or leave), hence "walk-in".
+-- Currently only delves; possibly there are more.
+-- To avoid redundant calls, make sure to only add instance IDs here that do not trigger the PLAYER_ENTERING_WORLD event.
+local WalkInInstances = {
+  -- Delves
+  -- TWW Vanilla
+  ["2664"] = true, -- Fungal Folly
+  ["2679"] = true, -- Mycomancer Cavern
+  ["2680"] = true, -- Earthcrawl Mines
+  ["2681"] = true, -- Kriegval's Rest
+  ["2683"] = true, -- The Waterworks
+  ["2684"] = true, -- The Dread Pit
+  ["2685"] = true, -- Skittering Breach
+  ["2686"] = true, -- Nightfall Sanctum
+  ["2687"] = true, -- The Sinkhole
+  ["2688"] = true, -- The Spiral Weave
+  ["2689"] = true, -- Tak-Rethan Abyss
+  ["2690"] = true, -- The Underkeep
+  ["2767"] = true, -- The Sinkhole
+  ["2768"] = true, -- Tak-Rethan Abyss
+  ["2836"] = true, -- Earthcrawl Mines
+  ["2682"] = true, -- Zekvir's Lair; boss delve
+  -- TWW Undermine
+  ["2815"] = true, -- Excavation Site 9
+  ["2826"] = true, -- Sidestreet Sluice
+  ["2831"] = true, -- Demolition Dome; boss delve
+  -- TWW Karesh
+  ["2803"] = true, -- Archival Assault
+  ["2951"] = true, -- Voidrazor Sanctuary; boss delve
+}
+
+function Addon:PLAYER_MAP_CHANGED(_, previousID, currentID)
+  if WalkInInstances[tostring(currentID)] or WalkInInstances[tostring(previousID)] then
+    -- The event fires very early, too early for GetInstanceInfo to retrieve the new ID.
+    -- A delay of `0` (aka next frame) seems to be enough in *many* cases, but sometimes not;
+    -- no idea what this depends on (server lag?); so using a delay like 1 or 3s is probably better.
+    -- A too long delay might cause trouble if the player starts combat immediately after entering/leaving the instance.
+    -- Note: Instead of delaying, we could also pass the ID as argument, but this would require various changes down the line.
+    C_Timer.After(3, Addon.PLAYER_ENTERING_WORLD)
   end
 end
 
@@ -1164,8 +1198,8 @@ end
 function Addon:NAME_PLATE_CREATED(plate)
   HandlePlateCreated(plate)
 
-  -- NamePlateDriverFrame.AcquireUnitFrame is not used in Classic
-  if not Addon.IS_MAINLINE and plate.UnitFrame then
+  -- NamePlateDriverFrame.AcquireUnitFrame is not used in Classic before Mists
+  if not Addon.ExpansionIsAtLeastMists and plate.UnitFrame then
     NamePlateDriverFrame_AcquireUnitFrame(nil, plate)
   end
 
@@ -1378,7 +1412,7 @@ local function UnitSpellcastMidway(event, unitid, ...)
 
   local tp_frame = Addon:GetThreatPlateForUnit(unitid)
   if tp_frame then
-    OnUpdateCastMidway(tp_frame, unitid)
+    OnUpdateCastMidway(tp_frame, unitid, tp_frame.visual.Castbar.IsChanneling)
   end
 end
 
@@ -1540,6 +1574,7 @@ end
 
 local ENABLED_EVENTS = {
   "PLAYER_ENTERING_WORLD",
+  "PLAYER_MAP_CHANGED",
   "PLAYER_LOGIN",
   -- "PLAYER_LOGOUT",
   "PLAYER_REGEN_ENABLED",
@@ -1553,18 +1588,15 @@ local ENABLED_EVENTS = {
   "PLAYER_SOFT_FRIEND_CHANGED",
   "PLAYER_SOFT_ENEMY_CHANGED",
   "PLAYER_SOFT_INTERACT_CHANGED",
-  PLAYER_FOCUS_CHANGED = Addon.ExpansionIsAtLeast(LE_EXPANSION_BURNING_CRUSADE),
+  "PLAYER_FOCUS_CHANGED",
 
   "UPDATE_MOUSEOVER_UNIT",
   "RAID_TARGET_UPDATE",
 
   "UNIT_NAME_UPDATE",
   "UNIT_MAXHEALTH",
-  -- UNIT_HEALTH, UNIT_HEALTH_FREQUENT: 
-  --   Shadowlands Patch 9.0.1 (2020-10-13): Removed. Replaced by UNIT HEALTH which is no longer aggressively throttled.
-  --   Cataclysm Patch 4.0.6 (2011-02-08): Added.
-  UNIT_HEALTH = Addon.IS_MAINLINE,
-  UNIT_HEALTH_FREQUENT = not Addon.IS_MAINLINE,
+  "UNIT_HEALTH",
+  "UNIT_HEALTH_FREQUENT",
   "UNIT_THREAT_LIST_UPDATE",
   "UNIT_FACTION",
   "UNIT_LEVEL",
@@ -1576,16 +1608,16 @@ local ENABLED_EVENTS = {
   "UNIT_SPELLCAST_CHANNEL_START",
   "UNIT_SPELLCAST_CHANNEL_UPDATE",
   "UNIT_SPELLCAST_CHANNEL_STOP",
-  UNIT_SPELLCAST_INTERRUPTIBLE = Addon.IS_MAINLINE,
-  UNIT_SPELLCAST_NOT_INTERRUPTIBLE = Addon.IS_MAINLINE,
+  "UNIT_SPELLCAST_INTERRUPTIBLE",
+  "UNIT_SPELLCAST_NOT_INTERRUPTIBLE",
   -- UNIT_SPELLCAST_SUCCEEDED
   -- UNIT_SPELLCAST_FAILED
   -- UNIT_SPELLCAST_FAILED_QUIET
   -- UNIT_SPELLCAST_INTERRUPTED - handled by COMBAT_LOG_EVENT_UNFILTERED / SPELL_INTERRUPT as it's the only way to find out the interruptorom
   -- UNIT_SPELLCAST_SENT
-  UNIT_SPELLCAST_EMPOWER_START = Addon.IS_MAINLINE,
-  UNIT_SPELLCAST_EMPOWER_UPDATE = Addon.IS_MAINLINE,
-  UNIT_SPELLCAST_EMPOWER_STOP = Addon.IS_MAINLINE,
+  "UNIT_SPELLCAST_EMPOWER_START",
+  "UNIT_SPELLCAST_EMPOWER_UPDATE",
+  "UNIT_SPELLCAST_EMPOWER_STOP",
 
   --PLAYER_CONTROL_LOST = ..., -- Does not seem to be necessary
   --PLAYER_CONTROL_GAINED = ...,  -- Does not seem to be necessary
@@ -1678,7 +1710,7 @@ else
   -- Only registered for player unit
   local TANK_AURA_SPELL_IDs = {
     [20468] = true, [20469] = true, [20470] = true, [25780] = true, -- Paladin Righteous Fury
-    [48263] = true,   -- Deathknight Frost Presence
+    [48263] = true,   -- Deathknight Blood Presence
     [407627] = true,  -- Paladin Righteous Fury (Season of Discovery)
     [408680] = true,  -- Shaman Way of Earth (Season of Discovery)
     [403789] = true,  -- Warlock Metamorphosis (Season of Discovery)
@@ -1714,8 +1746,8 @@ else
   -- No need to check here for (Addon.IS_WRATH_CLASSIC and Addon.PlayerClass == "DEATHKNIGHT") as deathknights
   -- are only available in Wrath Classic
   local ENABLE_UNIT_AURA_FOR_CLASS = {
-    PALADIN = Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC or Addon.IS_CATA_CLASSIC,
-    DEATHKNIGHT = Addon.IS_WRATH_CLASSIC or Addon.IS_CATA_CLASSIC,
+    PALADIN = Addon.ExpansionIsBetween(LE_EXPANSION_CLASSIC, LE_EXPANSION_LEGION),
+    DEATHKNIGHT = Addon.ExpansionIsBetween(LE_EXPANSION_WRATH_OF_THE_LICH_KING, LE_EXPANSION_LEGION),
     -- For Season of Discovery
     SHAMAN = Addon.IS_CLASSIC_SOD,
     WARLOCK = Addon.IS_CLASSIC_SOD,

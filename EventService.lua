@@ -131,46 +131,44 @@ local INTERNAL_EVENTS = {
 
 -- Register as main subscriber (only one is supported) for a WoW event - all other subscribers
 -- will receive the event after the main subscriber
-function EventService.RegisterEvent(event, func)
+function EventService.RegisterEvent(event, func, register_for_current_expansion)
+  if not INTERNAL_EVENTS[event] and not Addon:ExpansionSupportsEvent(event, register_for_current_expansion) then return end
 
   local previous_subscriber = RegisteredEvents[event]
   RegisteredEvents[event] = func or Addon
 
   -- Register at WoW only once,
   if not previous_subscriber then
-    --print ("EventService: Register", event)
-    EventHandlerFrame:RegisterEvent(event)
+    Addon:RegisterEvent(EventHandlerFrame, event)
   end
 end
 
 -- Unregister as main subscriber all other subscribers
-function EventService.UnregisterEvent(event, func)
-  --print ("EventService: Unregister", event)
+function EventService.UnregisterEvent(event, func, register_for_current_expansion)
+  if not INTERNAL_EVENTS[event] and not Addon:ExpansionSupportsEvent(event, register_for_current_expansion) then return end
 
   local previous_subscriber = RegisteredEvents[event]
   RegisteredEvents[event] = nil
 
-  -- or not SubscribersByEvent[event] or not next(SubscribersByEvent[event])
   if previous_subscriber and not (SubscribersByEvent[event] and next(SubscribersByEvent[event])) then
-    --print ("EventService: Unregistering at WoW - ", event)
-    EventHandlerFrame:UnregisterEvent(event)
+    Addon:UnregisterEvent(EventHandlerFrame, event)
   end
 end
 
 -- Subscribe to an event (WoW event or ThreatPlates internal event)
-function EventService.Subscribe(subscriber, event, func)
-  --print ("EventService: Subscribe", event)
+function EventService.Subscribe(subscriber, event, func, register_for_current_expansion)
+  if not INTERNAL_EVENTS[event] and not Addon:ExpansionSupportsEvent(event, register_for_current_expansion) then return end
 
   if not RegisteredEvents[event] and not INTERNAL_EVENTS[event] then
-    EventHandlerFrame:RegisterEvent(event)
+    Addon:RegisterEvent(EventHandlerFrame, event, register_for_current_expansion)
   end
 
   SubscribersByEvent[event] = SubscribersByEvent[event] or {}
   SubscribersByEvent[event][subscriber] = func or true
 end
 
-function EventService.SubscribeUnitEvent(subscriber, event, unitid, func)
-  --print ("EventService: Subscribe", event, "for", unitid)
+function EventService.SubscribeUnitEvent(subscriber, event, unitid, func, register_for_current_expansion)
+  if not INTERNAL_EVENTS[event] and not Addon:ExpansionSupportsEvent(event, register_for_current_expansion) then return end
 
   local event_handler_frame = RegisteredUnitEvents[unitid]
   if not event_handler_frame then
@@ -182,15 +180,15 @@ function EventService.SubscribeUnitEvent(subscriber, event, unitid, func)
     RegisteredUnitEvents[unitid] = event_handler_frame
   end
 
-  local all_subscribers = event_handler_frame.Events[event]
-  if not all_subscribers then
-    all_subscribers = {}
-    event_handler_frame.Events[event] = all_subscribers
+  local subscribers_for_event = event_handler_frame.Events[event]
+  if not subscribers_for_event then
+    subscribers_for_event = {}
+    event_handler_frame.Events[event] = subscribers_for_event
 
-    event_handler_frame:RegisterUnitEvent(event, unitid)
+    Addon:RegisterUnitEvent(event_handler_frame, event, unitid, register_for_current_expansion)
   end
 
-  all_subscribers[subscriber] = func or true
+  subscribers_for_event[subscriber] = func or true
 end
 
 function EventService.Publish(event, ...)
@@ -209,60 +207,44 @@ function EventService.Publish(event, ...)
   end
 end
 
+-- Unregister the event if the last subscriber was removed an there is no main subscriber
+local function UnregisterGameEvent(event, subscribers_for_event, subscriber, event_handler_frame)
+  subscribers_for_event[subscriber] = nil
+  if not INTERNAL_EVENTS[event] and next(subscribers_for_event) == nil then
+    Addon:UnregisterEvent(event_handler_frame, event)
+  end
+end
+
 -- Unscubscribe to an event
 function EventService.Unsubscribe(subscriber, event)
-  --print ("EventService: Unsubscribe", event)
+  if not INTERNAL_EVENTS[event] and not Addon:ExpansionSupportsEvent(event) then return end
 
-  if SubscribersByEvent[event] then
-    SubscribersByEvent[event][subscriber] = nil
-
-    -- Unregister the event if the last subscriber was removed an there is no main subscriber
-    if not INTERNAL_EVENTS[event] and next(SubscribersByEvent[event]) == nil and RegisteredEvents[event] == nil then
-      --print ("EventService: Unregistering event", event)
-      EventHandlerFrame:UnregisterEvent(event)
-    end
+  local subscribers_for_event = SubscribersByEvent[event]
+  if subscribers_for_event then
+    UnregisterGameEvent(event, subscribers_for_event, subscriber, EventHandlerFrame)
   end
 
+  -- unitid, event_handler_frame for unit
   for _, event_handler_frame in pairs(RegisteredUnitEvents) do
-    if event_handler_frame.Events[event] then
-      --print ("EventService: Removing event", event, "for", unitid)
-      event_handler_frame.Events[event][subscriber] = nil
-
-      -- Was the last subscriber for the unit event removed?
-      if next(event_handler_frame.Events[event]) == nil then
-        --print ("EventService: Unregistering event", event, "for", unitid)
-        event_handler_frame:UnregisterEvent(event)
-      end
+    local subscribers_for_event = event_handler_frame.Events and event_handler_frame.Events[event]
+    if subscribers_for_event then
+      UnregisterGameEvent(event, subscribers_for_event, subscriber, event_handler_frame)
     end
   end
 end
 
 -- Unsubscribes to all events (including unit-based events) for a subscriber
 function EventService.UnsubscribeAll(subscriber)
-  --print ("EventService: Unsubscribe All")
-
-  for event, all_subscribers in pairs(SubscribersByEvent) do
-    all_subscribers[subscriber] = nil
-
-    -- Unregister the event if the last subscriber was removed an there is no main subscriber
-    -- Don't bother to set SubscribersByEvent[event] to nil - should not impact performance as it's a hash table
-    if next(all_subscribers) == nil and RegisteredEvents[event] == nil then
-      --print ("EventService: Unregistering event", event)
-      EventHandlerFrame:UnregisterEvent(event)
+  for event, subscribers_for_event in pairs(SubscribersByEvent) do
+    if Addon:ExpansionSupportsEvent(event) then     
+      UnregisterGameEvent(event, subscribers_for_event, EventHandlerFrame)
     end
   end
 
-  for unitid, event_handler_frame in pairs(RegisteredUnitEvents) do
-    for event, all_subscribers in pairs(event_handler_frame.Events) do
-      if all_subscribers[subscriber] then
-        --print ("EventService: Removing event", event, "for", unitid)
-      end
-      all_subscribers[subscriber] = nil
-
-      -- Was the last subscriber for the unit event removed?
-      if next(all_subscribers) == nil then
-        --print ("EventService: Unregistering event", event, "for", unitid)
-        event_handler_frame:UnregisterEvent(event)
+  for _, event_handler_frame in pairs(RegisteredUnitEvents) do
+    for event, subscribers_for_event in pairs(event_handler_frame.Events) do
+      if Addon:ExpansionSupportsEvent(event) then     
+        UnregisterGameEvent(event, subscribers_for_event, subscriber, event_handler_frame)
       end
     end
   end
@@ -272,7 +254,7 @@ end
 -- Debug functions
 ---------------------------------------------------------------------------------------------------
 
-local function sort_function(a,b)
+local function SortFunction(a,b)
   if type(a) == "table"  then
     a = a.Name
   end
@@ -280,13 +262,13 @@ local function sort_function(a,b)
     b = b.Name
   end
 
-  return a<b
+  return (a or "") < (b or "")
 end
 
-local function pairsByKeys (t)
+local function PairsByKeys (t)
   local a = {}
   for n in pairs(t) do table.insert(a, n) end
-  table.sort(a, sort_function)
+  table.sort(a, SortFunction)
   local i = 0      -- iterator variable
   local iter = function ()   -- iterator function
     i = i + 1
@@ -299,14 +281,14 @@ end
 
 function Addon:PrintEventService()
   print ("EventService: Registered Events")
-  for event, _ in pairsByKeys(RegisteredEvents) do
+  for event, _ in PairsByKeys(RegisteredEvents) do
     print ("  " .. event)
   end
 
   print ("EventService: Subscribed Events")
-  for event, all_subscribers in pairsByKeys(SubscribersByEvent) do
+  for event, all_subscribers in PairsByKeys(SubscribersByEvent) do
     print ("  " .. event .. ": #Subscribers =", Addon.Debug:TableSize(all_subscribers))
-    for subscriber, func in pairsByKeys(all_subscribers) do
+    for subscriber, func in PairsByKeys(all_subscribers) do
       print ("    ->", subscriber.Name or subscriber)
     end
   end

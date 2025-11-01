@@ -4,7 +4,9 @@
 local ADDON_NAME, Addon = ...
 local ThreatPlates = Addon.ThreatPlates
 
-local Widget = (not Addon.IS_MAINLINE and {}) or Addon.Widgets:NewWidget("Quest")
+if not Addon.ExpansionIsAtLeastMists then return end
+
+local Widget = Addon.Widgets:NewWidget("Quest")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -12,6 +14,7 @@ local Widget = (not Addon.IS_MAINLINE and {}) or Addon.Widgets:NewWidget("Quest"
 
 -- Lua APIs
 local string, tonumber, pairs = string, tonumber, pairs
+local string_match = string.match
 
 -- WoW APIs
 local InCombatLockdown = InCombatLockdown
@@ -19,15 +22,18 @@ local UnitName, UnitExists = UnitName, UnitExists
 local IsInRaid, IsInGroup, GetNumGroupMembers, GetNumSubgroupMembers = IsInRaid, IsInGroup, GetNumGroupMembers, GetNumSubgroupMembers
 local wipe = wipe
 
-local RequestLoadQuestByID = C_QuestLog.RequestLoadQuestByID
 local GetQuestObjectives, GetQuestInfo = C_QuestLog.GetQuestObjectives, C_QuestLog.GetInfo
-local GetLogIndexForQuestID, GetNumQuestLogEntries = C_QuestLog.GetLogIndexForQuestID, C_QuestLog.GetNumQuestLogEntries
-local C_TooltipInfo_GetUnit = C_TooltipInfo and C_TooltipInfo.GetUnit
+local RequestLoadQuestByID = C_QuestLog.RequestLoadQuestByID
+local GetLogIndexForQuestID = C_QuestLog and C_QuestLog.GetLogIndexForQuestID or GetQuestLogIndexByID
+local GetNumQuestLogEntries = C_QuestLog and C_QuestLog.GetNumQuestLogEntries or GetNumQuestLogEntries
+local C_TooltipInfo_GetUnit = C_TooltipInfo and C_TooltipInfo.GetUnit -- Added in 10.0.2
+local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 local GetNamePlates = C_NamePlate.GetNamePlates
 
 -- ThreatPlates APIs
 local PlayerName = Addon.PlayerName
+local RGB_P = ThreatPlates.RGB_P
 local UnitDetailedThreatSituationWrapper = Addon.UnitDetailedThreatSituationWrapper
 
 local _G =_G
@@ -41,7 +47,6 @@ local Font
 
 local FONT_SCALING = 0.3
 local TEXTURE_SCALING = 0.5
-local ICON_PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\QuestWidget\\"
 
 ---------------------------------------------------------------------------------------------------
 -- Local variables
@@ -58,51 +63,126 @@ local GroupMembers = {}
 
 local IsQuestUnit -- Function
 
+if Addon.ExpansionIsBetween(LE_EXPANSION_MISTS_OF_PANDARIA, LE_EXPANSION_DRAGONFLIGHT) then
+  local ScannerName = "ThreatPlates_Tooltip_Subtext"
+  local TooltipScanner = CreateFrame( "GameTooltip", ScannerName , nil, "GameTooltipTemplate" ) -- Tooltip name cannot be nil
+  TooltipScanner:SetOwner( WorldFrame, "ANCHOR_NONE" )
+
+  local TooltipScannerData = {
+    lines = {
+      [1] = {},
+      [2] = {},
+      [3] = {},
+      [4] = {},
+      [5] = {},
+    }
+  }
+
+  local function CreateLineData(line)
+    local line_id = ScannerName .. "TextLeft" .. tostring(line)
+
+    TooltipScannerData.lines[line].leftText = _G[line_id]:GetText()
+    TooltipScannerData.lines[line].leftColor = RGB_P(_G[line_id]:GetTextColor())
+  end
+
+  -- Compatibility functions for tooltips in WoW Classic
+  C_TooltipInfo_GetUnit = function(unitid)
+    TooltipScanner:ClearLines()
+		TooltipScanner:SetUnit(unitid)
+
+    CreateLineData(3)
+    CreateLineData(4)
+    CreateLineData(5)
+    
+    return TooltipScannerData
+  end
+end
+
+ -- C_TooltipInfo.GetUnit: Added in 10.0.2
+if not GetQuestInfo then
+  GetQuestInfo = function(quest_log_index)
+    --local title, level, suggestedGroup, isHeader, isCollapsed, isComplete, frequency, questID, startEvent, displayQuestID, isOnMap, hasLocalPOI, isTask, isBounty, isStory, isHidden, isScaling
+    local title, _, _, isHeader, _, _, _, questID = GetQuestLogTitle(quest_log_index)    
+    return {
+        title = title,
+        isHeader = isHeader,
+        questID = questID,        
+    }
+  end
+end
+
 -- Since patch 8.3, quest tooltips have a different format depending on the localization, it seems
 -- at least for kill quests
 -- In Shadowlands, it seems that the format is randomly changed, at least for German, so check for
 -- everything as a backup
+local OBJECTIVE_PARSER_REGEXP_BY_EXPANSION = {
+  [LE_EXPANSION_MISTS_OF_PANDARIA] = {
+    -- Format (Mists): " - Objective: x/y"
+    LEFT =  "^%s.%s(.*: )(%d+)/(%d+)$",
+    RIGHT = "^%s.%s(.*: )(%d+)/(%d+)$",
+  },
+  MAINLINE = {
+    -- Format: "x/y Objective"
+    LEFT = "^(%d+)/(%d+)( .*)$",
+    -- Format: "Objective: x/y"
+    RIGHT = "^(.*: )(%d+)/(%d+)$",
+  },
+}
+
+local OBJECTIVE_GOAL_ALIGNMENT = {
+  enUS = "LEFT",
+  -- enGB = enGB clients return enUS
+  esMX = "LEFT",
+  ptBR = "LEFT",
+  itIT = "LEFT",
+  koKR = "LEFT",
+  zhTW = "LEFT",
+  zhCN = "LEFT",
+  --
+  deDE = "RIGHT",
+  frFR = "RIGHT",
+  esES = "RIGHT",
+  ruRU = "RIGHT",
+}
+
+-- Set correct regexps for current expansion and locale
+local RegexpForExpansion = OBJECTIVE_PARSER_REGEXP_BY_EXPANSION[Addon.GetExpansionLevel()]
+
+-- local RegexpAlignment = OBJECTIVE_GOAL_ALIGNMENT[GetLocale()]
+-- local RegexpDefault = (RegexpAlignment == "LEFT" and RegexpForExpansion.LEFT) or RegexpForExpansion.RIGHT
+-- local RegexpBackup = (RegexpAlignment == "LEFT" and RegexpForExpansion.RIGHT) or RegexpForExpansion.LEFT
+
+-- local function QuestObjectiveParser(text)
+--   local objective_name, current, goal = string_match(text, RegexpDefault)
+
+--   if not objective_name then
+--     current, goal, objective_name = string_match(text, RegexpBackup)
+--   end
+
+--   return objective_name, current, goal
+-- end
+
 local QUEST_OBJECTIVE_PARSER_LEFT = function(text)
-  local current, goal, objective_name = string.match(text,"^(%d+)/(%d+)( .*)$")
+  local current, goal, objective_name = string_match(text, RegexpForExpansion.LEFT)
 
   if not objective_name then
-    objective_name, current, goal = string.match(text,"^(.*: )(%d+)/(%d+)$")
+    objective_name, current, goal = string_match(text, RegexpForExpansion.RIGHT)
   end
 
   return objective_name, current, goal
 end
 
 local QUEST_OBJECTIVE_PARSER_RIGHT = function(text)
-  -- Quest objective: Versucht, zu kommunizieren: 0/1
-  local objective_name, current, goal = string.match(text,"^(.*: )(%d+)/(%d+)$")
+  local objective_name, current, goal = string_match(text, RegexpForExpansion.RIGHT)
 
   if not objective_name then
-    -- Quest objective: 0/1 Besucht die Halle der Kuriositäten
-    current, goal, objective_name = string.match(text,"^(%d+)/(%d+)( .*)$")
+    current, goal, objective_name = string_match(text, "^(%d+)/(%d+)( .*)$")
   end
 
   return objective_name, current, goal
 end
 
-local STANDARD_QUEST_OBJECTIVE_PARSER = {
-  -- x/y Objective
-  enUS = QUEST_OBJECTIVE_PARSER_LEFT,
-  -- enGB = enGB clients return enUS
-  esMX = QUEST_OBJECTIVE_PARSER_LEFT,
-  ptBR = QUEST_OBJECTIVE_PARSER_LEFT,
-  itIT = QUEST_OBJECTIVE_PARSER_LEFT,
-  koKR = QUEST_OBJECTIVE_PARSER_LEFT,
-  zhTW = QUEST_OBJECTIVE_PARSER_LEFT,
-  zhCN = QUEST_OBJECTIVE_PARSER_LEFT,
-
-  -- Objective: x/y
-  deDE = QUEST_OBJECTIVE_PARSER_RIGHT,
-  frFR = QUEST_OBJECTIVE_PARSER_RIGHT,
-  esES = QUEST_OBJECTIVE_PARSER_RIGHT,
-  ruRU = QUEST_OBJECTIVE_PARSER_RIGHT,
-}
-
-local QuestObjectiveParser = STANDARD_QUEST_OBJECTIVE_PARSER[GetLocale()] or QUEST_OBJECTIVE_PARSER_LEFT
+local QuestObjectiveParser = (RegexpAlignment == "LEFT" and QUEST_OBJECTIVE_PARSER_LEFT) or QUEST_OBJECTIVE_PARSER_RIGHT
 
 ---------------------------------------------------------------------------------------------------
 -- Quest Functions
@@ -118,9 +198,11 @@ function IsQuestUnit(unit)
 
   for i = 3, #tooltip_data.lines do
     local line = tooltip_data.lines[i]
-
     local text = line.leftText
     local text_r, text_g, text_b = line.leftColor.r, line.leftColor.g, line.leftColor.b
+
+    -- At list in Mists, tooltips are not guarantted to have 5 lines min.
+    if not text then break end
 
     if text_r > 0.99 and text_g > 0.8 and text_b == 0 then
       -- A line with this color is either the quest title or a player name (if on a group quest, but always after the quest title)
@@ -138,13 +220,10 @@ function IsQuestUnit(unit)
 
       -- Check if area / progress quest
       if string.find(text, "%%") then
-        objective_name, current, goal = string.match(text, "^(.*) %(?(%d+)%%%)?$")
+        objective_name, current, goal = string_match(text, "^(.*) %(?(%d+)%%%)?$")
         objective_type = "area"
-        --print ("  ", unit.name, "=> ", "Area: <" .. text .. ">", objective_name, current, goal)
       else
-        -- Standard x/y /pe quest
         objective_name, current, goal = QuestObjectiveParser(text)
-        --print ("  ", unit.name, "=> ", "Standard: <" .. text .. ">", objective_name, current, goal, "|")
       end
 
       if objective_name then
@@ -162,8 +241,6 @@ function IsQuestUnit(unit)
         local quest_objective
         if quest then
           quest_objective = quest.Objectives[objective_name]
-        --else
-        --  print ("<< Quest No Cached >> =>", quest_title)
         end
 
         -- A unit may be target of more than one quest, the quest indicator should be show if at least one quest is not completed.
@@ -215,7 +292,7 @@ local function CacheQuestObjectives(quest)
   quest.Objectives = quest.Objectives or {}
 
   local all_objectives = GetQuestObjectives(quest.questID)
-
+  
   local objective
   for objIndex = 1, #all_objectives do
     objective = all_objectives[objIndex]
@@ -336,7 +413,7 @@ function Widget:QUEST_LOG_UPDATE()
   -- UnitQuestLogChanged being true means that UNIT_QUEST_LOG_CHANGED was fired (possibly several times)
   -- So there should be quest progress => update all plates with the current progress.
   if UnitQuestLogChanged then
-    --print ("QUEST_LOG_UPDATE => UnitQuestLogChanged")
+    --f ("QUEST_LOG_UPDATE => UnitQuestLogChanged")
     UnitQuestLogChanged = false
 
     -- Update the cached quest progress (for non-progressbar quests) after QUEST_WATCH_UPDATE
@@ -358,11 +435,12 @@ function Widget:QUEST_LOG_UPDATE()
     -- by QUEST_ACCEPTED - with quest with multiple intermediate steps, I am not sure if that is true
     self:UpdateAllFramesWithPublish("SituationalColorUpdate")
   end
-
+  
   -- It does seem that this is no longer necessary
   if QuestLogNotComplete then
     QuestLogNotComplete = false
     self:GenerateQuestCache()
+    self:UpdateAllFramesAndNameplateColor()
   end
 end
 
@@ -544,22 +622,22 @@ function Widget:OnEnable()
   -- self:SubscribeEvent("PLAYER_ENTERING_WORLD") -- Disabled as nameplates are not yet created when this event fires
 
   self:SubscribeEvent("QUEST_ACCEPTED")
-    --self:RegisterEvent("QUEST_AUTOCOMPLETE")
-  --self:RegisterEvent("QUEST_COMPLETE")
+    --self:SubscribeEvent("QUEST_AUTOCOMPLETE")
+  --self:SubscribeEvent("QUEST_COMPLETE")
   self:SubscribeEvent("QUEST_DATA_LOAD_RESULT")
-  --self:RegisterEvent("QUEST_DETAIL")
-  --self:RegisterEvent("QUEST_LOG_CRITERIA_UPDATE")
+  --self:SubscribeEvent("QUEST_DETAIL")
+  --self:SubscribeEvent("QUEST_LOG_CRITERIA_UPDATE")
   self:SubscribeEvent("QUEST_LOG_UPDATE")
-  --self:RegisterEvent("QUEST_POI_UPDATE")
+  --self:SubscribeEvent("QUEST_POI_UPDATE")
   -- QUEST_REMOVED fires whenever the player turns in a quest, whether automatically with a Task-type quest
   -- (Bonus Objectives/World Quests), or by pressing the Complete button in a quest dialog window.
   -- also handles abandon quest
   self:SubscribeEvent("QUEST_REMOVED")
-  --self:RegisterEvent("QUEST_TURNED_IN")
-  --self:RegisterEvent("QUEST_WATCH_LIST_CHANGED")
+  --self:SubscribeEvent("QUEST_TURNED_IN")
+  --self:SubscribeEvent("QUEST_WATCH_LIST_CHANGED")
   self:SubscribeEvent("QUEST_WATCH_UPDATE")
-  --self:RegisterEvent("QUESTLINE_UPDATE")
-  --self:RegisterEvent("WORLD_QUEST_COMPLETED_BY_SPELL")
+  --self:SubscribeEvent("QUESTLINE_UPDATE")
+  --self:SubscribeEvent("WORLD_QUEST_COMPLETED_BY_SPELL")
   self:SubscribeUnitEvent("UNIT_QUEST_LOG_CHANGED", "player")
 
   self:SubscribeEvent("PLAYER_ENTERING_WORLD")
@@ -601,7 +679,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
   ICON_COLORS[1] = db.ColorPlayerQuest
   ICON_COLORS[2] = db.ColorGroupQuest
 
-  widget_frame.Icon:SetTexture(ICON_PATH .. db.IconTexture)
+  Addon:SetIconTexture(widget_frame.Icon, "Quest.Highlight", unit.unitid)
   widget_frame.Icon:SetAllPoints()
 
   self:UpdateFrame(widget_frame, unit)
@@ -633,15 +711,15 @@ function Widget:UpdateFrame(widget_frame, unit)
         text = current.numFulfilled .. '%'
 
         if unit.reaction ~= "FRIENDLY" then
-          widget_frame.Text.TypeTexture:SetTexture(ICON_PATH .. "kill")
+          Addon:SetIconTexture(widget_frame.Text.TypeTexture, "Quest.KillObjective", unit.unitid)
         end
       else
         text = current.numFulfilled .. '/' .. current.numRequired
 
         if current.type == "monster" then
-          widget_frame.Text.TypeTexture:SetTexture(ICON_PATH .. "kill")
+          Addon:SetIconTexture(widget_frame.Text.TypeTexture, "Quest.KillObjective", unit.unitid)
         elseif current.type == "item" then
-          widget_frame.Text.TypeTexture:SetTexture(ICON_PATH .. "loot")
+          Addon:SetIconTexture(widget_frame.Text.TypeTexture, "Quest.LootObjective", unit.unitid)
         end
       end
 
@@ -715,12 +793,11 @@ function Widget:PrintDebug(command)
     local tooltip_data = C_TooltipInfo_GetUnit("target")
     for i = 3, #tooltip_data.lines do
       local line = tooltip_data.lines[i]
-
       local text = line.leftText
       local text_r, text_g, text_b = line.leftColor.r, line.leftColor.g, line.leftColor.b
 
       Addon.Logging.Debug("=== Line:", text)
-      if text_r > 0.99 and text_g > 0.82 and text_b == 0 then
+      if text_r > 0.99 and text_g > 0.8 and text_b == 0 then
         -- A line with this color is either the quest title or a player name (if on a group quest, but always after the quest title)
         -- if quest_title_found then
         --   quest_player = (text == PlayerName)
@@ -743,7 +820,7 @@ function Widget:PrintDebug(command)
         Addon.Logging.Debug("    => Objective:", text)
         -- Check if area / progress quest
         if string.find(text, "%%") then
-          objective_name, current, goal = string.match(text, "^(.*) %(?(%d+)%%%)?$")
+          objective_name, current, goal = string_match(text, "^(.*) %(?(%d+)%%%)?$")
           objective_type = "area"
           Addon.Logging.Debug("    => Area: <" .. text .. ">", objective_name, current, goal)
         else
@@ -773,8 +850,10 @@ function Widget:PrintDebug(command)
 
           -- A unit may be target of more than one quest, the quest indicator should be show if at least one quest is not completed.
           if current and goal then
-            if current == goal then
-              Addon.Logging.Debug("  => Finished!")
+            if (current ~= goal) then
+              Addon.Logging.Debug("    => Quest:", objective_name, "- Current:", current, "- Goal:", goal, "- Type:", objective_type)
+            else
+              Addon.Logging.Debug("    => Finished!")
             end
           end
         end

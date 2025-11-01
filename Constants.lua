@@ -21,12 +21,12 @@ local RGB, RGB_P, RGB_WITH_HEX, HEX2RGB = Addon.RGB, Addon.RGB_P, Addon.RGB_WITH
 -- Global contstants
 ---------------------------------------------------------------------------------------------------
 
-ThreatPlates.ADDON_NAME = "Threat Plates"
+Addon.ADDON_NAME = "Threat Plates"
 
 Addon.ADDON_DIRECTORY = "Interface\\AddOns\\TidyPlates_ThreatPlates\\"
 
 -- Define names for keybindings
-_G["BINDING_HEADER_" .. "THREATPLATES"] = ThreatPlates.ADDON_NAME
+_G["BINDING_HEADER_" .. "THREATPLATES"] = Addon.ADDON_NAME
 _G["BINDING_NAME_" .. "THREATPLATES_NAMEPLATE_MODE_FOR_FRIENDLY_UNITS"] = L["Toggle Friendly Headline View"]
 _G["BINDING_NAME_" .. "THREATPLATES_NAMEPLATE_MODE_FOR_NEUTRAL_UNITS"] = L["Toggle Neutral Headline View"]
 _G["BINDING_NAME_" .. "THREATPLATES_NAMEPLATE_MODE_FOR_ENEMY_UNITS"] = L["Toggle Enemy Headline View"]
@@ -286,8 +286,8 @@ ThreatPlates.NAME_ABBREVIATION = {
   -- { SpellID = 204330, ID = "P2", GroupColor = "8a2be2", Icon = "spell_fire_totemofwrath" },	      -- Skyfury Totem
   -- { SpellID = 204336, ID = "P4", GroupColor = "8a2be2", Icon = "spell_nature_groundingtotem" },	  -- Grounding Totem
   -- { SpellID = 355580, ID = "P5", GroupColor = "8a2be2", Icon = "spell_shaman_stormtotem"},	      -- Static Field Totem
-  
-  local TOTEM_DATA_RETAIL = {
+local TOTEM_DATA_BY_EXPANSION = {
+  MAINLINE = {
     -- Baseline Totems
     { SpellID = 2484,   ID = "B1", GroupColor = "8b4513", Icon = "spell_nature_strengthofearthtotem02" },   -- Earthbind Totem
 
@@ -312,14 +312,14 @@ ThreatPlates.NAME_ABBREVIATION = {
     -- Hero talent totems
     { SpellID = 444995,  ID = "W1", GroupColor = "ffff00", Icon = "inv_ability_totemicshaman_surgingtotem" }, -- Surging Totem
     { SpellID = 445034,  ID = "W2", GroupColor = "ffff00", Icon = "spell_fire_searingtotem" },             -- Lively Totems
-    { SpellID = 461242, ID = "F1", GroupColor = "ff8f8f", Icon ="spell_fire_searingtotem", }, 	           -- Searing Totem, summmoned by Lively Totems
+    { SpellID = 461242, ID = "F1", GroupColor = "ffff00", Icon ="spell_fire_searingtotem", }, 	           -- Searing Totem, summmoned by Lively Totems
 
     -- Totems from PVP talents
-    { SpellID = 204331, ID = "P1", GroupColor = "8a2be2", Icon = "spell_nature_wrathofair_totem" },	-- Counterstrike Totem
-    { SpellID = 204336, ID = "P4", GroupColor = "8a2be2", Icon = "spell_nature_groundingtotem" },	  -- Grounding Totem
-    { SpellID = 355580, ID = "P5", GroupColor = "8a2be2", Icon = "spell_shaman_stormtotem"},	      -- Static Field Totem
+    { SpellID = 204331, ID = "P1", GroupColor = "4c9900", Icon = "spell_nature_wrathofair_totem" },	-- Counterstrike Totem
+    { SpellID = 204336, ID = "P4", GroupColor = "4c9900", Icon = "spell_nature_groundingtotem" },	  -- Grounding Totem
+    { SpellID = 355580, ID = "P5", GroupColor = "4c9900", Icon = "spell_shaman_stormtotem"},	      -- Static Field Totem
     { SpellID = 460697, ID = "P6", GroupColor = "8a2be2", Icon = "shaman_pvp_skyfurytotem"},	      -- Totem of Wrath
-  
+
     -- Totems from other sources
     { SpellID = 324386, ID = "O1", GroupColor = "00ffff", Icon = "ability_bastion_shaman" },	  -- Vesper Totem (Kyrian Covenant)
 
@@ -327,9 +327,35 @@ ThreatPlates.NAME_ABBREVIATION = {
     -- { SpellID = 383019,  ID = "T5", GroupColor = "b8d1ff", Icon = "ability_shaman_tranquilmindtotem" },	 -- Tranquil Air Totem
     -- { SpellID = 204330, ID = "P2", GroupColor = "8a2be2", Icon = "spell_fire_totemofwrath" },	      -- Skyfury Totem
     -- { SpellID = 8512,   ID = "H1", GroupColor = "ffb31f", Icon = "spell_nature_windfury" },	  -- Windfury Totem
-  }
+  },
 
-  local TOTEM_DATA_CATA_CLASSIC = {
+  [LE_EXPANSION_MISTS_OF_PANDARIA] = {
+    -- Earth Totems
+    { SpellID = 2484,    ID = "E1", GroupColor = "8B4513", Icon ="spell_nature_strengthofearthtotem02" },     -- Earthbind Totem
+    { SpellID = 8143,    ID = "E2", GroupColor = "8B4513", Icon ="spell_nature_tremortotem" },	              -- Tremor Totem
+    
+    -- Fire Totems
+    { SpellID = 3599,    ID = "F1", GroupColor = "ff8f8f", Icon ="spell_fire_searingtotem", }, 	              -- Searing Totem
+    { SpellID = 8190,    ID = "F2", GroupColor = "ff8f8f", Icon ="spell_fire_selfdestruct" }, 	              -- Magma Totem
+    
+    -- Air Totems
+    { SpellID = 108269,  ID = "A1", GroupColor = "ffb31f", Icon = "spell_nature_brilliance" },	              -- Capacitor Totem
+    { SpellID = 8177,    ID = "A2", GroupColor = "ffb31f", Icon ="spell_nature_groundingtotem" },          		-- Grounding Totem    
+    { SpellID = 120668,  ID = "A3", GroupColor = "ffb31f", Icon ="ability_shaman_tranquilmindtotem", }, 	    -- Stormlash Totem
+    { SpellID = 98008,   ID = "A4", GroupColor = "ffb31f", Icon = "spell_shaman_spiritlink" },	              -- Spirit Link Totem (Restoration)
+    
+    -- Water Totems
+    { SpellID = 5394,    ID = "W1", GroupColor = "b8d1ff", Icon ="inv_spear_04" },	            	            -- Healing Stream Totem
+    { SpellID = 108280,  ID = "W2", GroupColor = "b8d1ff", Icon = "ability_shaman_healingtide" },		          -- Healing Tide Totem
+    { SpellID = 16190,   ID = "W3", GroupColor = "b8d1ff", Icon ="spell_frost_summonwaterelemental" },		    -- Mana Tide Totem (Restoration)
+
+    -- Totems from talents
+    { SpellID = 108270,  ID = "T1", GroupColor = "ffff00", Icon = "ability_shaman_stonebulwark" },	          -- Stone Bulwark Totem
+    { SpellID = 51485,   ID = "T2", GroupColor = "ffff00", Icon = "spell_nature_stranglevines" },		          -- Earthgrab Totem
+    { SpellID = 108273,  ID = "T3", GroupColor = "ffff00", Icon = "ability_shaman_windwalktotem" },		        -- Windwalk Totem
+  },
+
+  [LE_EXPANSION_CATACLYSM] = {
     -- Earth Totems
     { SpellID = 8075,   ID = "E1", GroupColor = "8B4513", Icon ="spell_nature_earthbindtotem", },	            -- Strength of Earth Totem
     { SpellID = 8071,   ID = "E2", GroupColor = "8B4513", Icon ="spell_nature_stoneskintotem" },	            -- Stoneskin Totem
@@ -348,7 +374,7 @@ ThreatPlates.NAME_ABBREVIATION = {
     { SpellID = 8512,  ID = "A4", GroupColor = "ffb31f", Icon ="spell_nature_windfury" },	                 	  -- Windfury Totem
     { SpellID = 8177,   ID = "A5", GroupColor = "ffb31f", Icon ="spell_nature_groundingtotem" },          		-- Grounding Totem    
     { SpellID = 3738,  ID = "A8", GroupColor = "ffb31f", Icon ="spell_nature_slowingtotem" },		              -- Wrath of Air Totem
-    { SpellID = 98008,  ID = "A9", GroupColor = "4c9900", Icon = "spell_shaman_spiritlink" },	      	        -- Spirit Link Totem
+    { SpellID = 98008,  ID = "A9", GroupColor = "ffb31f", Icon = "spell_shaman_spiritlink" },	      	        -- Spirit Link Totem
 
     -- Water Totems
     { SpellID = 5394,  ID = "W1", GroupColor = "b8d1ff", Icon ="inv_spear_04" },	            	              -- Healing Stream Totem
@@ -356,123 +382,119 @@ ThreatPlates.NAME_ABBREVIATION = {
     { SpellID = 8184,  ID = "W3", GroupColor = "b8d1ff", Icon ="spell_fireresistancetotem_01" },	            -- Elemental Resistance Totem
     { SpellID = 16190,  ID = "W4", GroupColor = "b8d1ff", Icon ="spell_frost_summonwaterelemental" },		      -- Mana Tide Totem
     { SpellID = 87718,  ID = "W6", GroupColor = "b8d1ff", Icon ="spell_nature_brilliance" },	                -- Totem of Tranquil Mind
-  }
+  },
 
-local TOTEM_DATA_WRATH_CLASSIC = {
-  -- Earth Totems
-  { SpellID = 8075,   ID = "E1", GroupColor = "8B4513", Ranks = 8, Icon ="spell_nature_earthbindtotem", },	 -- Strength of Earth Totem
-  { SpellID = 8071,   ID = "E2", GroupColor = "8B4513", Ranks = 10, Icon ="spell_nature_stoneskintotem" },	 -- Stoneskin Totem
-  { SpellID = 5730,   ID = "E3", GroupColor = "8B4513", Ranks = 10, Icon ="spell_nature_stoneclawtotem" },	 -- Stoneclaw Totem
-  { SpellID = 2484,    ID = "E4", GroupColor = "8B4513", Icon ="spell_nature_strengthofearthtotem02" },      -- Earthbind Totem
-  { SpellID = 8143,    ID = "E5", GroupColor = "8B4513", Icon ="spell_nature_tremortotem" },	               -- Tremor Totem
-  { SpellID = 2062,    ID = "E6", GroupColor = "8B4513", Icon ="spell_nature_earthelemental_totem" },	       -- Earth Elemental Totem
+  [LE_EXPANSION_WRATH_OF_THE_LICH_KING] = {
+    -- Earth Totems
+    { SpellID = 8075,   ID = "E1", GroupColor = "8B4513", Ranks = 8, Icon ="spell_nature_earthbindtotem", },	 -- Strength of Earth Totem
+    { SpellID = 8071,   ID = "E2", GroupColor = "8B4513", Ranks = 10, Icon ="spell_nature_stoneskintotem" },	 -- Stoneskin Totem
+    { SpellID = 5730,   ID = "E3", GroupColor = "8B4513", Ranks = 10, Icon ="spell_nature_stoneclawtotem" },	 -- Stoneclaw Totem
+    { SpellID = 2484,    ID = "E4", GroupColor = "8B4513", Icon ="spell_nature_strengthofearthtotem02" },      -- Earthbind Totem
+    { SpellID = 8143,    ID = "E5", GroupColor = "8B4513", Icon ="spell_nature_tremortotem" },	               -- Tremor Totem
+    { SpellID = 2062,    ID = "E6", GroupColor = "8B4513", Icon ="spell_nature_earthelemental_totem" },	       -- Earth Elemental Totem
 
-  -- Fire Totems
-  { SpellID = 3599, ID = "F1", GroupColor = "ff8f8f", Ranks = 10, Icon ="spell_fire_searingtotem", }, 	    -- Searing Totem
-  { SpellID = 8181, ID = "F2", GroupColor = "ff8f8f", Ranks = 6, Icon ="spell_frostresistancetotem_01" },   -- Frost Resistance Totem
-  -- { SpellID = 1535, ID = "F3", GroupColor = "ff8f8f", Ranks = 7, Icon ="spell_fire_sealoffire" }, 	      -- Fire Nova Totem
-  { SpellID = 8190, ID = "F4", GroupColor = "ff8f8f", Ranks = 7, Icon ="spell_fire_selfdestruct" }, 	      -- Magma Totem
-  { SpellID = 8227, ID = "F5", GroupColor = "ff8f8f", Ranks = 8, Icon ="spell_nature_guardianward" }, 	    -- Flametongue Totem
-  { SpellID = 2894, ID = "F6", GroupColor = "ff8f8f", Icon ="spell_fire_elemental_totem" }, 	              -- Fire Elemental Totem
-  { SpellID = 30706, ID = "F7", GroupColor = "ff8f8f", Ranks = 4, Icon ="spell_fire_totemofwrath" }, 	      -- Totem of Wrath
+    -- Fire Totems
+    { SpellID = 3599, ID = "F1", GroupColor = "ff8f8f", Ranks = 10, Icon ="spell_fire_searingtotem", }, 	    -- Searing Totem
+    { SpellID = 8181, ID = "F2", GroupColor = "ff8f8f", Ranks = 6, Icon ="spell_frostresistancetotem_01" },   -- Frost Resistance Totem
+    -- { SpellID = 1535, ID = "F3", GroupColor = "ff8f8f", Ranks = 7, Icon ="spell_fire_sealoffire" }, 	      -- Fire Nova Totem
+    { SpellID = 8190, ID = "F4", GroupColor = "ff8f8f", Ranks = 7, Icon ="spell_fire_selfdestruct" }, 	      -- Magma Totem
+    { SpellID = 8227, ID = "F5", GroupColor = "ff8f8f", Ranks = 8, Icon ="spell_nature_guardianward" }, 	    -- Flametongue Totem
+    { SpellID = 2894, ID = "F6", GroupColor = "ff8f8f", Icon ="spell_fire_elemental_totem" }, 	              -- Fire Elemental Totem
+    { SpellID = 30706, ID = "F7", GroupColor = "ff8f8f", Ranks = 4, Icon ="spell_fire_totemofwrath" }, 	      -- Totem of Wrath
 
-  -- Air Totems
-  -- { SpellID = 8835,  ID = "A1", GroupColor = "ffb31f", Ranks = 3, Icon ="spell_nature_invisibilitytotem" },	 -- Grace of Air Totem
-  { SpellID = 10595,  ID = "A2", GroupColor = "ffb31f", Ranks = 6, Icon ="spell_nature_natureresistancetotem" }, -- Nature Resistance Totem
-  -- { SpellID = 15107,  ID = "A3", GroupColor = "ffb31f", Ranks = 4, Icon ="spell_nature_earthbind" },		       -- Windwall Totem
-  { SpellID = 8512,  ID = "A4", GroupColor = "ffb31f", Ranks = 5, Icon ="spell_nature_windfury" },	           	 -- Windfury Totem
-  { SpellID = 8177,   ID = "A5", GroupColor = "ffb31f", Icon ="spell_nature_groundingtotem" },          		     -- Grounding Totem
-  { SpellID = 6495,   ID = "A6", GroupColor = "ffb31f", Icon ="spell_nature_removecurse" },		                   -- Sentry Totem
-  -- { SpellID = 25908,  ID = "A7", GroupColor = "ffb31f", Icon ="spell_nature_brilliance" },		                 -- Tranquil Air Totem
-  { SpellID = 3738,  ID = "A8", GroupColor = "ffb31f", Icon ="spell_nature_slowingtotem" },		                   -- Wrath of Air Totem
+    -- Air Totems
+    -- { SpellID = 8835,  ID = "A1", GroupColor = "ffb31f", Ranks = 3, Icon ="spell_nature_invisibilitytotem" },	 -- Grace of Air Totem
+    { SpellID = 10595,  ID = "A2", GroupColor = "ffb31f", Ranks = 6, Icon ="spell_nature_natureresistancetotem" }, -- Nature Resistance Totem
+    -- { SpellID = 15107,  ID = "A3", GroupColor = "ffb31f", Ranks = 4, Icon ="spell_nature_earthbind" },		       -- Windwall Totem
+    { SpellID = 8512,  ID = "A4", GroupColor = "ffb31f", Ranks = 5, Icon ="spell_nature_windfury" },	           	 -- Windfury Totem
+    { SpellID = 8177,   ID = "A5", GroupColor = "ffb31f", Icon ="spell_nature_groundingtotem" },          		     -- Grounding Totem
+    { SpellID = 6495,   ID = "A6", GroupColor = "ffb31f", Icon ="spell_nature_removecurse" },		                   -- Sentry Totem
+    -- { SpellID = 25908,  ID = "A7", GroupColor = "ffb31f", Icon ="spell_nature_brilliance" },		                 -- Tranquil Air Totem
+    { SpellID = 3738,  ID = "A8", GroupColor = "ffb31f", Icon ="spell_nature_slowingtotem" },		                   -- Wrath of Air Totem
 
-  -- Water Totems
-  { SpellID = 5394,  ID = "W1", GroupColor = "b8d1ff", Ranks = 9, Icon ="inv_spear_04" },		              -- Healing Stream Totem
-  { SpellID = 5675,  ID = "W2", GroupColor = "b8d1ff", Ranks = 8, Icon ="spell_nature_manaregentotem" },	-- Mana Spring Totem
-  { SpellID = 8184,  ID = "W3", GroupColor = "b8d1ff", Ranks = 6, Icon ="spell_fireresistancetotem_01" },	-- Fire Resistance Totem
-  { SpellID = 16190,  ID = "W4", GroupColor = "b8d1ff", Icon ="spell_frost_summonwaterelemental" },		    -- Mana Tide Totem
-  { SpellID = 8170,   ID = "W5", GroupColor = "b8d1ff", Icon ="spell_nature_diseasecleansingtotem" },		  -- Cleansing Totem
-  -- { SpellID = 8166,   ID = "W6", GroupColor = "b8d1ff", Icon ="spell_nature_poisoncleansingtotem" },   -- Poison Cleansing Totem
+    -- Water Totems
+    { SpellID = 5394,  ID = "W1", GroupColor = "b8d1ff", Ranks = 9, Icon ="inv_spear_04" },		              -- Healing Stream Totem
+    { SpellID = 5675,  ID = "W2", GroupColor = "b8d1ff", Ranks = 8, Icon ="spell_nature_manaregentotem" },	-- Mana Spring Totem
+    { SpellID = 8184,  ID = "W3", GroupColor = "b8d1ff", Ranks = 6, Icon ="spell_fireresistancetotem_01" },	-- Fire Resistance Totem
+    { SpellID = 16190,  ID = "W4", GroupColor = "b8d1ff", Icon ="spell_frost_summonwaterelemental" },		    -- Mana Tide Totem
+    { SpellID = 8170,   ID = "W5", GroupColor = "b8d1ff", Icon ="spell_nature_diseasecleansingtotem" },		  -- Cleansing Totem
+    -- { SpellID = 8166,   ID = "W6", GroupColor = "b8d1ff", Icon ="spell_nature_poisoncleansingtotem" },   -- Poison Cleansing Totem
+  },
+
+  [LE_EXPANSION_BURNING_CRUSADE] = {
+    -- Earth Totems
+    { SpellID = 8075,   ID = "E1", GroupColor = "8B4513", Ranks = 6, Icon ="spell_nature_earthbindtotem", },	-- Strength of Earth Totem
+    { SpellID = 8071,   ID = "E2", GroupColor = "8B4513", Ranks = 8, Icon ="spell_nature_stoneskintotem" },	  -- Stoneskin Totem
+    { SpellID = 5730,   ID = "E3", GroupColor = "8B4513", Ranks = 7, Icon ="spell_nature_stoneclawtotem" },	  -- Stoneclaw Totem
+    { SpellID = 2484,    ID = "E4", GroupColor = "8B4513", Icon ="spell_nature_strengthofearthtotem02" },     -- Earthbind Totem
+    { SpellID = 8143,    ID = "E5", GroupColor = "8B4513", Icon ="spell_nature_tremortotem" },	              -- Tremor Totem
+    { SpellID = 2062,    ID = "E6", GroupColor = "8B4513", Icon ="spell_nature_earthelemental_totem" },	      -- Earth Elemental Totem
+
+    -- Fire Totems
+    { SpellID = 3599, ID = "F1", GroupColor = "ff8f8f", Ranks = 7, Icon ="spell_fire_searingtotem", }, 	    -- Searing Totem
+    { SpellID = 8181, ID = "F2", GroupColor = "ff8f8f", Ranks = 4, Icon ="spell_frostresistancetotem_01" }, -- Frost Resistance Totem
+    { SpellID = 1535, ID = "F3", GroupColor = "ff8f8f", Ranks = 7, Icon ="spell_fire_sealoffire" }, 	      -- Fire Nova Totem
+    { SpellID = 8190, ID = "F4", GroupColor = "ff8f8f", Ranks = 5, Icon ="spell_fire_selfdestruct" }, 	    -- Magma Totem
+    { SpellID = 8227, ID = "F5", GroupColor = "ff8f8f", Ranks = 5, Icon ="spell_nature_guardianward" }, 	  -- Flametongue Totem
+    { SpellID = 2894, ID = "F6", GroupColor = "ff8f8f", Icon ="spell_fire_elemental_totem" }, 	            -- Fire Elemental Totem
+    { SpellID = 30706, ID = "F7", GroupColor = "ff8f8f", Icon ="spell_fire_totemofwrath" }, 	              -- Totem of Wrath
+
+    -- Air Totems
+    { SpellID = 8835,  ID = "A1", GroupColor = "ffb31f", Ranks = 3, Icon ="spell_nature_invisibilitytotem" },		   -- Grace of Air Totem
+    { SpellID = 10595,  ID = "A2", GroupColor = "ffb31f", Ranks = 4, Icon ="spell_nature_natureresistancetotem" }, -- Nature Resistance Totem
+    { SpellID = 15107,  ID = "A3", GroupColor = "ffb31f", Ranks = 4, Icon ="spell_nature_earthbind" },		         -- Windwall Totem
+    { SpellID = 8512,  ID = "A4", GroupColor = "ffb31f", Ranks = 5, Icon ="spell_nature_windfury" },	           	 -- Windfury Totem
+    { SpellID = 8177,   ID = "A5", GroupColor = "ffb31f", Icon ="spell_nature_groundingtotem" },          		     -- Grounding Totem
+    { SpellID = 6495,   ID = "A6", GroupColor = "ffb31f", Icon ="spell_nature_removecurse" },		                   -- Sentry Totem
+    { SpellID = 25908,  ID = "A7", GroupColor = "ffb31f", Icon ="spell_nature_brilliance" },		                   -- Tranquil Air Totem
+    { SpellID = 3738,  ID = "A8", GroupColor = "ffb31f", Icon ="spell_nature_slowingtotem" },		                   -- Wrath of Air Totem
+
+    -- Water Totems
+    { SpellID = 5394,  ID = "W1", GroupColor = "b8d1ff", Ranks = 6, Icon ="inv_spear_04" },		                -- Healing Stream Totem
+    { SpellID = 5675,  ID = "W2", GroupColor = "b8d1ff", Ranks = 5, Icon ="spell_nature_manaregentotem" },		-- Mana Spring Totem
+    { SpellID = 8184,  ID = "W3", GroupColor = "b8d1ff", Ranks = 5, Icon ="spell_fireresistancetotem_01" },		-- Fire Resistance Totem
+    { SpellID = 16190,  ID = "W4", GroupColor = "b8d1ff", Icon ="spell_frost_summonwaterelemental" },		      -- Mana Tide Totem
+    { SpellID = 8170,   ID = "W5", GroupColor = "b8d1ff", Icon ="spell_nature_diseasecleansingtotem" },		    -- Disease Cleansing Totem
+    { SpellID = 8166,   ID = "W6", GroupColor = "b8d1ff", Icon ="spell_nature_poisoncleansingtotem" },        -- Poison Cleansing Totem
+  },
+
+  [LE_EXPANSION_CLASSIC] = {
+    -- Earth Totems
+    { SpellID = 25361,   ID = "E1", GroupColor = "8B4513", Ranks = 5, Icon ="spell_nature_earthbindtotem", },	  -- Strength of Earth Totem
+    { SpellID = 10408,   ID = "E2", GroupColor = "8B4513", Ranks = 6, },	  -- Stoneskin Totem
+    { SpellID = 10428,   ID = "E3", GroupColor = "8B4513", Ranks = 6, },	  -- Stoneclaw Totem
+    { SpellID = 2484,    ID = "E4", GroupColor = "8B4513", },           	  -- Earthbind Totem
+    { SpellID = 8143,    ID = "E5", GroupColor = "8B4513", },	              -- Tremor Totem
+
+    -- Fire Totems
+    { SpellID = 10438, ID = "F1", GroupColor = "ff8f8f", Ranks = 6, Icon ="spell_fire_searingtotem", }, 	  -- Searing Totem
+    { SpellID = 10479, ID = "F2", GroupColor = "ff8f8f", Ranks = 3, }, 	  -- Frost Resistance Totem
+    { SpellID = 11315, ID = "F3", GroupColor = "ff8f8f", Ranks = 5, }, 	  -- Fire Nova Totem
+    { SpellID = 10587, ID = "F4", GroupColor = "ff8f8f", Ranks = 4, }, 	  -- Magma Totem
+    { SpellID = 16387, ID = "F5", GroupColor = "ff8f8f", Ranks = 4, }, 	  -- Flametongue Totem
+
+    -- Air Totems
+    { SpellID = 25359,  ID = "A1", GroupColor = "ffb31f", Ranks = 3, },		-- Grace of Air Totem
+    { SpellID = 10601,  ID = "A2", GroupColor = "ffb31f", Ranks = 3, },		-- Nature Resistance Totem
+    { SpellID = 15112,  ID = "A3", GroupColor = "ffb31f", Ranks = 3, },		-- Windwall Totem
+    { SpellID = 10614,  ID = "A4", GroupColor = "ffb31f", Ranks = 3, },		-- Windfury Totem
+    { SpellID = 8177,   ID = "A5", GroupColor = "ffb31f", },          		-- Grounding Totem
+    { SpellID = 6495,   ID = "A6", GroupColor = "ffb31f", },		          -- Sentry Totem
+    { SpellID = 25908,  ID = "A7", GroupColor = "ffb31f", },		          -- Tranquil Air Totem
+
+    -- Water Totems
+    { SpellID = 10463,  ID = "W1", GroupColor = "b8d1ff", Ranks = 5, },		-- Healing Stream Totem
+    { SpellID = 10497,  ID = "W2", GroupColor = "b8d1ff", Ranks = 4, },		-- Mana Spring Totem
+    { SpellID = 10538,  ID = "W3", GroupColor = "b8d1ff", Ranks = 3, },		-- Fire Resistance Totem
+    { SpellID = 17359,  ID = "W4", GroupColor = "b8d1ff", Ranks = 3, },		-- Mana Tide Totem
+    { SpellID = 8170,   ID = "W5", GroupColor = "b8d1ff", },		          -- Disease Cleansing Totem
+    { SpellID = 8166,   ID = "W6", GroupColor = "b8d1ff", },        		  -- Poison Cleansing Totem
+  },
 }
 
-local TOTEM_DATA_BC_CLASSIC = {
-  -- Earth Totems
-  { SpellID = 8075,   ID = "E1", GroupColor = "8B4513", Ranks = 6, Icon ="spell_nature_earthbindtotem", },	-- Strength of Earth Totem
-  { SpellID = 8071,   ID = "E2", GroupColor = "8B4513", Ranks = 8, Icon ="spell_nature_stoneskintotem" },	  -- Stoneskin Totem
-  { SpellID = 5730,   ID = "E3", GroupColor = "8B4513", Ranks = 7, Icon ="spell_nature_stoneclawtotem" },	  -- Stoneclaw Totem
-  { SpellID = 2484,    ID = "E4", GroupColor = "8B4513", Icon ="spell_nature_strengthofearthtotem02" },     -- Earthbind Totem
-  { SpellID = 8143,    ID = "E5", GroupColor = "8B4513", Icon ="spell_nature_tremortotem" },	              -- Tremor Totem
-  { SpellID = 2062,    ID = "E6", GroupColor = "8B4513", Icon ="spell_nature_earthelemental_totem" },	      -- Earth Elemental Totem
-
-  -- Fire Totems
-  { SpellID = 3599, ID = "F1", GroupColor = "ff8f8f", Ranks = 7, Icon ="spell_fire_searingtotem", }, 	    -- Searing Totem
-  { SpellID = 8181, ID = "F2", GroupColor = "ff8f8f", Ranks = 4, Icon ="spell_frostresistancetotem_01" }, -- Frost Resistance Totem
-  { SpellID = 1535, ID = "F3", GroupColor = "ff8f8f", Ranks = 7, Icon ="spell_fire_sealoffire" }, 	      -- Fire Nova Totem
-  { SpellID = 8190, ID = "F4", GroupColor = "ff8f8f", Ranks = 5, Icon ="spell_fire_selfdestruct" }, 	    -- Magma Totem
-  { SpellID = 8227, ID = "F5", GroupColor = "ff8f8f", Ranks = 5, Icon ="spell_nature_guardianward" }, 	  -- Flametongue Totem
-  { SpellID = 2894, ID = "F6", GroupColor = "ff8f8f", Icon ="spell_fire_elemental_totem" }, 	            -- Fire Elemental Totem
-  { SpellID = 30706, ID = "F7", GroupColor = "ff8f8f", Icon ="spell_fire_totemofwrath" }, 	              -- Totem of Wrath
-
-  -- Air Totems
-  { SpellID = 8835,  ID = "A1", GroupColor = "ffb31f", Ranks = 3, Icon ="spell_nature_invisibilitytotem" },		   -- Grace of Air Totem
-  { SpellID = 10595,  ID = "A2", GroupColor = "ffb31f", Ranks = 4, Icon ="spell_nature_natureresistancetotem" }, -- Nature Resistance Totem
-  { SpellID = 15107,  ID = "A3", GroupColor = "ffb31f", Ranks = 4, Icon ="spell_nature_earthbind" },		         -- Windwall Totem
-  { SpellID = 8512,  ID = "A4", GroupColor = "ffb31f", Ranks = 5, Icon ="spell_nature_windfury" },	           	 -- Windfury Totem
-  { SpellID = 8177,   ID = "A5", GroupColor = "ffb31f", Icon ="spell_nature_groundingtotem" },          		     -- Grounding Totem
-  { SpellID = 6495,   ID = "A6", GroupColor = "ffb31f", Icon ="spell_nature_removecurse" },		                   -- Sentry Totem
-  { SpellID = 25908,  ID = "A7", GroupColor = "ffb31f", Icon ="spell_nature_brilliance" },		                   -- Tranquil Air Totem
-  { SpellID = 3738,  ID = "A8", GroupColor = "ffb31f", Icon ="spell_nature_slowingtotem" },		                   -- Wrath of Air Totem
-
-  -- Water Totems
-  { SpellID = 5394,  ID = "W1", GroupColor = "b8d1ff", Ranks = 6, Icon ="inv_spear_04" },		                -- Healing Stream Totem
-  { SpellID = 5675,  ID = "W2", GroupColor = "b8d1ff", Ranks = 5, Icon ="spell_nature_manaregentotem" },		-- Mana Spring Totem
-  { SpellID = 8184,  ID = "W3", GroupColor = "b8d1ff", Ranks = 5, Icon ="spell_fireresistancetotem_01" },		-- Fire Resistance Totem
-  { SpellID = 16190,  ID = "W4", GroupColor = "b8d1ff", Icon ="spell_frost_summonwaterelemental" },		      -- Mana Tide Totem
-  { SpellID = 8170,   ID = "W5", GroupColor = "b8d1ff", Icon ="spell_nature_diseasecleansingtotem" },		    -- Disease Cleansing Totem
-  { SpellID = 8166,   ID = "W6", GroupColor = "b8d1ff", Icon ="spell_nature_poisoncleansingtotem" },        -- Poison Cleansing Totem
-}
-
-local TOTEM_DATA_CLASSIC = {
-  -- Earth Totems
-  { SpellID = 25361,   ID = "E1", GroupColor = "8B4513", Ranks = 5, Icon ="spell_nature_earthbindtotem", },	  -- Strength of Earth Totem
-  { SpellID = 10408,   ID = "E2", GroupColor = "8B4513", Ranks = 6, },	  -- Stoneskin Totem
-  { SpellID = 10428,   ID = "E3", GroupColor = "8B4513", Ranks = 6, },	  -- Stoneclaw Totem
-  { SpellID = 2484,    ID = "E4", GroupColor = "8B4513", },           	  -- Earthbind Totem
-  { SpellID = 8143,    ID = "E5", GroupColor = "8B4513", },	              -- Tremor Totem
-
-  -- Fire Totems
-  { SpellID = 10438, ID = "F1", GroupColor = "ff8f8f", Ranks = 6, Icon ="spell_fire_searingtotem", }, 	  -- Searing Totem
-  { SpellID = 10479, ID = "F2", GroupColor = "ff8f8f", Ranks = 3, }, 	  -- Frost Resistance Totem
-  { SpellID = 11315, ID = "F3", GroupColor = "ff8f8f", Ranks = 5, }, 	  -- Fire Nova Totem
-  { SpellID = 10587, ID = "F4", GroupColor = "ff8f8f", Ranks = 4, }, 	  -- Magma Totem
-  { SpellID = 16387, ID = "F5", GroupColor = "ff8f8f", Ranks = 4, }, 	  -- Flametongue Totem
-
-  -- Air Totems
-  { SpellID = 25359,  ID = "A1", GroupColor = "ffb31f", Ranks = 3, },		-- Grace of Air Totem
-  { SpellID = 10601,  ID = "A2", GroupColor = "ffb31f", Ranks = 3, },		-- Nature Resistance Totem
-  { SpellID = 15112,  ID = "A3", GroupColor = "ffb31f", Ranks = 3, },		-- Windwall Totem
-  { SpellID = 10614,  ID = "A4", GroupColor = "ffb31f", Ranks = 3, },		-- Windfury Totem
-  { SpellID = 8177,   ID = "A5", GroupColor = "ffb31f", },          		-- Grounding Totem
-  { SpellID = 6495,   ID = "A6", GroupColor = "ffb31f", },		          -- Sentry Totem
-  { SpellID = 25908,  ID = "A7", GroupColor = "ffb31f", },		          -- Tranquil Air Totem
-
-  -- Water Totems
-  { SpellID = 10463,  ID = "W1", GroupColor = "b8d1ff", Ranks = 5, },		-- Healing Stream Totem
-  { SpellID = 10497,  ID = "W2", GroupColor = "b8d1ff", Ranks = 4, },		-- Mana Spring Totem
-  { SpellID = 10538,  ID = "W3", GroupColor = "b8d1ff", Ranks = 3, },		-- Fire Resistance Totem
-  { SpellID = 17359,  ID = "W4", GroupColor = "b8d1ff", Ranks = 3, },		-- Mana Tide Totem
-  { SpellID = 8170,   ID = "W5", GroupColor = "b8d1ff", },		          -- Disease Cleansing Totem
-  { SpellID = 8166,   ID = "W6", GroupColor = "b8d1ff", },        		  -- Poison Cleansing Totem
-}
-
-Addon.Data.Totems = 
-  (Addon.IS_CLASSIC and TOTEM_DATA_CLASSIC) or 
-  (Addon.IS_TBC_CLASSIC and TOTEM_DATA_BC_CLASSIC) or
-  (Addon.IS_WRATH_CLASSIC and TOTEM_DATA_WRATH_CLASSIC) or 
-  (Addon.IS_CATA_CLASSIC and TOTEM_DATA_CATA_CLASSIC) or 
-  TOTEM_DATA_RETAIL
 local TOTEM_RANKS_CLASSIC = { " II", " III", " IV", " V", " VI", " VII", " VIII", " IX", " X" }
 
+Addon.Data.Totems = TOTEM_DATA_BY_EXPANSION[Addon.GetExpansionLevel()]
 function Addon:InitializeTotemInformation()
   for _, totem_data in ipairs(Addon.Data.Totems) do
     local spell_info = GetSpellInfo(totem_data.SpellID)
@@ -491,6 +513,7 @@ function Addon:InitializeTotemInformation()
       Addon.TOTEMS[name] = totem_data.ID
 
       -- Add totem ranks for WoW Classic
+      -- if Addon.ExpansionIsBetween(LE_EXPANSION_CLASSIC, LE_EXPANSION_WRATH_OF_THE_LICH_KING) then
       if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
         for rank = 1, (totem_data.Ranks or 1) - 1  do
           Addon.TOTEMS[name .. TOTEM_RANKS_CLASSIC[rank]] = totem_data.ID
@@ -526,7 +549,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
     ScriptingIsEnabled = false,
   },
   char = {
-    welcome = false, -- no longer used since 9.2.0
+    --welcome = false, -- no longer used since 9.2.0
     spec = {} -- true => Tank, false => DPS/Heal }
     -- Still using table here for compatibility with non-classic version of Threat Plates, although only [1] is used in classic.
   },
@@ -563,6 +586,8 @@ ThreatPlates.DEFAULT_SETTINGS = {
       BackgroundUseForegroundColor = false,
       BackgroundOpacity = 0.7, -- old default: 1,
       BackgroundColor = RGB(0, 0, 0),
+      BorderUseForegroundColor = false,
+      BorderColor = RGB(0, 0, 0),
     },
     Name = {
       HealthbarMode = {
@@ -666,8 +691,6 @@ ThreatPlates.DEFAULT_SETTINGS = {
       ForceOutOfCombat = false,
       ForceNonAttackableUnits = false,
       ForceFriendlyInCombat = "NONE",
-      EnemySubtextCustom = "",
-      FriendlySubtextCustom = "",
     },
     Visibility = {
       FriendlyPlayer = { Show = true, UseHeadlineView = false },
@@ -758,6 +781,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
       anchor = "CENTER",
       ShowOrb = true,
       ShowNumber = true,
+      UseFrameSort = false,
       HideName = false,
       colors = {
         [1] = RGB(255,   0,   0, 1),
@@ -777,6 +801,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         ShowOrb = true,
         ShowNumber = true,
         HideName = false,
+        UseFrameSort = false,
         OrbColors = {
           [1] = RGB(  0, 255,   0, 1),
           [2] = RGB(  0, 255,   0, 1),
@@ -1357,7 +1382,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
       y_hv = -20,
       Specialization = "DRUID",
       ColorBySpec = {
-        DEATHKNIGHT = Addon.ExpansionIsClassicAndAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) and {
+        DEATHKNIGHT = Addon.ExpansionIsBetween(LE_EXPANSION_WRATH_OF_THE_LICH_KING, LE_EXPANSION_LEGION) and {
           [1] = RGB(255, 0, 0),
           [2] = RGB(255, 0, 0),
           [3] = RGB(0, 255, 255),
@@ -1534,10 +1559,19 @@ ThreatPlates.DEFAULT_SETTINGS = {
     BossModsWidget = {
       ON = true,
       ShowInHeadlineView = true,
-      x = 0,
-      y = 66,
-      x_hv = 0,
-      y_hv = 40,
+      AnchorTo = "Healthbar",
+      HealthbarMode = {
+        Anchor = "RIGHT",
+        InsideAnchor = false,
+        HorizontalOffset = 14,
+        VerticalOffset = 0,
+      },
+      NameMode = {
+        Anchor = "RIGHT",
+        InsideAnchor = false,
+        HorizontalOffset = 14,
+        VerticalOffset = 0,
+      },
       scale = 40,
       AuraSpacing = 4,
       Font = Addon.DEFAULT_FONT,
@@ -1546,6 +1580,32 @@ ThreatPlates.DEFAULT_SETTINGS = {
       -- TODO: add font flags like for custom text
       --ShowTrackingLine = true, -- Removed in 9.1.9
       --TrackingLineThickness = 4  -- Removed in 9.1.9
+      ShowTimers = true,
+      ShowAuras = true,
+      ShowCooldownSpiral = false,
+      Glow = {
+        Priority = "Important",
+        Type = "Pixel",
+        CustomColor = false,
+        Color = { 0.95, 0.95, 0.32, 1 },
+      },
+      LabelText = {
+        Show = true,
+        Anchor = "LEFT",
+        InsideAnchor = true,
+        HorizontalOffset = 1,
+        VerticalOffset = 0,
+        Font = {
+          Typeface = Addon.DEFAULT_FONT,
+          Size = 9,
+          -- Transparency = 1, -- Alpha is set by the BossMods addon
+          -- Color = RGB(255, 255, 255), -- Color is set by the BossMods addon
+          flags = "",
+          Shadow = true,
+          HorizontalAlignment = "LEFT",
+          VerticalAlignment = "MIDDLE",
+        }
+      },
     },
     ExperienceWidget = {
       ON = false,
@@ -1694,6 +1754,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         showIcon = true,
         useStyle = true,
         useColor = true,
+        UseBorderColor = false,
         UseThreatColor = false,
         UseThreatGlow = false,
         allowMarked = true,
@@ -1712,6 +1773,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
           g = 1,
           b = 1,
         },
+        BorderColor = { r = 0, g = 0, b = 0 },
         Scripts = {
           Type = "Standard",
           Function = "Create",
@@ -1966,7 +2028,6 @@ ThreatPlates.DEFAULT_SETTINGS = {
       art = {
         ON = true,
         theme = "default",
-
       },
       ThreatPercentage = {
         CustomColor = RGB(255, 255, 255),

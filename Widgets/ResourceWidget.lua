@@ -14,7 +14,7 @@ local format = format
 local ceil = ceil
 
 -- WoW APIs
-local UnitExists, UnitPower, UnitPowerMax = UnitExists, UnitPower, UnitPowerMax
+local UnitPower, UnitPowerMax = UnitPower, UnitPowerMax
 local PowerBarColor = PowerBarColor
 local SPELL_POWER_MANA = SPELL_POWER_MANA
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
@@ -33,8 +33,14 @@ local WidgetFrame
 -- Resource Widget Functions
 ---------------------------------------------------------------------------------------------------
 
+local function HideWidgetFrame()
+  local widget_frame = WidgetFrame
+  widget_frame:Hide()
+  widget_frame:SetParent(nil)
+end
+
 -- TODO: Use function from Localization (with one decimal)
-function Widget:ShortNumber(no)
+local function ShortNumber(no)
   if no <= 9999 then
     return no
   elseif no >= 1000000000 then
@@ -46,25 +52,21 @@ function Widget:ShortNumber(no)
   end
 end
 
-local function GetTargetUnitNameplate()
-  return GetNamePlateForUnit("anyenemy") or GetNamePlateForUnit("softfriend")
-end
-
-function Widget:PowerMana(unitid)
+local function PowerMana()
   local SPELL_POWER = SPELL_POWER_MANA
-  local res_value = UnitPower(unitid, SPELL_POWER)
-  local res_max = UnitPowerMax(unitid, SPELL_POWER)
+  local res_value = UnitPower("target", SPELL_POWER)
+  local res_max = UnitPowerMax("target", SPELL_POWER)
   local res_perc = ceil(100 * (res_value / res_max))
 
   local bar_value = res_perc
-  local text_value = self:ShortNumber(res_value)
+  local text_value = ShortNumber(res_value)
 
   return bar_value, text_value
 end
 
-function Widget:PowerGeneric(unitid)
-  local res_value = UnitPower(unitid, SPELL_POWER)
-  local res_max = UnitPowerMax(unitid, SPELL_POWER)
+local function PowerGeneric()
+  local res_value = UnitPower("target")
+  local res_max = UnitPowerMax("target")
   local res_perc = ceil(100 * (res_value / res_max))
 
   return res_perc, res_value
@@ -93,134 +95,97 @@ end
 --SPELL_POWER_PAIN            18      "PAIN"
 
 Widget.POWER_FUNCTIONS = {
-  MANA = Widget.PowerMana,
-  RAGE = Widget.PowerGeneric,
-  FOCUS = Widget.PowerGeneric,
-  ENERGY = Widget.PowerGeneric,
-  COMBO_POINTS = Widget.PowerGeneric,
-  RUNES = Widget.PowerGeneric,
-  RUNIC_POWER = Widget.PowerGeneric,
-  SOUL_SHARDS = Widget.PowerGeneric,
-  LUNAR_POWER = Widget.PowerGeneric,
-  HOLY_POWER = Widget.PowerGeneric,
+  MANA = PowerMana,
+  RAGE = PowerGeneric,
+  FOCUS = PowerGeneric,
+  ENERGY = PowerGeneric,
+  COMBO_POINTS = PowerGeneric,
+  RUNES = PowerGeneric,
+  RUNIC_POWER = PowerGeneric,
+  SOUL_SHARDS = PowerGeneric,
+  LUNAR_POWER = PowerGeneric,
+  HOLY_POWER = PowerGeneric,
   --ALTERNATE_POWER = PowerGeneric,
-  MAELSTROM = Widget.PowerGeneric,
-  CHI = Widget.PowerGeneric,
-  INSANITY = Widget.PowerGeneric,
-  ARCANE_CHARGES = Widget.PowerGeneric,
-  FURY = Widget.PowerGeneric,
-  PAIN = Widget.PowerGeneric,
+  MAELSTROM = PowerGeneric,
+  CHI = PowerGeneric,
+  INSANITY = PowerGeneric,
+  ARCANE_CHARGES = PowerGeneric,
+  FURY = PowerGeneric,
+  PAIN = PowerGeneric,
 }
 
--- function Widget:SetTargetPowerType(widget_frame, unitid)
---   local powerType, powerToken, altR, altG, altB =_G.UnitPowerType(unitid)
+function Widget:SetTargetPowerType(widget_frame, unit)
+  -- Reset the power function by default; it will be reassigned if appropriate
+  self.PowerFunction = nil
 
---   local db = self.db
---   local power_func = self.POWER_FUNCTIONS[powerToken]
---   if UnitPowerMax(unitid) == 0 or (db.ShowOnlyAltPower and power_func) then
---     power_func = nil
---   elseif not power_func then
---     if altR then
---       power_func = Widget.PowerGeneric
---     end
---   end
+  if UnitPowerMax("target") == 0 then return end
 
---   self.PowerFunction = power_func
-
---   if power_func then
---     -- determine color for power
---     local info = PowerBarColor[powerToken]
---     if info then
---       --The PowerBarColor takes priority
---       self.BarColorRed, self.BarColorGreen, self.BarColorBlue = info.r, info.g, info.b;
---     elseif not altR then
---       -- Couldn't find a power token entry. Default to indexing by power type or just mana if  we don't have that either.
---       info = PowerBarColor[powerType] or PowerBarColor["MANA"];
---       self.BarColorRed, self.BarColorGreen, self.BarColorBlue = info.r, info.g, info.b
---     else
---       self.BarColorRed, self.BarColorGreen, self.BarColorBlue = altR, altG, altB
---     end
---   end
--- end
-
-function Widget:SetTargetPowerType(widget_frame, unitid)
   -- The code to determine the power type could be moved to OnUnitAdded, but then code is necessary to determine when
   -- the power type on the unit changes (e.g., a druid that shapeshifts). Mabe there's even bosses that do that?!?
-  local powerType, powerToken, altR, altG, altB =_G.UnitPowerType(unitid)
+  local powerType, powerToken, altR, altG, altB = _G.UnitPowerType("target")
+  -- Fallback to generic function if at least alternate color exists
+  local power_func = self.POWER_FUNCTIONS[powerToken] or PowerGeneric
+  
+  -- Alternate power detection:
+  -- For normal resources, altR, altG, and altB are nil, but PowerBarColor[powerToken] is set.
+  -- For alternate resources, PowerBarColor[powerToken] is nil, but altR, altG, and altB are set.
+  if not altR and self.db.ShowOnlyAltPower then return end
 
-  local db = self.db
-  local power_func = self.POWER_FUNCTIONS[powerToken]
+  -- Determine power bar color
+  local colorInfo = PowerBarColor[powerToken]
 
-  if UnitPowerMax(unitid) == 0 or (db.ShowOnlyAltPower and power_func) then
-    self.PowerFunction = nil
-    return
-  elseif not power_func then
-    if altR then
-      power_func = Widget.PowerGeneric
-    else
-      self.PowerFunction = nil
-      return
-    end
-  end
-
-  -- determine color for power
-  local info = PowerBarColor[powerToken]
-  if info then
-    --The PowerBarColor takes priority
-    self.BarColorRed, self.BarColorGreen, self.BarColorBlue = info.r, info.g, info.b;
-  elseif not altR then
-    -- Couldn't find a power token entry. Default to indexing by power type or just mana if  we don't have that either.
-    info = PowerBarColor[powerType] or PowerBarColor["MANA"];
-    self.BarColorRed, self.BarColorGreen, self.BarColorBlue = info.r, info.g, info.b
-  else
+  if colorInfo then
+    self.BarColorRed, self.BarColorGreen, self.BarColorBlue = colorInfo.r, colorInfo.g, colorInfo.b
+  elseif altR then
     self.BarColorRed, self.BarColorGreen, self.BarColorBlue = altR, altG, altB
+  else
+    colorInfo = PowerBarColor[powerType] or PowerBarColor["MANA"]
+    self.BarColorRed, self.BarColorGreen, self.BarColorBlue = colorInfo.r, colorInfo.g, colorInfo.b
   end
 
   self.PowerFunction = power_func
 end
 
 function Widget:UpdateResourceBar()
-  local widget_frame = WidgetFrame
-
-  local bar_value, text_value = self:PowerFunction(unitid)
+  local bar_value, text_value = self:PowerFunction()
 
   local db = self.db
   if db.ShowBar then
-    widget_frame.Bar:SetValue(bar_value)
+    WidgetFrame.Bar:SetValue(bar_value)
   end
 
   if db.ShowText then
-    widget_frame.Text:SetText(text_value)
+    WidgetFrame.Text:SetText(text_value)
   end
 end
 
+-- UNIT_POWER_UPDATE is only registered for target unit
 function Widget:UNIT_POWER_UPDATE(unitid, powerType)
-  local plate = GetTargetUnitNameplate()
+  local tp_frame = Addon:GetThreatPlateForUnit("target")
 
-  local tp_frame = plate and plate.TPFrame
-  if tp_frame and tp_frame.Active then
-    if self.ShowWidget then
-      self:UpdateResourceBar(unitid)
-    end
+  if tp_frame and WidgetFrame:IsShown() then
+    self:UpdateResourceBar()
   end
 end
 
--- If only target nameplates are shonw, only the event for loosing the (soft) target is fired, but no event
--- for the new (soft) target is fired. The new target nameplate must be handled via NAME_PLATE_UNIT_ADDED.
+-- UNIT_DISPLAYPOWER is only registered for target unit
+function Widget:UNIT_DISPLAYPOWER(unitid)
+  local tp_frame = Addon:GetThreatPlateForUnit("target")
+
+  if tp_frame then
+    self:OnTargetUnitAdded(tp_frame, tp_frame.unit)
+  end
+end
 
 function Widget:PLAYER_TARGET_CHANGED()
-  local plate = GetTargetUnitNameplate()
-  local tp_frame = plate and plate.TPFrame
-  if tp_frame and tp_frame.Active then
+  local tp_frame = Addon:GetThreatPlateForUnit("target")
+
+  if tp_frame then
     self:OnTargetUnitAdded(tp_frame, tp_frame.unit)
   else
-    WidgetFrame:Hide()
-    WidgetFrame:SetParent(nil)
+    HideWidgetFrame()
   end
 end
-
-Widget.PLAYER_SOFT_ENEMY_CHANGED = Widget.PLAYER_TARGET_CHANGED
-Widget.PLAYER_SOFT_FRIEND_CHANGED = Widget.PLAYER_TARGET_CHANGED
 
 ---------------------------------------------------------------------------------------------------
 -- Widget functions for creation and update
@@ -258,13 +223,8 @@ end
 -- EVENT: UNIT_POWER_UPDATE: "unitID", "powerType"
 function Widget:OnEnable()
   self:SubscribeEvent("PLAYER_TARGET_CHANGED")
-  self:SubscribeEvent("PLAYER_SOFT_ENEMY_CHANGED")
-  self:SubscribeEvent("PLAYER_SOFT_FRIEND_CHANGED")
-  self:UnsubscribeEvent("UNIT_POWER_UPDATE", "target")
-  self:UnsubscribeEvent("UNIT_POWER_UPDATE", "softenemy")
-  self:UnsubscribeEvent("UNIT_POWER_UPDATE", "softfriend")
-
-  -- Widget:RegisterEvent("UNIT_DISPLAYPOWER") -- use this to determine power type changes on units
+  self:SubscribeUnitEvent("UNIT_POWER_UPDATE", "target")
+  self:SubscribeUnitEvent("UNIT_DISPLAYPOWER", "target")
 end
 
 -- function Widget:OnDisable()
@@ -276,68 +236,74 @@ function Widget:EnabledForStyle(style, unit)
 end
 
 function Widget:OnTargetUnitAdded(tp_frame, unit)
-  local db = self.db
+  if not unit.isTarget then return end
+
   local widget_frame = WidgetFrame
-
-  self.ShowWidget = false
-
-  local show
-  if unit.type == "PLAYER" then
-    show = (unit.reaction == "FRIENDLY" and db.ShowFriendly) or db.ShowEnemyPlayer
-  else
-    show = ((unit.isBoss or unit.isRare) and db.ShowEnemyBoss) or db.ShowEnemyNPC
+  if not self:EnabledForStyle(unit.style, unit) then 
+    HideWidgetFrame()
+    return
   end
 
-  if show and (unit.isTarget or unit.IsSoftEnemyTarget or unit.IsSoftFriendTarget) then
-    self:SetTargetPowerType(widget_frame, unit.unitid)
+  local db = self.db
+  local show_for_unit
+  if unit.reaction == "FRIENDLY" then
+    show_for_unit = db.ShowFriendly
+  else
+    if unit.type == "PLAYER" then
+      show_for_unit = db.ShowEnemyPlayer
+    elseif unit.isBoss or unit.isRare then
+      show_for_unit = db.ShowEnemyBoss
+    else
+      show_for_unit = db.ShowEnemyNPC
+    end
+  end
+  if not show_for_unit then 
+    HideWidgetFrame()
+    return
+  end
 
-    if self.PowerFunction then
-      self.ShowWidget = true
+  self:SetTargetPowerType(widget_frame, unit)
+  if not self.PowerFunction then 
+    HideWidgetFrame()
+    return
+  end
 
-      widget_frame:SetParent(tp_frame)
-      widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 8)
-      widget_frame:ClearAllPoints()
-      widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
+  widget_frame:SetParent(tp_frame)
+  widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 8)
+  widget_frame:ClearAllPoints()
+  widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
 
-      if db.ShowBar then
-        widget_frame.Bar:SetStatusBarColor(self.BarColorRed, self.BarColorGreen, self.BarColorBlue, 1)
+  if db.ShowBar then
+    widget_frame.Bar:SetStatusBarColor(self.BarColorRed, self.BarColorGreen, self.BarColorBlue, 1)
 
-        if db.BackgroundUseForegroundColor then
-          widget_frame.Background:SetVertexColor(self.BarColorRed, self.BarColorGreen, self.BarColorBlue, 0.3)
-        else
-          local color = db.BackgroundColor
-          widget_frame.Background:SetVertexColor(color.r, color.g, color.b, color.a)
-        end
+    if db.BackgroundUseForegroundColor then
+      widget_frame.Background:SetVertexColor(self.BarColorRed, self.BarColorGreen, self.BarColorBlue, 0.3)
+    else
+      local color = db.BackgroundColor
+      widget_frame.Background:SetVertexColor(color.r, color.g, color.b, color.a)
+    end
 
-        if db.BorderUseForegroundColor then
-          widget_frame.Border:SetBackdropBorderColor(self.BarColorRed, self.BarColorGreen, self.BarColorBlue, 1)
-        elseif db.BorderUseBackgroundColor then
-          local color = db.BackgroundColor
-          widget_frame.Border:SetBackdropBorderColor(color.r, color.g, color.b, color.a)
-        else
-          local color = db.BorderColor
-          widget_frame.Border:SetBackdropBorderColor(color.r, color.g, color.b, color.a)
-        end
-      end
-
-      self:UpdateResourceBar(unit.unitid)
-
-      widget_frame:Show()
+    if db.BorderUseForegroundColor then
+      widget_frame.Border:SetBackdropBorderColor(self.BarColorRed, self.BarColorGreen, self.BarColorBlue, 1)
+    elseif db.BorderUseBackgroundColor then
+      local color = db.BackgroundColor
+      widget_frame.Border:SetBackdropBorderColor(color.r, color.g, color.b, color.a)
+    else
+      local color = db.BorderColor
+      widget_frame.Border:SetBackdropBorderColor(color.r, color.g, color.b, color.a)
     end
   end
 
-  if not self.ShowWidget then
-    self:OnTargetUnitRemoved()
-  end
+  self:UpdateResourceBar()
+  widget_frame:Show()
 end
 
-function Widget:OnTargetUnitRemoved()
+function Widget:OnTargetUnitRemoved(tp_frame, unit)
   -- OnTargetUnitAdded and OnTargetUnitRemoved are called for all target units including soft-target units. 
   -- Only hide the widget if the nameplate for the unit is removed that shows the widget
-  if tp_frame ~= WidgetFrame:GetParent() then return end
-  
-  WidgetFrame:Hide()
-  WidgetFrame:SetParent(nil)
+  if tp_frame == WidgetFrame:GetParent() then
+    HideWidgetFrame()
+  end  
 end
 
 function Widget:UpdateLayout()

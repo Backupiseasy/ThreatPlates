@@ -24,28 +24,70 @@ Addon.IS_CLASSIC_SOD = (Addon.IS_CLASSIC and (select(4, GetBuildInfo()) >= 11500
 Addon.IS_TBC_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_BURNING_CRUSADE)
 Addon.IS_WRATH_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_WRATH_OF_THE_LICH_KING)
 Addon.IS_CATA_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_CATACLYSM)
+Addon.IS_MISTS_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_MISTS_OF_PANDARIA)
 Addon.IS_MAINLINE = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
 -- Addon.IS_TBC_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC and LE_EXPANSION_LEVEL_CURRENT == LE_EXPANSION_BURNING_CRUSADE)
 -- Addon.IS_WRATH_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC and LE_EXPANSION_LEVEL_CURRENT == LE_EXPANSION_WRATH_OF_THE_LICH_KING)
-Addon.WOW_USES_CLASSIC_NAMEPLATES = (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC or Addon.IS_CATA_CLASSIC)
--- ? Addon.WOW_FEATURE_ABSORBS
 
-Addon.ExpansionIsClassicAndAtLeast = function(expansion_id)
-	-- Method does not exist which means that this is the most recent / highest WoW version (Mainline) 
-	-- so we have to return true
-	-- Method exists, so this is a Classic WoW version, but as the expansion id is unknown, the expansion is 
-	-- an older one, so we have to return false
-	if Addon.IS_MAINLINE or not GetClassicExpansionLevel or not expansion_id then
-		return false
-	else
+-- For Mainline, this always returns true. 
+Addon.ExpansionIsAtLeast = function(expansion_id)
+	if Addon.IS_MAINLINE then 
+		return true 
+	elseif not expansion_id then 
+		-- Expansion id is unknown (not sure if that can ever happen), so the expansion is an older one: return false
+		return false 
+	else			
+		-- GetClassicExpansionLevel should be defined here as version is not mainline
 		return GetClassicExpansionLevel() >= expansion_id
 	end
 end
 
--- For Mainline, this always returns true. 
-Addon.ExpansionIsAtLeast = function(expansion_id)
-	return Addon.IS_MAINLINE or Addon.ExpansionIsClassicAndAtLeast(expansion_id)
+-- Does not work for expansion_id_start = LE_EXPANSION_CLASSIC
+Addon.ExpansionIsBetween = function(expansion_id_start, expansion_id_end)
+	if GetClassicExpansionLevel then
+		local classic_expansion_level = GetClassicExpansionLevel()
+		return classic_expansion_level >= expansion_id_start and classic_expansion_level <= expansion_id_end
+	else
+		return false
+	end
 end
+
+Addon.GetExpansionLevel = function ()
+	if Addon.IS_MAINLINE then
+		return "MAINLINE"
+	elseif Addon.IS_CLASSIC then
+		return LE_EXPANSION_CLASSIC
+	else
+		return GetClassicExpansionLevel()
+	end
+end
+
+Addon.WOW_USES_CLASSIC_NAMEPLATES = not Addon.ExpansionIsAtLeast(LE_EXPANSION_LEGION)
+-- Absorbs bug in Mists: https://github.com/Stanzilla/WoWUIBugs/issues/736
+Addon.WOW_FEATURE_ABSORBS =  Addon.ExpansionIsAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA)
+Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER =  not Addon.WOW_USES_CLASSIC_NAMEPLATES
+
+Addon.ExpansionIsAtLeastTBC = Addon.ExpansionIsAtLeast(LE_EXPANSION_BURNING_CRUSADE)
+Addon.ExpansionIsAtLeastWrath = Addon.ExpansionIsAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING)
+Addon.ExpansionIsAtLeastCata = Addon.ExpansionIsAtLeast(LE_EXPANSION_CATACLYSM)
+Addon.ExpansionIsAtLeastMists = Addon.ExpansionIsAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA)
+Addon.ExpansionIsAtLeastWoD = Addon.ExpansionIsAtLeast(LE_EXPANSION_WARLORDS_OF_DRAENOR)
+Addon.ExpansionIsAtLeastLegion = Addon.ExpansionIsAtLeast(LE_EXPANSION_LEGION)
+Addon.ExpansionIsAtLeastBfA = Addon.ExpansionIsAtLeast(LE_EXPANSION_BATTLE_FOR_AZEROTH)
+Addon.ExpansionIsAtLeastDF = Addon.ExpansionIsAtLeast(LE_EXPANSION_DRAGONFLIGHT)
+
+---------------------------------------------------------------------------------------------------
+-- Constants with different values in different expansions
+---------------------------------------------------------------------------------------------------
+
+Addon.NAMEPLATE_MAX_DISTANCE_MAX_VALUE = {
+  [LE_EXPANSION_CLASSIC] = 20,
+  [LE_EXPANSION_BURNING_CRUSADE] = 41,
+  [LE_EXPANSION_WRATH_OF_THE_LICH_KING] = 41,
+  [LE_EXPANSION_CATACLYSM] = 41,
+  [LE_EXPANSION_MISTS_OF_PANDARIA] = 41,
+  MAINLINE = 100,
+}
 
 ---------------------------------------------------------------------------------------------------
 -- Libraries
@@ -164,7 +206,14 @@ Addon.Cache = {
 if Addon.IS_MAINLINE then
 	Addon.UnitDetailedThreatSituationWrapper = UnitDetailedThreatSituation
 	Addon.IsSoloShuffle = C_PvP.IsSoloShuffle
-	Addon.GetSpellInfo = C_Spell.GetSpellInfo 
+	Addon.GetSpellInfo = C_Spell.GetSpellInfo
+elseif Addon.IS_MISTS_CLASSIC then
+	Addon.UnitDetailedThreatSituationWrapper = UnitDetailedThreatSituation
+	
+	-- Not available in Mists Classic
+	Addon.IsSoloShuffle = function() return false end
+
+	Addon.GetSpellInfo = C_Spell.GetSpellInfo
 else
   Addon.UnitDetailedThreatSituationWrapper = function(source, target)
     local is_tanking, status, threatpct, rawthreatpct, threat_value = UnitDetailedThreatSituation(source, target)
@@ -194,6 +243,10 @@ else
 	end
 end
 
+--------------------------------------------------------------------------------------------------
+-- Compatibility with other addons 
+---------------------------------------------------------------------------------------------------
+
 ---------------------------------------------------------------------------------------------------
 -- Aura Highlighting
 ---------------------------------------------------------------------------------------------------
@@ -209,6 +262,14 @@ local function Wrapper_AutoCastGlow_Start(frame, color, framelevel)
 	Addon.LibCustomGlow.AutoCastGlow_Start(frame, color, nil, nil, nil, nil, nil, nil, framelevel)
 end
 
+-- As there can be several custom styles with different glow effects be active on a unit, we have to stop all here
+local function Wrapper__PixelGlow_Stop(highlight_frame)
+  Addon.LibCustomGlow.ButtonGlow_Stop(highlight_frame)
+  Addon.LibCustomGlow.PixelGlow_Stop(highlight_frame)
+  Addon.LibCustomGlow.AutoCastGlow_Stop(highlight_frame)
+	highlight_frame:Hide()
+end
+
 Addon.CUSTOM_GLOW_FUNCTIONS = {
 	Button = { "ButtonGlow_Start", "ButtonGlow_Stop", 8 },
 	Pixel = { "PixelGlow_Start", "PixelGlow_Stop", 3 },
@@ -219,7 +280,56 @@ Addon.CUSTOM_GLOW_WRAPPER_FUNCTIONS = {
 	ButtonGlow_Start = Wrapper_ButtonGlow_Start,
 	PixelGlow_Start = Wrapper_PixelGlow_Start,
 	AutoCastGlow_Start = Wrapper_AutoCastGlow_Start,
+	Glow_Stop = Wrapper__PixelGlow_Stop,
 }
+
+---------------------------------------------------------------------------------------------------
+-- Functions for cooldown handling incl. OmniCC support
+---------------------------------------------------------------------------------------------------
+
+local function SetShownCooldownSwipe(self, show_cooldown_swipe, hide_omnic_cc)
+  if show_cooldown_swipe then
+    self:SetDrawEdge(true)
+    self:SetDrawSwipe(true)
+  else
+    self:SetDrawEdge(false)
+    self:SetDrawSwipe(false)
+  end
+
+  -- Fix for OmnniCC cooldown numbers being shown on auras
+  if self.noCooldownCount ~= hide_omnic_cc then
+    self.noCooldownCount = hide_omnic_cc
+    -- Force an update on OmniCC cooldowns
+    self:Hide()
+    self:Show()
+  end
+end
+
+local function SetCooldown(self, start, duration)
+  if start and duration and start > 0 and duration > 0 then
+    self:SetCooldown(start, duration)
+  else
+    self:Clear()
+  end
+end
+
+Addon.CreateCooldown = function (parent, hide_omnic_cc)
+  -- When the cooldown shares the frameLevel of its parent, the icon texture can sometimes render
+  -- ontop of it. So it looks like it's not drawing a cooldown but it's just hidden by the icon.
+
+  local frame = _G.CreateFrame("Cooldown", nil, parent, "ThreatPlatesCooldownSwipe")
+  frame:SetAllPoints(parent.Icon)
+  frame:SetReverse(true)
+  frame:SetHideCountdownNumbers(true)
+	frame:SetFrameLevel(parent:GetFrameLevel())
+  
+	frame.noCooldownCount = hide_omnic_cc
+
+	frame.SetShownSwipe = SetShownCooldownSwipe
+	frame.Set = SetCooldown
+
+  return frame
+end
 
 --------------------------------------------------------------------------------------------------
 -- General Functions

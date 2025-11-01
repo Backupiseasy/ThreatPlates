@@ -1,17 +1,240 @@
+﻿------------------------------------------------------
+13.0.0 (..-..--)
 ------------------------------------------------------
-12.0.10 (2024-09-14)
+* Masque support
+* Separate coloring modes for friendly and enemy units in healthbar and name-only mode
+* Highlight border for custom style icons (like totems)
+* Option to enable/disable to show interrupt source for casts
+* Animations (scaling/fading) for nameplates that are shown/hidden/change size
+* Removed disconnected option for coloring
+
 ------------------------------------------------------
-* Fixed a bug that caused the target and combo points widget on (soft-)target unit to be hidden when a (soft-)target unit died [GH-528, GH-554].
+12.6.2 (2025-10-22)
+------------------------------------------------------
+* Fixed a bug that prevented turning the camera while the right mouse button was held down and the cursor was hovering over an aura with aura tooltips enabled [Comment #7764].
+* Fixed a Lua error that occurred when enabling bar mode for auras [GH-613].
+
+------------------------------------------------------
+12.6.1 (2025-10-07)
+------------------------------------------------------
+* Updated list of instance IDs of Delves for custom nameplates [PR GH-612 by tflo].
+* Updated TOC version for Patch 11.2.5 for WoW Mainline.
+* Updated TOC version for Patch 5.5.1 for WoW Mists Classic [PR GH-611 by Adal4].
+
+------------------------------------------------------
+12.6.0 (2025-09-14)
+------------------------------------------------------
+* Added an option to change the healthbar border color [GH-600 by PolyBadger].
+
+------------------------------------------------------
+12.5.2 (2025-09-07)
+------------------------------------------------------
+* Fixed a Lua error that occurred on Death Knights when Blizzard-style combo points were used in Mists Classic.
+
+------------------------------------------------------
+12.5.1 (2025-09-03)
+------------------------------------------------------
+* Fixed a bug where internal variables were made global, which could cause issues with other addons [PR GH-608 by tflo].
+
+------------------------------------------------------
+12.5.0 (2025-08-31)
+------------------------------------------------------
+* Name-based custom nameplates now also work with just a player's name. There is no longer a need to include title and realm [PR GH-602 by tflo].
+* Added cooldown swipe support to the BossMods widget [Comment #7694].
+* Added Thunderstorm from Traveling Storms (Shaman) as a CC aura to the Auras widget [GH-606].
+
+------------------------------------------------------
+12.4.4 (2025-08-25)
+------------------------------------------------------
+* Fixed a bug that prevented the castbar from appearing after the nameplate was hidden while the unit was casting [GH-603, GH-604].
+* Fixed a bug that prevented DBM from correctly determining whether the Threat Plates BossMods widget was enabled.
+
+------------------------------------------------------
+12.4.3 (2025-08-18)
+------------------------------------------------------
+* Fixed a bug that prevented the castbar from hiding reliably for non-interruptible casts after a stun [GH-599].
+
+------------------------------------------------------
+12.4.2 (2025-08-11)
+------------------------------------------------------
+* Fixed a bug in the ComboPoints widget that prevented combo points from displaying correctly after a target switch [Comment #7712].
+
+------------------------------------------------------
+12.4.1 (2025-08-11)
+------------------------------------------------------
+* Fixed a typo that prevented all auras from being processed in certain situations in WoW Mainline.
+* Added Fist of Justice (Paladin) and Scatter Shot, Ice Trap, Entrapment (triggered by Ice Trap and Snake Trap, Hunter) as a CC aura to the Auras widget [Comment #7706].
+
+------------------------------------------------------
+12.4.0 (2025-08-07)
+------------------------------------------------------
+* Added support for enabling and disabling custom nameplates in instances by instance ID in Delves [GH-593].
+* Removed soft-target support for the Resource widgets resource update tracking for soft-targets is not currently supported by the WoW API. Additionally, resource updates for the current target were not working if soft-targeting was disabled in WoW [GH-590].
+* Fixed a bug in the Resource widget that was preventing the visibility settings for players and NPCs being working as intended.
+* Fixed a bug in the BossMods widget that was preventing the label from being disabled [Comment #7702]. The transparency setting has also been removed, as color and transparency are already set by the BossMods addon.
+* Fixed a Lua error that occurred when entering a full icon path in the custom nameplate icon selection [GH-595].
+* Fixed a bug affecting event registration compatibility across all versions of WoW.
+* In the BossMods widget, the borders around the icons are now removed automatically.
+* Improved DBM integration for BossMods widget so that DBM's own aura and timer icons are shown when BossMods widget is disabled.
+* Updated TOC version for Patch 11.2.0 for WoW Mainline.
+
+------------------------------------------------------
+12.3.10 (2025-07-16)
+------------------------------------------------------
+* Fixed a bug in Quest widget that prevented the healthbar of quest units from being highlighted in the quest color.
+* If LibDualSpec cannot be loaded for any reason, an error message will be printed to the chat instead of a Lua error being thrown.
+
+------------------------------------------------------
+12.3.9 (2025-07-06)
+------------------------------------------------------
+* Fixed a Lua error that prevented the combo points widget from displaying Death Knight runes in Mists Classic [GH-592].
+
+------------------------------------------------------
+12.3.8 (2025-07-06)
+------------------------------------------------------
+* Fixed a Lua error that occurred when opening the options due to LibDualSpec not being loaded in Mists Classic [GH-591, Comment #7656, #7668, #7676].
+* Updated integrated libraries (Ace3 r1364-alpha).
+
+------------------------------------------------------
+12.3.7 (2025-07-06)
+------------------------------------------------------
+* Improved off-tank detection in dungeons and raids for WoW Classic SoD.
+
+------------------------------------------------------
+12.3.7 (2025-07-06)
+------------------------------------------------------
+* Fixed a bug that prevented off-tank detection from working on Retail and Mists Classic, due to incorrect detection of other players' roles [GH-589].
+
+------------------------------------------------------
+12.3.6 (2025-07-05)
+------------------------------------------------------
+* Updated integrated library LibDualSpec to v1.27.0 to fix a Lua error that occurred when hovering over the dual spec options in the 'Profile' tab of the options.
+
+------------------------------------------------------
+12.3.5 (2025-07-04)
+------------------------------------------------------
+* Fixed a bug in the Quest widget that prevented Quest indicators from being displayed in localizations where quest progress was shown to the left of the quest objective (e.g. in English) [Comment ##7657].
+
+------------------------------------------------------
+12.3.4 (2025-07-04)
+------------------------------------------------------
+* Fixed a Lua error in WoW Classic that occurred because the Quest widget was not disabled correctly [GH-588, Comment #7655].
+
+------------------------------------------------------
+12.3.3 (2025-07-03)
+------------------------------------------------------
+* Enabled Quest widget for Mists Classic as quest tooltips are now available there.
+
+------------------------------------------------------
+12.3.2 (2025-07-03)
+------------------------------------------------------
+* Fixed a bug that was preventing target markers from being shown [GH-587].
+
+------------------------------------------------------
+12.3.1 (2025-07-02)
+------------------------------------------------------
+* Fixed a bug that was preventing the display of Chi points for Monks in the Combo Points widget.
+
+------------------------------------------------------
+12.3.0 (2025-07-02)
+------------------------------------------------------
+* Added support for WoW Mists of Pandaria Classic [GH-582].
+* Extended the scripting API to change most of the icon textures used in Threat Plates. More documentation can be found here: https://github.com/Backupiseasy/ThreatPlates/wiki/Scripts-%E2%80%90-Icon-Textures.
+* Updated integrated libraries (Ace3 r1362-alpha, LibSharedMedia-3.0 v11.1.1).
+
+------------------------------------------------------
+12.2.3 (2025-06-18)
+------------------------------------------------------
+* Fixed a bug in the script editor that caused updates to script code to be applied to the wrong custom style.
+* Fixed a bug that prevented some nameplate UI elements from being updated when script code was updated.
+* Updated TOC version for Patch 11.1.7 for WoW Mainline.
+
+------------------------------------------------------
+12.2.2 (2025-06-09)
+------------------------------------------------------
+* Added function TidyPlatesThreat:OpenOptionsDialog to open the Threat Plates options dialog from other addons.
+
+------------------------------------------------------
+12.2.1 (2025-06-01)
+------------------------------------------------------
+* Fixed a bug that prevented nameplates from reappearing after a Hunter's Feign Death had ended [GH-583].
+
+------------------------------------------------------
+12.2.0 (2025-05-29)
+------------------------------------------------------
+* HealerTracker widget has been improved so that it now works in arenas too (only for WoW Mainline) [Comment #7565].
+* Added support for DBM cooldown icons to BossMods widget.
+* Nameplates now will be immediately hidden when a mob dies similar to WoW default nameplates [GH-529, GH-576].
+* Unfriendly reaction color will also be used for attackable unfriendly units.
+* Added metadata to show Threat Plates in "Unit Frames" addon category.
+* Updated TOC version for Patch 1.15.7 for WoW Classic.
+* Updated integrated libraries (LibSharedMedia-3.0 v11.1.0, LibDualSpec-1.0 v1.26.0).
+
+------------------------------------------------------
+12.1.2 (2025-05-17)
+------------------------------------------------------
+* Updated integrated library LibCustomGlow to 1.0.4-4-gdc135fe-alpha to fix Lua error "Attempted to release inactive object" [GH-579, GH-578, Comment #7592].
+
+------------------------------------------------------
+12.1.1 (2025-04-23)
+------------------------------------------------------
+* Updated TOC version for Patch 11.1.5 for WoW Mainline.
+
+------------------------------------------------------
+12.1.0 (2025-03-07)
+------------------------------------------------------
+* Fixed a bug that caused widgets to not update when transparency settings were changed.
+* Improved performance of Healer Tracker widget by limiting combat log parsing for spell detection to battlegrounds and world PvP (during combat only).
+* Added FrameSort support to the Arena widget [PR GH-560].
+
+------------------------------------------------------
+12.0.16 (2025-02-26)
+------------------------------------------------------
+* Updated TOC version for Patch 11.1.0 for WoW Mainline.
+
+------------------------------------------------------
+12.0.15 (2025-02-23)
+------------------------------------------------------
+* Fixed a bug that caused supercharged combo points to not be displayed in the Combo Points widget [GH-567].
+* Updated TOC version for Patch 4.4.2 for WoW Cataclysm Classic.
+
+------------------------------------------------------
+12.0.14 (2025-02-16)
+------------------------------------------------------
+* Updated TOC version for Patch 1.15.6 for WoW Classic.
+
+------------------------------------------------------
+12.0.13 (2024-12-20)
+------------------------------------------------------
+* Updated TOC version for Patch 11.0.7 for WoW Mainline and Path 1.15.5 for WoW Classic.
+* Updated integrated libraries (LibDualSpec-1.0 v1.0.4-3-gc60c916-alpha).
+
+------------------------------------------------------
+12.0.12 (2024-11-01)
+------------------------------------------------------
+* Updated TOC version for Patch 4.4.1 for Cataclysm Classic.
+
+------------------------------------------------------
+12.0.11 (2024-10-23)
+------------------------------------------------------
+* Updated TOC version for Patch 11.0.5 for WoW Mainline.
+
+------------------------------------------------------
+12.0.10 (2024-10-18)
+------------------------------------------------------
+* Fixed several bugs that caused the target and Combo Points widget on (soft-)target units to disappear when a (soft-)target unit died [GH-528, GH-554, Comment #7442, #7444].
 * Fixed a bug that caused nameplates to be shown at a lower position when Only Names was enabled.
-* Fixed a Lua error that occurred when defining a custom style with an empty trigger value. 
+* Fixed a Lua error that occurred when defining a custom style with an empty trigger value [GH-555]. 
 * Fixed spell ID for CC Aura Banish (Warlock) in WoW Classic SoD [Comment #7414].
+* Updated list of spells to detect healers in Healer Tracker widget [GH-558].
 * Updated integrated libraries (Ace3 Release-r1349).
+* Updated TOC version for Classic Patch 1.15.4.
 
 ------------------------------------------------------
 12.0.9 (2024-07-15)
 ------------------------------------------------------
 * Fixed list of Shaman totems for TWW - added Totem of Wrath and Stone Bulwark Totem and removed non-existent totems [GH-550].
-* Fixed a bug that prevented totems with a spell rank from being recognised correctly in WoW Classic.
+* Fixed a bug that prevented totems with a spell rank from being recognized correctly in WoW Classic.
 
 ------------------------------------------------------
 12.0.8 (2024-07-15)
@@ -38,7 +261,7 @@
 12.0.4 (2024-07-14)
 ------------------------------------------------------
 * Fixed a bug that prevented CVars from being reset to their default value in General - Blizzard Settings.
-* Fixed a bug that prevented rogues with Just a Flesh Wund rune from being recognised as tanks in WoW Classic SoD.
+* Fixed a bug that prevented rogues with Just a Flesh Wound rune from being recognized as tanks in WoW Classic SoD.
 * Fixed some bugs due to API changes in Patch 11.0.2. 
 * Updated TOC version for Patch 11.0.2 for WoW Mainline.
 

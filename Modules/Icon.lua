@@ -41,7 +41,7 @@ local UseMasque, UseBorderlessIcons
 
 function IconModule.RegisterMasqueGroup(widget, name)
   if UseMasque then
-    local masque_group = Addon.LibMasque:Group(Addon.ThreatPlates.ADDON_NAME, name)
+    local masque_group = Addon.LibMasque:Group(Addon.ADDON_NAME, name)
     masque_group:SetCallback(function() Addon.Widgets:UpdateSettings(widget.Name) end)
     masque_groups[widget] = masque_group
   end

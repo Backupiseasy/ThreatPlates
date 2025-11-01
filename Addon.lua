@@ -18,7 +18,8 @@ local GetCVar, IsAddOnLoaded = GetCVar, C_AddOns.IsAddOnLoaded
 local C_NamePlate, Lerp =  C_NamePlate, Lerp
 local C_Timer_After = C_Timer.After
 local NamePlateDriverFrame = NamePlateDriverFrame
-local UnitClass, GetNumSpecializations, GetSpecializationInfo = UnitClass, GetNumSpecializations, GetSpecializationInfo
+local UnitClass = UnitClass
+local GetSpecializationInfo = C_SpecializationInfo and C_SpecializationInfo.GetSpecializationInfo or _G.GetSpecializationInfo
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -189,6 +190,7 @@ function Addon:ReloadTheme()
 
   -- Re-read all cached settings, ideally do not update any UI elements here
   Addon:InitializeCustomNameplates()
+  Addon:InitializeIconTextures()
   Addon:UpdateSettings()
   Addon.Widgets:InitializeAllWidgets() -- UpdateSettings and enable widgets
 
@@ -211,7 +213,8 @@ end
 function Addon:CheckForFirstStartUp()
   local db = self.db.global
 
-  if Addon.IS_MAINLINE then
+  -- GetNumSpecializations: Mists - Patch 5.0.4 (2012-08-28): Replaced GetNumTalentTabs.
+  if Addon.ExpansionIsAtLeastMists then
     local spec_roles = self.db.char.spec
     if #spec_roles ~= GetNumSpecializations() then
       for i = 1, GetNumSpecializations() do
@@ -344,10 +347,10 @@ function TidyPlatesThreat:OnInitialize()
   Addon.LibSharedMedia.RegisterCallback(Addon, "LibSharedMedia_Registered", "MediaUpdate" )
   
   -- Setup Interface panel options
-  local app_name = ThreatPlates.ADDON_NAME
+  local app_name = Addon.ADDON_NAME
   local dialog_name = app_name .. " Dialog"
   LibStub("AceConfig-3.0"):RegisterOptionsTable(dialog_name, ThreatPlates.GetInterfaceOptionsTable())
-  Addon.LibAceConfigDialog:AddToBlizOptions(dialog_name, ThreatPlates.ADDON_NAME)
+  Addon.LibAceConfigDialog:AddToBlizOptions(dialog_name, Addon.ADDON_NAME)
 
   -- Setup chat commands
   self:RegisterChatCommand("tptp", "ChatCommand")

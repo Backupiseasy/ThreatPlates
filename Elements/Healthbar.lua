@@ -37,6 +37,8 @@ local BorderBackdrop = {
   insets = { left = 0, right = 0, top = 0, bottom = 0 }
 }
 
+local COLOR_BLACK = Addon.RGB(0, 0, 0)
+
 ---------------------------------------------------------------------------------------------------
 -- Element code
 ---------------------------------------------------------------------------------------------------
@@ -483,11 +485,25 @@ local function ColorUpdate(tp_frame, color)
 
   if not healthbar:IsShown() then return end
 
+  --print("Color Update:", Addon.Debug:ColorToString(color))
   healthbar:SetStatusBarColor(color.r, color.g, color.b, 1)
+  
   if not SettingsHealthbar.BackgroundUseForegroundColor then
     color = SettingsHealthbar.BackgroundColor
   end
   healthbar.Background:SetVertexColor(color.r, color.g, color.b, 1 - SettingsHealthbar.BackgroundOpacity)
+
+  -- For simplicity, border color is uneffected by marks, threat, etc.
+  local border_color  
+  if style == "unique" then
+    border_color = (unique_setting.UseBorderColor and unique_setting.BorderColor) or COLOR_BLACK
+  elseif SettingsHealthbar.BorderUseForegroundColor then
+    border_color = color
+  else
+    border_color = SettingsHealthbar.BorderColor
+  end 
+  -- 100% color values are not saved in the database
+  healthbar.Border:SetBackdropBorderColor(border_color.r or 1, border_color.g or 1, border_color.b or 1, 1)
 end
 
 function Element.UpdateSettings()
@@ -522,15 +538,9 @@ function Element.UpdateSettings()
 end
 
 SubscribeEvent(Element, "UNIT_MAXHEALTH", UnitMaxHealthUpdate)
-
-if Addon.IS_MAINLINE then  
-  -- UNIT_HEALTH, UNIT_HEALTH_FREQUENT: 
-  --   Shadowlands Patch 9.0.1 (2020-10-13): Removed. Replaced by UNIT HEALTH which is no longer aggressively throttled.
-  --   Cataclysm Patch 4.0.6 (2011-02-08): Added.
-  SubscribeEvent(Element, "UNIT_HEALTH", UnitHealthbarUpdate)
-    -- Absorbs should have been added with Mists
-  SubscribeEvent(Element, "UNIT_ABSORB_AMOUNT_CHANGED", UnitHealthbarUpdate)
-  SubscribeEvent(Element, "UNIT_HEAL_ABSORB_AMOUNT_CHANGED", UnitHealthbarUpdate)
-else
-  SubscribeEvent(Element, "UNIT_HEALTH_FREQUENT", UnitHealthbarUpdate)
-end
+SubscribeEvent(Element, "UNIT_HEALTH", UnitHealthbarUpdate)
+SubscribeEvent(Element, "UNIT_HEALTH_FREQUENT", UnitHealthbarUpdate)
+-- UnitGetTotalAbsorbs: Mists - Patch 5.2.0 (2013-03-05): Added.
+SubscribeEvent(Element, "UNIT_ABSORB_AMOUNT_CHANGED", UnitHealthbarUpdate)
+-- UnitGetTotalHealAbsorbs: Mists - Patch 5.4.0 (2013-09-10): Added.
+SubscribeEvent(Element, "UNIT_HEAL_ABSORB_AMOUNT_CHANGED", UnitHealthbarUpdate)

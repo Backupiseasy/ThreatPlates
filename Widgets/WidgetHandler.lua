@@ -269,8 +269,14 @@ function WidgetHandler:InitializeWidget(widget_name)
 end
 
 function WidgetHandler:InitializeAllWidgets()
+  -- Initialize the script widget first, so that it is available for all other widgets, especially
+  -- things done in OnEnable
+  self:InitializeWidget("Script")
+
   for widget_name, _ in pairs(self.Widgets) do
-    self:InitializeWidget(widget_name)
+    if widget_name ~= "Script" then
+      self:InitializeWidget(widget_name)
+    end
   end
 end
 
@@ -332,7 +338,11 @@ function WidgetHandler:DisableWidget(widget_name)
     self.EnabledTargetWidgets[widget_name] = nil
 
     widget:OnDisable()
-    widget:OnTargetUnitRemoved()
+    for _, tp_frame in pairs(Addon.PlatesCreated) do
+      if tp_frame.unit.IsSoftTarget then
+        widget:OnTargetUnitRemoved(tp_frame, tp_frame.unit)
+      end
+    end
   elseif widget.FocusOnly then
     self.EnabledFocusWidget = nil
 
@@ -533,3 +543,9 @@ end
 --    end
 --  end
 --end
+
+function Addon:DebugWidgetHandler()
+  for event, _ in pairs(WidgetHandler.RegisteredEventsByWidget) do
+    Addon.Logging.Debug("    Event:", event)
+  end
+end

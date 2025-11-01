@@ -49,10 +49,10 @@ local ThreatModule = Addon.Threat
 -- Wrapper functions for WoW Classic
 ---------------------------------------------------------------------------------------------------
 
-if not Addon.IS_MAINLINE then
-  -- UnitGroupRolesAssigned does still not seem to work in Classic
-  UnitGroupRolesAssigned = function(target_unit)
-    return (GetPartyAssignment("MAINTANK", target_unit) and "TANK") or "NONE"
+if not Addon.ExpansionIsAtLeastMists then
+  -- UnitGroupRolesAssigned does still not seem to work in Classic before Mists
+  UnitGroupRolesAssignedWrapper = function(target_unit)
+    return (GetPartyAssignment("MAINTANK", target_unit) and "TANK") or _G.UnitGroupRolesAssigned(target_unit) or "NONE"
   end
 end
 
@@ -140,7 +140,7 @@ local function CheckIfUnitIsOfftanked(unit, threat_level, other_player_has_aggro
           local target_threat_situation = UnitThreatSituation(target_unit, unit.unitid) or 0
           if target_threat_situation > 1 then
             -- Target unit does tank unit, so check if target unit is a tank or an tank-like pet/guardian
-            if ("TANK" == UnitGroupRolesAssigned(target_unit) and not UnitIsUnit("player", target_unit)) or UnitIsUnit(target_unit, "pet") or IsOffTankCreature(target_unit) then
+            if ("TANK" == UnitGroupRolesAssignedWrapper(target_unit) and not UnitIsUnit("player", target_unit)) or UnitIsUnit(target_unit, "pet") or IsOffTankCreature(target_unit) then
               unit.IsOfftanked = true
             else
               -- Target unit does tank unit, but is not a tank or a tank-like pet/guardian

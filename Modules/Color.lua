@@ -32,20 +32,10 @@ local _G =_G
 local ColorModule = Addon.Color
 
 ---------------------------------------------------------------------------------------------------
--- Wrapper functions for WoW Classic
----------------------------------------------------------------------------------------------------
-
--- Quest tooltips: not sure since when available
-if not Addon.IS_MAINLINE then
-  -- Quest widget is not available in Classic
-  Addon.ShowQuestUnit = function(...) return false end
-end
-
----------------------------------------------------------------------------------------------------
 -- Constants
 ---------------------------------------------------------------------------------------------------
 
-local TRANPARENT_COLOR = Addon.RGB(0, 0, 0, 0)
+local TRANSPARENT_COLOR = Addon.RGB(0, 0, 0, 0)
 
 ---------------------------------------------------------------------------------------------------
 -- Cached configuration settings (for performance reasons)
@@ -195,8 +185,12 @@ local function GetColorByReaction(unit)
       color = ColorByReaction[UNIT_COLOR_MAP[unit.reaction][unit_type][unit_is_pvp][player_is_pvp]]
     end
   -- * From here: For NPCs (without pets)
-  elseif not UnitCanAttack("player", unit.unitid) and unit.blue < 0.1 and unit.green > 0.5 and unit.green < 0.6 and unit.red > 0.9 then
-    -- Handle non-attackable units with brown healtbars - currently, I know no better way to detect this.
+  elseif unit.blue < 0.1 and unit.green > 0.5 and unit.green < 0.6 and unit.red > 0.9 then
+    -- Unfriendly NPCs are shown with a brown healthbar color. 
+    -- These NPCs can have a UnitReaction of 3 (neutral) or 4 (hostile), e.g., Addled Enforcer in The Ringing Deeps.
+    -- Checking for UnitReaction("player", unit.unitid) == 3 will not work reliably.
+    -- Before TWW, I thought that only non-attackable units are shown in brown, but in TWW there are now 
+    -- also attackable unfriendly NPCs with brown healthbars. 
     color = ColorByReaction.UnfriendlyFaction
   else
     color = ColorByReaction[UNIT_COLOR_MAP[unit.reaction][unit_type]]
@@ -444,10 +438,10 @@ local function UpdatePlateColors(tp_frame)
 
   -- When a nameplate is initalized, colors (e.g., unit.ReactionColor) are not yet defined, so GetHealthbarColor
   -- returns nil
-  tp_frame.HealthbarColor = tp_frame:GetHealthbarColor() or TRANPARENT_COLOR
+  tp_frame.HealthbarColor = tp_frame:GetHealthbarColor() or TRANSPARENT_COLOR
   PublishEvent("HealthbarColorUpdate", tp_frame, tp_frame.HealthbarColor)
 
-  tp_frame.NameColor = tp_frame:GetNameColor() or TRANPARENT_COLOR
+  tp_frame.NameColor = tp_frame:GetNameColor() or TRANSPARENT_COLOR
   PublishEvent("NameColorUpdate", tp_frame, tp_frame.NameColor)
 end
 
@@ -457,7 +451,6 @@ function ColorModule.PlateUnitAdded(tp_frame)
   if tp_frame.PlateStyle == "None" then return end
   
   UpdatePlateColors(tp_frame)
-  --print ("Unit:", unit.name, "-> Updating Plate Colors:", Addon.Debug:ColorToString(tp_frame:GetHealthbarColor()))
 end
 
 -- Called in processing event: UpdateStyle in Nameplate.lua
@@ -547,6 +540,7 @@ function ColorModule.UpdateSettings()
 
   ColorByReaction = SettingsBase.ColorByReaction
   ColorByHealth = SettingsBase.ColorByHealth
+  HealthColorCache = {}
 
   -- NameModeSettings.HealthbarMode.UseTargetColoring = SettingsBase.targetWidget.ModeNames
   -- NameModeSettings.HealthbarMode.UseFocusColoring = SettingsBase.FocusWidget.ModeNames
@@ -626,9 +620,31 @@ function ColorModule.SetCastbarColor(unit)
 
 	db = db.settings.castbar
 	if db.BackgroundUseForegroundColor then
-		return c.r, c.g, c.b, c.a, c.r, c.g, c.b, 1 - db.BackgroundOpacity
+		return c.r, c.g, c.b, c.a, c.r, c.g, c.b, 1 - db.BackgroundOpacity, 0, 0, 0
 	else
 		local color = db.BackgroundColor
-		return c.r, c.g, c.b, c.a, color.r, color.g, color.b, 1 - db.BackgroundOpacity
+		return c.r, c.g, c.b, c.a, color.r, color.g, color.b, 1 - db.BackgroundOpacity, 0, 0, 0
 	end
+end
+
+function ColorModule.PrintDebug() 
+  local plate = C_NamePlate.GetNamePlateForUnit("target")
+  if not plate or not plate.TPFrame then return end
+
+  local tp_frame = plate.TPFrame
+  Addon.Logging.Debug("Color Module Settings:")
+  Addon.Logging.Debug("  Color:", Addon.Debug:ColorToString(tp_frame:GetHealthbarColor()))
+  Addon.Logging.Debug("  Color by Health:", IsColorByHealth(tp_frame))
+  Addon.Logging.Debug("  Type:")
+  Addon.Logging.Debug("    By Reaction:", Addon.Debug:ColorToString(GetUnitColorByReaction(tp_frame)))
+  Addon.Logging.Debug("    By Class:", Addon.Debug:ColorToString(GetUnitColorByClass(tp_frame)))
+  Addon.Logging.Debug("    By Health:", Addon.Debug:ColorToString(GetUnitColorByHealth(tp_frame)))
+  Addon.Logging.Debug("    By CustomPlate:", Addon.Debug:ColorToString(GetUnitColorCustomPlate(tp_frame)))
+  local plate_style, unit = tp_frame.PlateStyle, tp_frame.unit
+  Addon.Logging.Debug("  - Situational:", Addon.Debug:ColorToString(GetSituationalColorForHealthbar(unit, plate_style)))
+  Addon.Logging.Debug("  - Combat:", Addon.Debug:ColorToString(GetCombatColor(unit, plate_style)))
+  Addon.Logging.Debug("  - Class:", Addon.Debug:ColorToString(GetColorByClass(unit, plate_style)))
+  Addon.Logging.Debug("  - Reaction:", Addon.Debug:ColorToString(GetColorByReaction(unit, plate_style)))
+
+  UpdatePlateColors(tp_frame)
 end

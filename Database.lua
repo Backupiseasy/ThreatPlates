@@ -564,6 +564,16 @@ local function CurrentVersionIsOlderThan(current_version, max_version)
   end
 end
 
+local CurrentVersion = VersionToNumber(Addon.Meta("version"))
+
+function TidyPlatesThreat:VersionIsAtLeast(min_version)
+  if CurrentVersion == 0 then return true end -- Always return true in development (version = "@project-version@")
+
+  local min_version_no, _ = VersionToNumber(min_version)
+  return min_version_no > 0 and CurrentVersion >= min_version_no
+end
+
+
 ---------------------------------------------------------------------------------------------------
 -- Functions to access or manipulate entries
 ---------------------------------------------------------------------------------------------------
@@ -1205,23 +1215,6 @@ local function MigrateThreatValue(_, profile)
 end
 
 
-local function MigrationThreatSystemEnable(_, profile)
-  if DatabaseEntryExists(profile, { "threat", "ON" } and profile.threat.ON == false) then
-    -- If the database entry exists, it should always be false, but just to be sure
-    profile.threat.useScale = false
-    profile.threat.useAlpha = false
-    profile.threat.art = profile.threat.art or {}
-    profile.threat.art.ON = false
-    profile.threat.useHPColor = false
-    profile.threat.ThreatPercentage = profile.threat.ThreatPercentage or {}
-    profile.threat.ThreatPercentage.ShowAlways = false
-    profile.threat.ThreatPercentage.ShowInGroups = false
-    profile.threat.ThreatPercentage.ShowWithPet = false
-  end
-
-  DatabaseEntryDelete(profile, { "threat", "ON" })
-end
-
 local function MigrateFontFlagsNONE(_, profile)
   local function MigrateFontFlagsEntry(profile_to_migrate, keys)
     if DatabaseEntryExists(profile_to_migrate, keys) then
@@ -1313,6 +1306,65 @@ local function MigrateSetJustifyVCENTER(_, profile)
   MigrateVerticalAlignmentEntry(profile, { "settings", "castbar", "CastTarget", "Font", })
 end
 
+local function MigrateAnchorsForWidgets(profile_name, profile)
+  if DatabaseEntryExists(profile, { "BossModsWidget" }) then
+    local default_profile = ThreatPlates.DEFAULT_SETTINGS.profile
+
+    profile.BossModsWidget.HealthbarMode = profile.BossModsWidget.HealthbarMode or {}
+    profile.BossModsWidget.NameMode = profile.BossModsWidget.NameMode or {}
+
+    profile.BossModsWidget.HealthbarMode.HorizontalOffset = GetValueOrDefault(profile.BossModsWidget.x, default_profile.BossModsWidget.HealthbarMode.HorizontalOffset)
+    profile.BossModsWidget.HealthbarMode.VerticalOffset = GetValueOrDefault(profile.BossModsWidget.y, default_profile.BossModsWidget.HealthbarMode.VerticalOffset)
+    profile.BossModsWidget.NameMode.HorizontalOffset = GetValueOrDefault(profile.BossModsWidget.x_hv, default_profile.BossModsWidget.NameMode.HorizontalOffset)
+    profile.BossModsWidget.NameMode.VerticalOffset = GetValueOrDefault(profile.BossModsWidget.y_hv, default_profile.BossModsWidget.NameMode.VerticalOffset)
+
+    DatabaseEntryDelete(profile, { "BossModsWidget", "x" })
+    DatabaseEntryDelete(profile, { "BossModsWidget", "y" })
+    DatabaseEntryDelete(profile, { "BossModsWidget", "x_hv" })
+    DatabaseEntryDelete(profile, { "BossModsWidget", "y_hv" })
+  end
+end
+
+local function MigrationThreatSystemEnable(_, profile)
+  if DatabaseEntryExists(profile, { "threat", "ON" } and profile.threat.ON == false) then
+    -- If the database entry exists, it should always be false, but just to be sure
+    profile.threat.useScale = false
+    profile.threat.useAlpha = false
+    profile.threat.art = profile.threat.art or {}
+    profile.threat.art.ON = false
+    profile.threat.useHPColor = false
+    profile.threat.ThreatPercentage = profile.threat.ThreatPercentage or {}
+    profile.threat.ThreatPercentage.ShowAlways = false
+    profile.threat.ThreatPercentage.ShowInGroups = false
+    profile.threat.ThreatPercentage.ShowWithPet = false
+  end
+
+  DatabaseEntryDelete(profile, { "threat", "ON" })
+end
+
+local function MigrateForReleaseV13(profile_name, profile)
+  local default_profile = ThreatPlates.DEFAULT_SETTINGS.profile
+
+  profile.Healthbar = profile.Healthbar or {}
+  
+  -- DatabaseEntryExists(profile, { "friendlyClass" } and profile.threat.ON == true)
+  if profile.healthColorChange then
+    profile.Healthbar.FriendlyUnitMode = "HEALTH"
+    profile.Healthbar.EnemyUnitMode = "HEALTH"
+  else
+    if profile.friendlyClass then
+      profile.Healthbar.FriendlyUnitMode = "CLASS"
+    end
+    if profile.allowClass then
+      profile.Healthbar.EnemyUnitMode = "CLASS"
+    end
+  end
+
+  DatabaseEntryDelete(profile, { "healthColorChange" })
+  DatabaseEntryDelete(profile, { "friendlyClass" })
+  DatabaseEntryDelete(profile, { "allowClass" })
+end
+
 ---------------------------------------------------------------------------------------------------
 -- Main migration function & settings
 ---------------------------------------------------------------------------------------------------
@@ -1365,23 +1417,7 @@ local MIGRATION_FUNCTIONS_BY_VERSION = {
   },
   ["9.2.0"] = {
     { Type = "Migrate", Name = "Spelltext Position", Function = MigrateSpelltextPosition, NoDefaultProfile = true, Version = not Addon.IS_CLASSIC},
-    { Type = "Migrate", Name = "Fix Focus Target Texture", Function = FixTargetFocusTexture, NoDefaultProfile = true },
-    { Type = "Delete", Key = { "ShowThreatGlowOffTank" } }, -- never used
-    { Type = "Delete", Key = { "ColorByReaction", "DisconnectedUnit" } },
-    { Type = "Delete", Key = { "tidyplatesFade" } },
-    { Type = "Delete", Key = { "threat", "nonCombat" } }, -- migrated in 9.1.3
-    { Type = "Delete", Key = { "healthColorChange" } },
-    { Type = "Delete", Key = { "allowClass" } },
-    { Type = "Delete", Key = { "friendlyClass" } },
-    { Type = "Delete", Key = { "threat", "hideNonCombat" } },
-    { Type = "Delete", Key = { "aHPbarColor", } },
-    { Type = "Delete", Key = { "bHPbarColor", } },
-    { Type = "Delete", Key = { "settings", "name", } },
-    { Type = "Delete", Key = { "HeadlineView", "name", } },
-    { Type = "Delete", Key = { "blizzFadeS", } },
-    { Type = "Delete", Key = { "cache", } },
-    { Type = "Delete", Key = { "cacheClass", } },
-    { Type = "Delete", Key = { "customColor", } },
+    { Type = "Migrate", Name = "Fix Focus Target Texture", Function = FixTargetFocusTexture, NoDefaultProfile = true },    
   },
   ["9.2.2"] = {
     { Type = "Migrate", Name = "Custom Styles V3", Function = MigrateCustomStylesToV3 , Version = not Addon.IS_CLASSIC },
@@ -1415,77 +1451,129 @@ local MIGRATION_FUNCTIONS_BY_VERSION = {
   ["10.3.6"] = {
     { Type = "Migrate", Name = "Threat Value", Function = MigrateThreatValue, NoDefaultProfile = true },
   },
-  ["10.6.0"] = {
-    -- TODO: MigrateDeprecatedSettingsEntries
-    -- Color settings for healthbar and name
-    { Type = "Rename", FromKey = { "settings", "healthbar", "BackgroundUseForegroundColor" }, ToKey = { "Healthbar", "BackgroundUseForegroundColor" }, },
-    { Type = "Rename", FromKey = { "settings", "healthbar", "BackgroundOpacity" }, ToKey = { "Healthbar", "BackgroundOpacity" }, },
-    { Type = "Rename", FromKey = { "settings", "healthbar", "BackgroundColor" }, ToKey = { "Healthbar", "BackgroundColor" }, },
-    { Type = "Rename", FromKey =  { "settings", "raidicon", "hpColor" }, ToKey = { "Healthbar", "UseRaidMarkColoring" }, },
-    { Type = "Rename", FromKey =  { "settings", "name", "FriendlyTextColorMode" }, ToKey = { "Name", "HealthbarMode", "FriendlyUnitMode" }, },
-    { Type = "Rename", FromKey =  { "settings", "name", "FriendlyTextColor" }, ToKey = { "Name", "HealthbarMode", "FriendlyTextColor" }, },
-    { Type = "Rename", FromKey =  { "settings", "name", "EnemyTextColorMode" }, ToKey = { "Name", "HealthbarMode", "EnemyUnitMode" }, },
-    { Type = "Rename", FromKey =  { "settings", "name", "EnemyTextColor" }, ToKey = { "Name", "HealthbarMode", "EnemyTextColor" }, },
-    { Type = "Rename", FromKey =  { "settings", "name", "UseRaidMarkColoring" }, ToKey = { "Name", "HealthbarMode", "UseRaidMarkColoring" }, },
-    { Type = "Rename", FromKey =  { "HeadlineView", "FriendlyTextColorMode" }, ToKey = { "Name", "NameMode", "FriendlyUnitMode" }, },
-    { Type = "Rename", FromKey =  { "HeadlineView", "FriendlyTextColor" }, ToKey = { "Name", "NameMode", "FriendlyTextColor" }, },
-    { Type = "Rename", FromKey =  { "HeadlineView", "EnemyTextColorMode" }, ToKey = { "Name", "NameMode", "EnemyUnitMode" }, },
-    { Type = "Rename", FromKey =  { "HeadlineView", "EnemyTextColor" }, ToKey = { "Name", "NameMode", "EnemyTextColor" }, },
-    { Type = "Rename", FromKey =  { "HeadlineView", "UseRaidMarkColoring" }, ToKey = { "Name", "NameMode", "UseRaidMarkColoring" }, },
-    -- Customtext is now Status Text
-    { Type = "Rename", FromKey =  { "settings", "customtext", "x" }, ToKey = { "StatusText", "HealthbarMode", "HorizontalOffset" }, },
-    { Type = "Rename", FromKey =  { "settings", "customtext", "y" }, ToKey = { "StatusText", "HealthbarMode", "VerticalOffset" }, },
-    { Type = "Rename", FromKey =  { "settings", "customtext", "typeface" }, ToKey = { "StatusText", "HealthbarMode", "Font", "Typeface" }, },
-    { Type = "Rename", FromKey =  { "settings", "customtext", "size" }, ToKey = { "StatusText", "HealthbarMode", "Font", "Size" }, },
-    { Type = "Rename", FromKey =  { "settings", "customtext", "width" }, ToKey = { "StatusText", "HealthbarMode", "Font", "Width" }, },
-    { Type = "Rename", FromKey =  { "settings", "customtext", "height" }, ToKey = { "StatusText", "HealthbarMode", "Font", "Height" }, },
-    { Type = "Rename", FromKey =  { "settings", "customtext", "align" }, ToKey = { "StatusText", "HealthbarMode", "Font", "HorizontalAlignment" }, },
-    { Type = "Rename", FromKey =  { "settings", "customtext", "vertical" }, ToKey = { "StatusText", "HealthbarMode", "Font", "VerticalAlignment" }, },
-    { Type = "Rename", FromKey =  { "settings", "customtext", "shadow" }, ToKey = { "StatusText", "HealthbarMode", "Font", "Shadow" }, },
-    { Type = "Rename", FromKey =  { "settings", "customtext", "flags" }, ToKey = { "StatusText", "HealthbarMode", "Font", "flags" }, },
-    { Type = "Rename", FromKey =  { "settings", "customtext", "FriendlySubtext" }, ToKey = { "StatusText", "HealthbarMode", "FriendlySubtext" }, },
-    { Type = "Rename", FromKey =  { "settings", "customtext", "EnemySubtext" }, ToKey = { "StatusText", "HealthbarMode", "EnemySubtext" }, },
-    { Type = "Rename", FromKey =  { "settings", "customtext", "SubtextColorUseHeadline" }, ToKey = { "StatusText", "HealthbarMode", "SubtextColorUseHeadline" }, },
-    { Type = "Rename", FromKey =  { "settings", "customtext", "SubtextColorUseSpecific" }, ToKey = { "StatusText", "HealthbarMode", "SubtextColorUseSpecific" }, },
-    { Type = "Rename", FromKey =  { "settings", "customtext", "SubtextColor" }, ToKey = { "StatusText", "HealthbarMode", "SubtextColor" }, },
-    { Type = "Rename", FromKey =  { "HeadlineView", "customtext", "x" }, ToKey = { "StatusText", "NameMode", "HorizontalOffset" }, },
-    { Type = "Rename", FromKey =  { "HeadlineView", "customtext", "y" }, ToKey = { "StatusText", "NameMode", "VerticalOffset" }, },
-    { Type = "Rename", FromKey =  { "HeadlineView", "customtext", "size" }, ToKey = { "StatusText", "NameMode", "Font", "Size" }, },
-    { Type = "Rename", FromKey =  { "HeadlineView", "customtext", "align" }, ToKey = { "StatusText", "NameMode", "Font", "HorizontalAlignment" }, },
-    { Type = "Rename", FromKey =  { "HeadlineView", "customtext", "vertical" }, ToKey = { "StatusText", "NameMode", "Font", "VerticalAlignment" }, },
-    -- Name settings for healthbar and headline view
-    { Type = "Rename", FromKey =  { "HeadlineView", "name", "size" }, ToKey = { "Name", "NameMode", "Size" }, },
-    { Type = "Rename", FromKey =  { "HeadlineView", "name", "x" }, ToKey = { "Name", "NameMode", "HorizontalOffset" }, },
-    { Type = "Rename", FromKey =  { "HeadlineView", "name", "y" }, ToKey = { "Name", "NameMode", "VerticalOffset" }, },
-    { Type = "Rename", FromKey =  { "HeadlineView", "name", "align" }, ToKey = { "Name", "NameMode", "Font", "HorizontalAlignment" }, },
-    { Type = "Rename", FromKey =  { "HeadlineView", "name", "vertical" }, ToKey = { "Name", "NameMode", "Font", "VerticalAlignment" }, },
-    { Type = "Rename", FromKey =  { "settings", "name", "show" }, ToKey = { "Name", "HealthbarMode", "Enabled" }, },
-    { Type = "Rename", FromKey =  { "settings", "name", "x" }, ToKey = { "Name", "HealthbarMode", "HorizontalOffset" }, },
-    { Type = "Rename", FromKey =  { "settings", "name", "y" }, ToKey = { "Name", "HealthbarMode", "VerticalOffset" }, },
-    { Type = "Rename", FromKey =  { "settings", "name", "typeface" }, ToKey = { "Name", "HealthbarMode", "Font", "Typeface" }, },
-    { Type = "Rename", FromKey =  { "settings", "name", "size" }, ToKey = { "Name", "HealthbarMode", "Font", "Size", }, },
-    { Type = "Rename", FromKey =  { "settings", "name", "shadow" }, ToKey = { "Name", "HealthbarMode", "Font", "Shadow" }, },
-    { Type = "Rename", FromKey =  { "settings", "name", "flags" }, ToKey = { "Name", "HealthbarMode", "Font", "flags" }, },
-    { Type = "Rename", FromKey =  { "settings", "name", "align" }, ToKey = { "Name", "HealthbarMode", "Font", "HorizontalAlignment" }, },
-    { Type = "Rename", FromKey =  { "settings", "name", "vertical" }, ToKey = { "Name", "HealthbarMode", "Font", "VerticalAlignment" }, },
-    { Type = "Rename", FromKey =  { "settings", "name", "width" }, ToKey = { "Name", "HealthbarMode", "Font", "Width" }, },
-    { Type = "Rename", FromKey =  { "settings", "name", "height" }, ToKey = { "Name", "HealthbarMode", "Font", "Height" }, },
-    { Type = "Rename", FromKey =  { "Transparency", "Fadeing" }, ToKey = { "Animations", "EnableFading" }, },
-    -- Others
-    { Type = "Rename", FromKey =  { "HeadlineView", "ShowTargetHighlight" }, ToKey = { "targetWidget", "ShowInHeadlineView" }, },
-    { Type = "Rename", FromKey =  { "HeadlineView", "ShowFocusHighlight" }, ToKey = { "FocusWidget", "ShowInHeadlineView" }, },
-    { Type = "Rename", FromKey =  { "threatWidget", "ThreatPercentage" }, ToKey = { "threat", "ThreatPercentage" }, },
-    { Type = "Delete", Key = { "ShowThreatGlowOnAttackedUnitsOnly" } },
-    { Type = "Delete", Key = { "settings", "unique" } },
-    { Type = "Delete", Key = { "settings", "totem" } },
-    { Type = "Delete", Key = { "settings", "normal" } },
-    { Type = "Migrate", Name = "Threat System - Enable", Function = MigrationThreatSystemEnable, NoDefaultProfile = true },
-  },
   ["11.1.25"] = {
     { Type = "Migrate", Name = "Font Flag NONE", Function = MigrateFontFlagsNONE, NoDefaultProfile = true },
   },
   ["12.0.4"] = {
     { Type = "Migrate", Name = "JustifyV CENTER", Function = MigrateSetJustifyVCENTER, NoDefaultProfile = true },
+  },
+  ["12.1.0"] = {
+    { Type = "Migrate", Name = "BossMods Anchors", Function = MigrateAnchorsForWidgets, NoDefaultProfile = true },
+  },
+  ["13.0.0"] = {
+    -- char.welcome { Type = "Delete", Key = { "welcome", } },
+    -- char.specInfo { Type = "Delete", Key = { "specInfo", } },
+    { Type = "Delete", Key = { "blizzFadeS" } },
+    { Type = "Delete", Key = { "customColor" } },
+    { Type = "Delete", Key = { "cacheClass", } },
+    { Type = "Delete", Key = { "ShowThreatGlowOffTank" } }, -- never used
+    { Type = "Delete", Key = { "tidyplatesFade" } }, -- removed in 10.1.0 as it was no longer used
+    { Type = "Delete", Key = { "threat", "nonCombat" } }, -- migrated in 9.1.3
+    { Type = "Delete", Key = { "ShowThreatGlowOnAttackedUnitsOnly" } }, -- No longer supported    
+    { Type = "Delete", Key = { "ColorByReaction", "DisconnectedUnit" } }, -- No longer supported
+    { Type = "Migrate", FromKey = { "aHPbarColor", }, ToKey = { "ColorByHealth", "Low" }, },
+    { Type = "Migrate", FromKey = { "bHPbarColor", }, ToKey = { "ColorByHealth", "High" }, },
+
+    { Type = "Migrate", Name = "Release V13.0.0", Function = MigrateForReleaseV13, NoDefaultProfile = true },
+
+    -- NameOnly: HeadlineView - name
+    { Type = "Rename", FromKey = { "HeadlineView", "name", "size" },           ToKey = { "Name", "NameMode", "Font", "Size" }, },
+    { Type = "Rename", FromKey = { "HeadlineView", "name", "x" },              ToKey = { "Name", "NameMode", "HorizontalOffset" }, },
+    { Type = "Rename", FromKey = { "HeadlineView", "name", "y" },              ToKey = { "Name", "NameMode", "VerticalOffset" }, },
+    { Type = "Rename", FromKey = { "HeadlineView", "name", "align" },          ToKey = { "Name", "NameMode", "Font", "HorizontalAlignment" }, },
+    { Type = "Rename", FromKey = { "HeadlineView", "name", "vertical" },       ToKey = { "Name", "NameMode", "Font", "VerticalAlignment" }, },
+    -- NameOnly: HeadlineView - customtext
+    { Type = "Rename", FromKey = { "HeadlineView", "customtext", "size" },     ToKey = { "StatusText", "NameMode", "Font", "Size" }, },
+    { Type = "Rename", FromKey = { "HeadlineView", "customtext", "x" },        ToKey = { "StatusText", "NameMode", "HorizontalOffset" }, },
+    { Type = "Rename", FromKey = { "HeadlineView", "customtext", "y" },        ToKey = { "StatusText", "NameMode", "VerticalOffset" }, },
+    { Type = "Rename", FromKey = { "HeadlineView", "customtext", "align" },    ToKey = { "StatusText", "NameMode", "Font", "HorizontalAlignment" }, },
+    { Type = "Rename", FromKey = { "HeadlineView", "customtext", "vertical" }, ToKey = { "StatusText", "NameMode", "Font", "VerticalAlignment" }, },
+    -- NameOnly: HeadlineView  - Name
+    { Type = "Rename", FromKey = { "HeadlineView", "FriendlyTextColorMode" },  ToKey = { "Name", "NameMode", "FriendlyUnitMode" }, },
+    { Type = "Rename", FromKey = { "HeadlineView", "FriendlyTextColor" },      ToKey = { "Name", "NameMode", "FriendlyTextColor" }, },
+    { Type = "Rename", FromKey = { "HeadlineView", "EnemyTextColorMode" },     ToKey = { "Name", "NameMode", "EnemyUnitMode" }, },
+    { Type = "Rename", FromKey = { "HeadlineView", "EnemyTextColor" },         ToKey = { "Name", "NameMode", "EnemyTextColor" }, },
+    { Type = "Rename", FromKey = { "HeadlineView", "UseRaidMarkColoring" },    ToKey = { "Name", "NameMode", "UseRaidMarkColoring" }, },
+    -- NameOnly: HeadlineView - Status Text
+    { Type = "Rename", FromKey = { "HeadlineView", "SubtextColorUseHeadline" }, ToKey = { "StatusText", "NameMode", "SubtextColorUseHeadline" }, },
+    { Type = "Rename", FromKey = { "HeadlineView", "SubtextColorUseSpecific" }, ToKey = { "StatusText", "NameMode", "SubtextColorUseSpecific" }, },
+    { Type = "Rename", FromKey = { "HeadlineView", "SubtextColorUseSpecific" }, ToKey = { "StatusText", "NameMode", "SubtextColor" }, },
+    { Type = "Rename", FromKey = { "HeadlineView", "EnemySubtext" },            ToKey = { "StatusText", "NameMode", "EnemySubtext" }, },
+    { Type = "Rename", FromKey = { "HeadlineView", "EnemySubtextCustom" },      ToKey = { "StatusText", "NameMode", "EnemySubtextCustom" }, },
+    { Type = "Rename", FromKey = { "HeadlineView", "FriendlySubtext" },         ToKey = { "StatusText", "NameMode", "FriendlySubtext" }, },
+    { Type = "Rename", FromKey = { "HeadlineView", "FriendlySubtextCustom" },   ToKey = { "StatusText", "NameMode", "FriendlySubtextCustom" }, },
+    -- Others
+    { Type = "Rename", FromKey =  { "HeadlineView", "ShowTargetHighlight" }, ToKey = { "targetWidget", "ShowInHeadlineView" }, },
+    { Type = "Rename", FromKey =  { "HeadlineView", "ShowFocusHighlight" },  ToKey = { "FocusWidget", "ShowInHeadlineView" }, },
+    -- Delete empty entries
+    { Type = "Delete", Key = { "HeadlineView", "name", } },
+    { Type = "Delete", Key = { "HeadlineView", "customtext", } },
+
+    -- Cleanup threatWidget and remove tankedWidget
+    { Type = "Migrate", Name = "Threat System - Enable", Function = MigrationThreatSystemEnable, NoDefaultProfile = true },
+    { Type = "Rename", FromKey =  { "threatWidget", "ThreatPercentage" }, ToKey = { "threat", "ThreatPercentage" }, },
+    { Type = "Delete", Key = { "threatWidget" } },
+    { Type = "Delete", Key = { "tankedWidget" } },
+
+    -- Healthbar: color settings 
+    { Type = "Rename", FromKey = { "settings", "healthbar", "BackgroundUseForegroundColor" }, ToKey = { "Healthbar", "BackgroundUseForegroundColor" }, },
+    { Type = "Rename", FromKey = { "settings", "healthbar", "BackgroundOpacity" },            ToKey = { "Healthbar", "BackgroundOpacity" }, },
+    { Type = "Rename", FromKey = { "settings", "healthbar", "BackgroundColor" },              ToKey = { "Healthbar", "BackgroundColor" }, },
+    
+    -- Healthbar: name settings
+    { Type = "Rename", FromKey = { "settings", "name", "show" },                  ToKey = { "Name", "HealthbarMode", "Enabled" }, },
+    { Type = "Rename", FromKey = { "settings", "name", "x" },                     ToKey = { "Name", "HealthbarMode", "HorizontalOffset" }, },
+    { Type = "Rename", FromKey = { "settings", "name", "y" },                     ToKey = { "Name", "HealthbarMode", "VerticalOffset" }, },
+    { Type = "Rename", FromKey = { "settings", "name", "typeface" },              ToKey = { "Name", "HealthbarMode", "Font", "Typeface" }, },
+    { Type = "Rename", FromKey = { "settings", "name", "size" },                  ToKey = { "Name", "HealthbarMode", "Font", "Size", }, },
+    { Type = "Rename", FromKey = { "settings", "name", "shadow" },                ToKey = { "Name", "HealthbarMode", "Font", "Shadow" }, },
+    { Type = "Rename", FromKey = { "settings", "name", "flags" },                 ToKey = { "Name", "HealthbarMode", "Font", "flags" }, },
+    { Type = "Rename", FromKey = { "settings", "name", "align" },                 ToKey = { "Name", "HealthbarMode", "Font", "HorizontalAlignment" }, },
+    { Type = "Rename", FromKey = { "settings", "name", "vertical" },              ToKey = { "Name", "HealthbarMode", "Font", "VerticalAlignment" }, },
+    { Type = "Rename", FromKey = { "settings", "name", "width" },                 ToKey = { "Name", "HealthbarMode", "Font", "Width" }, },
+    { Type = "Rename", FromKey = { "settings", "name", "height" },                ToKey = { "Name", "HealthbarMode", "Font", "Height" }, },
+    { Type = "Rename", FromKey = { "settings", "name", "FriendlyTextColorMode" }, ToKey = { "Name", "HealthbarMode", "FriendlyUnitMode" }, },
+    { Type = "Rename", FromKey = { "settings", "name", "FriendlyTextColor" },     ToKey = { "Name", "HealthbarMode", "FriendlyTextColor" }, },
+    { Type = "Rename", FromKey = { "settings", "name", "EnemyTextColorMode" },    ToKey = { "Name", "HealthbarMode", "EnemyUnitMode" }, },
+    { Type = "Rename", FromKey = { "settings", "name", "EnemyTextColor" },        ToKey = { "Name", "HealthbarMode", "EnemyTextColor" }, },
+    { Type = "Rename", FromKey = { "settings", "name", "UseRaidMarkColoring" },   ToKey = { "Name", "HealthbarMode", "UseRaidMarkColoring" }, },
+    { Type = "Rename", FromKey = { "settings", "name", "AbbreviationForEnemyUnits" },    ToKey = { "Name", "HealthbarMode", "AbbreviationForEnemyUnits" }, },
+    { Type = "Rename", FromKey = { "settings", "name", "AbbreviationForFriendlyUnits" }, ToKey = { "Name", "HealthbarMode", "AbbreviationForFriendlyUnits" }, },
+    { Type = "Rename", FromKey = { "settings", "name", "ShowTitle" }, ToKey = { "Name", "HealthbarMode", "ShowTitle" }, },
+    { Type = "Rename", FromKey = { "settings", "name", "ShowRealm" }, ToKey = { "Name", "HealthbarMode", "ShowRealm" }, },
+    -- Delete empty entries
+    { Type = "Delete", Key = { "settings", "name", } },
+
+    -- Customtext is now Status Text
+    { Type = "Rename", FromKey =  { "settings", "customtext", "x" },                       ToKey = { "StatusText", "HealthbarMode", "HorizontalOffset" }, },
+    { Type = "Rename", FromKey =  { "settings", "customtext", "y" },                       ToKey = { "StatusText", "HealthbarMode", "VerticalOffset" }, },
+    { Type = "Rename", FromKey =  { "settings", "customtext", "typeface" },                ToKey = { "StatusText", "HealthbarMode", "Font", "Typeface" }, },
+    { Type = "Rename", FromKey =  { "settings", "customtext", "size" },                    ToKey = { "StatusText", "HealthbarMode", "Font", "Size" }, },
+    { Type = "Rename", FromKey =  { "settings", "customtext", "width" },                   ToKey = { "StatusText", "HealthbarMode", "Font", "Width" }, },
+    { Type = "Rename", FromKey =  { "settings", "customtext", "height" },                  ToKey = { "StatusText", "HealthbarMode", "Font", "Height" }, },
+    { Type = "Rename", FromKey =  { "settings", "customtext", "align" },                   ToKey = { "StatusText", "HealthbarMode", "Font", "HorizontalAlignment" }, },
+    { Type = "Rename", FromKey =  { "settings", "customtext", "vertical" },                ToKey = { "StatusText", "HealthbarMode", "Font", "VerticalAlignment" }, },
+    { Type = "Rename", FromKey =  { "settings", "customtext", "shadow" },                  ToKey = { "StatusText", "HealthbarMode", "Font", "Shadow" }, },
+    { Type = "Rename", FromKey =  { "settings", "customtext", "flags" },                   ToKey = { "StatusText", "HealthbarMode", "Font", "flags" }, },
+    { Type = "Rename", FromKey =  { "settings", "customtext", "FriendlySubtext" },         ToKey = { "StatusText", "HealthbarMode", "FriendlySubtext" }, },
+    { Type = "Rename", FromKey =  { "settings", "customtext", "FriendlySubtextCustom" },   ToKey = { "StatusText", "HealthbarMode", "FriendlySubtextCustom" }, },
+    { Type = "Rename", FromKey =  { "settings", "customtext", "EnemySubtext" },            ToKey = { "StatusText", "HealthbarMode", "EnemySubtext" }, },
+    { Type = "Rename", FromKey =  { "settings", "customtext", "EnemySubtextCustom" },      ToKey = { "StatusText", "HealthbarMode", "EnemySubtextCustom" }, },
+    { Type = "Rename", FromKey =  { "settings", "customtext", "SubtextColorUseHeadline" }, ToKey = { "StatusText", "HealthbarMode", "SubtextColorUseHeadline" }, },
+    { Type = "Rename", FromKey =  { "settings", "customtext", "SubtextColorUseSpecific" }, ToKey = { "StatusText", "HealthbarMode", "SubtextColorUseSpecific" }, },
+    { Type = "Rename", FromKey =  { "settings", "customtext", "SubtextColor" },            ToKey = { "StatusText", "HealthbarMode", "SubtextColor" }, },
+    -- Delete empty entries
+    { Type = "Delete", Key = { "settings", "customtext", } },
+    
+    { Type = "Rename", FromKey = { "settings", "raidicon", "hpColor" }, ToKey = { "Healthbar", "UseRaidMarkColoring" }, },
+    { Type = "Rename", FromKey = { "Transparency", "Fadeing" }, ToKey = { "Animations", "EnableFading" }, },
+    { Type = "Delete", Key = { "Transparency", } },
+
+    -- Others
+    { Type = "Delete", Key = { "settings", "unique" } },
+    { Type = "Delete", Key = { "settings", "totem" } },
+    { Type = "Delete", Key = { "settings", "normal" } },
+    { Type = "Delete", Key = { "settings", "threat", "scaleType" } },
   },
 }
 

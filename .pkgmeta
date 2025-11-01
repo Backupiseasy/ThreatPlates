@@ -60,5 +60,6 @@ ignore:
   - TidyPlates_ThreatPlates-TBC.toc
   - TidyPlates_ThreatPlates-Wrath.toc
   - TidyPlates_ThreatPlates-Cata.toc
+  - TidyPlates_ThreatPlates-Mists.toc
 
 move-folders:

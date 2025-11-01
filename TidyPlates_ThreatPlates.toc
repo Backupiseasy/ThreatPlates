@@ -1,9 +1,10 @@
-## Interface: 110002
-## Interface-Retail: 110002
-## Interface-Vanilla: 11503
+## Interface: 110205
+## Interface-Retail: 110205
+## Interface-Vanilla: 11507
 ## Interface-TBC: 20504
-## Interface-Wrath: 30402
-## Interface-Cata: 40400
+## Interface-Wrath: 30405
+## Interface-Cata: 40402
+## Interface-Mists: 50501
 
 ## Title: Threat Plates
 ## Version: @project-version@
@@ -16,6 +17,14 @@
 
 ## AddonCompartmentFunc: TidyPlatesThreat_OnAddonCompartmentClick
 ## IconTexture: Interface\Addons\TidyPlates_ThreatPlates\Artwork\Logo.tga
+## Category: Unit Frames
+## Category-deDE: Einheitenfenster
+
+## X-Category: Unit Frames
+## X-Website: https://wow.curseforge.com/projects/tidy-plates-threat-plates
+## X-Curse-Project-ID: 21217
+## X-WoWI-ID: 15749
+## X-Wago-ID: RqGZkkNd
 
 ## RequiredDeps:
 #@version-retail@
@@ -38,10 +47,10 @@
 ## OptionalDeps: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate, LibDualSpec-1.0
 ## X-Embeds: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate, LibDualSpec-1.0
 #@end-version-cata@
-## X-Website: https://wow.curseforge.com/projects/tidy-plates-threat-plates
-## X-Curse-Project-ID: 21217
-## X-WoWI-ID: 15749
-## X-Wago-ID: RqGZkkNd
+#@version-mists@
+## OptionalDeps: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate, LibDualSpec-1.0
+## X-Embeds: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate, LibDualSpec-1.0
+#@end-version-mists@
 
 ## X-License: GNU General Public License
 ## X-Credits: danltiger (for Tidy Plates), Tosaido (for quest handling code from QuestMobs)
@@ -53,6 +62,8 @@ ThreatPlates.xml
 
 Init.lua
 Debug.lua
+Compatibility.lua
+Localization.lua
 EventService.lua
 CVarsManager.lua
 Media.lua

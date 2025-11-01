@@ -46,10 +46,7 @@ function Element.TargetMarkerUpdate(tp_frame)
   local target_marker = tp_frame.visual.TargetMarker
   local icon = (style.raidicon.show and unit.TargetMarkerIcon) or unit.MentorIcon
   if icon then
-    local icon_coord = RAID_ICON_COORDINATE[icon]
-    -- ! Maybe use SetRaidTargetIconTexture(icon, index) - then we don't need SetTexCoord anymore
-    -- SetRaidTargetIconTexture(visual.raidicon, GetRaidTargetIndex(unit.unitid));
-    target_marker:SetTexCoord(icon_coord.x, icon_coord.x + 0.25, icon_coord.y,  icon_coord.y + 0.25)
+    Addon:SetIconTexture(target_marker, "TargetMarker." .. icon)
     target_marker:Show()
   else
     target_marker:Hide()

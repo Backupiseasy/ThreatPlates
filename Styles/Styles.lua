@@ -51,7 +51,7 @@ local StyleModule = Addon.Style
 ---------------------------------------------------------------------------------------------------
 
 -- UnitIsBattlePet: Mists - Patch 5.1.0 (2012-11-27): Added.
-if not Addon.ExpansionIsAtLeast() then -- Mists
+if not Addon.ExpansionIsAtLeastMists then -- Mists
   UnitIsBattlePet = function(...) return false end
 end
 
@@ -225,7 +225,7 @@ end
 --   * unit.name
 function StyleModule.ProcessNameTriggers(unit)
   local plate_style, custom_style, totem_settings
-  local name_custom_style = NameTriggers[unit.name] or NameTriggers[unit.NPCID]
+  local name_custom_style = NameTriggers[unit.name] or NameTriggers[unit.NPCID] or NameTriggers[unit.basename]
   if name_custom_style and name_custom_style.Enable.UnitReaction[unit.reaction] then
     custom_style = name_custom_style
     plate_style = GetStyleForPlate(custom_style)
@@ -318,7 +318,7 @@ function StyleModule.AuraTriggerCheckIfActive(unit, aura_id, aura_name, aura_cas
     unit.CustomStyleAura = (unique_settings.showNameplate and "unique") or (unique_settings.ShowHeadlineView and "NameOnly-Unique") or "etotem"
     unit.CustomPlateSettingsAura = unique_settings
 
-    icon = GetSpellInfo(aura_id).iconID
+    local icon = GetSpellInfo(aura_id).iconID
     unique_settings.AutomaticIcon = icon
   end
 end
@@ -335,7 +335,7 @@ function StyleModule.CastTriggerCheckIfActive(unit, spell_id, spell_name)
     unit.CustomStyleCast = (unique_settings.showNameplate and "unique") or (unique_settings.ShowHeadlineView and "NameOnly-Unique") or "etotem"
     unit.CustomPlateSettingsCast = unique_settings
 
-    icon = GetSpellInfo(spell_id).iconID
+    local icon = GetSpellInfo(spell_id).iconID
     unique_settings.AutomaticIcon = icon
   end
 end
@@ -402,10 +402,13 @@ function StyleModule.SetStyle(unit)
     return "empty"
   end
 
-  if (UnitIsDead(unit.unitid) and UnitIsUnit("softinteract", unit.unitid)) or unit.SoftInteractTargetIsDead then
-    -- We use IsDead to prevent the nameplate switching to healthbar view again shortly before disapearing
-    unit.SoftInteractTargetIsDead = true
-    return (unit.CustomPlateSettings and "NameOnly-Unique") or "NameOnly"
+  -- Hide the nameplate when the unit is dead. Otherwise, the empty healthbar will be shown until the nameplate is
+  -- removed. There will also be a short animation (the nameplate moving down) before it is removed. 
+  -- To avoid this glitch, we just set the nameplate style to empty. 
+  -- We cannot hide the nameplate here (or in UNIT_HEALTH), as this interferes with Hunter's Feign Death ability.
+  -- This results in the nameplate not being shown again if Feign Death ends [GH-583].
+  if UnitIsDead(unit.unitid) then
+    return "empty"
   end
 
   if not style and not UnitExists(unit.unitid) then

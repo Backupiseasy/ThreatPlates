@@ -4,3 +4,4 @@
 .vscode/
 workspace.code-workspace
 *.code-workspace
+*.tmp.driveupload/

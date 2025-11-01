@@ -88,7 +88,7 @@ function Element.UpdateStyle(tp_frame, style)
 
   local skull_icon, skull_style = visual.SkullIcon, style.skullicon
   if unit.isBoss and skull_style.show then
-    skull_icon:SetTexture(skull_style.texture)
+    Addon:SetIconTexture(skull_icon, "UnitClassification.Boss")
     skull_icon:SetSize(skull_style.width, skull_style.height)
     skull_icon:ClearAllPoints()
     skull_icon:SetPoint(skull_style.anchor, tp_frame, skull_style.anchor, skull_style.x, skull_style.y)
@@ -99,7 +99,7 @@ function Element.UpdateStyle(tp_frame, style)
 
   local elite_icon, elite_style = visual.EliteIcon, style.eliteicon
   if (unit.isRare or unit.isElite) and elite_style.show then
-    elite_icon:SetTexture(elite_style.texture)
+    Addon:SetIconTexture(elite_icon, "UnitClassification.Rare")
     elite_icon:SetSize(elite_style.width, elite_style.height)
     elite_icon:ClearAllPoints()
     elite_icon:SetPoint(elite_style.anchor, tp_frame, elite_style.anchor, elite_style.x, elite_style.y)

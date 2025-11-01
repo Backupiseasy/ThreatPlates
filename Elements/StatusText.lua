@@ -444,7 +444,8 @@ function Element.UpdateSettings()
     Truncate = function(value) return value end
   end
 
-  if Addon.IS_MAINLINE then
+  -- Absorbs: Mists - Added
+  if Addon.WOW_FEATURE_ABSORBS then
     ShowAbsorbs = Settings.AbsorbsAmount or Settings.AbsorbsPercentage
   else
     ShowAbsorbs = false
