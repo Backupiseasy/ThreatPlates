@@ -297,7 +297,7 @@ local TOTEM_DATA_BY_EXPANSION = {
     { SpellID = 192077,  ID = "T3", GroupColor = "b8d1ff", Icon = "ability_shaman_windwalktotem" },		   -- Wind Rush Totem
     { SpellID = 383013,  ID = "T4", GroupColor = "b8d1ff", Icon = "spell_nature_poisoncleansingtotem" }, -- Poison Cleansing Totem
     { SpellID = 5394,	   ID = "T7", GroupColor = "b8d1ff", Icon = "inv_spear_04" },		                   -- Healing Stream Totem
-    { SpellID = 108270,  ID = "T8", GroupColor = "b8d1ff", Icon = "ability_shaman_stonebulwark" },	     -- Stone Bulwark Totem
+    --{ SpellID = 108270,  ID = "T8", GroupColor = "b8d1ff", Icon = "ability_shaman_stonebulwark" },	   -- Stone Bulwark Totem, --! NO nameplate
     -- Elemental
     { SpellID = 192222, ID = "E1", GroupColor = "2b76ff", Icon = "spell_shaman_spewlava" }, 	           -- Liquid Magma Totem
     -- Enhancement
@@ -2169,9 +2169,9 @@ ThreatPlates.DEFAULT_SETTINGS = {
     },
     Animations = {
       -- ShowPlateDuration = 0.3, -- Blizzard: 0.3
-      HidePlateDuration = 0.3, -- Blizzard: 0.3
-      HidePlateFadeOut = true,
-      HidePlateScaleDown = true,
+      -- HidePlateDuration = 0.3, -- Blizzard: 0.3
+      -- HidePlateFadeOut = true,
+      -- HidePlateScaleDown = true,
       FadeToDuration = 0.15,   -- Blizzard: 0.25
       FadeInOccludedUnits = true,
       FadeOutOccludedUnits = true,

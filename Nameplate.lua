@@ -454,7 +454,7 @@ local function SetUnitAttributes(unit, unitid)
   SetUnitAttributeHealth(unit, unitid)
   
   -- Casting => UNIT_SPELLCAST_*
-  -- Initialized in OnStartCasting in OnShowNameplate, but only when unit is currently casting
+  -- Initialized in OnStartCasting in HandlePlateUnitAdded, but only when unit is currently casting
   unit.isCasting = false
   unit.IsInterrupted = false
   
@@ -712,7 +712,7 @@ local	function HandlePlateCreated(plate)
   Widgets:OnPlateCreated(tp_frame)
 end
 
--- OnShowNameplate
+-- HandlePlateUnitAdded
 local function HandlePlateUnitAdded(plate, unitid)
   local tp_frame = plate.TPFrame
   local unit = tp_frame.unit
@@ -729,7 +729,7 @@ local function HandlePlateUnitAdded(plate, unitid)
   PlatesByGUID[unit.guid] = plate
 
   SetNameplateVisibility(plate, unitid)
-  
+
   WidgetContainerAcquire(plate)
 
   -- Initialized nameplate style based on unit added
@@ -982,7 +982,7 @@ local function FrameOnUpdate(plate, elapsed)
   --      PlateOnUpdateQueue[i](plate, tp_frame.unit)
   --    end
 
-  ScalingModule.HideNameplate(tp_frame)
+  --ScalingModule.HideNameplate(tp_frame)
   -- Do this after the hiding stuff, to correctly set the occluded transparency
   TransparencyModule.SetOccludedTransparency(tp_frame)
 
@@ -1212,7 +1212,7 @@ end
 -- Payload: { Name = "unitToken", Type = "string", Nilable = false },
 function Addon:NAME_PLATE_UNIT_ADDED(unitid)
   -- Player's personal nameplate:
-  --   This nameplate is currently not handled by Threat Plates - OnShowNameplate is not called on it, therefore plate.TPFrame.Active is nil
+  --   This nameplate is currently not handled by Threat Plates - HandlePlateUnitAdded is not called on it, therefore plate.TPFrame.Active is nil
   -- Nameplates for GameObjects:
   --   There are some nameplates for GameObjects, e.g. Ring of Transference in Oribos. For the time being, we don't show them.
   --   Current assumption: for units of type "GameObject", UnitExists always returns false

@@ -1326,7 +1326,7 @@ local function MigrateAnchorsForWidgets(profile_name, profile)
 end
 
 local function MigrationThreatSystemEnable(_, profile)
-  if DatabaseEntryExists(profile, { "threat", "ON" } and profile.threat.ON == false) then
+  if DatabaseEntryExists(profile, { "threat", "ON" }) and profile.threat.ON == false then
     -- If the database entry exists, it should always be false, but just to be sure
     profile.threat.useScale = false
     profile.threat.useAlpha = false
@@ -1347,7 +1347,7 @@ local function MigrateForReleaseV13(profile_name, profile)
 
   profile.Healthbar = profile.Healthbar or {}
   
-  -- DatabaseEntryExists(profile, { "friendlyClass" } and profile.threat.ON == true)
+  -- DatabaseEntryExists(profile, { "friendlyClass" }) and profile.threat.ON == true)
   if profile.healthColorChange then
     profile.Healthbar.FriendlyUnitMode = "HEALTH"
     profile.Healthbar.EnemyUnitMode = "HEALTH"
@@ -1471,8 +1471,8 @@ local MIGRATION_FUNCTIONS_BY_VERSION = {
     { Type = "Delete", Key = { "threat", "nonCombat" } }, -- migrated in 9.1.3
     { Type = "Delete", Key = { "ShowThreatGlowOnAttackedUnitsOnly" } }, -- No longer supported    
     { Type = "Delete", Key = { "ColorByReaction", "DisconnectedUnit" } }, -- No longer supported
-    { Type = "Migrate", FromKey = { "aHPbarColor", }, ToKey = { "ColorByHealth", "Low" }, },
-    { Type = "Migrate", FromKey = { "bHPbarColor", }, ToKey = { "ColorByHealth", "High" }, },
+    { Type = "Rename", FromKey = { "aHPbarColor", }, ToKey = { "ColorByHealth", "Low" }, },
+    { Type = "Rename", FromKey = { "bHPbarColor", }, ToKey = { "ColorByHealth", "High" }, },
 
     { Type = "Migrate", Name = "Release V13.0.0", Function = MigrateForReleaseV13, NoDefaultProfile = true },
 
@@ -1825,8 +1825,6 @@ Addon.ImportCustomStyle = function(imported_custom_style)
 end
 
 Addon.ImportProfile = function(profile, profile_name, profile_version)
-  profile_version = "10.3.0"
-        
   -- Migrate the profile to the current version
   -- Using pcall here to catch errors in the migration code - should not happen, but still ...
   local migration_successful, return_value = pcall(MigrateProfile, profile, profile_name, profile_version)

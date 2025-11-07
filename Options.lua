@@ -501,7 +501,7 @@ local function UpdateClassIconTextures(class_theme, options_path)
 end
 
 local function UpdateTotemIconTexture(totem_style, totem_info, options_path)
-  IconTexturesByOptions["Totem." .. tostring(totem_info.SpellID)] = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\" .. totem_style .. "\\" .. totem_info.Icon
+  IconTexturesByOptions["Totem." .. tostring(totem_info.SpellID)] = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\normal\\" .. totem_info.Icon
   if options_path then
     options_path.args.Totems.args[totem_info.Name].args.Textures.args.Icon.image = IconTexturesByOptions["Totem." .. tostring(totem_info.SpellID)]
   end
@@ -519,6 +519,7 @@ local function SetTargetArtIconTexture(icon_id, style, tex_coords)
     TexCoords = tex_coords,
   }
 end
+
 local function UpdateTargetArtIconTexture(style, options_path)
   -- This also sets these icon ids unsed for the selected style, but they are not used it that case, so it does not matter
   SetTargetArtIconTexture("TargetHighlight.Center", style, { 0, 1, 0, 1 })
@@ -7503,69 +7504,69 @@ local function CreateAnimationsOptions()
           },
         },
       },
-      HideNameplates = {
-        name = L["Hiding Nameplates"],
-        type = "group",
-        order = 30,
-        inline = true,
-        args = {
-          Header = {
-            name = L["Enable the fade-out or scale-down animation when a nameplate is hidden by setting the duration to a value greater than 0 (maximum is 1). Disable it by setting the duration to 0. The default duration is shown in the duration option's tooltip."],
-            order = 1,
-            type = "description",
-            width = "full",
-          },
-          Duration = {
-            name = L["Duration"],
-            order = 10,
-            type = "range",
-            min = 0,
-            max = 1,
-            step = 0.01,
-            desc = L["Duration (in seconds) of the animation for fading out and scaling down a nameplate when it is hidden. Default duration is "] .. tostring(ThreatPlates.DEFAULT_SETTINGS.profile.Animations.FadeOutDuration) .. L["."],
-            arg = { "Animations", "HidePlateDuration" },
-            disabled = function() return CVars.InvalidCVarsForHidingNameplates() end,
-          },
-          Fading = {
-            type = "toggle",
-            order = 20,
-            name = "Fade-Out",
-            desc = L["Show a fade-out animation when a nameplate is hidden."],
-            arg = { "Animations", "HidePlateFadeOut" },
-            disabled = function() return db.Animations.HidePlateDuration <= 0 or CVars.InvalidCVarsForHidingNameplates() end,
-          },
-          Scaling = {
-            type = "toggle",
-            order = 30,
-            name = "Scale-Down",
-            desc = L["Show a scale-down animation when a nameplate is hidden."],
-            arg = { "Animations", "HidePlateScaleDown" },
-            disabled = function() return db.Animations.HidePlateDuration <= 0 or CVars.InvalidCVarsForHidingNameplates() end,
-          },
-          ImportantNotice = {
-            name = L["|cffff0000IMPORTANT: Currently, this feature is disabled as certain console variables (CVars) related to nameplate scaling are set in a way to prevent this feature from working. Clicking the button below will fix this and reset these CVars to their default values. This will change the appearance (scaling) of default Blizzard nameplates.|r"],
-            order = 40 ,
-            type = "description",
-            width = "full",
-            hidden = function() return not CVars.InvalidCVarsForHidingNameplates() end,
-          },
-          FixCVars = {
-            name = L["Fix Configuration Variables for Hiding Nameplates"],
-            type = "execute",
-            order = 50,
-            width = "full",
-            desc = L["This will reset all console variables (CVars) required for hiding nameplates to work to their default values."],
-            func = function()
-              Addon:CallbackWhenOoC(function()
-                CVars.FixCVarsForHidingNameplates()
-                Addon.Scaling:UpdateSettings()
-                --Addon:ForceUpdate()
-              end, L["Unable to change CVars for hiding nameplates while in combat."])
-            end,
-            hidden = function() return not CVars.InvalidCVarsForHidingNameplates() end,
-          },
-        },
-      },
+      -- HideNameplates = {
+      --   name = L["Hiding Nameplates"],
+      --   type = "group",
+      --   order = 30,
+      --   inline = true,
+      --   args = {
+      --     Header = {
+      --       name = L["Enable the fade-out or scale-down animation when a nameplate is hidden by setting the duration to a value greater than 0 (maximum is 1). Disable it by setting the duration to 0. The default duration is shown in the duration option's tooltip."],
+      --       order = 1,
+      --       type = "description",
+      --       width = "full",
+      --     },
+      --     Duration = {
+      --       name = L["Duration"],
+      --       order = 10,
+      --       type = "range",
+      --       min = 0,
+      --       max = 1,
+      --       step = 0.01,
+      --       desc = L["Duration (in seconds) of the animation for fading out and scaling down a nameplate when it is hidden. Default duration is "] .. tostring(ThreatPlates.DEFAULT_SETTINGS.profile.Animations.FadeOutDuration) .. L["."],
+      --       arg = { "Animations", "HidePlateDuration" },
+      --       disabled = function() return CVars.InvalidCVarsForHidingNameplates() end,
+      --     },
+      --     Fading = {
+      --       type = "toggle",
+      --       order = 20,
+      --       name = "Fade-Out",
+      --       desc = L["Show a fade-out animation when a nameplate is hidden."],
+      --       arg = { "Animations", "HidePlateFadeOut" },
+      --       disabled = function() return db.Animations.HidePlateDuration <= 0 or CVars.InvalidCVarsForHidingNameplates() end,
+      --     },
+      --     Scaling = {
+      --       type = "toggle",
+      --       order = 30,
+      --       name = "Scale-Down",
+      --       desc = L["Show a scale-down animation when a nameplate is hidden."],
+      --       arg = { "Animations", "HidePlateScaleDown" },
+      --       disabled = function() return db.Animations.HidePlateDuration <= 0 or CVars.InvalidCVarsForHidingNameplates() end,
+      --     },
+      --     ImportantNotice = {
+      --       name = L["|cffff0000IMPORTANT: Currently, this feature is disabled as certain console variables (CVars) related to nameplate scaling are set in a way to prevent this feature from working. Clicking the button below will fix this and reset these CVars to their default values. This will change the appearance (scaling) of default Blizzard nameplates.|r"],
+      --       order = 40 ,
+      --       type = "description",
+      --       width = "full",
+      --       hidden = function() return not CVars.InvalidCVarsForHidingNameplates() end,
+      --     },
+      --     FixCVars = {
+      --       name = L["Fix Configuration Variables for Hiding Nameplates"],
+      --       type = "execute",
+      --       order = 50,
+      --       width = "full",
+      --       desc = L["This will reset all console variables (CVars) required for hiding nameplates to work to their default values."],
+      --       func = function()
+      --         Addon:CallbackWhenOoC(function()
+      --           CVars.FixCVarsForHidingNameplates()
+      --           Addon.Scaling:UpdateSettings()
+      --           --Addon:ForceUpdate()
+      --         end, L["Unable to change CVars for hiding nameplates while in combat."])
+      --       end,
+      --       hidden = function() return not CVars.InvalidCVarsForHidingNameplates() end,
+      --     },
+      --   },
+      -- },
       FlashingAuras = {
         name = L["Aura Flashing"],
         type = "group",

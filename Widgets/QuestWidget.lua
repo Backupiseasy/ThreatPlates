@@ -440,7 +440,7 @@ function Widget:QUEST_LOG_UPDATE()
   if QuestLogNotComplete then
     QuestLogNotComplete = false
     self:GenerateQuestCache()
-    self:UpdateAllFramesAndNameplateColor()
+    self:UpdateAllFramesWithPublish()
   end
 end
 

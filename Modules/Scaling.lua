@@ -16,7 +16,8 @@ local UnitExists = UnitExists
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 local Style = Addon.Style
 local TransparencyModule, ScalingModule = Addon.Transparency, Addon.Scaling
-local AnimationScalePlate, AnimationStopScale, AnimationHidePlate = Addon.Animation.ScalePlate, Addon.Animation.StopScale, Addon.Animation.HidePlate
+local AnimationScalePlate, AnimationStopScale = Addon.Animation.ScalePlate, Addon.Animation.StopScale
+--local AnimationHidePlate = Addon.Animation.HidePlate
 local CVars = Addon.CVars
 local MathClamp = Addon.Clamp
 
@@ -36,7 +37,7 @@ local ScalePlate
 local Settings
 
 -- Cached CVARs
-local AnimateHideNameplate, CVAR_nameplateMinAlpha, CVAR_nameplateMinScale
+--local AnimateHideNameplate, CVAR_nameplateMinAlpha, CVAR_nameplateMinScale
 
 local function ScaleSituational(unit)
 	local db = Addon.db.profile.nameplate
@@ -205,28 +206,28 @@ function ScalingModule.UpdateStyle(tp_frame)
 	tp_frame:SetScale(Addon.UIScale * GetScale(tp_frame.unit))
 end
 
-function ScalingModule.HideNameplate(tp_frame)
-  if AnimateHideNameplate then
-		local scale = tp_frame.Parent:GetScale()
-    if scale < CVAR_nameplateMinScale then
-      if not tp_frame.HidingScale then
-        AnimationHidePlate(tp_frame)
-        tp_frame.HidingScale = scale + 0.01
-      end
+-- function ScalingModule.HideNameplate(tp_frame)
+--   if AnimateHideNameplate then
+-- 		local scale = tp_frame.Parent:GetScale()
+--     if scale < CVAR_nameplateMinScale then
+--       if not tp_frame.HidingScale then
+--         AnimationHidePlate(tp_frame)
+--         tp_frame.HidingScale = scale + 0.01
+--       end
 
-      if scale < tp_frame.HidingScale then
-        tp_frame.HidingScale = scale
-      elseif tp_frame.HidingScale ~= -1 then
-        -- Scale down stoppted and reversed - plate is no longer hiding
-				TransparencyModule.UpdateStyle(tp_frame)
-				ScalingModule.UpdateStyle(tp_frame)
-        tp_frame.HidingScale = -1
-      end
-    else -- scale >= CVAR_nameplateMinScale
-      tp_frame.HidingScale = nil
-    end
-  end
-end
+--       if scale < tp_frame.HidingScale then
+--         tp_frame.HidingScale = scale
+--       elseif tp_frame.HidingScale ~= -1 then
+--         -- Scale down stoppted and reversed - plate is no longer hiding
+-- 				TransparencyModule.UpdateStyle(tp_frame)
+-- 				ScalingModule.UpdateStyle(tp_frame)
+--         tp_frame.HidingScale = -1
+--       end
+--     else -- scale >= CVAR_nameplateMinScale
+--       tp_frame.HidingScale = nil
+--     end
+--   end
+-- end
 
 function ScalingModule.UpdateSettings()
 	Settings = Addon.db.profile.Animations
@@ -237,22 +238,22 @@ function ScalingModule.UpdateSettings()
 		ScalePlate = ScalePlateWithoutAnimation
 	end
 
-  if Settings.HidePlateDuration > 0 and (Settings.HidePlateFadeOut or Settings.HidePlateScaleDown) then
-    if CVars.InvalidCVarsForHidingNameplates() then
-      AnimateHideNameplate = false
-    else
-      AnimateHideNameplate = true
-      CVAR_nameplateMinScale = CVars:GetAsNumber("nameplateMinScale") * CVars:GetAsNumber("nameplateGlobalScale")
-      CVAR_nameplateMinAlpha = CVars:GetAsNumber("nameplateMinAlpha")
-    end
-  else
-    AnimateHideNameplate = false
-  end
+  -- if Settings.HidePlateDuration > 0 and (Settings.HidePlateFadeOut or Settings.HidePlateScaleDown) then
+  --   if CVars.InvalidCVarsForHidingNameplates() then
+  --     AnimateHideNameplate = false
+  --   else
+  --     AnimateHideNameplate = true
+  --     CVAR_nameplateMinScale = CVars:GetAsNumber("nameplateMinScale") * CVars:GetAsNumber("nameplateGlobalScale")
+  --     CVAR_nameplateMinAlpha = CVars:GetAsNumber("nameplateMinAlpha")
+  --   end
+  -- else
+  --   AnimateHideNameplate = false
+  -- end
 end
 
-function ScalingModule.HidingNameplatesIsEnabled()
-	return AnimateHideNameplate
-end
+-- function ScalingModule.HidingNameplatesIsEnabled()
+-- 	return AnimateHideNameplate
+-- end
 
 ---------------------------------------------------------------------------------------------------
 -- React to events that could change the nameplate scale/size

@@ -46,20 +46,23 @@ function Widget:IsEnabled()
 	return Addon.db.profile.totemWidget.ON
 end
 
---function Widget:UNIT_NAME_UPDATE()
---end
---
---function Widget:OnEnable()
---  self:SubscribeEvent("UNIT_NAME_UPDATE")
---end
+function Widget:UNIT_NAME_UPDATE(unitid)
+  local widget_frame = self:GetWidgetFrameForUnit(unitid)
+  if widget_frame then
+    self:OnUnitAdded(widget_frame, unitid)
+  end
+end
+
+function Widget:OnEnable()
+  
+  self:SubscribeEvent("UNIT_NAME_UPDATE")
+end
 
 function Widget:EnabledForStyle(style, unit)
 	return (style == "totem" or style == "etotem") and unit.TP_DetailedUnitType == "Totem"
 end
 
 function Widget:OnUnitAdded(widget_frame, unit)
-  --local totem_id = TOTEMS[unit.name]
-
   local totem_settings = unit.TotemSettings
   if not totem_settings then
     widget_frame:Hide()
@@ -73,23 +76,19 @@ function Widget:OnUnitAdded(widget_frame, unit)
   widget_frame:SetSize(db.scale, db.scale)
   Addon:SetIconTexture(widget_frame.Icon, "Totem." .. tostring(totem_settings.SpellID), unit.unitid)
 
-  local _, _, totem_icon = GetSpellInfo(totem_settings.SpellID)
-
-  --widget_frame.Icon:SetTexCoord(0, 1, 0, 1)
-  widget_frame.Icon:SetTexCoord(.08, .92, .08, .92)
-  widget_frame.Icon:SetTexture(totem_icon)
   if totem_settings.Style == "special" then
-   widget_frame.Border:SetTexture(PATH .. "SpecialTotemBorder")
+    widget_frame.Border:SetTexture("Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\SpecialTotemBorder")
+  else
+    widget_frame.Border:SetTexture()
   end
 
   widget_frame:Show()
 end
 
 function Widget:PrintDebug()
-  Addon.Logging.Debug(Widget.Name .. ":")
-  for icon_id, icon_ in pairs (getmetatable(Addon.IconTextures).__index) do
+  for icon_id, icon in pairs (getmetatable(Addon.IconTextures).__index) do
     if icon_id:sub(1, 6) == "Totem." then
-      Addon.Logging.Debug("    ", icon_id .. ":", icon_source)
+      Addon.Logging.Debug("    ", icon_id .. ":", icon)
     end
   end 
 end

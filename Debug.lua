@@ -109,7 +109,7 @@ Addon.Debug.PrintUnit = function(unitid)
 			if unit.style == "unique" then
 				Addon.Logging.Debug("    GetThreatSituation(Unique) = ", Addon.GetThreatSituation(unit, unit.style, Addon.db.profile.threat.toggle.OffTank))
 			else
-				Addon.Logging.Debug("    GetThreatSituation = ", Addon.GetThreatSituation(unit, Addon:GetThreatStyle(unit), Addon.db.profile.threat.toggle.OffTank))
+				Addon.Logging.Debug("    GetThreatSituation = ", Addon.GetThreatSituation(unit, Addon.Style:GetThreatStyle(unit), Addon.db.profile.threat.toggle.OffTank))
 			end
 		end
 		Addon.Logging.Debug("  -- Player Control ---------------------------------")

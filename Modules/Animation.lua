@@ -24,8 +24,8 @@ local AnimationModule = Addon.Animation
 -- Local variables
 ---------------------------------------------------------------------------------------------------
 -- ShowPlateDuration
-local HidePlateDuration, FadeToDuration, ScaleToDuration, FlashDuration
-local HidePlateFadeOut, HidePlateScaleDown
+local FadeToDuration, ScaleToDuration, FlashDuration
+--local HidePlateDuratio, HidePlateFadeOut, HidePlateScaleDown
 
 ---------------------------------------------------------------------------------------------------
 -- Cached configuration settings (for performance reasons)
@@ -227,49 +227,49 @@ function AnimationModule.StopScale(frame)
   end
 end
 
-function AnimationModule.HidePlate(frame)
-  local show_animation = false
+-- function AnimationModule.HidePlate(frame)
+--   local show_animation = false
 
-  if Settings.HidePlateFadeOut then
-    frame.FadeAnimation = frame.FadeAnimation or {}
+--   if Settings.HidePlateFadeOut then
+--     frame.FadeAnimation = frame.FadeAnimation or {}
 
-    local animation = frame.FadeAnimation
-    animation.StartAlpha = frame:GetAlpha()
-    animation.TargetAlpha = 0.01
-    animation.Duration = HidePlateDuration
-    animation.Timer = 0
-    animation.Playing = true
+--     local animation = frame.FadeAnimation
+--     animation.StartAlpha = frame:GetAlpha()
+--     animation.TargetAlpha = 0.01
+--     animation.Duration = HidePlateDuration
+--     animation.Timer = 0
+--     animation.Playing = true
 
-    show_animation = true
-  end
+--     show_animation = true
+--   end
 
-  if Settings.HidePlateScaleDown then
-    frame.ScaleAnimation = frame.ScaleAnimation or {}
+--   if Settings.HidePlateScaleDown then
+--     frame.ScaleAnimation = frame.ScaleAnimation or {}
 
-    local animation = frame.ScaleAnimation
-    animation.StartScale = frame:GetScale()
-    animation.TargetScale = 0.3
-    animation.Duration = HidePlateDuration
-    animation.Timer = 0
-    animation.Playing = true
+--     local animation = frame.ScaleAnimation
+--     animation.StartScale = frame:GetScale()
+--     animation.TargetScale = 0.3
+--     animation.Duration = HidePlateDuration
+--     animation.Timer = 0
+--     animation.Playing = true
 
-    show_animation = true
-  end
+--     show_animation = true
+--   end
 
-  -- Frame is hidden immediately (no scale animation) or after the animation ends
-  if show_animation then
-    AnimatedFrames[frame] = true
-    AnimationFrame:Show()
-  end
-end
+--   -- Frame is hidden immediately (no scale animation) or after the animation ends
+--   if show_animation then
+--     AnimatedFrames[frame] = true
+--     AnimationFrame:Show()
+--   end
+-- end
 
 function AnimationModule.UpdateSettings()
   Settings = Addon.db.profile.Animations
 
-  -- ShowPlateDuration = Settings.ShowPlateDuration
-  HidePlateDuration = Settings.HidePlateDuration
-  HidePlateFadeOut = Settings.HidePlateFadeOut
-  HidePlateScaleDown = Settings.HidePlateScaleDown
+  --ShowPlateDuration = Settings.ShowPlateDuration
+  --HidePlateDuration = Settings.HidePlateDuration
+  --HidePlateFadeOut = Settings.HidePlateFadeOut
+  --HidePlateScaleDown = Settings.HidePlateScaleDown
   FadeToDuration = Settings.FadeToDuration
   ScaleToDuration = Settings.ScaleToDuration
   FlashDuration = Settings.FlashDuration

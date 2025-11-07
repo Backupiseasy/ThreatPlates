@@ -112,7 +112,8 @@ local function GetUnitType(unit)
     unit_class = "Player"
   elseif unit.classification == "minus" then
     unit_class = "Minus"
-  elseif unit.TotemSettings then
+  --elseif unit.TotemSettings then
+  elseif UnitCreatureType(unit.unitid) == Addon.TotemCreatureType and UnitPlayerControlled(unit.unitid) and TOTEMS[unit.name] then
     unit_class = "Totem"
   elseif UnitIsOtherPlayersPet(unit.unitid) or UnitIsUnit(unit.unitid, "pet") then -- player pets are also considered guardians, so this check has priority
     -- ? Better to use UnitIsOwnerOrControllerOfUnit("player", unit.unitid) here?
@@ -203,7 +204,7 @@ local function ShowUnit(unit)
 end
 
 -- Returns style based on threat (currently checks for in combat, should not do hat)
-function StyleModule.GetThreatStyle(unit)
+local function GetThreatStyle(unit)
   -- style tank/dps only used for NPCs/non-player units
   if ThreatShowFeedback(unit) then
     return Addon.GetPlayerRole()
@@ -220,11 +221,15 @@ local function GetStyleForPlate(custom_style)
   --return nil
 end
 
--- Check if a unit is a totem or a custom nameplates (e.g., after UNIT_NAME_UPDATE)
+  -- Check if a unit is a totem or a custom nameplates (e.g., after UNIT_NAME_UPDATE)
 -- Depends on:
 --   * unit.name
-function StyleModule.ProcessNameTriggers(unit)
-  local plate_style, custom_style, totem_settings
+local function ProcessNameTriggers(unit)
+  -- Set these values to nil if not custom nameplate or totem
+  unit.TotemSettings = nil
+  --unit.CustomPlateSettings = nil
+
+  local plate_style, custom_style
   local name_custom_style = NameTriggers[unit.name] or NameTriggers[unit.NPCID] or NameTriggers[unit.basename]
   if name_custom_style and name_custom_style.Enable.UnitReaction[unit.reaction] then
     custom_style = name_custom_style
@@ -265,30 +270,29 @@ function StyleModule.ProcessNameTriggers(unit)
     end
   end
 
-  if not plate_style and UnitCreatureType(unit.unitid) == Addon.TotemCreatureType and UnitPlayerControlled(unit.unitid) then
-    -- Check for player totems and ignore NPC totems
-    local totem_id = TOTEMS[unit.name]
-    if totem_id then
-      local db = Addon.db.profile.totemSettings
-      totem_settings = db[totem_id]
-      if totem_settings.ShowNameplate then
-        plate_style = (db.hideHealthbar and "etotem") or "totem"
-      else
-        plate_style = "etotem"
-      end
-    end
-  end
+  -- Set these values to nil if not custom nameplate or totem
+  unit.CustomPlateSettings = custom_style
 
   -- Conditions:
   --   * custom_style == nil: No custom style found
   --   * custom_style ~= nil: Custom style found, active
   --   * plate_style == nil: Appearance part of style will not be used, only icon will be shown (if custom_style ~= nil)
+  if plate_style then return plate_style end
 
-  -- Set these values to nil if not custom nameplate or totem
-  unit.CustomPlateSettings = custom_style
-  unit.TotemSettings = totem_settings
+  -- Totems:
+  if unit.TP_DetailedUnitType ~= "Totem" then return end
 
-  return plate_style
+  -- Check for player totems and ignore NPC totems
+  local totem_id = TOTEMS[unit.name]
+  if not totem_id then return end
+  
+  local db = Addon.db.profile.totemSettings
+  unit.TotemSettings = db[totem_id]
+
+  if unit.TotemSettings.ShowNameplate and not db.hideHealthbar then
+    return "totem"
+  end
+  return "etotem"
 end
 
 function StyleModule.AuraTriggerInitialize(unit)
@@ -357,7 +361,7 @@ function StyleModule.CastTriggerReset(unit)
   end
 end
 
-function StyleModule.SetStyle(unit)
+local function SetStyle(unit)
   local show, hide_unit_type, headline_view = ShowUnit(unit)
 
   -- Nameplate is disabled in General - Visibility
@@ -374,9 +378,9 @@ function StyleModule.SetStyle(unit)
     style = unit.CustomStyleAura
     unit.CustomPlateSettings = unit.CustomPlateSettingsAura
   else
-  	style = StyleModule.ProcessNameTriggers(unit) or (headline_view and "NameOnly")
+    style = ProcessNameTriggers(unit) or (headline_view and "NameOnly")
   end
-	  
+
   -- Dynamic enable checks for custom styles
   -- Only check it once if custom style is used for multiple mobs
   -- only check it once when entering a dungeon, not on every style change
@@ -415,7 +419,7 @@ function StyleModule.SetStyle(unit)
     style = "etotem"
   end
 
-  return style or StyleModule.GetThreatStyle(unit)
+  return style or GetThreatStyle(unit)
 end
 
 ---------------------------------------------------------------------------------------------------------------------
@@ -463,16 +467,18 @@ local function SetNameplateStyle(tp_frame, stylename)
   UpdateNameplateStyle(tp_frame, style)
 end
 
-function StyleModule.PlateUnitAdded(tp_frame)
+local function PlateUnitAdded(tp_frame)
+  local style = SetStyle(tp_frame.unit)
+  
   -- Update with old_custom_style == nil and tp_frame.stylename == nil
-  SetNameplateStyle(tp_frame, StyleModule.SetStyle(tp_frame.unit))
+  SetNameplateStyle(tp_frame, style)
 end
 
-function StyleModule.Update(tp_frame)
+local function Update(tp_frame)
   local unit = tp_frame.unit
 
   local old_custom_style = unit.CustomPlateSettings
-  local stylename = StyleModule.SetStyle(unit)
+  local stylename = SetStyle(unit)
 
   if tp_frame.stylename ~= stylename then
     SetNameplateStyle(tp_frame, stylename)
@@ -481,10 +487,24 @@ function StyleModule.Update(tp_frame)
   end
 end
 
-function StyleModule.UpdateName(tp_frame)
-  local stylename = StyleModule.ProcessNameTriggers(tp_frame.unit)
+local function UpdateName(tp_frame)
+  local stylename = ProcessNameTriggers(tp_frame.unit)
 
   if stylename and tp_frame.stylename ~= stylename then
     SetNameplateStyle(tp_frame, stylename)
   end
 end
+
+-- Define module API:
+StyleModule.UpdateName = UpdateName
+StyleModule.ProcessNameTriggers = ProcessNameTriggers
+StyleModule.PlateUnitAdded = PlateUnitAdded
+StyleModule.Update = Update
+StyleModule.SetStyle = SetStyle
+StyleModule.GetThreatStyle = GetThreatStyle
+--StyleModule.AuraTriggerInitialize = AuraTriggerInitialize
+--StyleModule.AuraTriggerUpdateStyle = AuraTriggerUpdateStyle
+--StyleModule.AuraTriggerCheckIfActive = AuraTriggerCheckIfActive
+--StyleModule.CastTriggerCheckIfActive = CastTriggerCheckIfActive
+--StyleModule.CastTriggerUpdateStyle = CastTriggerUpdateStyle
+--StyleModule.CastTriggerReset = CastTriggerReset

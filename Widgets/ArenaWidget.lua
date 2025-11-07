@@ -282,7 +282,7 @@ function Widget:UpdateLayout(widget_frame)
   
   Addon:SetIconTexture(widget_frame.Icon, "Arena")
   
-  Font:UpdateText(widget_frame, widget_frame.NumText, Settings.NumberText)
+  FontUpdateText(widget_frame, widget_frame.NumText, Settings.NumberText)
 end
 
 function Widget:UpdateSettings()
