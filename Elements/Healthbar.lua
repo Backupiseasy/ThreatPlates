@@ -13,7 +13,6 @@ local UnitGetTotalHealAbsorbs = UnitGetTotalHealAbsorbs
 local InCombatLockdown = InCombatLockdown
 
 -- ThreatPlates APIs
-local ThreatPlates= Addon.ThreatPlates
 local FontUpdateText, FontUpdateTextSize = Addon.Font.UpdateText, Addon.Font.UpdateTextSize
 local SubscribeEvent, UnsubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Unsubscribe, Addon.EventService.Publish
 local BackdropTemplate = Addon.BackdropTemplate
@@ -511,7 +510,7 @@ function Element.UpdateSettings()
   SettingsHealthbar = Addon.db.profile.Healthbar
 
   local db = Addon.db.profile.settings.healthborder
-  BorderBackdrop.edgeFile = (db.show and ThreatPlates.Art .. db.texture) or nil
+  BorderBackdrop.edgeFile = (db.show and Addon.PATH_ARTWORK .. db.texture) or nil
   BorderBackdrop.edgeSize = db.EdgeSize
   BorderBackdrop.insets.left = db.Offset
   BorderBackdrop.insets.right = db.Offset

@@ -1,7 +1,6 @@
 local _, Addon = ...
-local t = Addon.ThreatPlates
 
-local EMPTY_TEXTURE = t.Art .. "Empty"
+local EMPTY_TEXTURE = Addon.PATH_ARTWORK .. "Empty"
 
 local function Create(name)
 	local db = Addon.db.profile.settings

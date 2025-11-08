@@ -26,7 +26,6 @@ local NamePlateDriverFrame, UnitNameplateShowsWidgetsOnly = NamePlateDriverFrame
 local GetSpecializationInfo, GetSpecialization = GetSpecializationInfo, GetSpecialization
 
 -- ThreatPlates APIs
-local ThreatPlates = Addon.ThreatPlates
 local L = Addon.L
 local Widgets = Addon.Widgets
 local CVars = Addon.CVars
@@ -784,8 +783,8 @@ function Addon:ConfigClickableArea(toggle_show)
         -- Draw background to show for clickable area
         tp_frame.Background = _G.CreateFrame("Frame", nil, ConfigModePlate, BackdropTemplate)
         tp_frame.Background:SetBackdrop({
-          bgFile = ThreatPlates.Art .. "TP_WhiteSquare.tga",
-          edgeFile = ThreatPlates.Art .. "TP_WhiteSquare.tga",
+          bgFile = Addon.PATH_ARTWORK .. "TP_WhiteSquare.tga",
+          edgeFile = Addon.PATH_ARTWORK .. "TP_WhiteSquare.tga",
           edgeSize = 2,
           insets = { left = 0, right = 0, top = 0, bottom = 0 },
         })

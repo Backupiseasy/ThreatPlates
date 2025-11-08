@@ -78,6 +78,7 @@ Nameplate.lua
 Database.lua
 Addon.lua
 Commands.lua
+AceGUIPreviewImage.lua
 Options.lua
 
 Styles\Styles.xml

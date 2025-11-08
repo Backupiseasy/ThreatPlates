@@ -1,8 +1,6 @@
 local ADDON_NAME, Addon = ...
-local ThreatPlates = Addon.ThreatPlates
 
-local ART_PATH = ThreatPlates.Art
-local EMPTY_TEXTURE = ART_PATH.."Empty"
+local EMPTY_TEXTURE = Addon.PATH_ARTWORK.."Empty"
 
 -------------------------------------------------------------------------------------
 -- Style: Text-Only for Headline-View
@@ -66,7 +64,7 @@ local function Create(name)
     },
 
     highlight = {
-      texture = (dbprofile.HeadlineView.ShowMouseoverHighlight and ART_PATH.."Highlight") or EMPTY_TEXTURE,
+      texture = (dbprofile.HeadlineView.ShowMouseoverHighlight and Addon.PATH_ARTWORK .."Highlight") or EMPTY_TEXTURE,
       show = dbprofile.HeadlineView.ShowMouseoverHighlight,
     },
 
@@ -82,7 +80,7 @@ local function Create(name)
     },
 
     castborder = {
-      texture = (db.castbar.ShowInHeadlineView and db.castborder.show and ThreatPlates.Art .. db.castborder.texture) or EMPTY_TEXTURE,
+      texture = (db.castbar.ShowInHeadlineView and db.castborder.show and Addon.PATH_ARTWORK .. db.castborder.texture) or EMPTY_TEXTURE,
       edgesize = db.castborder.EdgeSize,
       offset = db.castborder.Offset,
       show = true,

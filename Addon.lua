@@ -2,7 +2,6 @@
 -- Main file for addon Threat Plates
 ---------------------------------------------------------------------------------------------------
 local _, Addon = ...
-local ThreatPlates = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -317,7 +316,7 @@ end
 -- by the game client. It's a good time to do things like restore saved settings (see the info on
 -- AceConfig for more notes about that).
 function TidyPlatesThreat:OnInitialize()
-  local defaults = ThreatPlates.DEFAULT_SETTINGS
+  local defaults = Addon.DEFAULT_SETTINGS
 
   -- change back defaults old settings if wanted preserved it the user want's to switch back
   if ThreatPlatesDB and ThreatPlatesDB.global and ThreatPlatesDB.global.DefaultsVersion == "CLASSIC" then
@@ -349,7 +348,7 @@ function TidyPlatesThreat:OnInitialize()
   -- Setup Interface panel options
   local app_name = Addon.ADDON_NAME
   local dialog_name = app_name .. " Dialog"
-  LibStub("AceConfig-3.0"):RegisterOptionsTable(dialog_name, ThreatPlates.GetInterfaceOptionsTable())
+  LibStub("AceConfig-3.0"):RegisterOptionsTable(dialog_name, Addon.GetInterfaceOptionsTable())
   Addon.LibAceConfigDialog:AddToBlizOptions(dialog_name, Addon.ADDON_NAME)
 
   -- Setup chat commands

@@ -29,14 +29,11 @@ local GetSpecializationInfo = C_SpecializationInfo and C_SpecializationInfo.GetS
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
 local LibStub = LibStub
-local ThreatPlates = Addon.ThreatPlates
 local RGB_WITH_HEX = Addon.RGB_WITH_HEX
 local L = Addon.L
 local Meta = Addon.Meta
 local F = Addon.FlattenTable
 local CVars = Addon.CVars
-
-local PATH_ART = ThreatPlates.Art
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -500,16 +497,16 @@ local function UpdateClassIconTextures(class_theme, options_path)
   end
 end
 
-local function UpdateTotemIconTexture(totem_style, totem_info, options_path)
+local function UpdateTotemIconTexture(totem_info, options_path)
   IconTexturesByOptions["Totem." .. tostring(totem_info.SpellID)] = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\normal\\" .. totem_info.Icon
   if options_path then
-    options_path.args.Totems.args[totem_info.Name].args.Textures.args.Icon.image = IconTexturesByOptions["Totem." .. tostring(totem_info.SpellID)]
+    options_path.args.Totems.args[totem_info.Name].args.Textures.args.Preview.image = IconTexturesByOptions["Totem." .. tostring(totem_info.SpellID)]
   end
 end
 
 local function UpdateTotemIconTextures(totem_settings, options_path)
   for _, totem_info in pairs(Addon.TotemInformation) do
-    UpdateTotemIconTexture(totem_settings[totem_info.ID].Style, totem_info, options_path)
+    UpdateTotemIconTexture(totem_info, options_path)
   end
 end
 
@@ -840,7 +837,7 @@ end
 Addon.UpdateCustomStyles = UpdateSpecial
 
 local function AddIfSettingExists(entry)
-  local value = ThreatPlates.DEFAULT_SETTINGS.profile
+  local value = Addon.DEFAULT_SETTINGS.profile
   for index, key in ipairs(entry.arg) do
     if value ~= nil then
       value = value[key]
@@ -1615,14 +1612,14 @@ local function GetFontPositioningEntry(pos, widget_info)
         type = "select",
         order = 50,
         name = L["Horizontal Align"],
-        values = ThreatPlates.AlignH,
+        values = Addon.AlignH,
         arg = F(widget_info, "Font", "HorizontalAlignment"),
       }),
       AlignY = AddIfSettingExists({
         type = "select",
         order = 60,
         name = L["Vertical Align"],
-        values = ThreatPlates.AlignV,
+        values = Addon.AlignV,
         arg = F(widget_info, "Font", "VerticalAlignment"),
       }),
     }
@@ -2230,11 +2227,11 @@ local function CreateComboPointsWidgetOptions()
                 type = "color",
                 order = 170,
                 get = function(info)
-                  local color = db.ComboPoints.ColorBySpec.ROGUE.Animacharge or ThreatPlates.RGB(0, 0, 0)
+                  local color = db.ComboPoints.ColorBySpec.ROGUE.Animacharge or Addon.RGB(0, 0, 0)
                   return color.r, color.g, color.b
                 end,
                 set = function(info, r, g, b)
-                  db.ComboPoints.ColorBySpec.ROGUE.Animacharge = ThreatPlates.RGB(r * 255, g * 255, b * 255)
+                  db.ComboPoints.ColorBySpec.ROGUE.Animacharge = Addon.RGB(r * 255, g * 255, b * 255)
                   Addon.Widgets:UpdateSettings("ComboPoints")
                 end,
                 hasAlpha = false,
@@ -2246,11 +2243,11 @@ local function CreateComboPointsWidgetOptions()
                 type = "color",
                 order = 180,
                 get = function(info)
-                  local color = db.ComboPoints.ColorBySpec.DEATHKNIGHT.DeathRune or ThreatPlates.RGB(0, 0, 0)
+                  local color = db.ComboPoints.ColorBySpec.DEATHKNIGHT.DeathRune or Addon.RGB(0, 0, 0)
                   return color.r, color.g, color.b
                 end,
                 set = function(info, r, g, b)
-                  db.ComboPoints.ColorBySpec.DEATHKNIGHT.DeathRune = ThreatPlates.RGB(r * 255, g * 255, b * 255)
+                  db.ComboPoints.ColorBySpec.DEATHKNIGHT.DeathRune = Addon.RGB(r * 255, g * 255, b * 255)
                   Addon.Widgets:UpdateSettings("ComboPoints")
                 end,
                 hasAlpha = false,
@@ -2406,14 +2403,14 @@ local function CreateArenaWidgetOptions()
                     type = "select",
                     order = 40,
                     name = L["Horizontal Align"],
-                    values = ThreatPlates.AlignH,
+                    values = Addon.AlignH,
                     arg = { "arenaWidget", "NumberText", "Font", "HorizontalAlignment" },
                   },
                   AlignY = {
                     type = "select",
                     order = 50,
                     name = L["Vertical Align"],
-                    values = ThreatPlates.AlignV,
+                    values = Addon.AlignV,
                     arg = { "arenaWidget", "NumberText", "Font", "VerticalAlignment" },
                   },
                 },
@@ -6297,7 +6294,7 @@ local function CreateColorsSettings()
             order = 200,
             width = "full",
             func = function()
-              for name, color in pairs(ThreatPlates.DEFAULT_SETTINGS.profile.ColorByReaction) do
+              for name, color in pairs(Addon.DEFAULT_SETTINGS.profile.ColorByReaction) do
                 if type(color) == "table" then
                   db.ColorByReaction[name] = Addon.CopyTable(color)
                 end
@@ -6320,7 +6317,7 @@ local function CreateColorsSettings()
             order = 60,
             width = "full",
             func = function()
-              for name, color in pairs(ThreatPlates.DEFAULT_SETTINGS.profile.Colors.Classes) do
+              for name, color in pairs(Addon.DEFAULT_SETTINGS.profile.Colors.Classes) do
                 db.Colors.Classes[name] = Addon.CopyTable(color)
               end
               Addon:ForceUpdate()
@@ -6388,7 +6385,7 @@ local function CreateColorsSettings()
             order = 50,
             width = "full",
             func = function()
-              for name, color in pairs(ThreatPlates.DEFAULT_SETTINGS.profile.settings.raidicon.hpMarked) do
+              for name, color in pairs(Addon.DEFAULT_SETTINGS.profile.settings.raidicon.hpMarked) do
                 db.settings.raidicon.hpMarked[name] = Addon.CopyTable(color)
               end
               Addon:ForceUpdate()
@@ -6400,7 +6397,7 @@ local function CreateColorsSettings()
   }
 
   local i = 1
-  for class_name, _ in pairs(ThreatPlates.DEFAULT_SETTINGS.profile.Colors.Classes) do
+  for class_name, _ in pairs(Addon.DEFAULT_SETTINGS.profile.Colors.Classes) do
     -- LOCALIZED_CLASS_NAMES_MALE is not defined for unknown classes (for Classic version)
     if LOCALIZED_CLASS_NAMES_MALE[class_name] then
       entry.args.ClassColors.args[class_name] = {
@@ -6509,7 +6506,7 @@ local function CreateAutomationSettings()
             order = 10,
             type = "select",
             width = "double",
-            values = ThreatPlates.AUTOMATION,
+            values = Addon.AUTOMATION,
             set = SyncGameSettings,
             arg = { "Automation", "FriendlyUnits" },
           },
@@ -6518,7 +6515,7 @@ local function CreateAutomationSettings()
             order = 20,
             type = "select",
             width = "double",
-            values = ThreatPlates.AUTOMATION,
+            values = Addon.AUTOMATION,
             set = SyncGameSettings,
             arg = { "Automation", "EnemyUnits" },
           },
@@ -6932,14 +6929,14 @@ local function CreateHealthbarOptions()
                 name = L["Friendly Healthbar Color"],
                 order = 10,
                 type = "select",
-                values = ThreatPlates.FRIENDLY_HEALTHBAR_COLOR,
+                values = Addon.FRIENDLY_HEALTHBAR_COLOR,
                 arg = { "Healthbar", "FriendlyUnitMode" }
               },
               EnemyColor = {
                 name = L["Enemy Healthbar Color"],
                 order = 20,
                 type = "select",
-                values = ThreatPlates.ENEMY_HEALTHBAR_COLOR,
+                values = Addon.ENEMY_HEALTHBAR_COLOR,
                 arg = { "Healthbar", "EnemyUnitMode" }
               },
               Spacer1 = GetSpacerEntry(25),
@@ -7351,14 +7348,14 @@ local function CreateCastbarOptions()
                 name = L["Horizontal Align"],
                 type = "select",
                 order = 1,
-                values = ThreatPlates.AlignH,
+                values = Addon.AlignH,
                 arg = { "settings", "spelltext", "align" },
               },
               AlignV = {
                 name = L["Vertical Align"],
                 type = "select",
                 order = 2,
-                values = ThreatPlates.AlignV,
+                values = Addon.AlignV,
                 arg = { "settings", "spelltext", "vertical" },
               },
               OffsetX = GetPlacementEntry(L["Offset X"], 3, { "settings", "castbar", "SpellNameText", "HorizontalOffset" } ),
@@ -7376,14 +7373,14 @@ local function CreateCastbarOptions()
                 name = L["Horizontal Align"],
                 type = "select",
                 order = 1,
-                values = ThreatPlates.AlignH,
+                values = Addon.AlignH,
                 arg = { "settings", "castbar", "CastTimeText", "Font", "HorizontalAlignment" },
               },
               AlignV = {
                 name = L["Vertical Align"],
                 type = "select",
                 order = 2,
-                values = ThreatPlates.AlignV,
+                values = Addon.AlignV,
                 arg = { "settings", "castbar", "CastTimeText", "Font", "VerticalAlignment" },
               },
               OffsetX = GetPlacementEntry(L["Offset X"], 3, { "settings", "castbar", "CastTimeText", "HorizontalOffset" } ),
@@ -7448,7 +7445,7 @@ local function CreateAnimationsOptions()
       --       min = 0,
       --       max = 5,
       --       step = 0.01,
-      --       desc = L["Duration (in seconds) for fading in a nameplate when it is displayed. Default duration is "] .. tostring(ThreatPlates.DEFAULT_SETTINGS.profile.Animations.FadeInDuration) .. L["."],
+      --       desc = L["Duration (in seconds) for fading in a nameplate when it is displayed. Default duration is "] .. tostring(Addon.DEFAULT_SETTINGS.profile.Animations.FadeInDuration) .. L["."],
       --       arg = { "Animations", "ShowPlateDuration" },
       --     },
       --   },
@@ -7472,7 +7469,7 @@ local function CreateAnimationsOptions()
             min = 0,
             max = 1,
             step = 0.01,
-            desc = L["Duration (in seconds) for fading in or out a nameplate when its transparency is changed. Default duration is "] .. tostring(ThreatPlates.DEFAULT_SETTINGS.profile.Animations.FadeInDuration) .. L["."],
+            desc = L["Duration (in seconds) for fading in or out a nameplate when its transparency is changed. Default duration is "] .. tostring(Addon.DEFAULT_SETTINGS.profile.Animations.FadeInDuration) .. L["."],
             arg = { "Animations", "FadeToDuration" },
           },
           FadeInOccludedUnits = {
@@ -7499,7 +7496,7 @@ local function CreateAnimationsOptions()
             min = 0,
             max = 1,
             step = 0.01,
-            desc = L["Duration (in seconds) for scaling up or down a nameplate when its size is changed. Default duration is "] .. tostring(ThreatPlates.DEFAULT_SETTINGS.profile.Animations.ScaleToDuration) .. L["."],
+            desc = L["Duration (in seconds) for scaling up or down a nameplate when its size is changed. Default duration is "] .. tostring(Addon.DEFAULT_SETTINGS.profile.Animations.ScaleToDuration) .. L["."],
             arg = { "Animations", "ScaleToDuration" },
           },
         },
@@ -7523,7 +7520,7 @@ local function CreateAnimationsOptions()
       --       min = 0,
       --       max = 1,
       --       step = 0.01,
-      --       desc = L["Duration (in seconds) of the animation for fading out and scaling down a nameplate when it is hidden. Default duration is "] .. tostring(ThreatPlates.DEFAULT_SETTINGS.profile.Animations.FadeOutDuration) .. L["."],
+      --       desc = L["Duration (in seconds) of the animation for fading out and scaling down a nameplate when it is hidden. Default duration is "] .. tostring(Addon.DEFAULT_SETTINGS.profile.Animations.FadeOutDuration) .. L["."],
       --       arg = { "Animations", "HidePlateDuration" },
       --       disabled = function() return CVars.InvalidCVarsForHidingNameplates() end,
       --     },
@@ -7669,7 +7666,7 @@ local function CreateNameOptions()
                 name = L["Friendly Name Color"],
                 order = 10,
                 type = "select",
-                values = ThreatPlates.FRIENDLY_NAME_COLOR,
+                values = Addon.FRIENDLY_NAME_COLOR,
                 arg = { "Name", "HealthbarMode", "FriendlyUnitMode" }
               },
               FriendlyColorCustom = GetColorAlphaEntry(20, { "Name", "HealthbarMode", "FriendlyTextColor" },
@@ -7678,7 +7675,7 @@ local function CreateNameOptions()
                 name = L["Enemy Name Color"],
                 order = 30,
                 type = "select",
-                values = ThreatPlates.ENEMY_NAME_COLOR,
+                values = Addon.ENEMY_NAME_COLOR,
                 arg = { "Name", "HealthbarMode", "EnemyUnitMode" }
               },
               EnemyColorCustom = GetColorAlphaEntry(40, { "Name", "HealthbarMode", "EnemyTextColor" }, 
@@ -7706,14 +7703,14 @@ local function CreateNameOptions()
                 name = L["Enemy Units"],
                 order = 10,
                 type = "select",
-                values = ThreatPlates.NAME_ABBREVIATION,
+                values = Addon.NAME_ABBREVIATION,
                 arg = { "Name", "HealthbarMode", "AbbreviationForEnemyUnits" },
               },
               NameAbbreviationForFriendlyUnits = {
                 name = L["Friendly Units"],
                 order = 10,
                 type = "select",
-                values = ThreatPlates.NAME_ABBREVIATION,
+                values = Addon.NAME_ABBREVIATION,
                 arg = { "Name", "HealthbarMode", "AbbreviationForFriendlyUnits" },
               },
             },
@@ -7736,7 +7733,7 @@ local function CreateNameOptions()
                 name = L["Friendly Names Color"],
                 order = 10,
                 type = "select",
-                values = ThreatPlates.FRIENDLY_NAME_COLOR,
+                values = Addon.FRIENDLY_NAME_COLOR,
                 arg = { "Name", "NameMode", "FriendlyUnitMode" }
               },
               FriendlyColorCustom = GetColorAlphaEntry(20, {  "Name", "NameMode", "FriendlyTextColor" },
@@ -7745,7 +7742,7 @@ local function CreateNameOptions()
                 name = L["Enemy Name Color"],
                 order = 30,
                 type = "select",
-                values = ThreatPlates.ENEMY_NAME_COLOR,
+                values = Addon.ENEMY_NAME_COLOR,
                 arg = { "Name", "NameMode", "EnemyUnitMode" }
               },
               EnemyColorCustom = GetColorAlphaEntry(40, { "Name", "NameMode", "EnemyTextColor" },
@@ -8241,7 +8238,7 @@ CreateCustomNameplateEntry = function(index)
 
           -- Clean trigger settings as it does not make sense to duplicate them (would create a error message and prevent pasting)
           local copy_trigger = duplicated_style.Trigger
-          duplicated_style.Trigger = Addon.CopyTable(ThreatPlates.DEFAULT_SETTINGS.profile.uniqueSettings["**"].Trigger)
+          duplicated_style.Trigger = Addon.CopyTable(Addon.DEFAULT_SETTINGS.profile.uniqueSettings["**"].Trigger)
           duplicated_style.Trigger.Name.Input = ""
           duplicated_style.Trigger.Type = copy_trigger.Type
 
@@ -8266,7 +8263,7 @@ CreateCustomNameplateEntry = function(index)
 
           -- Clean trigger settings as it does not make sense to duplicate them (would create a error message and prevent pasting)
           local copy_trigger = clipboard.Trigger
-          clipboard.Trigger = Addon.CopyTable(ThreatPlates.DEFAULT_SETTINGS.profile.uniqueSettings["**"].Trigger)
+          clipboard.Trigger = Addon.CopyTable(Addon.DEFAULT_SETTINGS.profile.uniqueSettings["**"].Trigger)
           clipboard.Trigger.Name.Input = ""
           clipboard.Trigger.Type = copy_trigger.Type
         end,
@@ -8828,14 +8825,17 @@ CreateCustomNameplateEntry = function(index)
           },
           Spacer1 = GetSpacerEntry(40),
           Icon = {
-            name = L["Preview"],
             type = "execute",
-            width = "full",
-            disabled = function() return not db.uniqueSettings[index].showIcon or not db.uniqueWidget.ON end,
+            dialogControl = "ThreatPlatesImagePreview",
             order = 50,
+            width = "full",
             image = function() return CustomPlateGetIcon(index) end,
             imageWidth = 64,
             imageHeight = 64,
+            name = function() 
+              return (db.uniqueSettings[index].ShowHighlightBorder and "Highlight") or nil
+            end,
+            disabled = function() return not db.uniqueSettings[index].showIcon or not db.uniqueWidget.ON end,
           },
           Description = {
             type = "description",
@@ -8908,7 +8908,7 @@ CreateCustomNameplateEntry = function(index)
 
               -- If the current value is no longer valid (LegacyCode removed or type switch), change it to some valid value
               if not values[val] then
-                val = ThreatPlates.DEFAULT_SETTINGS.profile.uniqueSettings["**"].Scripts.Function
+                val = Addon.DEFAULT_SETTINGS.profile.uniqueSettings["**"].Scripts.Function
                 db.uniqueSettings[index].Scripts.Function = val
               end
 
@@ -9124,7 +9124,7 @@ CreateCustomNameplatesGroup = function()
 
         -- If slot_no is nil, General Settings is selected currently.
         local slot_no = (tonumber(selected:match("#(.*)")) or 0) + 1
-        table.insert(db.uniqueSettings, slot_no, Addon.CopyTable(ThreatPlates.DEFAULT_SETTINGS.profile.uniqueSettings["**"]))
+        table.insert(db.uniqueSettings, slot_no, Addon.CopyTable(Addon.DEFAULT_SETTINGS.profile.uniqueSettings["**"]))
         db.uniqueSettings[slot_no].Trigger.Name.Input = ""
 
         CreateCustomNameplatesGroup()
@@ -9508,23 +9508,25 @@ local function CreateTotemOptions()
           order = 3,
           inline = true,
           args = {
-            Icon = {
-              name = "",
+            Preview = {
               type = "execute",
-              width = "full",
+              dialogControl = "ThreatPlatesImagePreview",
               order = 0,
-              image = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\" .. db.totemSettings[totem_info.ID].Style .. "\\" .. totem_info.Icon,
+              width = "full",
+              image = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\normal\\" .. totem_info.Icon,
+              imageWidth = 64,
+              imageHeight = 64,
+              --imageCoords = { 0, 1, 0, 1 },
+              name = function() 
+                return (db.totemSettings[totem_info.ID].Style == "special" and "Highlight") or nil
+              end,
             },
             Style = {
               name = "",
               type = "select",
               order = 1,
               width = "full",
-              set = function(info, val)
-                UpdateTotemIconTexture(val, totem_info, options)
-                SetValue(info, val)
-              end,
-              values = { normal = L["Normal"], special = L["Special"] },
+              values = { normal = "Normal", special = "Special" },
               arg = { "totemSettings", totem_info.ID, "Style" },
             },
           },
@@ -9963,7 +9965,7 @@ local function CreateOptionsTable()
                       order = 10,
                       type = "select",
                       width = "double",
-                      values = ThreatPlates.FRIENDLY_SUBTEXT,
+                      values = Addon.FRIENDLY_SUBTEXT,
                       set = function(info, val)
                         SetValue(info, val)
                         Addon.LoadLibraryDogTag()
@@ -9975,7 +9977,7 @@ local function CreateOptionsTable()
                       order = 20,
                       type = "select",
                       width = "double",
-                      values = ThreatPlates.ENEMY_SUBTEXT,
+                      values = Addon.ENEMY_SUBTEXT,
                       set = function(info, val)
                         SetValue(info, val)
                         Addon.LoadLibraryDogTag()
@@ -10065,7 +10067,7 @@ local function CreateOptionsTable()
                       name = L["Friendly Status Text"],
                       order = 10,
                       type = "select",
-                      values = ThreatPlates.FRIENDLY_SUBTEXT,
+                      values = Addon.FRIENDLY_SUBTEXT,
                       width = "double",
                       set = function(info, val)
                         SetValue(info, val)
@@ -10078,7 +10080,7 @@ local function CreateOptionsTable()
                       order = 20,
                       type = "select",
                       width = "double",
-                      values = ThreatPlates.ENEMY_SUBTEXT,
+                      values = Addon.ENEMY_SUBTEXT,
                       set = function(info, val)
                         SetValue(info, val)
                         Addon.LoadLibraryDogTag()
@@ -10320,14 +10322,14 @@ local function CreateOptionsTable()
                       name = L["Horizontal Align"],
                       type = "select",
                       order = 3,
-                      values = ThreatPlates.AlignH,
+                      values = Addon.AlignH,
                       arg = { "settings", "level", "align" },
                     },
                     AlignV = {
                       name = L["Vertical Align"],
                       type = "select",
                       order = 4,
-                      values = ThreatPlates.AlignV,
+                      values = Addon.AlignV,
                       arg = { "settings", "level", "vertical" },
                     },
                   },
@@ -11135,7 +11137,6 @@ local function GetInterfaceOptionsTable()
       openoptions = {
         type = "execute",
         name = L["Open Options"],
-        --image = PATH_ART .. "LogoLegacy",
         image = Meta("IconTexture"),
         width = "full",
         -- imageWidth = 256,
@@ -11254,4 +11255,4 @@ end
 -----------------------------------------------------
 -- External
 -----------------------------------------------------
-ThreatPlates.GetInterfaceOptionsTable = GetInterfaceOptionsTable
+Addon.GetInterfaceOptionsTable = GetInterfaceOptionsTable

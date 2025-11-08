@@ -1,5 +1,4 @@
 local ADDON_NAME, Addon = ...
-local ThreatPlates = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Stuff for handling the configuration of Threat Plates - ThreatPlatesDB
@@ -98,10 +97,10 @@ Addon.ANCHOR_POINT_TEXT = {
   BOTTOMRIGHT = {"BOTTOMRIGHT", "TOPLEFT"}
 }
 
-ThreatPlates.AlignH = {LEFT = L["Left"], CENTER = L["Center"], RIGHT = L["Right"]}
-ThreatPlates.AlignV = {BOTTOM = L["Bottom"], MIDDLE = L["Middle"], TOP = L["Top"]}
+Addon.AlignH = {LEFT = L["Left"], CENTER = L["Center"], RIGHT = L["Right"]}
+Addon.AlignV = {BOTTOM = L["Bottom"], MIDDLE = L["Middle"], TOP = L["Top"]}
 
-ThreatPlates.AUTOMATION = {
+Addon.AUTOMATION = {
   NONE = "No Automation",
   SHOW_COMBAT = "Show during Combat, Hide when Combat ends",
   HIDE_COMBAT = "Hide when Combat starts, Show when Combat ends",
@@ -175,8 +174,6 @@ Addon.THREAT_REFERENCE = {
 -- Paths
 ---------------------------------------------------------------------------------------------------
 
-ThreatPlates.Widgets = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Widgets\\"
-
 ---------------------------------------------------------------------------------------------------
 -- Global contstants for options dialog
 ---------------------------------------------------------------------------------------------------
@@ -187,7 +184,7 @@ Addon.AurasFilterMode = {
   None = L["None"],
 }
 
-ThreatPlates.FontStyle = {
+Addon.FontStyle = {
   NONE = L["None"],
   OUTLINE = L["Outline"],
   THICKOUTLINE = L["Thick Outline"],
@@ -197,26 +194,26 @@ ThreatPlates.FontStyle = {
 }
 
 -- "By Threat", "By Level Color", "By Normal/Elite/Boss"
-ThreatPlates.ENEMY_HEALTHBAR_COLOR = {
+Addon.ENEMY_HEALTHBAR_COLOR = {
   REACTION = L["By Reaction"],
   CLASS = L["By Class"],
   HEALTH = L["By Health"],
 }
 
-ThreatPlates.FRIENDLY_HEALTHBAR_COLOR = {
+Addon.FRIENDLY_HEALTHBAR_COLOR = {
   REACTION = L["By Reaction"],
   CLASS = L["By Class"],
   HEALTH = L["By Health"],
 }
 
-ThreatPlates.ENEMY_NAME_COLOR = {
+Addon.ENEMY_NAME_COLOR = {
   CLASS = L["By Class"],
   CUSTOM = L["By Custom Color"],
   REACTION = L["By Reaction"],
   HEALTH = L["By Health"],
 }
 
-ThreatPlates.FRIENDLY_NAME_COLOR = {
+Addon.FRIENDLY_NAME_COLOR = {
   CLASS = L["By Class"],
   CUSTOM = L["By Custom Color"],
   REACTION = L["By Reaction"],
@@ -225,7 +222,7 @@ ThreatPlates.FRIENDLY_NAME_COLOR = {
 
 
 -- NPC Role, Guild, or Quest", "Quest",
-ThreatPlates.ENEMY_SUBTEXT = {
+Addon.ENEMY_SUBTEXT = {
   NONE = L["None"],
   HEALTH = L["Health"],
   ROLE = L["NPC Role"],
@@ -237,7 +234,7 @@ ThreatPlates.ENEMY_SUBTEXT = {
 }
 
 -- "NPC Role, Guild, or Quest", "Quest"
-ThreatPlates.FRIENDLY_SUBTEXT = {
+Addon.FRIENDLY_SUBTEXT = {
   NONE = L["None"],
   HEALTH = L["Health"],
   ROLE = L["NPC Role"],
@@ -257,7 +254,7 @@ Addon.THREAT_VALUE_TYPE = {
   THREAT_PERCENTAGE_DELTA = L["Delta Percentage"],
 }
 
-ThreatPlates.NAME_ABBREVIATION = {
+Addon.NAME_ABBREVIATION = {
     FULL = L["Full Name"],
     INITIALS = L["Initials"],
     LAST = L["Last Word"],
@@ -541,7 +538,7 @@ end
 -- Default settings for ThreatPlates
 ---------------------------------------------------------------------------------------------------
 
-ThreatPlates.DEFAULT_SETTINGS = {
+Addon.DEFAULT_SETTINGS = {
   global = {
     version = "",
     DefaultsVersion = "SMOOTH",

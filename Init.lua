@@ -133,15 +133,12 @@ Addon.IS_MAINLINE = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
 ---------------------------------------------------------------------------------------------------
 -- Define table that contains all addon-global variables and functions
 ---------------------------------------------------------------------------------------------------
-Addon.ThreatPlates = {}
 Addon.Debug = {}
 Addon.Theme = {}
 
 Addon.PlatesCreated = {}
 Addon.PlatesByUnit = {}
 Addon.PlatesByGUID = {}
-
-local ThreatPlates = Addon.ThreatPlates
 
 -- Modules
 Addon.Threat = {}
@@ -402,13 +399,6 @@ Addon.Meta = function(value)
 		meta = C_AddOns.GetAddOnMetadata("TidyPlates_ThreatPlates",value)
 	end
 	return meta or ""
-end
-
-ThreatPlates.HCC = {}
-for i=1,#CLASS_SORT_ORDER do
-	local str = RAID_CLASS_COLORS[CLASS_SORT_ORDER[i]].colorStr;
-	local str = gsub(str,"(ff)","",1)
-	ThreatPlates.HCC[CLASS_SORT_ORDER[i]] = str;
 end
 
 -- Helper Functions

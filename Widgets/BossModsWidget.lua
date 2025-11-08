@@ -17,7 +17,7 @@ local tremove, sort = tremove, sort
 local strbyte, strsub = strbyte, strsub
 
 -- ThreatPlates APIs
-local L = Addon.ThreatPlates.L
+local L = Addon.L
 local BackdropTemplate = Addon.BackdropTemplate
 local RGB, RGB_P, RGB_WITH_HEX = Addon.RGB, Addon.RGB_P, Addon.RGB_WITH_HEX
 local Font = Addon.Font
@@ -638,7 +638,7 @@ function Widget:UpdateSettings()
 
   GlowHighlightStartFunction = CUSTOM_GLOW_WRAPPER_FUNCTIONS[CUSTOM_GLOW_FUNCTIONS[Settings.Glow.Type][1]]
   GlowHighlightStopFunction = Addon.LibCustomGlow[CUSTOM_GLOW_FUNCTIONS[Settings.Glow.Type][2]]
-  DefaultGlowColor = Addon.ThreatPlates.DEFAULT_SETTINGS.profile.uniqueSettings["**"].Effects.Glow.Color
+  DefaultGlowColor = Addon.DEFAULT_SETTINGS.profile.uniqueSettings["**"].Effects.Glow.Color
 
   if DBM and DBM.RegisterCallback and DBM.UnregisterCallback then
     if Settings.ShowAuras then

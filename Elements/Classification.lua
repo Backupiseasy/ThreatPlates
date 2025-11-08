@@ -13,18 +13,17 @@ local ADDON_NAME, Addon = ...
 local CreateFrame = CreateFrame
 
 -- ThreatPlates APIs
-local ThreatPlates = Addon.ThreatPlates
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 local BackdropTemplate = Addon.BackdropTemplate
 
 local ELITE_BACKDROP = {
   TP_EliteBorder_Default = {
-    edgeFile = ThreatPlates.Art .. "TP_WhiteSquare",
+    edgeFile = Addon.PATH_ARTWORK .. "TP_WhiteSquare",
     edgeSize = 1.5,
     offset = 1.8,
   },
   TP_EliteBorder_Thin = {
-    edgeFile = ThreatPlates.Art .. "TP_WhiteSquare",
+    edgeFile = Addon.PATH_ARTWORK .. "TP_WhiteSquare",
     edgeSize = 0.9,
     offset = 1.1,
   }

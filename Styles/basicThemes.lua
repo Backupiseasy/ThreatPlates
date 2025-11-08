@@ -1,8 +1,6 @@
 ﻿local ADDON_NAME, Addon = ...
-local ThreatPlates = Addon.ThreatPlates
 
-local ART_PATH = ThreatPlates.Art
-local EMPTY_TEXTURE = ART_PATH.."Empty"
+local EMPTY_TEXTURE = Addon.PATH_ARTWORK.."Empty"
 
 local function Create(name)
   local db = Addon.db.profile.settings
@@ -36,7 +34,7 @@ local function Create(name)
     },
 
     healthborder = {
-      texture = (db.healthborder.show and ThreatPlates.Art .. db.healthborder.texture) or EMPTY_TEXTURE,
+      texture = (db.healthborder.show and Addon.PATH_ARTWORK .. db.healthborder.texture) or EMPTY_TEXTURE,
       edgesize = db.healthborder.EdgeSize,
       offset = db.healthborder.Offset,
       show = true,
@@ -48,7 +46,7 @@ local function Create(name)
     },
 
     threatborder = {
-      texture = ThreatPlates.Art.."TP_Threat",
+      texture = Addon.PATH_ARTWORK.."TP_Threat",
       width = 256,
       height = 64,
       x = 0,
@@ -75,7 +73,7 @@ local function Create(name)
     },
 
     castborder = {
-      texture = (db.castborder.show and ThreatPlates.Art .. db.castborder.texture) or EMPTY_TEXTURE,
+      texture = (db.castborder.show and Addon.PATH_ARTWORK .. db.castborder.texture) or EMPTY_TEXTURE,
       edgesize = db.castborder.EdgeSize,
       offset = db.castborder.Offset,
       show = true,

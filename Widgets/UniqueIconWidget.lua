@@ -147,7 +147,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
     end
 
     if unique_setting.ShowHighlightBorder then
-      widget_frame.HighlightBorder:SetTexture("Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\SpecialTotemBorder")
+      widget_frame.HighlightBorder:SetTexture(Addon.PATH_ARTWORK .. "HighlightBorder")
       widget_frame.HighlightBorder:Show()
     else
       widget_frame.HighlightBorder:Hide()
@@ -225,5 +225,5 @@ end
 function Widget:UpdateSettings()
   self.db = Addon.db.profile.uniqueWidget
 
-  DefaultGlowColor = Addon.ThreatPlates.DEFAULT_SETTINGS.profile.uniqueSettings["**"].Effects.Glow.Color
+  DefaultGlowColor = Addon.DEFAULT_SETTINGS.profile.uniqueSettings["**"].Effects.Glow.Color
 end

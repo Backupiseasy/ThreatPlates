@@ -2,7 +2,6 @@
 -- Quest Widget
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
-local ThreatPlates = Addon.ThreatPlates
 
 if not Addon.ExpansionIsAtLeastMists then return end
 
@@ -33,7 +32,7 @@ local GetNamePlates = C_NamePlate.GetNamePlates
 
 -- ThreatPlates APIs
 local PlayerName = Addon.PlayerName
-local RGB_P = ThreatPlates.RGB_P
+local RGB_P = Addon.RGB_P
 local UnitDetailedThreatSituationWrapper = Addon.UnitDetailedThreatSituationWrapper
 
 local _G =_G

@@ -2,7 +2,6 @@
 -- Element: Moueover Highlight
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
-local ThreatPlates = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -24,11 +23,10 @@ local _G =_G
 -- GLOBALS: CreateFrame
 
 local OFFSET_HIGHLIGHT = 1
-local ART_PATH = ThreatPlates.Art
-local NAME_STYLE_TEXTURE = ART_PATH .. "Highlight"
-local HEALTHBAR_STYLE_TEXTURE = ART_PATH .. "TP_HealthBar_Highlight"
+local NAME_STYLE_TEXTURE = Addon.PATH_ARTWORK .. "Highlight"
+local HEALTHBAR_STYLE_TEXTURE = Addon.PATH_ARTWORK .. "TP_HealthBar_Highlight"
 local BACKDROP = {
-  edgeFile = ART_PATH .. "TP_WhiteSquare",
+  edgeFile = Addon.PATH_ARTWORK .. "TP_WhiteSquare",
   edgeSize = 1,
 }
 

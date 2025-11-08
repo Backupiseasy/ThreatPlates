@@ -1,5 +1,4 @@
 ﻿local _, Addon = ...
-local ThreatPlates = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -14,7 +13,7 @@ local Media = LibStub("LibSharedMedia-3.0")
 
 --local koKR, ruRU, zhCN, zhTW, western = Media.LOCALE_BIT_koKR, Media.LOCALE_BIT_ruRU, Media.LOCALE_BIT_zhCN, Media.LOCALE_BIT_zhTW, Media.LOCALE_BIT_western
 
-ThreatPlates.Art = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\"
+Addon.PATH_ARTWORK = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\"
 
 ---------------------------------------------------------------------------------------------------
 -- Register media files that ThreatPlates needs at least (because of default settings)

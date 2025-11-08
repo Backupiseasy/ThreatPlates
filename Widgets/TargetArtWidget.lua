@@ -2,7 +2,6 @@
 -- Target Art Widget
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
-local ThreatPlates = Addon.ThreatPlates
 
 local FocusWidget = (Addon.ExpansionIsAtLeastTBC and Addon.Widgets:NewFocusWidget("Focus")) or {}
 local Widget = Addon.Widgets:NewTargetWidget("TargetArt")
@@ -30,26 +29,25 @@ local _G =_G
 -- List them here for Mikk's FindGlobals script
 -- GLOBALS: CreateFrame
 
-local ART_PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\"
 local BACKDROP = {
   default = {
-    edgeFile = ThreatPlates.Art .. "TP_WhiteSquare",
+    edgeFile = Addon.PATH_ARTWORK .. "TP_WhiteSquare",
     edgeSize = 1.8,
     offset = 4,
   },
   squarethin = {
-    edgeFile = ThreatPlates.Art .. "TP_WhiteSquare",
+    edgeFile = Addon.PATH_ARTWORK .. "TP_WhiteSquare",
     edgeSize = 1,
     offset = 3,
   },
   threat_glow = {
-    edgeFile = ThreatPlates.Art .. "TP_Threat",
+    edgeFile = Addon.PATH_ARTWORK .. "TP_Threat",
     edgeSize = 10,
     offset = 5,
   },
   glow = {
-    bgFile = ThreatPlates.Art .. "TP_WhiteSquare",
-    edgeFile = ART_PATH .. "glow_border",
+    bgFile = Addon.PATH_ARTWORK .. "TP_WhiteSquare",
+    edgeFile = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\TargetArtWidget\\glow_border",
     edgeSize = 10,
     offset = 5,
     inset = 5,
@@ -353,7 +351,7 @@ local function CreateTargetHighlightFrame(target_unitid)
     widget_frame.HealthbarMode = healthbar_mode_frame
 
     widget_frame.NameModeTexture = widget_frame:CreateTexture(nil, "BACKGROUND", nil, 0)
-    widget_frame.NameModeTexture:SetTexture(ThreatPlates.Art .. "Target")
+    widget_frame.NameModeTexture:SetTexture(Addon.PATH_ARTWORK .. "Target")
 
     -- Create soft target / interact icon
     local soft_target_icon_frame = _G.CreateFrame("Frame",nil, widget_frame, BackdropTemplate)
@@ -563,7 +561,7 @@ function FocusWidget:Create()
     widget_frame.HealthbarMode = healthbar_mode_frame
 
     widget_frame.NameModeTexture = widget_frame:CreateTexture(nil, "BACKGROUND", nil, -1)
-    widget_frame.NameModeTexture:SetTexture(ThreatPlates.Art .. "Target")
+    widget_frame.NameModeTexture:SetTexture(Addon.PATH_ARTWORK .. "Target")
 
     self:UpdateLayout()
   end

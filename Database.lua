@@ -1,5 +1,4 @@
 local ADDON_NAME, Addon = ...
-local ThreatPlates = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Stuff for handling the database with the SavedVariables of ThreatPlates (ThreatPlatesDB)
@@ -522,7 +521,7 @@ Addon.SwitchToDefaultSettingsV1 = function()
 
   db:SetProfile("_ThreatPlatesInternal")
 
-  local defaults = Addon.GetDefaultSettingsV1(ThreatPlates.DEFAULT_SETTINGS)
+  local defaults = Addon.GetDefaultSettingsV1(Addon.DEFAULT_SETTINGS)
   db:RegisterDefaults(defaults)
 
   db:SetProfile(current_profile)
@@ -535,7 +534,7 @@ Addon.SwitchToCurrentDefaultSettings = function()
 
   db:SetProfile("_ThreatPlatesInternal")
 
-  db:RegisterDefaults(ThreatPlates.DEFAULT_SETTINGS)
+  db:RegisterDefaults(Addon.DEFAULT_SETTINGS)
 
   db:SetProfile(current_profile)
   db:DeleteProfile("_ThreatPlatesInternal")
@@ -696,7 +695,7 @@ end
 --      profile.AuraWidget = profile.AuraWidget or {}
 --      profile.AuraWidget.ModeIcon = profile.AuraWidget.ModeIcon or {}
 --
---      local default_profile = ThreatPlates.DEFAULT_SETTINGS.profile.AuraWidget
+--      local default_profile = Addon.DEFAULT_SETTINGS.profile.AuraWidget
 --      profile.AuraWidget.FilterMode = profile.debuffWidget.mode                     or default_profile.FilterMode
 --      profile.AuraWidget.ModeIcon.Style = profile.debuffWidget.style                or default_profile.ModeIcon.Style
 --      profile.AuraWidget.ShowTargetOnly = profile.debuffWidget.targetOnly           or default_profile.ShowTargetOnly
@@ -838,7 +837,7 @@ end
 --    end
 --
 --    if DatabaseEntryExists(profile, { "AuraWidget", "scale", } ) then
---      profile.AuraWidget.Debuffs.Scale = DatabaseEntrySetValueOrDefault(profile.AuraWidget.scale, ThreatPlates.DEFAULT_SETTINGS.profile.AuraWidget.Debuffs.Scale)
+--      profile.AuraWidget.Debuffs.Scale = DatabaseEntrySetValueOrDefault(profile.AuraWidget.scale, Addon.DEFAULT_SETTINGS.profile.AuraWidget.Debuffs.Scale)
 --      DatabaseEntryDelete(profile, { "AuraWidget", "scale", } )
 --    end
 --  end
@@ -962,7 +961,7 @@ end
 
 local function MigrateSpelltextPosition(profile_name, profile)
   if DatabaseEntryExists(profile, { "settings", "spelltext" } ) then
-    local default_profile = ThreatPlates.DEFAULT_SETTINGS.profile
+    local default_profile = Addon.DEFAULT_SETTINGS.profile
 
     profile.settings = profile.settings or {}
     profile.settings.castbar = profile.settings.castbar or {}
@@ -990,13 +989,13 @@ end
 local function FixTargetFocusTexture(profile_name, profile)
   if DatabaseEntryExists(profile, { "targetWidget", "theme" } ) then
     if not Addon.TARGET_TEXTURES[profile.targetWidget.theme] then
-      profile.targetWidget.theme = ThreatPlates.DEFAULT_SETTINGS.profile.targetWidget.theme
+      profile.targetWidget.theme = Addon.DEFAULT_SETTINGS.profile.targetWidget.theme
     end
   end
 
   if DatabaseEntryExists(profile, { "FocusWidget", "theme" } ) then
     if not Addon.TARGET_TEXTURES[profile.FocusWidget.theme] then
-      profile.FocusWidget.theme = ThreatPlates.DEFAULT_SETTINGS.profile.FocusWidget.theme
+      profile.FocusWidget.theme = Addon.DEFAULT_SETTINGS.profile.FocusWidget.theme
     end
   end
 end
@@ -1069,7 +1068,7 @@ local function DisableShowBlizzardAurasForClassic(profile_name, profile)
 end
 
 local function MigrateAurasWidgetV2(_, profile)
-  local default_profile = ThreatPlates.DEFAULT_SETTINGS.profile
+  local default_profile = Addon.DEFAULT_SETTINGS.profile
 
   local function MigrateFontSettings(aura_type, font_area)
     local profile_aura_type_modebar = profile.AuraWidget[aura_type].ModeBar
@@ -1169,9 +1168,9 @@ local function MigrateAurasWidgetV2(_, profile)
 end
 
 local function MigrateFixAurasCyclicAnchoring(_, profile)
-  local buffs_anchor_to = ThreatPlates.DEFAULT_SETTINGS.profile.AuraWidget.Buffs.AnchorTo
-  local debuffs_anchor_to = ThreatPlates.DEFAULT_SETTINGS.profile.AuraWidget.Debuffs.AnchorTo
-  local cc_anchor_to = ThreatPlates.DEFAULT_SETTINGS.profile.AuraWidget.CrowdControl.AnchorTo
+  local buffs_anchor_to = Addon.DEFAULT_SETTINGS.profile.AuraWidget.Buffs.AnchorTo
+  local debuffs_anchor_to = Addon.DEFAULT_SETTINGS.profile.AuraWidget.Debuffs.AnchorTo
+  local cc_anchor_to = Addon.DEFAULT_SETTINGS.profile.AuraWidget.CrowdControl.AnchorTo
 
   if DatabaseEntryExists(profile, { "AuraWidget", "Buffs", "AnchorTo" } ) then
     buffs_anchor_to = profile.AuraWidget.Buffs.AnchorTo
@@ -1199,7 +1198,7 @@ local function MigrateFixAurasCyclicAnchoring(_, profile)
 end
 
 local function MigrateThreatValue(_, profile)
-  local default_profile = ThreatPlates.DEFAULT_SETTINGS.profile
+  local default_profile = Addon.DEFAULT_SETTINGS.profile
 
   if DatabaseEntryExists(profile, { "threatWidget", "ThreatPercentage" } ) then
     profile.threatWidget.ThreatPercentage.ShowInGroups = GetValueOrDefault(profile.threatWidget.ThreatPercentage.OnlyInGroups, default_profile.threatWidget.ThreatPercentage.OnlyInGroups)
@@ -1308,7 +1307,7 @@ end
 
 local function MigrateAnchorsForWidgets(profile_name, profile)
   if DatabaseEntryExists(profile, { "BossModsWidget" }) then
-    local default_profile = ThreatPlates.DEFAULT_SETTINGS.profile
+    local default_profile = Addon.DEFAULT_SETTINGS.profile
 
     profile.BossModsWidget.HealthbarMode = profile.BossModsWidget.HealthbarMode or {}
     profile.BossModsWidget.NameMode = profile.BossModsWidget.NameMode or {}
@@ -1343,7 +1342,7 @@ local function MigrationThreatSystemEnable(_, profile)
 end
 
 local function MigrateForReleaseV13(profile_name, profile)
-  local default_profile = ThreatPlates.DEFAULT_SETTINGS.profile
+  local default_profile = Addon.DEFAULT_SETTINGS.profile
 
   profile.Healthbar = profile.Healthbar or {}
   
@@ -1703,7 +1702,7 @@ end
 
 --   for profile_name, profile in pairs(profile_table) do
 --     ThreatPlates.Print(L["  Profile: "] .. profile_name, true)
---     DeleteEntry(profile, ThreatPlates.DEFAULT_SETTINGS.profile, "")
+--     DeleteEntry(profile, Addon.DEFAULT_SETTINGS.profile, "")
 --   end
 -- end
 
@@ -1806,7 +1805,7 @@ local function UpdateRuntimeValueFromCustomStyle(custom_style, imported_custom_s
 end
 
 Addon.ImportCustomStyle = function(imported_custom_style)
-  local custom_style = Addon.CopyTable(ThreatPlates.DEFAULT_SETTINGS.profile.uniqueSettings["**"])
+  local custom_style = Addon.CopyTable(Addon.DEFAULT_SETTINGS.profile.uniqueSettings["**"])
 
   UpdateFromCustomStyle(custom_style, imported_custom_style)
 

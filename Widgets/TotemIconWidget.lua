@@ -77,7 +77,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
   Addon:SetIconTexture(widget_frame.Icon, "Totem." .. tostring(totem_settings.SpellID), unit.unitid)
 
   if totem_settings.Style == "special" then
-    widget_frame.Border:SetTexture("Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\SpecialTotemBorder")
+    widget_frame.Border:SetTexture(Addon.PATH_ARTWORK .. "HighlightBorder")
   else
     widget_frame.Border:SetTexture()
   end

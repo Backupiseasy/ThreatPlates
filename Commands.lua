@@ -444,8 +444,8 @@ function TidyPlatesThreat:ChatCommand(input)
 			if not plate._TPBackground then				
 				plate._TPBackground = _G.CreateFrame("Frame", nil, plate, Addon.BackdropTemplate)
 				plate._TPBackground:SetBackdrop({
-					bgFile = Addon.ThreatPlates.Art .. "TP_WhiteSquare.tga",
-					edgeFile = Addon.ThreatPlates.Art .. "TP_WhiteSquare.tga",
+					bgFile = Addon.PATH_ARTWORK .. "TP_WhiteSquare.tga",
+					edgeFile = Addon.PATH_ARTWORK .. "TP_WhiteSquare.tga",
 					edgeSize = 2,
 					insets = { left = 0, right = 0, top = 0, bottom = 0 },
 				})

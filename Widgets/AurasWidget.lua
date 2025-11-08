@@ -2,7 +2,6 @@
 -- Auras Widget
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
-local ThreatPlates = Addon.ThreatPlates
 
 local Widget = Addon.Widgets:NewWidget("Auras")
 
@@ -3613,7 +3612,7 @@ function Widget:UpdateSettings()
   AuraHighlightStop = Addon.LibCustomGlow[CUSTOM_GLOW_FUNCTIONS[self.db.Highlight.Type][2]]
   AuraHighlightOffset = CUSTOM_GLOW_FUNCTIONS[self.db.Highlight.Type][3]
 
-  local color = (self.db.Highlight.CustomColor and self.db.Highlight.Color) or ThreatPlates.DEFAULT_SETTINGS.profile.AuraWidget.Highlight.Color
+  local color = (self.db.Highlight.CustomColor and self.db.Highlight.Color) or Addon.DEFAULT_SETTINGS.profile.AuraWidget.Highlight.Color
   AuraHighlightColor[1] = color.r
   AuraHighlightColor[2] = color.g
   AuraHighlightColor[3] = color.b

@@ -11,7 +11,6 @@ local tostring, tonumber, string_format = tostring, tonumber, string.format
 local SetCVar, GetCVar, GetCVarDefault, GetCVarBool = C_CVar.SetCVar, C_CVar.GetCVar, C_CVar.GetCVarDefault, C_CVar.GetCVarBool
 
 -- ThreatPlates APIs
-local ThreatPlates = Addon.ThreatPlates
 local L = Addon.L
 
 local _G =_G
