@@ -11,10 +11,11 @@ local ADDON_NAME, Addon = ...
 local strsplit, pairs = strsplit, pairs
 
 -- WoW APIs
-local IsInInstance = IsInInstance
 local UnitThreatSituation = UnitThreatSituation
 local UnitIsPlayer, UnitPlayerControlled = UnitIsPlayer, UnitPlayerControlled
-local UnitThreatSituation, UnitIsUnit, UnitExists, UnitGroupRolesAssigned = UnitThreatSituation, UnitIsUnit, UnitExists, UnitGroupRolesAssigned
+local UnitThreatSituation, UnitIsUnit, UnitExists = UnitThreatSituation, UnitIsUnit, UnitExists
+local UnitGroupRolesAssignedWrapper = UnitGroupRolesAssigned
+local IsInInstance = IsInInstance
 
 -- WoW Classic APIs:
 local GetPartyAssignment = GetPartyAssignment

@@ -793,12 +793,12 @@ function Addon:ConfigClickableArea(toggle_show)
         tp_frame.Background:SetPoint("CENTER", ConfigModePlate.UnitFrame, "CENTER")
 
         local width, height
-        if ConfigModePlate.unit.reaction == "FRIENDLY" then          
+        if tp_frame.unit.reaction == "FRIENDLY" then          
           width, height = C_NamePlate.GetNamePlateFriendlySize()
         else
           width, height = C_NamePlate.GetNamePlateEnemySize()
         end
-        ConfigModePlate.Background:SetSize(width, height)
+        tp_frame.Background:SetSize(width, height)
 
         tp_frame.Background:Show()
 
@@ -906,8 +906,8 @@ end
 
 function Addon:ForceUpdateFrameOnShow()
   SettingsShowOnlyNames = CVars:GetAsBool("nameplateShowOnlyNames") and Addon.db.profile.BlizzardSettings.Names.Enabled
-  for plate, _ in pairs(Addon.PlatesVisible) do
-    ClassicBlizzardNameplatesSetAlpha(plate.UnitFrame, SettingsShowOnlyNames and 0 or 1)
+  for _, tp_frame in Addon:GetActiveThreatPlates() do
+    ClassicBlizzardNameplatesSetAlpha(tp_frame.Parent.UnitFrame, SettingsShowOnlyNames and 0 or 1)
   end
 end
 
@@ -1637,7 +1637,7 @@ local ENABLED_EVENTS = {
 }
 
 -- GetSpecialization: Mists - Patch 5.0.4 (2012-08-28): Replaced GetPrimaryTalentTree.
-if Addon.IS_MAINLINE then
+if Addon.ExpansionIsAtLeastMists then
   function Addon:ACTIVE_TALENT_GROUP_CHANGED()
     local player_specialization = GetSpecialization()
     if player_specialization then
@@ -1646,7 +1646,7 @@ if Addon.IS_MAINLINE then
         local role = select(5, GetSpecializationInfo(player_specialization))
         Addon.PlayerRole = (role == "TANK" and "tank") or "dps"
       else
-        local role = db.char.spec[player_specialization]
+        Addon.PlayerRole = (db.char.spec[player_specialization] and "tank") or "dps"
       end
     end
   end

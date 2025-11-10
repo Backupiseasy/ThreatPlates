@@ -234,7 +234,7 @@ local function TextHealthPercentColored(unit)
     end
 
     text_health = HpAmt .. HpMax .. HpPct
-    color = ColorModule.GetColorByHealthDeficit(unit)
+    color = ColorModule.GetColorByHealthDeficit
   end
 
   if text_health and text_absorbs then
