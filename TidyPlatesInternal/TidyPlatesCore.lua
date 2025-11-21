@@ -1309,7 +1309,7 @@ local function NamePlateDriverFrame_AcquireUnitFrame(_, plate)
   end
 end
 
-local function ARENA_OPPONENT_UPDATE(event, unitid, update_reason)
+function CoreEvents:ARENA_OPPONENT_UPDATE(unitid, update_reason)
   -- Event is only registered in solo shuffles, so no need to check here for that
   if update_reason == "seen" then
     local plate = PlatesByUnit[unitid]
