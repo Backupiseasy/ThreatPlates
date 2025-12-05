@@ -1,10 +1,10 @@
-## Interface: 110205
-## Interface-Retail: 110205
-## Interface-Vanilla: 11507
+## Interface: 110207
+## Interface-Retail: 110207
+## Interface-Vanilla: 11508
 ## Interface-TBC: 20504
 ## Interface-Wrath: 30405
 ## Interface-Cata: 40402
-## Interface-Mists: 50501
+## Interface-Mists: 50502
 
 ## Title: Threat Plates
 ## Version: @project-version@
