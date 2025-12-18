@@ -10,6 +10,9 @@ local ADDON_NAME, Addon = ...
 -- Lua APIs
 local format, pairs = format, pairs
 
+-- WoW APIs
+local AbbreviateNumbers = AbbreviateNumbers
+
 -- ThreatPlates APIs
 local TextCache = Addon.Cache.Texts
 
@@ -86,7 +89,6 @@ local TruncateWestern = function(value)
   end
 end
 
--- TODO: NUMBER_ABBREVIATION_DATA - AbbreviateNumbers
 local MAP_LOCALE_TO_UNIT_SYMBOL = {
   koKR = { -- Korrean
     Unit_1K = "천",
@@ -127,7 +129,7 @@ if MAP_LOCALE_TO_UNIT_SYMBOL[client_locale] then
   end
 end
 
-Addon.Truncate = TruncateWestern
+Addon.Truncate = AbbreviateNumbers
 
 ---------------------------------------------------------------------------------------------------
 -- Transliteration
@@ -169,7 +171,9 @@ end
 ---------------------------------------------------------------------------------------------------
 
 function LocalizationModule.UpdateSettings()
-  Addon.Truncate = (Addon.db.profile.text.LocalizedUnitSymbol and TruncateEastAsian) or TruncateWestern
+  if not Addon.ExpansionIsAtLeastMidnight then
+    Addon.Truncate = (Addon.db.profile.text.LocalizedUnitSymbol and TruncateEastAsian) or TruncateWestern
+  end
 
   -- Clear cache for texts as e.g., abbreviation mode might have changed
   wipe(TextCache)

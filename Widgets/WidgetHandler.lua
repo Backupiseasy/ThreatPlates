@@ -254,7 +254,8 @@ function WidgetHandler:NewFocusWidget(widget_name)
 end
 
 function WidgetHandler:IsEnabled(widget_name)
-  return self.Widgets[widget_name]:IsEnabled()
+  local widget = self.Widgets[widget_name]
+  return widget and widget:IsEnabled()
 end
 
 function WidgetHandler:InitializeWidget(widget_name)

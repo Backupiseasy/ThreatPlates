@@ -36,6 +36,7 @@ local ColorModule = Addon.Color
 ---------------------------------------------------------------------------------------------------
 
 local TRANSPARENT_COLOR = Addon.RGB(0, 0, 0, 0)
+local MIDNIGHT_HEALTH_COLOR_WRAPPER = Addon.RGB(1, 1, 1)
 
 ---------------------------------------------------------------------------------------------------
 -- Cached configuration settings (for performance reasons)
@@ -64,6 +65,7 @@ local NameModeSettings = {
 
 local HealthColorCache = {}
 local CS = CreateFrame("ColorSelect")
+local HealthColorCurve
 
 --GetSmudgeColorRGB function - from: https://www.wowinterface.com/downloads/info22536-ColorSmudge.html
 --arg1: color table in RGB {r=0,g=0,b=0}
@@ -99,20 +101,30 @@ function CS:GetSmudgeColorRGB(colorA, colorB, perc)
   return self:GetColorRGB()
 end
 
-local function GetColorByHealth(unit)
-  local health_pct = ceil(100 * unit.health / unit.healthmax)
+if Addon.ExpansionIsAtLeastMidnight then
+  ColorModule.GetColorByHealthDeficit = function(unit)
+    MIDNIGHT_HEALTH_COLOR_WRAPPER.HealthColor = _G.UnitHealthPercentColor(unit.unitid, HealthColorCurve, true)
+    return MIDNIGHT_HEALTH_COLOR_WRAPPER
 
-  local color = HealthColorCache[health_pct]
-  if not color then
-    color = RGB_P(CS:GetSmudgeColorRGB(ColorByHealth.Low, ColorByHealth.High, health_pct))
-    HealthColorCache[health_pct] = color
+    --local color = _G.UnitHealthPercentColor(unit.unitid, HealthColorCurve, true)
+    --return RGB_P(color::GetRGB())
   end
+else
+  ColorModule.GetColorByHealthDeficit = function(unit)
+    local health_pct = ceil(100 * unit.health / unit.healthmax)
 
-  return color
+    local color = HealthColorCache[health_pct]
+    if not color then
+      color = RGB_P(CS:GetSmudgeColorRGB(ColorByHealth.Low, ColorByHealth.High, health_pct))
+      HealthColorCache[health_pct] = color
+    end
+
+    return color
+  end
 end
 
 -- Works as all functions using this function are triggerd by the NameColorChanged event
-ColorModule.GetColorByHealthDeficit = GetColorByHealth
+local GetColorByHealth = ColorModule.GetColorByHealthDeficit
 
 ---------------------------------------------------------------------------------------------------
 -- Color by unit reaction 
@@ -540,6 +552,14 @@ function ColorModule.UpdateSettings()
 
   ColorByReaction = SettingsBase.ColorByReaction
   ColorByHealth = SettingsBase.ColorByHealth
+  -- Initialize the ColorCurve for health-based coloring (retail/Midnight)
+  if Addon.ExpansionIsAtLeastMidnight then
+    HealthColorCurve = C_CurveUtil.CreateColorCurve({
+      {percent = 1.0, color = CreateColor(ColorByHealth.High.r, ColorByHealth.High.g, ColorByHealth.High.b)},
+      {percent = 0.0, color = CreateColor(ColorByHealth.Low.r, ColorByHealth.Low.g, ColorByHealth.Low.b)},
+    })
+  end
+
   HealthColorCache = {}
 
   -- NameModeSettings.HealthbarMode.UseTargetColoring = SettingsBase.targetWidget.ModeNames

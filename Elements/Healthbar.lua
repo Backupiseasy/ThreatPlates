@@ -50,7 +50,7 @@ local UpdateAbsorbs
 
 -- UnitGetTotalAbsorbs: Mists - Patch 5.2.0 (2013-03-05): Added.
 -- UnitGetTotalHealAbsorbs: Mists - Patch 5.4.0 (2013-09-10): Added.
-if Addon.IS_MAINLINE then
+if Addon.IS_MAINLINE and not Addon.IS_MIDNIGHT then
   UpdateAbsorbs = function(tp_frame)
     local visual = tp_frame.visual
     local absorbbar = visual.Healthbar.Absorbs
@@ -368,13 +368,6 @@ function Element.PlateUnitAdded(tp_frame)
   healthbar:SetMinMaxValues(0, unit.healthmax)
   healthbar:SetValue(unit.health)
 
-  if unit.healthmax == unit.health then
-    healthbar.Background:Hide()
-  else
-    healthbar.Background:SetSize(healthbar:GetWidth() * (1 - (unit.health / unit.healthmax)), healthbar:GetHeight())
-    healthbar.Background:Show()
-  end
-
   UpdateAbsorbs(tp_frame)
   UpdateTargetUnit(healthbar, unit.unitid)
 end
@@ -484,8 +477,12 @@ local function ColorUpdate(tp_frame, color)
 
   if not healthbar:IsShown() then return end
 
-  --print("Color Update:", Addon.Debug:ColorToString(color))
-  healthbar:SetStatusBarColor(color.r, color.g, color.b, 1)
+  if Addon.ExpansionIsAtLeastMidnight and color.HealthColor then
+    --healthbar:SetStatusBarColor(color.HealthColor:GetRGB())
+    healthbar:SetStatusBarColor(color.r, color.g, color.b, 1)
+  else
+    healthbar:SetStatusBarColor(color.r, color.g, color.b, 1)
+  end
   
   if not SettingsHealthbar.BackgroundUseForegroundColor then
     color = SettingsHealthbar.BackgroundColor

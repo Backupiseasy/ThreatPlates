@@ -3,6 +3,8 @@
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
 
+if Addon.ExpansionIsAtLeastMidnight then return end
+
 local Widget = Addon.Widgets:NewWidget("Auras")
 
 ---------------------------------------------------------------------------------------------------
@@ -139,7 +141,8 @@ local CC_SILENCE = 101
 local CC_OTHER = 999
 
 local CROWD_CONTROL_SPELLS_BY_EXPANSION = {
-  MAINLINE = {
+  MAINLINE = {},
+  LE_EXPANSION_WAR_WITHIN = {
     ---------------------------------------------------------------------------------------------------
     -- Druid
     ---------------------------------------------------------------------------------------------------

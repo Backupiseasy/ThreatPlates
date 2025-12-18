@@ -8,7 +8,7 @@ local _, Addon = ...
 local pairs, next = pairs, next
 
 -- WoW APIs
-local WorldFrame, CreateFrame = WorldFrame, CreateFrame
+local WorldFrame = WorldFrame
 
 -- ThreatPlates APIs
 
@@ -30,7 +30,7 @@ local SubscribersByEvent = {}
 -- WoW Event Handler
 ---------------------------------------------------------------------------------------------------
 
-local EventHandlerFrame = CreateFrame("Frame", nil, WorldFrame)
+local EventHandlerFrame = _G.CreateFrame("Frame")
 
 local function EventHandler(self, event, ...)
   --print ("Publishing Event", event, ...)

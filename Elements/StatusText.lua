@@ -23,7 +23,7 @@ local RGB = Addon.RGB
 local FontUpdateText = Addon.Font.UpdateText
 local TransliterateCyrillicLetters = Addon.Localization.TransliterateCyrillicLetters
 local L = Addon.L
-local ColorModule = Addon.Color
+local GetColorByHealthDeficit = Addon.Color.GetColorByHealthDeficit
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -169,13 +169,64 @@ local function GetLevelDescription(unit)
   return description, GetLevelColor
 end
 
--- return ceil(100 * (unit.health / unit.healthmax)) .. "%", ColorModule.GetColorByHealthDeficit()(unit)
-local function TextHealthPercentColored(unit)
-  local text_health, text_absorbs, color = "", "", GetRoleColor
+local TextHealthPercentColored
 
-  if ShowAbsorbs then
-    local absorbs_amount = _G.UnitGetTotalAbsorbs(unit.unitid) or 0
-    if absorbs_amount > 0 then
+if Addon.ExpansionIsAtLeastMidnight then
+  TextHealthPercentColored = function(unit)
+    local text_health, text_absorbs, color = "", "", GetRoleColor
+
+    if ShowAbsorbs then
+      local absorbs_amount = _G.UnitGetTotalAbsorbs(unit.unitid) or 0
+      
+      if Settings.AbsorbsShorten then
+        text_absorbs = Truncate(absorbs_amount)
+      else
+        text_absorbs = absorbs_amount
+      end
+
+      text_absorbs = "[" .. text_absorbs .. "]"
+    end
+
+    if ShowHealth then
+      local HpPct, HpAmt, HpMax = "", "", ""
+
+      if Settings.amount then
+        --if Settings.deficit and (unit.health ~= unit.healthmax) then
+        if Settings.deficit then
+          HpAmt = ("-%s"):format(Truncate(UnitHealthMissing(unit.unitid)))
+        else
+          HpAmt = Truncate(UnitHealth(unit.unitid))
+        end
+
+        if Settings.max then
+          HpMax = (" / %s"):format(Truncate(UnitHealthMax(unit.unitid)))
+        end
+      end
+
+      if Settings.percent then
+        HpPct = ("%.f%%"):format(UnitHealthPercent(unit.unitid, true))
+        if Settings.amount then
+          HpPct = (" - %s"):format(HpPct)
+        end
+      end
+
+      --text_health = ("%s%s%s"):format(HpAmt, HpMax, HpPct)
+      text_health = HpAmt .. HpMax .. HpPct
+      color = GetColorByHealthDeficit
+    end
+
+    if text_health and text_absorbs then
+      return text_health .. " " .. text_absorbs, color
+    else
+      return text_health .. text_absorbs, color
+    end
+  end
+else
+  TextHealthPercentColored = function(unit)
+    local text_health, text_absorbs, color = "", "", GetRoleColor
+
+    if ShowAbsorbs then
+      local absorbs_amount = _G.UnitGetTotalAbsorbs(unit.unitid) or 0
       if Settings.AbsorbsAmount then
         if Settings.AbsorbsShorten then
           text_absorbs = Truncate(absorbs_amount)
@@ -198,49 +249,49 @@ local function TextHealthPercentColored(unit)
         text_absorbs = "[" .. text_absorbs .. "]"
       end
     end
-  end
 
-  if ShowHealth and (Settings.full or unit.health ~= unit.healthmax) then
-    local HpPct, HpAmt, HpMax = "", "", ""
+    if ShowHealth and (Settings.full or unit.health ~= unit.healthmax) then
+      local HpPct, HpAmt, HpMax = "", "", ""
 
-    if Settings.amount then
-      if Settings.deficit and unit.health ~= unit.healthmax then
-        HpAmt = "-" .. Truncate(unit.healthmax - unit.health)
-      else
-        HpAmt = Truncate(unit.health)
-      end
-
-      if Settings.max then
-        if HpAmt ~= "" then
-          HpMax = " / " .. Truncate(unit.healthmax)
+      if Settings.amount then
+        if Settings.deficit and unit.health ~= unit.healthmax then
+          HpAmt = "-" .. Truncate(unit.healthmax - unit.health)
         else
-          HpMax = Truncate(unit.healthmax)
+          HpAmt = Truncate(unit.health)
+        end
+
+        if Settings.max then
+          if HpAmt ~= "" then
+            HpMax = " / " .. Truncate(unit.healthmax)
+          else
+            HpMax = Truncate(unit.healthmax)
+          end
         end
       end
-    end
 
-    if Settings.percent then
-      -- Blizzard calculation:
-      -- local perc = math.ceil(100 * (UnitHealth(frame.displayedUnit)/UnitHealthMax(frame.displayedUnit)));
+      if Settings.percent then
+        -- Blizzard calculation:
+        -- local perc = math.ceil(100 * (UnitHealth(frame.displayedUnit)/UnitHealthMax(frame.displayedUnit)));
 
-      local perc = ceil(100 * (unit.health / unit.healthmax))
-      -- old: floor(100*(unit.health / unit.healthmax))
+        local perc = ceil(100 * (unit.health / unit.healthmax))
+        -- old: floor(100*(unit.health / unit.healthmax))
 
-      if HpMax ~= "" or HpAmt ~= "" then
-        HpPct = " - "..perc.."%"
-      else
-        HpPct = perc.."%"
+        if HpMax ~= "" or HpAmt ~= "" then
+          HpPct = " - "..perc.."%"
+        else
+          HpPct = perc.."%"
+        end
       end
+
+      text_health = HpAmt .. HpMax .. HpPct
+      color = GetColorByHealthDeficit
     end
 
-    text_health = HpAmt .. HpMax .. HpPct
-    color = ColorModule.GetColorByHealthDeficit
-  end
-
-  if text_health and text_absorbs then
-    return text_health .. " " .. text_absorbs, color
-  else
-    return text_health .. text_absorbs, color
+    if text_health and text_absorbs then
+      return text_health .. " " .. text_absorbs, color
+    else
+      return text_health .. text_absorbs, color
+    end
   end
 end
 
@@ -296,7 +347,7 @@ end
 
 -- Guild, Role, Level, Health
 local function TextAll(unit)
-  if (unit.health < unit.healthmax) then
+  if unit.health ~= unit.healthmax then
     return TextHealthPercentColored(unit)
   else
     return TextRoleGuildLevel(unit)

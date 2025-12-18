@@ -43,28 +43,18 @@ local Element = Addon.Elements.NewElement("Castbar")
 ---------------------------------------------------------------------------------------------------
 
 local function OnUpdate(self, elapsed)
-  if self.IsCasting then
+  if self.IsCasting or self.IsChanneling then
     self.Value = self.Value + elapsed
 
-    local value, max_value = self.Value, self.MaxValue
-    if value < max_value then
-      self:SetValue(value)
-      self.CastTime:SetText(string_format("%.1f", max_value - value))
-      self.Spark:SetPoint("CENTER", self, "LEFT", (value / max_value) * self:GetWidth(), 0)
+    local current_value = self.MaxValue - self.Value
+    if current_value > 0 then
+      self:SetValue(self.Value)
+      self.CastTime:SetText(string_format("%.1f", current_value))
+      self.Spark:SetPoint("CENTER", self:GetStatusBarTexture(), "RIGHT")
       return
     end
 
-    self:SetValue(max_value)
-  elseif self.IsChanneling then
-    self.Value = self.Value - elapsed
-
-    local value = self.Value
-    if value > 0 then
-      self:SetValue(value)
-      self.CastTime:SetText(string_format("%.1f", value))
-      self.Spark:SetPoint("CENTER", self, "LEFT", (value / self.MaxValue) * self:GetWidth(), 0)
-      return
-    end
+    self:SetValue(self.MaxValue)
   elseif (self.FlashTime > 0) then
     self.CastTime:SetText("")
     self.FlashTime = self.FlashTime - elapsed
@@ -73,6 +63,20 @@ local function OnUpdate(self, elapsed)
 
   self:Hide()
   self:GetParent().unit.IsInterrupted = false
+end
+
+local function OnUpdateMidnight(self, elapsed)
+  if self.IsCasting or self.IsChanneling then
+    self:SetValue(GetTimePreciseSec() * 1000)
+    --self.CastTime:SetText(string_format("%.1f", max_value - value))
+    self.Spark:SetPoint("CENTER", self:GetStatusBarTexture(), "RIGHT")
+  elseif self.FlashTime > 0 then
+    self.CastTime:SetText("")
+    self.FlashTime = self.FlashTime - elapsed
+  else
+    self:Hide()
+    self:GetParent().unit.IsInterrupted = false
+  end
 end
 
 local function OnHide(self)
@@ -158,6 +162,7 @@ function Element.PlateCreated(tp_frame)
   castbar.Spark = spark
 
   local spell_text = castbar.Overlay:CreateFontString(nil, "ARTWORK")
+  spell_text:SetFont("Fonts\\FRIZQT__.TTF", 11)
   spell_text:SetWordWrap(false) -- otherwise text is wrapped when plate is scaled down
 
   -- Remaining cast time
@@ -175,7 +180,11 @@ function Element.PlateCreated(tp_frame)
   castbar.Value = 0
   castbar.MaxValue = 0
 
-  castbar:SetScript("OnUpdate", OnUpdate)
+  if Addon.ExpansionIsAtLeastMidnight then
+    castbar:SetScript("OnUpdate", OnUpdateMidnight)
+  else
+    castbar:SetScript("OnUpdate", OnUpdate)
+  end
   castbar:SetScript("OnHide", OnHide)
   castbar:SetScript("OnSizeChanged", OnSizeChanged)
 

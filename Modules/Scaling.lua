@@ -243,7 +243,7 @@ function ScalingModule.UpdateSettings()
   --     AnimateHideNameplate = false
   --   else
   --     AnimateHideNameplate = true
-  --     CVAR_nameplateMinScale = CVars:GetAsNumber("nameplateMinScale") * CVars:GetAsNumber("nameplateGlobalScale")
+  --     CVAR_nameplateMinScale = CVars:GetAsNumber("nameplateMinScale") * CVars:GetAsNumber("")
   --     CVAR_nameplateMinAlpha = CVars:GetAsNumber("nameplateMinAlpha")
   --   end
   -- else

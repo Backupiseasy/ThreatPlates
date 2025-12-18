@@ -84,7 +84,7 @@ if Addon.WOW_USES_CLASSIC_NAMEPLATES then
 
     Addon:ConfigClickableArea(false)
   end
-else 
+elseif not Addon.ExpansionIsAtLeastMidnight then
   local function CalculateSynchedNameplateSize(width_key, height_key)
     local width, height
     
@@ -150,6 +150,8 @@ else
     --local clampedZeroBasedScale = Saturate(zeroBasedScale)
     --C_NamePlate_SetNamePlateSelfSize(baseWidth * horizontalScale * Lerp(1.1, 1.0, clampedZeroBasedScale), baseHeight)
   end
+else
+  Addon.SetBaseNamePlateSize = function(self) end
 end
 
 ------------------
@@ -198,13 +200,15 @@ function Addon:ReloadTheme()
 
   -- Do this after combat ends, not in PLAYER_ENTERING_WORLD as it won't get set if the player is on combat when
   -- that event fires.
-  Addon:CallbackWhenOoC(function() Addon:SetBaseNamePlateSize() end, L["Unable to change a setting while in combat."])
-  Addon:CallbackWhenOoC(function()
-    local db = self.db.profile
-    SetNamePlateFriendlyClickThrough(db.NamePlateFriendlyClickThrough)
-    SetNamePlateEnemyClickThrough(db.NamePlateEnemyClickThrough)
-  end)
-
+  if not Addon.ExpansionIsAtLeastMidnight then
+    Addon:CallbackWhenOoC(function() Addon:SetBaseNamePlateSize() end, L["Unable to change a setting while in combat."])
+    Addon:CallbackWhenOoC(function()
+      local db = self.db.profile
+      SetNamePlateFriendlyClickThrough(db.NamePlateFriendlyClickThrough)
+      SetNamePlateEnemyClickThrough(db.NamePlateEnemyClickThrough)
+    end)
+  end
+  
   -- Update all UI elements (frames, textures, ...)
   Addon:UpdateAllPlates()
 end

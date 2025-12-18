@@ -169,10 +169,12 @@ local function ChatCommandDebug(cmd_list)
 	elseif command == "version" then
 		Addon.Logging.Debug("Expansion Level:", Addon.GetExpansionLevel())
 		Addon.Logging.Debug("Mainline:", Addon.IS_MAINLINE)
+		Addon.Logging.Debug("Midnight:", Addon.IS_MIDNIGHT)
 		Addon.Logging.Debug("Classic:", Addon.IS_CLASSIC)
 		Addon.Logging.Debug("Classic SoD:", Addon.IS_CLASSIC_SOD)
 		Addon.Logging.Debug("Classic Mists:", Addon.IS_MISTS_CLASSIC)
 		Addon.Logging.Debug("At least MoP:", Addon.ExpansionIsAtLeastMists)
+		Addon.Logging.Debug("At least Midnight:", Addon.ExpansionIsAtLeastMidnight)
 		Addon.Logging.Debug("WOW_USES_CLASSIC_NAMEPLATES:", Addon.WOW_USES_CLASSIC_NAMEPLATES)
 		Addon.Logging.Debug("WOW_FEATURE_ABSORBS:", Addon.WOW_FEATURE_ABSORBS)
 		Addon.Logging.Debug("WOW_FEATURE_BLIZZARD_AURA_FILTER:", Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER)
@@ -375,6 +377,19 @@ local function ChatCommandDebug(cmd_list)
 		if color then
 			Addon.Logging.Info("    GetThreatColor:", color.r, color.g, color.b)
 		end
+	elseif command == "size" then
+		local plate = C_NamePlate.GetNamePlateForUnit("mouseover")
+		if not plate then return end
+		local unit = plate.TPFrame.unit
+
+		print("Plate Size:")
+		print("    Plate:", plate:GetSize())
+		print("    UnitFrame:", plate.UnitFrame:GetSize())
+		print("    Healthbar:", plate.UnitFrame.healthBar:GetSize())
+		print("    Nameplate:", C_NamePlate.GetNamePlateSize())
+		print("Threat Plate Size:")
+		print("    Width:", plate.TPFrame:GetWidth())
+		print("    Height:", plate.TPFrame:GetHeight())
 	elseif command == "role" then
 		local spec_roles = Addon.db.char.spec
 		for i, is_tank in pairs(spec_roles) do

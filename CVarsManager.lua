@@ -26,8 +26,8 @@ local COMBAT_PROTECTED = {
   -- Miscellaneous
   uiScale = true,
   -- Nameplate CVars
-  nameplateLargeBottomInset = true,
-  nameplateLargeTopInset = true,
+  nameplateLargeBottomInset = true, -- Removed in Midnight
+  nameplateLargeTopInset = true,    -- Removed in Midnight
   nameplateMaxAlpha = true,
   nameplateMaxDistance = true,
   nameplateMinAlpha = true,
@@ -227,12 +227,15 @@ function CVars:CVarExists(cvar)
 end
 
 local RESET_TO_DEFAULT = {
-  "nameplateOtherTopInset", "nameplateOtherBottomInset", "nameplateLargeTopInset", "nameplateLargeBottomInset",
   "nameplateMotion", "nameplateMotionSpeed", "nameplateOverlapH", "nameplateOverlapV",
   "nameplateMaxDistance", "nameplateTargetBehindMaxDistance",
   "nameplateShowOnlyNames", 
   "clampTargetNameplateToScreen",
   "nameplateResourceOnTarget",
+  (not Addon.ExpansionIsAtLeastMidnight and "nameplateLargeTopInset") or nil, -- Removed in Midnight
+  (not Addon.ExpansionIsAtLeastMidnight and "nameplateLargeBottomInset") or nil, -- Removed in Midnight
+  (not Addon.ExpansionIsAtLeastMidnight and "nameplateOtherTopInset") or nil, -- Removed in Midnight
+  (not Addon.ExpansionIsAtLeastMidnight and "nameplateOtherBottomInset") or nil, -- Removed in Midnight
   -- "nameplateGlobalScale" -- Reset it to 1, if it get's somehow corrupted
   -- Action Target
   "SoftTargetEnemy", "SoftTargetNameplateEnemy", "SoftTargetIconEnemy",
@@ -248,30 +251,6 @@ function CVars:ResetToDefaults()
     end
   end
 end
-
----------------------------------------------------------------------------------------------------
--- 
----------------------------------------------------------------------------------------------------
-
--- From addon: AdvancedInterfaceOptions
-function CVars:CVarExists(cvar)
-	return not not select(2, pcall(function() return addon.GetCVarInfo(cvar) end))
-end
-
-local RESET_TO_DEFAULT = {
-  "nameplateOtherTopInset", "nameplateOtherBottomInset", "nameplateLargeTopInset", "nameplateLargeBottomInset",
-  "nameplateMotion", "nameplateMotionSpeed", "nameplateOverlapH", "nameplateOverlapV",
-  "nameplateMaxDistance", "nameplateTargetBehindMaxDistance",
-  "nameplateShowOnlyNames", 
-  "clampTargetNameplateToScreen",
-  "nameplateResourceOnTarget",
-  -- "nameplateGlobalScale" -- Reset it to 1, if it get's somehow corrupted
-  -- Action Target
-  "SoftTargetEnemy", "SoftTargetNameplateEnemy", "SoftTargetIconEnemy",
-  "SoftTargetFriend", "SoftTargetNameplateFriend", "SoftTargetIconFriend",
-  "SoftTargetInteract", "SoftTargetNameplateInteract", "SoftTargetIconInteract",
-  "SoftTargetIconGameObject", "SoftTargetLowPriorityIcons",
-}
 
 local function SetCVarHook(name, value, c)
   if not MONITORED_CVARS[name] then return end

@@ -25,7 +25,7 @@ local WOW_EVENTS = {
   BN_CONNECTED = true,
   BN_FRIEND_ACCOUNT_OFFLINE = true,
   BN_FRIEND_ACCOUNT_ONLINE = true,
-  COMBAT_LOG_EVENT_UNFILTERED = true,
+  COMBAT_LOG_EVENT_UNFILTERED = Addon.ExpansionIsBetween(LE_EXPANSION_CLASSIC, LE_EXPANSION_WAR_WITHIN),
   FRIENDLIST_UPDATE = true,
   GUILD_ROSTER_UPDATE = true,
   GROUP_LEFT = true,
@@ -40,7 +40,7 @@ local WOW_EVENTS = {
   PLAYER_FLAGS_CHANGED = true,
   PLAYER_FOCUS_CHANGED = Addon.ExpansionIsAtLeastTBC,
   PLAYER_LOGIN = true,
-  PLAYER_MAP_CHANGED = Addon.IS_MAINLINE, -- Added in 11.0.0 (TWW)
+  PLAYER_MAP_CHANGED = Addon.ExpansionIsAtLeastTWW, -- Added in 11.0.0 (TWW)
   PLAYER_REGEN_DISABLED = true,
   PLAYER_REGEN_ENABLED = true,
   PLAYER_SOFT_ENEMY_CHANGED = true,
@@ -86,6 +86,7 @@ local WOW_EVENTS = {
   UNIT_SPELLCAST_NOT_INTERRUPTIBLE = true,
   UNIT_SPELLCAST_START = true,
   UNIT_SPELLCAST_STOP = true,
+  UNIT_SPELLCAST_SENT = Addon.ExpansionIsAtLeastMidnight,
   UNIT_TARGET = true,
   UNIT_THREAT_LIST_UPDATE = true,
   UPDATE_BATTLEFIELD_SCORE = Addon.ExpansionIsAtLeastCata,
@@ -199,4 +200,10 @@ end
 -- Quest widget is not available in Classic
 if not Addon.ExpansionIsAtLeastMists then -- 
   Addon.ShowQuestUnit = function(...) return false end
+end
+
+if Addon.ExpansionIsAtLeastMidnight then
+  Addon.IsSecretValue = _G.issecretvalue
+else
+  Addon.IsSecretValue = function() return false end
 end

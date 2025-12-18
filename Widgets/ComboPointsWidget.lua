@@ -303,7 +303,8 @@ end
 
 function Widget:UpdateComboPoints(widget_frame)
   local points = UnitPower("player", self.PowerType) or 0
-
+  print("Combo Points:", points)
+  
   if points == 0 and not InCombatLockdown() then
     for i = 1, self.UnitPowerMax do
       widget_frame.ComboPoints[i]:Hide()

@@ -53,7 +53,7 @@ end
 ---------------------------------------------------------------------------------------------------
 -- Global contstants for various stuff
 ---------------------------------------------------------------------------------------------------
-Addon.ON_UPDATE_INTERVAL = 0.25 -- minimum number of seconds between each update of a frame for OnUpdate handlers
+Addon.ON_UPDATE_INTERVAL = 0.1 -- minimum number of seconds between each update of a frame for OnUpdate handlers
 Addon.CASTBAR_INTERRUPT_HOLD_TIME = 1
 
 Addon.UIScale = 1
@@ -641,7 +641,7 @@ Addon.DEFAULT_SETTINGS = {
         FriendlySubtextCustom = "",
         EnemySubtext = "HEALTH",
         EnemySubtextCustom = "",
-        SubtextColorUseHeadline = false,
+        SubtextCofffffffffflorUseHeadline = false,
         SubtextColorUseSpecific = false,
         SubtextColor =  RGB(255, 255, 255, 1),
         -- Font anchoring and format
@@ -692,6 +692,11 @@ Addon.DEFAULT_SETTINGS = {
     Visibility = {
       FriendlyPlayer = { Show = true, UseHeadlineView = false },
       FriendlyNPC = { Show = "nameplateShowFriendlyNPCs", UseHeadlineView = false },
+      -- nameplateShowFriendlyPlayerGuardians
+      -- nameplateShowFriendlyPlayerMinions
+      -- nameplateShowFriendlyPlayerPets
+      -- nameplateShowFriendlyPlayers
+      -- nameplateShowFriendlyPlayerTotems
       FriendlyMinion = { Show = "nameplateShowFriendlyMinions",  },
       FriendlyPet = { Show = "nameplateShowFriendlyPets", UseHeadlineView = false },
       FriendlyGuardian = { Show = "nameplateShowFriendlyGuardians", UseHeadlineView = false },

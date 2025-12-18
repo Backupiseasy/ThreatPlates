@@ -2789,7 +2789,7 @@ local function CreateStealthWidgetOptions()
     name = L["Stealth"],
     order = 80,
     type = "group",
-    hidden = function() return Addon.IS_CLASSIC end,
+    hidden = function() return not Addon.Widgets:IsEnabled("Stealth") end,
     args = {
       Enable = GetEnableEntry(L["Enable Stealth Widget"], L["This widget shows a stealth icon on nameplates of units that can detect stealth."], "stealthWidget", true),
       Layout = {
@@ -5599,6 +5599,7 @@ local function CreateVisibilityTab()
         order = 70,
         inline = true,
         width = "full",
+        hidden = Addon.ExpansionIsAtLeastMidnight,
         args = {
           ClickthroughFriendly = {
             name = L["Friendly Units"],
@@ -5665,7 +5666,8 @@ local function CreateLocalizationSettings()
             order = 10,
             width = "double",
             desc = L["If enabled, the truncated health text will be localized, i.e. local metric unit symbols (like k for thousands) will be used."],
-            arg = { "text", "LocalizedUnitSymbol" }
+            arg = { "text", "LocalizedUnitSymbol" },
+            hidden = Addon.ExpansionIsAtLeastMidnight,
           },
         },
       },
@@ -5676,7 +5678,6 @@ local function CreateLocalizationSettings()
 end
 
 local function CreateBlizzardSettings()
--- nameplateGlobalScale
   -- rmove /tptp command for stacking, not-stacking nameplates
   -- don'T allow to change all cvar related values in Combat, either by using the correct CVarTPTP function
   -- or by disabling the options in this case
@@ -6069,6 +6070,7 @@ local function CreateBlizzardSettings()
                 isPercent = true,
                 desc = L["The inset from the top (in screen percent) that the non-self nameplates are clamped to."],
                 arg = "nameplateOtherTopInset",
+                hidden = Addon.ExpansionIsAtLeastMidnight,
               },
               OtherBottomInset = {
                 name = L["Bottom Inset"],
@@ -6091,6 +6093,7 @@ local function CreateBlizzardSettings()
                 isPercent = true,
                 desc = L["The inset from the top (in screen percent) that large nameplates are clamped to."],
                 arg = "nameplateLargeTopInset",
+                hidden = Addon.ExpansionIsAtLeastMidnight,
               },
               LargeBottomInset = {
                 name = L["Large Bottom Inset"],
@@ -6102,6 +6105,7 @@ local function CreateBlizzardSettings()
                 isPercent = true,
                 desc = L["The inset from the bottom (in screen percent) that large nameplates are clamped to."],
                 arg = "nameplateLargeBottomInset",
+                hidden = Addon.ExpansionIsAtLeastMidnight,
               },
               ClampTarget = {
                 name = L["Clamp Target Nameplate to Screen"],
@@ -6110,7 +6114,7 @@ local function CreateBlizzardSettings()
                 width = "double",
                 desc = L["Clamps the target's nameplate to the edges of the screen, even if the target is off-screen."],
                 arg = "clampTargetNameplateToScreen",
-                hidden = function() return Addon.IS_MAINLINE end,
+                hidden = Addon.IS_MAINLINE,
               },
             },
           },
@@ -6874,45 +6878,45 @@ local function CreateHealthbarOptions()
           },
         },
       },
-      Layout = {
-        name = L["Layout"],
-        type = "group",
-        inline = false,
-        order = 20,
-        args = {
-          Placement = {
-            name = L["Placement"],
-            type = "group",
-            inline = true,
-            order = 20,
-            args = {
-              Warning = {
-                type = "description",
-                order = 1,
-                name = L["Changing these settings will alter the placement of the nameplates, however the mouseover area does not follow. |cffff0000Use with caution!|r"],
-              },
-              OffsetX = {
-                name = L["Offset X"],
-                type = "range",
-                min = -60,
-                max = 60,
-                step = 1,
-                order = 2,
-                arg = { "settings", "frame", "x" },
-              },
-              Offsety = {
-                name = L["Offset Y"],
-                type = "range",
-                min = -60,
-                max = 60,
-                step = 1,
-                order = 3,
-                arg = { "settings", "frame", "y" },
-              },
-            },
-          },
-        },
-      },
+      -- Layout = {
+      --   name = L["Layout"],
+      --   type = "group",
+      --   inline = false,
+      --   order = 20,
+      --   args = {
+      --     Placement = {
+      --       name = L["Placement"],
+      --       type = "group",
+      --       inline = true,
+      --       order = 20,
+      --       args = {
+      --         Warning = {
+      --           type = "description",
+      --           order = 1,
+      --           name = L["Changing these settings will alter the placement of the nameplates, however the mouseover area does not follow. |cffff0000Use with caution!|r"],
+      --         },
+      --         OffsetX = {
+      --           name = L["Offset X"],
+      --           type = "range",
+      --           min = -60,
+      --           max = 60,
+      --           step = 1,
+      --           order = 2,
+      --           arg = { "settings", "frame", "x" },
+      --         },
+      --         Offsety = {
+      --           name = L["Offset Y"],
+      --           type = "range",
+      --           min = -60,
+      --           max = 60,
+      --           step = 1,
+      --           order = 3,
+      --           arg = { "settings", "frame", "y" },
+      --         },
+      --       },
+      --     },
+      --   },
+      -- },
       ColorSettings = {
         name = L["Coloring"],
         type = "group",
@@ -10223,7 +10227,8 @@ local function CreateOptionsTable()
                           type = "toggle",
                           order = 60,
                           desc = L["Display health text on units with full health."],
-                          arg = { "text", "full" }
+                          arg = { "text", "full" },
+                          hidden = Addon.ExpansionIsAtLeastMidnight,
                         },
                         Truncate = {
                           name = L["Shorten"],
@@ -10232,13 +10237,6 @@ local function CreateOptionsTable()
                           desc = L["This will format text to a simpler format using M or K for millions and thousands. Disabling this will show exact health amounts."],
                           arg = { "text", "truncate" },
                         },
-                        -- UseLocalizedUnit = {
-                        --   name = L["Localization"],
-                        --   type = "toggle",
-                        --   order = 80,
-                        --   desc = L["If enabled, the truncated health text will be localized, i.e. local metric unit symbols (like k for thousands) will be used."],
-                        --   arg = { "text", "LocalizedUnitSymbol" }
-                        -- },
                       },
                     },
                     AbsorbsText = {
@@ -10246,14 +10244,15 @@ local function CreateOptionsTable()
                       order = 35,
                       type = "group",
                       inline = true,
-                      hidden = function() return not Addon.WOW_FEATURE_ABSORBS end, -- Absorbs were added with Mists
+                      hidden = not Addon.WOW_FEATURE_ABSORB, -- Absorbs were added with Mists
                       args = {
                         EnableAmount = {
                           name = L["Amount"],
                           type = "toggle",
                           order = 10,
                           desc = L["Display absorbs amount text."],
-                          arg = { "text", "AbsorbsAmount" }
+                          arg = { "text", "AbsorbsAmount" },
+                          hidden = Addon.ExpansionIsAtLeastMidnight
                         },
                         EnableShorten = {
                           name = L["Shorten"],
@@ -10261,7 +10260,8 @@ local function CreateOptionsTable()
                           order = 20,
                           desc = L["This will format text to a simpler format using M or K for millions and thousands. Disabling this will show exact absorbs amounts."],
                           arg = { "text", "AbsorbsShorten" },
-                          disabled = function() return not db.text.AbsorbsAmount end
+                          disabled = function() return not db.text.AbsorbsAmount end,
+                          hidden = Addon.ExpansionIsAtLeastMidnight,
                         },
                         EnablePercentage = {
                           name = L["Percentage"],
