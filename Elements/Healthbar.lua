@@ -473,9 +473,9 @@ local function UnitHealthbarUpdate(unitid)
 end
 
 local function ColorUpdate(tp_frame, color)
+  if tp_frame.PlateStyle ~= "HealthbarMode" then return end
+  
   local healthbar = tp_frame.visual.Healthbar
-
-  if not healthbar:IsShown() then return end
 
   if Addon.ExpansionIsAtLeastMidnight and color.HealthColor then
     --healthbar:SetStatusBarColor(color.HealthColor:GetRGB())
@@ -491,7 +491,7 @@ local function ColorUpdate(tp_frame, color)
 
   -- For simplicity, border color is uneffected by marks, threat, etc.
   local border_color  
-  if style == "unique" then
+  if tp_frame.stylename == "unique" then
     border_color = (unique_setting.UseBorderColor and unique_setting.BorderColor) or COLOR_BLACK
   elseif SettingsHealthbar.BorderUseForegroundColor then
     border_color = color

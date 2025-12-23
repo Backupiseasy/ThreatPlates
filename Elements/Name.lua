@@ -118,11 +118,8 @@ local function UNIT_NAME_UPDATE(unitid)
 end
 
 local function ColorUpdate(tp_frame, color)
-  local name_text = tp_frame.visual.NameText
-
-  if not name_text:IsShown() then return end
-
   if Settings[tp_frame.PlateStyle].Enabled then
+    local name_text = tp_frame.visual.NameText
     name_text:SetTextColor(color.r, color.g, color.b, color.a)
   end
 end

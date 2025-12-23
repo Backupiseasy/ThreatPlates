@@ -3,7 +3,9 @@
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
 
-local Widget = (Addon.IS_CLASSIC and {}) or Addon.Widgets:NewWidget("Arena")
+if Addon.IS_CLASSIC then return end
+
+local Widget = Addon.Widgets:NewWidget("Arena")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants

@@ -14,7 +14,7 @@ local pairs, next = pairs, next
 local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
-local EventServiceSubscribe, EventServiceSubscribeUnit, EventServicePublish = Addon.EventService.Subscribe, Addon.EventService.SubscribeUnitEvent, Addon.EventService.Publish
+local EventServiceSubscribe, EventServiceSubscribeUnitEvent, EventServicePublish = Addon.EventService.Subscribe, Addon.EventService.SubscribeUnitEvent, Addon.EventService.Publish
 local EventServiceUnsubscribe, EventServiceUnsubscribeAll = Addon.EventService.Unsubscribe, Addon.EventService.UnsubscribeAll
 
 local _G = _G
@@ -75,7 +75,7 @@ local function SubscribeEvent(widget, event, func)
 end
 
 local function SubscribeUnitEvent(widget, event, unitid, func)
-  EventServiceSubscribeUnit(widget, event, unitid, func)
+  EventServiceSubscribeUnitEvent(widget, event, unitid, func)
 
   --  if not widget.EventHandlerFrame then
   WidgetHandler.EventHandlerFrame = _G.CreateFrame("Frame", nil, WorldFrame)

@@ -115,7 +115,6 @@ local SoftTargetSettings = {
 }
 local UpdateTexture, ShowBorder, NameModeOffsetX, NameModeOffsetY
 
-local SettingsHV, FocusSettingsHV
 local FocusWidgetFrame
 local FocusUpdateTexture, FocusShowBorder, FocusNameModeOffsetX, FocusNameModeOffsetY
 
@@ -230,7 +229,7 @@ local UPDATE_TEXTURE_FUNCTIONS = {
   threat_glow = UpdateBorderTexture,
   arrows_legacy = UpdateSideTexture,
   bubble = UpdateSideTexture,
-  crescent = UpdateSideTexture,
+  crescent = UpdattareSideTexture,
   Stripes = UpdateOverlayTexture,
 }
 
@@ -290,7 +289,7 @@ local function PlayerTargetChanged(target_unitid)
   if tp_frame and (not UnitIsUnit("target", tp_frame.unit.unitid) or target_unitid == "target") then
     local unit = tp_frame.unit
     if Widget:EnabledForStyle(unit.style, unit) then
-      local healthbar = tp_frame.visual.healthbar
+      local healthbar = tp_frame.visual.Healthbar
       widget_frame:SetParent(tp_frame)
       widget_frame:SetFrameLevel(healthbar:GetFrameLevel() + FRAME_LEVEL_BY_TEXTURE[Settings.theme])
       --widget_frame.HealthbarMode:SetFrameLevel(widget_frame:GetFrameLevel())
@@ -406,7 +405,7 @@ end
 
 function Widget:EnabledForStyle(style, unit)
   if (style == "NameOnly" or style == "NameOnly-Unique") then
-    return SettingsHV.ShowTargetHighlight
+    return Settings.ShowTargetHighlight
   else
     return Settings.ON
   end

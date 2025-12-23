@@ -67,7 +67,7 @@ local _G =_G
 -- Constants
 local CASTBAR_INTERRUPT_HOLD_TIME = Addon.CASTBAR_INTERRUPT_HOLD_TIME
 
-local IGNORED_UNITIDS = {
+local IGNORED_UNITS = {
   target = true,
   player = true,
   focus =  true,
@@ -304,14 +304,23 @@ end
 
 function Addon:GetThreatPlateForUnit(unitid)
   -- Skip special unitids (they are updated via their nameplate unitid) and personal nameplate
-  if IGNORED_UNITIDS[unitid] or UnitIsUnit("player", unitid) then return end
+  if not unitid or unitid == "player" or UnitIsUnit("player", unitid) then return end
 
   -- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED
-  local tp_frame = self.PlatesByUnit[unitid]
-  if tp_frame and tp_frame.Active then
-    return tp_frame
+  -- local tp_frame = self.PlatesByUnit[unitid]
+  -- if tp_frame and tp_frame.Active then
+  local plate = GetNamePlateForUnit(unitid)
+  if plate and plate.TPFrame.Active then
+    return plate.TPFrame
   end
 end
+
+-- function Addon:GetNonIgnoredThreatPlateForUnit(unitid)
+--   -- Skip special unitids (they are updated via their nameplate unitid) and personal nameplate
+--   if IGNORED_UNITS[unitid] then return end
+
+--   return self:GetThreatPlateForUnit(unitid)
+-- end
 
 function Addon:GetThreatPlateForTarget()
   local plate = GetNamePlateForUnit("target")
@@ -653,32 +662,35 @@ local function IgnoreUnitForThreatPlates(unitid)
   return UnitIsUnit("player", unitid) or UnitNameplateShowsWidgetsOnly(unitid)
 end
 
--- local function HideNameplate(plate)
---   plate.UnitFrame:Hide()
---   plate.TPFrame:Hide()
---   plate.TPFrame.Active = false
--- end
+local SetShownBlizzardPlate
+
+if Addon.ExpansionIsAtLeastMidnight then
+  SetShownBlizzardPlate = function(unit_frame, show)
+    unit_frame:SetAlpha(show and 1 or 0)
+  end
+else
+  SetShownBlizzardPlate = function(unit_frame, show)
+    unit_frame:SetShown(show)
+  end  
+end
 
 local function ShowBlizzardNameplate(plate, show_blizzard_plate)
+  SetShownBlizzardPlate(plate.UnitFrame, show_blizzard_plate)
+
   if show_blizzard_plate then
-    plate.UnitFrame:SetAlpha(1)
     --plate.UnitFrame:Show()
     WidgetContainerReset(plate)
     plate.TPFrame:Hide()
     plate.TPFrame.Active = false
   else
-    plate.UnitFrame:SetAlpha(0)
     --plate.UnitFrame:Hide()
     plate.TPFrame:Show()
     plate.TPFrame.Active = true
   end
 end
 
--- This function should only be called for visible nameplates: PlatesVisible[plate] ~= nil
 local function SetNameplateVisibility(plate, unitid)
   -- ! Interactive objects do also have nameplates. We should not mess with the visibility the of these objects.
-  -- if not PlatesVisible[plate] then return end
-  
   -- We cannot use unit.reaction here as it is not guaranteed that it's update whenever this function is called (see UNIT_FACTION).  local unit_reaction = UnitReaction("player", unitid) or 0
   local unit_reaction = UnitReaction("player", unitid) or 0
   if unit_reaction > 4 then
@@ -728,14 +740,10 @@ end
 local function FrameOnShow(UnitFrame)
   local unitid = UnitFrame.unit
   
-  print("OnShow:", unitid)
-  UnitFrame:SetAlpha(0)
-
   -- Hide nameplates that have not yet an unit added
   if not unitid then 
     -- ? Not sure if Hide() is really needed here or if even TPFrame should also be hidden here ...
-    --UnitFrame:Hide()
-    UnitFrame:SetAlpha(0)
+    SetShownBlizzardPlate(UnitFrame, false)
     return
   end
 
@@ -744,7 +752,6 @@ local function FrameOnShow(UnitFrame)
     UnitFrame:GetParent().TPFrame:Hide()
     return
   end
-
 
   if UnitIsUnit(unitid, "player") then -- or: ns.PlayerNameplate == GetNamePlateForUnit(UnitFrame.unit)
     -- Skip the personal resource bar of the player character, don't unhook scripts as nameplates, even the personal
@@ -761,12 +768,10 @@ local function FrameOnShow(UnitFrame)
     -- Not sure if unit.reaction will always be correctly set here, so:
     local unit_reaction = UnitReaction("player", unitid) or 0
     if unit_reaction > 4 then
-      --UnitFrame:SetAlpha(SettingsShowFriendlyBlizzardNameplates and 1 or 0)
-      UnitFrame:SetAlpha(0)
+      SetShownBlizzardPlate(UnitFrame, SettingsShowFriendlyBlizzardNameplates)
       --UnitFrame:SetShown(SettingsShowFriendlyBlizzardNameplates)
     else
-      --UnitFrame:SetAlpha(SettingsShowEnemyBlizzardNameplates and 1 or 0)
-      UnitFrame:SetAlpha(0)
+      SetShownBlizzardPlate(UnitFrame, SettingsShowEnemyBlizzardNameplates)
       --UnitFrame:SetShown(SettingsShowEnemyBlizzardNameplates)
     end
   end
@@ -892,16 +897,13 @@ local function HandlePlateUnitAdded(plate, unitid)
   -- Initialize unit data for which there are no events when players enters world or that
   -- do not change over the nameplate lifetime
   SetUnitAttributes(unit, unitid)
-  ThreatModule.SetUnitAttribute(tp_frame)
-
   PlatesByUnit[unitid] = tp_frame
   PlatesByGUID[unit.guid] = plate
 
-  SetNameplateVisibility(plate, unitid)
-
-  WidgetContainerAcquire(plate)
-
   -- Initialized nameplate style based on unit added
+  ThreatModule.SetUnitAttribute(tp_frame)
+  SetNameplateVisibility(plate, unitid)
+  WidgetContainerAcquire(plate)
   -- ColorModule/TransparencyModule/ScalingModule are called in StyleModule.PlateUnitAdded
   StyleModule.PlateUnitAdded(tp_frame)
   -- TODO: This is not ideal/correct as Style.Update calls ElementsUpdateStyle
@@ -1359,6 +1361,9 @@ function Addon:NAME_PLATE_UNIT_REMOVED(unitid)
 end
 
 function Addon:UNIT_NAME_UPDATE(unitid)
+  -- Skip special unitids (they are updated via their nameplate unitid) and personal nameplate
+  if IGNORED_UNITS[unitid] then return end
+
   local tp_frame = self:GetThreatPlateForUnit(unitid)
   if tp_frame then
     SetUnitAttributeName(tp_frame.unit, unitid)
@@ -1443,6 +1448,9 @@ function Addon:RAID_TARGET_UPDATE()
 end
 
 function Addon:UNIT_HEALTH(unitid)
+  -- Skip special unitids (they are updated via their nameplate unitid) and personal nameplate
+  if IGNORED_UNITS[unitid] then return end
+  
   local tp_frame = Addon:GetThreatPlateForUnit(unitid)
   if tp_frame then
     SetUnitAttributeHealth(tp_frame.unit, unitid)  
@@ -1456,6 +1464,9 @@ end
 Addon.UNIT_HEALTH_FREQUENT = Addon.UNIT_HEALTH
 
 function Addon:UNIT_MAXHEALTH(unitid)
+  -- Skip special unitids (they are updated via their nameplate unitid) and personal nameplate
+  if IGNORED_UNITS[unitid] then return end
+
   local tp_frame = self:GetThreatPlateForUnit(unitid)
   if tp_frame then
     SetUnitAttributeHealth(tp_frame.unit, unitid)  
@@ -1463,6 +1474,9 @@ function Addon:UNIT_MAXHEALTH(unitid)
 end
 
 function Addon:UNIT_THREAT_LIST_UPDATE(unitid)
+  -- Skip special unitids (they are updated via their nameplate unitid) and personal nameplate
+  if IGNORED_UNITS[unitid] then return end
+
   local tp_frame = self:GetThreatPlateForUnit(unitid)
   if tp_frame then
     ThreatModule.Update(tp_frame)
@@ -1507,6 +1521,9 @@ function Addon:UNIT_FACTION(unitid)
 end
 
 function Addon:UNIT_LEVEL(unitid)
+  -- Skip special unitids (they are updated via their nameplate unitid) and personal nameplate
+  if IGNORED_UNITS[unitid] then return end
+
   local tp_frame = self:GetThreatPlateForUnit(unitid)
   if tp_frame then
     SetUnitAttributeLevel(tp_frame.unit, unitid)
@@ -1516,7 +1533,7 @@ end
 -- Update spell currently being cast
 local function UnitSpellcastMidway(event, unitid, ...)
   -- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED
-  if not ShowCastBars then return end
+  if IGNORED_UNITS[unitid] or not ShowCastBars then return end
 
   local tp_frame = Addon:GetThreatPlateForUnit(unitid)
   if tp_frame then
@@ -1526,7 +1543,7 @@ end
 
 function Addon:UNIT_SPELLCAST_START(unitid, ...)
   -- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED
-  if not ShowCastBars then return end
+  if IGNORED_UNITS[unitid] or not ShowCastBars then return end
 
   local tp_frame = Addon:GetThreatPlateForUnit(unitid)
   if tp_frame then
@@ -1536,7 +1553,7 @@ end
 
 function Addon:UNIT_SPELLCAST_STOP(unitid, ...)
   -- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED
-  if not ShowCastBars then return end
+  if IGNORED_UNITS[unitid] or not ShowCastBars then return end
 
   local tp_frame = Addon:GetThreatPlateForUnit(unitid)
   if tp_frame then
@@ -1556,7 +1573,7 @@ end
 
 function Addon:UNIT_SPELLCAST_CHANNEL_START(unitid, _, spellid)
   -- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED
-  if not ShowCastBars then return end
+  if IGNORED_UNITS[unitid] or not ShowCastBars then return end
 
   local tp_frame = Addon:GetThreatPlateForUnit(unitid)
   if tp_frame then
@@ -1581,7 +1598,7 @@ Addon.UNIT_SPELLCAST_EMPOWER_STOP = Addon.UNIT_SPELLCAST_STOP
 
 function Addon.UNIT_SPELLCAST_INTERRUPTED(event, unitid, castGUID, spellID, sourceName, interrupterGUID)
   -- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED
-  if not ShowCastBars then return end
+  if IGNORED_UNITS[unitid] or not ShowCastBars then return end
 
   local tp_frame = Addon:GetThreatPlateForUnit(unitid)
   if tp_frame then

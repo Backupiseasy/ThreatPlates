@@ -457,13 +457,12 @@ local function UpdatePlateColors(tp_frame)
   PublishEvent("NameColorUpdate", tp_frame, tp_frame.NameColor)
 end
 
-
 -- Called in processing event: NAME_PLATE_UNIT_ADDED
-function ColorModule.PlateUnitAdded(tp_frame)
-  if tp_frame.PlateStyle == "None" then return end
+-- function ColorModule.PlateUnitAdded(tp_frame)
+--   if tp_frame.PlateStyle == "None" then return end
   
-  UpdatePlateColors(tp_frame)
-end
+--   UpdatePlateColors(tp_frame)
+-- end
 
 -- Called in processing event: UpdateStyle in Nameplate.lua
 function ColorModule.UpdateStyle(tp_frame, style)

@@ -495,11 +495,6 @@ end
 -- Auras Module / Handler 
 ---------------------------------------------------------------------------------------------------
 
--- local AurasModule = {}
-
--- function AurasModule:RegisterEvents()
--- end
-
 local UnitAuraWrapper
 local ProcessAllUnitAuras
 
@@ -631,13 +626,18 @@ local function FlagAuraGridForUpdate(aura_grid_update, is_crowdcontrol_aura, is_
   end
 end
 
+function Widget:UNIT_AURA(unitid, unit_aura_update_info)
+  local widget_frame = self:GetWidgetFrameForUnit(unitid)
+  if widget_frame then 
+    widget_frame.Widget:UpdateAuras(widget_frame, widget_frame.unit)
+  end
+end
+
 local StartTimeForAura = {}
 
-local function UnitAuraEventHandler(widget_frame, event, unitid, update_info)
-  local unit = widget_frame.unit
-
-  if widget_frame.Active then
-    update_info = update_info
+function Widget:UNIT_AURA(unitid, update_info)
+  local widget_frame = self:GetWidgetFrameForUnit(unitid)
+  if widget_frame then 
     widget_frame.Widget:UpdateAuras(widget_frame, widget_frame.unit)
 
     if update_info and update_info.addedAuras then
@@ -1980,8 +1980,6 @@ function Widget:Create(tp_frame)
 
   self:UpdateLayout(widget_frame)
 
-  --EventRegistry:RegisterFrameEventAndCallback("UNIT_AURA", UnitAuraEventHandler)
-  widget_frame:SetScript("OnEvent", UnitAuraEventHandler)
   widget_frame:HookScript("OnShow", OnShowHookScript)
   -- widget_frame:HookScript("OnHide", OnHideHookScript)
   --------------------------------------
@@ -1999,6 +1997,7 @@ function Widget:OnEnable()
   self:SubscribeEvent("PLAYER_TARGET_CHANGED")
   self:SubscribeEvent("PLAYER_REGEN_ENABLED")
   self:SubscribeEvent("PLAYER_REGEN_DISABLED")
+  self:SubscribeEvent("UNIT_AURA")
   -- LOSS_OF_CONTROL_ADDED
   -- LOSS_OF_CONTROL_UPDATE
 end
@@ -2033,17 +2032,12 @@ function Widget:OnUnitAdded(widget_frame, unit)
   --   widget_frame.Buffs:SetScale(1)
   --   widget_frame.Debuffs:SetScale(1)
   -- end
-
-  widget_frame:UnregisterAllEvents()
-  widget_frame:RegisterUnitEvent("UNIT_AURA", unit.unitid)
   
   self:UpdateAuras(widget_frame, unit)
 end
 
-function Widget:OnUnitRemoved(widget_frame, unit)
-  -- Unregister UNIT_AURA which was registerd by this frame - TODO: change this to SubscribeUnitEvent
-  widget_frame:UnregisterAllEvents()
-end
+-- function Widget:OnUnitRemoved(widget_frame, unit)
+-- end
 
 local function ParseFilter(filter_by_spell)
   local filter = {}

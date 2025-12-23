@@ -662,6 +662,10 @@ local function CVarsManagerSetBool(info, value)
   --Addon:ForceUpdate()
 end
 
+local function CVarIsUnavailable(info) 
+  return C_CVar.GetCVarInfo(info.arg) == nil 
+end
+
 ---------------------------------------------------------------------------------------------------
 -- Getter Functions
 ---------------------------------------------------------------------------------------------------
@@ -2332,7 +2336,7 @@ local function CreateArenaWidgetOptions()
     type = "group",
     order = 10,
     childGroups = "tab",
-    hidden = function() return Addon.IS_CLASSIC end,
+    hidden = function() return not Addon.Widgets.Widgets.Arena end,
     args = {
       Enable = GetEnableEntry(L["Enable Arena Widget"], L["This widget shows various icons (orbs and numbers) on enemy nameplates in arenas for easier differentiation."], "arenaWidget", false),
       Layout = {
@@ -3290,7 +3294,7 @@ local function CreateExperienceWidgetOptions()
     type = "group",
     order = 54,
     childGroups = "tab",
-    hidden = function() return not Addon.ExpansionIsAtLeastBfA end,
+    hidden = function() return not Addon.Widgets.Widgets.Experience end,
     args = {
       Enable = GetEnableEntry(
         L["Enable Experience Widget"],
@@ -3508,7 +3512,7 @@ local function CreateFocusWidgetOptions()
     name = L["Focus"],
     type = "group",
     order = 55,
-    hidden = function() return Addon.IS_CLASSIC end,
+    hidden = function() return not Addon.Widgets.Widgets.Focus end,
     args = {
       Enable = GetEnableEntry(L["Enable Focus Widget"], L["This widget highlights the nameplate of your current focus target by showing a border around the healthbar and by coloring the nameplate's healtbar and/or name with a custom color."], "FocusWidget", false),
       Texture = {
@@ -5989,6 +5993,7 @@ local function CreateBlizzardSettings()
                 set = function(info, value) SetValueCVar(info, (value == "Overlapping" and "0") or "1") end,
                 get = function(info) return (GetValueCVarBool(info) and "Stacking") or "Overlapping" end,
                 arg = "nameplateMotion",
+                hidden = CVarIsUnavailable,
               },
               MotionSpeed = {
                 name = L["Motion Speed"],
@@ -5999,6 +6004,7 @@ local function CreateBlizzardSettings()
                 step = 0.01,
                 desc = L["Controls the rate at which nameplate animates into their target locations [0.0-1.0]."],
                 arg = "nameplateMotionSpeed",
+                hidden = CVarIsUnavailable,
               },
               OverlapH = {
                 name = L["Horizontal Overlap"],
@@ -6010,6 +6016,7 @@ local function CreateBlizzardSettings()
                 isPercent = true,
                 desc = L["Percentage amount for horizontal overlap of nameplates."],
                 arg = "nameplateOverlapH",
+                hidden = CVarIsUnavailable,
               },
               OverlapV = {
                 name = L["Vertical Overlap"],
@@ -6021,6 +6028,7 @@ local function CreateBlizzardSettings()
                 isPercent = true,
                 desc = L["Percentage amount for vertical overlap of nameplates."],
                 arg = "nameplateOverlapV",
+                hidden = CVarIsUnavailable,
               },
             },
           },
@@ -6040,6 +6048,7 @@ local function CreateBlizzardSettings()
                 width = "double",
                 desc = L["The max distance to show nameplates."],
                 arg = "nameplateMaxDistance",
+                hidden = CVarIsUnavailable,            
               },
               MaxDistanceBehindCam = {
                 name = L["Max Distance Behind Camera"],
@@ -6051,6 +6060,7 @@ local function CreateBlizzardSettings()
                 width = "double",
                 desc = L["The max distance to show the target nameplate when the target is behind the camera."],
                 arg = "nameplateTargetBehindMaxDistance",
+                hidden = CVarIsUnavailable,
               },
             },
           },
@@ -6070,7 +6080,7 @@ local function CreateBlizzardSettings()
                 isPercent = true,
                 desc = L["The inset from the top (in screen percent) that the non-self nameplates are clamped to."],
                 arg = "nameplateOtherTopInset",
-                hidden = Addon.ExpansionIsAtLeastMidnight,
+                hidden = CVarIsUnavailable,
               },
               OtherBottomInset = {
                 name = L["Bottom Inset"],
@@ -6081,7 +6091,7 @@ local function CreateBlizzardSettings()
                 step = 0.01,
                 isPercent = true,
                 desc = L["The inset from the bottom (in screen percent) that the non-self nameplates are clamped to."],
-                arg = "nameplateOtherBottomInset",
+                hidden = CVarIsUnavailable,
               },
               LargeTopInset = {
                 name = L["Large Top Inset"],
@@ -6093,7 +6103,7 @@ local function CreateBlizzardSettings()
                 isPercent = true,
                 desc = L["The inset from the top (in screen percent) that large nameplates are clamped to."],
                 arg = "nameplateLargeTopInset",
-                hidden = Addon.ExpansionIsAtLeastMidnight,
+                hidden = CVarIsUnavailable,
               },
               LargeBottomInset = {
                 name = L["Large Bottom Inset"],
@@ -6105,16 +6115,16 @@ local function CreateBlizzardSettings()
                 isPercent = true,
                 desc = L["The inset from the bottom (in screen percent) that large nameplates are clamped to."],
                 arg = "nameplateLargeBottomInset",
-                hidden = Addon.ExpansionIsAtLeastMidnight,
+                hidden = CVarIsUnavailable,
               },
               ClampTarget = {
                 name = L["Clamp Target Nameplate to Screen"],
                 order = 50,
                 type = "toggle",
-                width = "double",
+                width = "full",
                 desc = L["Clamps the target's nameplate to the edges of the screen, even if the target is off-screen."],
                 arg = "clampTargetNameplateToScreen",
-                hidden = Addon.IS_MAINLINE,
+                hidden = CVarIsUnavailable,
               },
             },
           },

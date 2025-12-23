@@ -1,6 +1,8 @@
 local ADDON_NAME, Addon = ...
 
-local Widget = (Addon.ExpansionIsAtLeastBfA and Addon.Widgets:NewWidget("Experience")) or {}
+if not Addon.ExpansionIsAtLeastBfA then return end
+
+local Widget = Addon.Widgets:NewWidget("Experience")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
