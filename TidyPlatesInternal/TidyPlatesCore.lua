@@ -207,7 +207,7 @@ if Addon.IS_CLASSIC then
         endTime = (GetTime() + channel_cast_time) * 1000
         startTime = GetTime() * 1000
 
-        unit.ChannelEventSpellID = event_spellid
+        plate.TPFrame.unit.ChannelEventSpellID = event_spellid
 
         return name, name, texture, startTime, endTime, isTradeSkill, notInterruptible, event_spellid
       end
