@@ -170,13 +170,24 @@ local function ChatCommandDebug(cmd_list)
 		end			
 	elseif command == "version" then
 		Addon.Logging.Debug("Expansion Level:", Addon.GetExpansionLevel())
-		Addon.Logging.Debug("Mainline:", Addon.IS_MAINLINE)
-		Addon.Logging.Debug("Midnight:", Addon.IS_MIDNIGHT)
-		Addon.Logging.Debug("Classic:", Addon.IS_CLASSIC)
-		Addon.Logging.Debug("Classic SoD:", Addon.IS_CLASSIC_SOD)
-		Addon.Logging.Debug("Classic Mists:", Addon.IS_MISTS_CLASSIC)
-		Addon.Logging.Debug("At least MoP:", Addon.ExpansionIsAtLeastMists)
-		Addon.Logging.Debug("At least Midnight:", Addon.ExpansionIsAtLeastMidnight)
+		if Addon.IS_CLASSIC_SOD then
+			Addon.Logging.Debug("Version: Classic Era - Season of Discovery")
+		elseif Addon.IS_CLASSIC then
+			Addon.Logging.Debug("Version: Classic Era")
+		end
+		if Addon.IS_TBC_CLASSIC then
+			Addon.Logging.Debug("Version: TBC Classic")
+		end
+		if Addon.IS_MISTS_CLASSIC then
+			Addon.Logging.Debug("Version: Mists Classic")
+		end
+		if Addon.IS_MAINLINE then
+			Addon.Logging.Debug("Version: Mainline")
+		end
+		if Addon.IS_MIDNIGHT then
+			Addon.Logging.Debug("Version: Mainline - Midnight")
+		end
+
 		Addon.Logging.Debug("WOW_USES_CLASSIC_NAMEPLATES:", Addon.WOW_USES_CLASSIC_NAMEPLATES)
 		Addon.Logging.Debug("WOW_FEATURE_ABSORBS:", Addon.WOW_FEATURE_ABSORBS)
 		Addon.Logging.Debug("WOW_FEATURE_BLIZZARD_AURA_FILTER:", Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER)
