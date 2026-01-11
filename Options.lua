@@ -6091,6 +6091,7 @@ local function CreateBlizzardSettings()
                 step = 0.01,
                 isPercent = true,
                 desc = L["The inset from the bottom (in screen percent) that the non-self nameplates are clamped to."],
+                arg = "nameplateOtherBottomInset",
                 hidden = CVarIsUnavailable,
               },
               LargeTopInset = {
@@ -11119,17 +11120,15 @@ local function CreateOptionsTable()
   options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(Addon.db)
   options.args.profiles.order = 10000
 
-  -- Add dual-spec support
-  if Addon.ExpansionIsAtLeastWrath then
-    local LibDualSpec = LibStub:GetLibrary("LibDualSpec-1.0", true)
-    if LibDualSpec then
-      LibDualSpec:EnhanceDatabase(Addon.db, Addon.ADDON_NAME)
-      LibDualSpec:EnhanceOptions(options.args.profiles, Addon.db)
-    else
-      Addon.Logging.Error("LibDualSpec-1.0 cannot be loaded, dual-spec support will not be available.")
-    end
+  -- Add dual-spec support, no also available in Classic
+  local LibDualSpec = LibStub:GetLibrary("LibDualSpec-1.0", true)
+  if LibDualSpec then
+    LibDualSpec:EnhanceDatabase(Addon.db, Addon.ADDON_NAME)
+    LibDualSpec:EnhanceOptions(options.args.profiles, Addon.db)
+  else
+    Addon.Logging.Error("LibDualSpec-1.0 cannot be loaded, dual-spec support will not be available.")
   end
-
+  
   AddImportExportOptions(options.args.profiles)
 end
 

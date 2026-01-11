@@ -2345,10 +2345,8 @@ local function TimerCallback()
     GenerateDemoAuras()
   end
 
-  for plate, unitid in pairs(Addon.PlatesVisible) do
-    if plate.TPFrame.Active then
-      Widget:UpdateAuras(plate.TPFrame.widgets.Auras, plate.TPFrame.unit)
-    end
+  for _, tp_frame in Addon:GetActiveThreatPlates() do
+    Widget:UpdateAuras(tp_frame.widgets.Auras, tp_frame.unit)
   end
 end
 

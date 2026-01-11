@@ -1918,57 +1918,24 @@ end
 -- Auras Module / Handler 
 ---------------------------------------------------------------------------------------------------
 
-local UnitAuraWrapper
-local ProcessAllUnitAuras
-
--- Defined here as it's used for configuration mode even in Mainline
-local function ProcessAllUnitAurasClassic(unitid, effect)
-  local _
-  local unit_auras = {}
-
-  for i = 1, 40 do
-    local aura = {}
-
-    aura.name, aura.icon, aura.applications, aura.dispelName, aura.duration, aura.expirationTime, aura.sourceUnit,
-      aura.isStealable, aura.nameplateShowPersonal, aura.spellId, aura.canApplyAura, aura.isBossAura, _, aura.nameplateShowAll =
-      UnitAuraWrapper(unitid, i, effect)
-
-    if aura.name then 
-      aura.auraInstanceID = i
-
-      aura.duration = aura.duration or 0
-
-      unit_auras[#unit_auras + 1] = aura
-      -- if aura.sourceUnit == "player" then
-      --   Addon.Logging.Debug("Aura:", aura.name, "=> ID:", aura.spellId)
-      -- end
-    else
-      break
-    end
-  end
-
-  return unit_auras
-end
+local UnitAuraCache = {}
 
 -- UnitAuraSlots: BfA - Patch 8.2.5 (2019-09-24): Added.
 -- C_UnitAuras.GetAuraSlots: DF - Patch 10.2.5 (2024-01-16): Deprecated. Replaced by C_UnitAuras.GetAuraSlots.
-if Addon.IS_MAINLINE then  
-  ProcessAllUnitAuras = function(unitid, effect)
-    local _
-    local unit_auras = {}
+local function ProcessAllUnitAuras(unitid, effect)
+  local aura_max_display = (effect == "HARMFUL" and DEBUFF_MAX_DISPLAY) or BUFF_MAX_DISPLAY
+  local unit_auras = {}
 
-    local aura_max_display = (effect == "HARMFUL" and DEBUFF_MAX_DISPLAY) or BUFF_MAX_DISPLAY
-
-    -- AuraUtil.ForEachAura(unitid, effect, BUFF_MAX_DISPLAY, function(unit_aura_info)
-    --   unit_aura_info.duration = unit_aura_info.duration or 0
-    --   unit_auras[#unit_auras + 1] = unit_aura_info
-    --   -- Addon.Logging.Debug("Aura:", aura.name, "=> ID:", aura.spellId)
-    -- end, true)
-
+  if effect == "HELPFUL" and UnitReaction("player", unitid) < 5 and UnitAuraCache[unitid] then
+    for aura_instance_id, unit_aura_info in pairs (UnitAuraCache[unitid].Buffs) do
+      unit_aura_info.duration = unit_aura_info.duration or 0
+      unit_auras[#unit_auras + 1] = unit_aura_info
+    end
+  else
     -- AuraUtil.ForEachAura:
     local continuation_token
     repeat
-      -- continuationToken is the first return value of UnitAuraSlots
+      -- continuationToken is the first return value of GetAuraSlots
       local slots = { GetAuraSlots(unitid, effect, aura_max_display, continuation_token) }
       continuation_token = slots[1]
 
@@ -1979,18 +1946,15 @@ if Addon.IS_MAINLINE then
         if unit_aura_info then
           unit_aura_info.duration = unit_aura_info.duration or 0
           unit_auras[#unit_auras + 1] = unit_aura_info
-          -- if unit_aura_info.sourceUnit == "player" then
+          -- if unit_aura_info.sourcseeUnit == "player" then
           --   Addon.Logging.Debug("Aura:", unit_aura_info.name, "=> ID:", unit_aura_info.spellId)
           -- end
         end
       end
     until continuation_token == nil
-
-    return unit_auras
   end
-else
-  UnitAuraWrapper = UnitAura -- will be overwritten for Classic (but not for TBC or Wrath Classic)
-  ProcessAllUnitAuras = ProcessAllUnitAurasClassic
+
+  return unit_auras
 end
 
 local function IgnoreAuraUpdateForUnit(widget_frame, unit)
@@ -2040,10 +2004,46 @@ local function FlagAuraGridForUpdate(aura_grid_update, is_crowdcontrol_aura, is_
   end
 end
 
+local function UpdateUnitAuraCache(unit, unit_aura_update_info)
+  local unit_aura_cache = UnitAuraCache[unit.unitid]
+  if not unit_aura_cache then
+    unit_aura_cache = {
+      Buffs = {},
+    }
+    UnitAuraCache[unit.unitid] = unit_aura_cache
+  end
+
+  if unit_aura_update_info == nil then
+    unit_aura_cache.Buffs = {}
+  else
+    if unit_aura_update_info.isFullUpdate then
+      unit_aura_cache.Buffs = {}
+    end
+
+    if unit.reaction ~= "FRIENDLY" then
+      if unit_aura_update_info.addedAuras then
+        for _, unit_aura_info in ipairs(unit_aura_update_info.addedAuras) do
+          if unit_aura_info.isHelpful then
+            unit_aura_cache.Buffs[unit_aura_info.auraInstanceID] = unit_aura_info
+            print("  Addded:", unit_aura_info.auraInstanceID, unit_aura_info.name)
+          end
+        end
+      end
+
+      if unit_aura_update_info.removedAuraInstanceIDs then
+        for _, aura_instance_id in ipairs(unit_aura_update_info.removedAuraInstanceIDs) do
+          unit_aura_cache.Buffs[aura_instance_id] = nil
+          print("  Removed:", aura_instance_id)
+        end
+      end
+    end
+  end
+end
+
 function Widget:UNIT_AURA(unitid, unit_aura_update_info)
   local widget_frame = self:GetWidgetFrameForUnit(unitid)
   if widget_frame then 
-    widget_frame.Widget:UpdateAuras(widget_frame, widget_frame.unit)
+    widget_frame.Widget:UpdateAuras(widget_frame, widget_frame.unit, unit_aura_update_info)
   end
 end
 
@@ -2672,7 +2672,7 @@ end
 
 function Widget:UpdateAurasGrids(widget_frame, unit)
   local db = self.db
-
+  
   widget_frame.UnitAuras = {}
 
   local enabled_cc
@@ -2741,8 +2741,9 @@ function Widget:UpdateAurasGrids(widget_frame, unit)
   -- end
 end
 
-function Widget:UpdateAuras(widget_frame, unit)
+function Widget:UpdateAuras(widget_frame, unit, unit_aura_update_info)
   if not IgnoreAuraUpdateForUnit(widget_frame, unit) then 
+    UpdateUnitAuraCache(unit, unit_aura_update_info)
     self:UpdateAurasGrids(widget_frame, unit)
   end
 end
@@ -3639,7 +3640,6 @@ end
 ---------------------------------------------------------------------------------------------------
 
 local EnabledConfigMode = false
-local OldUnitAura, OldProcessAllUnitAuras
 local Timer
 
 local ConfigModeAuras = {
@@ -3681,15 +3681,6 @@ local function GenerateDemoAuras()
   end
 end
 
-local function UnitAuraForConfigurationMode(unitid, i, effect)
-  local aura = ConfigModeAuras[effect][i]
-  if aura then
-    return unpack(aura)
-  else
-    return nil
-  end
-end
-
 local function TimerCallback()
   for no = 40, 1, -1 do
     local aura = ConfigModeAuras.HARMFUL[no]
@@ -3706,30 +3697,65 @@ local function TimerCallback()
     GenerateDemoAuras()
   end
 
-  for plate, unitid in pairs(Addon.PlatesVisible) do
-    if plate.TPFrame.Active then
-      Widget:UpdateAuras(plate.TPFrame.widgets.Auras, plate.TPFrame.unit)
-    end
+  for _, tp_frame in Addon:GetActiveThreatPlates() do
+    Widget:UpdateAuras(tp_frame.widgets.Auras, tp_frame.unit)
   end
 end
+
+local function UnitAuraForConfigurationMode(unitid, i, effect)
+  local aura = ConfigModeAuras[effect][i]
+  if aura then
+    return unpack(aura)
+  else
+    return nil
+  end
+end
+
+-- Defined here as it's used for configuration mode even in Mainline
+local function ProcessAllUnitAurasConfigMode(unitid, effect)
+  local _
+  local unit_auras = {}
+
+  for i = 1, 40 do
+    local aura = {}
+
+    aura.name, aura.icon, aura.applications, aura.dispelName, aura.duration, aura.expirationTime, aura.sourceUnit,
+      aura.isStealable, aura.nameplateShowPersonal, aura.spellId, aura.canApplyAura, aura.isBossAura, _, aura.nameplateShowAll =
+      UnitAuraForConfigurationMode(unitid, i, effect)
+
+    if aura.name then 
+      aura.auraInstanceID = i
+
+      aura.duration = aura.duration or 0
+
+      unit_auras[#unit_auras + 1] = aura
+      -- if aura.sourceUnit == "player" then
+      --   Addon.Logging.Debug("Aura:", aura.name, "=> ID:", aura.spellId)
+      -- end
+    else
+      break
+    end
+  end
+
+  return unit_auras
+end
+
+local ProcessAllUnitAurasBackup
 
 function Widget:ToggleConfigurationMode()
   if not EnabledConfigMode then
     EnabledConfigMode = true
 
     GenerateDemoAuras()
-    OldUnitAura = UnitAuraWrapper
-    OldProcessAllUnitAuras = ProcessAllUnitAuras
-    UnitAuraWrapper = UnitAuraForConfigurationMode
-    ProcessAllUnitAuras = ProcessAllUnitAurasClassic
+    ProcessAllUnitAurasBackup = ProcessAllUnitAuras
+    ProcessAllUnitAuras = ProcessAllUnitAurasConfigMode
 
     Addon:ForceUpdate()
     Timer = C_Timer.NewTicker(0.5, TimerCallback)
   else
     EnabledConfigMode = false
 
-    UnitAuraWrapper = OldUnitAura
-    ProcessAllUnitAuras = OldProcessAllUnitAuras
+    ProcessAllUnitAuras = ProcessAllUnitAurasBackup
     Timer:Cancel()
 
     Addon:ForceUpdate()
