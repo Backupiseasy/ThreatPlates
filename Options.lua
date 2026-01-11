@@ -11468,9 +11468,9 @@ local function CreateOptionsTable()
   options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(Addon.db)
   options.args.profiles.order = 10000
 
-  -- Add dual-spec support
-  if Addon.ExpansionIsAtLeastWrath then
-    local LibDualSpec = LibStub:GetLibrary("LibDualSpec-1.0", true)
+  -- Add dual-spec support, no also available in Classic (Season, Anniversary)
+  local LibDualSpec = LibStub:GetLibrary("LibDualSpec-1.0", true)
+  if Addon.ExpansionIsAtLeastWrath or Addon.IS_CLASSIC_SOD or (C_Seasons and C_Seasons.GetActiveSeason() == 11) or (C_Seasons and C_Seasons.GetActiveSeason() == 12) then
     if LibDualSpec then
       LibDualSpec:EnhanceDatabase(Addon.db, t.ADDON_NAME)
       LibDualSpec:EnhanceOptions(options.args.profiles, Addon.db)

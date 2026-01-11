@@ -25,7 +25,8 @@ local UnitDetailedThreatSituation = UnitDetailedThreatSituation
 -- WoW Version Check
 ---------------------------------------------------------------------------------------------------
 Addon.IS_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
-Addon.IS_CLASSIC_SOD = (Addon.IS_CLASSIC and (select(4, GetBuildInfo()) >= 11500))
+Addon.IS_CLASSIC_SOM = (Addon.IS_CLASSIC and C_Seasons and C_Seasons.GetActiveSeason() == 1)
+Addon.IS_CLASSIC_SOD = (Addon.IS_CLASSIC and C_Seasons and C_Seasons.GetActiveSeason() == 2)
 Addon.IS_TBC_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_BURNING_CRUSADE)
 Addon.IS_WRATH_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_WRATH_OF_THE_LICH_KING)
 Addon.IS_CATA_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_CATACLYSM)
