@@ -178,7 +178,11 @@ local function ChatCommandDebug(cmd_list)
 			end
 		end
 		if Addon.IS_TBC_CLASSIC then
-			Addon.Logging.Debug("Version: TBC Classic")
+			if C_Seasons and (C_Seasons.GetActiveSeason() == 125) then
+				Addon.Logging.Debug("Version: TBC Classic - Anniversary Edition")
+			else
+				Addon.Logging.Debug("Version: TBC Classic")
+			end
 		end
 		if Addon.IS_MISTS_CLASSIC then
 			Addon.Logging.Debug("Version: Mists Classic")
