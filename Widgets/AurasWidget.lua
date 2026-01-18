@@ -23,6 +23,7 @@ local BUFF_MAX_DISPLAY = BUFF_MAX_DISPLAY
 local GetFramerate = GetFramerate
 local DebuffTypeColor = DebuffTypeColor
 local UnitIsUnit = UnitIsUnit
+local UnitAura = UnitAura
 local GetAuraSlots = C_UnitAuras and C_UnitAuras.GetAuraSlots
 local GetAuraDataBySlot, GetAuraDataByAuraInstanceID = C_UnitAuras and C_UnitAuras.GetAuraDataBySlot, C_UnitAuras and C_UnitAuras.GetAuraDataByAuraInstanceID
 local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlate.GetNamePlateForUnit
@@ -1593,6 +1594,7 @@ Widget.CROWD_CONTROL_SPELLS = CROWD_CONTROL_SPELLS_BY_EXPANSION[Addon.GetExpansi
 ---------------------------------------------------------------------------------------------------
 --local PLayerIsInCombat = false
 --local DispellableDebuffCache = {}
+local UnitAuraCache = {}
 
 ---------------------------------------------------------------------------------------------------
 -- Cached configuration settings
@@ -1926,7 +1928,7 @@ local function ProcessAllUnitAuras(unitid, effect)
   local aura_max_display = (effect == "HARMFUL" and DEBUFF_MAX_DISPLAY) or BUFF_MAX_DISPLAY
   local unit_auras = {}
 
-  if effect == "HELPFUL" and UnitReaction("player", unitid) < 5 and UnitAuraCache[unitid] then
+  if Addon.IS_CLASSIC and effect == "HELPFUL" and UnitReaction("player", unitid) < 5 and UnitAuraCache[unitid] then
     for aura_instance_id, unit_aura_info in pairs (UnitAuraCache[unitid].Buffs) do
       unit_aura_info.duration = unit_aura_info.duration or 0
       unit_auras[#unit_auras + 1] = unit_aura_info
@@ -2743,7 +2745,9 @@ end
 
 function Widget:UpdateAuras(widget_frame, unit, unit_aura_update_info)
   if not IgnoreAuraUpdateForUnit(widget_frame, unit) then 
-    UpdateUnitAuraCache(unit, unit_aura_update_info)
+    if Addon.IS_CLASSIC then
+      UpdateUnitAuraCache(unit, unit_aura_update_info)
+    end
     self:UpdateAurasGrids(widget_frame, unit)
   end
 end
@@ -3711,27 +3715,19 @@ local function UnitAuraForConfigurationMode(unitid, i, effect)
   end
 end
 
--- Defined here as it's used for configuration mode even in Mainline
 local function ProcessAllUnitAurasConfigMode(unitid, effect)
-  local _
   local unit_auras = {}
 
   for i = 1, 40 do
     local aura = {}
 
     aura.name, aura.icon, aura.applications, aura.dispelName, aura.duration, aura.expirationTime, aura.sourceUnit,
-      aura.isStealable, aura.nameplateShowPersonal, aura.spellId, aura.canApplyAura, aura.isBossAura, _, aura.nameplateShowAll =
+      aura.isStealable, aura.nameplateShowPersonal, aura.spellId, aura.canApplyAura, aura.isBossAura, aura.castByPlayer, aura.nameplateShowAll =
       UnitAuraForConfigurationMode(unitid, i, effect)
 
     if aura.name then 
       aura.auraInstanceID = i
-
-      aura.duration = aura.duration or 0
-
       unit_auras[#unit_auras + 1] = aura
-      -- if aura.sourceUnit == "player" then
-      --   Addon.Logging.Debug("Aura:", aura.name, "=> ID:", aura.spellId)
-      -- end
     else
       break
     end

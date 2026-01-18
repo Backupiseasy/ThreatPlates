@@ -170,13 +170,21 @@ local function ChatCommandDebug(cmd_list)
 		end			
 	elseif command == "version" then
 		Addon.Logging.Debug("Expansion Level:", Addon.GetExpansionLevel())
-		if Addon.IS_CLASSIC_SOD then
-			Addon.Logging.Debug("Version: Classic Era - Season of Discovery")
-		elseif Addon.IS_CLASSIC then
-			Addon.Logging.Debug("Version: Classic Era")
+		if Addon.IS_CLASSIC then
+			if Addon.IS_CLASSIC_SOD then
+				Addon.Logging.Debug("Version: Classic Era - Season of Discovery")
+			elseif C_Seasons and (C_Seasons.GetActiveSeason() == 11 or C_Seasons.GetActiveSeason() == 12) then
+				Addon.Logging.Debug("Version: Classic Era - Anniversary Realm")
+			else
+				Addon.Logging.Debug("Version: Classic Era")
+			end
 		end
 		if Addon.IS_TBC_CLASSIC then
-			Addon.Logging.Debug("Version: TBC Classic")
+			if C_Seasons and (C_Seasons.GetActiveSeason() == 125) then
+				Addon.Logging.Debug("Version: TBC Classic - Anniversary Edition")
+			else
+				Addon.Logging.Debug("Version: TBC Classic")
+			end
 		end
 		if Addon.IS_MISTS_CLASSIC then
 			Addon.Logging.Debug("Version: Mists Classic")
@@ -188,10 +196,11 @@ local function ChatCommandDebug(cmd_list)
 			Addon.Logging.Debug("Version: Mainline - Midnight")
 		end
 
-		Addon.Logging.Debug("WOW_USES_CLASSIC_NAMEPLATES:", Addon.WOW_USES_CLASSIC_NAMEPLATES)
-		Addon.Logging.Debug("WOW_FEATURE_ABSORBS:", Addon.WOW_FEATURE_ABSORBS)
-		Addon.Logging.Debug("WOW_FEATURE_BLIZZARD_AURA_FILTER:", Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER)
-		Addon.Logging.Debug("NAMEPLATE_MAX_DISTANCE_MAX_VALUE:", Addon.NAMEPLATE_MAX_DISTANCE_MAX_VALUE[Addon.GetExpansionLevel()])
+		Addon.Logging.Debug("-- Enabled Features --")
+		Addon.Logging.Debug("  WOW_USES_CLASSIC_NAMEPLATES:", Addon.WOW_USES_CLASSIC_NAMEPLATES)
+		Addon.Logging.Debug("  WOW_FEATURE_ABSORBS:", Addon.WOW_FEATURE_ABSORBS)
+		Addon.Logging.Debug("  WOW_FEATURE_BLIZZARD_AURA_FILTER:", Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER)
+		Addon.Logging.Debug("  NAMEPLATE_MAX_DISTANCE_MAX_VALUE:", Addon.NAMEPLATE_MAX_DISTANCE_MAX_VALUE[Addon.GetExpansionLevel()])
 	elseif command == "combat" and Addon.DEBUG then
 		--Addon.Logging.Info("|cff89F559Threat Plates|r: Event publishing overview:")
 		if not plate then return end

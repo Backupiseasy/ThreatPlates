@@ -1,4 +1,4 @@
-﻿------------------------------------------------------
+------------------------------------------------------
 13.0.0 (..-..--)
 ------------------------------------------------------
 * Masque support
@@ -7,6 +7,28 @@
 * Option to enable/disable to show interrupt source for casts
 * Animations (scaling/fading) for nameplates that are shown/hidden/change size
 * Removed disconnected option for coloring
+
+------------------------------------------------------
+12.6.5 (2026-01-14)
+------------------------------------------------------
+* Added support for WoW Burning Crusade Classic Anniversary Edition.
+* Fixed a Lua error that occurred in rare circumstances in WoW Classic when a unit's castbar was shown.
+* Support for dual spec profiles has been enabled for WoW Classic.
+* Fixed a bug in Auras widget that prevented buffs of hostile units from being displayed. [PM].
+* Updated TOC version for Patch 5.5.3 for WoW Mists Classic.
+
+------------------------------------------------------
+12.6.4 (2025-12-06)
+------------------------------------------------------
+* Updated integrated libraries (Ace3 r1377).
+* Updated TOC version for Patch 11.2.7 for WoW Mainline.
+* Updated TOC version for Patch 5.5.2 for WoW Mists Classic.
+* Updated TOC version for Patch 1.15.8 for WoW Classic.
+
+------------------------------------------------------
+12.6.3 (2025-11-27)
+------------------------------------------------------
+* Fixed a Lua error that occurred in arenas and battlegrounds due to incorrect registration of the ARENA_OPPONENT_UPDATE event [GH-614].
 
 ------------------------------------------------------
 12.6.2 (2025-10-22)

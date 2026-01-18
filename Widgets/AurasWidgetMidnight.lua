@@ -2320,15 +2320,6 @@ local function GenerateDemoAuras()
   end
 end
 
-local function UnitAuraForConfigurationMode(unitid, i, effect)
-  local aura = ConfigModeAuras[effect][i]
-  if aura then
-    return unpack(aura)
-  else
-    return nil
-  end
-end
-
 local function TimerCallback()
   for no = 40, 1, -1 do
     local aura = ConfigModeAuras.HARMFUL[no]
@@ -2350,23 +2341,52 @@ local function TimerCallback()
   end
 end
 
+local function UnitAuraForConfigurationMode(unitid, i, effect)
+  local aura = ConfigModeAuras[effect][i]
+  if aura then
+    return unpack(aura)
+  else
+    return nil
+  end
+end
+
+local function ProcessAllUnitAurasConfigMode(unitid, effect)
+  local unit_auras = {}
+
+  for i = 1, 40 do
+    local aura = {}
+
+    aura.name, aura.icon, aura.applications, aura.dispelName, aura.duration, aura.expirationTime, aura.sourceUnit,
+      aura.isStealable, aura.nameplateShowPersonal, aura.spellId, aura.canApplyAura, aura.isBossAura, aura.castByPlayer, aura.nameplateShowAll =
+      UnitAuraForConfigurationMode(unitid, i, effect)
+
+    if aura.name then 
+      aura.auraInstanceID = i
+      unit_auras[#unit_auras + 1] = aura
+    else
+      break
+    end
+  end
+
+  return unit_auras
+end
+
+local ProcessAllUnitAurasBackup
+
 function Widget:ToggleConfigurationMode()
   if not EnabledConfigMode then
     EnabledConfigMode = true
 
     GenerateDemoAuras()
-    OldUnitAura = UnitAuraWrapper
-    OldProcessAllUnitAuras = ProcessAllUnitAuras
-    UnitAuraWrapper = UnitAuraForConfigurationMode
-    ProcessAllUnitAuras = ProcessAllUnitAurasClassic
+    ProcessAllUnitAurasBackup = ProcessAllUnitAuras
+    ProcessAllUnitAuras = ProcessAllUnitAurasConfigMode
 
     Addon:ForceUpdate()
     Timer = C_Timer.NewTicker(0.5, TimerCallback)
   else
     EnabledConfigMode = false
 
-    UnitAuraWrapper = OldUnitAura
-    ProcessAllUnitAuras = OldProcessAllUnitAuras
+    ProcessAllUnitAuras = ProcessAllUnitAurasBackup
     Timer:Cancel()
 
     Addon:ForceUpdate()
