@@ -5826,6 +5826,7 @@ local function CreateBlizzardSettings()
                 name = L["Only Names"],
                 order = 30,
                 type = "toggle",
+                width = "double",
                 set = function(info, val)
                   Addon.db.profile.BlizzardSettings.Names.ShowOnlyNames = val
                   SetValueCVarBool(info, val)
@@ -5835,10 +5836,21 @@ local function CreateBlizzardSettings()
                 desc = L["Show only unit names and hide healthbars (requires /reload). Note that the clickable area of friendly nameplates will also be set to zero so that they don't interfere with enemy nameplates stacking (not in Classic or TBC Classic)."],
                 arg = "nameplateShowOnlyNames",
               },
+              ShowOnlyNameForFriendlyPlayerUnits = {
+                name = L["Only Names for Friendly Players"],
+                order = 35,
+                type = "toggle",
+                width = "double",
+                set = SetValueCVarBool,
+                get = GetValueCVarBool,
+                desc = L["Hide healthbars of friendly units"],
+                arg = "nameplateShowOnlyNameForFriendlyPlayerUnits",            
+              },                    
               DebuffsOnFriendly = {
                 name = L["Debuffs on Friendly"],
                 order = 40,
                 type = "toggle",
+                width = "double",
                 set = SetValueCVarBool,
                 get = GetValueCVarBool,
                 arg = "nameplateShowDebuffsOnFriendly",
@@ -5846,6 +5858,7 @@ local function CreateBlizzardSettings()
               OnlyInInstances = {
                 type = "toggle",
                 name = L["Players in Instances"],
+                width = "double",
                 order = 50,
                 desc = L["Show friendly players' and totems' names in instances."],
                 arg = { "BlizzardSettings", "Names", "ShowPlayersInInstances" },

@@ -1,4 +1,4 @@
-## Interface: 120000
+## Interface: 120001
 
 ## Title: Threat Plates
 ## Version: @project-version@
@@ -35,12 +35,11 @@ ThreatPlates.xml
 Init.lua
 Debug.lua
 Compatibility.lua
+Modules\Localization.lua
 EventService.lua
 CVarsManager.lua
 Media.lua
 Constants.lua
-Modules\Localization.lua
-Modules\Font.lua
 Modules\Modules.xml
 Elements\Elements.xml
 Widgets\WidgetHandler.lua

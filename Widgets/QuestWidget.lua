@@ -5,6 +5,8 @@ local ADDON_NAME, Addon = ...
 
 if not Addon.ExpansionIsAtLeastMists then return end
 
+if Addon.ExpansionIsAtLeastMidnight then return end
+
 local Widget = Addon.Widgets:NewWidget("Quest")
 
 ---------------------------------------------------------------------------------------------------

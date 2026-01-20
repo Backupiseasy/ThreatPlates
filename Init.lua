@@ -27,6 +27,7 @@ Addon.IS_TBC_CLASSIC_ANNIVERSARY = (Addon.IS_TBC_CLASSIC and C_Seasons and C_Sea
 Addon.IS_WRATH_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_WRATH_OF_THE_LICH_KING)
 Addon.IS_CATA_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_CATACLYSM)
 Addon.IS_MISTS_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_MISTS_OF_PANDARIA)
+--Addon.IS_MIDNIGHT = GetServerExpansionLevel() == LE_EXPANSION_MIDNIGHT
 Addon.IS_MIDNIGHT = (select(4, GetBuildInfo()) >= 120000)
 Addon.IS_MAINLINE = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
 -- Addon.IS_TBC_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC and LE_EXPANSION_LEVEL_CURRENT == LE_EXPANSION_BURNING_CRUSADE)

@@ -631,8 +631,8 @@ function ColorModule.SetCastbarColor(unit)
   -- the interrupt color may be shown for a cast
 	if unit.IsInterrupted then
 		c = db.castbarColorInterrupted
-	elseif unit.spellIsShielded then
-		c = db.castbarColorShield
+	-- elseif unit.spellIsShielded then
+	-- 	c = db.castbarColorShield
 	else
 		c = db.castbarColor
 	end

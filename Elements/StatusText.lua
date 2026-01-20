@@ -204,7 +204,7 @@ if Addon.ExpansionIsAtLeastMidnight then
       end
 
       if Settings.percent then
-        HpPct = ("%.f%%"):format(UnitHealthPercent(unit.unitid, true))
+        HpPct = ("%.f%%"):format(UnitHealthPercent(unit.unitid, true, CurveConstants.ScaleTo100))
         if Settings.amount then
           HpPct = (" - %s"):format(HpPct)
         end

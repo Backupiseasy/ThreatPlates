@@ -42,7 +42,7 @@ local UseMasque, UseBorderlessIcons
 function IconModule.RegisterMasqueGroup(widget, name)
   if UseMasque then
     local masque_group = Addon.LibMasque:Group(Addon.ADDON_NAME, name)
-    masque_group:SetCallback(function() Addon.Widgets:UpdateSettings(widget.Name) end)
+    masque_group:RegisterCallback(function() Addon.Widgets:UpdateSettings(widget.Name) end)
     masque_groups[widget] = masque_group
   end
 end
@@ -71,6 +71,11 @@ local function GetParentFrame(self)
   return (UseMasque and self) or self:GetParent()
 end
 
+local function SetIconTexture(self, texture_info, unitid)
+  local icon = (UseMasque and self.icon) or self
+  Addon:SetIconTexture(icon, texture_info, unitid)
+end
+
 -- local function ReSkin(self)
 --   if UseMasque then
 --     self.MasqueGroup:ReSkin(self)
@@ -97,6 +102,7 @@ function IconModule.CreateIcon(widget, parent)
   icon.SetIconTexture = SetIconTexture
   icon.GetIconTexture = GetIconTexture
   icon.GetParentFrame = GetParentFrame
+  icon.SetTPIconTexture = SetIconTexture
   --icon.ReSkin = ReSkin
 
   return icon

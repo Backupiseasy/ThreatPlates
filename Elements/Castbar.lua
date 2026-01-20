@@ -105,19 +105,17 @@ end
 local function SetFormat(self, show)
   local db = Addon.db.profile.settings
 
-  if show then
-    self.InterruptShield:SetShown(db.castnostop.ShowInterruptShield)
-    if db.castborder.show and db.castnostop.ShowOverlay then
-      self.InterruptBorder:Show()
-      self.InterruptOverlay:Show()
-    else
-      self.InterruptBorder:Hide()
-      self.InterruptOverlay:Hide()
-    end
-  else
+  self.InterruptBorder:SetAlphaFromBoolean(show, 1, 0)
+  self.InterruptOverlay:SetAlphaFromBoolean(show, 1, 0)
+  self.InterruptShield:SetAlphaFromBoolean(show, 1, 0)
+
+  if not db.castnostop.ShowInterruptShield then
+    self.InterruptShield:Hide(db.castnostop.ShowInterruptShield)
+  end
+    
+  if not db.castborder.show or not db.castnostop.ShowOverlay then
     self.InterruptBorder:Hide()
     self.InterruptOverlay:Hide()
-    self.InterruptShield:Hide()
   end
 
   self.Spark:SetShown(db.castbar.ShowSpark)

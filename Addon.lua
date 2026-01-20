@@ -151,7 +151,10 @@ elseif not Addon.ExpansionIsAtLeastMidnight then
     --C_NamePlate_SetNamePlateSelfSize(baseWidth * horizontalScale * Lerp(1.1, 1.0, clampedZeroBasedScale), baseHeight)
   end
 else
-  Addon.SetBaseNamePlateSize = function(self) end
+  Addon.SetBaseNamePlateSize = function(self, plate) 
+    C_NamePlateManager.SetNamePlateHitTestInsets(Enum.NamePlateType.Enemy, -10000, -10000, -10000, -10000)
+    C_NamePlateManager.SetNamePlateHitTestInsets(Enum.NamePlateType.Friendly, 10000, 10000, 10000, 10000)
+  end
 end
 
 ------------------

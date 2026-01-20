@@ -198,7 +198,7 @@ else
 end
 
 -- Quest widget is not available in Classic
-if not Addon.ExpansionIsAtLeastMists then -- 
+if not Addon.ExpansionIsAtLeastMists or Addon.ExpansionIsAtLeastMidnight then
   Addon.ShowQuestUnit = function(...) return false end
 end
 

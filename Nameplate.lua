@@ -453,8 +453,10 @@ local function SetUnitAttributes(unit, unitid)
     unit.class = ""
     unit.type = "NPC"
 
-    local _, _, _, _, _, npc_id = strsplit("-", unit.guid or "")
-    unit.NPCID = npc_id
+    if not Addon.ExpansionIsAtLeastMidnight then
+      local _, _, _, _, _, npc_id = strsplit("-", unit.guid or "")
+      unit.NPCID = npc_id
+    end
   end
 
   SetUnitAttributeReaction(unit, unitid)
@@ -516,7 +518,7 @@ local function OnStartCasting(tp_frame, unitid, channeled, event_spellid)
     name, text, texture, startTime, endTime, isTradeSkill, _, notInterruptible, spellID = UnitCastingInfo(unitid)
   end
 
-  if not name or (not IsSecretValue(isTradeSkill) and isTradeSkill) then
+  if not name or isTradeSkill then
     castbar:Hide()
     return 
   end
@@ -533,12 +535,7 @@ local function OnStartCasting(tp_frame, unitid, channeled, event_spellid)
 
   unit.isCasting = true
   unit.IsInterrupted = false
-  
-  if Addon.ExpansionIsAtLeastMidnight then
-    unit.spellIsShielded = false
-  else
-    unit.spellIsShielded = notInterruptible
-  end
+  unit.spellIsShielded = notInterruptible
 
   if StyleModule.CastTriggerUpdateStyle(unit) then
     StyleModule:Update(tp_frame)
@@ -548,13 +545,15 @@ local function OnStartCasting(tp_frame, unitid, channeled, event_spellid)
   visual.SpellText:SetText(text)
   visual.SpellIcon:SetTexture(texture)
 
-  local target_unit_name = UnitName(unit.unitid .. "target")
-  -- There are situations when UnitName returns nil (OnHealthUpdate, hypothesis: health update when the unit died tiggers this, but then there is no target any more)
-  if target_unit_name then
-    local _, class_name = UnitClass(target_unit_name)
-    castbar.CastTarget:SetText(Addon.ColorByClass(class_name, TransliterateCyrillicLetters(target_unit_name)))
-  else
-    castbar.CastTarget:SetText(nil)
+  if not Addon.ExpansionIsAtLeastMidnight then
+    local target_unit_name = UnitName(unit.unitid .. "target")
+    -- There are situations when UnitName returns nil (OnHealthUpdate, hypothesis: health update when the unit died tiggers this, but then there is no target any more)
+    if target_unit_name then
+      local _, class_name = UnitClass(target_unit_name)
+      castbar.CastTarget:SetText(Addon.ColorByClass(class_name, TransliterateCyrillicLetters(target_unit_name)))
+    else
+      castbar.CastTarget:SetText(nil)
+    end
   end
 
   castbar:SetReverseFill(castbar.IsChanneling)
@@ -667,6 +666,7 @@ local SetShownBlizzardPlate
 if Addon.ExpansionIsAtLeastMidnight then
   SetShownBlizzardPlate = function(unit_frame, show)
     unit_frame:SetAlpha(show and 1 or 0)
+    --unit_frame:SetShown(show)
   end
 else
   SetShownBlizzardPlate = function(unit_frame, show)
@@ -785,7 +785,9 @@ local function FrameOnUpdate(plate, elapsed)
     return
   end
 
-  --tp_frame:SetFrameLevel(plate:GetFrameLevel() * 10)
+  local plate_framelevel = plate:GetFrameLevel()
+  tp_frame:SetFrameLevel(plate_framelevel)
+  -- plate.TPAnchorFrame:SetFrameLevel(plate_framelevel)
 
   --    for i = 1, #PlateOnUpdateQueue do
   --      PlateOnUpdateQueue[i](plate, tp_frame.unit)
@@ -817,7 +819,7 @@ end
 
 local	function HandlePlateCreated(plate)
   -- Parent could be: WorldFrame, UIParent, plate
-  local tp_frame = _G.CreateFrame("Frame",  "ThreatPlatesFrame" .. GetNameForNameplate(plate), plate, BackdropTemplate)
+  local tp_frame = _G.CreateFrame("Frame",  "ThreatPlatesFrame" .. GetNameForNameplate(plate), UIParent, BackdropTemplate)
   tp_frame:EnableMouse(false)
   tp_frame:SetPoint("CENTER", plate, "CENTER")
 
@@ -828,12 +830,12 @@ local	function HandlePlateCreated(plate)
   tp_frame.GetAnchor = GetAnchorForThreatPlateExternal
 
   local db = Addon.db.profile.settings.frame
-  -- ---@type plateanchorframe
-  -- plate.PlaterAnchorFrame = _G.CreateFrame("Frame", tp_frame:GetName() .. "AnchorFrame", plate)
-  -- plate.PlaterAnchorFrame:EnableMouse(false)
-  -- plate.PlaterAnchorFrame:SetSize(110, 45) -- db.x, db.y
-  -- plate.PlaterAnchorFrame:SetParent(plate) -- redundant as its created with plate as parent
-
+  ---Anchor frame for Threat Plates
+  -- plate.TPAnchorFrame = _G.CreateFrame("Frame", tp_frame:GetName() .. "AnchorFrame", plate)
+  -- plate.TPAnchorFrame:SetSize(110, 45) -- db.x, db.y
+  -- plate.TPAnchorFrame:EnableMouse(false)
+  -- plate.TPAnchorFrame:SetParent(plate) -- redundant as its created with plate as parent
+  
   -- plate.Background = _G.CreateFrame("Frame", nil, plate, BackdropTemplate)
   -- plate.Background:EnableMouse(false)
   -- plate.Background:SetBackdrop({
@@ -867,26 +869,45 @@ local function HandlePlateUnitAdded(plate, unitid)
   if Addon.ExpansionIsAtLeastMidnight then
     C_NamePlateManager.SetNamePlateSimplified(unitid, false)
 
-    if not InCombatLockdown() then
-      C_NamePlateManager.SetNamePlateHitTestFrame(unitid, tp_frame)
-    -- else
-    --   plate.UnitFrame.HitTestFrame:SetParent(plate.UnitFrame)
-    --   plate.UnitFrame.HitTestFrame:ClearAllPoints()
-    --   plate.UnitFrame.HitTestFrame:SetAllPoints(tp_frame)
-    end
+    -- if not InCombatLockdown() then
+    --   C_NamePlateManager.SetNamePlateHitTestFrame(unitid, tp_frame)
+    -- -- else
+    -- --   plate.UnitFrame.HitTestFrame:SetParent(plate.UnitFrame)
+    -- --   plate.UnitFrame.HitTestFrame:ClearAllPoints()
+    -- --   plate.UnitFrame.HitTestFrame:SetAllPoints(tp_frame)
+    -- end
+
+    Addon.SetBaseNamePlateSize(plate)
 
     -- plate.UnitFrame.HitTestFrame:SetParent(plate.unitFrame)
     -- plate.UnitFrame.HitTestFrame:ClearAllPoints()
     -- plate.UnitFrame.HitTestFrame:SetPoint("TOPLEFT", plate.unitFrame, "TOPLEFT")
     -- plate.UnitFrame.HitTestFrame:SetPoint("BOTTOMRIGHT", plate.unitFrame, "BOTTOMRIGHT")
 
+    -- C_Timer.After(0.1, function()
+    --   if not plate.UnitFrame then return end
+
+    --   plate.TPAnchorFrame:ClearAllPoints()
+    --   if SettingsShowOnlyNames then
+    --     plate.TPAnchorFrame:SetParent(plate)
+    --     plate.TPAnchorFrame:Hide()
+    --   else
+    --     plate.TPAnchorFrame:SetParent(plate.UnitFrame.healthBar)
+    --     plate.TPAnchorFrame:Show()
+    --   end
+    --   plate.TPAnchorFrame:SetPoint("topright", plate.UnitFrame.healthBar, "topright")
+    --   plate.TPAnchorFrame:SetPoint("bottomleft", plate.UnitFrame.healthBar, "bottomleft")
+    --   plate.TPAnchorFrame:SetFrameStrata(plate.UnitFrame.healthBar:GetFrameStrata())
+    --   plate.TPAnchorFrame:SetFrameLevel(plate.UnitFrame.healthBar:GetFrameLevel()+1)
+    -- end)
+  
 
     -- local healthbar = tp_frame.visual.Healthbar
-    -- plate.PlaterAnchorFrame:ClearAllPoints()
-    -- plate.PlaterAnchorFrame:SetParent(healthbar)
-    -- plate.PlaterAnchorFrame:SetPoint("topright", healthbar, "topright")
-    -- plate.PlaterAnchorFrame:SetPoint("bottomleft", healthbar, "bottomleft")
-    -- plate.PlaterAnchorFrame:Show()
+    -- plate.TPAnchorFrame:ClearAllPoints()
+    -- plate.TPAnchorFrame:SetParent(healthbar)
+    -- plate.TPAnchorFrame:SetPoint("topright", healthbar, "topright")
+    -- plate.TPAnchorFrame:SetPoint("bottomleft", healthbar, "bottomleft")
+    -- plate.TPAnchorFrame:Show()
 
     --plate.Background:SetAllPoints(plate.UnitFrame.HitTestFrame)
   end
@@ -898,7 +919,9 @@ local function HandlePlateUnitAdded(plate, unitid)
   -- do not change over the nameplate lifetime
   SetUnitAttributes(unit, unitid)
   PlatesByUnit[unitid] = tp_frame
-  PlatesByGUID[unit.guid] = plate
+  if not Addon.ExpansionIsAtLeastMidnight then
+    PlatesByGUID[unit.guid] = plate
+  end
 
   -- Initialized nameplate style based on unit added
   ThreatModule.SetUnitAttribute(tp_frame)
@@ -1296,19 +1319,19 @@ function Addon:NAME_PLATE_CREATED(plate)
     NamePlateDriverFrame_AcquireUnitFrame(nil, plate)
   end
 
-  if NamePlateDriverFrame then
-    hooksecurefunc(NamePlateDriverFrame, "OnNamePlateRemoved", function(_, unitid)
-      local plate = GetNamePlateForUnit(unitid)
-      if plate and plate.UnitFrame and plate.UnitFrame.HitTestFrame then
-        local unit_frame = plate.UnitFrame
-        unit_frame.HitTestFrame:SetParent(unit_frame)
-        unit_frame.HitTestFrame:ClearAllPoints()
-        unit_frame.HitTestFrame:SetPoint("TOPLEFT", unit_frame.HealthBarsContainer.healthBar)
-        unit_frame.HitTestFrame:SetPoint("BOTTOMRIGHT", unit_frame.HealthBarsContainer.healthBar)
-        unit_frame.HitTestFrame:SetScale(1)
-      end
-    end)
-  end
+  -- if NamePlateDriverFrame then
+  --   hooksecurefunc(NamePlateDriverFrame, "OnNamePlateRemoved", function(_, unitid)
+  --     local plate = GetNamePlateForUnit(unitid)
+  --     if plate and plate.UnitFrame and plate.UnitFrame.HitTestFrame then
+  --       local unit_frame = plate.UnitFrame
+  --       unit_frame.HitTestFrame:SetParent(unit_frame)
+  --       unit_frame.HitTestFrame:ClearAllPoints()
+  --       unit_frame.HitTestFrame:SetPoint("TOPLEFT", unit_frame.HealthBarsContainer.healthBar)
+  --       unit_frame.HitTestFrame:SetPoint("BOTTOMRIGHT", unit_frame.HealthBarsContainer.healthBar)
+  --       unit_frame.HitTestFrame:SetScale(1)
+  --     end
+  --   end)
+  -- end
 
   plate:HookScript('OnHide', FrameOnHide)
   plate:HookScript('OnUpdate', FrameOnUpdate)
@@ -1343,8 +1366,10 @@ function Addon:NAME_PLATE_UNIT_REMOVED(unitid)
   tp_frame.Active = false
 
   PlatesByUnit[unitid] = nil
-  if tp_frame.unit.guid then -- maybe hide directly after create with unit added?
-    PlatesByGUID[tp_frame.unit.guid] = nil
+  if not Addon.ExpansionIsAtLeastMidnight then
+    if tp_frame.unit.guid then -- maybe hide directly after create with unit added?
+      PlatesByGUID[tp_frame.unit.guid] = nil
+    end
   end
 
   ElementsPlateUnitRemoved(tp_frame)
@@ -1358,6 +1383,10 @@ function Addon:NAME_PLATE_UNIT_REMOVED(unitid)
   -- If both are unique, the nameplate is not updated to the correct custom style, but uses the
   -- previous one, I think
   tp_frame.stylename = nil
+
+  -- plate.TPAnchorFrame:ClearAllPoints()
+  -- plate.TPAnchorFrame:SetParent(plate)
+  -- plate.TPAnchorFrame:SetSize(110, 45)
 end
 
 function Addon:UNIT_NAME_UPDATE(unitid)
@@ -1398,6 +1427,16 @@ end
 -- for the new (soft) target is fired. The new target nameplate must be handled via NAME_PLATE_UNIT_ADDED.
 
 function Addon:PLAYER_TARGET_CHANGED()
+  local plate = GetNamePlateForUnit("target")
+  if plate and plate.TPFrame.Active and plate.UnitFrame then
+    local db = Addon.db.profile.settings.frame
+    local width, height = db.width, db.height
+    print("Config Size:", width, "/", height)
+    local width, height = plate.UnitFrame:GetSize()
+    print("  -> Plate:", width, "/", height)
+    local width, height = plate.TPFrame:GetSize()
+    print("  -> TPFrame:", width, "/", height)
+  end  
   PlayerTargetChanged("target")
 end
 

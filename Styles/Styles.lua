@@ -112,7 +112,7 @@ local function GetUnitType(unit)
   elseif unit.classification == "minus" then
     unit_class = "Minus"
   --elseif unit.TotemSettings then
-  elseif UnitCreatureType(unit.unitid) == Addon.TotemCreatureType and UnitPlayerControlled(unit.unitid) and TOTEMS[unit.name] then
+  elseif not Addon.ExpansionIsAtLeastMidnight and UnitCreatureType(unit.unitid) == Addon.TotemCreatureType and UnitPlayerControlled(unit.unitid) and TOTEMS[unit.name] then
     unit_class = "Totem"
   elseif UnitIsOtherPlayersPet(unit.unitid) or UnitIsUnit(unit.unitid, "pet") then -- player pets are also considered guardians, so this check has priority
     -- ? Better to use UnitIsOwnerOrControllerOfUnit("player", unit.unitid) here?
@@ -224,6 +224,8 @@ end
 -- Depends on:
 --   * unit.name
 local function ProcessNameTriggers(unit)
+  if Addon.ExpansionIsAtLeastMidnight then return end
+  
   -- Set these values to nil if not custom nameplate or totem
   unit.TotemSettings = nil
   --unit.CustomPlateSettings = nil

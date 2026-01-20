@@ -21,6 +21,7 @@ local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
 local BackdropTemplate = Addon.BackdropTemplate
+local IsSecretValue = Addon.IsSecretValue
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -118,7 +119,9 @@ function Widget:SetTargetPowerType(widget_frame, unit)
   -- Reset the power function by default; it will be reassigned if appropriate
   self.PowerFunction = nil
 
-  if UnitPowerMax("target") == 0 then return end
+  local target_max_power = UnitPowerMax("target")
+
+  if IsSecretValue(target_max_power) or target_max_power then return end
 
   -- The code to determine the power type could be moved to OnUnitAdded, but then code is necessary to determine when
   -- the power type on the unit changes (e.g., a druid that shapeshifts). Mabe there's even bosses that do that?!?

@@ -106,7 +106,7 @@ end
 ---------------------------------------------------------------------------------------------------
 
 local function UpdateIconTexture(widget_frame, icon_texture, unique_setting)
-  widget_frame.Icon:SetIconTexture(icon_texture)
+  widget_frame.Icon:SetTPIconTexture(icon_texture)
 end
 
 function Widget:OnUnitAdded(widget_frame, unit)

@@ -90,7 +90,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
     end
 
     widget_frame:SetSize(db.scale, db.scale)
-    Addon:SetIconTexture(widget_frame.Icon, "Class." .. unit.class, unit.unitid)
+    widget_frame.Icon:SetTPIconTexture("Class." .. unit.class, unit.unitid)
 
     widget_frame:Show()
   else

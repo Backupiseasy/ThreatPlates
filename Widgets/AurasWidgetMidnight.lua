@@ -36,6 +36,7 @@ local CUSTOM_GLOW_FUNCTIONS, CUSTOM_GLOW_WRAPPER_FUNCTIONS = Addon.CUSTOM_GLOW_F
 local BackdropTemplate = Addon.BackdropTemplate
 local MODE_FOR_STYLE, AnchorFrameTo = Addon.MODE_FOR_STYLE, Addon.AnchorFrameTo
 local IsSecretValue = Addon.IsSecretValue
+local AbbreviateNumbers = AbbreviateNumbers
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -148,7 +149,15 @@ local function AuraFrameOnLeave(self)
 end
 
 -- SetUnitBuffByAuraInstanceID, SetUnitDebuffByAuraInstanceID: Dragonflight - Patch 10.0.0
-if Addon.IS_MAINLINE then
+if Addon.ExpansionIsAtLeastMidnight then
+  AuraFrameOnEnter = function(self)
+    AuraTooltip:SetOwner(self, "ANCHOR_LEFT")
+    AuraTooltip:SetUnitAuraByAuraInstanceID(self:GetParent():GetParent().unit.unitid, self.AuraData.auraInstanceID)
+
+    -- Would show more information, but mainly about the spell, not the aura
+    -- AuraTooltip:SetSpellByID(self.AuraData.spellId)
+  end
+elseif Addon.ExpansionIsAtLeastDF then
   AuraFrameOnEnter = function(self)
     AuraTooltip:SetOwner(self, "ANCHOR_LEFT")
 
@@ -158,12 +167,6 @@ if Addon.IS_MAINLINE then
     else
       AuraTooltip:SetUnitDebuffByAuraInstanceID(self:GetParent():GetParent().unit.unitid, self.AuraData.auraInstanceID, self.AuraData.effect)
     end
-
-    -- ! BETA:
-    --AuraTooltip:SetUnitAuraByAuraInstanceID(self:GetParent():GetParent().unit.unitid, self.AuraData.auraInstanceID)
-
-    -- Would show more information, but mainly about the spell, not the aura
-    --AuraTooltip:SetSpellByID(self.AuraData.spellId)
   end
 else  
   AuraFrameOnEnter = function(self)
@@ -1647,15 +1650,12 @@ local function UpdateAuraInformationIconMode(self, aura_frame) -- texture, durat
   self:UpdateWidgetTime(aura_frame, expiration, duration)
 
   local db_widget = self.db_widget
-  if IsSecretValue(stacks) then
+  if db_widget.ShowStackCount then
+    local stacks = C_UnitAuras.GetAuraApplicationDisplayCount(aura_frame.unitid, aura_frame.AuraData.auraInstanceID)
     aura_frame.Stacks:SetText(stacks)
+    aura_frame.Stacks:Show()
   else
-    if db_widget.ShowStackCount and stacks > 1 then
-      aura_frame.Stacks:SetText(stacks)
-      aura_frame.Stacks:Show()
-    else
-      aura_frame.Stacks:Hide()
-    end
+    aura_frame.Stacks:Hide()
   end
 
   aura_frame.Icon:SetTexture(aura_frame.AuraData.icon)
@@ -1688,29 +1688,61 @@ local function UpdateAuraInformationIconMode(self, aura_frame) -- texture, durat
   aura_frame:Show()
 end
 
+-- local AbbrevOptions = {
+--    breakpointData= {
+--       {breakpoint = 3600, fractionDivisor = 3600, significandDivisor = 1/1, abbreviation = "", abbreviationIsGlobal = false}, 
+--       {breakpoint = 60, fractionDivisor = 60, significandDivisor = 1/1, abbreviation = "", abbreviationIsGlobal = false},
+--       {breakpoint = 0, fractionDivisor = 1, significandDivisor = 1/1, abbreviation = "", abbreviationIsGlobal = false}
+-- }}
+
+-- local AbbrevOptionsUnit = {
+--    breakpointData= {
+--       {breakpoint = 3600, fractionDivisor = 3600, significandDivisor = 1/1, abbreviation = "h", abbreviationIsGlobal = false}, 
+--       {breakpoint = 60, fractionDivisor = 60, significandDivisor = 1/1, abbreviation = "m", abbreviationIsGlobal = false},
+--       {breakpoint = 0, fractionDivisor = 1, significandDivisor = 1/1, abbreviation = "", abbreviationIsGlobal = false}
+-- }}
+
+-- local function GetAbbreviatedTime(seconds)
+--   return AbbreviateNumbers(seconds, AbbrevOptions)
+-- end
+
+-- local TimeFormatter = CreateFromMixins(SecondsFormatterMixin)
+-- TimeFormatter:Init(0, SecondsFormatter.Abbreviation.OneLetter, false, true)
+-- TimeFormatter:Init(
+--   SecondsFormatterConstants.ZeroApproximationThreshold,
+--   SecondsFormatter.Abbreviation.OneLetter,
+--   SecondsFormatterConstants.DontRoundUpLastUnit,
+--   SecondsFormatterConstants.ConvertToLower,
+--   SecondsFormatterConstants.RoundUpIntervals)
+-- TimeFormatter:SetDesiredUnitCount(1)
+-- TimeFormatter:SetMinInterval(SecondsFormatter.Interval.Minutes)
+-- TimeFormatter:SetStripIntervalWhitespace(true)
+
 local function UpdateWidgetTimeIconMode(self, aura_frame, expiration, duration)
-  if IsSecretValue(duration) then 
-    local timeleft = C_UnitAuras.GetAuraDuration(aura_frame.unitid, aura_frame.AuraData.auraInstanceID)
-    aura_frame.TimeLeft:SetFormattedText("%.1f", timeleft:GetRemainingDuration())
+  local timeleft = C_UnitAuras.GetAuraDuration(aura_frame.unitid, aura_frame.AuraData.auraInstanceID)
+  if timeleft then
+    aura_frame.TimeLeft:SetAlphaFromBoolean(timeleft:IsZero(), 0, 1)
+    -- -- "%.1f"    
+    aura_frame.TimeLeft:SetFormattedText("%d", timeleft:GetRemainingDuration())
+
+    -- Unit is hostile and debuff - short duration format
+    -- if (UnitReaction("player", aura_frame.unitid) < 5) and aura_frame.isHarmful then
+    -- -- "%.1f"    
+    --   aura_frame.TimeLeft:SetFormattedText("%d", timeleft:GetRemainingDuration())
+    -- else
+    --   aura_frame.TimeLeft:SetText(TimeFormatter:Format(timeleft:GetRemainingDuration(), false, true))
+    -- end
+
     aura_frame.Cooldown:SetCooldownFromDurationObject(timeleft)
   else
-    if expiration > 0 then
-      local timeleft = expiration - GetTime()  
-      if timeleft > 60 then
-        aura_frame.TimeLeft:SetFormattedText("%dm", floor(timeleft/60))
-      else
-        aura_frame.TimeLeft:SetFormattedText("%d", timeleft)
-      end
-    else
-      aura_frame.TimeLeft:SetText("")
-      AnimationStopFlash(aura_frame)
-
-      local db_widget = self.db_widget
-      if db_widget.FlashWhenExpiring and timeleft < db_widget.FlashTime then
-        AnimationFlash(aura_frame)
-      end
-    end
+    aura_frame.TimeLeft:SetText()
   end
+
+  -- AnimationStopFlash(aura_frame)
+  -- local db_widget = self.db_widget
+  -- if db_widget.FlashWhenExpiring and timeleft < db_widget.FlashTime then
+  --   AnimationFlash(aura_frame)
+  -- end
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -1851,8 +1883,10 @@ local function UpdateAuraInformationBarMode(self, aura_frame) -- texture, durati
   -- Expiration
   self:UpdateWidgetTime(aura_frame, expiration, duration)
 
-  if stacks > 1 and self.db_widget.ShowStackCount then
-    -- Stacks are either shown on the icon or as postfix to the aura name when
+  if self.db_widget.ShowStackCount then
+    local stacks = C_UnitAuras.GetAuraApplicationDisplayCount(aura_frame.unitid, aura_frame.AuraData.auraInstanceID)
+    
+     -- Stacks are either shown on the icon or as postfix to the aura name when
     -- a) OmniCC is enabled (which shows the CD on the icon) or the icon is disabled
     if not db.ShowIcon or not HideOmniCC then
       aura_frame.Stacks:Hide()
@@ -1889,48 +1923,44 @@ local function UpdateAuraInformationBarMode(self, aura_frame) -- texture, durati
 end
 
 local function UpdateWidgetTimeBarMode(self, aura_frame, expiration, duration)
-  if duration == 0 then
-    aura_frame.TimeText:SetText("")
-    aura_frame.Statusbar:SetValue(100)
-    AnimationStopFlash(aura_frame)
-  elseif expiration == 0 then
-    aura_frame.TimeText:SetText("")
-    aura_frame.Statusbar:SetValue(0)
-    AnimationStopFlash(aura_frame)
-  else
-    local db = self.db_widget
+  local timeleft = C_UnitAuras.GetAuraDuration(aura_frame.unitid, aura_frame.AuraData.auraInstanceID)
+  if timeleft then
+    aura_frame.TimeText:SetAlphaFromBoolean(timeleft:IsZero(), 0, 1)
 
-    local timeleft = expiration - GetTime()
-
-    if db.ShowDuration then
-      if timeleft > 60 then
-        aura_frame.TimeText:SetText(floor(timeleft/60).."m")
-      else
-        aura_frame.TimeText:SetText(floor(timeleft))
-      end
-
-      if db.FlashWhenExpiring and timeleft < db.FlashTime then
-        AnimationFlash(aura_frame)
-      end
+    if timeleft:GetTotalDuration() == 0 then
+      aura_frame.Statusbar:SetValue(100)
+      --AnimationStopFlash(aura_frame)
+    -- elseif expiration == 0 then
+    --   aura_frame.TimeText:SetText("")
+    --   aura_frame.Statusbar:SetValue(0)
+      --AnimationStopFlash(aura_frame)
     else
-      aura_frame.TimeText:SetText("")
+      local db = self.db_widget
 
-      if db.FlashWhenExpiring and timeleft < db.FlashTime then
-        AnimationFlash(aura_frame)
+      
+      if db.ShowDuration then
+        aura_frame.TimeText:SetFormattedText("%d", timeleft:GetRemainingDuration())
+      else
+        aura_frame.TimeText:SetText()
       end
-    end
+      -- if db.FlashWhenExpiring and timeleft < db.FlashTime then
+      --   AnimationFlash(aura_frame)
+      -- end
 
-    aura_frame.Statusbar:SetValue(timeleft * 100 / duration)
+      aura_frame.Statusbar:SetTimerDuration(timeleft, 0)
+    end
+  else
+    aura_frame.TimeText:SetText()
   end
 end
 
 local function UpdateWidgetTimeBarModeNoDuration(self, aura_frame, expiration, duration)
   if duration == 0 then
     aura_frame.Statusbar:SetValue(100)
-    Animation:StopFlash(aura_frame)
+    --AnimationStopFlash(aura_frame)
   elseif expiration == 0 then
     aura_frame.Statusbar:SetValue(0)
-    Animation:StopFlash(aura_frame)
+    --AnimationStopFlash(aura_frame)
   else
     local timeleft = expiration - GetTime()
     if timeleft > 60 then
@@ -2190,7 +2220,7 @@ function Widget:UpdateSettingsBarMode(aura_type, filter)
   if ShowDuration then
     aura_grid.UpdateWidgetTime = UpdateWidgetTimeBarMode
   else
-    aura_grid.UpdateWidgetTime = UpdateWidgetTimeBarModeNoDuration
+    aura_grid.UpdateWidgetTime = UpdateWidgetTimeBarMode
   end
 
   aura_grid.Create = CreateAuraGrid

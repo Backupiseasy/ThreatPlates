@@ -57,6 +57,7 @@ local COMBAT_PROTECTED = {
   nameplateShowFriendlyPets = true,
   nameplateShowFriendlyTotems = true,
   nameplateShowOnlyNames = true,
+  nameplateShowOnlyNameForFriendlyPlayerUnits = true,
   -- Soft Target CVars
   SoftTargetForce = true,
   SoftTargetEnemy = true,
