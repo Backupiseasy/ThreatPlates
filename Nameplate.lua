@@ -667,6 +667,7 @@ if Addon.ExpansionIsAtLeastMidnight then
   SetShownBlizzardPlate = function(unit_frame, show)
     unit_frame:SetAlpha(show and 1 or 0)
     --unit_frame:SetShown(show)
+    unit_frame:GetParent().TPFrame:SetShown(not show)
   end
 else
   SetShownBlizzardPlate = function(unit_frame, show)
@@ -737,6 +738,20 @@ local function ClassicBlizzardNameplatesSetAlpha(UnitFrame, alpha)
   end
 end
 
+-- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly/enemy units
+local function SetVisibilityOfBlizzardNameplate(UnitFrame, unitid)
+  -- Not sure if unit.reaction will always be correctly set here, so:
+  local unit_reaction = UnitReaction("player", unitid) or 0
+  if unit_reaction > 4 then
+    SetShownBlizzardPlate(UnitFrame, SettingsShowFriendlyBlizzardNameplates)
+    --UnitFrame:SetShown(SettingsShowFriendlyBlizzardNameplates)
+  else
+    SetShownBlizzardPlate(UnitFrame, SettingsShowEnemyBlizzardNameplates)
+    --UnitFrame:SetShown(SettingsShowEnemyBlizzardNameplates)
+  end
+end
+
+
 local function FrameOnShow(UnitFrame)
   local unitid = UnitFrame.unit
   
@@ -753,6 +768,7 @@ local function FrameOnShow(UnitFrame)
     return
   end
 
+
   if UnitIsUnit(unitid, "player") then -- or: ns.PlayerNameplate == GetNamePlateForUnit(UnitFrame.unit)
     -- Skip the personal resource bar of the player character, don't unhook scripts as nameplates, even the personal
     -- resource bar, get re-used
@@ -764,16 +780,7 @@ local function FrameOnShow(UnitFrame)
       ClassicBlizzardNameplatesSetAlpha(UnitFrame, 0)
     end
   
-    -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly units
-    -- Not sure if unit.reaction will always be correctly set here, so:
-    local unit_reaction = UnitReaction("player", unitid) or 0
-    if unit_reaction > 4 then
-      SetShownBlizzardPlate(UnitFrame, SettingsShowFriendlyBlizzardNameplates)
-      --UnitFrame:SetShown(SettingsShowFriendlyBlizzardNameplates)
-    else
-      SetShownBlizzardPlate(UnitFrame, SettingsShowEnemyBlizzardNameplates)
-      --UnitFrame:SetShown(SettingsShowEnemyBlizzardNameplates)
-    end
+    SetVisibilityOfBlizzardNameplate(UnitFrame, unitid)
   end
 end
 
@@ -814,6 +821,18 @@ local function NamePlateDriverFrame_AcquireUnitFrame(_, plate)
   if unit_frame and not unit_frame:IsForbidden() and not unit_frame.ThreatPlates then
     unit_frame.ThreatPlates = true
     unit_frame:HookScript("OnShow", FrameOnShow)
+    
+    -- Shameless copy from Plater - prevent Blizzard plates from showing when their alpha is changed
+    -- as they are currently hidden using with SetAlpha(0)
+    local locked = false
+    hooksecurefunc(unit_frame, "SetAlpha", function(self)
+      if locked or self:IsForbidden() then return end
+
+      locked = true
+      SetVisibilityOfBlizzardNameplate(self, self.unit)
+      --self:SetAlpha(0)
+      locked = false
+    end)
   end
 end
 
@@ -822,7 +841,8 @@ local	function HandlePlateCreated(plate)
   local tp_frame = _G.CreateFrame("Frame",  "ThreatPlatesFrame" .. GetNameForNameplate(plate), UIParent, BackdropTemplate)
   tp_frame:EnableMouse(false)
   tp_frame:SetPoint("CENTER", plate, "CENTER")
-
+  -- Size is set in Styles.lua
+  
   tp_frame.Parent = plate
   plate.TPFrame = tp_frame
 
@@ -847,7 +867,7 @@ local	function HandlePlateCreated(plate)
   -- plate.Background:SetBackdropColor(0,0,0,.3)
   -- plate.Background:SetBackdropBorderColor(0, 0, 0, 0.8)
   -- plate.Background:Show()
-
+  
   tp_frame.visual = {}
   tp_frame.style = {}
   tp_frame.unit = {}
@@ -866,6 +886,8 @@ local function HandlePlateUnitAdded(plate, unitid)
   local tp_frame = plate.TPFrame
   local unit = tp_frame.unit
 
+  --plate.Background:SetAllPoints(plate.TPFrame)
+
   if Addon.ExpansionIsAtLeastMidnight then
     C_NamePlateManager.SetNamePlateSimplified(unitid, false)
 
@@ -876,8 +898,6 @@ local function HandlePlateUnitAdded(plate, unitid)
     -- --   plate.UnitFrame.HitTestFrame:ClearAllPoints()
     -- --   plate.UnitFrame.HitTestFrame:SetAllPoints(tp_frame)
     -- end
-
-    Addon.SetBaseNamePlateSize(plate)
 
     -- plate.UnitFrame.HitTestFrame:SetParent(plate.unitFrame)
     -- plate.UnitFrame.HitTestFrame:ClearAllPoints()
@@ -909,7 +929,7 @@ local function HandlePlateUnitAdded(plate, unitid)
     -- plate.TPAnchorFrame:SetPoint("bottomleft", healthbar, "bottomleft")
     -- plate.TPAnchorFrame:Show()
 
-    --plate.Background:SetAllPoints(plate.UnitFrame.HitTestFrame)
+    -- plate.Background:SetAllPoints(plate.UnitFrame.HitTestFrame)
   end
 
   -- Set unit attributes
@@ -1059,12 +1079,14 @@ function Addon:UpdateSettings()
     Addon.UnitIsTarget = function(unitid) return UnitIsUnit("target", unitid) end
   end
 
-  if db.settings.castnostop.ShowInterruptSource then
-    RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-  else
-    UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+  if not Addon.ExpansionIsAtLeastMidnight then
+    if db.settings.castnostop.ShowInterruptSource then
+      RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+    else
+      UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+    end
   end
-
+  
   ShowCastBars = db.settings.castbar.show or db.settings.castbar.ShowInHeadlineView
   
   -- ? Not sure if this is still necessary after moving registering events to Addon.lua - OnInitialize
@@ -1427,16 +1449,6 @@ end
 -- for the new (soft) target is fired. The new target nameplate must be handled via NAME_PLATE_UNIT_ADDED.
 
 function Addon:PLAYER_TARGET_CHANGED()
-  local plate = GetNamePlateForUnit("target")
-  if plate and plate.TPFrame.Active and plate.UnitFrame then
-    local db = Addon.db.profile.settings.frame
-    local width, height = db.width, db.height
-    print("Config Size:", width, "/", height)
-    local width, height = plate.UnitFrame:GetSize()
-    print("  -> Plate:", width, "/", height)
-    local width, height = plate.TPFrame:GetSize()
-    print("  -> TPFrame:", width, "/", height)
-  end  
   PlayerTargetChanged("target")
 end
 

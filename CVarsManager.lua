@@ -256,17 +256,17 @@ end
 local function SetCVarHook(name, value, c)
   if not MONITORED_CVARS[name] then return end
 
-  if name == "nameplateMinScale" or name == "nameplateMaxScale" or name == "nameplateLargerScale" or name == "nameplateSelectedScale" then
-    -- Update Hiding Nameplates only if something changed
-    local enabled = Addon.Scaling.HidingNameplatesIsEnabled()
-    local invalid = CVars.InvalidCVarsForHidingNameplates()
-    if (enabled and invalid) or (not enabled and not invalid) then
-      Addon.Scaling:UpdateSettings()
-      --Addon:ForceUpdate()
-    elseif invalid then
-      Addon.Logging.Warning(L["Animations for hiding nameplates are being disabled as certain console variables (CVars) related to nameplate scaling are set in a way to prevent this feature from working."])
-    end
-  elseif name == "nameplateMinAlpha" or name == "nameplateMaxAlpha" or name == "nameplateOccludedAlphaMult" or name == "nameplateSelectedAlpha" then
+  -- if name == "nameplateMinScale" or name == "nameplateMaxScale" or name == "nameplateLargerScale" or name == "nameplateSelectedScale" then
+  --   -- Update Hiding Nameplates only if something changed
+  --   local enabled = Addon.Scaling.HidingNameplatesIsEnabled()
+  --   local invalid = CVars.InvalidCVarsForHidingNameplates()
+  --   if (enabled and invalid) or (not enabled and not invalid) then
+  --     Addon.Scaling:UpdateSettings()
+  --     --Addon:ForceUpdate()
+  --   elseif invalid then
+  --     Addon.Logging.Warning(L["Animations for hiding nameplates are being disabled as certain console variables (CVars) related to nameplate scaling are set in a way to prevent this feature from working."])
+  --   end
+  if name == "nameplateMinAlpha" or name == "nameplateMaxAlpha" or name == "nameplateOccludedAlphaMult" or name == "nameplateSelectedAlpha" then
     local enabled = Addon.Transparency.OcclusionDetectionIsEnabled()
     local invalid = CVars.InvalidCVarsForOcclusionDetection()
     -- Update Hiding Nameplates only if something changed
