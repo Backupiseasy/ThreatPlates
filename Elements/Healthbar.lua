@@ -476,10 +476,8 @@ local function ColorUpdate(tp_frame, color)
   if tp_frame.PlateStyle ~= "HealthbarMode" then return end
   
   local healthbar = tp_frame.visual.Healthbar
-
-  if Addon.ExpansionIsAtLeastMidnight and color.HealthColor then
-    --healthbar:SetStatusBarColor(color.HealthColor:GetRGB())
-    healthbar:SetStatusBarColor(color.r, color.g, color.b, 1)
+  if Addon.ExpansionIsAtLeastMidnight then
+    healthbar:GetStatusBarTexture():SetVertexColor(color.r, color.g, color.b)
   else
     healthbar:SetStatusBarColor(color.r, color.g, color.b, 1)
   end

@@ -187,7 +187,9 @@ local function GetColorByReaction(unit)
 end
 
 if Addon.ExpansionIsAtLeastMidnight then
-  ColorModule.GetColorByHealthDeficit = GetColorByReaction
+  ColorModule.GetColorByHealthDeficit = function(unit)
+    return UnitHealthPercent(unit.unitid, true, HealthColorCurve)
+  end
 else
   ColorModule.GetColorByHealthDeficit = function(unit)
     local health_pct = ceil(100 * unit.health / unit.healthmax)
@@ -547,10 +549,9 @@ function ColorModule.UpdateSettings()
   ColorByHealth = SettingsBase.ColorByHealth
   -- Initialize the ColorCurve for health-based coloring (retail/Midnight)
   if Addon.ExpansionIsAtLeastMidnight then
-    HealthColorCurve = C_CurveUtil.CreateColorCurve({
-      {percent = 1.0, color = CreateColor(ColorByHealth.High.r, ColorByHealth.High.g, ColorByHealth.High.b)},
-      {percent = 0.0, color = CreateColor(ColorByHealth.Low.r, ColorByHealth.Low.g, ColorByHealth.Low.b)},
-    })
+    HealthColorCurve = C_CurveUtil.CreateColorCurve()
+    HealthColorCurve:AddPoint(0.0, CreateColor(ColorByHealth.Low.r, ColorByHealth.Low.g, ColorByHealth.Low.b))
+    HealthColorCurve:AddPoint(1.0, CreateColor(ColorByHealth.High.r, ColorByHealth.High.g, ColorByHealth.High.b))
   end
 
   HealthColorCache = {}
