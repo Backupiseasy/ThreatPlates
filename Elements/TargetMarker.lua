@@ -10,6 +10,7 @@ local ADDON_NAME, Addon = ...
 -- Lua APIs
 
 -- WoW APIs
+local SetRaidTargetIconTexture = SetRaidTargetIconTexture
 
 -- ThreatPlates APIs
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
@@ -46,7 +47,11 @@ function Element.TargetMarkerUpdate(tp_frame)
   local target_marker = tp_frame.visual.TargetMarker
   local icon = (style.raidicon.show and unit.TargetMarkerIcon) or unit.MentorIcon
   if icon then
-    Addon:SetIconTexture(target_marker, "TargetMarker." .. icon)
+    if Addon.ExpansionIsAtLeastMidnight then
+      SetRaidTargetIconTexture(target_marker, icon)
+    else
+      Addon:SetIconTexture(target_marker, "TargetMarker." .. icon)
+    end
     target_marker:Show()
   else
     target_marker:Hide()

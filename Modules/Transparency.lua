@@ -350,7 +350,7 @@ end
 
 -- Move UpdatePlate_SetAlpha to this file
 local function SituationalEvent(tp_frame)
-  if not tp_frame:IsShown() or (tp_frame.IsOccluded and not Addon.UnitIsTarget(unit.unitid)) then
+  if not tp_frame:IsShown() or (tp_frame.IsOccluded and not Addon.UnitIsTarget(tp_frame.unit.unitid)) then
     return
   end
 

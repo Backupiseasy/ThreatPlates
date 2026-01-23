@@ -101,31 +101,6 @@ function CS:GetSmudgeColorRGB(colorA, colorB, perc)
   return self:GetColorRGB()
 end
 
-if Addon.ExpansionIsAtLeastMidnight then
-  ColorModule.GetColorByHealthDeficit = function(unit)
-    MIDNIGHT_HEALTH_COLOR_WRAPPER.HealthColor = _G.UnitHealthPercentColor(unit.unitid, HealthColorCurve, true)
-    return MIDNIGHT_HEALTH_COLOR_WRAPPER
-
-    --local color = _G.UnitHealthPercentColor(unit.unitid, HealthColorCurve, true)
-    --return RGB_P(color::GetRGB())
-  end
-else
-  ColorModule.GetColorByHealthDeficit = function(unit)
-    local health_pct = ceil(100 * unit.health / unit.healthmax)
-
-    local color = HealthColorCache[health_pct]
-    if not color then
-      color = RGB_P(CS:GetSmudgeColorRGB(ColorByHealth.Low, ColorByHealth.High, health_pct))
-      HealthColorCache[health_pct] = color
-    end
-
-    return color
-  end
-end
-
--- Works as all functions using this function are triggerd by the NameColorChanged event
-local GetColorByHealth = ColorModule.GetColorByHealthDeficit
-
 ---------------------------------------------------------------------------------------------------
 -- Color by unit reaction 
 ---------------------------------------------------------------------------------------------------
@@ -210,6 +185,25 @@ local function GetColorByReaction(unit)
 
   return color
 end
+
+if Addon.ExpansionIsAtLeastMidnight then
+  ColorModule.GetColorByHealthDeficit = GetColorByReaction
+else
+  ColorModule.GetColorByHealthDeficit = function(unit)
+    local health_pct = ceil(100 * unit.health / unit.healthmax)
+
+    local color = HealthColorCache[health_pct]
+    if not color then
+      color = RGB_P(CS:GetSmudgeColorRGB(ColorByHealth.Low, ColorByHealth.High, health_pct))
+      HealthColorCache[health_pct] = color
+    end
+
+    return color
+  end
+end
+
+-- Works as all functions using this function are triggerd by the NameColorChanged event
+local GetColorByHealth = ColorModule.GetColorByHealthDeficit
 
 ---------------------------------------------------------------------------------------------------
 -- Color by class
@@ -299,7 +293,7 @@ local function GetSituationalColorForHealthbar(unit, plate_style)
     color = SettingsBase.FocusWidget.HPBarColor
   else
     local use_target_mark_color
-    if unit.TargetMarkerIcon then
+    if not Addon.ExpansionIsAtLeastMidnight and unit.TargetMarkerIcon then
       if unit.CustomPlateSettings then
         use_target_mark_color = unit.CustomPlateSettings.allowMarked
       else
@@ -331,7 +325,7 @@ local function GetSituationalColorForName(unit, plate_style)
     color = SettingsBase.FocusWidget.HPBarColor
   else
     local use_target_mark_color
-    if unit.TargetMarkerIcon then
+    if not Addon.ExpansionIsAtLeastMidnight and unit.TargetMarkerIcon then
       if unit.CustomPlateSettings then
         use_target_mark_color = unit.CustomPlateSettings.allowMarked
       else

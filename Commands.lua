@@ -275,6 +275,13 @@ local function ChatCommandDebug(cmd_list)
 				end
 			end
 		end
+	elseif command == "test" then
+    local plate = C_NamePlate.GetNamePlateForUnit("target")
+    if not plate then return end
+
+		print("SetSize")
+	  plate.UnitFrame.healthBar:SetSize(300, 80)
+		plate.UnitFrame:SetSize(300, 80)
 	else
 		Addon.Logging.Error(L["Unknown option: "] .. command)
 		PrintHelp()

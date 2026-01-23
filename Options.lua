@@ -5916,7 +5916,7 @@ local function CreateBlizzardSettings()
               },
               Spacer1 = GetSpacerEntry(18),
               EnemyWidth = {
-                name = (Addon.WOW_USES_CLASSIC_NAMEPLATES and L["Width"]) or L["Enemy Width"],
+                name = ((Addon.WOW_USES_CLASSIC_NAMEPLATES or Addon.ExpansionIsAtLeastMidnight) and L["Width"]) or L["Enemy Width"],
                 order = 20,
                 type = "range",
                 min = 1,
@@ -5934,7 +5934,7 @@ local function CreateBlizzardSettings()
                 disabled = function() return db.settings.frame.SyncWithHealthbar end,
               },
               EnemyHeight = {
-                name = (Addon.WOW_USES_CLASSIC_NAMEPLATES and L["Height"]) or L["Enemy Height"],
+                name = ((Addon.WOW_USES_CLASSIC_NAMEPLATES or Addon.ExpansionIsAtLeastMidnight) and L["Height"]) or L["Enemy Height"],
                 order = 25,
                 type = "range",
                 min = 1,
@@ -5968,7 +5968,7 @@ local function CreateBlizzardSettings()
                 end,
                 arg = { "settings", "frame", "widthFriend" },
                 disabled = function() return db.settings.frame.SyncWithHealthbar end,
-                hidden = function() return Addon.WOW_USES_CLASSIC_NAMEPLATES end,
+                hidden = Addon.WOW_USES_CLASSIC_NAMEPLATES or Addon.ExpansionIsAtLeastMidnight,
               },
               FriendHeight = {
                 name = L["Friend Height"],
@@ -5987,7 +5987,7 @@ local function CreateBlizzardSettings()
                 end,
                 arg = { "settings", "frame", "heightFriend"},
                 disabled = function() return db.settings.frame.SyncWithHealthbar end,
-                hidden = function() return Addon.WOW_USES_CLASSIC_NAMEPLATES end,
+                hidden = Addon.WOW_USES_CLASSIC_NAMEPLATES or Addon.ExpansionIsAtLeastMidnight,
               },              
             },
           },
@@ -6629,7 +6629,7 @@ local function CreateHealthbarOptions()
             inline = true,
             args = {
               WidthEnemy = GetRangeEntry(
-                (Addon.WOW_USES_CLASSIC_NAMEPLATES and L["Bar Width"]) or L["Enemy Bar Width"], 
+                ((Addon.WOW_USES_CLASSIC_NAMEPLATES or Addon.ExpansionIsAtLeastMidnight) and L["Bar Width"]) or L["Enemy Bar Width"], 
                 10, { "settings", "healthbar", "width" }, 5, 500,
                 function(info, val)
                   if InCombatLockdown() then
@@ -6642,7 +6642,7 @@ local function CreateHealthbarOptions()
                   end
                 end),
               HeightEnemy = GetRangeEntry(
-                (Addon.WOW_USES_CLASSIC_NAMEPLATES and L["Bar Height"]) or L["Enemy Bar Height"], 
+                ((Addon.WOW_USES_CLASSIC_NAMEPLATES or Addon.ExpansionIsAtLeastMidnight) and L["Bar Height"]) or L["Enemy Bar Height"], 
                 11, {"settings", "healthbar", "height" }, 1, 100,
                 function(info, val)
                   if InCombatLockdown() then
@@ -6665,7 +6665,7 @@ local function CreateHealthbarOptions()
                     Addon.Widgets:UpdateSettings("TargetArt")                    
                   end
                 end,
-                function() return Addon.WOW_USES_CLASSIC_NAMEPLATES end),
+                function() return Addon.WOW_USES_CLASSIC_NAMEPLATES or Addon.ExpansionIsAtLeastMidnight end),
               HeightFriendly = GetRangeEntry(L["Friend Bar Height"], 13, {"settings", "healthbar", "heightFriend" }, 1, 100,
                 function(info, val)
                   if InCombatLockdown() then
@@ -6677,7 +6677,7 @@ local function CreateHealthbarOptions()
                     Addon.Widgets:UpdateSettings("TargetArt")                    
                   end
                 end,                
-                function() return Addon.WOW_USES_CLASSIC_NAMEPLATES end),
+                function() return Addon.WOW_USES_CLASSIC_NAMEPLATES or Addon.ExpansionIsAtLeastMidnight end),
               Spacer1 = GetSpacerEntry(25),
               ShowHealAbsorbs = {
                 name = L["Heal Absorbs"],
@@ -7176,6 +7176,7 @@ local function CreateCastbarOptions()
                 order = 80,
                 type = "toggle",
                 arg = { "settings", "castnostop", "ShowInterruptSource" },
+                hidden = Addon.ExpansionIsAtLeastMidnight
               },
               CastTarget = {
                 name = L["Cast Target"],

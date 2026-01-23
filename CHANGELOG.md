@@ -11,4 +11,7 @@ This is a basic version with Midnight support. Expect lots of missing features a
 * Updated integrated libraries (Ace3 r1387-alpha, LibSharedMedia-3.0 v11.2.1)
 
 Beta changes:
-* Fixed interface version for WoW Retail (12.0.0).
+* Fixed a Lua error that occurred when setting a target marker [Comment #7826, #7821]
+* Fixed a Lua error that occurred when occluded transparency was enabled [GH-631].
+* Fixed a Lua error that occurred when mouseover transparency was enabled [GH-631].
+* Fixed a Lua error when health-based coloring for healthbar or name was used (health-based coloring is disabled for now) [GH-633].

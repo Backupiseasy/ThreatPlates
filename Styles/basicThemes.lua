@@ -28,8 +28,8 @@ local function Create(name)
         height = db.healthbar.height,
       },
       FRIENDLY = {
-        width = (Addon.WOW_USES_CLASSIC_NAMEPLATES and db.healthbar.width) or db.healthbar.widthFriend,
-        height = (Addon.WOW_USES_CLASSIC_NAMEPLATES and db.healthbar.height) or db.healthbar.heightFriend,  
+        width = ((Addon.WOW_USES_CLASSIC_NAMEPLATES or Addon.ExpansionIsAtLeastMidnight) and db.healthbar.width) or db.healthbar.widthFriend,
+        height = ((Addon.WOW_USES_CLASSIC_NAMEPLATES or Addon.ExpansionIsAtLeastMidnight) and db.healthbar.height) or db.healthbar.heightFriend,  
       },
     },
 

@@ -418,8 +418,13 @@ end
 
 local function SetUnitAttributeTargetMarker(unit, unitid)
   local raid_icon_index = GetRaidTargetIndex(unitid)
-  unit.TargetMarkerIcon = TARGET_MARKER_LIST[raid_icon_index]
-  unit.MentorIcon = MENTOR_ICON_LIST[raid_icon_index]
+  if Addon.ExpansionIsAtLeastMidnight then 
+    unit.TargetMarkerIcon = raid_icon_index
+    unit.MentorIcon = raid_icon_index
+  else
+    unit.TargetMarkerIcon = TARGET_MARKER_LIST[raid_icon_index]
+    unit.MentorIcon = MENTOR_ICON_LIST[raid_icon_index]
+  end
 end
 
 local function SetUnitAttributeTarget(unit)
@@ -666,8 +671,6 @@ local SetShownBlizzardPlate
 if Addon.ExpansionIsAtLeastMidnight then
   SetShownBlizzardPlate = function(unit_frame, show)
     unit_frame:SetAlpha(show and 1 or 0)
-    --unit_frame:SetShown(show)
-    unit_frame:GetParent().TPFrame:SetShown(not show)
   end
 else
   SetShownBlizzardPlate = function(unit_frame, show)
@@ -792,9 +795,7 @@ local function FrameOnUpdate(plate, elapsed)
     return
   end
 
-  local plate_framelevel = plate:GetFrameLevel()
-  tp_frame:SetFrameLevel(plate_framelevel)
-  -- plate.TPAnchorFrame:SetFrameLevel(plate_framelevel)
+  tp_frame:SetFrameLevel(plate:GetFrameLevel())
 
   --    for i = 1, #PlateOnUpdateQueue do
   --      PlateOnUpdateQueue[i](plate, tp_frame.unit)
@@ -802,7 +803,7 @@ local function FrameOnUpdate(plate, elapsed)
 
   --ScalingModule.HideNameplate(tp_frame)
   -- Do this after the hiding stuff, to correctly set the occluded transparency
-  TransparencyModule.SetOccludedTransparency(tp_frame)
+  TransparencyModule:SetOccludedTransparency(tp_frame)
 
   WidgetContainerAnchor(tp_frame)
 end
@@ -824,15 +825,17 @@ local function NamePlateDriverFrame_AcquireUnitFrame(_, plate)
     
     -- Shameless copy from Plater - prevent Blizzard plates from showing when their alpha is changed
     -- as they are currently hidden using with SetAlpha(0)
-    local locked = false
-    hooksecurefunc(unit_frame, "SetAlpha", function(self)
-      if locked or self:IsForbidden() then return end
+    if Addon.ExpansionIsAtLeastMidnight then
+      local locked = false
+      hooksecurefunc(unit_frame, "SetAlpha", function(self)
+        if locked or self:IsForbidden() then return end
 
-      locked = true
-      SetVisibilityOfBlizzardNameplate(self, self.unit)
-      --self:SetAlpha(0)
-      locked = false
-    end)
+        locked = true
+        SetVisibilityOfBlizzardNameplate(self, self.unit)
+        --self:SetAlpha(0)
+        locked = false
+      end)
+    end
   end
 end
 
@@ -848,13 +851,6 @@ local	function HandlePlateCreated(plate)
 
   -- ! Can be used by other addons (e.g., BigDebuffs) to get the correct anchor for its content
   tp_frame.GetAnchor = GetAnchorForThreatPlateExternal
-
-  local db = Addon.db.profile.settings.frame
-  ---Anchor frame for Threat Plates
-  -- plate.TPAnchorFrame = _G.CreateFrame("Frame", tp_frame:GetName() .. "AnchorFrame", plate)
-  -- plate.TPAnchorFrame:SetSize(110, 45) -- db.x, db.y
-  -- plate.TPAnchorFrame:EnableMouse(false)
-  -- plate.TPAnchorFrame:SetParent(plate) -- redundant as its created with plate as parent
   
   -- plate.Background = _G.CreateFrame("Frame", nil, plate, BackdropTemplate)
   -- plate.Background:EnableMouse(false)
@@ -1079,12 +1075,10 @@ function Addon:UpdateSettings()
     Addon.UnitIsTarget = function(unitid) return UnitIsUnit("target", unitid) end
   end
 
-  if not Addon.ExpansionIsAtLeastMidnight then
-    if db.settings.castnostop.ShowInterruptSource then
-      RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-    else
-      UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-    end
+  if db.settings.castnostop.ShowInterruptSource then
+    RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+  else
+    UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
   end
   
   ShowCastBars = db.settings.castbar.show or db.settings.castbar.ShowInHeadlineView
@@ -1341,20 +1335,6 @@ function Addon:NAME_PLATE_CREATED(plate)
     NamePlateDriverFrame_AcquireUnitFrame(nil, plate)
   end
 
-  -- if NamePlateDriverFrame then
-  --   hooksecurefunc(NamePlateDriverFrame, "OnNamePlateRemoved", function(_, unitid)
-  --     local plate = GetNamePlateForUnit(unitid)
-  --     if plate and plate.UnitFrame and plate.UnitFrame.HitTestFrame then
-  --       local unit_frame = plate.UnitFrame
-  --       unit_frame.HitTestFrame:SetParent(unit_frame)
-  --       unit_frame.HitTestFrame:ClearAllPoints()
-  --       unit_frame.HitTestFrame:SetPoint("TOPLEFT", unit_frame.HealthBarsContainer.healthBar)
-  --       unit_frame.HitTestFrame:SetPoint("BOTTOMRIGHT", unit_frame.HealthBarsContainer.healthBar)
-  --       unit_frame.HitTestFrame:SetScale(1)
-  --     end
-  --   end)
-  -- end
-
   plate:HookScript('OnHide', FrameOnHide)
   plate:HookScript('OnUpdate', FrameOnUpdate)
   
@@ -1492,7 +1472,7 @@ function Addon:RAID_TARGET_UPDATE()
     local previous_mentor_icon = unit.MentorIcon
     local previous_icon = unit.TargetMarkerIcon or unit.MentorIcon
     SetUnitAttributeTargetMarker(unit, unitid)
-    if previous_target_marker_icon ~= unit.TargetMarkerIcon or previous_mentor_icon ~= unit.MentorIcon then
+    if Addon.ExpansionIsAtLeastMidnight or previous_target_marker_icon ~= unit.TargetMarkerIcon or previous_mentor_icon ~= unit.MentorIcon then
       PublishEvent("TargetMarkerUpdate", tp_frame)
     end
   end
