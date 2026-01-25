@@ -1,4 +1,4 @@
----------------------------------------------------------------------------------------------------
+﻿---------------------------------------------------------------------------------------------------
 -- Main file for addon Threat Plates
 ---------------------------------------------------------------------------------------------------
 local _, Addon = ...
@@ -154,10 +154,10 @@ else
   Addon.SetBaseNamePlateSize = function(self, plate) 
     local db = Addon.db.profile.settings.healthbar
     --C_NamePlate.SetNamePlateSize(db.width + 40, db.height + 40)
-    C_NamePlate.SetNamePlateSize(db.width, db.height)
+    --C_NamePlate.SetNamePlateSize(db.width, db.height)
     
-    C_NamePlateManager.SetNamePlateHitTestInsets(Enum.NamePlateType.Enemy, -10000, -10000, -10000, -10000)
-    C_NamePlateManager.SetNamePlateHitTestInsets(Enum.NamePlateType.Friendly, -10000, -10000, -10000, -10000)
+    -- C_NamePlateManager.SetNamePlateHitTestInsets(Enum.NamePlateType.Enemy, -10000, -10000, -10000, -10000)
+    -- C_NamePlateManager.SetNamePlateHitTestInsets(Enum.NamePlateType.Friendly, -10000, -10000, -10000, -10000)
   end
 end
 

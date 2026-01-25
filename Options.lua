@@ -5407,7 +5407,6 @@ local function CreateHeadlineViewShowEntry()
       SetValue(info, val)
     end,
   }
-
   args.EnemyUnits.args.MinionsHeader = {
     name = L["Minions"],
     type = "header", 
@@ -5517,11 +5516,21 @@ local function CreateVisibilityTab()
             type = "toggle",
             width = "full",
             set = function(info, value)
-              CVars:Overwrite("nameplateShowFriends", (value and 1) or 0)
-              CVars:Overwrite("nameplateShowEnemies", (value and 1) or 0)
+              if Addon.ExpansionIsAtLeastMidnight then
+                CVars:Overwrite("nameplateShowFriendlyPlayers", (value and 1) or 0)
+                CVars:Overwrite("nameplateShowFriendlyNPCs", (value and 1) or 0)
+                CVars:Overwrite("nameplateShowEnemies", (value and 1) or 0)
+              else
+                CVars:Overwrite("nameplateShowFriends", (value and 1) or 0)
+                CVars:Overwrite("nameplateShowEnemies", (value and 1) or 0)
+              end
             end,
             get = function(info)
-              return GetCVarBool("nameplateShowFriends") and GetCVarBool("nameplateShowEnemies")
+              if Addon.ExpansionIsAtLeastMidnight then
+                return GetCVarBool("nameplateShowFriendlyPlayers") and GetCVarBool("nameplateShowFriendlyNPCs") and GetCVarBool("nameplateShowEnemies")
+              else
+                return GetCVarBool("nameplateShowFriends") and GetCVarBool("nameplateShowEnemies")
+              end
             end,
           },
           AllFriendly = {
@@ -5529,7 +5538,24 @@ local function CreateVisibilityTab()
             type = "toggle",
             order = 30,
             width = "full",
-            arg = "nameplateShowFriends"
+            arg = "nameplateShowFriends",
+            hidden = Addon.ExpansionIsAtLeastMidnight
+          },
+          AllFriendlyPlayers = {
+            name = L["Show Friendly Player Nameplates (SHIFT-V)"],
+            type = "toggle",
+            order = 31,
+            width = "full",
+            arg = "nameplateShowFriendlyPlayers",
+            hidden = not Addon.ExpansionIsAtLeastMidnight
+          },
+          AllFriendlyNPCs = {
+            name = L["Show Friendly NPC Nameplates"],
+            type = "toggle",
+            order = 32,
+            width = "full",
+            arg = "nameplateShowFriendlyNPCs",
+            hidden = not Addon.ExpansionIsAtLeastMidnight
           },
           AllHostile = {
             name = L["Show Enemy Nameplates (ALT-V)"],

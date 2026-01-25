@@ -843,7 +843,7 @@ local	function HandlePlateCreated(plate)
   -- Parent could be: WorldFrame, UIParent, plate
   local tp_frame = _G.CreateFrame("Frame",  "ThreatPlatesFrame" .. GetNameForNameplate(plate), UIParent, BackdropTemplate)
   tp_frame:EnableMouse(false)
-  tp_frame:SetPoint("CENTER", plate, "CENTER")
+
   -- Size is set in Styles.lua
   
   tp_frame.Parent = plate
@@ -882,6 +882,7 @@ local function HandlePlateUnitAdded(plate, unitid)
   local tp_frame = plate.TPFrame
   local unit = tp_frame.unit
 
+  tp_frame:SetPoint("CENTER", plate.UnitFrame.healthBar, "CENTER")
   --plate.Background:SetAllPoints(plate.TPFrame)
 
   if Addon.ExpansionIsAtLeastMidnight then
