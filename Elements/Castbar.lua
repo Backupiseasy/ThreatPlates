@@ -231,11 +231,13 @@ function Element.UpdateStyle(tp_frame, style)
     border:ClearAllPoints()
     border:SetPoint("TOPLEFT", castbar, "TOPLEFT", - offset, offset)
     border:SetPoint("BOTTOMRIGHT", castbar, "BOTTOMRIGHT", offset, - offset)
-    border:SetBackdrop({
-      edgeFile = castborder_style.texture,
-      edgeSize = castborder_style.edgesize,
-      insets = { left = offset, right = offset, top = offset, bottom = offset },
-    })
+    if not Addon.ExpansionIsAtLeastMidnight then
+      border:SetBackdrop({
+        edgeFile = castborder_style.texture,
+        edgeSize = castborder_style.edgesize,
+        insets = { left = offset, right = offset, top = offset, bottom = offset },
+      })
+    end
     border:SetBackdropBorderColor(0, 0, 0, 1)
     border:SetShown(castborder_style.show)
 
@@ -291,7 +293,9 @@ function Element.UpdateStyle(tp_frame, style)
     end
 
     cast_time:ClearAllPoints()
-    cast_time:SetSize(castbar:GetSize())
+    if not Addon.ExpansionIsAtLeastMidnight then
+      cast_time:SetSize(castbar:GetSize())
+    end
     cast_time:SetPoint("CENTER", castbar, "CENTER", db.CastTimeText.HorizontalOffset, db.CastTimeText.VerticalOffset)
 
     cast_time:Show()
