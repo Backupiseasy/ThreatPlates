@@ -11,5 +11,5 @@ This is a basic version with Midnight support. Expect lots of missing features a
 * Updated integrated libraries (Ace3 r1387-alpha, LibSharedMedia-3.0 v11.2.1)
 
 Beta changes:
-* Fixed several Lua errors caused by nameplate size changes. 
-* Updated nameplate show/hide CVars (partially).
+* Fixed frame strata for Threat Plates (BACKGROUND) [GH-637].
+* Fixed wrong definitions for WoW API function LoadAddOn [GH-638].

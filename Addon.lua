@@ -19,6 +19,7 @@ local C_Timer_After = C_Timer.After
 local NamePlateDriverFrame = NamePlateDriverFrame
 local UnitClass = UnitClass
 local GetSpecializationInfo = C_SpecializationInfo and C_SpecializationInfo.GetSpecializationInfo or _G.GetSpecializationInfo
+local LoadAddOn = C_AddOns and C_AddOns.LoadAddOn or _G.LoadAddOn
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat

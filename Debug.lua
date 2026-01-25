@@ -3,6 +3,7 @@ local _, Addon = ...
 -- Lua APIs
 
 -- WoW APIs
+local LoadAddOn = C_AddOns and C_AddOns.LoadAddOn or _G.LoadAddOn
 
 -- ThreatPlates APIs
 local Debug = Addon.Debug

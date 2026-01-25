@@ -19,7 +19,7 @@ local UnitChannelInfo, UnitPlayerControlled = UnitChannelInfo, UnitPlayerControl
 local UnitIsUnit, UnitIsPlayer = UnitIsUnit, UnitIsPlayer
 local GetCreatureDifficultyColor, GetRaidTargetIndex = GetCreatureDifficultyColor, GetRaidTargetIndex
 local GetTime, CombatLogGetCurrentEventInfo = GetTime, CombatLogGetCurrentEventInfo
-local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlate.GetNamePlateForUnit
+local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local GetPlayerInfoByGUID = GetPlayerInfoByGUID
 local IsInInstance, InCombatLockdown = IsInInstance, InCombatLockdown
 local NamePlateDriverFrame, UnitNameplateShowsWidgetsOnly = NamePlateDriverFrame, UnitNameplateShowsWidgetsOnly
@@ -842,6 +842,7 @@ end
 local	function HandlePlateCreated(plate)
   -- Parent could be: WorldFrame, UIParent, plate
   local tp_frame = _G.CreateFrame("Frame",  "ThreatPlatesFrame" .. GetNameForNameplate(plate), UIParent, BackdropTemplate)
+  tp_frame:SetFrameStrata("BACKGROUND")
   tp_frame:EnableMouse(false)
 
   -- Size is set in Styles.lua

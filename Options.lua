@@ -42,15 +42,15 @@ local _G =_G
 
 local UNIT_TYPES = {
   {
-    Faction = "Friendly", Disabled = "nameplateShowFriends",
+    Faction = "Friendly",
     UnitTypes = { "Player", "NPC", "Minus", "Pet", "Guardian", "Totem", }
   },
   {
-    Faction = "Enemy", Disabled = "nameplateShowEnemies",
+    Faction = "Enemy",
     UnitTypes = { "Player", "NPC", "Minus", "Pet", "Guardian", "Totem", }
   },
   {
-    Faction = "Neutral", Disabled = "nameplateShowEnemies",
+    Faction = "Neutral",
     UnitTypes = { "NPC", "Minus" }
   }
 }
@@ -5503,7 +5503,7 @@ local function CreateVisibilityTab()
           Description = GetDescriptionEntry(L["These options allow you to control which nameplates are visible within the game field while you play."]),
           Spacer0 = GetSpacerEntry(1),
           AllPlates = {
-            name = L["Always Show Nameplates"],
+            name = L["Always Show Nameplate"],
             desc = L["Show nameplates at all times."],
             type = "toggle",
             order = 10,
@@ -5511,18 +5511,18 @@ local function CreateVisibilityTab()
             arg = "nameplateShowAll"
           },
           AllUnits = {
-            name = L["Show All Nameplates (Friendly and Enemy Units) (CTRL-V)"],
+            name = L["Show All Nameplates (Friendly and Enemy Units)"],
             order = 20,
             type = "toggle",
             width = "full",
             set = function(info, value)
               if Addon.ExpansionIsAtLeastMidnight then
-                CVars:Overwrite("nameplateShowFriendlyPlayers", (value and 1) or 0)
-                CVars:Overwrite("nameplateShowFriendlyNPCs", (value and 1) or 0)
-                CVars:Overwrite("nameplateShowEnemies", (value and 1) or 0)
+                CVars:OverwriteBool("nameplateShowFriendlyPlayers", value)
+                CVars:OverwriteBool("nameplateShowFriendlyNPCs", value)
+                CVars:OverwriteBool("nameplateShowEnemies", value)
               else
-                CVars:Overwrite("nameplateShowFriends", (value and 1) or 0)
-                CVars:Overwrite("nameplateShowEnemies", (value and 1) or 0)
+                CVars:OverwriteBool("nameplateShowFriends", value)
+                CVars:OverwriteBool("nameplateShowEnemies", value)
               end
             end,
             get = function(info)
@@ -5534,7 +5534,7 @@ local function CreateVisibilityTab()
             end,
           },
           AllFriendly = {
-            name = L["Show Friendly Nameplates (SHIFT-V)"],
+            name = L["Show Friendly Nameplates"],
             type = "toggle",
             order = 30,
             width = "full",
@@ -5542,7 +5542,7 @@ local function CreateVisibilityTab()
             hidden = Addon.ExpansionIsAtLeastMidnight
           },
           AllFriendlyPlayers = {
-            name = L["Show Friendly Player Nameplates (SHIFT-V)"],
+            name = L["Show Friendly Player Nameplates"],
             type = "toggle",
             order = 31,
             width = "full",
@@ -5558,7 +5558,7 @@ local function CreateVisibilityTab()
             hidden = not Addon.ExpansionIsAtLeastMidnight
           },
           AllHostile = {
-            name = L["Show Enemy Nameplates (ALT-V)"],
+            name = L["Show Enemy Nameplates"],
             order = 40,
             type = "toggle",
             width = "full",
