@@ -184,7 +184,9 @@ function Element.PlateCreated(tp_frame)
     castbar:SetScript("OnUpdate", OnUpdate)
   end
   castbar:SetScript("OnHide", OnHide)
-  castbar:SetScript("OnSizeChanged", OnSizeChanged)
+  if not Addon.ExpansionIsAtLeastMidnight then
+    castbar:SetScript("OnSizeChanged", OnSizeChanged)
+  end
 
   tp_frame.visual.Castbar = castbar
   tp_frame.visual.SpellText = spell_text
