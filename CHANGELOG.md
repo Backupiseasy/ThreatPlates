@@ -13,3 +13,4 @@ This is a basic version with Midnight support. Expect lots of missing features a
 Beta changes:
 * Fixed frame strata for Threat Plates (BACKGROUND) [GH-637].
 * Fixed wrong definitions for WoW API function LoadAddOn [GH-638].
+* Fixed several Lua errors caused by secret values [GH-639].
