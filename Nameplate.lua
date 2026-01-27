@@ -836,6 +836,9 @@ local function NamePlateDriverFrame_AcquireUnitFrame(_, plate)
         locked = false
       end)
     end
+    
+    plate.TPFrame:SetPoint("CENTER", plate.UnitFrame, "CENTER")
+    --plate.Background:SetAllPoints(plate.TPFrame)
   end
 end
 
@@ -882,9 +885,6 @@ end
 local function HandlePlateUnitAdded(plate, unitid)
   local tp_frame = plate.TPFrame
   local unit = tp_frame.unit
-
-  tp_frame:SetPoint("CENTER", plate.UnitFrame.healthBar, "CENTER")
-  --plate.Background:SetAllPoints(plate.TPFrame)
 
   if Addon.ExpansionIsAtLeastMidnight then
     C_NamePlateManager.SetNamePlateSimplified(unitid, false)

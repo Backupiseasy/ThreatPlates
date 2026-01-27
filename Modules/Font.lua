@@ -108,7 +108,7 @@ end
 
 function FontModule.UpdateTextSize(parent, font, db)
   local width, height = parent:GetSize()
-  if not Addon.ExpansionIsAtLeastMidnight and (db.AutoSizing == nil or db.AutoSizing) then
+  if db.AutoSizing == nil or db.AutoSizing then
     font:SetSize(width, height)
     font:SetWordWrap(false)
   else

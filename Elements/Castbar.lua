@@ -15,6 +15,7 @@ local CreateFrame = CreateFrame
 local GetSpellTexture = C_Spell and C_Spell.GetSpellTexture or _G.GetSpellTexture -- Retail now uses C_Spell.GetSpellTexture
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local UnitIsUnit = UnitIsUnit
+local GetTimePreciseSec = GetTimePreciseSec
 
 -- ThreatPlates APIs
 local SetCastbarColor = Addon.Color.SetCastbarColor
@@ -87,12 +88,6 @@ local function OnHide(self)
   end
 end
 
-local function OnSizeChanged(self, width, height)
-  local scale_factor = height / 10
-  self.InterruptShield:SetSize(14 * scale_factor, 16 * scale_factor)
-  self.Spark:SetSize(3, self:GetHeight())
-end
-
 ---------------------------------------------------------------------------------------------------
 -- Basic castbar functions
 ---------------------------------------------------------------------------------------------------
@@ -127,7 +122,7 @@ end
 
 -- Called in processing event: NAME_PLATE_CREATED
 function Element.PlateCreated(tp_frame)
-  local castbar = CreateFrame("StatusBar", nil, tp_frame)
+  local castbar = CreateFrame("StatusBar", nil, tp_frame, BackdropTemplate)
   -- ! Set the texture here; without a set texture, color changes with SetStatusBarColor will not be applied and
   -- ! the set color will be lost
   castbar:SetStatusBarTexture("Interface\\RaidFrame\\Raid-Bar-Hp-Fill")
@@ -136,7 +131,7 @@ function Element.PlateCreated(tp_frame)
   castbar.Border = CreateFrame("Frame", nil, castbar, BackdropTemplate)
   castbar.Background = castbar:CreateTexture(nil, "ARTWORK")
   castbar.InterruptBorder = CreateFrame("Frame", nil, castbar, BackdropTemplate)
-  castbar.Overlay = CreateFrame("Frame", nil, castbar)
+  castbar.Overlay = CreateFrame("Frame", nil, castbar, BackdropTemplate)
 
   castbar.InterruptOverlay = castbar.Overlay:CreateTexture(nil, "ARTWORK", nil, 2)
   castbar.InterruptShield = castbar.Overlay:CreateTexture(nil, "OVERLAY", nil, 0)
@@ -184,9 +179,6 @@ function Element.PlateCreated(tp_frame)
     castbar:SetScript("OnUpdate", OnUpdate)
   end
   castbar:SetScript("OnHide", OnHide)
-  if not Addon.ExpansionIsAtLeastMidnight then
-    castbar:SetScript("OnSizeChanged", OnSizeChanged)
-  end
 
   tp_frame.visual.Castbar = castbar
   tp_frame.visual.SpellText = spell_text
@@ -218,10 +210,10 @@ function Element.UpdateStyle(tp_frame, style)
     local castborder_style = style.castborder
 
     -- Set castbar color here otherwise it may be shown sometimes with non-initialized backdrop color (white)
-    castbar:SetStatusBarTexture(castbar_style.texture)
-    castbar:SetSize(castbar_style.width, castbar_style.height)
     castbar:ClearAllPoints()
+    castbar:SetSize(castbar_style.width, castbar_style.height)
     castbar:SetPoint(castbar_style.anchor, tp_frame, castbar_style.anchor, castbar_style.x + target_offset_x, castbar_style.y + target_offset_y)
+    castbar:SetStatusBarTexture(castbar_style.texture)
 
     local background = castbar.Background
     background:SetTexture(castbar_style.backdrop)
@@ -230,19 +222,16 @@ function Element.UpdateStyle(tp_frame, style)
 
     local offset = castborder_style.offset
     local border = castbar.Border
+    border:SetBackdrop({
+      edgeFile = castborder_style.texture,
+      edgeSize = castborder_style.edgesize,
+      insets = { left = offset, right = offset, top = offset, bottom = offset },
+    })
+    border:SetBackdropBorderColor(0, 0, 0, 1)
     border:ClearAllPoints()
     border:SetPoint("TOPLEFT", castbar, "TOPLEFT", - offset, offset)
     border:SetPoint("BOTTOMRIGHT", castbar, "BOTTOMRIGHT", offset, - offset)
-    if not Addon.ExpansionIsAtLeastMidnight then
-      border:SetBackdrop({
-        edgeFile = castborder_style.texture,
-        edgeSize = castborder_style.edgesize,
-        insets = { left = offset, right = offset, top = offset, bottom = offset },
-      })
-    end
-    border:SetBackdropBorderColor(0, 0, 0, 1)
     border:SetShown(castborder_style.show)
-
 
     border = castbar.InterruptBorder
     border:ClearAllPoints()
@@ -252,6 +241,11 @@ function Element.UpdateStyle(tp_frame, style)
     border:SetBackdropBorderColor(1, 0, 0, 1)
 
     castbar:SetAllColors(SetCastbarColor(unit))
+
+    local scale_factor = castbar_style.height / 10
+    castbar.InterruptShield:SetSize(14 * scale_factor, 16 * scale_factor)
+    castbar.Spark:SetSize(3, castbar_style.height)
+
     castbar:Show()
   else
     castbar:Hide()
@@ -295,9 +289,7 @@ function Element.UpdateStyle(tp_frame, style)
     end
 
     cast_time:ClearAllPoints()
-    if not Addon.ExpansionIsAtLeastMidnight then
-      cast_time:SetSize(castbar:GetSize())
-    end
+    cast_time:SetSize(castbar_style.width, castbar_style.height)
     cast_time:SetPoint("CENTER", castbar, "CENTER", db.CastTimeText.HorizontalOffset, db.CastTimeText.VerticalOffset)
 
     cast_time:Show()

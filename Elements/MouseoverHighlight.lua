@@ -108,6 +108,8 @@ function Element.PlateCreated(tp_frame)
 
   healthbar.Highlight:Hide() -- HighlightTexture is shown/hidden together with Highlight
   healthbar.NameHighlight:Hide()
+
+  healthbar.MouseoverHighlight = healthbar.Highlight
 end
 
 -- Called in processing event: NAME_PLATE_UNIT_ADDED

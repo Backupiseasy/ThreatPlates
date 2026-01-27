@@ -85,8 +85,6 @@ end
 function Element.PlateUnitAdded(tp_frame)
   local unit = tp_frame.unit
 
-  if Addon.ExpansionIsAtLeastMidnight then return end
-
   if tp_frame.style.threatborder.show and unit.ThreatLevel then
     local unique_setting = unit.CustomPlateSettings
     if not unique_setting or unique_setting.UseThreatGlow then
