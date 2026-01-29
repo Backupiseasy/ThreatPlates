@@ -100,19 +100,25 @@ end
 local function SetFormat(self, show)
   local db = Addon.db.profile.settings
 
-  self.InterruptBorder:SetAlphaFromBoolean(show, 1, 0)
-  self.InterruptOverlay:SetAlphaFromBoolean(show, 1, 0)
-  self.InterruptShield:SetAlphaFromBoolean(show, 1, 0)
-
-  if not db.castnostop.ShowInterruptShield then
-    self.InterruptShield:Hide(db.castnostop.ShowInterruptShield)
-  end
+  if Addon.ExpansionIsAtLeastMidnight then
+    self.InterruptBorder:SetAlphaFromBoolean(show, 1, 0)
+    self.InterruptOverlay:SetAlphaFromBoolean(show, 1, 0)
+    self.InterruptShield:SetAlphaFromBoolean(show, 1, 0)
     
-  if not db.castborder.show or not db.castnostop.ShowOverlay then
-    self.InterruptBorder:Hide()
-    self.InterruptOverlay:Hide()
+    if not db.castnostop.ShowInterruptShield then
+      self.InterruptShield:Hide(db.castnostop.ShowInterruptShield)
+    end
+      
+    if not db.castborder.show or not db.castnostop.ShowOverlay then
+      self.InterruptBorder:Hide()
+      self.InterruptOverlay:Hide()
+    end
+  else
+    self.InterruptShield:SetShown(show and db.castnostop.ShowInterruptShield)
+    self.InterruptBorder:SetShown(show and db.castborder.show and db.castnostop.ShowOverlay)
+    self.InterruptOverlay:SetShown(show and db.castborder.show and db.castnostop.ShowOverlay)
   end
-
+  
   self.Spark:SetShown(db.castbar.ShowSpark)
 end
 
