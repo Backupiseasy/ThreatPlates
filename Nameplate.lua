@@ -767,7 +767,9 @@ local function FrameOnShow(UnitFrame)
 
   -- Don't show ThreatPlates for ignored units (e.g., widget-only nameplates (since Shadowlands))
   if IgnoreUnitForThreatPlates(unitid) then
-    UnitFrame:GetParent().TPFrame:Hide()
+    if UnitFrame:GetParent().TPFrame then
+      UnitFrame:GetParent().TPFrame:Hide()
+    end
     return
   end
 
@@ -887,7 +889,7 @@ local function HandlePlateUnitAdded(plate, unitid)
   local unit = tp_frame.unit
 
   if Addon.ExpansionIsAtLeastMidnight then
-    C_NamePlateManager.SetNamePlateSimplified(unitid, false)
+    --C_NamePlateManager.SetNamePlateSimplified(unitid, false)
 
     -- if not InCombatLockdown() then
     --   C_NamePlateManager.SetNamePlateHitTestFrame(unitid, tp_frame)
