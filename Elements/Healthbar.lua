@@ -50,13 +50,13 @@ local UpdateAbsorbs
 
 -- UnitGetTotalAbsorbs: Mists - Patch 5.2.0 (2013-03-05): Added.
 -- UnitGetTotalHealAbsorbs: Mists - Patch 5.4.0 (2013-09-10): Added.
-if Addon.IS_MAINLINE and not Addon.IS_MIDNIGHT then
+if Addon.IS_MAINLINE then
   UpdateAbsorbs = function(tp_frame)
     local visual = tp_frame.visual
     local absorbbar = visual.Healthbar.Absorbs
     local healthbar = visual.Healthbar
 
-    if IGNORED_STYLES[tp_frame.style] then
+    if IGNORED_STYLES[tp_frame.style] or Addon.ExpansionIsAtLeastMidnight then
       healthbar.HealAbsorbGlow:Hide()
       healthbar.HealAbsorb:Hide()
       healthbar.HealAbsorbLeftShadow:Hide()
