@@ -282,6 +282,56 @@ local function ChatCommandDebug(cmd_list)
 		print("SetSize")
 	  plate.UnitFrame.healthBar:SetSize(300, 80)
 		plate.UnitFrame:SetSize(300, 80)
+	elseif command == "restrictions" then
+		local cvar_type = cmd_list[2]
+		local all = {
+			"secretCombatRestrictionsForced",
+			"secretEncounterRestrictionsForced",
+			"secretChallengeModeRestrictionsForced",
+			"secretPvPMatchRestrictionsForced",
+			"secretMapRestrictionsForced",
+		}
+
+		-- If we're in combat, bail out once before making any changes
+		if InCombatLockdown() then
+			Addon.Logging.Warning(L["We're unable to change this while in combat"])
+			return
+		end
+
+		-- If no type specified, set all CVars to false
+		if not cvar_type then
+			for _, name in ipairs(all) do
+				SetCVar(name, 0)
+			end
+			Addon.Logging.Info(L["All restriction CVars are now |cffff0000OFF!|r"]) 
+			return
+		end
+
+		local map_type = {
+			combat = "secretCombatRestrictionsForced",
+			encounter = "secretEncounterRestrictionsForced",
+			challenge = "secretChallengeModeRestrictionsForced",
+			pvp = "secretPvPMatchRestrictionsForced",
+			map = "secretMapRestrictionsForced",
+		}
+		local target_cvar = map_type[string.lower(cvar_type)]
+		if not target_cvar then
+			Addon.Logging.Error(L["Unknown restrictions type: "] .. (cvar_type or ""))
+			Addon.Logging.Print(L["Valid types: combat, encounter, challenge, pvp, map"]) 
+			return
+		end
+
+		local selected_on = GetCVar(target_cvar) == "1"
+
+		for _, name in ipairs(all) do
+			SetCVar(name, (name == target_cvar and not selected_on) and 1 or 0)
+		end
+
+		if selected_on then
+			Addon.Logging.Info(L["All restriction CVars are now |cffff0000OFF!|r"]) 
+		else
+			Addon.Logging.Info(L["Set restriction: "] .. cvar_type)
+		end
 	else
 		Addon.Logging.Error(L["Unknown option: "] .. command)
 		PrintHelp()
@@ -345,6 +395,7 @@ function TidyPlatesThreat:ChatCommand(input)
 			plate._TPBackground:SetAllPoints(plate.UnitFrame)
 			plate._TPBackground:Show()
 		end	
+	
 	elseif Addon.DEBUG then
 		ChatCommandDebug(cmd_list)
 	else
