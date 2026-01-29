@@ -5861,6 +5861,7 @@ local function CreateBlizzardSettings()
                 get = GetValueCVarBool,
                 desc = L["Show only unit names and hide healthbars (requires /reload). Note that the clickable area of friendly nameplates will also be set to zero so that they don't interfere with enemy nameplates stacking (not in Classic or TBC Classic)."],
                 arg = "nameplateShowOnlyNames",
+                hidden = Addon.ExpansionIsAtLeastMidnight,
               },
               ShowOnlyNameForFriendlyPlayerUnits = {
                 name = L["Only Names for Friendly Players"],
@@ -5870,7 +5871,8 @@ local function CreateBlizzardSettings()
                 set = SetValueCVarBool,
                 get = GetValueCVarBool,
                 desc = L["Hide healthbars of friendly units"],
-                arg = "nameplateShowOnlyNameForFriendlyPlayerUnits",            
+                arg = "nameplateShowOnlyNameForFriendlyPlayerUnits",    
+                hidden = not Addon.ExpansionIsAtLeastMidnight,        
               },                    
               DebuffsOnFriendly = {
                 name = L["Debuffs on Friendly"],
