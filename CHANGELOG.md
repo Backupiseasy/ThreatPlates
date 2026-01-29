@@ -11,4 +11,5 @@ This is a basic version with Midnight support. Expect lots of missing features a
 * Updated integrated libraries (Ace3 r1387-alpha, LibSharedMedia-3.0 v11.2.1)
 
 Beta changes:
-* Fixed a root cause for lots of Lua errors caused by secret values (but probably not all of them).
+* Made some code Midnight only to fix Lua errors in other versions of WoW.
+* Fixed different nameplate size for Threat Plates in 13.x release. 
