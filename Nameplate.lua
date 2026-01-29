@@ -846,7 +846,12 @@ end
 
 local	function HandlePlateCreated(plate)
   -- Parent could be: WorldFrame, UIParent, plate
-  local tp_frame = _G.CreateFrame("Frame",  "ThreatPlatesFrame" .. GetNameForNameplate(plate), UIParent, BackdropTemplate)
+  -- Hierarchy and Scaling: UIParent scales with the UI size setting. Parent frames to WorldFrame (or nil) to make them ignore the UI scale.
+  -- Visibility: Elements attached directly to WorldFrame remain visible even when the main UI is hidden (Alt+Z).
+  -- Use UIParent (Default): For almost all addons, chat frames, action bars, and UI elements.
+  -- WorldFrame: For elements that must sit behind the UI or remain visible when the UI is hidden (e.g., custom 3D effects, background custom textures). 
+  -- => Using World Frame is wrong!
+  local tp_frame = _G.CreateFrame("Frame",  "ThreatPlatesFrame" .. GetNameForNameplate(plate), WorldFrame, BackdropTemplate)
   tp_frame:SetFrameStrata("BACKGROUND")
   tp_frame:EnableMouse(false)
 
