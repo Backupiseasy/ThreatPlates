@@ -2027,7 +2027,6 @@ local function UpdateUnitAuraCache(unit, unit_aura_update_info)
         for _, unit_aura_info in ipairs(unit_aura_update_info.addedAuras) do
           if unit_aura_info.isHelpful then
             unit_aura_cache.Buffs[unit_aura_info.auraInstanceID] = unit_aura_info
-            print("  Addded:", unit_aura_info.auraInstanceID, unit_aura_info.name)
           end
         end
       end
@@ -2035,7 +2034,6 @@ local function UpdateUnitAuraCache(unit, unit_aura_update_info)
       if unit_aura_update_info.removedAuraInstanceIDs then
         for _, aura_instance_id in ipairs(unit_aura_update_info.removedAuraInstanceIDs) do
           unit_aura_cache.Buffs[aura_instance_id] = nil
-          print("  Removed:", aura_instance_id)
         end
       end
     end
