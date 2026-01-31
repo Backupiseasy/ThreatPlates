@@ -12,7 +12,6 @@ local abs, floor, ceil, pairs = abs, floor, ceil, pairs
 
 -- WoW APIs
 local UnitCanAttack, UnitIsPVP, UnitPlayerControlled = UnitCanAttack, UnitIsPVP, UnitPlayerControlled
-local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- WoW Classic APIs:
 
@@ -642,10 +641,9 @@ function ColorModule.SetCastbarColor(unit)
 end
 
 function ColorModule.PrintDebug() 
-  local plate = C_NamePlate.GetNamePlateForUnit("target")
-  if not plate or not plate.TPFrame then return end
+  local tp_frame = Addon:GetThreatPlateForTarget()
+  if not tp_frame then return end
 
-  local tp_frame = plate.TPFrame
   Addon.Logging.Debug("Color Module Settings:")
   Addon.Logging.Debug("  Color:", Addon.Debug:ColorToString(tp_frame:GetHealthbarColor()))
   Addon.Logging.Debug("  Color by Health:", IsColorByHealth(tp_frame))

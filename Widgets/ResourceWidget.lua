@@ -17,7 +17,6 @@ local ceil = ceil
 local UnitPower, UnitPowerMax = UnitPower, UnitPowerMax
 local PowerBarColor = PowerBarColor
 local SPELL_POWER_MANA = SPELL_POWER_MANA
-local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
 local BackdropTemplate = Addon.BackdropTemplate

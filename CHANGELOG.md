@@ -13,3 +13,6 @@ This is a basic version with Midnight support. Expect lots of missing features a
 Beta changes:
 * Made some code Midnight only to fix Lua errors in other versions of WoW.
 * Fixed different nameplate size for Threat Plates in 13.x release. 
+
+* Fixed a Lua error that occurred when WoW events for protected nameplates were processed (e..g, friendy players in instances) [Comment #7870]
+* Consolidated accessing nameplates using unitid into central defined functions to reduce errors caused by non/wrong initialized Threat Plates. This should fix Comment #7870.

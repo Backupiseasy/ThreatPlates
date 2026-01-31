@@ -13,7 +13,6 @@ local string_format = string.format
 -- WoW APIs
 local CreateFrame = CreateFrame
 local GetSpellTexture = C_Spell and C_Spell.GetSpellTexture or _G.GetSpellTexture -- Retail now uses C_Spell.GetSpellTexture
-local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local UnitIsUnit = UnitIsUnit
 local GetTimePreciseSec = GetTimePreciseSec
 
@@ -22,6 +21,7 @@ local SetCastbarColor = Addon.Color.SetCastbarColor
 local FontSetJustify, FontUpdateText, FontUpdateTextSize = Addon.Font.SetJustify, Addon.Font.UpdateText, Addon.Font.UpdateTextSize
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 local BackdropTemplate = Addon.BackdropTemplate
+local L = Addon.L
 
 local ART_PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Artwork\\"
 local INTERRUPT_BORDER_BACKDROP = {
@@ -357,16 +357,16 @@ end
 
 function Addon:ConfigCastbar()
   if not EnabledConfigMode then
-    local plate = GetNamePlateForUnit("target")
-    if plate then
-      local visual = plate.TPFrame.visual
+    local tp_frame = Addon:GetThreatPlateForTarget()
+    if tp_frame then
+      local visual = tp_frame.visual
       local castbar = visual.Castbar
 
-      if ShowOnUnit(plate.TPFrame.unit) then
-        ConfigModePlate = plate
+      if ShowOnUnit(tp_frame.unit) then
+        ConfigModePlate = tp_frame
 
         castbar:SetScript("OnUpdate", function(self, elapsed)
-          if ShowOnUnit(plate.TPFrame.unit) then
+          if ShowOnUnit(tp_frame.unit) then
             local db = Addon.db.profile.settings
 
             self:SetMinMaxValues(0, 100)
@@ -376,16 +376,16 @@ function Addon:ConfigCastbar()
             self.CastTime:SetText(3.5)
             self.CastTarget:SetText("Temple Guard")
 
-            self.Border:SetShown(plate.TPFrame.style.castborder.show)
-            self:SetFormat(plate.TPFrame.style.castnostop.show)
+            self.Border:SetShown(tp_frame.style.castborder.show)
+            self:SetFormat(tp_frame.style.castnostop.show)
             self.InterruptShield:SetShown(db.castnostop.ShowInterruptShield)
 
             self.Spark:SetSize(3, self:GetHeight() + 1)
             self.Spark:SetPoint("CENTER", self, "LEFT", 0.5 * self:GetWidth(), 0)
 
-            visual.SpellText:SetShown(plate.TPFrame.style.spelltext.show)
+            visual.SpellText:SetShown(tp_frame.style.spelltext.show)
             self.CastTime:SetShown(db.castbar.ShowCastTime)
-            visual.SpellIcon:SetShown(plate.TPFrame.style.spellicon.show)
+            visual.SpellIcon:SetShown(tp_frame.style.spellicon.show)
             self.CastTarget:SetShown(db.castbar.CastTarget.Show)
             self:Show()
           else
@@ -422,13 +422,13 @@ function Addon:ConfigCastbar()
       Addon.Logging.Warning(L["Please select a target unit to enable configuration mode."])
     end
   else
-    local castbar = ConfigModePlate.TPFrame.visual.Castbar
+    local castbar = ConfigModePlate.visual.Castbar
     castbar:SetScript("OnUpdate", OnUpdate)
     castbar.Hide = castbar._Hide
     castbar:Hide()
     EnabledConfigMode = false
 
-    if ConfigModePlate and ConfigModePlate.TPFrame.Active then
+    if ConfigModePlate and ConfigModePlate.Active then
       Addon:ForceUpdateOnNameplate(ConfigModePlate)
     end
   end

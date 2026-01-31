@@ -159,23 +159,22 @@ end
 function Element.UPDATE_MOUSEOVER_UNIT()
   if UnitIsUnit("mouseover", "player") then return end -- TODO: target as well?
 
-  local plate = GetNamePlateForUnit("mouseover")
-
   -- Check for TPFrame.Active to prevent accessing the personal resource bar
-  if not plate or not plate.TPFrame.Active then return end
+  local plate = GetNamePlateForUnit("mouseover")
+  local tp_frame = plate and plate.TPFrame
+  if tp_frame and tp_frame.Active then
+    HideMouseoverHighlightFrame()
 
-  HideMouseoverHighlightFrame()
+    local unit = tp_frame.unit
+    unit.isMouseover = true
+    tp_frame.visual.Healthbar.MouseoverHighlight:SetShown(tp_frame.style.highlight.show and TargetHighlightEnabledForStyle[unit.style] and not unit.isTarget)
 
-  local tp_frame = plate.TPFrame
-  local unit = tp_frame.unit
-  unit.isMouseover = true
-  tp_frame.visual.Healthbar.MouseoverHighlight:SetShown(tp_frame.style.highlight.show and TargetHighlightEnabledForStyle[unit.style] and not unit.isTarget)
+    CurrentMouseoverUnitID = tp_frame.unit.unitid
+    CurrentMouseoverPlate = tp_frame
+    MouseoverHighlightFrame:Show()
 
-  CurrentMouseoverUnitID = tp_frame.unit.unitid
-  CurrentMouseoverPlate = tp_frame
-  MouseoverHighlightFrame:Show()
-
-  PublishEvent("MouseoverOnEnter", tp_frame)
+    PublishEvent("MouseoverOnEnter", tp_frame)
+  end
 end
 
 SubscribeEvent(Element, "PLAYER_TARGET_CHANGED", Element.UPDATE_MOUSEOVER_UNIT)

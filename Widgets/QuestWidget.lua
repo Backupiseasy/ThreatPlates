@@ -28,9 +28,6 @@ local RequestLoadQuestByID = C_QuestLog.RequestLoadQuestByID
 local GetLogIndexForQuestID = C_QuestLog and C_QuestLog.GetLogIndexForQuestID or GetQuestLogIndexByID
 local GetNumQuestLogEntries = C_QuestLog and C_QuestLog.GetNumQuestLogEntries or GetNumQuestLogEntries
 local C_TooltipInfo_GetUnit = C_TooltipInfo and C_TooltipInfo.GetUnit -- Added in 10.0.2
-local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
-
-local GetNamePlates = C_NamePlate.GetNamePlates
 
 -- ThreatPlates APIs
 local PlayerName = Addon.PlayerName
@@ -359,18 +356,14 @@ end
 
 -- Same as Widget:UpdateAllFramesWithPublish but with the additiona check of widget_frame.IsQuestUnit
 function Widget:RefreshCombatVisisbility()
-  local frame, widget_frame
-  for _, plate in pairs(GetNamePlates()) do
-    frame = plate and plate.TPFrame
-    if frame and frame.Active then
-      widget_frame = frame.widgets.Quest
-      if widget_frame.IsQuestUnit then
-        -- Call UpdateFrame as widget may be non-initialized if player entered world while in combat
-        if widget_frame.Active then
-          self:UpdateFrame(widget_frame, frame.unit)
-        end
-        self:PublishEvent("SituationalColorUpdate", frame)  -- to update healthbar/name color, if necessary
+  for _, tp_frame in Addon:GetActiveThreatPlates() do
+    local widget_frame = tp_frame.widgets.Quest
+    if widget_frame.IsQuestUnit then
+      -- Call UpdateFrame as widget may be non-initialized if player entered world while in combat
+      if widget_frame.Active then
+        self:UpdateFrame(widget_frame, tp_frame.unit)
       end
+      self:PublishEvent("SituationalColorUpdate", tp_frame)  -- to update healthbar/name color, if necessary
     end
   end
 end

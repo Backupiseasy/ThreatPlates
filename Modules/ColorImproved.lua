@@ -12,7 +12,6 @@ local abs, floor, ceil, pairs = abs, floor, ceil, pairs
 
 -- WoW APIs
 local UnitCanAttack, UnitIsPVP, UnitPlayerControlled = UnitCanAttack, UnitIsPVP, UnitPlayerControlled
-local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 
 -- WoW Classic APIs:
 
@@ -534,14 +533,11 @@ function ColorModule.UpdateStyle(tp_frame, style)
 end
 
 local function UNIT_HEALTH(unitid)
-  local plate = GetNamePlateForUnit(unitid)
-  local tp_frame = plate and plate.TPFrame
-  if tp_frame and tp_frame.Active and tp_frame.PlateStyle ~= "None" then
-    --print ("Color - UNIT_HEALTH:", unitid)
-
+  local tp_frame = Addon:GetThreatPlateForUnit(unitid)
+  if tp_frame and tp_frame.PlateStyle ~= "None" then
     GetColorByHealth(tp_frame.unit)
     UpdatePlateColors(tp_frame)
-  end
+  end  
 end
 
 local function CombatUpdate(tp_frame)

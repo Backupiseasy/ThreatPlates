@@ -302,6 +302,22 @@ end
 -- Functions for accessing nameplate frames
 ---------------------------------------------------------------------------------------------------------------------
 
+-- NAME_PLATE_CREATED
+--   TPFrame added, for all plates
+--   Add to PlatesCreated
+-- FORBIDDEN_NAME_PLATE_UNIT_ADDED
+-- NAME_PLATE_UNIT_ADDED
+--   Only processed for non-player nameplates and non-widget-only nameplates
+--   Add PlatesByUnit
+--   Set to Active (if not Blizzard plates are shown)
+-- NAME_PLATE_UNIT_REMOVED
+--   Remove PlatesByUnit
+--   Set to not Active
+-- TPFrame.Active
+--   Active if unit added and TP shown (not Blizzard nameplate enabled)
+-- PlatesByUnit
+--   Nameplates can be in PlatesByUnit, but not Active (if Blizzard plates are shown for this unit type)
+
 function Addon:GetThreatPlateForUnit(unitid)
   -- Skip special unitids (they are updated via their nameplate unitid) and personal nameplate
   if not unitid or unitid == "player" or UnitIsUnit("player", unitid) then return end
@@ -310,8 +326,19 @@ function Addon:GetThreatPlateForUnit(unitid)
   -- local tp_frame = self.PlatesByUnit[unitid]
   -- if tp_frame and tp_frame.Active then
   local plate = GetNamePlateForUnit(unitid)
-  if plate and plate.TPFrame.Active then
-    return plate.TPFrame
+
+  if plate and not plate.TPFrame then
+    print("No TP Plate:", unitid, plate:IsForbidden())
+  end
+
+  -- local tp_frame = PlatesByUnit[unitid]
+  -- if tp_frame and tp_frame.IsActive then
+  --   return tp_frame
+  -- end
+
+  local tp_frame = plate and plate.TPFrame
+  if tp_frame and tp_frame.Active then
+    return tp_frame
   end
 end
 
@@ -324,44 +351,42 @@ end
 
 function Addon:GetThreatPlateForTarget()
   local plate = GetNamePlateForUnit("target")
-  if plate and plate.TPFrame.Active then
-     return plate.TPFrame
+  local tp_frame = plate and plate.TPFrame
+  if tp_frame and tp_frame.Active then
+    return tp_frame
+  end
+end
+
+function Addon:GetThreatPlateForFocus()
+  local plate = GetNamePlateForUnit("focus")
+  local tp_frame = plate and plate.TPFrame
+  if tp_frame and tp_frame.Active then
+    return tp_frame
   end
 end
 
 function Addon:GetThreatPlateForGUID(guid)
   local plate = self.PlatesByGUID[guid]
-  if plate and plate.TPFrame.Active then
-    return plate.TPFrame
+  local tp_frame = plate and plate.TPFrame
+  if tp_frame and tp_frame.Active then
+    return tp_frame
   end
 end
 
 function Addon:GetActiveThreatPlates()
-  local function ActiveTPFrameIterator(t, unitid)
-    local tp_frame
-    repeat
-      unitid, tp_frame = next(t, unitid)
+  -- Iterator that returns only active TP frames from `self.PlatesByUnit`.
+  local function ActiveTPFrameIterator(t, last)
+    local unitid, tp_frame = next(t, last)
+    while unitid do
       if tp_frame and tp_frame.Active then
         return unitid, tp_frame
       end
-    until not tp_frame 
+      unitid, tp_frame = next(t, unitid)
+    end
     return nil
   end
 
- return ActiveTPFrameIterator, self.PlatesByUnit, nil
- 
-  -- local plates_by_unit = self.PlatesByUnit
-  -- return function()
-  --   local index
-  --   repeat
-  --     local unitid, tp_frame = next(plates_by_unit, index)
-  --     if tp_frame and tp_frame.Active then
-  --       index = unitid
-  --       return unitid, tp_frame
-  --     end
-  --   until not tp_frame
-  --   return nil
-  -- end
+  return ActiveTPFrameIterator, self.PlatesByUnit, nil
 end
 
 ---------------------------------------------------------------------------------------------------------------------
@@ -894,7 +919,7 @@ local function HandlePlateUnitAdded(plate, unitid)
   local unit = tp_frame.unit
 
   if Addon.ExpansionIsAtLeastMidnight then
-    --C_NamePlateManager.SetNamePlateSimplified(unitid, false)
+    C_NamePlateManager.SetNamePlateSimplified(unitid, false)
 
     -- if not InCombatLockdown() then
     --   C_NamePlateManager.SetNamePlateHitTestFrame(unitid, tp_frame)
@@ -1118,8 +1143,8 @@ function Addon:ForceUpdate()
   Addon:UpdateAllPlates()
 end
 
-function Addon:ForceUpdateOnNameplate(plate)
-  HandlePlateUnitAdded(plate, plate.TPFrame.unit.unitid)
+function Addon:ForceUpdateOnNameplate(tp_frame)
+  HandlePlateUnitAdded(tp_frame.Parent, tp_frame.unit.unitid)
 end
 
 function Addon:ForceUpdateFrameOnShow()
@@ -1415,9 +1440,10 @@ end
 local function PlayerTargetChanged(target_unitid)
   -- If the previous target unit's nameplate is still shown, update it:
   local plate = LastTargetPlate[target_unitid]
-  if plate and plate.TPFrame.Active then
-    SetUnitAttributeTarget(plate.TPFrame.unit)
-    PublishEvent("TargetLost", plate.TPFrame)
+  local tp_frame = plate and plate.TPFrame
+  if tp_frame and tp_frame.Active then
+    SetUnitAttributeTarget(tp_frame.unit)
+    PublishEvent("TargetLost", tp_frame)
 
     LastTargetPlate[target_unitid] = nil
 
@@ -1426,11 +1452,12 @@ local function PlayerTargetChanged(target_unitid)
   end
 
   plate = GetNamePlateForUnit(target_unitid)
-  if plate and plate.TPFrame.Active then
+  tp_frame = plate and plate.TPFrame
+  if tp_frame and tp_frame.Active then
     LastTargetPlate[target_unitid] = plate
 
-    SetUnitAttributeTarget(plate.TPFrame.unit)
-    PublishEvent("TargetGained", plate.TPFrame)
+    SetUnitAttributeTarget(tp_frame.unit)
+    PublishEvent("TargetGained", tp_frame)
   end
 end
 
@@ -1454,19 +1481,22 @@ function Addon:PLAYER_SOFT_INTERACT_CHANGED()
 end
 
 function Addon:PLAYER_FOCUS_CHANGED()
-  if LastFocusPlate and LastFocusPlate.TPFrame.Active then
-    LastFocusPlate.TPFrame.unit.IsFocus = false
-    PublishEvent("FocusLost", LastFocusPlate.TPFrame)
+  -- Don't check for Active here as we have to unset IsFocus 
+  if LastFocusPlate then
+    LastFocusPlate.unit.IsFocus = false
+    if LastFocusPlate.Active then
+      PublishEvent("FocusLost", LastFocusPlate)
+    end
     LastFocusPlate = nil
     -- Update mouseover, if the mouse was hovering over the targeted unit
     Addon:UPDATE_MOUSEOVER_UNIT()
   end
 
-  local plate = GetNamePlateForUnit("focus")
-  if plate and plate.TPFrame.Active then
-    plate.TPFrame.unit.IsFocus = true
-    PublishEvent("FocusGained", plate.TPFrame)
-    LastFocusPlate = plate
+  local tp_frame = Addon:GetThreatPlateForFocus()
+  if tp_frame then
+    tp_frame.unit.IsFocus = true
+    PublishEvent("FocusGained", tp_frame)
+    LastFocusPlate = tp_frame
   end
 end
 
@@ -1718,11 +1748,6 @@ function Addon:ARENA_OPPONENT_UPDATE(unitid, update_reason)
     if tp_frame then
       StyleModule.Update(tp_frame)
     end
-
-    -- local plate = PlatesByUnit[unitid]
-    -- if plate then
-    --   Addon:ForceUpdateOnNameplate(plate)
-    -- end
   end
 
   -- Not sure if needed after the addition for enemy/friendly health bar sizes

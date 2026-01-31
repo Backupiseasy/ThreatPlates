@@ -532,10 +532,8 @@ end
 ---------------------------------------------------------------------------------------------------
 
 function FocusWidget:PLAYER_FOCUS_CHANGED()
-  local plate = GetNamePlateForUnit("focus")
-
-  local tp_frame = plate and plate.TPFrame
-  if tp_frame and tp_frame.Active then
+  local tp_frame = Addon:GetThreatPlateForFocus()
+  if tp_frame then
     self:OnFocusUnitAdded(tp_frame, tp_frame.unit)
   else
     HideWidgetFrame(FocusWidgetFrame)

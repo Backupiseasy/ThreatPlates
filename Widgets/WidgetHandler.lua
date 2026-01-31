@@ -11,7 +11,6 @@ local ADDON_NAME, Addon = ...
 local pairs, next = pairs, next
 
 -- WoW APIs
-local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
 local EventServiceSubscribe, EventServiceSubscribeUnitEvent, EventServicePublish = Addon.EventService.Subscribe, Addon.EventService.SubscribeUnitEvent, Addon.EventService.Publish
@@ -126,33 +125,25 @@ end
 ---------------------------------------------------------------------------------------------------
 
 local function UpdateAllFrames(widget)
-  local frame, widget_frame
-  for _, plate in pairs(GetNamePlates()) do
-    frame = plate and plate.TPFrame
-    if frame and frame.Active then
-      widget_frame = frame.widgets[widget.Name]
-      if widget_frame.Active then
-        widget:UpdateFrame(widget_frame, frame.unit)
-      end
+  for _, tp_frame in Addon:GetActiveThreatPlates() do
+    local widget_frame = tp_frame.widgets[widget.Name]
+    if widget_frame.Active then
+      widget:UpdateFrame(widget_frame, tp_frame.unit)
     end
   end
 end
 
 -- If no event to fire as part of the update is specified, QuestUpdate is used
 local function UpdateAllFramesWithPublish(widget, event)
-  local frame, widget_frame
-  for _, plate in pairs(GetNamePlates()) do
-    frame = plate and plate.TPFrame
-    if frame and frame.Active then
-      widget_frame = frame.widgets[widget.Name]
-      if widget_frame.Active then
-        widget:UpdateFrame(widget_frame, frame.unit)
-      end
-
-      -- Publish that unit data was changed (for color updates of healthbar/name)
-      --print ("UpdateAllFramesWithPublish: Fire Event =>", event, "for", tp_frame.unit.name)
-      widget:PublishEvent(event, frame)
+  for _, tp_frame in Addon:GetActiveThreatPlates() do
+    local widget_frame = tp_frame.widgets[widget.Name]
+    if widget_frame.Active then
+      widget:UpdateFrame(widget_frame, tp_frame.unit)
     end
+
+    -- Publish that unit data was changed (for color updates of healthbar/name)
+    --print ("UpdateAllFramesWithPublish: Fire Event =>", event, "for", tp_frame.unit.name)
+    widget:PublishEvent(event, tp_frame)
   end
 end
 

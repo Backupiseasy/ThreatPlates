@@ -5689,6 +5689,7 @@ local function CreateLocalizationSettings()
         order = 20,
         type = "group",
         inline = true,
+        hidden = Addon.ExpansionIsAtLeastMidnight,
         args = {
           MetricUnitSymbols = {
             name = L["Metric Unit Symbols"],
@@ -5697,7 +5698,6 @@ local function CreateLocalizationSettings()
             width = "double",
             desc = L["If enabled, the truncated health text will be localized, i.e. local metric unit symbols (like k for thousands) will be used."],
             arg = { "text", "LocalizedUnitSymbol" },
-            hidden = Addon.ExpansionIsAtLeastMidnight,
           },
         },
       },
@@ -6110,6 +6110,7 @@ local function CreateBlizzardSettings()
             order = 40,
             type = "group",
             inline = true,
+            hidden = Addon.ExpansionIsAtLeastMidnight,
             args = {
               OtherTopInset = {
                 name = L["Top Inset"],

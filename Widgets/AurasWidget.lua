@@ -26,7 +26,6 @@ local UnitIsUnit = UnitIsUnit
 local UnitAura = UnitAura
 local GetAuraSlots = C_UnitAuras and C_UnitAuras.GetAuraSlots
 local GetAuraDataBySlot, GetAuraDataByAuraInstanceID = C_UnitAuras and C_UnitAuras.GetAuraDataBySlot, C_UnitAuras and C_UnitAuras.GetAuraDataByAuraInstanceID
-local GetNamePlates, GetNamePlateForUnit = C_NamePlate.GetNamePlates, C_NamePlate.GetNamePlateForUnit
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -2850,12 +2849,12 @@ function Widget:PLAYER_TARGET_CHANGED()
     self.CurrentTarget = nil
   end
 
-  local plate = GetNamePlateForUnit("target")
-  if plate and plate.TPFrame.Active then
-    self.CurrentTarget = plate.TPFrame.widgets.Auras
+  local tp_frame = Addon:GetThreatPlateForTarget()
+  if tp_frame then
+    self.CurrentTarget = tp_frame.widgets.Auras
 
     if self.CurrentTarget.Active then
-      self:UpdateAuras(self.CurrentTarget, plate.TPFrame.unit)
+      self:UpdateAuras(self.CurrentTarget, tp_frame.unit)
     end
   end
 end
@@ -2864,9 +2863,8 @@ end
 function Widget:PLAYER_REGEN_ENABLED()
   -- It seems that unitid here can be nil when using the healthstone while in combat
   -- assert (unit.unitid ~= nil, "Auras: PLAYER_REGEN_ENABLED - unitid =", unit.unitid)
-
   for unitid, tp_frame in Addon:GetActiveThreatPlates() do
-    local widget_frame = self:GetWidgetFrameForUnit(unitid)
+    local widget_frame = tp_frame.widgets.Auras
     if widget_frame then 
       local unit = tp_frame.unit
       if unit.HasUnlimitedAuras then
@@ -3364,17 +3362,6 @@ function Widget:OnEnable()
   self:SubscribeEvent("UNIT_AURA")
   -- LOSS_OF_CONTROL_ADDED
   -- LOSS_OF_CONTROL_UPDATE
-end
-
-function Widget:OnDisable()
-  self:UnsubscribeAllEvents()
-
-  for _, plate in pairs(GetNamePlates()) do
-    local tp_frame = plate and plate.TPFrame
-    if tp_frame and tp_frame.Active then
-      tp_frame.widgets.Auras:UnsubscribeAllEvents()
-    end
-  end
 end
 
 function Widget:EnabledForStyle(style, unit)
