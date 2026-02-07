@@ -18,3 +18,4 @@ Beta changes:
 * Consolidated accessing nameplates using unitid into central defined functions to reduce errors caused by non/wrong initialized Threat Plates. This should fix Comment #7870.
 * Disabled cast target in instances as UnitName returns secret values [Comment #7885].
 * Disabled off-tank detection as UnitIsUnit returns secret values [Comment #7898].
+* Fixed wrong header for key bindings in WoW options in WoW Midnight.
