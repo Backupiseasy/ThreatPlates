@@ -575,15 +575,14 @@ local function OnStartCasting(tp_frame, unitid, channeled, event_spellid)
   visual.SpellText:SetText(text)
   visual.SpellIcon:SetTexture(texture)
 
-  if not Addon.ExpansionIsAtLeastMidnight then
-    local target_unit_name = UnitName(unit.unitid .. "target")
+  -- target_unit_name is secret in instances in Midnight
+  local target_unit_name = UnitName(unit.unitid .. "target")
+  if target_unit_name and not Addon.IsSecretValue(target_unit_name) then
     -- There are situations when UnitName returns nil (OnHealthUpdate, hypothesis: health update when the unit died tiggers this, but then there is no target any more)
-    if target_unit_name then
-      local _, class_name = UnitClass(target_unit_name)
-      castbar.CastTarget:SetText(Addon.ColorByClass(class_name, TransliterateCyrillicLetters(target_unit_name)))
-    else
-      castbar.CastTarget:SetText(nil)
-    end
+    local _, class_name = UnitClass(target_unit_name)
+    castbar.CastTarget:SetText(Addon.ColorByClass(class_name, TransliterateCyrillicLetters(target_unit_name)))
+  else
+    castbar.CastTarget:SetText(nil)
   end
 
   castbar:SetReverseFill(castbar.IsChanneling)

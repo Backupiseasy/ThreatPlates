@@ -202,8 +202,11 @@ if not Addon.ExpansionIsAtLeastMists or Addon.ExpansionIsAtLeastMidnight then
   Addon.ShowQuestUnit = function(...) return false end
 end
 
-if Addon.ExpansionIsAtLeastMidnight then
-  Addon.IsSecretValue = _G.issecretvalue
-else
-  Addon.IsSecretValue = function() return false end
-end
+---------------------------------------------------------------------------------------------------
+-- Midnight
+---------------------------------------------------------------------------------------------------
+
+Addon.IsSecretValue = _G.issecretvalue or function() return false end
+
+Addon.UnitTokenRestrictedForAddOns = UnitTokenRestrictedForAddOns or function() return false end
+

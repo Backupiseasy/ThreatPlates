@@ -16,3 +16,4 @@ Beta changes:
 
 * Fixed a Lua error that occurred when WoW events for protected nameplates were processed (e..g, friendy players in instances) [Comment #7870]
 * Consolidated accessing nameplates using unitid into central defined functions to reduce errors caused by non/wrong initialized Threat Plates. This should fix Comment #7870.
+* Disabled cast target in instances as UnitName returns secret values [Comment #7885].
