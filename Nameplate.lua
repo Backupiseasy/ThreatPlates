@@ -327,9 +327,9 @@ function Addon:GetThreatPlateForUnit(unitid)
   -- if tp_frame and tp_frame.Active then
   local plate = GetNamePlateForUnit(unitid)
 
-  if plate and not plate.TPFrame then
-    print("No TP Plate:", unitid, plate:IsForbidden())
-  end
+  -- if plate and not plate.TPFrame then
+  --   print("No TP Plate:", unitid, plate:IsForbidden())
+  -- end
 
   -- local tp_frame = PlatesByUnit[unitid]
   -- if tp_frame and tp_frame.IsActive then
@@ -863,26 +863,29 @@ local function NamePlateDriverFrame_AcquireUnitFrame(_, plate)
       end)
     end
     
+    -- # Nameplate Hierarchy, Anchoring, and Scaling
     plate.TPFrame:SetPoint("CENTER", plate.UnitFrame, "CENTER")
     --plate.Background:SetAllPoints(plate.TPFrame)
   end
 end
 
-local	function HandlePlateCreated(plate)
+-- # Nameplate Hierarchy, Anchoring, and Scaling
+local function SetNameplateFrameProperties(tp_frame)
   -- Parent could be: WorldFrame, UIParent, plate
-  -- Hierarchy and Scaling: UIParent scales with the UI size setting. Parent frames to WorldFrame (or nil) to make them ignore the UI scale.
-  -- Visibility: Elements attached directly to WorldFrame remain visible even when the main UI is hidden (Alt+Z).
-  -- Use UIParent (Default): For almost all addons, chat frames, action bars, and UI elements.
-  -- WorldFrame: For elements that must sit behind the UI or remain visible when the UI is hidden (e.g., custom 3D effects, background custom textures). 
-  -- => Using World Frame is wrong!
+  tp_frame:SetParent(Addon.NameplateParentFrame or tp_frame.Parent)
+  tp_frame:SetFrameStrata(Addon.NameplateFrameStrata)
+end
+
+local	function HandlePlateCreated(plate)
   local tp_frame = _G.CreateFrame("Frame",  "ThreatPlatesFrame" .. GetNameForNameplate(plate), WorldFrame, BackdropTemplate)
-  tp_frame:SetFrameStrata("BACKGROUND")
   tp_frame:EnableMouse(false)
 
-  -- Size is set in Styles.lua
-  
   tp_frame.Parent = plate
   plate.TPFrame = tp_frame
+  
+  -- # Nameplate Hierarchy, Anchoring, and Scaling
+  SetNameplateFrameProperties(tp_frame)
+  -- Size is set in Styles.lua
 
   -- ! Can be used by other addons (e.g., BigDebuffs) to get the correct anchor for its content
   tp_frame.GetAnchor = GetAnchorForThreatPlateExternal
@@ -1076,6 +1079,20 @@ end
 -- Useful to make a theme respond to externally-captured data (such as the combat log)
 --------------------------------------------------------------------------------------------------------------
 
+function Addon:UpdateNameplateFrameProperties()
+  local db = self.db.profile.Appearance
+
+  if db.AnchorFrame == "WORLD_FRAME" then
+    Addon.NameplateParentFrame = WorldFrame
+  elseif db.AnchorFrame == "UI_PARENT" then
+    Addon.NameplateParentFrame = UIParent
+  else
+    Addon.NameplateParentFrame = nil
+  end
+
+  Addon.NameplateFrameStrata = db.FrameStrata
+end
+
 function Addon:UpdateSettings()
   --wipe(PlateOnUpdateQueue)
 
@@ -1088,6 +1105,8 @@ function Addon:UpdateSettings()
   Addon.Animation.UpdateSettings()
   Addon.Color.UpdateSettings()
   ElementsUpdateSettings()
+
+  self:UpdateNameplateFrameProperties()
 
   local db = Addon.db.profile
 
@@ -1122,11 +1141,17 @@ function Addon:UpdateSettings()
   end
 end
 
-function Addon:UpdateAllPlates()
-    -- No need to update only active nameplates, as this is only done when settings are changed, so performance is
-    -- not really an issue.
+function Addon:UpdatePlatesVisible()
+  -- No need to update only active nameplates, as this is only done when settings are changed, so performance is
+  -- not really an issue.
   for unitid, tp_frame in pairs(PlatesByUnit) do
     HandlePlateUnitAdded(tp_frame.Parent, unitid)
+  end
+end
+
+function Addon:UpdatePlatesCreated()
+  for _, tp_frame in pairs(self.PlatesCreated) do
+    SetNameplateFrameProperties(tp_frame)
   end
 end
 
@@ -1139,7 +1164,7 @@ end
 
 function Addon:ForceUpdate()
   Addon:UpdateSettings()
-  Addon:UpdateAllPlates()
+  Addon:UpdatePlatesVisible()
 end
 
 function Addon:ForceUpdateOnNameplate(tp_frame)

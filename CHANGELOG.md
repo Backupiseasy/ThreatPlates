@@ -9,7 +9,8 @@ This is a basic version with Midnight support. Expect lots of missing features a
 * Added Masque support for (some) icons.
 * Removed Disconnected option for coloring of healthbars.
 * Updated integrated libraries (Ace3 r1387-alpha, LibSharedMedia-3.0 v11.2.1)
-
+* Added options to configure parent frame and frame strata of Threat Plates [GH-193, GH-399].
+ 
 Beta changes:
 * Disabled cast target in instances as UnitName returns secret values [Comment #7885].
 * Disabled off-tank detection as UnitIsUnit returns secret values [Comment #7898].

@@ -152,7 +152,7 @@ elseif not Addon.ExpansionIsAtLeastMidnight then
     --C_NamePlate_SetNamePlateSelfSize(baseWidth * horizontalScale * Lerp(1.1, 1.0, clampedZeroBasedScale), baseHeight)
   end
 else
-  Addon.SetBaseNamePlateSize = function(self, plate) 
+  Addon.SetBaseNamePlateSize = function(self) 
     --local db = Addon.db.profile.settings.healthbar
     --C_NamePlate.SetNamePlateSize(db.width + 40, db.height + 40)
     --C_NamePlate.SetNamePlateSize(db.width, db.height)
@@ -218,7 +218,7 @@ function Addon:ReloadTheme()
   end
   
   -- Update all UI elements (frames, textures, ...)
-  Addon:UpdateAllPlates()
+  Addon:UpdatePlatesVisible()
 end
 
 function Addon:CheckForFirstStartUp()

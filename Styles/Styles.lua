@@ -440,9 +440,7 @@ local NAMEPLATE_MODE_BY_THEME = {
 }
 
 local function UpdateNameplateStyle(tp_frame, style)
-  -- Frame
-  --tp_frame:ClearAllPoints()
-  --tp_frame:SetPoint(style.frame.anchor, tp_frame.Parent, style.frame.anchor, style.frame.x, style.frame.y)
+  -- # Nameplate Hierarchy, Anchoring, and Scaling
   local style_healthbar = style.healthbar[tp_frame.unit.reaction]
   tp_frame:SetSize(style_healthbar.width, style_healthbar.height)
 

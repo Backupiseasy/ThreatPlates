@@ -332,6 +332,7 @@ local function ChatCommandDebug(cmd_list)
 		print("IsForbidden:", plate:IsForbidden())
 		print("  TP State:", plate.TPFrame and "TPFrame" or "<>", "-", plate.TPFrame and Addon.PlatesByUnit[plate.UnitFrame.unit] and "PlatesByUnit" or "<>" )
 		print("Scale:", plate.TPFrame:GetScale())
+		print("UI Prent:", UIParent:GetEffectiveScale())
 	else
 		Addon.Logging.Error(L["Unknown option: "] .. command)
 		PrintHelp()
