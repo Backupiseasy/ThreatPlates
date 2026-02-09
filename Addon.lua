@@ -219,6 +219,7 @@ function Addon:ReloadTheme()
   
   -- Update all UI elements (frames, textures, ...)
   Addon:UpdatePlatesVisible()
+  Addon:UpdateFramePropertiesOfPlatesCreated()
 end
 
 function Addon:CheckForFirstStartUp()

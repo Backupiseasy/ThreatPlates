@@ -1106,7 +1106,7 @@ function Addon:UpdateSettings()
   Addon.Color.UpdateSettings()
   ElementsUpdateSettings()
 
-  self:UpdateNameplateFrameProperties()
+  Addon:UpdateNameplateFrameProperties()
 
   local db = Addon.db.profile
 
@@ -1149,7 +1149,7 @@ function Addon:UpdatePlatesVisible()
   end
 end
 
-function Addon:UpdatePlatesCreated()
+function Addon:UpdateFramePropertiesOfPlatesCreated()
   for _, tp_frame in pairs(self.PlatesCreated) do
     SetNameplateFrameProperties(tp_frame)
   end

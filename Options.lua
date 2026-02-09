@@ -6502,7 +6502,7 @@ local function CreateAppearanceTab()
             set = function(info, val)
               SetValueGeneral(info, val)
               Addon:UpdateNameplateFrameProperties()
-              Addon:UpdatePlatesCreated()
+              Addon:UpdateFramePropertiesOfPlatesCreated()
             end,
             values = { WORLD_FRAME = "World Frame", UI_PARENT = "UI Parent",  PLATE = "Nameplate"},
             arg = { "Appearance", "AnchorFrame" }
@@ -6514,7 +6514,7 @@ local function CreateAppearanceTab()
             set = function(info, val)
               SetValueGeneral(info, val)
               Addon:UpdateNameplateFrameProperties()
-              Addon:UpdatePlatesCreated()
+              Addon:UpdateFramePropertiesOfPlatesCreated()
             end,
             values = { BACKGROUND = "BACKGROUND", LOW = "LOW",  MEDIUM = "MEDIUM", HIGH = "HIGH", DIALOG = "DIALOG", TOOLTIP = "TOOLTIP" } ,
             desc = L["Which frame strata the nameplate will be placed in."],
