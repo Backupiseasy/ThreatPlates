@@ -10,6 +10,11 @@
 * Updated integrated libraries (Ace3 r1387-alpha, LibSharedMedia-3.0 v11.2.1)
 
 ------------------------------------------------------
+12.6.6 (2026-02-10)
+------------------------------------------------------
+* Fixed a Lua error that occurred in WoW Classic in certain situations when units were channeling spells [Comment #7909].
+
+------------------------------------------------------
 12.6.5 (2026-01-14)
 ------------------------------------------------------
 * Added support for WoW Burning Crusade Classic Anniversary Edition.
