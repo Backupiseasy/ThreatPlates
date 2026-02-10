@@ -129,46 +129,41 @@ end
 -- Module code
 ---------------------------------------------------------------------------------------------------
 
-local CheckIfUnitIsOfftanked
-
 -- UnitIsUnit returns secret values in instances in Midnight, so off-tank detection no longer works.
-if Addon.ExpansionIsAtLeastMidnight then
-  CheckIfUnitIsOfftanked = function() return false end
-else
-  CheckIfUnitIsOfftanked = function(unit, threat_level, other_player_has_aggro)
-    -- Reset IsOfftanked if the player is tanking
-    if other_player_has_aggro then
-      if unit.style == "tank" and ShowOffTank then
-        local target_unit = unit.unitid .. "target"
+local function CheckIfUnitIsOfftanked(unit, threat_level, other_player_has_aggro)
+  -- Reset IsOfftanked if the player is tanking
+  -- Off-tank detection does not work in Midnight because of secret values
+  if other_player_has_aggro and not Addon.ExpansionIsAtLeastMidnight then
+    if unit.style == "tank" and ShowOffTank then
+      local target_unit = unit.unitid .. "target"
 
-        -- Player does not tank the unit, so check if it is off-tanked:
-        if UnitExists(target_unit) then
-          if UnitIsPlayer(target_unit) or UnitPlayerControlled(target_unit) then
-            local target_threat_situation = UnitThreatSituation(target_unit, unit.unitid) or 0
-            if target_threat_situation > 1 then
-              -- Target unit does tank unit, so check if target unit is a tank or an tank-like pet/guardian
-              if ("TANK" == UnitGroupRolesAssignedWrapper(target_unit) and not UnitIsUnit("player", target_unit)) or UnitIsUnit(target_unit, "pet") or IsOffTankCreature(target_unit) then
-                unit.IsOfftanked = true
-              else
-                -- Target unit does tank unit, but is not a tank or a tank-like pet/guardian
-                unit.IsOfftanked = false
-              end
+      -- Player does not tank the unit, so check if it is off-tanked:
+      if UnitExists(target_unit) then
+        if UnitIsPlayer(target_unit) or UnitPlayerControlled(target_unit) then
+          local target_threat_situation = UnitThreatSituation(target_unit, unit.unitid) or 0
+          if target_threat_situation > 1 then
+            -- Target unit does tank unit, so check if target unit is a tank or an tank-like pet/guardian
+            if ("TANK" == UnitGroupRolesAssignedWrapper(target_unit) and not UnitIsUnit("player", target_unit)) or UnitIsUnit(target_unit, "pet") or IsOffTankCreature(target_unit) then
+              unit.IsOfftanked = true
+            else
+              -- Target unit does tank unit, but is not a tank or a tank-like pet/guardian
+              unit.IsOfftanked = false
             end
           end
         end
-    
-        -- Player does not tank the mob, but player might have been off-tanking before losing target.
-        -- In that case, we assume that the mob is still securely off-tanked
-        if unit.IsOfftanked then
-          threat_level = "OFFTANK"
-        end
       end
-    else
-      unit.IsOfftanked = false
+  
+      -- Player does not tank the mob, but player might have been off-tanking before losing target.
+      -- In that case, we assume that the mob is still securely off-tanked
+      if unit.IsOfftanked then
+        threat_level = "OFFTANK"
+      end
     end
-
-    return threat_level
+  else
+    unit.IsOfftanked = false
   end
+
+  return threat_level
 end
 
 local function UpdateThreatStatus(unit)
