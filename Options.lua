@@ -589,9 +589,7 @@ local function SetValue(info, ...)
   -- For widgets: check if the widget if enabled or disabled. If so, call InitializeWidget additionally
   -- Also: Fix some bad configuration settings design by me:
   local widget_info_key = info.arg[1]
-  if widget_info_key == "HeadlineView" and info.arg[2] == "ShowTargetHighlight" then
-    widget_info_key = "targetWidget"
-  elseif widget_info_key == "Custom" then
+  if widget_info_key == "Custom" then
     widget_info_key = "UniqueIcon"
   end
 

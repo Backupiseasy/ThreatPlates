@@ -7,9 +7,10 @@ This is a basic version with Midnight support. Expect lots of missing features a
 * Added an option to show/hide the source unit for a interrupt.
 * Added animations for nameplates when they change size.
 * Added Masque support for (some) icons.
-* Removed Disconnected option for coloring of healthbars.
-* Updated integrated libraries (Ace3 r1387-alpha, LibSharedMedia-3.0 v11.2.1)
 * Added options to configure parent frame and frame strata of Threat Plates [GH-193, GH-399].
+* Removed Disconnected option for coloring of healthbars.
+* Fixed a bug that prevented the target highlight from being shown in headline view mode.
+* Updated integrated libraries (Ace3 r1387-alpha, LibSharedMedia-3.0 v11.2.1)
  
 Beta changes:
 * Hopefully fixed Lua errors that occurred because of accessing nameplates using unit tokens that are not allowed for this purpose (arenaN, bossN) [Comment #7944, #7939,# 7938, GH-654].

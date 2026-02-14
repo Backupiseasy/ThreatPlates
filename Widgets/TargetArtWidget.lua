@@ -289,12 +289,12 @@ local function PlayerTargetChanged(target_unitid)
   if tp_frame and (not UnitIsUnit("target", tp_frame.unit.unitid) or target_unitid == "target") then
     local unit = tp_frame.unit
     if Widget:EnabledForStyle(unit.style, unit) then
-      local healthbar = tp_frame.visual.Healthbar
       widget_frame:SetParent(tp_frame)
-      widget_frame:SetFrameLevel(healthbar:GetFrameLevel() + FRAME_LEVEL_BY_TEXTURE[Settings.theme])
-      --widget_frame.HealthbarMode:SetFrameLevel(widget_frame:GetFrameLevel())
+
+      local anchor_frame = ((unit.style == "NameOnly" or unit.style == "NameOnly-Unique") and tp_frame.visual.textframe) or tp_frame.visual.Healthbar
       widget_frame:ClearAllPoints()
-      widget_frame:SetAllPoints(healthbar)
+      widget_frame:SetAllPoints(anchor_frame)
+      widget_frame:SetFrameLevel(anchor_frame:GetFrameLevel() + FRAME_LEVEL_BY_TEXTURE[Settings.theme])
     
       Widget:UpdateTargetUnitHighlight(widget_frame, target_unitid, unit)
       OnSoftTargetIconUpdate(widget_frame, target_unitid, unit)
@@ -351,7 +351,7 @@ local function CreateTargetHighlightFrame(target_unitid)
 
     widget_frame.NameModeTexture = widget_frame:CreateTexture(nil, "BACKGROUND", nil, 0)
     widget_frame.NameModeTexture:SetTexture(Addon.PATH_ARTWORK .. "Target")
-
+    
     -- Create soft target / interact icon
     local soft_target_icon_frame = _G.CreateFrame("Frame",nil, widget_frame, BackdropTemplate)
     local soft_target_icon = soft_target_icon_frame:CreateTexture("$parentIcon", "OVERLAY")
@@ -377,6 +377,7 @@ local function CreateTargetHighlightFrame(target_unitid)
     UpdateTargetHighlightFrame(widget_frame)
     
     TargetHighlightFrames[target_unitid] = widget_frame
+
   end
 end
 
@@ -405,7 +406,7 @@ end
 
 function Widget:EnabledForStyle(style, unit)
   if (style == "NameOnly" or style == "NameOnly-Unique") then
-    return Settings.ShowTargetHighlight
+    return Settings.ShowInHeadlineView
   else
     return Settings.ON
   end
@@ -476,15 +477,6 @@ function Widget:OnTargetUnitRemoved(tp_frame, unit)
   if unit.IsSoftFriendTarget then    
     HideWidgetFrame(TargetHighlightFrames.softinteract)
   end
-end
-
-function Widget:UpdateLayout()
-  local widget_frame = WidgetFrame
-
-  UpdateTexture(Settings, widget_frame, widget_frame.HealthbarMode)
-  local db = Addon.db.profile
-  widget_frame.NameModeTexture:SetSize(128, 32 * GetHeadlineViewHeight(db.Name.NameMode, db.StatusText.NameMode) / 18)
-  widget_frame.NameModeTexture:SetPoint("CENTER", widget_frame, "CENTER", NameModeOffsetX, NameModeOffsetY)
 end
 
 function Widget:UpdateSettings()
