@@ -638,6 +638,9 @@ end
 local StartTimeForAura = {}
 
 function Widget:UNIT_AURA(unitid, update_info)
+  -- GetNamePlateForUnit no longer accepts arenaX or bossX unitids in restricted environments
+  --if not string.match(unitid, "nameplate%d%d?$") then return end
+
   local widget_frame = self:GetWidgetFrameForUnit(unitid)
   if widget_frame then 
     widget_frame.Widget:UpdateAuras(widget_frame, widget_frame.unit)

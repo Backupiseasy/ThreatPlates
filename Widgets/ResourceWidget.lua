@@ -163,7 +163,7 @@ end
 
 -- UNIT_POWER_UPDATE is only registered for target unit
 function Widget:UNIT_POWER_UPDATE(unitid, powerType)
-  local tp_frame = Addon:GetThreatPlateForUnit("target")
+  local tp_frame = Addon:GetThreatPlateForTarget()
 
   if tp_frame and WidgetFrame:IsShown() then
     self:UpdateResourceBar()
@@ -172,7 +172,7 @@ end
 
 -- UNIT_DISPLAYPOWER is only registered for target unit
 function Widget:UNIT_DISPLAYPOWER(unitid)
-  local tp_frame = Addon:GetThreatPlateForUnit("target")
+  local tp_frame = Addon:GetThreatPlateForTarget()
 
   if tp_frame then
     self:OnTargetUnitAdded(tp_frame, tp_frame.unit)
@@ -180,7 +180,7 @@ function Widget:UNIT_DISPLAYPOWER(unitid)
 end
 
 function Widget:PLAYER_TARGET_CHANGED()
-  local tp_frame = Addon:GetThreatPlateForUnit("target")
+  local tp_frame = Addon:GetThreatPlateForTarget()
 
   if tp_frame then
     self:OnTargetUnitAdded(tp_frame, tp_frame.unit)

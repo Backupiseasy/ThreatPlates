@@ -321,27 +321,40 @@ end
 -- PlatesByUnit
 --   Nameplates can be in PlatesByUnit, but not Active (if Blizzard plates are shown for this unit type)
 
+local NON_NAMEPLATE_UNITIDs = {
+  target = true,
+  player = true,
+  focus =  true,
+  anyenemy = true,
+  anyfriend = true,
+  anyinteract = true,
+  softenemy = true,
+  softfriend = true,
+  softinteract = true,
+}
+
 function Addon:GetThreatPlateForUnit(unitid)
   -- Skip special unitids (they are updated via their nameplate unitid) and personal nameplate
   if not unitid or unitid == "player" or UnitIsUnit("player", unitid) then return end
 
-  -- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED
-  -- local tp_frame = self.PlatesByUnit[unitid]
-  -- if tp_frame and tp_frame.Active then
-  local plate = GetNamePlateForUnit(unitid)
-
-  -- if plate and not plate.TPFrame then
-  --   print("No TP Plate:", unitid, plate:IsForbidden())
+  -- if not string.match(unitid, "nameplate%d%d?$") then 
+  --   print("Non-nameplate unitid passed to GetThreatPlateForUnit:", unitid)
   -- end
 
-  -- local tp_frame = PlatesByUnit[unitid]
-  -- if tp_frame and tp_frame.IsActive then
-  --   return tp_frame
-  -- end
-
-  local tp_frame = plate and plate.TPFrame
-  if tp_frame and tp_frame.Active then
-    return tp_frame
+  -- Non-nameplate unitids (target, focus, ...) are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED 
+  -- and need to be accessed via GetNamePlateForUnit
+  if NON_NAMEPLATE_UNITIDs[unitid] then
+    local plate = GetNamePlateForUnit(unitid)
+    local tp_frame = plate and plate.TPFrame
+    if tp_frame and tp_frame.Active then
+      return tp_frame
+    end
+  else
+    -- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED
+    local tp_frame = PlatesByUnit[unitid]
+    if tp_frame and tp_frame.IsActive then
+      return tp_frame
+    end
   end
 end
 
@@ -866,7 +879,7 @@ local function NamePlateDriverFrame_AcquireUnitFrame(_, plate)
       end)
     end
     
-    -- # Nameplate Hierarchy, Anchoring, and Scaling
+   -- # Nameplate Hierarchy, Anchoring, and Scaling
     plate.TPFrame:SetPoint("CENTER", plate.UnitFrame, "CENTER")
     --plate.Background:SetAllPoints(plate.TPFrame)
   end
@@ -1060,10 +1073,10 @@ function Addon:ConfigClickableArea(toggle_show)
 
         -- remove the config background if the nameplate is hidden to prevent it
         -- from being shown again when the nameplate is reused at a later date
-        tp_frame:HookScript('OnHide', function(self)
+        tp_frame:HookScript("OnHide", function(self)
           self.Background:Hide()
           self.Background = nil
-          self:SetScript('OnHide', nil)
+          self:SetScript("OnHide", nil)
           ConfigModePlate = nil
         end)
       else
@@ -1598,6 +1611,9 @@ function Addon:UNIT_FACTION(unitid)
       PublishEvent("FationUpdate", tp_frame)
     end
   else
+    -- GetNamePlateForUnit no longer accepts arenaX or bossX unitids in restricted environments
+    -- if not string.match(unitid, "nameplate%d%d?$") then return end
+
     -- It seems that (at least) in solo shuffles, the UNIT_FACTION event is fired in between the events
     -- NAME_PLATE_UNIT_REMOVE and NAME_PLATE_UNIT_ADDED. As SetNameplateVisibility sets the TPFrame Active, this results 
     -- in Lua errors, so basically we cannot use it here to check if the plate is active.

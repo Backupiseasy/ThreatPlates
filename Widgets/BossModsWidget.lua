@@ -704,7 +704,7 @@ function Addon:ConfigBossModsWidget()
   local event = "Configuration Mode"
   
   if not EnabledConfigMode then
-    local tp_frame = Addon:GetThreatPlateForUnit("target")
+    local tp_frame = Addon:GetThreatPlateForTarget()
     if tp_frame then
       local guid = _G.UnitGUID("target")
       

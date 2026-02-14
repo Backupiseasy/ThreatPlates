@@ -12,8 +12,9 @@ This is a basic version with Midnight support. Expect lots of missing features a
 * Added options to configure parent frame and frame strata of Threat Plates [GH-193, GH-399].
  
 Beta changes:
+* Hopefully fixed Lua errors that occurred because of accessing nameplates using unit tokens that are not allowed for this purpose (arenaN, bossN) [Comment #7944, #7939,# 7938, GH-654].
+* Disabled HealerTracker widget because of BG scoreboard restrictions.
 * Fixed a Lua error that occurred due to an error in the code for disabling off-tank detection for Midnight [Comment #7923, #7922, #7916, #7917, #7915].
-
 * Disabled cast target in instances as UnitName returns secret values [Comment #7885].
 * Disabled off-tank detection as UnitIsUnit returns secret values [Comment #7898].
 * Fixed wrong header for key bindings in WoW options in WoW Midnight.
