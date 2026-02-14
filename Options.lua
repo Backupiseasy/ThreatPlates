@@ -2704,7 +2704,7 @@ end
     name = L["Quest"],
     order = 100,
     type = "group",
-    hidden = function() return not Addon.ExpansionIsAtLeastMists end,
+    hidden = function() return not Addon.Widgets.Widgets.Quest end,
     args = {
       Enable = GetEnableEntry(L["Enable Quest Widget"], L["This widget shows a quest icon above unit nameplates or colors the nameplate healthbar of units that are involved with any of your current quests."], "questWidget", true),
       Visibility = { type = "group",	order = 10,	name = L["Visibility"], inline = true,
@@ -2814,6 +2814,7 @@ local function CreateHealerTrackerWidgetOptions()
     name = L["Healer Tracker"],
     order = 60,
     type = "group",
+    hidden = function() return not Addon.Widgets.Widgets.HealerTracker end,
     args = {
       Enable = GetEnableEntry(L["Enable Healer Tracker Widget"], L["This widget shows players that are healers."], "healerTracker", true),
       Layout = {
