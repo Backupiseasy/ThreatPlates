@@ -197,9 +197,9 @@ if Addon.IS_CLASSIC then
     local name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID, _ = _G.UnitChannelInfo(unitid)
 
     if not event_spellid then
-      local plate = PlatesByUnit[unitid]
-      if plate then 
-        event_spellid = plate.TPFrame.unit.ChannelEventSpellID
+      local tp_frame = PlatesByUnit[unitid]
+      if tp_frame then 
+        event_spellid = tp_frame.unit.ChannelEventSpellID
       end
     end
 
@@ -211,9 +211,9 @@ if Addon.IS_CLASSIC then
         endTime = (GetTime() + channel_cast_time) * 1000
         startTime = GetTime() * 1000
 
-        local plate = PlatesByUnit[unitid]
-        if plate then 
-          plate.TPFrame.unit.ChannelEventSpellID = event_spellid
+        local tp_frame = PlatesByUnit[unitid]
+        if tp_frame then 
+          tp_frame.unit.ChannelEventSpellID = event_spellid
         end
         
         return name, name, texture, startTime, endTime, isTradeSkill, notInterruptible, event_spellid
@@ -1543,7 +1543,7 @@ local function UpdateForMouseoverFrequent()
     
     -- plate is never nil here as it is set before the mouseover monitor is created
     -- and never deleted somewhere else
-    local tp_frame = PlatesByUnit["mouseover"].TPFrame
+    local tp_frame = PlatesByUnit["mouseover"]
     -- Do this even if nameplate is not active as otherwise, mouseover is not shown correctly
     -- when switching between TP plates and Blizzard plates
     tp_frame.unit.isMouseover = false
@@ -1560,7 +1560,7 @@ function Addon:UPDATE_MOUSEOVER_UNIT()
   -- Check for TPFrame.Active to prevent accessing the personal resource bar
   local tp_frame = self:GetThreatPlateForUnit("mouseover")
   if tp_frame then
-    PlatesByUnit["mouseover"] = tp_frame.Parent
+    PlatesByUnit["mouseover"] = tp_frame
     tp_frame.unit.isMouseover = true
 
     PublishEvent("MouseoverOnEnter", tp_frame)
