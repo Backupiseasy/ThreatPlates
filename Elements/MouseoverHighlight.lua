@@ -38,45 +38,11 @@ local TargetHighlightEnabledForStyle = {}
 ---------------------------------------------------------------------------------------------------
 -- Local variables
 ---------------------------------------------------------------------------------------------------
-local MouseoverHighlightFrame = _G.CreateFrame("Frame", nil)
-local CurrentMouseoverPlate
-local CurrentMouseoverUnitID
 
 ---------------------------------------------------------------------------------------------------
 -- Element code
 ---------------------------------------------------------------------------------------------------
 local Element = Addon.Elements.NewElement("MouseoverHighlight")
-
----------------------------------------------------------------------------------------------------
--- Mouseover Highlight Frame for detecting when mouseover ends for a unit
----------------------------------------------------------------------------------------------------
-
-local function HideMouseoverHighlightFrame()
-  if CurrentMouseoverUnitID then
-    local tp_frame = CurrentMouseoverPlate
-    tp_frame.unit.isMouseover = false
-    tp_frame.visual.Healthbar.MouseoverHighlight:Hide()
-
-    PublishEvent("MouseoverOnLeave", tp_frame)
-    CurrentMouseoverUnitID = nil
-  end
-
-  MouseoverHighlightFrame:Hide()
-end
-
-local function OnUpdateMouseoverHighlight(frame, elapsed)
-  -- Mouseover unit may have been removed from nameplate (e.g., unit died) or unit may have lost mouseover
-  if not CurrentMouseoverPlate.Active then
-    -- No need to hide stuff of set isMouseover to false as the plate was already wiped
-    CurrentMouseoverUnitID = nil
-    MouseoverHighlightFrame:Hide()
-  elseif not UnitIsUnit("mouseover", CurrentMouseoverUnitID) then
-    HideMouseoverHighlightFrame()
-  end
-end
-
-MouseoverHighlightFrame:SetScript("OnUpdate", OnUpdateMouseoverHighlight)
-MouseoverHighlightFrame:Hide()
 
 ---------------------------------------------------------------------------------------------------
 -- Core element code
@@ -146,8 +112,8 @@ end
 function Element.UpdateSettings()
   local db = Addon.db.profile
 
-  TargetHighlightEnabledForStyle["NameOnly"] = db.HeadlineView.ShowTargetHighlight
-  TargetHighlightEnabledForStyle["NameOnly-Unique"] = db.HeadlineView.ShowTargetHighlight
+  TargetHighlightEnabledForStyle["NameOnly"] = db.targetWidget.ShowInHeadlineView
+  TargetHighlightEnabledForStyle["NameOnly-Unique"] = db.targetWidget.ShowInHeadlineView
   TargetHighlightEnabledForStyle["dps"] = db.targetWidget.ON
   TargetHighlightEnabledForStyle["tank"] = db.targetWidget.ON
   TargetHighlightEnabledForStyle["normal"] = db.targetWidget.ON
@@ -156,26 +122,24 @@ function Element.UpdateSettings()
 end
 
 -- Registered in Nameplate.lua
-function Element.UPDATE_MOUSEOVER_UNIT()
-  if UnitIsUnit("mouseover", "player") then return end -- TODO: target as well?
+local function MouseoverOnEnter(tp_frame)  
+  local unit = tp_frame.unit
+  tp_frame.visual.Healthbar.MouseoverHighlight:SetShown(tp_frame.style.highlight.show and TargetHighlightEnabledForStyle[unit.style] and not unit.isTarget)
+end
 
-  -- Check for TPFrame.Active to prevent accessing the personal resource bar
-  local plate = GetNamePlateForUnit("mouseover")
-  local tp_frame = plate and plate.TPFrame
-  if tp_frame and tp_frame.Active then
-    HideMouseoverHighlightFrame()
+local function MouseoverOnLeave(tp_frame)
+  tp_frame.visual.Healthbar.MouseoverHighlight:Hide()
+end
 
-    local unit = tp_frame.unit
-    unit.isMouseover = true
-    tp_frame.visual.Healthbar.MouseoverHighlight:SetShown(tp_frame.style.highlight.show and TargetHighlightEnabledForStyle[unit.style] and not unit.isTarget)
-
-    CurrentMouseoverUnitID = tp_frame.unit.unitid
-    CurrentMouseoverPlate = tp_frame
-    MouseoverHighlightFrame:Show()
-
-    PublishEvent("MouseoverOnEnter", tp_frame)
+local function TargetLost(tp_frame)
+  --local plate = Addon.PlatesByUnit["mouseover"]
+  --if plate and plate = tp_frame.Parent then
+  if UnitIsUnit("mouseover", tp_frame.unit.unitid) then
+    MouseoverOnEnter(tp_frame)
   end
 end
 
-SubscribeEvent(Element, "PLAYER_TARGET_CHANGED", Element.UPDATE_MOUSEOVER_UNIT)
---SubscribeEvent(Element, "PLAYER_FOCUS_CHANGED", Element.UPDATE_MOUSEOVER_UNIT)
+SubscribeEvent(Element, "MouseoverOnEnter", MouseoverOnEnter)
+SubscribeEvent(Element, "MouseoverOnLeave", MouseoverOnLeave)
+SubscribeEvent(Element, "TargetGained", MouseoverOnLeave)
+SubscribeEvent(Element, "TargetLost", TargetLost)

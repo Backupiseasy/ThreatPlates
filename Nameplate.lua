@@ -331,15 +331,12 @@ local NON_NAMEPLATE_UNITIDs = {
   softenemy = true,
   softfriend = true,
   softinteract = true,
+  mouseover = true,
 }
 
 function Addon:GetThreatPlateForUnit(unitid)
   -- Skip special unitids (they are updated via their nameplate unitid) and personal nameplate
   if not unitid or unitid == "player" or UnitIsUnit("player", unitid) then return end
-
-  -- if not string.match(unitid, "nameplate%d%d?$") then 
-  --   print("Non-nameplate unitid passed to GetThreatPlateForUnit:", unitid)
-  -- end
 
   -- Non-nameplate unitids (target, focus, ...) are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED 
   -- and need to be accessed via GetNamePlateForUnit
@@ -1486,9 +1483,6 @@ local function PlayerTargetChanged(target_unitid)
     PublishEvent("TargetLost", tp_frame)
 
     LastTargetPlate[target_unitid] = nil
-
-    -- Update mouseover, if the mouse was hovering over the targeted unit
-    Addon:UPDATE_MOUSEOVER_UNIT()
   end
 
   plate = GetNamePlateForUnit(target_unitid)
@@ -1540,7 +1534,43 @@ function Addon:PLAYER_FOCUS_CHANGED()
   end
 end
 
-Addon.UPDATE_MOUSEOVER_UNIT = Addon.Elements.GetElement("MouseoverHighlight").UPDATE_MOUSEOVER_UNIT
+local MouseoverMonitor
+
+local function UpdateForMouseoverFrequent()
+  if not UnitExists("mouseover") then
+    MouseoverMonitor:Cancel()
+    MouseoverMonitor = nil
+    
+    -- plate is never nil here as it is set before the mouseover monitor is created
+    -- and never deleted somewhere else
+    local tp_frame = PlatesByUnit["mouseover"].TPFrame
+    -- Do this even if nameplate is not active as otherwise, mouseover is not shown correctly
+    -- when switching between TP plates and Blizzard plates
+    tp_frame.unit.isMouseover = false
+
+    if tp_frame.Active then
+      PublishEvent("MouseoverOnLeave", tp_frame)
+    end
+
+    PlatesByUnit["mouseover"] = nil
+  end
+end
+
+function Addon:UPDATE_MOUSEOVER_UNIT()
+  -- Check for TPFrame.Active to prevent accessing the personal resource bar
+  local tp_frame = self:GetThreatPlateForUnit("mouseover")
+  if tp_frame then
+    PlatesByUnit["mouseover"] = tp_frame.Parent
+    tp_frame.unit.isMouseover = true
+
+    PublishEvent("MouseoverOnEnter", tp_frame)
+    
+    if not MouseoverMonitor then
+      MouseoverMonitor = C_Timer.NewTicker(0.1, UpdateForMouseoverFrequent)
+    end 
+
+  end
+end
 
 function Addon:RAID_TARGET_UPDATE()
   for unitid, tp_frame in self:GetActiveThreatPlates() do
