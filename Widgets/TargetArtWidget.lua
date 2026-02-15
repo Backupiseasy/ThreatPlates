@@ -14,7 +14,6 @@ local Widget = Addon.Widgets:NewTargetWidget("TargetArt")
 local abs, max, min = abs, max, min
 
 -- WoW APIs
-local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local SetUnitCursorTexture, PixelUtil_SetPoint = SetUnitCursorTexture, PixelUtil.SetPoint
 local UnitIsUnit = UnitIsUnit
 

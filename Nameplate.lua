@@ -349,8 +349,8 @@ function Addon:GetThreatPlateForUnit(unitid)
   else
     -- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED
     local tp_frame = PlatesByUnit[unitid]
-    if tp_frame and tp_frame.IsActive then
-      return tp_frame
+    if tp_frame and tp_frame.Active then
+        return tp_frame
     end
   end
 end
@@ -1641,9 +1641,6 @@ function Addon:UNIT_FACTION(unitid)
       PublishEvent("FationUpdate", tp_frame)
     end
   else
-    -- GetNamePlateForUnit no longer accepts arenaX or bossX unitids in restricted environments
-    -- if not string.match(unitid, "nameplate%d%d?$") then return end
-
     -- It seems that (at least) in solo shuffles, the UNIT_FACTION event is fired in between the events
     -- NAME_PLATE_UNIT_REMOVE and NAME_PLATE_UNIT_ADDED. As SetNameplateVisibility sets the TPFrame Active, this results 
     -- in Lua errors, so basically we cannot use it here to check if the plate is active.

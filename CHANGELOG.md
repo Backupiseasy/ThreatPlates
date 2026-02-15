@@ -14,6 +14,7 @@ This is a basic version with Midnight support. Expect lots of missing features a
  
 Beta changes:
 * Fixed a Lua error that occurred when hovering over a nameplate [Comment #7849]
+* Fixed a bug that prevented any nameplates from being updated [Comment #7961].
 * Hopefully fixed Lua errors that occurred because of accessing nameplates using unit tokens that are not allowed for this purpose (arenaN, bossN) [Comment #7944, #7939,# 7938, GH-654].
 * Disabled HealerTracker widget because of BG scoreboard restrictions.
 * Fixed a Lua error that occurred due to an error in the code for disabling off-tank detection for Midnight [Comment #7923, #7922, #7916, #7917, #7915].

@@ -10,7 +10,6 @@ local ADDON_NAME, Addon = ...
 -- Lua APIs
 
 -- WoW APIs
-local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local UnitIsUnit = UnitIsUnit
 
 -- ThreatPlates APIs
