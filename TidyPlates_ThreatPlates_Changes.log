@@ -9,7 +9,7 @@
 * Added options to configure parent frame and frame strata of Threat Plates [GH-193, GH-399].
 * Removed Disconnected option for coloring of healthbars.
 * Fixed a bug that prevented the target highlight from being shown in headline view mode.
-* Updated integrated libraries (Ace3 r1387-alpha, LibSharedMedia-3.0 v11.2.1)
+* Updated integrated libraries (Ace3 r1387-alpha, LibSharedMedia-3.0 v11.2.1, LibDualSpec v1.29.0)
 
 ------------------------------------------------------
 12.6.6 (2026-02-10)
