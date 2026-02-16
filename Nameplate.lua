@@ -2016,7 +2016,7 @@ else
   if ENABLE_UNIT_AURA_FOR_CLASS[Addon.PlayerClass] then
     Addon.EventService.SubscribeUnitEvent(Addon, "UNIT_AURA", "player")
     -- UNIT_AURA does not seem to be fired after login (even when buffs are active)
-    UNIT_AURA()
+    Addon:UNIT_AURA()
   end
 end
 

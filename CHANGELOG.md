@@ -13,6 +13,7 @@ This is a basic version with Midnight support. Expect lots of missing features a
 * Updated integrated libraries (Ace3 r1387-alpha, LibSharedMedia-3.0 v11.2.1)
  
 Beta changes:
+* Fixed a Lua error that occurred on Paladins in TBC Classic [Comment #7895].
 * Fixed a Lua error that occurred when opening options which hovering over a nameplate.
 * Fixed a Lua error that occurred when hovering over a nameplate [Comment #7849]
 * Fixed a bug that prevented any nameplates from being updated [Comment #7961].
