@@ -6,7 +6,7 @@ local ADDON_NAME, Addon = ...
 
 -- Lua APIs
 local _
-local type, select, pairs, tostring  = type, select, pairs, tostring 			    -- Local function copy
+local type, select, pairs, tostring  = type, select, pairs, tostring
 local max, gsub, tonumber, math_abs = math.max, string.gsub, tonumber, math.abs
 local next = next
 
@@ -1643,15 +1643,15 @@ function Addon:UNIT_FACTION(unitid)
   else
     -- It seems that (at least) in solo shuffles, the UNIT_FACTION event is fired in between the events
     -- NAME_PLATE_UNIT_REMOVE and NAME_PLATE_UNIT_ADDED. As SetNameplateVisibility sets the TPFrame Active, this results 
-    -- in Lua errors, so basically we cannot use it here to check if the plate is active.
-    local plate = GetNamePlateForUnit(unitid)
+    -- in Lua errors, so basically we cannot use it here to check if the plate is active.    
+    -- local plate = self:GetThreatPlateForUnit(unitid)
     local tp_frame = PlatesByUnit[unitid]
-    if plate and tp_frame then
+    if tp_frame then
       -- If Blizzard-style nameplates are used, we also need to check if TP plates are disabled/enabled now
       -- This also needs to be done no matter if the plate is Active or not as units with
       -- mindcontrolled
       SetUnitAttributeReaction(tp_frame.unit, unitid)
-      SetNameplateVisibility(plate, unitid)
+      SetNameplateVisibility(tp_frame.Parent, unitid)
       if tp_frame.Active then
         StyleModule.Update(tp_frame)
         PublishEvent("FactionUpdate", tp_frame)
