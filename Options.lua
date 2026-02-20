@@ -5651,6 +5651,7 @@ local function CreateLocalizationSettings()
     order = 135,
     type = "group",
     inline = false,
+    hidden = Addon.ExpansionIsAtLeastMidnight,
     args = {
       Texts = {
         name = L["Texts"],
@@ -5661,7 +5662,7 @@ local function CreateLocalizationSettings()
           TransliterateCyrillicLetters = {
             name = L["Transliterate Cyrillic Letters"],
             order = 10,
-            type = "toggle",
+            type = "togglfe",
             width = "double",
             arg = { "Localization", "TransliterateCyrillicLetters" },
           },
@@ -5672,7 +5673,6 @@ local function CreateLocalizationSettings()
         order = 20,
         type = "group",
         inline = true,
-        hidden = Addon.ExpansionIsAtLeastMidnight,
         args = {
           MetricUnitSymbols = {
             name = L["Metric Unit Symbols"],
@@ -7766,6 +7766,7 @@ local function CreateNameOptions()
             order = 60,
             type = "group",
             inline = true,
+            hidden = Addon.ExpansionIsAtLeastMidnight,
             args = {
               NameAbbreviationForEnemyUnits = {
                 name = L["Enemy Units"],

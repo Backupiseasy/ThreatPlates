@@ -146,6 +146,8 @@ local TRANSLITERATE_CHARS = {
 }
 
 function LocalizationModule.TransliterateCyrillicLetters(text)
+  if Addon.ExpansionIsAtLeastMidnight then return text end
+  
   if Addon.db.profile.Localization.TransliterateCyrillicLetters and text and text:len() > 1 then
     local cache_entry = TextCache[text]
     

@@ -53,41 +53,45 @@ end
 function Element.PlateUnitAdded(tp_frame)
   local unit = tp_frame.unit
   
-  local unit_name = TransliterateCyrillicLetters(unit.name)
-  
-  -- Full names in headline view, otherwise
-  if unit.type ~= "PLAYER" and tp_frame.PlateStyle ~= "NameMode" then 
-    local db = ModeSettings[tp_frame.PlateStyle]
-    local name_setting = (unit.reaction == "FRIENDLY" and db.AbbreviationForFriendlyUnits) or db.AbbreviationForEnemyUnits
-    if name_setting ~= "FULL" then
-      -- Use unit name here to not use the transliterated text
-      local cache_entry = TextCache[unit.name]
+  if Addon.ExpansionIsAtLeastMidnight then
+    tp_frame.visual.NameText:SetText(unit.name)
+  else
+    local unit_name = TransliterateCyrillicLetters(unit.name)
+    
+    -- Full names in headline view, otherwise
+    if unit.type ~= "PLAYER" and tp_frame.PlateStyle ~= "NameMode" then 
+      local db = ModeSettings[tp_frame.PlateStyle]
+      local name_setting = (unit.reaction == "FRIENDLY" and db.AbbreviationForFriendlyUnits) or db.AbbreviationForEnemyUnits
+      if name_setting ~= "FULL" then
+        -- Use unit name here to not use the transliterated text
+        local cache_entry = TextCache[unit.name]
 
-      local abbreviated_name = cache_entry.Abbreviation
-      if not abbreviated_name then
-        local parts, count = SplitByWhitespace(unit_name)
-        if name_setting == "INITIALS" then
-          local initials = {}
-          for i, p in pairs(parts) do
-            if i == count then
-              initials[i] = p
-            else
-              initials[i] = string_sub(p, 0, 1)
+        local abbreviated_name = cache_entry.Abbreviation
+        if not abbreviated_name then
+          local parts, count = SplitByWhitespace(unit_name)
+          if name_setting == "INITIALS" then
+            local initials = {}
+            for i, p in pairs(parts) do
+              if i == count then
+                initials[i] = p
+              else
+                initials[i] = string_sub(p, 0, 1)
+              end
             end
+            abbreviated_name = table_concat(initials, ". ")
+          else -- LAST
+            abbreviated_name = parts[count]
           end
-          abbreviated_name = table_concat(initials, ". ")
-        else -- LAST
-          abbreviated_name = parts[count]
+
+          cache_entry.Abbreviation = abbreviated_name
         end
 
-        cache_entry.Abbreviation = abbreviated_name
+        unit_name = abbreviated_name
       end
-
-      unit_name = abbreviated_name
     end
-  end
 
-  tp_frame.visual.NameText:SetText(unit_name)
+    tp_frame.visual.NameText:SetText(unit_name)
+  end
 end
 
 -- Called in processing event: NAME_PLATE_UNIT_REMOVED
