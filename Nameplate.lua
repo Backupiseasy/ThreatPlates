@@ -1579,7 +1579,6 @@ function Addon:RAID_TARGET_UPDATE()
     -- Only update plates that changed
     local previous_target_marker_icon = unit.TargetMarkerIcon
     local previous_mentor_icon = unit.MentorIcon
-    local previous_icon = unit.TargetMarkerIcon or unit.MentorIcon
     SetUnitAttributeTargetMarker(unit, unitid)
     if Addon.ExpansionIsAtLeastMidnight or previous_target_marker_icon ~= unit.TargetMarkerIcon or previous_mentor_icon ~= unit.MentorIcon then
       PublishEvent("TargetMarkerUpdate", tp_frame)
@@ -1638,7 +1637,7 @@ function Addon:UNIT_FACTION(unitid)
     for unitid_frame, tp_frame in self:GetActiveThreatPlates() do
       SetUnitAttributeReaction(tp_frame.unit, unitid_frame)
       StyleModule.Update(tp_frame)
-      PublishEvent("FationUpdate", tp_frame)
+      PublishEvent("FactionUpdate", tp_frame)
     end
   else
     -- It seems that (at least) in solo shuffles, the UNIT_FACTION event is fired in between the events
@@ -1758,7 +1757,7 @@ function Addon.UNIT_SPELLCAST_INTERRUPTED(event, unitid, castGUID, spellID, sour
         castbar:SetStatusBarColor(color.r, color.g, color.b, color.a)
         castbar.FlashTime = CASTBAR_INTERRUPT_HOLD_TIME
 
-        UNIT_SPELLCAST_STOP("UNIT_SPELLCAST_STOP", unitid)
+        self:UNIT_SPELLCAST_STOP("UNIT_SPELLCAST_STOP", unitid)
 
         -- I am assuming that OnStopCasting is called always when a cast is interrupted from
         -- _STOP events
@@ -1768,7 +1767,7 @@ function Addon.UNIT_SPELLCAST_INTERRUPTED(event, unitid, castGUID, spellID, sour
         castbar:Show()
       end
     else
-      UNIT_SPELLCAST_STOP("UNIT_SPELLCAST_STOP", unitid)
+      self:UNIT_SPELLCAST_STOP("UNIT_SPELLCAST_STOP", unitid)
     end
   end
 end

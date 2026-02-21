@@ -11,7 +11,6 @@ local ADDON_NAME, Addon = ...
 local strsplit, pairs = strsplit, pairs
 
 -- WoW APIs
-local UnitThreatSituation = UnitThreatSituation
 local UnitIsPlayer, UnitPlayerControlled = UnitIsPlayer, UnitPlayerControlled
 local UnitThreatSituation, UnitIsUnit, UnitExists = UnitThreatSituation, UnitIsUnit, UnitExists
 local UnitGroupRolesAssignedWrapper = UnitGroupRolesAssigned

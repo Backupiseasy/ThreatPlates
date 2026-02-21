@@ -106,7 +106,7 @@ local function SetFormat(self, show)
     self.InterruptShield:SetAlphaFromBoolean(show, 1, 0)
     
     if not db.castnostop.ShowInterruptShield then
-      self.InterruptShield:Hide(db.castnostop.ShowInterruptShield)
+      self.InterruptShield:Hide()
     end
       
     if not db.castborder.show or not db.castnostop.ShowOverlay then

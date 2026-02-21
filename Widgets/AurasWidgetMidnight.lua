@@ -301,7 +301,7 @@ if Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER then
     local show_aura = db.ShowAllEnemy 
                       or (db.ShowOnEnemyNPCs and unit.type == "NPC")
 
-    if aura.duration and db.HideUnlimitedDuration then
+    if (not aura.duration or aura.duration == 0) and db.HideUnlimitedDuration then
       show_aura = false
     else
       show_aura = db.ShowAllEnemy or (db.ShowOnEnemyNPCs and unit.type == "NPC")

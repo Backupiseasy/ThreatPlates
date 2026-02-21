@@ -34,33 +34,7 @@ Addon.Widgets = WidgetHandler
 ---------------------------------------------------------------------------------------------------
 -- Event handling stuff
 ---------------------------------------------------------------------------------------------------
---local function EventHandler(self, event, ...)
---  local widgets = WidgetHandler.RegisteredEventsByWidget[event]
---
---  if widgets then
---    for widget, func in pairs(widgets) do
---      if func == true then
---        widget[event](widget, ...)
---      else
---        func(event, ...)
---      end
---    end
---  end
---end
---
---local function UnitEventHandler(self, event, ...)
---  local widget = self.Widget
---  local func = widget.RegistedUnitEvents[event]
---
---  if func == true then
---    widget[event](widget, ...)
---  else
---    func(event, ...)
---  end
---end
---
 WidgetHandler.EventHandlerFrame = _G.CreateFrame("Frame", nil, WorldFrame)
---WidgetHandler.EventHandlerFrame:SetScript("OnEvent", EventHandler)
 
 local function SubscribeEvent(widget, event, func)
   EventServiceSubscribe(widget, event, func)
