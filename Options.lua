@@ -5662,7 +5662,7 @@ local function CreateLocalizationSettings()
           TransliterateCyrillicLetters = {
             name = L["Transliterate Cyrillic Letters"],
             order = 10,
-            type = "togglfe",
+            type = "toggle",
             width = "double",
             arg = { "Localization", "TransliterateCyrillicLetters" },
           },
