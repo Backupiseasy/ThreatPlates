@@ -1534,29 +1534,26 @@ function Addon:PLAYER_FOCUS_CHANGED()
   end
 end
 
+
+local function RemoveMouseoverFromNameplate()
+  local tp_frame = PlatesByUnit["mouseover"]
+  if not tp_frame then return end
+  
+  -- Do this even if nameplate is not active as otherwise, mouseover is not shown correctly
+  -- when switching between TP plates and Blizzard plates
+  tp_frame.unit.isMouseover = false
+  if tp_frame.Active then
+    PublishEvent("MouseoverOnLeave", tp_frame)
+  end
+
+  PlatesByUnit["mouseover"] = nil
+end
+  
 local MouseoverMonitor
 
-local function UpdateForMouseoverFrequent()
-  if not UnitExists("mouseover") then
-    MouseoverMonitor:Cancel()
-    MouseoverMonitor = nil
-    
-    -- plate is never nil here as it is set before the mouseover monitor is created
-    -- and never deleted somewhere else
-    local tp_frame = PlatesByUnit["mouseover"]
-    -- Do this even if nameplate is not active as otherwise, mouseover is not shown correctly
-    -- when switching between TP plates and Blizzard plates
-    tp_frame.unit.isMouseover = false
-
-    if tp_frame.Active then
-      PublishEvent("MouseoverOnLeave", tp_frame)
-    end
-
-    PlatesByUnit["mouseover"] = nil
-  end
-end
-
 function Addon:UPDATE_MOUSEOVER_UNIT()
+  RemoveMouseoverFromNameplate()
+
   -- Check for TPFrame.Active to prevent accessing the personal resource bar
   local tp_frame = self:GetThreatPlateForUnit("mouseover")
   if tp_frame then
@@ -1566,9 +1563,14 @@ function Addon:UPDATE_MOUSEOVER_UNIT()
     PublishEvent("MouseoverOnEnter", tp_frame)
     
     if not MouseoverMonitor then
-      MouseoverMonitor = C_Timer.NewTicker(0.1, UpdateForMouseoverFrequent)
+      MouseoverMonitor = C_Timer.NewTicker(0.1, function()
+        if not UnitExists("mouseover") then
+          MouseoverMonitor:Cancel()
+          MouseoverMonitor = nil
+          RemoveMouseoverFromNameplate()
+        end
+      end)
     end 
-
   end
 end
 
