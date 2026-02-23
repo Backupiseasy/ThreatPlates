@@ -262,20 +262,25 @@ end
 ---------------------------------------------------------------------------------------------------
 
 -- Threat System is OP, player is in combat, style is tank or dps
-local function GetCombatColor(unit)
+local function GetColorByThreat(unit)
   -- For styles normal, totem, empty, no threat feedback i shown
   -- Style custom is handled by the part below
   local style = (unit.CustomPlateSettings and StyleModule.GetThreatStyle(unit)) or unit.style
-
-  local color
   if style == "dps" or style == "tank" then
-    color = ThreatColor[style][unit.ThreatLevel]
+    return ThreatColor[style][unit.ThreatLevel]
   end
 
-  return color
+  return
 end
 
-ColorModule.GetThreatColor = GetCombatColor
+-- Threat System is OP, player is in combat, style is tank or dps
+local function GetThreatColor(unit)
+  if not SettingsBase.threat.useHPColor then return end
+
+  return GetColorByThreat(unit)
+end
+
+ColorModule.GetThreatColor = GetColorByThreat
 
 ---------------------------------------------------------------------------------------------------
 -- Color by situation
@@ -350,7 +355,7 @@ end
 
 local function GetUnitColorByCustomStyle(unit)
   local unique_setting = unit.CustomPlateSettings
-  return (unique_setting and unique_setting.UseThreatColor and GetCombatColor(unit)) or GetCustomStyleColor(unit)
+  return (unique_setting and unique_setting.UseThreatColor and GetThreatColor(unit)) or GetCustomStyleColor(unit)
 end
 
 local function GetUnitColorByHealth(tp_frame)
@@ -360,13 +365,13 @@ end
 
 local function GetUnitColorByReaction(tp_frame)
   local unit = tp_frame.unit
-  return GetSituationalColorForHealthbar(unit, tp_frame.PlateStyle) or GetCombatColor(unit) or GetColorByReaction(unit)
+  return GetSituationalColorForHealthbar(unit, tp_frame.PlateStyle) or GetThreatColor(unit) or GetColorByReaction(unit)
 end
 
 local function GetUnitColorByClass(tp_frame)
   local unit = tp_frame.unit
   local plate_style = tp_frame.PlateStyle
-  return GetSituationalColorForHealthbar(unit, plate_style) or GetCombatColor(unit) or GetColorByClass(unit, plate_style) or GetColorByReaction(unit)
+  return GetSituationalColorForHealthbar(unit, plate_style) or GetThreatColor(unit) or GetColorByClass(unit, plate_style) or GetColorByReaction(unit)
 end
 
 local function GetUnitColorCustomPlate(tp_frame)
@@ -387,13 +392,13 @@ end
 
 local function GetUnitColorByReactionName(tp_frame)
   local unit = tp_frame.unit
-  return GetSituationalColorForName(unit, tp_frame.PlateStyle) or GetCombatColor(unit) or GetColorByReaction(unit)
+  return GetSituationalColorForName(unit, tp_frame.PlateStyle) or GetThreatColor(unit) or GetColorByReaction(unit)
 end
 
 local function GetUnitColorByClassName(tp_frame)
   local unit = tp_frame.unit
   local plate_style = tp_frame.PlateStyle
-  return GetSituationalColorForName(unit, plate_style) or GetCombatColor(unit) or GetColorByClass(unit, plate_style) or GetColorByReaction(unit)
+  return GetSituationalColorForName(unit, plate_style) or GetThreatColor(unit) or GetColorByClass(unit, plate_style) or GetColorByReaction(unit)
 end
 
 local function GetUnitColorCustomColorName(tp_frame)
@@ -570,7 +575,7 @@ function ColorModule.UpdateSettings()
   end
 
   -- Subscribe/unsubscribe to events based on settings
-  if SettingsBase.threat.useHPColor or SettingsBase.settings.threatborder.show  and
+  if (SettingsBase.threat.useHPColor or SettingsBase.settings.threatborder.show) and
     not (Settings.FriendlyUnitMode == "HEALTH" and Settings.EnemyUnitMode == "HEALTH" and
       SettingsName.HealthbarMode.FriendlyUnitMode == "HEALTH" and SettingsName.HealthbarMode.EnemyUnitMode == "HEALTH" and
       SettingsName.NameMode.FriendlyUnitMode == "HEALTH" and SettingsName.NameMode.EnemyUnitMode == "HEALTH") then
@@ -654,7 +659,7 @@ function ColorModule.PrintDebug()
   Addon.Logging.Debug("    By CustomPlate:", Addon.Debug:ColorToString(GetUnitColorCustomPlate(tp_frame)))
   local plate_style, unit = tp_frame.PlateStyle, tp_frame.unit
   Addon.Logging.Debug("  - Situational:", Addon.Debug:ColorToString(GetSituationalColorForHealthbar(unit, plate_style)))
-  Addon.Logging.Debug("  - Combat:", Addon.Debug:ColorToString(GetCombatColor(unit, plate_style)))
+  Addon.Logging.Debug("  - Combat:", Addon.Debug:ColorToString(GetThreatColor(unit, plate_style)))
   Addon.Logging.Debug("  - Class:", Addon.Debug:ColorToString(GetColorByClass(unit, plate_style)))
   Addon.Logging.Debug("  - Reaction:", Addon.Debug:ColorToString(GetColorByReaction(unit, plate_style)))
 
