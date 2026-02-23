@@ -301,12 +301,8 @@ if Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER then
     local show_aura = db.ShowAllEnemy 
                       or (db.ShowOnEnemyNPCs and unit.type == "NPC")
 
-    if (not aura.duration or aura.duration == 0) and db.HideUnlimitedDuration then
-      show_aura = false
-    else
-      show_aura = db.ShowAllEnemy or (db.ShowOnEnemyNPCs and unit.type == "NPC")
+    -- if aura.duration and db.HideUnlimitedDuration then
       --(db.ShowDispellable and aura.isStealable) or  (aura.dispelName == "Magic" and db.ShowMagic)
-    end
 
     -- --  local show_aura = db.ShowAllEnemy or (db.ShowOnEnemyNPCs and unit.type == "NPC") or (db.ShowDispellable and aura.isStealable)
     -- local spellfound = self.AuraFilterBuffs[aura.name] or self.AuraFilterBuffs[aura.spellId]
