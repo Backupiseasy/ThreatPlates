@@ -153,12 +153,14 @@ elseif not Addon.ExpansionIsAtLeastMidnight then
   end
 else
   Addon.SetBaseNamePlateSize = function(self) 
-    --local db = Addon.db.profile.settings.healthbar
-    --C_NamePlate.SetNamePlateSize(db.width + 40, db.height + 40)
-    --C_NamePlate.SetNamePlateSize(db.width, db.height)
+    -- # Nameplate Hierarchy, Anchoring, and Scaling
+    local db = Addon.db.profile.settings.healthbar
+    -- local extraXOffset = 10;
+		-- local extraYOffset = setupOptions.healthBarHeight / 2;
+    C_NamePlate.SetNamePlateSize(db.width + 10, db.height + 10)
     
-    --C_NamePlateManager.SetNamePlateHitTestInsets(Enum.NamePlateType.Enemy, -10000, -10000, -10000, -10000)
-    --C_NamePlateManager.SetNamePlateHitTestInsets(Enum.NamePlateType.Friendly, -10000, -10000, -10000, -10000)
+    C_NamePlateManager.SetNamePlateHitTestInsets(Enum.NamePlateType.Enemy, -10000, -10000, -10000, -10000)
+    C_NamePlateManager.SetNamePlateHitTestInsets(Enum.NamePlateType.Friendly, -10000, -10000, -10000, -10000)
   end
 end
 

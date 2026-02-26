@@ -13,6 +13,8 @@ This is a basic version with Midnight support. Expect lots of missing features a
 * Updated integrated libraries (Ace3 r1387-alpha, LibSharedMedia-3.0 v11.2.1)
  
 Beta changes:
+* Fixed a bug where the clickable area was not adjusted when the nameplate size was changed. This only works if parent UI Parent or Nameplate is selected in General - Appearance.
+* Added some basic filters for auras back to Threat Plates.
 * Fixed a bug that prevented threat colouring from being disabled. [Comments #7990 and #7897].
 * Fixed a Lua error that occurred when the aura duration was classified as a secret value in the Auras widget [Comment #8001].
 * Fixed a bug that prevented a nameplate from resetting correctly after the unit lost mouseover focus [Comment #7991].
