@@ -25,6 +25,7 @@ local DebuffTypeColor = DebuffTypeColor
 local UnitIsUnit = UnitIsUnit
 local GetAuraSlots = C_UnitAuras and C_UnitAuras.GetAuraSlots
 local GetAuraDataBySlot, GetAuraDataByAuraInstanceID = C_UnitAuras and C_UnitAuras.GetAuraDataBySlot, C_UnitAuras and C_UnitAuras.GetAuraDataByAuraInstanceID
+local IsAuraFilteredOutByInstanceID, GetAuraDuration = C_UnitAuras.IsAuraFilteredOutByInstanceID, C_UnitAuras.GetAuraDuration
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -85,10 +86,10 @@ local DEBUFF_DISPLAY_COLOR_INFO = {
   [9] = DEBUFF_TYPE_BLEED_COLOR, -- enrage
   [11] = DEBUFF_TYPE_BLEED_COLOR,
 }
-local DispelColorCurve = C_CurveUtil.CreateColorCurve()
-DispelColorCurve:SetType(Enum.LuaCurveType.Step)
+local DispellColorCurve = C_CurveUtil.CreateColorCurve()
+DispellColorCurve:SetType(Enum.LuaCurveType.Step)
 for i, c in pairs(DEBUFF_DISPLAY_COLOR_INFO) do
-  DispelColorCurve:AddPoint(i, c)
+  DispellColorCurve:AddPoint(i, c)
 end
 
 local DISPELL_TYPE_NAME = {
@@ -233,81 +234,62 @@ Widget.FILTER_FUNCTIONS = {
   Allow = FilterAllowlist,
 }
 
-if Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER then
-  function Widget:FilterFriendlyDebuffsBySpell(db, aura, AuraFilterFunction)    
-    local show_aura = db.ShowAllFriendly --or
-    --                   (db.ShowBlizzardForFriendly and (aura.nameplateShowAll or (aura.nameplateShowPersonal and aura.CastByPlayer))) or
-    --                   (db.ShowDispellable and aura.isStealable) or
-    --                   (db.ShowBoss and aura.isBossAura) or
-    --                   (aura.dispelName and db.FilterByType[self.AURA_TYPE[aura.dispelName]])
+function Widget:FilterFriendlyDebuffsBySpell(db, aura, AuraFilterFunction, unit)    
+  local show_aura = 
+    db.ShowAllFriendly
+    --(db.ShowBlizzardForFriendly and (aura.nameplateShowAll or (aura.nameplateShowPersonal and aura.CastByPlayer))) or
+    or (db.ShowDispellable and aura.IsDispellable)
+    --(db.ShowBoss and aura.isBossAura) or
+    --(aura.dispelName and db.FilterByType[self.AURA_TYPE[aura.dispelName]])
 
-    -- local spellfound = self.AuraFilterDebuffs[aura.name] or self.AuraFilterDebuffs[aura.spellId]
+  return show_aura
+end
 
-    -- return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer)
-    
-    return show_aura
-  end
+function Widget:FilterEnemyDebuffsBySpell(db, aura, AuraFilterFunction, unit)
+  local show_aura = 
+    db.ShowAllEnemy 
+    or (db.ShowOnlyMine and aura.CastByPlayer) 
+    --or (db.ShowBlizzardForEnemy and (aura.IsImportant or aura.CastByPlayer))
 
-  function Widget:FilterEnemyDebuffsBySpell(db, aura, AuraFilterFunction)
-    local show_aura = db.ShowAllEnemy 
-                      or (db.ShowOnlyMine and aura.CastByPlayer) 
-                      --or (db.ShowBlizzardForEnemy and aura.isNameplateOnly)
+  return show_aura
+end
 
-    -- local spellfound = self.AuraFilterDebuffs[aura.name] or self.AuraFilterDebuffs[aura.spellId]
+function Widget:FilterFriendlyCrowdControlBySpell(db, aura, AuraFilterFunction, unit)
+  local show_aura = 
+    db.ShowAllFriendly
+    --(db.ShowBlizzardForFriendly and (aura.nameplateShowAll or (aura.nameplateShowPersonal and aura.CastByPlayer))) or
+    or (db.ShowDispellable and aura.IsDispellable)
+    --(db.ShowBoss and aura.isBossAura)
 
-    -- return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer, db.ShowOnlyMine)
+  return show_aura
+end
 
-    return show_aura
-  end
+function Widget:FilterEnemyCrowdControlBySpell(db, aura, AuraFilterFunction, unit)
+  local show_aura = 
+    db.ShowAllEnemy 
+    --or (db.ShowBlizzardForEnemy and (aura.nameplateShowAll or (aura.nameplateShowPersonal and aura.CastByPlayer)))
 
-  function Widget:FilterFriendlyCrowdControlBySpell(db, aura, AuraFilterFunction)
-    local show_aura = db.ShowAllFriendly --or
-    --                   (db.ShowBlizzardForFriendly and (aura.nameplateShowAll or (aura.nameplateShowPersonal and aura.CastByPlayer))) or
-    --                   (db.ShowDispellable and aura.isStealable) or
-    --                   (db.ShowBoss and aura.isBossAura)
+  return show_aura
+end  
 
-    -- local spellfound = self.AuraFilterCrowdControl[aura.name] or self.AuraFilterCrowdControl[aura.spellId]
+function Widget:FilterFriendlyBuffsBySpell(db, aura, AuraFilterFunction, unit)
+  local show_aura = 
+    db.ShowAllFriendly 
+    or (db.ShowOnFriendlyNPCs and unit.type == "NPC") 
+    or (db.ShowOnlyMine and aura.CastByPlayer)
+    -- or (db.ShowPlayerCanApply and aura.canApplyAura)
 
-    -- return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer)
-    
-    return show_aura
-  end
+  return show_aura
+end
 
-  function Widget:FilterEnemyCrowdControlBySpell(db, aura, AuraFilterFunction)
-    local show_aura = db.ShowAllEnemy --or
-    --                   (db.ShowBlizzardForEnemy and (aura.nameplateShowAll or (aura.nameplateShowPersonal and aura.CastByPlayer)))
-
-    -- local spellfound = self.AuraFilterCrowdControl[aura.name] or self.AuraFilterCrowdControl[aura.spellId]
-
-    -- return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer)
-
-    return show_aura
-  end  
-
-  function Widget:FilterFriendlyBuffsBySpell(db, aura, AuraFilterFunction, unit)
-    local show_aura = db.ShowAllFriendly 
-          or (db.ShowOnFriendlyNPCs and unit.type == "NPC") 
-          or (db.ShowOnlyMine and aura.CastByPlayer)
-    --   (db.ShowPlayerCanApply and aura.canApplyAura)
-
-    -- local spellfound = self.AuraFilterBuffs[aura.name] or self.AuraFilterBuffs[aura.spellId]
-
-    --return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer)
-
-    return show_aura
-  end
-
-  function Widget:FilterEnemyBuffsBySpell(db, aura, AuraFilterFunction, unit)
-    local show_aura = db.ShowAllEnemy 
-                      or (db.ShowOnEnemyNPCs and unit.type == "NPC")
+function Widget:FilterEnemyBuffsBySpell(db, aura, AuraFilterFunction, unit)
+  local show_aura = 
+    db.ShowAllEnemy 
+    or (db.ShowOnEnemyNPCs and unit.type == "NPC")
+    or (db.ShowDispellable and aura.IsDispellable)
+    -- (aura.dispelName == "Magic" and db.ShowMagic)
 
     -- if aura.duration and db.HideUnlimitedDuration then
-      --(db.ShowDispellable and aura.isStealable) or  (aura.dispelName == "Magic" and db.ShowMagic)
-
-    -- --  local show_aura = db.ShowAllEnemy or (db.ShowOnEnemyNPCs and unit.type == "NPC") or (db.ShowDispellable and aura.isStealable)
-    -- local spellfound = self.AuraFilterBuffs[aura.name] or self.AuraFilterBuffs[aura.spellId]
-
-    -- show_aura = AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer)
 
     -- -- Checking unlimited auras after filter function results in the filter list not being able to overwrite
     -- -- the "Show Unlimited Buffs" settings
@@ -319,90 +301,7 @@ if Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER then
     --   unit.HasUnlimitedAuras = true
     -- end
 
-    return show_aura
-  end
-else
-  -- ShowBlizzard... is not supported in Classic
-  function Widget:FilterFriendlyDebuffsBySpell(db, aura, AuraFilterFunction)
-    local show_aura = db.ShowAllFriendly or
-      -- (db.ShowBlizzardForFriendly and (aura.nameplateShowAll or (aura.nameplateShowPersonal and aura.CastByPlayer))) or
-      (db.ShowDispellable and aura.isStealable) or
-      (db.ShowBoss and aura.isBossAura) or
-      (aura.dispelName and db.FilterByType[self.AURA_TYPE[aura.dispelName]])
-
-    local spellfound = self.AuraFilterDebuffs[aura.name] or self.AuraFilterDebuffs[aura.spellId]
-
-    return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer)
-  end
-
-  function Widget:FilterEnemyDebuffsBySpell(db, aura, AuraFilterFunction)
-    local show_aura = db.ShowAllEnemy or
-      (db.ShowOnlyMine and aura.CastByPlayer) --or
-      -- (db.ShowBlizzardForEnemy and (aura.nameplateShowAll or (aura.nameplateShowPersonal and aura.CastByPlayer)))
-
-    local spellfound = self.AuraFilterDebuffs[aura.name] or self.AuraFilterDebuffs[aura.spellId]
-
-    return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer, db.ShowOnlyMine)
-  end
-
-  function Widget:FilterFriendlyCrowdControlBySpell(db, aura, AuraFilterFunction)
-    local show_aura = db.ShowAllFriendly or
-      --(db.ShowBlizzardForFriendly and (aura.nameplateShowAll or (aura.nameplateShowPersonal and aura.CastByPlayer))) or
-      (db.ShowDispellable and aura.isStealable) or
-      (db.ShowBoss and aura.isBossAura)
-
-    local spellfound = self.AuraFilterCrowdControl[aura.name] or self.AuraFilterCrowdControl[aura.spellId]
-
-    return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer)
-  end
-
-  function Widget:FilterEnemyCrowdControlBySpell(db, aura, AuraFilterFunction)
-    local show_aura = true
-      --db.ShowAllEnemy or
-      --(db.ShowBlizzardForEnemy and (aura.nameplateShowAll or (aura.nameplateShowPersonal and aura.CastByPlayer)))
-
-    local spellfound = self.AuraFilterCrowdControl[aura.name] or self.AuraFilterCrowdControl[aura.spellId]
-
-    return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer)
-  end
-
-  function Widget:FilterFriendlyBuffsBySpell(db, aura, AuraFilterFunction, unit)
-    local show_aura = db.ShowAllFriendly or
-      (db.ShowOnFriendlyNPCs and unit.type == "NPC") or
-      (db.ShowOnlyMine and aura.CastByPlayer) or
-      (db.ShowPlayerCanApply and aura.canApplyAura)
-
-    local spellfound = self.AuraFilterBuffs[aura.name] or self.AuraFilterBuffs[aura.spellId]
-
-    return AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer)
-  end
-
-  function Widget:FilterEnemyBuffsBySpell(db, aura, AuraFilterFunction, unit)
-    local show_aura
-    if aura.duration <= 0 and db.HideUnlimitedDuration then
-      show_aura = false
-    else
-      show_aura = db.ShowAllEnemy or (db.ShowOnEnemyNPCs and unit.type == "NPC") or (db.ShowDispellable and aura.isStealable) or
-        (aura.dispelName == "Magic" and db.ShowMagic)
-    end
-
-    --  local show_aura = db.ShowAllEnemy or (db.ShowOnEnemyNPCs and unit.type == "NPC") or (db.ShowDispellable and aura.isStealable)
-    local spellfound = self.AuraFilterBuffs[aura.name] or self.AuraFilterBuffs[aura.spellId]
-
-    show_aura = AuraFilterFunction(show_aura, spellfound, aura.CastByPlayer)
-
-    -- Checking unlimited auras after filter function results in the filter list not being able to overwrite
-    -- the "Show Unlimited Buffs" settings
-    if show_aura and (aura.duration <= 0) then
-      show_aura =  db.ShowUnlimitedAlways or
-        (db.ShowUnlimitedInCombat and unit.InCombat) or
-        (db.ShowUnlimitedInInstances and Addon.IsInInstance) or
-        (db.ShowUnlimitedOnBosses and unit.IsBossOrRare)
-      unit.HasUnlimitedAuras = true
-    end
-
-    return show_aura
-  end
+  return show_aura
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -493,88 +392,77 @@ end
 -- Auras Module / Handler 
 ---------------------------------------------------------------------------------------------------
 
-local UnitAuraWrapper
-local ProcessAllUnitAuras
-
--- Defined here as it's used for configuration mode even in Mainline
-local function ProcessAllUnitAurasClassic(unitid, effect)
-  local _
-  local unit_auras = {}
-
-  for i = 1, 40 do
-    local aura = {}
-
-    aura.name, aura.icon, aura.applications, aura.dispelName, aura.duration, aura.expirationTime, aura.sourceUnit,
-      aura.isStealable, aura.nameplateShowPersonal, aura.spellId, aura.canApplyAura, aura.isBossAura, _, aura.nameplateShowAll =
-      UnitAuraWrapper(unitid, i, effect)
-
-    if aura.name then 
-      aura.auraInstanceID = i
-
-      aura.duration = aura.duration or 0
-
-      unit_auras[#unit_auras + 1] = aura
-      -- if aura.sourceUnit == "player" then
-      --   Addon.Logging.Debug("Aura:", aura.name, "=> ID:", aura.spellId)
-      -- end
-    else
-      break
-    end
-  end
-
-  return unit_auras
-end
-
 -- UnitAuraSlots: BfA - Patch 8.2.5 (2019-09-24): Added.
 -- C_UnitAuras.GetAuraSlots: DF - Patch 10.2.5 (2024-01-16): Deprecated. Replaced by C_UnitAuras.GetAuraSlots.
-if Addon.IS_MAINLINE then  
-  ProcessAllUnitAuras = function(unitid, effect)
-    -- local _
-    -- local unit_auras = {}
+local function ProcessAllUnitAuras(unitid, effect)
+  -- local aura_max_display = (effect == "HARMFUL" and DEBUFF_MAX_DISPLAY) or BUFF_MAX_DISPLAY
 
-    -- local aura_max_display = (effect == "HARMFUL" and DEBUFF_MAX_DISPLAY) or BUFF_MAX_DISPLAY
+  -- -- AuraUtil.ForEachAura(unitid, effect, BUFF_MAX_DISPLAY, function(unit_aura_info)
+  -- --   unit_aura_info.duration = unit_aura_info.duration or 0
+  -- --   unit_auras[#unit_auras + 1] = unit_aura_info
+  -- --   -- Addon.Logging.Debug("Aura:", aura.name, "=> ID:", aura.spellId)
+  -- -- end, true)
 
-    -- -- AuraUtil.ForEachAura(unitid, effect, BUFF_MAX_DISPLAY, function(unit_aura_info)
-    -- --   unit_aura_info.duration = unit_aura_info.duration or 0
-    -- --   unit_auras[#unit_auras + 1] = unit_aura_info
-    -- --   -- Addon.Logging.Debug("Aura:", aura.name, "=> ID:", aura.spellId)
-    -- -- end, true)
+  -- -- AuraUtil.ForEachAura:
+  -- local continuation_token
+  -- repeat
+  --   -- continuationToken is the first return value of UnitAuraSlots
+  --   local slots = { GetAuraSlots(unitid, effect, aura_max_display, continuation_token) }
+  --   continuation_token = slots[1]
 
-    -- -- AuraUtil.ForEachAura:
-    -- local continuation_token
-    -- repeat
-    --   -- continuationToken is the first return value of UnitAuraSlots
-    --   local slots = { GetAuraSlots(unitid, effect, aura_max_display, continuation_token) }
-    --   continuation_token = slots[1]
+  --   for i = 2, #slots do
+  --     local unit_aura_info = GetAuraDataBySlot(unitid, slots[i])  
+  --     -- Without this check, there will be a Lua error when a priest mindcontrolls another player as 
+  --     -- unit_aura_info is nil here in this case
+  --     if type(unit_aura_info) ~= nil then
+  --       --unit_aura_info.duration = unit_aura_info.duration or 0
+  --       unit_auras[#unit_auras + 1] = unit_aura_info
 
-    --   for i = 2, #slots do
-    --     local unit_aura_info = GetAuraDataBySlot(unitid, slots[i])  
-    --     -- Without this check, there will be a Lua error when a priest mindcontrolls another player as 
-    --     -- unit_aura_info is nil here in this case
-    --     if type(unit_aura_info) ~= nil then
-    --       --unit_aura_info.duration = unit_aura_info.duration or 0
-    --       unit_auras[#unit_auras + 1] = unit_aura_info
+  --       print(unit_aura_info.name, "=>", not C_UnitAuras.IsAuraFilteredOutByInstanceID(unitid, unit_aura_info.auraInstanceID, 'HARMFUL|PLAYER'))
+  --     end
+  --   end
+  -- until continuation_token == nil
 
-    --       print(unit_aura_info.name, "=>", not C_UnitAuras.IsAuraFilteredOutByInstanceID(unitid, unit_aura_info.auraInstanceID, 'HARMFUL|PLAYER'))
-    --     end
-    --   end
-    -- until continuation_token == nil
+  -- return unit_auras
 
-    -- return unit_auras
+  local unit_auras = {}
+  local function HandleAura(aura)
+    unit_auras[#unit_auras + 1] = aura
+    
+    aura.effect = effect
+    aura.CastByPlayer = not IsAuraFilteredOutByInstanceID(unitid, aura.auraInstanceID, effect .. "|PLAYER") -- aura.isFromPlayerOrPlayerPet, aura.nameplateShowPersonal
+    --aura.IsRaid = not IsAuraFilteredOutByInstanceID(unitid, aura.auraInstanceID, effect .. "|RAID") -- aura.isRaid
+    -- CANCELABLE, NOT_CANCELABLE
+    --aura.fd = not IsAuraFilteredOutByInstanceID(unitid, aura.auraInstanceID, effect .. "|INCLUDE_NAME_PLATE_ONLY") -- aura.isNameplateOnly
+    --aura.IsExternalDefensive = not IsAuraFilteredOutByInstanceID(unitid, aura.auraInstanceID, effect .. "|EXTERNAL_DEFENSIVE")
+    aura.CrowdControl = not IsAuraFilteredOutByInstanceID(unitid, aura.auraInstanceID, effect .. "|CROWD_CONTROL")    
+    --aura.IsRaidInCombat = not IsAuraFilteredOutByInstanceID(unitid, aura.auraInstanceID, effect .. "|RAID_IN_COMBAT")
+    aura.IsDispellable = not IsAuraFilteredOutByInstanceID(unitid, aura.auraInstanceID, effect .. "|RAID_PLAYER_DISPELLABLE")
+    --aura.IsBigDefensive = not IsAuraFilteredOutByInstanceID(unitid, aura.auraInstanceID, effect .. "|BIG_DEFENSIVE")
+    --aura.IsImportant = not IsAuraFilteredOutByInstanceID(unitid, aura.auraInstanceID, effect .. "|IMPORTANT")
+    
+    -- if aura.CastByPlayer or aura.IsRaid or aura.IsExternalDefensive or aura.CrowdControl or aura.IsRaidInCombat or
+    --   aura.IsDispellable or aura.IsBigDefensive or aura.IsImportant then
+    --   print("Aura:", aura.name, "=>", 
+    --     aura.CastByPlayer and "PLAYER" or "", 
+    --     aura.IsRaid and "RAID" or "", 
+    --     --aura.IsNameplateOnly and "NAME_PLATE_ONLY" or "", 
+    --     aura.IsExternalDefensive and "EXTERNAL_DEFENSIVE" or "", 
+    --     aura.CrowdControl and "CROWD_CONTROL" or "", 
+    --     aura.IsRaidInCombat and "RAID_IN_COMBAT" or "", 
+    --     aura.IsDispellable and "RAID_PLAYER_DISPELLABLE" or "", 
+    --     aura.IsBigDefensive and "BIG_DEFENSIVE" or "", 
+    --     aura.IsImportant and "IMPORTANT" or "")
 
-    local unit_auras = {}
-    local function HandleAura(aura)
-      unit_auras[#unit_auras + 1] = aura
-      
-      aura.CastByPlayer = not C_UnitAuras.IsAuraFilteredOutByInstanceID(unitid, aura.auraInstanceID, "HARMFUL|PLAYER")
-    end
-    AuraUtil.ForEachAura(unitid, effect, nil, HandleAura, true)
-
-    return unit_auras
+    --     print("Filter:", aura.isNameplateOnly)
+    --     -- Secret values: 
+    --     -- aura.nameplateShowAll, aura.nameplateShowPersonal
+    -- end
   end
-else
-  UnitAuraWrapper = UnitAura -- will be overwritten for Classic (but not for TBC or Wrath Classic)
-  ProcessAllUnitAuras = ProcessAllUnitAurasClassic
+
+  AuraUtil.ForEachAura(unitid, effect, nil, HandleAura, true)
+
+  return unit_auras
 end
 
 local function IgnoreAuraUpdateForUnit(widget_frame, unit)
@@ -657,424 +545,24 @@ function Widget:UNIT_AURA(unitid, update_info)
   end
 end
 
--- Struct UnitAuraInfo: https://wowpedia.fandom.com/wiki/Struct_UnitAuraInfo
---   dispelName is the UnitAura return value for the auraType ("" is enrage, nil/"none" for unspecified and "Disease", "Poison", "Curse", "Magic" for other types.	
--- local function UnitAuraEventHandler(widget_frame, event, unitid, unit_aura_update_info)
---   local unit = widget_frame.unit
-
---   if widget_frame.Active then
---     if unit_aura_update_info == nil or unit_aura_update_info.isFullUpdate then
---       widget_frame.Widget:UpdateAuras(widget_frame, widget_frame.unit)
---     else
---       if IgnoreAuraUpdateForUnit(widget_frame, unit) then return end
-
---       -- Current implementation: updates a aura grid frame only if either a shown aura is removed or a new
---       -- aura should be shown (considering filter settings)
---       local aura_grid_update = AuraGridUpdate
---       aura_grid_update.Buffs = false
---       aura_grid_update.Debuffs = false
---       aura_grid_update.CrowdControl = false
-
---       local db = Widget.db
---       local enabled_cc = (unit.reaction == "FRIENDLY" and db.CrowdControl.ShowFriendly) or db.CrowdControl.ShowEnemy
-
---       if unit_aura_update_info.addedAuras ~= nil then
---         for _, unit_aura_info in ipairs(unit_aura_update_info.addedAuras) do
---           local is_crowdcontrol_aura = enabled_cc -- and Widget.CROWD_CONTROL_SPELLS[unit_aura_info.spellId]
-
---           FlagAuraGridForUpdate(aura_grid_update, is_crowdcontrol_aura, unit_aura_info.isHarmful)
---           -- print("  Add =>", aura_data.name, ":", grid_name)            
---         end                  
---       end
-
---       if unit_aura_update_info.updatedAuraInstanceIDs ~= nil then
---         for _, aura_instance_id in ipairs(unit_aura_update_info.updatedAuraInstanceIDs) do
---           local aura_frame = widget_frame.UnitAuras[aura_instance_id]
---           if aura_frame then
---             -- Just update the corresponding aura_frame
---             local aura_data = aura_frame.AuraData
-            
---             -- local grid_name = (aura_data.CrowdControl and "CrowdControl") or (aura_data.effect == "HARMFUL" and "Debuffs") or "Buffs"
---             -- print("  Update =>", aura_data.name, ":", grid_name, "-", aura_data.auraInstanceID)        
-
---             -- Update the aura data from the unit_aura_info
---             local unit_aura_info = GetAuraDataByAuraInstanceID(unitid, aura_data.auraInstanceID)
---             -- If unit_aura_info is nil, this means that the aura expired, so nothing to do here
---             if unit_aura_info then
---               -- for k, v in pairs(unit_aura_info) do
---               --   if unit_aura_info[k] ~= aura_data.UnitAuraInfo[k] and 
---               --     k ~= "points" and k ~= "expirationTime" and k ~= "applications" and k ~= "duration" and k ~= "sourceUnit" then
---               --     print("  -", k, ":", aura_data.UnitAuraInfo[k], "=>", unit_aura_info[k])
---               --   end
---               -- end
-
---               -- Updates for the following attributes seem to be happinging and relevant:
---               --   applications (stacks)
---               --   duration (including expirationTime)
---               -- Irrelevant are:
---               --   points
---               --   sourceUnit - What does this mean? Is the aura overwritten? E.g. mouseover => nameplateXX, nil => nameplateXX
-
---               -- If the attribute changes that is used for sorting, we have to update the whole grid
---               -- ? Is it really worth handling this special case considering the performance impact?
---               --FlagAuraGridForUpdate(aura_grid_update, aura_data.CrowdControl, aura_data.effect == "HARMFUL")
-
---               FlagAuraGridForUpdate(aura_grid_update, aura_data.CrowdControl, aura_data.effect == "HARMFUL")
-
---               -- if unit_aura_info.duration ~= aura_data.duration and (db.SortOrder == "Duration" or db.SortOrder == "TimeLeft") then
---               --   FlagAuraGridForUpdate(aura_grid_update, aura_data.CrowdControl, aura_data.effect == "HARMFUL")
---               -- else
---               --   aura_data.applications = unit_aura_info.applications
---               --   -- Although only the duration change is imporatant, we need to update expirationTime as well as
---               --   -- otherwise calculation of the remaining duration would be wrong
---               --   aura_data.duration = unit_aura_info.duration
---               --   aura_data.expirationTime = unit_aura_info.expirationTime
-                
---               --   -- ! This is not necessary, if the corresponding aura grid will be updated anyway ...
---               --   aura_grid_update.AuraFrames[#aura_grid_update.AuraFrames + 1] = aura_frame
---               -- end
---             end
---           end                  
---         end
---       end
-    
---       if unit_aura_update_info.removedAuraInstanceIDs ~= nil then
---         for _, aura_instance_id in ipairs(unit_aura_update_info.removedAuraInstanceIDs) do
---           local aura_frame = widget_frame.UnitAuras[aura_instance_id]
---           if aura_frame then
---             FlagAuraGridForUpdate(aura_grid_update, aura_frame.AuraData.CrowdControl, aura_frame.AuraData.effect == "HARMFUL")
---             -- print("  Delete =>", aura_data.name, ":", grid_name)            
---           end                  
---         end
---       end      
-
---       local update_buff_grid, update_debuff_grid, update_cc_grid = aura_grid_update.Buffs, aura_grid_update.Debuffs, aura_grid_update.CrowdControl
-
---       if unit.reaction == "FRIENDLY" then -- friendly or better
---         local buff_aura_grid = (db.SwitchAreaByReaction and widget_frame.Debuffs) or widget_frame.Buffs
---         local debuff_aura_grid = (db.SwitchAreaByReaction and widget_frame.Buffs) or widget_frame.Debuffs        
-
---         if update_buff_grid then
---           Widget:UpdateUnitAuras(buff_aura_grid, unit, db.Buffs.ShowFriendly, false, Widget.FilterFriendlyBuffsBySpell, Widget.FilterFriendlyCrowdControlBySpell, "HELPFUL", db.Buffs.FilterMode)
---         end
---         if update_debuff_grid or update_cc_grid then
---           Widget:UpdateUnitAuras(debuff_aura_grid, unit, db.Debuffs.ShowFriendly, enabled_cc, Widget.FilterFriendlyDebuffsBySpell, Widget.FilterFriendlyCrowdControlBySpell, "HARMFUL", db.Debuffs.FilterMode)
---         end
---       else
---         if update_buff_grid then
---           Widget:UpdateUnitAuras(widget_frame.Buffs, unit, db.Buffs.ShowEnemy, false, Widget.FilterEnemyBuffsBySpell, Widget.FilterEnemyCrowdControlBySpell, "HELPFUL", db.Buffs.FilterMode)
---         end
---         if update_debuff_grid or update_cc_grid then
---           Widget:UpdateUnitAuras(widget_frame.Debuffs, unit, db.Debuffs.ShowEnemy, enabled_cc, Widget.FilterEnemyDebuffsBySpell, Widget.FilterEnemyCrowdControlBySpell, "HARMFUL", db.Debuffs.FilterMode)
---         end
---       end
-
---       if AuraGridUpdateForUnitNotNecessary(widget_frame, unit) then return end
-      
---       -- Aura grids have to be updated here only when auras changed, not necessarily because ActiveAuras > 0
---       if update_buff_grid then
---         Widget:UpdatePositionAuraGrid(widget_frame, "Buffs", unit.style)
---       -- else
---       --   for i = #aura_grid_update.BuffsAuraFrames, 1, -1 do
---       --     Widget.Buffs:UpdateAuraInformation(aura_grid_update.BuffsAuraFrames[i])
---       --     aura_grid_update.BuffsAuraFrames[i] = nil
---       --   end
---       end
---       if update_debuff_grid then
---         Widget:UpdatePositionAuraGrid(widget_frame, "Debuffs", unit.style)
---       -- else
---       --   for i = #aura_grid_update.DebuffsAuraFrames, 1, -1 do
---       --     Widget.Debuffs:UpdateAuraInformation(aura_grid_update.DebuffsAuraFrames[i])
---       --     aura_grid_update.DebuffsAuraFrames[i] = nil
---       --   end
---       end
---       if update_cc_grid then
---         Widget:UpdatePositionAuraGrid(widget_frame, "CrowdControl", unit.style)
---       -- else
---       --   for i = #aura_grid_update.CrowdControlAuraFrames, 1, -1 do
---       --     Widget.CrowdControl:UpdateAuraInformation(aura_grid_update.CrowdControlAuraFrames[i])
---       --     aura_grid_update.CrowdControlAuraFrames[i] = nil
---       --   end
---       end
-
---       -- Update aura frames directly if their aura grid was not updated anyway
---       --for i = 1, #aura_grid_update.AuraFrames do
---       for i = #aura_grid_update.AuraFrames, 1, -1 do
---         local aura_frame = aura_grid_update.AuraFrames[i]
---         local aura_data = aura_frame.AuraData
-
---         if not update_cc_grid and aura_data.CrowdControl then
---           Widget.CrowdControl:UpdateAuraInformation(aura_frame)
---         elseif not update_debuff_grid and aura_data.effect == "HARMFUL" then
---           Widget.Debuffs:UpdateAuraInformation(aura_frame)
---         elseif not update_buff_grid and aura_data.effect == "HELPFUL" then
---           Widget.Buffs:UpdateAuraInformation(aura_frame)
---         end
-
---         aura_grid_update.AuraFrames[i] = nil
---       end
-
---       if widget_frame.Buffs.ActiveAuras > 0 or widget_frame.Debuffs.ActiveAuras > 0 or widget_frame.CrowdControl.ActiveAuras > 0 then
---         widget_frame.CrowdControl:SetShown(enabled_cc)
---         widget_frame:Show()
---       else
---         widget_frame:Hide()
---       end
---     end
---   end
--- end
-
--------------------------------------------------------------
--- Widget Object Functions
--------------------------------------------------------------
-
--- local function ShouldShowAura(widget_frame, unit, aura)
---   -- CastByPlayer is also used by aura trigger custom styles (only my auras)
-  
---   -- aura.caster => aura.sourceUnit
---   -- aura.StealOrPurge => aura.isStealable
---   -- aura.texture => aura.icon
---   -- aura.stacks => aura.applications
---   -- aura.expiration => aura.expirationTime
---   -- Fehlt: 
---   --   aura.dispelName
-  
---   -- Neu:
---   --   aura.isRaid
---   --   aura.isNameplateOnly
---   --   aura.timeMod?
---   --   aura.auraInstanceID
---   --   aura.isHarmful, aura.isHelpful
-  
---   aura.CastByPlayer = aura.isFromPlayerOrPlayerPet or aura.sourceUnit == "vehicle"
-
---   UnitStyle_AuraTrigger_CheckIfActive(unit, aura.spellId, aura.name, aura.CastByPlayer)
-
---   -- Workaround or hack, currently, for making aura-triggered custom nameplates work even on nameplates that do
---   -- not show auras currently without a big overhead
---   if widget_frame.HideAuras then return false end
-
-  
---   local show_aura = false
-  
---   local db_auras = (aura.isHarmful and Widget.db.Debuffs) or Widget.db.Buffs
---   local db_crowdcontrol = Widget.db.CrowdControl
-
---   local AuraFilterFunction = Widget.FILTER_FUNCTIONS[db_auras.FilterMode]
---   local AuraFilterFunctionCC = Widget.FILTER_FUNCTIONS[db_crowdcontrol.FilterMode]
-
---   local enabled_auras, enabled_cc, SpellFilter, SpellFilterCC
---   if unit.reaction == "FRIENDLY" then 
---     if aura.isHarmful then
---       enabled_auras = Widget.db.Debuffs.ShowFriendly
---       enabled_cc = db_crowdcontrol.ShowFriendly
---       SpellFilter = Widget.FilterFriendlyDebuffsBySpell
---     else
---       enabled_auras = Widget.db.Buffs.ShowFriendly
---       enabled_cc = false
---       SpellFilter = Widget.FilterFriendlyBuffsBySpell
---     end
---     SpellFilterCC = Widget.FilterFriendlyCrowdControlBySpell
---   else
---     if aura.isHarmful then
---       enabled_auras = Widget.db.Debuffs.ShowEnemy
---       enabled_cc = db_crowdcontrol.ShowEnemy
---       SpellFilter = Widget.FilterEnemyDebuffsBySpell
---     else
---       enabled_auras = Widget.db.Buffs.ShowEnemy
---       enabled_cc = false
---       SpellFilter = Widget.FilterEnemyBuffsBySpell
---     end
---     SpellFilterCC = Widget.FilterEnemyCrowdControlBySpell
---   end
-
---   -- --
---   -- local filters = {
---   --   FRIENDLY = {
---   --     [true] = {
---   --       EnabledAuras = Widget.db.Debuffs.ShowFriendly,
---   --       EnabledCC = db_crowdcontrol.ShowFriendly,
---   --       SpellFilter = Widget.FilterFriendlyDebuffsBySpell,
---   --       SpellFilterCC = Widget.FilterFriendlyCrowdControlBySpell,
---   --     },
---   --     [false] = {
---   --       EnabledAuras = Widget.db.Buffs.ShowFriendly,
---   --       EnabledCC = false,
---   --       SpellFilter = Widget.FilterFriendlyBuffsBySpell,
---   --       SpellFilterCC = Widget.FilterFriendlyCrowdControlBySpell,
---   --     }
---   --   },
---   --   HOSTILE = {
---   --     [true] = {
---   --     },
---   --     [false] = {
---   --     }
---   --   }
---   -- }
---   -- filters.NEUTRAL = filters.HOSTILE
---   -- local filter_unit = filters[unit.reaction][aura.isHarmful]
-
---   aura.effect = (aura.isHarmful and "HARMFUL") or "HELPFUL"
---   aura.CrowdControl = (enabled_cc and Widget.CROWD_CONTROL_SPELLS[aura.spellId])
-
---   if aura.CrowdControl then
---     show_aura = SpellFilterCC(Widget, Widget.db, aura, AuraFilterFunctionCC)
-    
---     -- Show crowd control auras that are not shown in Blizard mode as normal debuffs
---     if not show_aura and enabled_auras then
---       aura.CrowdControl = false
---       show_aura = SpellFilter(Widget, db_auras, aura, AuraFilterFunction)
---     end
---   elseif enabled_auras then
---     show_aura = SpellFilter(Widget, db_auras, aura, AuraFilterFunction, unit)
---   end
-
---   if show_aura then
---     aura.color = Widget:GetColorForAura(aura)
---     aura.priority = Widget.PRIORITY_FUNCTIONS[Widget.db.SortOrder](aura)
---   end
-
---   return show_aura
--- end
-
--- function Widget:UpdateUnitAurasTest(aura_grid_frame, unit, enabled_auras, enabled_cc, SpellFilter, SpellFilterCC, effect, filter_mode)
---   --AuraUtil.ForEachAura("player", effect, nil, HandleAura, true)
-
---   local function HandleAura(aura_info)
---     print("====> Aura:", aura_info.name)
---     Addon.Debug.PrintTable(aura_info)
---   end
-
---   local function ForEachAuraHelper(unit, filter, func, continuationToken, ...)
--- 		-- continuationToken is the first return value of UnitAuraSlots()
--- 		local n = select('#', ...);
--- 		for i=1, n do
--- 			local slot = select(i, ...);
---       local auraInfo = C_UnitAuras.GetAuraDataBySlot(unit, slot);
---       func(auraInfo);
--- 		end
--- 		return continuationToken;
--- 	end
-
---   local unit = "player"
-  
---   local continuation_token
---   repeat
---     -- continuationToken is the first return value of UnitAuraSltos
---     local slots = { UnitAuraSlots(unit, effect, BUFF_MAX_DISPLAY, continuation_token) }
---     continuation_token = slots[1]
-
---     for i = 2, #slots do
---       local aura_data = C_UnitAuras.GetAuraDataBySlot(unit, slots[i])      
---       print("====> Aura:", aura_data.name)
---       Addon.Debug.PrintTable(aura_data)
-
---       print(">>>>", UnitAuraBySlot(unit, slots[i]))
---     end
-
---     --continuationToken = ForEachAuraHelper(unit, effect, HandleAura, UnitAuraSlots(unit, effect, nil, continuationToken))
---   until continuation_token == nil
--- end
-  
--- function Widget:HandleAura(widget_frame, unit, slot, effect, enabled_auras, enabled_cc, SpellFilter, SpellFilterCC, filter_mode)
---   local db = self.db
---   local db_auras = (effect == "HARMFUL" and db.Debuffs) or db.Buffs
---   local unitid = unit.unitid
---   local UnitAuraList = {}
-
---   local AuraFilterFunction = self.FILTER_FUNCTIONS[filter_mode]
---   local AuraFilterFunctionCC = self.FILTER_FUNCTIONS[db.CrowdControl.FilterMode]
-
---   -- Auras are evaluated by an external function - pre-filtering before the icon grid is populated
---   UnitAuraList[aura_count] = UnitAuraList[aura_count] or {}
---   local aura = UnitAuraList[aura_count]
-
---   -- * Using variable names from UNIT_AURA updatedAuraInfos here to avoid to much copying of variables
---   -- TBC Classic, Retail:
---   -- name, icon, count, dispelName, duration, expirationTime, source, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, castByPlayer, nameplateShowAll, timeMod, ...
---   aura.name, aura.icon, aura.applications, aura.dispelName, aura.duration, aura.expirationTime, aura.sourceUnit,
---     aura.isStealable, aura.nameplateShowPersonal, aura.spellId, aura.canApplyAura, aura.isBossAura, _, aura.nameplateShowAll =
---     UnitAuraWrapper(unitid, slot)
-  
---   -- ShowPesonal: Debuffs  that are shown on Blizzards nameplate, no matter who casted them (and
---   -- nameplateShowAll: Debuffs
---   if not aura.name then 
---     return false
---   end
-
---   -- Addon.Logging.Debug("Aura:", aura.name, "=> ID:", aura.spellId)
-
---   -- CastByPlayer is also used by aura trigger custom styles (only my auras)
---   aura.CastByPlayer = (aura.sourceUnit == "player" or aura.sourceUnit == "pet" or aura.sourceUnit == "vehicle")
---   --aura.CastByPlayer = aura.isFromPlayerOrPlayerPet or aura.sourceUnit == "vehicle"
-
---   UnitStyle_AuraTrigger_CheckIfActive(unit, aura.spellId, aura.name, aura.CastByPlayer)
-
---   -- Cache dispellable debuffs for more efficient checks with the UNIT_AURA event
---   --DispellableDebuffCache[aura.spellId] = aura.isStealable
-
---   -- Workaround or hack, currently, for making aura-triggered custom nameplates work even on nameplates that do
---   -- not show auras currently without a big overhead
---   local show_aura = false
---   if not widget_frame.HideAuras then
---     aura.effect = effect
---     aura.CrowdControl = (enabled_cc and self.CROWD_CONTROL_SPELLS[aura.spellId])
-    
---     -- Store Order/Priority
---     if aura.CrowdControl then
---       show_aura = SpellFilterCC(self, db.CrowdControl, aura, AuraFilterFunctionCC)
-
---       -- Show crowd control auras that are not shown in Blizard mode as normal debuffs
---       if not show_aura and enabled_auras then
---         aura.CrowdControl = false
---         show_aura = SpellFilter(self, db_auras, aura, AuraFilterFunction)
---       end
---     elseif enabled_auras then
---       show_aura = SpellFilter(self, db_auras, aura, AuraFilterFunction, unit)
---     end
-
---     if show_aura then
---       aura.color = self:GetColorForAura(aura)
---       aura.priority = self.PRIORITY_FUNCTIONS[db.SortOrder](aura)
-
---       local aura_data = GetAuraDataBySlot(unitid, slot)   
---       aura.auraInstanceID = aura_data.auraInstanceID
---       aura.AuraData = aura_data
-
---       aura_count = aura_count + 1
---     end
-
---     -- local show_aura_new = ShouldShowAura(widget_frame, unit, aura)
---     -- if show_aura ~= show_aura_new then
---     --   print("Compare:", aura.name, " = ", show_aura, "=> New:", show_aura_new)
---     -- end
---   end
-
---   return show_aura
--- end
-
 function Widget:UpdateUnitAuras(aura_grid_frame, unit, enabled_auras, enabled_cc, SpellFilter, SpellFilterCC, effect, filter_mode)
-  --local aura_grid_frame = widget_frame[aura_type]
-  --local enabled_auras = frame.AuraGrid[aura_type].ShowFriendly
-  --local filter_mode = frame.AuraGrid[aura_type].FilterMode
   local aura_grid = aura_grid_frame.AuraGrid
 
-  -- If debuffs are disabled, but CCs are enabled, we should just hide debuffs, but still process all auras to be able to show CC debuffs
-  if not (enabled_auras or enabled_cc) then 
+  -- If auras are disabled, hide the grid and return an empty list
+  if not enabled_auras then
     aura_grid_frame.ActiveAuras = 0
-    aura_grid:HideNonActiveAuras(aura_grid_frame)
     aura_grid_frame:Hide()
-    return
-  end 
+    aura_grid:HideNonActiveAuras(aura_grid_frame)
+    return {}
+  end
 
-  -- Show the aura grid (for debuffs) as it might be hidden when the nameplate was, e.g., used for friendly units where debuffs&CCs are disabled, 
-  -- and then is re-used for enemy units where these are enabled.
+  -- Show the aura grid – it may have been hidden when the nameplate was used for a unit
+  -- type where this aura category was disabled.
   aura_grid_frame:Show()
 
   local db = self.db
-  -- Optimization for auras sorting
 
-  aura_grid_frame.Filter = effect -- Used for showning the correct tooltip
+  aura_grid_frame.Filter = effect -- used for showing the correct tooltip
   local widget_frame = aura_grid_frame:GetParent()
   unit.HasUnlimitedAuras = false
   local unitid = unit.unitid
@@ -1085,66 +573,41 @@ function Widget:UpdateUnitAuras(aura_grid_frame, unit, enabled_auras, enabled_cc
 
   local unit_auras_to_show = {}
 
-  local unit_auras = ProcessAllUnitAuras(unitid, effect)
+  -- Can do this here as aura tiggers do not work in Midnight right now
+  if widget_frame.HideAuras then return end
+
+  local unit_auras = ProcessAllUnitAuras(unit.unitid, effect)
   for i = 1, #unit_auras do
     local aura = unit_auras[i]
+    local show_aura
 
-    -- if C_Spell.IsSpellImportant(aura.spellId) then
-    --   print("Aura:", aura.name)
-    -- end
+    --UnitStyle_AuraTrigger_CheckIfActive(unit, aura.spellId, aura.name, aura.CastByPlayer)
+    if aura.CrowdControl then
+      show_aura = SpellFilterCC(self, db.CrowdControl, aura, AuraFilterFunctionCC, unit)
 
-    -- CastByPlayer is also used by aura trigger custom styles (only my auras)
-    -- aura.CastByPlayer aura.sourceUnit == "player" or aura.sourceUnit == "pet" or aura.sourceUnit == "vehicle")
-
-    -- Cache dispellable debuffs for more efficient checks with the UNIT_AURA event
-    -- DispellableDebuffCache[aura.spellId] = aura.isStealable
-
-    -- AuraTriggerCheckIfActive(unit, aura.spellId, aura.name, aura.CastByPlayer)
-    
-    -- Workaround or hack, currently, for making aura-triggered custom nameplates work even on nameplates that do
-    -- not show auras currently without a big overhead
-    if not widget_frame.HideAuras then
-      local show_aura
-
-      aura.effect = effect
-      -- aura.CrowdControl = enabled_cc and self.CROWD_CONTROL_SPELLS[aura.spellId]
-      
-      -- Store Order/Priority
-      if aura.CrowdControl then
-
-        show_aura = SpellFilterCC(self, db.CrowdControl, aura, AuraFilterFunctionCC)
-
-        -- Show crowd control auras that are not shown in Blizard mode as normal debuffs
-        if not show_aura and enabled_auras then
-          aura.CrowdControl = false
-          show_aura = SpellFilter(self, db_auras, aura, AuraFilterFunction)
-        end
-      elseif enabled_auras then
+      -- Show crowd control auras that are not shown in Blizard mode as normal debuffs
+      if not show_aura and enabled_auras then
+        aura.CrowdControl = false
         show_aura = SpellFilter(self, db_auras, aura, AuraFilterFunction, unit)
       end
+    elseif enabled_auras then
+      show_aura = SpellFilter(self, db_auras, aura, AuraFilterFunction, unit)
+    end
 
-      if show_aura then
-        aura.color = self:GetColorForAura(aura)
-        -- aura.priority = PRIORITY_FUNCTIONS[db.SortOrder](aura)
+    if show_aura then
+      aura.color = self:GetColorForAura(aura)
+      --aura.priority = PRIORITY_FUNCTIONS[db.SortOrder](aura)
 
-        unit_auras_to_show[#unit_auras_to_show + 1] = aura
-      end
-
-      -- local show_aura_new = ShouldShowAura(widget_frame, unit, aura)
-      -- if show_aura ~= show_aura_new then
-      --   print("Compare:", aura.name, " = ", show_aura, "=> New:", show_aura_new)
-      -- end
+      unit_auras_to_show[#unit_auras_to_show + 1] = aura
     end
   end
-
-  if widget_frame.HideAuras then return end
 
   -- Show auras
   local aura_grid_cc = self.CrowdControl
   local aura_grid_frame_cc = widget_frame.CrowdControl
 
   -- Sort auras based on order criteria
-  -- SortAurasByPriority(unit_auras_to_show)
+--  SortAurasByPriority(unit_auras_to_show)
 
   local aura_count = 0
   local aura_count_cc = 0
@@ -1168,9 +631,9 @@ function Widget:UpdateUnitAuras(aura_grid_frame, unit, enabled_auras, enabled_cc
 
       -- aura_frame is nil here when the max amount of auras is already shown
       if aura_frame then
+        aura_frame.unitid = unitid
         widget_frame.UnitAuras[aura.auraInstanceID] = aura_frame
 
-        aura_frame.unitid = unit.unitid
         aura_frame.AuraData = aura
         -- Call function to display the aura
         if aura.CrowdControl then
@@ -1198,61 +661,36 @@ function Widget:UpdateUnitAuras(aura_grid_frame, unit, enabled_auras, enabled_cc
   end
 end
 
--- local function CenterAuraGrid(aura_grid, aura_grid_frame, db_aura_grid)
---   local auras_no = aura_grid_frame.ActiveAuras
---   if aura_grid.IconMode and auras_no > 0 then
---     local x_offset = 0
---     if db_aura_grid.CenterAuras then
---       -- Re-anchor the first frame, if auras should be centered
---       x_offset = (auras_no < aura_grid.Columns) and aura_grid.CenterAurasPositions[auras_no] or 0
---     end
---     local align_layout = aura_grid.AlignLayout
---     local aura_one = aura_grid_frame.AuraFrames[1]
---     aura_one:ClearAllPoints()
---     aura_one:SetPoint(align_layout[3], aura_grid_frame, (aura_grid.AuraWidgetOffset + x_offset) * align_layout[5], (aura_grid.AuraWidgetOffset + aura_grid.RowSpacing) * align_layout[6])
---   end
--- end
+-- Fills an aura grid with the pre-filtered auras returned by UpdateUnitAuras.
+-- aura_grid       : Widget grid object (self.Buffs / self.Debuffs / self.CrowdControl)
+-- aura_grid_frame : corresponding frame on the nameplate (widget_frame.Buffs etc.)
+local function UpdateAurasOfGrid(widget_frame, unit, unit_auras_to_show, aura_grid, aura_grid_frame)
+  if widget_frame.HideAuras then return end
 
--- function Widget:ResizeAurasOfAuraGrid(aura_grid, aura_grid_frame)
---   local db_aura_grid = aura_grid.db
---   local aura_frame_list = aura_grid_frame.AuraFrames
---   local auras_no = aura_grid_frame.ActiveAuras
+  local aura_count = 0
 
---   print ("No: ", auras_no)
---   local auras_no = aura_grid_frame.ActiveAuras
---   for index = 1, auras_no do
---     local aura_frame = aura_frame_list[index]
---     aura_frame:SetSize(db_aura_grid.IconWidth, db_aura_grid.IconHeight)
+  for index = 1, #unit_auras_to_show do
+    local aura = unit_auras_to_show[index]
 
---     -- Need to do this because of different offset
---     local align_layout = aura_grid.AlignLayout
---     aura_frame:ClearAllPoints()
---     if index == 1 then
---       aura_frame:SetPoint(align_layout[3], aura_grid_frame, aura_grid.AuraWidgetOffset * align_layout[5], (aura_grid.AuraWidgetOffset + aura_grid.RowSpacing) * align_layout[6])
---     elseif (index - 1) % aura_grid.Columns == 0 then
---       aura_frame:SetPoint(align_layout[3], aura_frame_list[index - aura_grid.Columns], align_layout[4], 0, aura_grid.RowSpacing * align_layout[6])
---     else
---       aura_frame:SetPoint(align_layout[1], aura_frame_list[index - 1], align_layout[2], aura_grid.ColumnSpacing * align_layout[5], 0)
---     end
---   end
+    if aura.spellId and aura.expirationTime then
+      if aura_count < aura_grid.MaxAuras then
+        aura_count = aura_count + 1
+        local aura_frame = aura_grid:GetAuraFrame(aura_grid_frame, aura_count)
 
---   -- Re-center aura area as size has changed now
---   -- CenterAuraGrid(aura_grid, aura_grid_frame, db_aura_grid)
---   if aura_grid.IconMode and auras_no > 0 then
---     local x_offset = 0
---     if db_aura_grid.CenterAuras then
---       -- Re-anchor the first frame, if auras should be centered
---       x_offset = (auras_no < aura_grid.Columns) and aura_grid.CenterAurasPositions[auras_no] or 0
---     end
---     local align_layout = aura_grid.AlignLayout
---     local aura_one = aura_grid_frame.AuraFrames[1]
---     aura_one:ClearAllPoints()
---     aura_one:SetPoint(align_layout[3], aura_grid_frame, (aura_grid.AuraWidgetOffset + x_offset) * align_layout[5], (aura_grid.AuraWidgetOffset + aura_grid.RowSpacing) * align_layout[6])
---   end
+        widget_frame.UnitAuras[aura.auraInstanceID] = aura_frame
+        aura_frame.unitid = unit.unitid
+        aura_frame.AuraData = aura
+        aura_grid:UpdateAuraInformation(aura_frame)
+      else
+        break -- grid is full
+      end
+    end
+  end
 
---   aura_grid_frame:SetHeight(ceil(auras_no / aura_grid.Columns) * (aura_grid.AuraHeight + aura_grid.AuraWidgetOffset) +
---   aura_grid.RowSpacing + aura_grid.AuraWidgetOffset)
--- end
+  -- Mark inactive aura slots as hidden
+  aura_grid_frame.ActiveAuras = aura_count
+  aura_grid:HideNonActiveAuras(aura_grid_frame, true)
+end
 
 function Widget:UpdatePositionAuraGrid(widget_frame, aura_type, unit_style)
   local db = self.db
@@ -1294,6 +732,11 @@ function Widget:UpdateAurasGrids(widget_frame, unit)
 
   widget_frame.UnitAuras = {}
 
+  local unitid = unit.unitid
+  widget_frame.Buffs.unitid = unitid
+  widget_frame.Debuffs.unitid = unitid
+  widget_frame.CrowdControl.unitid = unitid
+
   local enabled_cc
   if unit.reaction == "FRIENDLY"  then -- friendly or better
     enabled_cc = db.CrowdControl.ShowFriendly
@@ -1327,43 +770,12 @@ function Widget:UpdateAurasGrids(widget_frame, unit)
   else
     widget_frame:Hide()
   end
-
-  -- if unit_is_friendly and db.SwitchScaleByReaction then
-  --   aura_grid_frame:SetHeight(ceil(auras_no / aura_grid.Columns) * (aura_grid.AuraHeight + aura_grid.AuraWidgetOffset) +
-  --   aura_grid.RowSpacing + aura_grid.AuraWidgetOffset)
-  -- end
-
-  -- if unit_is_friendly then
-  --   frame_auras_one, frame_auras_two = widget_frame.Buffs, widget_frame.Debuffs
-  --   auras_one_active, auras_two_active = buffs_active, debuffs_active
-  --   if db.SwitchScaleByReaction then
-  --     scale_auras_one, scale_auras_two = db.Debuffs.Scale, db.Buffs.Scale
-  --   else
-  --     scale_auras_one, scale_auras_two = db.Buffs.Scale, db.Debuffs.Scale
-  --   end
-  -- else
-  --   frame_auras_one, frame_auras_two = widget_frame.Debuffs, widget_frame.Buffs
-  --   auras_one_active, auras_two_active = debuffs_active, buffs_active
-  --   scale_auras_one, scale_auras_two = db.Debuffs.Scale, db.Buffs.Scale
-  -- end
-
-  -- if unit_is_friendly and db.SwitchScaleByReaction then
-  --   print (unit.name, "=> Switch By Reaction")
-  --   -- self:ResizeAurasOfAuraGrid(widget_frame, "Buffs", "Debuffs") 
-  --   -- self:ResizeAurasOfAuraGrid(widget_frame, "Debuffs", "Buffs")
-  --   self:ResizeAurasOfAuraGrid(self.Buffs, widget_frame.Debuffs)
-  --   self:ResizeAurasOfAuraGrid(self.Debuffs, widget_frame.Buffs)
-
-  --   widget_frame.IsSwitchedByReaction = true
-  -- else
-  --   widget_frame.IsSwitchedByReaction = false
-  -- end
 end
 
 function Widget:UpdateAuras(widget_frame, unit)
   if not IgnoreAuraUpdateForUnit(widget_frame, unit) then 
     self:UpdateAurasGrids(widget_frame, unit)
- end
+  end
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -1658,12 +1070,10 @@ local function UpdateAuraInformationIconMode(self, aura_frame) -- texture, durat
   -- Highlight Coloring
   if self.db.ShowBorder then
     if db_widget.ShowAuraType then
-      -- local dispel_type = DISPELL_TYPE_NAME[aura_frame.AuraData.dispelName]
-      -- print("Dispel Type:", aura_frame.AuraData.dispelName, dispel_type)
-      -- if aura_frame.AuraData.dispelName then
-      --   aura_frame.Border:SetBackdropBorderColor(DispelColorCurve:Evaluate(DISPELL_TYPE_NAME[aura_frame.AuraData.dispelType]))
-        aura_frame.Border:SetBackdropBorderColor(color.r, color.g, color.b, 1)
-      -- end
+      --local dispel_type = DISPELL_TYPE_NAME[aura_frame.AuraData.dispelName] or 0
+      --local dispel_color = DispellColorCurve:Evaluate(dispel_type)
+      --aura_frame.Border:SetBackdropBorderColor(dispel_color.r, dispel_color.g, dispel_color.b, 1)
+      aura_frame.Border:SetBackdropBorderColor(color.r, color.g, color.b, 1)
     end
   end
 
@@ -1714,7 +1124,7 @@ end
 -- TimeFormatter:SetStripIntervalWhitespace(true)
 
 local function UpdateWidgetTimeIconMode(self, aura_frame, expiration, duration)
-  local timeleft = C_UnitAuras.GetAuraDuration(aura_frame.unitid, aura_frame.AuraData.auraInstanceID)
+  local timeleft = GetAuraDuration(aura_frame:GetParent().unitid, aura_frame.AuraData.auraInstanceID)
   if timeleft then
     aura_frame.TimeLeft:SetAlphaFromBoolean(timeleft:IsZero(), 0, 1)
     -- -- "%.1f"    
@@ -2292,7 +1702,6 @@ end
 ---------------------------------------------------------------------------------------------------
 
 local EnabledConfigMode = false
-local OldUnitAura, OldProcessAllUnitAuras
 local Timer
 
 local ConfigModeAuras = {
