@@ -427,10 +427,17 @@ local function SetUnitAttributeName(unit, unitid)
   unit.name = unit_name
 end
 
+Addon.GetUnitReactionToPlayer = function(unitid)
+  return UnitReaction(unitid or "", "player") or 0
+end
+
 local function SetUnitAttributeReaction(unit, unitid)
   -- Reaction => UNIT_FACTION
   unit.red, unit.green, unit.blue = _G.UnitSelectionColor(unitid)
-  unit.reaction = MAP_UNIT_REACTION[UnitReaction("player", unitid)] or GetReactionByColor(unit.red, unit.green, unit.blue)
+  -- unitid needs to be the first parameter of UnitReaction, otherwise, e.g., some hostile NPCs will return 4 (neutral) 
+  -- resulting in a wrong reaction color
+  -- unitid can be here, at least I think there were errors like this, so to be save use "" as a fallback
+  unit.reaction = MAP_UNIT_REACTION[Addon.GetUnitReactionToPlayer(unitid)] or GetReactionByColor(unit.red, unit.green, unit.blue)
 
   -- Enemy players turn to neutral, e.g., when mounting a flight path mount, so fix reaction in that situations
   if unit.reaction == "NEUTRAL" and (unit.type == "PLAYER" or UnitPlayerControlled(unitid)) then
@@ -732,9 +739,8 @@ end
 
 local function SetNameplateVisibility(plate, unitid)
   -- ! Interactive objects do also have nameplates. We should not mess with the visibility the of these objects.
-  -- We cannot use unit.reaction here as it is not guaranteed that it's update whenever this function is called (see UNIT_FACTION).  local unit_reaction = UnitReaction("player", unitid) or 0
-  local unit_reaction = UnitReaction("player", unitid) or 0
-  if unit_reaction > 4 then
+  -- We cannot use unit.reaction here as it is not guaranteed that it's update whenever this function is called (see UNIT_FACTION).
+  if Addon.GetUnitReactionToPlayer(unitid) > 4 then
     ShowBlizzardNameplate(plate, SettingsShowFriendlyBlizzardNameplates)
   else
     ShowBlizzardNameplate(plate, SettingsShowEnemyBlizzardNameplates)
@@ -742,8 +748,7 @@ local function SetNameplateVisibility(plate, unitid)
 end
 
 local function ThreatPlatesIsActive(unitid)
-  local unit_reaction = UnitReaction("player", unitid) or 0
-  if unit_reaction > 4 then
+  if Addon.GetUnitReactionToPlayer(unitid) > 4 then
     return not SettingsShowFriendlyBlizzardNameplates
   else
     return not SettingsShowEnemyBlizzardNameplates
@@ -781,8 +786,7 @@ end
 -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly/enemy units
 local function SetVisibilityOfBlizzardNameplate(UnitFrame, unitid)
   -- Not sure if unit.reaction will always be correctly set here, so:
-  local unit_reaction = UnitReaction("player", unitid) or 0
-  if unit_reaction > 4 then
+  if Addon.GetUnitReactionToPlayer(unitid) > 4 then
     SetShownBlizzardPlate(UnitFrame, SettingsShowFriendlyBlizzardNameplates)
     --UnitFrame:SetShown(SettingsShowFriendlyBlizzardNameplates)
   else

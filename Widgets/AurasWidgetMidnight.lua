@@ -1131,7 +1131,7 @@ local function UpdateWidgetTimeIconMode(self, aura_frame, expiration, duration)
     aura_frame.TimeLeft:SetFormattedText("%d", timeleft:GetRemainingDuration())
 
     -- Unit is hostile and debuff - short duration format
-    -- if (UnitReaction("player", aura_frame.unitid) < 5) and aura_frame.isHarmful then
+    -- if (Addon.GetUnitReactionToPlayer(unitid) < 5) and aura_frame.isHarmful then
     -- -- "%.1f"    
     --   aura_frame.TimeLeft:SetFormattedText("%d", timeleft:GetRemainingDuration())
     -- else
@@ -1446,17 +1446,6 @@ function Widget:EnabledForStyle(style, unit)
 end
 
 function Widget:OnUnitAdded(widget_frame, unit)
-  local db = self.db
-
-  -- if db.SwitchScaleByReaction and UnitReaction("player", unit.unitid) > 4 then
-  --   print ("Scale: Buffs =", self.SwitchScaleBuffsFactor, "- Debuffs =", self.SwitchScaleDebuffsFactor)
-  --   widget_frame.Buffs:SetScale(self.SwitchScaleBuffsFactor)
-  --   widget_frame.Debuffs:SetScale(self.SwitchScaleDebuffsFactor)
-  -- else
-  --   widget_frame.Buffs:SetScale(1)
-  --   widget_frame.Debuffs:SetScale(1)
-  -- end
-  
   self:UpdateAuras(widget_frame, unit)
 end
 

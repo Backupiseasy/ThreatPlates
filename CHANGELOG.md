@@ -13,6 +13,7 @@ This is a basic version with Midnight support. Expect lots of missing features a
 * Updated integrated libraries (Ace3 r1387-alpha, LibSharedMedia-3.0 v11.2.1)
  
 Beta changes:
+* Fixed a bug where hostile NPCs were shown with neutral color (yellow) [Comment #7971, #8013].
 * Re-enabled nameplate clickthough in Midnight.
 * Fixed a bug where the clickable area was not adjusted when the nameplate size was changed. This only works if parent UI Parent or Nameplate is selected in General - Appearance.
 * Added some basic filters for auras back to Threat Plates.

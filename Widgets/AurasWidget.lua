@@ -1927,7 +1927,7 @@ local function ProcessAllUnitAuras(unitid, effect)
   local aura_max_display = (effect == "HARMFUL" and DEBUFF_MAX_DISPLAY) or BUFF_MAX_DISPLAY
   local unit_auras = {}
 
-  if Addon.IS_CLASSIC and effect == "HELPFUL" and UnitReaction("player", unitid) < 5 and UnitAuraCache[unitid] then
+  if Addon.IS_CLASSIC and effect == "HELPFUL" and Addon.GetUnitReactionToPlayer(unitid) < 5 and UnitAuraCache[unitid] then
     for aura_instance_id, unit_aura_info in pairs (UnitAuraCache[unitid].Buffs) do
       unit_aura_info.duration = unit_aura_info.duration or 0
       unit_auras[#unit_auras + 1] = unit_aura_info
@@ -3373,17 +3373,6 @@ function Widget:EnabledForStyle(style, unit)
 end
 
 function Widget:OnUnitAdded(widget_frame, unit)
-  local db = self.db
-
-  -- if db.SwitchScaleByReaction and UnitReaction("player", unit.unitid) > 4 then
-  --   print ("Scale: Buffs =", self.SwitchScaleBuffsFactor, "- Debuffs =", self.SwitchScaleDebuffsFactor)
-  --   widget_frame.Buffs:SetScale(self.SwitchScaleBuffsFactor)
-  --   widget_frame.Debuffs:SetScale(self.SwitchScaleDebuffsFactor)
-  -- else
-  --   widget_frame.Buffs:SetScale(1)
-  --   widget_frame.Debuffs:SetScale(1)
-  -- end
-
   self:UpdateAuras(widget_frame, unit)
 end
 
