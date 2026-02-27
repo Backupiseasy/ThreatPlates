@@ -68,8 +68,8 @@ end
 
 local function OnUpdateMidnight(self, elapsed)
   if self.IsCasting or self.IsChanneling then
-    self:SetValue(GetTimePreciseSec() * 1000)
-    --self.CastTime:SetText(string_format("%.1f", max_value - value))
+    self:SetValue(self.Duration:GetRemainingDuration())
+    self.CastTime:SetText(string_format("%.1f", self.Duration:GetRemainingDuration()))
     self.Spark:SetPoint("CENTER", self:GetStatusBarTexture(), "RIGHT")
   elseif self.FlashTime > 0 then
     self.CastTime:SetText("")

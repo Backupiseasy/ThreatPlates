@@ -13,6 +13,8 @@ This is a basic version with Midnight support. Expect lots of missing features a
 * Updated integrated libraries (Ace3 r1387-alpha, LibSharedMedia-3.0 v11.2.1)
  
 Beta changes:
+* Re-enabled cast target in Midnight.
+* Fixed a bug where the castbar not showing channeled spells with the correct animation direction.
 * Fixed the clickable area now also when Threat Plates were anchored to WorldFrame.
 * Fixed a bug where hostile NPCs were shown with neutral color (yellow) [Comment #7971, #8013].
 * Re-enabled nameplate clickthough in Midnight.

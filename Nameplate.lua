@@ -24,6 +24,11 @@ local GetPlayerInfoByGUID = GetPlayerInfoByGUID
 local IsInInstance, InCombatLockdown = IsInInstance, InCombatLockdown
 local NamePlateDriverFrame, UnitNameplateShowsWidgetsOnly = NamePlateDriverFrame, UnitNameplateShowsWidgetsOnly
 local GetSpecializationInfo, GetSpecialization = GetSpecializationInfo, GetSpecialization
+local CastbarInterpolation = Enum.StatusBarInterpolation and Enum.StatusBarInterpolation.Immediate
+local CastbarCastingDirection = Enum.StatusBarTimerDirection and Enum.StatusBarTimerDirection.ElapsedTime
+local CastbarChannelDirection = Enum.StatusBarTimerDirection and Enum.StatusBarTimerDirection.RemainingTime
+local WrapTextInColor = C_ColorUtil and C_ColorUtil.WrapTextInColor
+local GetClassColor = C_ClassColor and C_ClassColor.GetClassColor
 
 -- ThreatPlates APIs
 local L = Addon.L
@@ -595,40 +600,44 @@ local function OnStartCasting(tp_frame, unitid, channeled, event_spellid)
   visual.SpellText:SetText(text)
   visual.SpellIcon:SetTexture(texture)
 
-  -- target_unit_name is secret in instances in Midnight
-  local target_unit_name = UnitName(unit.unitid .. "target")
-  if target_unit_name and not Addon.IsSecretValue(target_unit_name) then
-    -- There are situations when UnitName returns nil (OnHealthUpdate, hypothesis: health update when the unit died tiggers this, but then there is no target any more)
-    local _, class_name = UnitClass(target_unit_name)
-    castbar.CastTarget:SetText(Addon.ColorByClass(class_name, TransliterateCyrillicLetters(target_unit_name)))
-  else
-    castbar.CastTarget:SetText(nil)
-  end
-
-  castbar:SetReverseFill(castbar.IsChanneling)
-
   if Addon.ExpansionIsAtLeastMidnight then
+    local target_unit_name =  UnitSpellTargetName(unitid)
+    if target_unit_name then
+      target_unit_name = UnitName(target_unit_name) or target_unit_name
+      local class_name = UnitSpellTargetClass(unitid)
+      if class_name then
+        target_unit_name = WrapTextInColor(target_unit_name, GetClassColor(class_name))
+      end
+      castbar.CastTarget:SetText(TransliterateCyrillicLetters(target_unit_name))
+    else
+      castbar.CastTarget:SetText(nil)
+    end
+
     -- Although Evoker's empowered casts are considered channeled, time (and therefore growth direction)
     -- is calculated like for normal casts. Therefore: castbar.IsCasting = true
     castbar.IsCasting = not channeled --or (numStages and numStages > 0)
 
-    -- Sometimes startTime/endTime are nil (even in Retail). Not sure if name is always nil is this case as well, just to be sure here
-    -- I think this should not be necessary, name should be nil in this case, but not sure.
-    local current_time = GetTimePreciseSec() * 1000
-    if type(startTime) == "nil" then
-      startTime = current_time
-    end
-    if type(endTime) == "nil" then
-      endTime = current_time
+    if channeled then
+      castbar.Duration = UnitChannelDuration(unitid)
+      castbar:SetTimerDuration(castbar.Duration, CastbarInterpolation, CastbarChannelDirection)
+    else
+      castbar.Duration = UnitCastingDuration(unitid)
+      castbar:SetTimerDuration(castbar.Duration, CastbarInterpolation, CastbarCastingDirection)
     end
 
-    -- castbar.MinValue = startTime
-    -- castbar.MaxValue = endTime
-    castbar:SetMinMaxValues(startTime, endTime)
-    castbar:SetValue(current_time)
     castbar:SetAllColors(ColorModule.SetCastbarColor(unit))
-    castbar:SetFormat(unit.spellIsShielded)
+    castbar:SetFormat(notInterruptible)
   else
+    -- target_unit_name is secret in instances in Midnight
+    local target_unit_name = UnitName(unit.unitid .. "target")
+    if target_unit_name and not Addon.IsSecretValue(target_unit_name) then
+      -- There are situations when UnitName returns nil (OnHealthUpdate, hypothesis: health update when the unit died tiggers this, but then there is no target any more)
+      local _, class_name = UnitClass(target_unit_name)
+      castbar.CastTarget:SetText(Addon.ColorByClass(class_name, TransliterateCyrillicLetters(target_unit_name)))
+    else
+      castbar.CastTarget:SetText(nil)
+    end
+    
     -- Although Evoker's empowered casts are considered channeled, time (and therefore growth direction)
     -- is calculated like for normal casts. Therefore: castbar.IsCasting = true
     castbar.IsCasting = not channeled or (numStages and numStages > 0)
@@ -644,7 +653,7 @@ local function OnStartCasting(tp_frame, unitid, channeled, event_spellid)
     castbar:SetMinMaxValues(0, castbar.MaxValue)
     castbar:SetValue(castbar.Value)
     castbar:SetAllColors(ColorModule.SetCastbarColor(unit))
-    castbar:SetFormat(unit.spellIsShielded)
+    castbar:SetFormat(notInterruptible)
   end
 
   castbar.IsChanneling = not castbar.IsCasting
