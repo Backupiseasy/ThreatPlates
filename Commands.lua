@@ -231,7 +231,7 @@ local function ChatCommandDebug(cmd_list)
 
 		print("Name:", unit.name)
 		print("  Reaction:", unit.reaction)
-		print("    UnitReaction:", UnitReaction("target", "player"))
+		print("    UnitReaction:", Addon.GetUnitReactionToPlayer("target"))
     print("    UnitCanAttack = ", UnitCanAttack("target", "player"))
     print("    UnitIsFriend = ", UnitIsFriend("target", "player"))
 		print("    UnitSelectionColor = ", UnitSelectionColor("target"))

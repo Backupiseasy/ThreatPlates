@@ -99,7 +99,7 @@ Addon.Debug.PrintUnit = function(unitid)
 		if Addon.IS_MAINLINE then
 			Addon.Logging.Debug("  UnitNameplateShowsWidgetsOnly = ", UnitNameplateShowsWidgetsOnly(unitid))
 		end
-    Addon.Logging.Debug("  Reaction = ", UnitReaction("player", unitid))
+    Addon.Logging.Debug("  Reaction = ", Addon.GetUnitReactionToPlayer(unitid))
     local r, g, b, a = UnitSelectionColor(unitid, true)
     Addon.Logging.Debug("  SelectionColor: r =", ceil(r * 255), ", g =", ceil(g * 255), ", b =", ceil(b * 255), ", a =", ceil(a * 255))
 		Addon.Logging.Debug("  -- Threat ---------------------------------")

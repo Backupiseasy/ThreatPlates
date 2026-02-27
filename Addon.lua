@@ -154,10 +154,15 @@ elseif not Addon.ExpansionIsAtLeastMidnight then
 else
   -- # Nameplate Hierarchy, Anchoring, and Scaling
   Addon.SetBaseNamePlateSize = function(self) 
-    local db = self.db.profile
     -- local extraXOffset = 10;
 		-- local extraYOffset = setupOptions.healthBarHeight / 2;
-    C_NamePlate.SetNamePlateSize(db.settings.healthbar.width + 10, db.settings.healthbar.height + 10)
+    local width, height = self.db.profile.settings.healthbar.width, self.db.profile.settings.healthbar.height
+    if Addon.NameplateParentFrame == WorldFrame then
+      local ui_scale = UIParent:GetEffectiveScale()
+      C_NamePlate.SetNamePlateSize(width / ui_scale, height / ui_scale)
+    else
+      C_NamePlate.SetNamePlateSize(width + 10, height + 10)
+    end
     self.SetNamePlateClickThrough()
   end
 end
