@@ -152,15 +152,13 @@ elseif not Addon.ExpansionIsAtLeastMidnight then
     --C_NamePlate_SetNamePlateSelfSize(baseWidth * horizontalScale * Lerp(1.1, 1.0, clampedZeroBasedScale), baseHeight)
   end
 else
+  -- # Nameplate Hierarchy, Anchoring, and Scaling
   Addon.SetBaseNamePlateSize = function(self) 
-    -- # Nameplate Hierarchy, Anchoring, and Scaling
-    local db = Addon.db.profile.settings.healthbar
+    local db = self.db.profile
     -- local extraXOffset = 10;
 		-- local extraYOffset = setupOptions.healthBarHeight / 2;
-    C_NamePlate.SetNamePlateSize(db.width + 10, db.height + 10)
-    
-    C_NamePlateManager.SetNamePlateHitTestInsets(Enum.NamePlateType.Enemy, -10000, -10000, -10000, -10000)
-    C_NamePlateManager.SetNamePlateHitTestInsets(Enum.NamePlateType.Friendly, -10000, -10000, -10000, -10000)
+    C_NamePlate.SetNamePlateSize(db.settings.healthbar.width + 10, db.settings.healthbar.height + 10)
+    self.SetNamePlateClickThrough()
   end
 end
 
@@ -210,14 +208,8 @@ function Addon:ReloadTheme()
 
   -- Do this after combat ends, not in PLAYER_ENTERING_WORLD as it won't get set if the player is on combat when
   -- that event fires.
-  if not Addon.ExpansionIsAtLeastMidnight then
-    Addon:CallbackWhenOoC(function() Addon:SetBaseNamePlateSize() end, L["Unable to change a setting while in combat."])
-    Addon:CallbackWhenOoC(function()
-      local db = self.db.profile
-      SetNamePlateFriendlyClickThrough(db.NamePlateFriendlyClickThrough)
-      SetNamePlateEnemyClickThrough(db.NamePlateEnemyClickThrough)
-    end)
-  end
+  Addon:CallbackWhenOoC(function() Addon:SetBaseNamePlateSize() end, L["Unable to change a setting while in combat."])
+  Addon.SetNamePlateClickThrough()
   
   -- Update all UI elements (frames, textures, ...)
   Addon:UpdatePlatesVisible()

@@ -5914,7 +5914,6 @@ local function CreateVisibilityTab()
         order = 70,
         inline = true,
         width = "full",
-        hidden = Addon.ExpansionIsAtLeastMidnight,
         args = {
           ClickthroughFriendly = {
             name = L["Friendly Units"],
@@ -5922,9 +5921,18 @@ local function CreateVisibilityTab()
             type = "toggle",
             width = "double",
             desc = L["Enable nameplate clickthrough for friendly units."],
-            set = function(info, val) Addon.SetNamePlateClickThrough(val, db.NamePlateEnemyClickThrough) end,
-            -- return in-game value for clickthrough as config values may be wrong because of in-combat restrictions when changing them
-            get = function(info) return C_NamePlate.GetNamePlateFriendlyClickThrough() end,
+            set = function(info, val) 
+              SetValue(info, val)
+              Addon.SetNamePlateClickThrough()                 
+            end,
+            get = function(info) 
+              if Addon.ExpansionIsAtLeastMidnight then
+                return db.NamePlateFriendlyClickThrough
+              else
+                -- return in-game value for clickthrough as config values may be wrong because of in-combat restrictions when changing them
+                return C_NamePlate.GetNamePlateFriendlyClickThrough() 
+              end
+            end,
             arg = { "NamePlateFriendlyClickThrough" },
           },
           ClickthroughEnemy = {
@@ -5933,9 +5941,18 @@ local function CreateVisibilityTab()
             type = "toggle",
             width = "double",
             desc = L["Enable nameplate clickthrough for enemy units."],
-            set = function(info, val) Addon.SetNamePlateClickThrough(db.NamePlateFriendlyClickThrough, val) end,
-            -- return in-game value for clickthrough as config values may be wrong because of in-combat restrictions when changing them
-            get = function(info) return C_NamePlate.GetNamePlateEnemyClickThrough() end,
+            set = function(info, val) 
+              SetValue(info, val)
+              Addon.SetNamePlateClickThrough()
+            end,
+            get = function(info) 
+              if Addon.ExpansionIsAtLeastMidnight then
+                return db.NamePlateEnemyClickThrough
+              else
+                -- return in-game value for clickthrough as config values may be wrong because of in-combat restrictions when changing them
+                return C_NamePlate.GetNamePlateEnemyClickThrough() 
+              end
+            end,
             arg = { "NamePlateEnemyClickThrough" },
           },
         },
