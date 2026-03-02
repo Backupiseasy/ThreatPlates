@@ -66,6 +66,24 @@ local HealthColorCache = {}
 local CS = CreateFrame("ColorSelect")
 local HealthColorCurve
 
+-- ColorCurve mapping GetRaidTargetIndex() return values (0 = no marker, 1-8 = icons)
+-- to their respective Blizzard UI marker colors. Uses Step interpolation for discrete mapping.
+-- Colors sourced from UnitPopupRaidTarget*ButtonMixin:GetColor() in Blizzard_UnitPopupShared.
+-- local RaidTargetColorCurve
+-- if Addon.ExpansionIsAtLeastMidnight then
+--   RaidTargetColorCurve = C_CurveUtil.CreateColorCurve()
+--   RaidTargetColorCurve:SetType(Enum.LuaCurveType.Step)
+--   RaidTargetColorCurve:AddPoint(0, CreateColor(0,    0,     0,     0))     -- no marker: transparent
+--   RaidTargetColorCurve:AddPoint(1, CreateColor(1,    0.92,  0,     1))     -- 1 Star:     yellow
+--   RaidTargetColorCurve:AddPoint(2, CreateColor(0.98, 0.57,  0,     1))     -- 2 Circle:   orange
+--   RaidTargetColorCurve:AddPoint(3, CreateColor(0.83, 0.22,  0.9,   1))     -- 3 Diamond:  purple
+--   RaidTargetColorCurve:AddPoint(4, CreateColor(0.04, 0.95,  0,     1))     -- 4 Triangle: green
+--   RaidTargetColorCurve:AddPoint(5, CreateColor(0.7,  0.82,  0.875, 1))     -- 5 Moon:     light blue
+--   RaidTargetColorCurve:AddPoint(6, CreateColor(0,    0.71,  1,     1))     -- 6 Square:   blue
+--   RaidTargetColorCurve:AddPoint(7, CreateColor(1,    0.24,  0.168, 1))     -- 7 Cross:    red
+--   RaidTargetColorCurve:AddPoint(8, CreateColor(0.98, 0.98,  0.98,  1))     -- 8 Skull:    white
+-- end
+
 --GetSmudgeColorRGB function - from: https://www.wowinterface.com/downloads/info22536-ColorSmudge.html
 --arg1: color table in RGB {r=0,g=0,b=0}
 --arg2: color table in RGB {r=1,g=1,b=1}
@@ -306,8 +324,9 @@ local function GetSituationalColorForHealthbar(unit, plate_style)
         use_target_mark_color = Settings.UseRaidMarkColoring
       end
     end
-
+    
     if use_target_mark_color then
+      --color = RaidTargetColorCurve:Evaluate(GetRaidTargetIndex(unit.unitid) or 0)
       color = SettingsBase.settings.raidicon.hpMarked[unit.TargetMarkerIcon]
     elseif unit.IsTapDenied then
       color = ColorByReaction.TappedUnit
