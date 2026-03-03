@@ -16,6 +16,7 @@ local WorldFrame, UIParent, INTERRUPTED = WorldFrame, UIParent, INTERRUPTED
 local UnitExists, UnitName, UnitReaction, UnitClass, UnitPVPName = UnitExists, UnitName, UnitReaction, UnitClass, UnitPVPName
 local UnitEffectiveLevel = UnitEffectiveLevel
 local UnitChannelInfo, UnitPlayerControlled = UnitChannelInfo, UnitPlayerControlled
+local UnitSpellTargetName, UnitSpellTargetClass = UnitSpellTargetName, UnitSpellTargetClass
 local UnitIsUnit, UnitIsPlayer = UnitIsUnit, UnitIsPlayer
 local GetCreatureDifficultyColor, GetRaidTargetIndex = GetCreatureDifficultyColor, GetRaidTargetIndex
 local GetTime, CombatLogGetCurrentEventInfo = GetTime, CombatLogGetCurrentEventInfo
@@ -578,7 +579,7 @@ local function OnStartCasting(tp_frame, unitid, channeled, event_spellid)
     return 
   end
 
-  if not IsSecretValue(name) then
+  if not Addon.ExpansionIsAtLeastMidnight then
     StyleModule.CastTriggerCheckIfActive(unit, spellID, name)
   end
 
@@ -592,9 +593,11 @@ local function OnStartCasting(tp_frame, unitid, channeled, event_spellid)
   unit.IsInterrupted = false
   unit.spellIsShielded = notInterruptible
 
-  if StyleModule.CastTriggerUpdateStyle(unit) then
-    StyleModule:Update(tp_frame)
-    -- style = tp_frame.style
+  if not Addon.ExpansionIsAtLeastMidnight then
+    if StyleModule.CastTriggerUpdateStyle(unit) then
+      StyleModule:Update(tp_frame)
+      -- style = tp_frame.style
+    end
   end
 
   visual.SpellText:SetText(text)
@@ -628,7 +631,6 @@ local function OnStartCasting(tp_frame, unitid, channeled, event_spellid)
     castbar:SetAllColors(ColorModule.SetCastbarColor(unit))
     castbar:SetFormat(notInterruptible)
   else
-    -- target_unit_name is secret in instances in Midnight
     local target_unit_name = UnitName(unit.unitid .. "target")
     if target_unit_name and not Addon.IsSecretValue(target_unit_name) then
       -- There are situations when UnitName returns nil (OnHealthUpdate, hypothesis: health update when the unit died tiggers this, but then there is no target any more)
@@ -712,7 +714,7 @@ local function WidgetContainerAnchor(tp_frame)
 end
 
 ---------------------------------------------------------------------------------------------------------------------
--- Handle default nameplate visibility
+-- * Control default nameplate visibility and behaviour
 ---------------------------------------------------------------------------------------------------------------------
 
 local function IgnoreUnitForThreatPlates(unitid)
@@ -761,26 +763,6 @@ local function ThreatPlatesIsActive(unitid)
     return not SettingsShowFriendlyBlizzardNameplates
   else
     return not SettingsShowEnemyBlizzardNameplates
-  end
-end
-
-local function GetAnchorForThreatPlateFrame(self)
-  local visual = self.visual
-  if visual.healthbar:IsShown() then
-    return visual.healthbar, self
-  elseif visual.name:IsShown() then
-    return visual.name, self
-  else -- this could happen for personal nameplate which is not handled by TP
-    return self, self
-  end
-end
-
-local function GetAnchorForThreatPlateExternal(self)
-  local unit_frame = self.Parent.UnitFrame
-  if ThreatPlatesIsActive(unit_frame.unit) then
-    return GetAnchorForThreatPlateFrame(self)
-  else
-    return unit_frame, unit_frame
   end
 end
 
@@ -900,6 +882,26 @@ local function SetNameplateFrameProperties(tp_frame)
   -- Parent could be: WorldFrame, UIParent, plate
   tp_frame:SetParent(Addon.NameplateParentFrame or tp_frame.Parent)
   tp_frame:SetFrameStrata(Addon.NameplateFrameStrata)
+end
+
+local function GetAnchorForThreatPlateFrame(self)
+  local visual = self.visual
+  if visual.healthbar:IsShown() then
+    return visual.healthbar, self
+  elseif visual.name:IsShown() then
+    return visual.name, self
+  else -- this could happen for personal nameplate which is not handled by TP
+    return self, self
+  end
+end
+
+local function GetAnchorForThreatPlateExternal(self)
+  local unit_frame = self.Parent.UnitFrame
+  if ThreatPlatesIsActive(unit_frame.unit) then
+    return GetAnchorForThreatPlateFrame(self)
+  else
+    return unit_frame, unit_frame
+  end
 end
 
 local	function HandlePlateCreated(plate)
