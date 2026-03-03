@@ -21,11 +21,16 @@ local tonumber = tonumber
 -- WoW APIs
 local BUFF_MAX_DISPLAY = BUFF_MAX_DISPLAY
 local GetFramerate = GetFramerate
-local DebuffTypeColor = DebuffTypeColor
 local UnitIsUnit = UnitIsUnit
 local GetAuraSlots = C_UnitAuras and C_UnitAuras.GetAuraSlots
 local GetAuraDataBySlot, GetAuraDataByAuraInstanceID = C_UnitAuras and C_UnitAuras.GetAuraDataBySlot, C_UnitAuras and C_UnitAuras.GetAuraDataByAuraInstanceID
 local IsAuraFilteredOutByInstanceID, GetAuraDuration = C_UnitAuras.IsAuraFilteredOutByInstanceID, C_UnitAuras.GetAuraDuration
+local GetAuraApplicationDisplayCount = C_UnitAuras.GetAuraApplicationDisplayCount
+local GetAuraDispelTypeColor = C_UnitAuras.GetAuraDispelTypeColor
+local AuraBarInterpolation = Enum.StatusBarInterpolation and Enum.StatusBarInterpolation.Immediate
+local ElapsedTimeDirection = Enum.StatusBarTimerDirection and Enum.StatusBarTimerDirection.ElapsedTime
+local RemainingTimeDirection = Enum.StatusBarTimerDirection and Enum.StatusBarTimerDirection.RemainingTime
+local EvaluateColorValueFromBoolean = C_CurveUtil.EvaluateColorValueFromBoolean
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -75,32 +80,6 @@ Widget.Debuffs = {
 }
 Widget.CrowdControl = {
   CenterAurasPositions = {}
-}
-
-local DEBUFF_DISPLAY_COLOR_INFO = {
-  [0] = DEBUFF_TYPE_NONE_COLOR,
-  [1] = DEBUFF_TYPE_MAGIC_COLOR,
-  [2] = DEBUFF_TYPE_CURSE_COLOR,
-  [3] = DEBUFF_TYPE_DISEASE_COLOR,
-  [4] = DEBUFF_TYPE_POISON_COLOR,
-  [9] = DEBUFF_TYPE_BLEED_COLOR, -- enrage
-  [11] = DEBUFF_TYPE_BLEED_COLOR,
-}
-local DispellColorCurve = C_CurveUtil.CreateColorCurve()
-DispellColorCurve:SetType(Enum.LuaCurveType.Step)
-for i, c in pairs(DEBUFF_DISPLAY_COLOR_INFO) do
-  DispellColorCurve:AddPoint(i, c)
-end
-
-local DISPELL_TYPE_NAME = {
-  -- https://wago.tools/db2/SpellDispelType
-  None = 0,
-  Magic = 1,
-  Curse = 2,
-  Disease = 3,
-  Poison = 4,
-  Enrage = 9,
-  Bleed = 11,
 }
 
 ---------------------------------------------------------------------------------------------------
@@ -179,11 +158,34 @@ end
 -- Filtering and sorting functions
 ---------------------------------------------------------------------------------------------------
 
-function Widget:GetColorForAura(aura)
+local DEBUFF_DISPLAY_COLOR_INFO = {
+  [0] = DEBUFF_TYPE_NONE_COLOR,
+  [1] = DEBUFF_TYPE_MAGIC_COLOR,
+  [2] = DEBUFF_TYPE_CURSE_COLOR,
+  [3] = DEBUFF_TYPE_DISEASE_COLOR,
+  [4] = DEBUFF_TYPE_POISON_COLOR,
+  [9] = DEBUFF_TYPE_BLEED_COLOR, -- enrage
+  [11] = DEBUFF_TYPE_BLEED_COLOR,
+}
+
+local DispelColorCurve = C_CurveUtil.CreateColorCurve()
+
+DispelColorCurve:SetType(Enum.LuaCurveType.Step)
+for i, c in pairs(DEBUFF_DISPLAY_COLOR_INFO) do
+  DispelColorCurve:AddPoint(i, c)
+end
+
+function Widget:GetColorForAura(aura, unitid)
 	local db = self.db
 
   -- if aura.dispelName and db.ShowAuraType then
-  --   return DebuffTypeColor[aura.dispelName]
+  if db.ShowAuraType and Addon.ExpansionIsAtLeastMidnight then
+    local color = GetAuraDispelTypeColor(aura.unitid, aura.auraInstanceID, DispelColorCurve)
+    if color then
+      return color
+    end
+  end
+
   if aura.effect == "HARMFUL" then  
     return db.DefaultDebuffColor
   else
@@ -249,7 +251,7 @@ function Widget:FilterEnemyDebuffsBySpell(db, aura, AuraFilterFunction, unit)
   local show_aura = 
     db.ShowAllEnemy 
     or (db.ShowOnlyMine and aura.CastByPlayer) 
-    --or (db.ShowBlizzardForEnemy and (aura.IsImportant or aura.CastByPlayer))
+    or (db.ShowBlizzardForEnemy and (aura.IsImportant or aura.CastByPlayer))
 
   return show_aura
 end
@@ -434,12 +436,12 @@ local function ProcessAllUnitAuras(unitid, effect)
     --aura.IsRaid = not IsAuraFilteredOutByInstanceID(unitid, aura.auraInstanceID, effect .. "|RAID") -- aura.isRaid
     -- CANCELABLE, NOT_CANCELABLE
     --aura.fd = not IsAuraFilteredOutByInstanceID(unitid, aura.auraInstanceID, effect .. "|INCLUDE_NAME_PLATE_ONLY") -- aura.isNameplateOnly
-    --aura.IsExternalDefensive = not IsAuraFilteredOutByInstanceID(unitid, aura.auraInstanceID, effect .. "|EXTERNAL_DEFENSIVE")
+    aura.IsExternalDefensive = not IsAuraFilteredOutByInstanceID(unitid, aura.auraInstanceID, effect .. "|EXTERNAL_DEFENSIVE")
     aura.CrowdControl = not IsAuraFilteredOutByInstanceID(unitid, aura.auraInstanceID, effect .. "|CROWD_CONTROL")    
-    --aura.IsRaidInCombat = not IsAuraFilteredOutByInstanceID(unitid, aura.auraInstanceID, effect .. "|RAID_IN_COMBAT")
+    aura.IsRaidInCombat = not IsAuraFilteredOutByInstanceID(unitid, aura.auraInstanceID, effect .. "|RAID_IN_COMBAT")
     aura.IsDispellable = not IsAuraFilteredOutByInstanceID(unitid, aura.auraInstanceID, effect .. "|RAID_PLAYER_DISPELLABLE")
-    --aura.IsBigDefensive = not IsAuraFilteredOutByInstanceID(unitid, aura.auraInstanceID, effect .. "|BIG_DEFENSIVE")
-    --aura.IsImportant = not IsAuraFilteredOutByInstanceID(unitid, aura.auraInstanceID, effect .. "|IMPORTANT")
+    aura.IsBigDefensive = not IsAuraFilteredOutByInstanceID(unitid, aura.auraInstanceID, effect .. "|BIG_DEFENSIVE")
+    aura.IsImportant = not IsAuraFilteredOutByInstanceID(unitid, aura.auraInstanceID, effect .. "|IMPORTANT")
     
     -- if aura.CastByPlayer or aura.IsRaid or aura.IsExternalDefensive or aura.CrowdControl or aura.IsRaidInCombat or
     --   aura.IsDispellable or aura.IsBigDefensive or aura.IsImportant then
@@ -595,6 +597,7 @@ function Widget:UpdateUnitAuras(aura_grid_frame, unit, enabled_auras, enabled_cc
     end
 
     if show_aura then
+      aura.unitid = unitid
       aura.color = self:GetColorForAura(aura)
       --aura.priority = PRIORITY_FUNCTIONS[db.SortOrder](aura)
 
@@ -1058,7 +1061,7 @@ local function UpdateAuraInformationIconMode(self, aura_frame) -- texture, durat
 
   local db_widget = self.db_widget
   if db_widget.ShowStackCount then
-    local stacks = C_UnitAuras.GetAuraApplicationDisplayCount(aura_frame.unitid, aura_frame.AuraData.auraInstanceID)
+    local stacks = GetAuraApplicationDisplayCount(aura_frame.unitid, aura_frame.AuraData.auraInstanceID)
     aura_frame.Stacks:SetText(stacks)
     aura_frame.Stacks:Show()
   else
@@ -1070,9 +1073,6 @@ local function UpdateAuraInformationIconMode(self, aura_frame) -- texture, durat
   -- Highlight Coloring
   if self.db.ShowBorder then
     if db_widget.ShowAuraType then
-      --local dispel_type = DISPELL_TYPE_NAME[aura_frame.AuraData.dispelName] or 0
-      --local dispel_color = DispellColorCurve:Evaluate(dispel_type)
-      --aura_frame.Border:SetBackdropBorderColor(dispel_color.r, dispel_color.g, dispel_color.b, 1)
       aura_frame.Border:SetBackdropBorderColor(color.r, color.g, color.b, 1)
     end
   end
@@ -1164,7 +1164,6 @@ local function CreateAuraFrameBarMode(self, parent)
 
   frame.Statusbar = _G.CreateFrame("StatusBar", nil, frame)
   frame.Statusbar:SetFrameLevel(parent:GetFrameLevel())
-  frame.Statusbar:SetMinMaxValues(0, 100)
 
   frame.Background = frame.Statusbar:CreateTexture(nil, "BACKGROUND", nil, 0)
   frame.Background:SetAllPoints()
@@ -1285,11 +1284,8 @@ local function UpdateAuraInformationBarMode(self, aura_frame) -- texture, durati
   local stacks = aura_frame.AuraData.applications
   local color = aura_frame.AuraData.color
 
-  -- Expiration
-  self:UpdateWidgetTime(aura_frame, expiration, duration)
-
   if self.db_widget.ShowStackCount then
-    local stacks = C_UnitAuras.GetAuraApplicationDisplayCount(aura_frame.unitid, aura_frame.AuraData.auraInstanceID)
+    local stacks = GetAuraApplicationDisplayCount(aura_frame.unitid, aura_frame.AuraData.auraInstanceID)
     
      -- Stacks are either shown on the icon or as postfix to the aura name when
     -- a) OmniCC is enabled (which shows the CD on the icon) or the icon is disabled
@@ -1309,54 +1305,73 @@ local function UpdateAuraInformationBarMode(self, aura_frame) -- texture, durati
     aura_frame.Icon:SetTexture(aura_frame.AuraData.icon)
   end
 
-  if AuraHighlightEnabled then
-    if aura_frame.AuraData.isStealable then
-      AuraHighlightStart(aura_frame.Highlight, AuraHighlightColor, 0)
-    else
-      AuraHighlightStop(aura_frame.Highlight)
-    end
+  if not IsSecretValue(duration) then
+    -- if AuraHighlightEnabled then
+    --   if aura_frame.AuraData.isStealable then
+    --     AuraHighlightStart(aura_frame.Highlight, AuraHighlightColor, 0)
+    --   else
+    --     AuraHighlightStop(aura_frame.Highlight)
+    --   end
+    -- end
+
+    aura_frame.Cooldown:Set(duration, expiration)
+    AnimationStopFlash(aura_frame)
   end
 
   aura_frame.LabelText:SetText(aura_frame.AuraData.name)
-  -- Highlight Coloring
   aura_frame.Statusbar:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
 
-  aura_frame.Cooldown:Set(duration, expiration)
-  AnimationStopFlash(aura_frame)
+  self:UpdateWidgetTime(aura_frame, expiration, duration)
 
   aura_frame:Show()
 end
 
 local function UpdateWidgetTimeBarMode(self, aura_frame, expiration, duration)
-  local timeleft = C_UnitAuras.GetAuraDuration(aura_frame.unitid, aura_frame.AuraData.auraInstanceID)
+  local timeleft = GetAuraDuration(aura_frame.unitid, aura_frame.AuraData.auraInstanceID)
   if timeleft then
     aura_frame.TimeText:SetAlphaFromBoolean(timeleft:IsZero(), 0, 1)
+    aura_frame.TimeText:SetFormattedText("%d", timeleft:GetRemainingDuration())
+    aura_frame.Cooldown:SetCooldownFromDurationObject(timeleft)
+  
+    aura_frame.Statusbar:SetTimerDuration(timeleft, AuraBarInterpolation, RemainingTimeDirection)
 
-    if timeleft:GetTotalDuration() == 0 then
-      aura_frame.Statusbar:SetValue(100)
-      --AnimationStopFlash(aura_frame)
-    -- elseif expiration == 0 then
-    --   aura_frame.TimeText:SetText("")
-    --   aura_frame.Statusbar:SetValue(0)
-      --AnimationStopFlash(aura_frame)
-    else
-      local db = self.db_widget
+    local color = aura_frame.AuraData.color
+    local bg_color = self.db.BackgroundColor
+    
+    local duration_is_zero = timeleft:IsZero()
+    local r = EvaluateColorValueFromBoolean(duration_is_zero, color.r, bg_color.r)
+    local g = EvaluateColorValueFromBoolean(duration_is_zero, color.g, bg_color.g)
+    local b = EvaluateColorValueFromBoolean(duration_is_zero, color.b, bg_color.b)
+    local a = EvaluateColorValueFromBoolean(duration_is_zero, color.a, bg_color.a)
 
-      
-      if db.ShowDuration then
-        aura_frame.TimeText:SetFormattedText("%d", timeleft:GetRemainingDuration())
-      else
-        aura_frame.TimeText:SetText()
-      end
+    aura_frame.Background:SetVertexColor(r, g, b, a)
+  else
+    aura_frame.TimeText:SetText()
+  end
+
+  -- if timeleft then
+  --   aura_frame.TimeText:SetAlphaFromBoolean(timeleft:IsZero(), 0, 1)
+
+  --   if timeleft:GetTotalDuration() == 0 then
+  --     aura_frame.Statusbar:SetValue(100)
+  --     --AnimationStopFlash(aura_frame)
+  --   -- elseif expiration == 0 then
+  --   --   aura_frame.TimeText:SetText("")
+  --   --   aura_frame.Statusbar:SetValue(0)
+  --     --AnimationStopFlash(aura_frame)
+  --   else
+  --     local db = self.db_widget
+     
+
       -- if db.FlashWhenExpiring and timeleft < db.FlashTime then
       --   AnimationFlash(aura_frame)
       -- end
 
-      aura_frame.Statusbar:SetTimerDuration(timeleft, 0)
-    end
-  else
-    aura_frame.TimeText:SetText()
-  end
+  --     aura_frame.Statusbar:SetTimerDuration(timeleft, 0)
+  --   end
+  -- else
+  --   aura_frame.TimeText:SetText()
+  -- end
 end
 
 local function UpdateWidgetTimeBarModeNoDuration(self, aura_frame, expiration, duration)
