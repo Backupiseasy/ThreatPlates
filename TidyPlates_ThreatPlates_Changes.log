@@ -1,6 +1,8 @@
 ﻿------------------------------------------------------
 13.0.1 (2026-03-03)
 ------------------------------------------------------
+* Disabled status text option Everything in WoW Midnight due to restrictions on secret values.
+* Health status text can be hidden again at full health for WoW Midnight.
 * Updated integrated libraries (Ace3 r1390, LibCustomGlow to 1.0.4-9-g51de51c-alpha, LibDualSpec v1.29.0)
 
 ------------------------------------------------------

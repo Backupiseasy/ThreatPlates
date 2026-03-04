@@ -10612,7 +10612,6 @@ local function CreateOptionsTable()
                           order = 60,
                           desc = L["Display health text on units with full health."],
                           arg = { "text", "full" },
-                          hidden = Addon.ExpansionIsAtLeastMidnight,
                         },
                         Truncate = {
                           name = L["Shorten"],

@@ -35,6 +35,15 @@ local LineNoOfNPCRole
 local COLOR_ROLE = RGB(255, 255, 255, .7)
 local COLOR_GUILD = RGB(178, 178, 229, .7)
 
+local HideAtFullHealthCurve
+if Addon.ExpansionIsAtLeastMidnight then
+  HideAtFullHealthCurve = C_CurveUtil.CreateCurve()
+  HideAtFullHealthCurve:SetType(Enum.LuaCurveType.Step)
+  HideAtFullHealthCurve:AddPoint(0.0, 1)
+  HideAtFullHealthCurve:AddPoint(0.9999999, 1)
+  HideAtFullHealthCurve:AddPoint(1, 0)
+end
+
 ---------------------------------------------------------------------------------------------------
 -- Local variables
 ---------------------------------------------------------------------------------------------------
@@ -347,10 +356,10 @@ end
 
 -- Guild, Role, Level, Health
 local function TextAll(unit)
-  if unit.health ~= unit.healthmax then
-    return TextHealthPercentColored(unit)
-  else
+  if Addon.ExpansionIsAtLeastMidnight or unit.health == unit.healthmax then
     return TextRoleGuildLevel(unit)
+  else
+    return TextHealthPercentColored(unit)
   end
 end
 
@@ -417,6 +426,10 @@ local function SetStatusText(tp_frame)
   status_text_frame:SetText(status_text)
   if status_text then
     status_text_frame:SetTextColor(color.r, color.g, color.b, color.a)
+  end
+
+  if Addon.ExpansionIsAtLeastMidnight and status_text_func == TextHealthPercentColored then
+    status_text_frame:SetAlpha(UnitHealthPercent(unit.unitid, true, HideAtFullHealthCurve))
   end
 end
 
