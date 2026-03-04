@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+13.0.1 (2026-03-03)
+------------------------------------------------------
+* Updated integrated libraries (Ace3 r1390, LibCustomGlow to 1.0.4-9-g51de51c-alpha, LibDualSpec v1.29.0)
+
+------------------------------------------------------
 13.0.0 - Release for WoW Midnight (2026-03-03)
 ------------------------------------------------------
 * Friendly and enemy unit coloring modes can now be configured separately in health bar and name-only modes.

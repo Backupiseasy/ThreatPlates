@@ -1,5 +1,48 @@
 Changes since tag 1.0.4
 
+commit d2a5c2ef671cf43ae96c09e2670464cbf16a8328
+Author: Simpy <kodi03466@hotmail.com>
+Date:   Mon Jan 26 17:23:25 2026 -0500
+
+    bgUpdate: compatibility with classic variants
+
+commit d2a5c2ef671cf43ae96c09e2670464cbf16a8328
+Author: Simpy <kodi03466@hotmail.com>
+Date:   Mon Jan 26 17:23:25 2026 -0500
+
+    bgUpdate: compatibility with classic variants
+
+commit 6b27918a0d5eca555fb3f47a5a386309baef04cb
+Author: RedAces <redaces@gmx.de>
+Date:   Sun Jan 25 17:48:21 2026 +0100
+
+    bump TOC for 12.0 (Midnight) and fix the "compare with secret" error (#33)
+    
+    * bump TOC for 12.0 (Midnight) and fix the "compare with secret" error
+    
+    * revert removal and check for secret value instead
+    
+    * bump minor version
+    
+    * add 12.0.1 to ToC
+
+commit 9d44c4dde5d229f3791fba173b38740f0230f20f
+Author: MoONSHO7 <benmoon88@gmail.com>
+Date:   Sun Jan 25 23:41:08 2026 +0800
+
+    12.0.0 Curve Capability (#32)
+    
+    * 12.0.0 Curve Capability
+    
+    * - Increment minor
+    - Remove comments to align with project
+
+commit f37334f81238feb0ca601641f7a0902960c0c19d
+Author: StormFX <stormfx@gmail.com>
+Date:   Tue Dec 30 16:51:33 2025 -0600
+
+    Pass the frame to Masque.
+
 commit dc135fe0dd6ca0c1215eac1606db44bef6b55149
 Author: Infus <infus@squorn.de>
 Date:   Tue May 6 10:47:21 2025 +0200
