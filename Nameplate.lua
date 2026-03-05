@@ -886,10 +886,10 @@ end
 
 local function GetAnchorForThreatPlateFrame(self)
   local visual = self.visual
-  if visual.healthbar:IsShown() then
-    return visual.healthbar, self
-  elseif visual.name:IsShown() then
-    return visual.name, self
+  if visual.Healthbar:IsShown() then
+    return visual.Healthbar, self
+  elseif visual.NameText:IsShown() then
+    return visual.NameText, self
   else -- this could happen for personal nameplate which is not handled by TP
     return self, self
   end

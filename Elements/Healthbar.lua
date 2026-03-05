@@ -79,7 +79,7 @@ if Addon.IS_MAINLINE then
     -- heal_absorb = 0.25 * UnitHealth(unitid)
     -- absorb = UnitHealthMax(unitid) * 0.3 -- REMOVE
     -- health = health_max * 0.75 -- REMOVE
-    -- visual.healthbar:SetValue(health)
+    -- visual.Healthbar:SetValue(health)
 
     if Settings.ShowHealAbsorbs and heal_absorb > 0 then
       healthbar.HealAbsorbGlow:SetShown(heal_absorb > health)

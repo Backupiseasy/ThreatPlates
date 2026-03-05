@@ -598,14 +598,14 @@ local function SetAnchorForWidget(widget_frame)
   --     anchor_frame = auras_widget_frame[auras_anchor]
 
   --     if not anchor_frame:IsShown() then
-  --       anchor_frame = tp_frame.visual.healthbar
+  --       anchor_frame = tp_frame.visual.Healthbar
   --     end
   --   end
   -- end
 
-  -- anchor_frame = anchor_frame or tp_frame.visual.healthbar
+  -- anchor_frame = anchor_frame or tp_frame.visual.Healthbar
 
-  AnchorFrameTo(Settings[MODE_FOR_STYLE[widget_frame.unit.style]], widget_frame, widget_frame:GetParent().visual.healthbar)
+  AnchorFrameTo(Settings[MODE_FOR_STYLE[widget_frame.unit.style]], widget_frame, widget_frame:GetParent().visual.Healthbar)
 end
 
 function Widget:OnUnitAdded(widget_frame, unit)
