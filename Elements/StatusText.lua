@@ -16,6 +16,7 @@ local UnitName = UnitName
 local C_TooltipInfo_GetUnit = C_TooltipInfo and C_TooltipInfo.GetUnit
 local UNIT_LEVEL_TEMPLATE = UNIT_LEVEL_TEMPLATE
 local GetGuildInfo = GetGuildInfo
+local CreateColor = CreateColor
 
 -- ThreatPlates APIs
 local SubscribeEvent, PublishEvent,  UnsubscribeEvent = Addon.EventService.Subscribe, Addon.EventService.Publish, Addon.EventService.Unsubscribe
@@ -36,12 +37,19 @@ local COLOR_ROLE = RGB(255, 255, 255, .7)
 local COLOR_GUILD = RGB(178, 178, 229, .7)
 
 local HideAtFullHealthCurve
+--local HideAtZeroAbsorbsCurve
 if Addon.ExpansionIsAtLeastMidnight then
   HideAtFullHealthCurve = C_CurveUtil.CreateCurve()
   HideAtFullHealthCurve:SetType(Enum.LuaCurveType.Step)
-  HideAtFullHealthCurve:AddPoint(0.0, 1)
+  HideAtFullHealthCurve:AddPoint(0, 1)
   HideAtFullHealthCurve:AddPoint(0.9999999, 1)
   HideAtFullHealthCurve:AddPoint(1, 0)
+
+  -- HideAtZeroAbsorbsCurve = C_CurveUtil.CreateCurve()
+  -- HideAtZeroAbsorbsCurve:SetType(Enum.LuaCurveType.Step)
+  -- HideAtZeroAbsorbsCurve:AddPoint(0, 0)
+  -- HideAtZeroAbsorbsCurve:AddPoint(0.0000001, 1)
+  -- HideAtZeroAbsorbsCurve:AddPoint(1, 1)
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -182,25 +190,13 @@ local TextHealthPercentColored
 
 if Addon.ExpansionIsAtLeastMidnight then
   TextHealthPercentColored = function(unit)
-    local text_health, text_absorbs, color = "", "", GetRoleColor
-
-    if ShowAbsorbs then
-      local absorbs_amount = _G.UnitGetTotalAbsorbs(unit.unitid) or 0
-      
-      if Settings.AbsorbsShorten then
-        text_absorbs = Truncate(absorbs_amount)
-      else
-        text_absorbs = absorbs_amount
-      end
-
-      text_absorbs = "[" .. text_absorbs .. "]"
-    end
+    local text_health, text_absorbs
+    local color = GetRoleColor
 
     if ShowHealth then
       local HpPct, HpAmt, HpMax = "", "", ""
 
       if Settings.amount then
-        --if Settings.deficit and (unit.health ~= unit.healthmax) then
         if Settings.deficit then
           HpAmt = ("-%s"):format(Truncate(UnitHealthMissing(unit.unitid)))
         else
@@ -224,10 +220,27 @@ if Addon.ExpansionIsAtLeastMidnight then
       color = GetColorByHealthDeficit
     end
 
+    if ShowAbsorbs then
+      local absorbs_amount = _G.UnitGetTotalAbsorbs(unit.unitid) or 0
+      
+      if Settings.AbsorbsShorten then
+        text_absorbs = Truncate(absorbs_amount)
+      else
+        text_absorbs = absorbs_amount
+      end
+
+      -- local alpha = HideAtZeroAbsorbsCurve:Evaluate(absorbs_amount)
+      -- -- Copy color to not overwrite the original alpha value
+      -- local absorbs_color = CreateColor(color.r, color.g, color.b, alpha)
+      -- text_absorbs = C_ColorUtil.WrapTextInColor("[" .. text_absorbs .. "]", absorbs_color)
+
+      text_absorbs = "[" .. text_absorbs .. "]"
+    end
+  
     if text_health and text_absorbs then
       return text_health .. " " .. text_absorbs, color
     else
-      return text_health .. text_absorbs, color
+      return (text_health or "") .. (text_absorbs or "") , color
     end
   end
 else
@@ -296,7 +309,7 @@ else
       color = GetColorByHealthDeficit
     end
 
-    if text_health and text_absorbs then
+    if text_health ~= "" and text_absorbs ~= "" then
       return text_health .. " " .. text_absorbs, color
     else
       return text_health .. text_absorbs, color
@@ -405,12 +418,10 @@ local function SetStatusText(tp_frame)
     
   local status_text_func = StatusTextFunc[tp_frame.PlateStyle][unit.reaction]
 
-  local status_text, color
+  local status_text, color_func, color
   if status_text_func then
-    local subtext, color_func = status_text_func(unit)
-    if subtext then
-      status_text = subtext
-
+    status_text, color_func = status_text_func(unit)
+    if status_text then
       local db = ModeSettings[tp_frame.PlateStyle]
       if db.SubtextColorUseHeadline then
         color = tp_frame:GetNameColor()
@@ -425,11 +436,12 @@ local function SetStatusText(tp_frame)
   local status_text_frame = tp_frame.visual.StatusText
   status_text_frame:SetText(status_text)
   if status_text then
-    status_text_frame:SetTextColor(color.r, color.g, color.b, color.a)
-  end
+    if Addon.ExpansionIsAtLeastMidnight and status_text_func == TextHealthPercentColored and not Settings.full then
+      local alpha  = UnitHealthPercent(unit.unitid, true, HideAtFullHealthCurve)
+      color = CreateColor(color.r, color.g, color.b, alpha)
+    end
 
-  if Addon.ExpansionIsAtLeastMidnight and status_text_func == TextHealthPercentColored then
-    status_text_frame:SetAlpha(UnitHealthPercent(unit.unitid, true, HideAtFullHealthCurve))
+    status_text_frame:SetTextColor(color.r, color.g, color.b, color.a)
   end
 end
 

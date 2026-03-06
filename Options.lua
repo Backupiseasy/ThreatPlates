@@ -10627,7 +10627,7 @@ local function CreateOptionsTable()
                       order = 35,
                       type = "group",
                       inline = true,
-                      hidden = not Addon.WOW_FEATURE_ABSORB, -- Absorbs were added with Mists
+                      hidden = not Addon.WOW_FEATURE_ABSORBS, -- Absorbs were added with Mists
                       args = {
                         EnableAmount = {
                           name = L["Amount"],
@@ -10635,7 +10635,6 @@ local function CreateOptionsTable()
                           order = 10,
                           desc = L["Display absorbs amount text."],
                           arg = { "text", "AbsorbsAmount" },
-                          hidden = Addon.ExpansionIsAtLeastMidnight
                         },
                         EnableShorten = {
                           name = L["Shorten"],
@@ -10644,14 +10643,14 @@ local function CreateOptionsTable()
                           desc = L["This will format text to a simpler format using M or K for millions and thousands. Disabling this will show exact absorbs amounts."],
                           arg = { "text", "AbsorbsShorten" },
                           disabled = function() return not db.text.AbsorbsAmount end,
-                          hidden = Addon.ExpansionIsAtLeastMidnight,
                         },
                         EnablePercentage = {
                           name = L["Percentage"],
                           type = "toggle",
                           order = 30,
                           desc = L["Display absorbs percentage text."],
-                          arg = { "text", "AbsorbsPercentage" }
+                          arg = { "text", "AbsorbsPercentage" },
+                          hidden = Addon.ExpansionIsAtLeastMidnight,
                         },
                       },
                     },
