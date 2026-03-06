@@ -7372,6 +7372,8 @@ local function CreateHealthbarOptions()
     },
   }
 
+  entry.args.TargetUnitText.hidden = Addon.ExpansionIsAtLeastMidnight
+
   entry.args.TargetUnitText.args.Showing = {
     name = L["Show"],
     order = 5,

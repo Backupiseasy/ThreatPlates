@@ -1,7 +1,8 @@
 ﻿------------------------------------------------------
-13.0.1 (2026-03-03)
+13.0.1 (2026-03-06)
 ------------------------------------------------------
 * Disabled status text option Everything in WoW Midnight due to restrictions on secret values.
+* Disabled showing the name of a unit's target in WoW Midnight due to restrictions on accessing a unit's target [GH-662].
 * Health status text can be hidden again at full health for WoW Midnight.
 * Fixed a Lua error that occurred when another addon tried to anchor itself to a Threat Plate [GH-660].
 * Disabled OmniCC option in Auras widget as OmniCC no longer is available in WoW Midnight [GH-659].

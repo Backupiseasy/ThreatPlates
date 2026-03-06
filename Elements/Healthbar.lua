@@ -258,6 +258,8 @@ local function ShowTargetUnit(healthbar, unitid)
 end
 
 local function UpdateTargetUnit(healthbar, unitid)
+  if Addon.ExpansionIsAtLeastMidnight then return end
+
   if SettingsTargetUnitHide or (SettingsShowOnlyForTarget and not UnitIsUnit("target", unitid)) or (SettingsTargetUnit.ShowOnlyInCombat and not InCombatLockdown()) then
     HideTargetUnit(healthbar)
   else
@@ -518,7 +520,7 @@ function Element.UpdateSettings()
 
   SubscribeEvent(Element, "HealthbarColorUpdate", ColorUpdate)
 
-  if SettingsTargetUnit.Show then
+  if not Addon.ExpansionIsAtLeastMidnight and SettingsTargetUnit.Show then
     SubscribeEvent(Element, "UNIT_TARGET", UNIT_TARGET)
     SubscribeEvent(Element, "ThreatUpdate", UnitThreatUpdate)
     SubscribeEvent(Element, "TargetLost", PlayerTargetLost)
