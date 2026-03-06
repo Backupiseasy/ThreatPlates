@@ -4437,7 +4437,7 @@ local function CreateAurasWidgetOptions()
                 desc = L["Show time left on auras that have a duration."],
                 arg = { "AuraWidget", "ShowDuration" },
                 disabled = function()
-                  return db.AuraWidget.ShowOmniCC
+                  return db.AuraWidget.ShowOmniCC and not Addon.ExpansionIsAtLeastMidnight
                 end
               },
               OmniCC = {
@@ -4446,6 +4446,7 @@ local function CreateAurasWidgetOptions()
                 order = 35,
                 desc = L["Show the OmniCC cooldown count instead of the built-in duration text on auras."],
                 arg = { "AuraWidget", "ShowOmniCC" },
+                hidden = Addon.ExpansionIsAtLeastMidnight,
               },
               Stacks = {
                 name = L["Stack Count"],

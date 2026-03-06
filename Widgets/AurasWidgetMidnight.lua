@@ -1663,9 +1663,9 @@ function Widget:UpdateSettings()
   self:ParseSpellFilters()
 
   SetNoCooldownCount = OmniCC and OmniCC.Cooldown and OmniCC.Cooldown.SetNoCooldownCount
-  HideOmniCC = not self.db.ShowOmniCC  
+  HideOmniCC = not self.db.ShowOmniCC or Addon.ExpansionIsAtLeastMidnight
 
-  ShowDuration = self.db.ShowDuration and not self.db.ShowOmniCC
+  ShowDuration = self.db.ShowDuration and HideOmniCC
   --  -- Don't update any widget frame if the widget isn't enabled.
 --  if not self:IsEnabled() then return end
 
