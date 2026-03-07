@@ -521,29 +521,10 @@ function Widget:UNIT_AURA(unitid, unit_aura_update_info)
   end
 end
 
-local StartTimeForAura = {}
-
 function Widget:UNIT_AURA(unitid, update_info)
   local widget_frame = self:GetWidgetFrameForUnit(unitid)
   if widget_frame then 
     widget_frame.Widget:UpdateAuras(widget_frame, widget_frame.unit)
-
-    if update_info and update_info.addedAuras then
-      local start_time = GetTime()
-      for _, aura_data in ipairs(update_info.addedAuras) do
-        StartTimeForAura[aura_data.auraInstanceID] = start_time
-        local aura_frame = widget_frame.UnitAuras[aura_data.auraInstanceID]
-        if aura_frame then
-          aura_frame.Cooldown:SetCooldownDuration(aura_data.duration) --, modRate)
-        end
-      end
-    end
-
-    if update_info and update_info.removedAuraInstanceIDs then
-      for _, aura_instance_id in ipairs(update_info.removedAuraInstanceIDs) do
-        StartTimeForAura[aura_instance_id] = nil
-      end
-    end
   end
 end
 

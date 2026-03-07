@@ -2,6 +2,7 @@
 13.0.2 (2026-03-07)
 ------------------------------------------------------
 * Disabled threat detection heuristic in WoW Midnight due to Lua errors caused by restrictions on secret values [GH-664].
+* Fixed a Lua error in Auras widget in WoW Midnight caused by legacy, unused code [GH-663].
 
 ------------------------------------------------------
 13.0.1 (2026-03-06)
