@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+13.0.3 (2026-03-07)
+------------------------------------------------------
+* Fixed a Lua error in Resource widget in WoW Midnight due to restrictions on secret values.
+
+------------------------------------------------------
 13.0.2 (2026-03-07)
 ------------------------------------------------------
 * Disabled threat detection heuristic in WoW Midnight due to Lua errors caused by restrictions on secret values [GH-664].

@@ -14,13 +14,15 @@ local format = format
 local ceil = ceil
 
 -- WoW APIs
-local UnitPower, UnitPowerMax = UnitPower, UnitPowerMax
+local UnitPower, UnitPowerMax, UnitPowerPercent = UnitPower, UnitPowerMax, UnitPowerPercent
 local PowerBarColor = PowerBarColor
 local SPELL_POWER_MANA = SPELL_POWER_MANA
+local ScaleTo100 = CurveConstants and CurveConstants.ScaleTo100
 
 -- ThreatPlates APIs
 local BackdropTemplate = Addon.BackdropTemplate
 local IsSecretValue = Addon.IsSecretValue
+local Truncate = Addon.Truncate
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -39,37 +41,26 @@ local function HideWidgetFrame()
   widget_frame:SetParent(nil)
 end
 
--- TODO: Use function from Localization (with one decimal)
-local function ShortNumber(no)
-  if no <= 9999 then
-    return no
-  elseif no >= 1000000000 then
-    return format("%.0fb", no /1000000000)
-  elseif no >= 1000000 then
-    return format("%.0fm", no /1000000)
-  elseif no >= 10000 then
-    return format("%.0fk", no /1000)
+if not UnitPowerPercent then
+  UnitPowerPercent = function(unit, power_type, ...)
+    local absolute_value = UnitPower("target", power_type)
+    local max_value = UnitPowerMax("target", power_type)
+    return ceil(100 * (absolute_value / max_value))
   end
 end
 
 local function PowerMana()
-  local SPELL_POWER = SPELL_POWER_MANA
-  local res_value = UnitPower("target", SPELL_POWER)
-  local res_max = UnitPowerMax("target", SPELL_POWER)
-  local res_perc = ceil(100 * (res_value / res_max))
-
-  local bar_value = res_perc
-  local text_value = ShortNumber(res_value)
-
-  return bar_value, text_value
+  local absolute_value = UnitPower("target", SPELL_POWER_MANA)
+  local percentage_value = UnitPowerPercent("target", SPELL_POWER_MANA, false, ScaleTo100)
+  
+  return percentage_value, Truncate(absolute_value)
 end
 
-local function PowerGeneric()
-  local res_value = UnitPower("target")
-  local res_max = UnitPowerMax("target")
-  local res_perc = ceil(100 * (res_value / res_max))
+local function PowerGeneric()  
+  local absolute_value = UnitPower("target")
+  local percentage_value = UnitPowerPercent("target", nil, false, ScaleTo100)
 
-  return res_perc, res_value
+  return percentage_value, absolute_value
 end
 
 --INDEX_VARIABLE              INDEX   TOKEN
