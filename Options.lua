@@ -10923,6 +10923,7 @@ local function CreateOptionsTable()
                   type = "group",
                   order = 10,
                   inline = true,
+                  hidden = Addon.ExpansionIsAtLeastMidnight,
                   args = {
                     OffTank = {
                       type = "toggle",
@@ -10940,6 +10941,7 @@ local function CreateOptionsTable()
                   type = "group",
                   order = 20,
                   inline = true,
+                  hidden = Addon.ExpansionIsAtLeastMidnight,
                   args = {
                     Note = {
                       name = L["By default, the threat system works based on a mob's threat table. Some mobs do not have such a threat table even if you are in combat with them. The threat detection heuristic uses other factors to determine if you are in combat with a mob. This works well in instances. In the open world, this can show units in combat with you that are actually just in combat with another player (and not you)."],

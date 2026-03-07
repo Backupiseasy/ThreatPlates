@@ -132,7 +132,7 @@ end
 local function CheckIfUnitIsOfftanked(unit, threat_level, other_player_has_aggro)
   -- Reset IsOfftanked if the player is tanking
   -- Off-tank detection does not work in Midnight because of secret values
-  if other_player_has_aggro and not Addon.ExpansionIsAtLeastMidnight then
+  if other_player_has_aggro then
     if unit.style == "tank" and ShowOffTank then
       local target_unit = unit.unitid .. "target"
 
@@ -295,9 +295,9 @@ end
 function ThreatModule.UpdateSettings()
   Settings = Addon.db.profile.threat
 
-  UseThreatTable = Settings.UseThreatTable
-  UseHeuristicInInstances = Settings.UseHeuristicInInstances
-  ShowOffTank = Settings.toggle.OffTank
+  UseThreatTable = Settings.UseThreatTable or Addon.ExpansionIsAtLeastMidnight
+  UseHeuristicInInstances = Settings.UseHeuristicInInstances and not Addon.ExpansionIsAtLeastMidnight
+  ShowOffTank = Settings.toggle.OffTank and not Addon.ExpansionIsAtLeastMidnight
   ShowInstancesOnly = Settings.toggle.InstancesOnly
 
   -- SubscribeEvent(ThreatModule, "UNIT_THREAT_SITUATION_UPDATE", function(unitid) end)
