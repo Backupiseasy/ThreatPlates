@@ -5,3 +5,5 @@
 workspace.code-workspace
 *.code-workspace
 *.tmp.driveupload/
+*.tmp.drivedownload/
+.github/copilot-instructions.md
