@@ -2,6 +2,7 @@
 13.0.3 (2026-03-07)
 ------------------------------------------------------
 * Fixed a Lua error in Resource widget in WoW Midnight due to restrictions on secret values.
+* Fixed a Lua error in the NPC Role status text in WoW Midnight due to restrictions on secret values [Comment ##8058].
 
 ------------------------------------------------------
 13.0.2 (2026-03-07)

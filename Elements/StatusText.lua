@@ -25,6 +25,8 @@ local FontUpdateText = Addon.Font.UpdateText
 local TransliterateCyrillicLetters = Addon.Localization.TransliterateCyrillicLetters
 local L = Addon.L
 local GetColorByHealthDeficit = Addon.Color.GetColorByHealthDeficit
+local GetUnitNPCRole = Addon.C_TooltipInfo_GetUnit_NPCRole
+local IsSecretValue = Addon.IsSecretValue
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -45,11 +47,11 @@ if Addon.ExpansionIsAtLeastMidnight then
   HideAtFullHealthCurve:AddPoint(0.9999999, 1)
   HideAtFullHealthCurve:AddPoint(1, 0)
 
-  -- HideAtZeroAbsorbsCurve = C_CurveUtil.CreateCurve()
-  -- HideAtZeroAbsorbsCurve:SetType(Enum.LuaCurveType.Step)
-  -- HideAtZeroAbsorbsCurve:AddPoint(0, 0)
-  -- HideAtZeroAbsorbsCurve:AddPoint(0.0000001, 1)
-  -- HideAtZeroAbsorbsCurve:AddPoint(1, 1)
+  HideAtZeroAbsorbsCurve = C_CurveUtil.CreateCurve()
+  HideAtZeroAbsorbsCurve:SetType(Enum.LuaCurveType.Step)
+  HideAtZeroAbsorbsCurve:AddPoint(0, 0)
+  HideAtZeroAbsorbsCurve:AddPoint(0.0000001, 1)
+  HideAtZeroAbsorbsCurve:AddPoint(1, 1)
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -57,32 +59,6 @@ end
 ---------------------------------------------------------------------------------------------------
 local Truncate
 local UnitSubtitles = {}
-
-if not Addon.IS_MAINLINE then
-  local ScannerName = "ThreatPlates_Tooltip_Subtext"
-  local TooltipScanner = CreateFrame( "GameTooltip", ScannerName , nil, "GameTooltipTemplate" ) -- Tooltip name cannot be nil
-  TooltipScanner:SetOwner( WorldFrame, "ANCHOR_NONE" )
-
-  local TooltipScannerData = {
-    lines = {
-      [1] = {},
-      [2] = {},
-      [3] = {},      
-    }
-  }
-
-  -- Compatibility functions for tooltips in WoW Classic
-  C_TooltipInfo_GetUnit = function(unitid)
-    TooltipScanner:ClearLines()
-		TooltipScanner:SetUnit(unitid)
-
-    TooltipScannerData.lines[1].leftText = _G[ScannerName.."TextLeft1"]:GetText()
-    TooltipScannerData.lines[2].leftText = _G[ScannerName.."TextLeft2"]:GetText()
-    TooltipScannerData.lines[3].leftText = _G[ScannerName .. "TextLeft3"]:GetText()
-
-    return TooltipScannerData
-  end
-end
 
 ---------------------------------------------------------------------------------------------------
 -- Cached configuration settings
@@ -118,44 +94,37 @@ local function GetRoleColor(unit)
 end
 
 local function GetUnitSubtitle(unit)
-  -- Bypass caching while in an instance
-  --if inInstance or (not UnitExists(unitid)) then return end
   if UnitIsPlayer(unit.unitid) or UnitPlayerControlled(unit.unitid) or not UnitExists(unit.unitid) then return end
-
-	--local guid = UnitGUID(unit.unitid)
-	local name = unit.name
-	local subtitle = UnitSubtitles[name]
-
+  
+  local subtitle = not IsSecretValue(unit.name) and UnitSubtitles[unit.name]	
 	if not subtitle then
-		local tooltip_data = C_TooltipInfo_GetUnit(unit.unitid)
+		local tooltip_data = GetUnitNPCRole(unit.unitid)
     if tooltip_data then
-      -- If colorbind mode is enabled, additional information (reputation) is shown in the tooltip
+      -- If colorblind mode is enabled, additional information (reputation) is shown in the tooltip
       -- before the NPC information (line 3 instead of line 2)      
       if #tooltip_data.lines >= LineNoOfNPCRole then 
-        name = tooltip_data.lines[1].leftText
-
-        if name then name = gsub( gsub( (name), "|c........", "" ), "|r", "" ) else return end	-- Strip color escape sequences: "|c"
-        if name ~= UnitName(unit.unitid) then return end	-- Avoid caching information for the wrong unit
-
-        -- Tooltip Format Priority: Faction, Description, Level
-        local tooltip_subtitle = tooltip_data.lines[LineNoOfNPCRole].leftText or ""
-        if string.match(tooltip_subtitle, UNIT_LEVEL_TEMPLATE) then
-          subtitle = ""
-        else
-          subtitle = tooltip_subtitle
+        local tooltip_name = tooltip_data.lines[1].leftText
+        if not tooltip_name then return end
+        
+        -- Strip color escape sequences: "|c"
+        -- Name of unit: type = Enum.TooltipDataLineType.UnitName
+        if not Addon.ExpansionIsAtLeastMidnight then
+          tooltip_name = gsub( gsub( (tooltip_name), "|c........", "" ), "|r", "" ) 
+          if tooltip_name ~= UnitName(unit.unitid) then return end	-- Avoid caching information for the wrong unit
         end
         
-        UnitSubtitles[name] = subtitle
+        -- Tooltip Format Priority: Faction, Description, Level
+        local tooltip_subtitle = tooltip_data.lines[LineNoOfNPCRole].leftText or ""
+        if IsSecretValue(tooltip_subtitle) or string.match(tooltip_subtitle, UNIT_LEVEL_TEMPLATE) then return end
+
+        subtitle = tooltip_subtitle
+        
+        UnitSubtitles[tooltip_name] = subtitle
       end
     end
 	end
 
-	-- Maintaining a cache allows us to avoid the hit
-	if subtitle == "" then
-		return nil
-	else
-		return subtitle
-	end
+  return subtitle
 end
 
 -- Level

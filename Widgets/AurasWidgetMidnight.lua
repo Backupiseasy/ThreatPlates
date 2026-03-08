@@ -536,7 +536,7 @@ function Widget:UpdateUnitAuras(aura_grid_frame, unit, enabled_auras, enabled_cc
     aura_grid_frame.ActiveAuras = 0
     aura_grid_frame:Hide()
     aura_grid:HideNonActiveAuras(aura_grid_frame)
-    return {}
+    return
   end
 
   -- Show the aura grid – it may have been hidden when the nameplate was used for a unit
@@ -643,37 +643,6 @@ function Widget:UpdateUnitAuras(aura_grid_frame, unit, enabled_auras, enabled_cc
     -- If scanning debuffs, also hide non-active CC aura slots
     aura_grid_cc:HideNonActiveAuras(aura_grid_frame_cc)
   end
-end
-
--- Fills an aura grid with the pre-filtered auras returned by UpdateUnitAuras.
--- aura_grid       : Widget grid object (self.Buffs / self.Debuffs / self.CrowdControl)
--- aura_grid_frame : corresponding frame on the nameplate (widget_frame.Buffs etc.)
-local function UpdateAurasOfGrid(widget_frame, unit, unit_auras_to_show, aura_grid, aura_grid_frame)
-  if widget_frame.HideAuras then return end
-
-  local aura_count = 0
-
-  for index = 1, #unit_auras_to_show do
-    local aura = unit_auras_to_show[index]
-
-    if aura.spellId and aura.expirationTime then
-      if aura_count < aura_grid.MaxAuras then
-        aura_count = aura_count + 1
-        local aura_frame = aura_grid:GetAuraFrame(aura_grid_frame, aura_count)
-
-        widget_frame.UnitAuras[aura.auraInstanceID] = aura_frame
-        aura_frame.unitid = unit.unitid
-        aura_frame.AuraData = aura
-        aura_grid:UpdateAuraInformation(aura_frame)
-      else
-        break -- grid is full
-      end
-    end
-  end
-
-  -- Mark inactive aura slots as hidden
-  aura_grid_frame.ActiveAuras = aura_count
-  aura_grid:HideNonActiveAuras(aura_grid_frame, true)
 end
 
 function Widget:UpdatePositionAuraGrid(widget_frame, aura_type, unit_style)
