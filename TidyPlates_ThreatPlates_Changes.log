@@ -1,6 +1,8 @@
 ﻿------------------------------------------------------
-13.0.3 (2026-03-07)
+13.0.3 (2026-03-12)
 ------------------------------------------------------
+* Fixed several issues related to castbars. Castbars shown be shown more consistently now. 
+* The interruptor of a cast is shown again in WoW Midnight.
 * Fixed a Lua error in Resource widget in WoW Midnight due to restrictions on secret values.
 * Fixed a Lua error in the NPC Role status text in WoW Midnight due to restrictions on secret values [Comment ##8058].
 

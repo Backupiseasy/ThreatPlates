@@ -117,7 +117,7 @@ end
 local function UNIT_NAME_UPDATE(unitid)
   local tp_frame = Addon:GetThreatPlateForUnit(unitid)
   if tp_frame then
-    tp_frame.visual.NameText:SetText(tp_frame.unit.name)
+    Element.PlateUnitAdded(tp_frame)
   end
 end
 

@@ -451,6 +451,8 @@ local function UpdateNameplateStyle(tp_frame, style)
 
   ElementsUpdateStyle(tp_frame, style)
   Widgets:OnUnitAdded(tp_frame, tp_frame.unit)
+
+  Addon:UpdateCastbar(tp_frame)
 end
 
 local function SetNameplateStyle(tp_frame, stylename)

@@ -42,9 +42,9 @@ local function HideWidgetFrame()
 end
 
 if not UnitPowerPercent then
-  UnitPowerPercent = function(unit, power_type, ...)
-    local absolute_value = UnitPower("target", power_type)
-    local max_value = UnitPowerMax("target", power_type)
+  UnitPowerPercent = function(unitid, power_type, ...)
+    local absolute_value = UnitPower(unitid, power_type)
+    local max_value = UnitPowerMax(unitid, power_type)
     return ceil(100 * (absolute_value / max_value))
   end
 end

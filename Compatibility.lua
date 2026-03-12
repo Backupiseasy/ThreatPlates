@@ -79,6 +79,9 @@ local WOW_EVENTS = {
   UNIT_SPELLCAST_CHANNEL_STOP = true,
   UNIT_SPELLCAST_CHANNEL_UPDATE = true,
   UNIT_SPELLCAST_DELAYED = true,
+  UNIT_SPELLCAST_INTERRUPTED = Addon.ExpansionIsAtLeastMidnight, 
+  --UNIT_SPELLCAST_FAILED = Addon.ExpansionIsAtLeastMidnight, 
+  --UNIT_SPELLCAST_FAILED_QUIET = Addon.ExpansionIsAtLeastMidnight, 
   UNIT_SPELLCAST_EMPOWER_START = Addon.ExpansionIsAtLeastDF,
   UNIT_SPELLCAST_EMPOWER_STOP = Addon.ExpansionIsAtLeastDF,
   UNIT_SPELLCAST_EMPOWER_UPDATE = Addon.ExpansionIsAtLeastDF,
@@ -207,6 +210,3 @@ end
 ---------------------------------------------------------------------------------------------------
 
 Addon.IsSecretValue = _G.issecretvalue or function() return false end
-
-Addon.UnitTokenRestrictedForAddOns = UnitTokenRestrictedForAddOns or function() return false end
-

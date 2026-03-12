@@ -7615,7 +7615,7 @@ local function CreateCastbarOptions()
                 arg = { "settings", "castbar", "BackgroundUseForegroundColor" },
               },
               BGColorCustom = {
-            name = L["Color"], type = "color",	order = 70,	arg = {"settings", "castbar", "BackgroundColor"},
+                name = L["Color"], type = "color",	order = 70,	arg = {"settings", "castbar", "BackgroundColor"},
                 width = "half",
                 disabled = function() return db.settings.castbar.BackgroundUseForegroundColor end,
               },

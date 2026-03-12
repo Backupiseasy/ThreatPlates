@@ -21,7 +21,7 @@ local UnitIsUnit, UnitIsPlayer = UnitIsUnit, UnitIsPlayer
 local GetCreatureDifficultyColor, GetRaidTargetIndex = GetCreatureDifficultyColor, GetRaidTargetIndex
 local GetTime, CombatLogGetCurrentEventInfo = GetTime, CombatLogGetCurrentEventInfo
 local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
-local GetPlayerInfoByGUID = GetPlayerInfoByGUID
+local GetPlayerInfoByGUID, UnitNameFromGUID = GetPlayerInfoByGUID, UnitNameFromGUID
 local IsInInstance, InCombatLockdown = IsInInstance, InCombatLockdown
 local NamePlateDriverFrame, UnitNameplateShowsWidgetsOnly = NamePlateDriverFrame, UnitNameplateShowsWidgetsOnly
 local GetSpecializationInfo, GetSpecialization = GetSpecializationInfo, GetSpecialization
@@ -30,6 +30,7 @@ local CastbarCastingDirection = Enum.StatusBarTimerDirection and Enum.StatusBarT
 local CastbarChannelDirection = Enum.StatusBarTimerDirection and Enum.StatusBarTimerDirection.RemainingTime
 local WrapTextInColor = C_ColorUtil and C_ColorUtil.WrapTextInColor
 local GetClassColor = C_ClassColor and C_ClassColor.GetClassColor
+local UnitChannelDuration, UnitCastingDuration = UnitChannelDuration, UnitCastingDuration
 
 -- ThreatPlates APIs
 local L = Addon.L
@@ -418,16 +419,19 @@ local function SetUnitAttributeName(unit, unitid)
   -- Let's preserve the unaltered name for the custom styles check…
   unit.basename = unit_name
 
-  if unit.type == "PLAYER" then
-    local db = Addon.db.profile.Name.HealthbarMode
+  if unit.type ~= "PLAYER" then
+    unit.name = unit_name
+    return
+  end
 
-    if db.ShowTitle then
-      unit_name = UnitPVPName(unitid)
-    end
+  local db = Addon.db.profile.Name.HealthbarMode
 
-    if db.ShowRealm and realm then
-      unit_name = unit_name .. " - " .. realm
-    end
+  if db.ShowTitle then
+    unit_name = UnitPVPName(unitid) or unit_name
+  end
+
+  if db.ShowRealm and realm then
+    unit_name = unit_name .. " - " .. (realm or "")
   end
 
   unit.name = unit_name
@@ -556,10 +560,9 @@ end
 -- Nameplate Updating:
 ---------------------------------------------------------------------------------------------------------------------
 
-local function OnStartCasting(tp_frame, unitid, channeled, event_spellid)
-  local unit, visual, style = tp_frame.unit, tp_frame.visual, tp_frame.style
-
-  local castbar = tp_frame.visual.Castbar
+local function OnStartCasting(tp_frame, unitid, cast_guid, event_spell_id, castbar_id, channeled)
+  local visual = tp_frame.visual
+  local castbar = visual.Castbar
   -- Don't check for or style.castbar.show here as depending on the cast the nameplate style can change (with then
   -- a castbar that should be shown).
   if not tp_frame:IsShown() then
@@ -567,24 +570,29 @@ local function OnStartCasting(tp_frame, unitid, channeled, event_spellid)
     return
   end
 
-  local name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID, numStages
+  local name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spell_id, numStages, uci_castbar_id
+  local cast_id, is_empowered
   if channeled then
-    name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID, _, numStages = UnitChannelInfo(unitid, event_spellid)
+    -- spell_id is only used in the wrapper for Classic version of UnitChannelInfo
+    name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spell_id, is_empowered, numStages, uci_castbar_id = UnitChannelInfo(unitid, event_spell_id)
   else
-    name, text, texture, startTime, endTime, isTradeSkill, _, notInterruptible, spellID = UnitCastingInfo(unitid)
+    name, text, texture, startTime, endTime, isTradeSkill, cast_id, notInterruptible, spell_id, uci_castbar_id = UnitCastingInfo(unitid)
   end
+
+  castbar.CastbarID = castbar_id or uci_castbar_id  
 
   if not name or isTradeSkill then
     castbar:Hide()
     return 
   end
 
+  local unit = tp_frame.unit
   if not Addon.ExpansionIsAtLeastMidnight then
-    StyleModule.CastTriggerCheckIfActive(unit, spellID, name)
+    StyleModule.CastTriggerCheckIfActive(unit, spell_id, name)
   end
 
   -- Abort here as casts can now switch nameplate styles (e.g,. from headline to healthbar view
-  if not style.castbar.show and not unit.CustomStyleCast then
+  if not tp_frame.style.castbar.show and not unit.CustomStyleCast then
     castbar:Hide()
     return
   end
@@ -596,7 +604,6 @@ local function OnStartCasting(tp_frame, unitid, channeled, event_spellid)
   if not Addon.ExpansionIsAtLeastMidnight then
     if StyleModule.CastTriggerUpdateStyle(unit) then
       StyleModule:Update(tp_frame)
-      -- style = tp_frame.style
     end
   end
 
@@ -668,16 +675,18 @@ local function OnStartCasting(tp_frame, unitid, channeled, event_spellid)
   castbar:Show()
 end
 
-local function UpdateCastbar(tp_frame, unitid)
+function Addon:UpdateCastbar(tp_frame)
   if not ShowCastBars then return end
 
-  if tp_frame.unit.isCasting then 
+  local castbar = tp_frame.visual.Castbar
+  local unit = tp_frame.unit
+  if unit.isCasting then 
     -- Check to see if there's a spell being cast
-    OnStartCasting(tp_frame, unitid, tp_frame.visual.Castbar.IsChanneling)
+    OnStartCasting(tp_frame, unit.unitid, nil, nil, castbar.CastbarID, castbar.IsChanneling)
   else
     -- It would be better to check for IsInterrupted here and not hide it if that is true
     -- Not currently sure though, if that might work with the Hide() calls in OnStartCasting
-    tp_frame.visual.Castbar:Hide()
+    castbar:Hide()
   end
 end
 
@@ -943,78 +952,44 @@ local	function HandlePlateCreated(plate)
   Widgets:OnPlateCreated(tp_frame)
 end
 
--- HandlePlateUnitAdded
 local function HandlePlateUnitAdded(plate, unitid)
   local tp_frame = plate.TPFrame
   local unit = tp_frame.unit
 
   if Addon.ExpansionIsAtLeastMidnight then
     C_NamePlateManager.SetNamePlateSimplified(unitid, false)
-
-    -- if not InCombatLockdown() then
-    --   C_NamePlateManager.SetNamePlateHitTestFrame(unitid, tp_frame)
-    -- -- else
-    -- --   plate.UnitFrame.HitTestFrame:SetParent(plate.UnitFrame)
-    -- --   plate.UnitFrame.HitTestFrame:ClearAllPoints()
-    -- --   plate.UnitFrame.HitTestFrame:SetAllPoints(tp_frame)
-    -- end
-
-    -- plate.UnitFrame.HitTestFrame:SetParent(plate.unitFrame)
-    -- plate.UnitFrame.HitTestFrame:ClearAllPoints()
-    -- plate.UnitFrame.HitTestFrame:SetPoint("TOPLEFT", plate.unitFrame, "TOPLEFT")
-    -- plate.UnitFrame.HitTestFrame:SetPoint("BOTTOMRIGHT", plate.unitFrame, "BOTTOMRIGHT")
-
-    -- C_Timer.After(0.1, function()
-    --   if not plate.UnitFrame then return end
-
-    --   plate.TPAnchorFrame:ClearAllPoints()
-    --   if SettingsShowOnlyNames then
-    --     plate.TPAnchorFrame:SetParent(plate)
-    --     plate.TPAnchorFrame:Hide()
-    --   else
-    --     plate.TPAnchorFrame:SetParent(plate.UnitFrame.healthBar)
-    --     plate.TPAnchorFrame:Show()
-    --   end
-    --   plate.TPAnchorFrame:SetPoint("topright", plate.UnitFrame.healthBar, "topright")
-    --   plate.TPAnchorFrame:SetPoint("bottomleft", plate.UnitFrame.healthBar, "bottomleft")
-    --   plate.TPAnchorFrame:SetFrameStrata(plate.UnitFrame.healthBar:GetFrameStrata())
-    --   plate.TPAnchorFrame:SetFrameLevel(plate.UnitFrame.healthBar:GetFrameLevel()+1)
-    -- end)
-  
-
-    -- local healthbar = tp_frame.visual.Healthbar
-    -- plate.TPAnchorFrame:ClearAllPoints()
-    -- plate.TPAnchorFrame:SetParent(healthbar)
-    -- plate.TPAnchorFrame:SetPoint("topright", healthbar, "topright")
-    -- plate.TPAnchorFrame:SetPoint("bottomleft", healthbar, "bottomleft")
-    -- plate.TPAnchorFrame:Show()
-
-    -- plate.Background:SetAllPoints(plate.UnitFrame.HitTestFrame)
   end
-
-  -- Set unit attributes
-  -- Update modules, then elements, then widgets
 
   -- Initialize unit data for which there are no events when players enters world or that
   -- do not change over the nameplate lifetime
   SetUnitAttributes(unit, unitid)
   PlatesByUnit[unitid] = tp_frame
-  if not Addon.ExpansionIsAtLeastMidnight then
-    PlatesByGUID[unit.guid] = plate
+  local guid = unit.guid
+  if guid and not IsSecretValue(guid) then
+    PlatesByGUID[guid] = plate
   end
-
-  -- Initialized nameplate style based on unit added
+  
+  -- Update modules, then elements, then widgets
   ThreatModule.SetUnitAttribute(tp_frame)
   SetNameplateVisibility(plate, unitid)
   WidgetContainerAcquire(plate)
+  -- Initialized nameplate style based on unit added
   -- ColorModule/TransparencyModule/ScalingModule are called in StyleModule.PlateUnitAdded
   StyleModule.PlateUnitAdded(tp_frame)
   -- TODO: This is not ideal/correct as Style.Update calls ElementsUpdateStyle
   ElementsPlateUnitAdded(tp_frame)
 
-  -- Call this after the plate is shown as OnStartCasting checks if the plate is shown; if not, the castbar is hidden and
-  -- nothing is updated
-  UpdateCastbar(tp_frame, unitid)
+  -- Check to see if there's a spell being cast.
+  -- Call this after the plate is shown as OnStartCasting checks if the plate is shown; if not, the castbar is hidden and nothing is updated.
+  if ShowCastBars then
+    if UnitCastingInfo(unitid) then
+      OnStartCasting(tp_frame, unitid, nil, nil, nil, false)
+    elseif UnitChannelInfo(unitid) then
+      OnStartCasting(tp_frame, unitid, nil, nil, nil, true)
+    else
+      tp_frame.visual.Castbar:Hide()
+    end
+  end
 end
 
 --------------------------------------------------------------------------------------------------------------
@@ -1480,7 +1455,7 @@ end
 function Addon:UNIT_NAME_UPDATE(unitid)
   -- Skip special unitids (they are updated via their nameplate unitid) and personal nameplate
   if IGNORED_UNITS[unitid] then return end
-
+  
   local tp_frame = self:GetThreatPlateForUnit(unitid)
   if tp_frame then
     SetUnitAttributeName(tp_frame.unit, unitid)
@@ -1687,106 +1662,134 @@ function Addon:UNIT_LEVEL(unitid)
 end
 
 -- Update spell currently being cast
-local function UnitSpellcastMidway(event, unitid, ...)
+local function UnitSpellcastMidway(event, unitid, cast_guid, spell_id, castbar_id)
+  -- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED
+  if IGNORED_UNITS[unitid] or not ShowCastBars then return end
+
+  local tp_frame = Addon:GetThreatPlateForUnit(unitid)
+  if not tp_frame then return end
+
+  local castbar = tp_frame.visual.Castbar
+  if castbar_id ~= castbar.CastbarID then return end
+  
+  OnStartCasting(tp_frame, unitid, cast_guid, spell_id, castbar_id, castbar.IsChanneling)
+end
+
+function Addon:UNIT_SPELLCAST_START(unitid, cast_guid, spell_id, castbar_id)
   -- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED
   if IGNORED_UNITS[unitid] or not ShowCastBars then return end
 
   local tp_frame = Addon:GetThreatPlateForUnit(unitid)
   if tp_frame then
-    OnStartCasting(tp_frame, unitid, tp_frame.visual.Castbar.IsChanneling)
+    OnStartCasting(tp_frame, unitid, cast_guid, spell_id, castbar_id, false)
   end
 end
 
-function Addon:UNIT_SPELLCAST_START(unitid, ...)
+function Addon:UNIT_SPELLCAST_STOP(unitid, cast_guid, spell_id, castbar_id)
+  -- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED
+  if IGNORED_UNITS[unitid] or not ShowCastBars then return end
+
+  local tp_frame = Addon:GetThreatPlateForUnit(unitid)
+  if not tp_frame then return end
+
+  local castbar = tp_frame.visual.Castbar
+  if castbar_id ~= castbar.CastbarID then return end
+
+  castbar.CastbarID = nil
+  castbar.IsChanneling = false
+  castbar.IsCasting = false
+  
+  tp_frame.unit.isCasting = false
+
+  if StyleModule.CastTriggerReset(tp_frame.unit) then
+    StyleModule.Update(tp_frame)
+  end
+
+  PublishEvent("CastingStopped", tp_frame)
+
+  --castbar:Hide()
+end
+
+function Addon:UNIT_SPELLCAST_CHANNEL_START(unitid, cast_guid, spell_id, castbar_id)
   -- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED
   if IGNORED_UNITS[unitid] or not ShowCastBars then return end
 
   local tp_frame = Addon:GetThreatPlateForUnit(unitid)
   if tp_frame then
-    OnStartCasting(tp_frame, unitid, false)
+    OnStartCasting(tp_frame, unitid, cast_guid, spell_id, castbar_id, true)
   end
 end
 
-function Addon:UNIT_SPELLCAST_STOP(unitid, ...)
-  -- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED
+function Addon:UNIT_SPELLCAST_CHANNEL_STOP(unitid, cast_guid, spell_id, interrupted_by, castbar_id)
   if IGNORED_UNITS[unitid] or not ShowCastBars then return end
 
-  local tp_frame = Addon:GetThreatPlateForUnit(unitid)
-  if tp_frame then
-    tp_frame.unit.isCasting = false
-
-    local castbar = tp_frame.visual.Castbar
-    castbar.IsChanneling = false
-    castbar.IsCasting = false
-
-    if StyleModule.CastTriggerReset(tp_frame.unit) then
-      StyleModule.Update(tp_frame)
-    end
-
-    PublishEvent("CastingStopped", tp_frame)
+  if interrupted_by ~= nil then
+    Addon:UNIT_SPELLCAST_INTERRUPTED(unitid, cast_guid, spell_id, interrupted_by, castbar_id)
+  else
+    Addon:UNIT_SPELLCAST_STOP(unitid, cast_guid, spell_id, castbar_id)  -- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED
   end
 end
 
-function Addon:UNIT_SPELLCAST_CHANNEL_START(unitid, _, spellid)
-  -- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED
-  if IGNORED_UNITS[unitid] or not ShowCastBars then return end
+-- function Addon:UNIT_SPELLCAST_FAILED(unitTarget, castGUID, spellID, castBarID)
+--   print("UNIT_SPELLCAST_FAILED:", unitTarget, castGUID, spellID, castBarID)
+--   local tp_frame = Addon:GetThreatPlateForUnit(unitid)
+--   if not tp_frame then return end
+-- end
 
-  local tp_frame = Addon:GetThreatPlateForUnit(unitid)
-  if tp_frame then
-    OnStartCasting(tp_frame, unitid, true, spellid)
-  end
-end
+-- function Addon:UNIT_SPELLCAST_FAILED_QUIET(unitTarget, castGUID, spellID, castBarID)
+--   print("UNIT_SPELLCAST_FAILED_QUIET:", unitTarget, castGUID, spellID, castBarID)
+--   local tp_frame = Addon:GetThreatPlateForUnit(unitid)
+--   if not tp_frame then return end
+-- end
 
 Addon.UNIT_SPELLCAST_CHANNEL_UPDATE = Addon.UNIT_SPELLCAST_CHANNEL_START
-Addon.UNIT_SPELLCAST_DELAYED = UnitSpellcastMidway
-Addon.UNIT_SPELLCAST_CHANNEL_STOP = Addon.UNIT_SPELLCAST_STOP
 
+Addon.UNIT_SPELLCAST_DELAYED = UnitSpellcastMidway
 Addon.UNIT_SPELLCAST_INTERRUPTIBLE = UnitSpellcastMidway
 Addon.UNIT_SPELLCAST_NOT_INTERRUPTIBLE = UnitSpellcastMidway
+--Addon.UNIT_SPELLCAST_FAILED = Addon.UNIT_SPELLCAST_STOP
+--Addon.UNIT_SPELLCAST_FAILED_QUIET = Addon.UNIT_SPELLCAST_STOP
 
 Addon.UNIT_SPELLCAST_EMPOWER_START = Addon.UNIT_SPELLCAST_CHANNEL_START
 Addon.UNIT_SPELLCAST_EMPOWER_UPDATE = UnitSpellcastMidway
 Addon.UNIT_SPELLCAST_EMPOWER_STOP = Addon.UNIT_SPELLCAST_STOP
 
---  function CoreEvents:UNIT_SPELLCAST_INTERRUPTED(unitid, lineid, spellid)
---    if unitid == "target" or UnitIsUnit("player", unitid) or not ShowCastBars then return end
---  end
+-- UNIT_SPELLCAST_FAILED
 
-function Addon.UNIT_SPELLCAST_INTERRUPTED(event, unitid, castGUID, spellID, sourceName, interrupterGUID)
+function Addon:UNIT_SPELLCAST_INTERRUPTED(unitid, cast_guid, spell_id, interrupted_by, castbar_id)
   -- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED
   if IGNORED_UNITS[unitid] or not ShowCastBars then return end
 
   local tp_frame = Addon:GetThreatPlateForUnit(unitid)
-  if tp_frame then
-    if sourceName then
-      local visual = tp_frame.visual
-      local castbar = visual.Castbar
-      if castbar:IsShown() then
-        sourceName = gsub(sourceName, "%-[^|]+", "") -- UnitName(sourceName) only works in groups
-        local _, class_name = GetPlayerInfoByGUID(interrupterGUID)
-        visual.SpellText:SetText(INTERRUPTED .. " [" .. Addon.ColorByClass(class_name, TransliterateCyrillicLetters(sourceName)) .. "]")
+  if not tp_frame then return end
 
-        local _, max_val = castbar:GetMinMaxValues()
-        castbar:SetValue(max_val)
-        castbar.Spark:Hide()
+  local castbar = tp_frame.visual.Castbar
+  if castbar_id ~= castbar.CastbarID or not castbar:IsShown() or not interrupted_by then return end
 
-        local color = Addon.db.profile.castbarColorInterrupted
-        castbar:SetStatusBarColor(color.r, color.g, color.b, color.a)
-        castbar.FlashTime = CASTBAR_INTERRUPT_HOLD_TIME
-
-        self:UNIT_SPELLCAST_STOP("UNIT_SPELLCAST_STOP", unitid)
-
-        -- I am assuming that OnStopCasting is called always when a cast is interrupted from
-        -- _STOP events
-        tp_frame.unit.IsInterrupted = true
-
-        -- Should not be necessary any longer ... as OnStopCasting is not hiding the castbar anymore
-        castbar:Show()
-      end
-    else
-      self:UNIT_SPELLCAST_STOP("UNIT_SPELLCAST_STOP", unitid)
-    end
+  local _, class, _, race, _, name, realm = GetPlayerInfoByGUID(interrupted_by)  
+  name = name or UnitNameFromGUID(interrupted_by)
+  local class_color = class and GetClassColor(class) or nil
+  if class_color then
+    name = class_color:WrapTextInColorCode(name)
   end
+  
+  tp_frame.visual.SpellText:SetText(INTERRUPTED .. " [" ..TransliterateCyrillicLetters(name) .. "]")
+
+  castbar:SetMinMaxValues(0, 1)
+  castbar:SetValue(1)
+  castbar.Spark:Hide()
+
+  local color = Addon.db.profile.castbarColorInterrupted
+  castbar:SetStatusBarColor(color.r, color.g, color.b, color.a)
+  castbar.FlashTime = CASTBAR_INTERRUPT_HOLD_TIME
+
+  -- I am assuming that OnStopCasting is called always when a cast is interrupted from
+  -- _STOP events
+  tp_frame.unit.IsInterrupted = true
+  
+  Addon:UNIT_SPELLCAST_STOP(unitid, cast_guid, spell_id, castbar_id)
+  -- Should not be necessary any longer ... as OnStopCasting is not hiding the castbar anymore
+  castbar:Show()
 end
 
 function Addon:COMBAT_LOG_EVENT_UNFILTERED()
@@ -1887,9 +1890,9 @@ local ENABLED_EVENTS = {
   "UNIT_SPELLCAST_INTERRUPTIBLE",
   "UNIT_SPELLCAST_NOT_INTERRUPTIBLE",
   -- UNIT_SPELLCAST_SUCCEEDED
-  -- UNIT_SPELLCAST_FAILED
-  -- UNIT_SPELLCAST_FAILED_QUIET
-  -- UNIT_SPELLCAST_INTERRUPTED - handled by COMBAT_LOG_EVENT_UNFILTERED / SPELL_INTERRUPT as it's the only way to find out the interruptorom
+  --"UNIT_SPELLCAST_FAILED",
+  --"UNIT_SPELLCAST_FAILED_QUIET",
+  "UNIT_SPELLCAST_INTERRUPTED",   -- Used in Midnight, otherweise handled by events COMBAT_LOG_EVENT_UNFILTERED / SPELL_INTERRUPT as it's the only way to find out the interruptorom
   -- UNIT_SPELLCAST_SENT
   "UNIT_SPELLCAST_EMPOWER_START",
   "UNIT_SPELLCAST_EMPOWER_UPDATE",

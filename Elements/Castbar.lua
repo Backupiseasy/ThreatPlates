@@ -81,9 +81,7 @@ local function OnUpdateMidnight(self, elapsed)
 end
 
 local function OnHide(self)
-  -- OnUpdateCastMidway is hiding the castbar if the unit is no longer casting
-  -- So we have to show the castbar again
-  if self.FlashTime > 0 then
+   if self.FlashTime > 0 then
     self:Show()
   end
 end
@@ -184,7 +182,7 @@ function Element.PlateCreated(tp_frame)
   else
     castbar:SetScript("OnUpdate", OnUpdate)
   end
-  castbar:SetScript("OnHide", OnHide)
+  castbar:HookScript("OnHide", OnHide)
 
   tp_frame.visual.Castbar = castbar
   tp_frame.visual.SpellText = spell_text
@@ -273,7 +271,7 @@ function Element.UpdateStyle(tp_frame, style)
 
     spell_text:ClearAllPoints()
     spell_text:SetSize(spell_text_style.width, spell_text_style.height)
-    spell_text:SetPoint(spell_text_style.anchor, castbar, spell_text_style.anchor, db.SpellNameText.HorizontalOffset + target_offset_x, db.SpellNameText.VerticalOffset + target_offset_y)
+    spell_text:SetPoint(spell_text_style.anchor, castbar, spell_text_style.anchor, db.SpellNameText.HorizontalOffset, db.SpellNameText.VerticalOffset)
 
     spell_text:SetWordWrap(false)
 

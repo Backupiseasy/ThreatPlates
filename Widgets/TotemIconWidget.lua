@@ -54,7 +54,6 @@ function Widget:UNIT_NAME_UPDATE(unitid)
 end
 
 function Widget:OnEnable()
-  
   self:SubscribeEvent("UNIT_NAME_UPDATE")
 end
 
