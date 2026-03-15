@@ -271,7 +271,9 @@ local function SetCVarHook(name, value, c)
   --   elseif invalid then
   --     Addon.Logging.Warning(L["Animations for hiding nameplates are being disabled as certain console variables (CVars) related to nameplate scaling are set in a way to prevent this feature from working."])
   --   end
-  if name == "nameplateMinAlpha" or name == "nameplateMaxAlpha" or name == "nameplateOccludedAlphaMult" or name == "nameplateSelectedAlpha" then
+  
+  -- Occluded Units needs to be enabled for this check to report a warning
+  if Addon.db.profile.nameplate.toggle.OccludedUnits and (name == "nameplateMinAlpha" or name == "nameplateMaxAlpha" or name == "nameplateOccludedAlphaMult" or name == "nameplateSelectedAlpha") then
     local enabled = Addon.Transparency.OcclusionDetectionIsEnabled()
     local invalid = CVars.InvalidCVarsForOcclusionDetection()
     -- Update Hiding Nameplates only if something changed
