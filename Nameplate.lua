@@ -528,7 +528,8 @@ local function SetUnitAttributes(unit, unitid)
   -- Initialized in OnStartCasting in HandlePlateUnitAdded, but only when unit is currently casting
   unit.isCasting = false
   unit.IsInterrupted = false
-  
+  unit.CastIsNotInterruptible = false
+
   -- Target, Focus, and Mouseover => PLAYER_TARGET_CHANGED, UPDATE_MOUSEOVER_UNIT, PLAYER_FOCUS_CHANGED
   SetUnitAttributeTarget(unit, unitid)
   unit.IsFocus = UnitIsUnit("focus", unitid) -- required here for config changes which reset all plates without calling TARGET_CHANGED, MOUSEOVER, ...
@@ -599,7 +600,7 @@ local function OnStartCasting(tp_frame, unitid, cast_guid, event_spell_id, castb
 
   unit.isCasting = true
   unit.IsInterrupted = false
-  unit.spellIsShielded = notInterruptible
+  unit.CastIsNotInterruptible = notInterruptible
 
   if not Addon.ExpansionIsAtLeastMidnight then
     if StyleModule.CastTriggerUpdateStyle(unit) then
@@ -634,9 +635,6 @@ local function OnStartCasting(tp_frame, unitid, cast_guid, event_spell_id, castb
       castbar.Duration = UnitCastingDuration(unitid)
       castbar:SetTimerDuration(castbar.Duration, CastbarInterpolation, CastbarCastingDirection)
     end
-
-    castbar:SetAllColors(ColorModule.SetCastbarColor(unit))
-    castbar:SetFormat(notInterruptible)
   else
     local target_unit_name = UnitName(unit.unitid .. "target")
     if target_unit_name and not Addon.IsSecretValue(target_unit_name) then
@@ -661,11 +659,10 @@ local function OnStartCasting(tp_frame, unitid, cast_guid, event_spell_id, castb
     castbar.MaxValue = (endTime - startTime) / 1000   
     castbar:SetMinMaxValues(0, castbar.MaxValue)
     castbar:SetValue(castbar.Value)
-    castbar:SetAllColors(ColorModule.SetCastbarColor(unit))
-    castbar:SetFormat(notInterruptible)
   end
-
+  
   castbar.IsChanneling = not castbar.IsCasting
+  castbar:UpdateForCast(unit)
 
   -- Only publish this event once (OnStartCasting is called for re-freshing as well)
   if not castbar:IsShown() then

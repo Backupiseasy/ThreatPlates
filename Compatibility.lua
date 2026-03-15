@@ -7,6 +7,8 @@ local ADDON_NAME, Addon = ...
 -- Lua APIs
 
 -- WoW APIs
+local EvaluateColorValueFromBoolean = C_CurveUtil and C_CurveUtil.EvaluateColorValueFromBoolean
+local CreateColor = CreateColor
 
 -- ThreatPlates APIs
 
@@ -210,3 +212,11 @@ end
 ---------------------------------------------------------------------------------------------------
 
 Addon.IsSecretValue = _G.issecretvalue or function() return false end
+
+Addon.EvaluateColorValueFromBoolean = function(boolean, color_if_true, color_if_false)
+  local r = EvaluateColorValueFromBoolean(boolean, color_if_true.r, color_if_false.r)
+  local g = EvaluateColorValueFromBoolean(boolean, color_if_true.g, color_if_false.g)
+  local b = EvaluateColorValueFromBoolean(boolean, color_if_true.b, color_if_false.b)
+  local a = EvaluateColorValueFromBoolean(boolean, color_if_true.a, color_if_false.a)
+  return CreateColor(r, g, b, a)
+end

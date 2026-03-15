@@ -30,7 +30,6 @@ local GetAuraDispelTypeColor = C_UnitAuras.GetAuraDispelTypeColor
 local AuraBarInterpolation = Enum.StatusBarInterpolation and Enum.StatusBarInterpolation.Immediate
 local ElapsedTimeDirection = Enum.StatusBarTimerDirection and Enum.StatusBarTimerDirection.ElapsedTime
 local RemainingTimeDirection = Enum.StatusBarTimerDirection and Enum.StatusBarTimerDirection.RemainingTime
-local EvaluateColorValueFromBoolean = C_CurveUtil.EvaluateColorValueFromBoolean
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -40,7 +39,7 @@ local AuraTriggerInitialize, AuraTriggerUpdateStyle, AuraTriggerCheckIfActive = 
 local CUSTOM_GLOW_FUNCTIONS, CUSTOM_GLOW_WRAPPER_FUNCTIONS = Addon.CUSTOM_GLOW_FUNCTIONS, Addon.CUSTOM_GLOW_WRAPPER_FUNCTIONS
 local BackdropTemplate = Addon.BackdropTemplate
 local MODE_FOR_STYLE, AnchorFrameTo = Addon.MODE_FOR_STYLE, Addon.AnchorFrameTo
-local IsSecretValue = Addon.IsSecretValue
+local IsSecretValue, EvaluateColorValueFromBoolean = Addon.IsSecretValue, Addon.EvaluateColorValueFromBoolean
 local AbbreviateNumbers = AbbreviateNumbers
 
 local _G =_G
@@ -1288,13 +1287,9 @@ local function UpdateWidgetTimeBarMode(self, aura_frame, expiration, duration)
     local color = aura_frame.AuraData.color
     local bg_color = self.db.BackgroundColor
     
-    local duration_is_zero = timeleft:IsZero()
-    local r = EvaluateColorValueFromBoolean(duration_is_zero, color.r, bg_color.r)
-    local g = EvaluateColorValueFromBoolean(duration_is_zero, color.g, bg_color.g)
-    local b = EvaluateColorValueFromBoolean(duration_is_zero, color.b, bg_color.b)
-    local a = EvaluateColorValueFromBoolean(duration_is_zero, color.a, bg_color.a)
+    local color = EvaluateColorValueFromBoolean(timeleft:IsZero(), color, bg_color)
 
-    aura_frame.Background:SetVertexColor(r, g, b, a)
+    aura_frame.Background:SetVertexColor(color:GetRGBA())
   else
     aura_frame.TimeText:SetText()
   end

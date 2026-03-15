@@ -17,11 +17,11 @@ local UnitIsUnit = UnitIsUnit
 local GetTimePreciseSec = GetTimePreciseSec
 
 -- ThreatPlates APIs
-local SetCastbarColor = Addon.Color.SetCastbarColor
 local FontSetJustify, FontUpdateText, FontUpdateTextSize = Addon.Font.SetJustify, Addon.Font.UpdateText, Addon.Font.UpdateTextSize
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 local BackdropTemplate = Addon.BackdropTemplate
 local L = Addon.L
+local EvaluateColorValueFromBoolean = Addon.EvaluateColorValueFromBoolean
 
 local ART_PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Artwork\\"
 local INTERRUPT_BORDER_BACKDROP = {
@@ -90,14 +90,54 @@ end
 -- Basic castbar functions
 ---------------------------------------------------------------------------------------------------
 
-local function SetAllColors(self, rBar, gBar, bBar, aBar, rBackdrop, gBackdrop, bBackdrop, aBackdrop)
-  self:SetStatusBarColor(rBar or 1, gBar or 1, bBar or 1, aBar or 1)
-  self.Background:SetVertexColor(rBackdrop or 1, gBackdrop or 1, bBackdrop or 1, aBackdrop or 1)
+local function GetCastbarColor(unit)
+	if not unit.unitid then return end
+
+	local db = Addon.db.profile
+
+	local c
+
+
+  -- Because of this ordering, IsInterrupted must be set to false when a new cast is cast. Otherwise
+  -- the interrupt color may be shown for a cast
+  if Addon.ExpansionIsAtLeastMidnight then
+    if unit.IsInterrupted then
+      c = db.castbarColorInterrupted
+    else
+      c = EvaluateColorValueFromBoolean(unit.CastIsNotInterruptible, db.castbarColorShield, db.castbarColor)
+    end
+  else
+    if unit.IsInterrupted then
+      c = db.castbarColorInterrupted
+    elseif unit.CastIsNotInterruptible then
+      c = db.castbarColorShield
+    else
+      c = db.castbarColor
+    end
+  end
+
+	db = db.settings.castbar
+	if db.BackgroundUseForegroundColor then
+		return c.r, c.g, c.b, c.a, c.r, c.g, c.b, 1 - db.BackgroundOpacity
+	else
+		local color = db.BackgroundColor
+		return c.r, c.g, c.b, c.a, color.r, color.g, color.b, 1 - db.BackgroundOpacity
+	end
 end
 
-local function SetFormat(self, show)
+local function SetCastbarColor(castbar, unit)
+  local rBar, gBar, bBar, aBar, rBackdrop, gBackdrop, bBackdrop, aBackdrop = GetCastbarColor(unit)
+
+  castbar:SetStatusBarColor(rBar or 1, gBar or 1, bBar or 1, aBar or 1)
+  castbar.Background:SetVertexColor(rBackdrop or 1, gBackdrop or 1, bBackdrop or 1, aBackdrop or 1)
+end
+
+local function UpdateForCast(self, unit)
+  SetCastbarColor(self, unit)
+
   local db = Addon.db.profile.settings
 
+  local show = unit.CastIsNotInterruptible
   if Addon.ExpansionIsAtLeastMidnight then
     self.InterruptBorder:SetAlphaFromBoolean(show, 1, 0)
     self.InterruptOverlay:SetAlphaFromBoolean(show, 1, 0)
@@ -148,8 +188,7 @@ function Element.PlateCreated(tp_frame)
   castbar.InterruptShield:SetTexture(ART_PATH .. "Interrupt_Shield")
   castbar.InterruptShield:SetPoint("CENTER", castbar, "LEFT")
 
-  castbar.SetAllColors = SetAllColors
-  castbar.SetFormat = SetFormat
+  castbar.UpdateForCast = UpdateForCast
 
   castbar:SetStatusBarColor(1, 0.8, 0)
 
@@ -158,18 +197,17 @@ function Element.PlateCreated(tp_frame)
   spark:SetBlendMode("ADD")
   castbar.Spark = spark
 
-  local spell_text = castbar.Overlay:CreateFontString(nil, "ARTWORK")
-  spell_text:SetFont("Fonts\\FRIZQT__.TTF", 11)
+  local spell_text = castbar.Overlay:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+  spell_text:SetTextColor(1, 1, 1, 1)
   spell_text:SetWordWrap(false) -- otherwise text is wrapped when plate is scaled down
 
   -- Remaining cast time
-  castbar.CastTime = castbar.Overlay:CreateFontString(nil, "ARTWORK")
-  castbar.CastTime:SetFont("Fonts\\FRIZQT__.TTF", 11)
+  castbar.CastTime = castbar.Overlay:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+  castbar.CastTime:SetTextColor(1, 1, 1, 1)
   castbar.CastTime:SetAllPoints(castbar)
   castbar.CastTime:SetJustifyH("RIGHT")
 
-  castbar.CastTarget = castbar:CreateFontString(nil, "ARTWORK")
-  castbar.CastTarget:SetFont("Fonts\\FRIZQT__.TTF", 11)
+  castbar.CastTarget = castbar:CreateFontString(nil, "ARTWORK", "GameFontNormal")
 
   castbar.IsCasting = false
   castbar.IsChanneling = false
@@ -244,7 +282,7 @@ function Element.UpdateStyle(tp_frame, style)
     border:SetBackdrop(INTERRUPT_BORDER_BACKDROP)
     border:SetBackdropBorderColor(1, 0, 0, 1)
 
-    castbar:SetAllColors(SetCastbarColor(unit))
+    SetCastbarColor(castbar, unit)
 
     local scale_factor = castbar_style.height / 10
     castbar.InterruptShield:SetSize(14 * scale_factor, 16 * scale_factor)
