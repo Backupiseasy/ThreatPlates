@@ -8043,7 +8043,7 @@ local function CreateNameOptions()
                 type = "toggle",
                 width = "double",
                 arg = { "Name", "HealthbarMode", "Enabled" },
-              },w
+              },
             },
           },
           Color = {

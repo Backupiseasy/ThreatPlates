@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+13.0.5 (2026-03-15)
+------------------------------------------------------
+* Fixed a Lua error that occurred when opening the options due to a typo [Comment #8112].
+
+------------------------------------------------------
 13.0.4 (2026-03-15)
 ------------------------------------------------------
 * Fixed a bug where interruptible and non-interruptible casts were not displayed in the correct castbar color [GH-651, Comment #7907].
