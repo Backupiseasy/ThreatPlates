@@ -7532,12 +7532,11 @@ local function CreateCastbarOptions()
                 hidden = function() return Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC end,
               },
               InterruptSource = {
-                name = L["Interrupt Source"],
-                desc = L["Shows the name of the player that interrupted the spell. |cffff0000IMPORTANT: This parses the Combat Log and therefore is a CPU-instensive functionality.|r"],
+                name = L["Interrupt Source"],                
+                desc = L["Shows the name of the player that interrupted the spell."],
                 order = 80,
                 type = "toggle",
                 arg = { "settings", "castnostop", "ShowInterruptSource" },
-                hidden = Addon.ExpansionIsAtLeastMidnight
               },
               CastTarget = {
                 name = L["Cast Target"],

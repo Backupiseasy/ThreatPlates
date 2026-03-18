@@ -97,7 +97,6 @@ local function GetCastbarColor(unit)
 
 	local c
 
-
   -- Because of this ordering, IsInterrupted must be set to false when a new cast is cast. Otherwise
   -- the interrupt color may be shown for a cast
   if Addon.ExpansionIsAtLeastMidnight then
@@ -135,26 +134,28 @@ end
 local function UpdateForCast(self, unit)
   SetCastbarColor(self, unit)
 
+  local show = unit.CastIsNotInterruptible
   local db = Addon.db.profile.settings
 
-  local show = unit.CastIsNotInterruptible
-  if Addon.ExpansionIsAtLeastMidnight then
-    self.InterruptBorder:SetAlphaFromBoolean(show, 1, 0)
-    self.InterruptOverlay:SetAlphaFromBoolean(show, 1, 0)
-    self.InterruptShield:SetAlphaFromBoolean(show, 1, 0)
-    
-    if not db.castnostop.ShowInterruptShield then
-      self.InterruptShield:Hide()
+  if db.castnostop.ShowInterruptShield then
+    if Addon.ExpansionIsAtLeastMidnight then
+      self.InterruptBorder:SetAlphaFromBoolean(show, 1, 0)
     end
-      
-    if not db.castborder.show or not db.castnostop.ShowOverlay then
-      self.InterruptBorder:Hide()
-      self.InterruptOverlay:Hide()
-    end
+    self.InterruptBorder:Show()
   else
-    self.InterruptShield:SetShown(show and db.castnostop.ShowInterruptShield)
-    self.InterruptBorder:SetShown(show and db.castborder.show and db.castnostop.ShowOverlay)
-    self.InterruptOverlay:SetShown(show and db.castborder.show and db.castnostop.ShowOverlay)
+    self.InterruptBorder:Hide()
+  end
+
+  if db.castborder.show and db.castnostop.ShowOverlay then
+    if Addon.ExpansionIsAtLeastMidnight then
+      self.InterruptOverlay:SetAlphaFromBoolean(show, 1, 0)
+      self.InterruptShield:SetAlphaFromBoolean(show, 1, 0)
+    end
+    self.InterruptBorder:Show()
+    self.InterruptOverlay:Show()
+  else
+    self.InterruptBorder:Hide()
+    self.InterruptOverlay:Hide()
   end
   
   self.Spark:SetShown(db.castbar.ShowSpark)
@@ -413,7 +414,11 @@ function Addon:ConfigCastbar()
             self.CastTarget:SetText("Temple Guard")
 
             self.Border:SetShown(tp_frame.style.castborder.show)
-            self:SetFormat(tp_frame.style.castnostop.show)
+            self:UpdateForCast({
+              unitid = "target",
+              CastIsNotInterruptible = tp_frame.style.castnostop.show
+            })
+            -- UpdateForCast does not correctly show/hide the shield with the above unit data
             self.InterruptShield:SetShown(db.castnostop.ShowInterruptShield)
 
             self.Spark:SetSize(3, self:GetHeight() + 1)
