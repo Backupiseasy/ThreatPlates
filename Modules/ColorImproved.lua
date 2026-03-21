@@ -97,6 +97,7 @@ local UNIT_COLOR_MAP = {
 ---------------------------------------------------------------------------------------------------
 local SettingsBase, Settings, SettingsName
 local ColorByReaction, ColorByHealth
+local ShowQuestUnit
 local HealthbarColorFunctions = {}
 local NameColorFunctions = {
   HealthbarMode = {},

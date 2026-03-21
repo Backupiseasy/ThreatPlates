@@ -28,7 +28,7 @@ local IGNORED_STYLES = Addon.IGNORED_STYLES_WITH_NAMEMODE
 ---------------------------------------------------------------------------------------------------
 -- Local variables
 ---------------------------------------------------------------------------------------------------
-local Settings, SettingsTargetUnit, SettingsTargetUnitHide, SettingsShowOnlyForTarget
+local Settings, SettingsHealthbar, SettingsTargetUnit, SettingsTargetUnitHide, SettingsShowOnlyForTarget
 local BorderBackdrop = {
   bgFile = "",
   edgeFile = "",

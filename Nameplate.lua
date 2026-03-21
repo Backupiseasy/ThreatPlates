@@ -740,15 +740,16 @@ else
 end
 
 local function ShowBlizzardNameplate(plate, show_blizzard_plate)
-  SetShownBlizzardPlate(plate.UnitFrame, show_blizzard_plate)
+  -- Sometimes, especially in PvP, plate.UnitFrame can be nil although the nameplate is still active (no NAME_PLATE_UNIT_REMOVED event fired)
+  if plate.UnitFrame then
+    SetShownBlizzardPlate(plate.UnitFrame, show_blizzard_plate)
+  end
 
   if show_blizzard_plate then
-    --plate.UnitFrame:Show()
     WidgetContainerReset(plate)
     plate.TPFrame:Hide()
     plate.TPFrame.Active = false
   else
-    --plate.UnitFrame:Hide()
     plate.TPFrame:Show()
     plate.TPFrame.Active = true
   end
@@ -1614,19 +1615,18 @@ end
 -- Update all elements that depend on the unit's reaction towards the player
 function Addon:UNIT_FACTION(unitid)
   -- Skip special unitids (they are updated via their nameplate unitid) and personal nameplate
-  if unitid == "target" then
-    return
-  elseif unitid == "player" then
+  if unitid == "target" then return end
+
+  if unitid == "player" then
     -- We first need to check if TP is active or not on a nameplate. After a faction change, other nameplates might be active
     -- (friendly/hostile) than before. So, we need to update Active first (as GetActiveThreatPlates only iterates over active
     for plate_unitid, tp_frame in pairs(PlatesByUnit) do
       SetNameplateVisibility(tp_frame.Parent, plate_unitid)
-    end
-
-    for unitid_frame, tp_frame in self:GetActiveThreatPlates() do
-      SetUnitAttributeReaction(tp_frame.unit, unitid_frame)
-      StyleModule.Update(tp_frame)
-      PublishEvent("FactionUpdate", tp_frame)
+      if tp_frame.Active then
+        SetUnitAttributeReaction(tp_frame.unit, plate_unitid)
+        StyleModule.Update(tp_frame)
+        PublishEvent("FactionUpdate", tp_frame)
+      end
     end
   else
     -- It seems that (at least) in solo shuffles, the UNIT_FACTION event is fired in between the events
@@ -1638,9 +1638,9 @@ function Addon:UNIT_FACTION(unitid)
       -- If Blizzard-style nameplates are used, we also need to check if TP plates are disabled/enabled now
       -- This also needs to be done no matter if the plate is Active or not as units with
       -- mindcontrolled
-      SetUnitAttributeReaction(tp_frame.unit, unitid)
       SetNameplateVisibility(tp_frame.Parent, unitid)
       if tp_frame.Active then
+        SetUnitAttributeReaction(tp_frame.unit, unitid)
         StyleModule.Update(tp_frame)
         PublishEvent("FactionUpdate", tp_frame)
       end

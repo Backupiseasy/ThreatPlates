@@ -47,11 +47,11 @@ if Addon.ExpansionIsAtLeastMidnight then
   HideAtFullHealthCurve:AddPoint(0.9999999, 1)
   HideAtFullHealthCurve:AddPoint(1, 0)
 
-  HideAtZeroAbsorbsCurve = C_CurveUtil.CreateCurve()
-  HideAtZeroAbsorbsCurve:SetType(Enum.LuaCurveType.Step)
-  HideAtZeroAbsorbsCurve:AddPoint(0, 0)
-  HideAtZeroAbsorbsCurve:AddPoint(0.0000001, 1)
-  HideAtZeroAbsorbsCurve:AddPoint(1, 1)
+  -- HideAtZeroAbsorbsCurve = C_CurveUtil.CreateCurve()
+  -- HideAtZeroAbsorbsCurve:SetType(Enum.LuaCurveType.Step)
+  -- HideAtZeroAbsorbsCurve:AddPoint(0, 0)
+  -- HideAtZeroAbsorbsCurve:AddPoint(0.0000001, 1)
+  -- HideAtZeroAbsorbsCurve:AddPoint(1, 1)
 end
 
 ---------------------------------------------------------------------------------------------------
