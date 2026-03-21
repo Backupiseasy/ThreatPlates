@@ -3,7 +3,7 @@
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
 
-if not Addon.ExpansionIsAtLeastMists or Addon.ExpansionIsAtLeastMidnight then return end
+if not Addon.ExpansionIsAtLeastMists then return end
 
 local Widget = Addon.Widgets:NewWidget("Quest")
 
@@ -31,6 +31,7 @@ local C_TooltipInfo_GetUnit = C_TooltipInfo and C_TooltipInfo.GetUnit -- Added i
 local PlayerName = Addon.PlayerName
 local RGB_P = Addon.RGB_P
 local UnitDetailedThreatSituationWrapper = Addon.UnitDetailedThreatSituationWrapper
+local IsSecretValue = Addon.IsSecretValue
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -52,12 +53,10 @@ local HideInCombat
 local QuestLogNotComplete = true
 local UnitQuestLogChanged = false
 --local QuestAcceptedUpdatePending = true
-local FirstPOIUpateAfterLogin = true
+--local FirstPOIUpateAfterLogin = true
 local QuestByTitle, QuestByID, QuestsToUpdate = {}, {}, {}
 local QuestUnitsToUpdate = {}
 local GroupMembers = {}
-
-local IsQuestUnit -- Function
 
 if Addon.ExpansionIsBetween(LE_EXPANSION_MISTS_OF_PANDARIA, LE_EXPANSION_DRAGONFLIGHT) then
   local ScannerName = "ThreatPlates_Tooltip_Subtext"
@@ -144,20 +143,6 @@ local OBJECTIVE_GOAL_ALIGNMENT = {
 -- Set correct regexps for current expansion and locale
 local RegexpForExpansion = OBJECTIVE_PARSER_REGEXP_BY_EXPANSION[Addon.GetExpansionLevel()]
 
--- local RegexpAlignment = OBJECTIVE_GOAL_ALIGNMENT[GetLocale()]
--- local RegexpDefault = (RegexpAlignment == "LEFT" and RegexpForExpansion.LEFT) or RegexpForExpansion.RIGHT
--- local RegexpBackup = (RegexpAlignment == "LEFT" and RegexpForExpansion.RIGHT) or RegexpForExpansion.LEFT
-
--- local function QuestObjectiveParser(text)
---   local objective_name, current, goal = string_match(text, RegexpDefault)
-
---   if not objective_name then
---     current, goal, objective_name = string_match(text, RegexpBackup)
---   end
-
---   return objective_name, current, goal
--- end
-
 local QUEST_OBJECTIVE_PARSER_LEFT = function(text)
   local current, goal, objective_name = string_match(text, RegexpForExpansion.LEFT)
 
@@ -178,13 +163,57 @@ local QUEST_OBJECTIVE_PARSER_RIGHT = function(text)
   return objective_name, current, goal
 end
 
+local RegexpAlignment = OBJECTIVE_GOAL_ALIGNMENT[GetLocale()] or "RIGHT"
 local QuestObjectiveParser = (RegexpAlignment == "LEFT" and QUEST_OBJECTIVE_PARSER_LEFT) or QUEST_OBJECTIVE_PARSER_RIGHT
 
 ---------------------------------------------------------------------------------------------------
 -- Quest Functions
 ---------------------------------------------------------------------------------------------------
 
-function IsQuestUnit(unit)
+local function ParseObjectiveFromTooltipLine(quest_title, text)
+  local objective_name, current, goal
+  local objective_type = false
+
+  -- Check if area / progress quest
+  if string.find(text, "%%") then
+    objective_name, current, goal = string_match(text, "^(.*) %(?(%d+)%%%)?$")
+    objective_type = "area"
+  else
+    objective_name, current, goal = QuestObjectiveParser(text)
+  end
+
+  if not objective_name then return end
+
+  current = tonumber(current)
+
+  if objective_type then
+    goal = 100
+  else
+    goal = tonumber(goal)
+  end
+
+  -- Note: "progressbar" type quest (area quest) progress cannot get via the API, so for this tooltips
+  -- must be used. That's also the reason why their progress is not cached.
+  local quest = QuestByTitle[quest_title]
+  local quest_objective
+  if quest then
+    quest_objective = quest.Objectives[objective_name]
+  end
+
+  -- A unit may be target of more than one quest, the quest indicator should be show if at least one quest is not completed.
+  if current and goal then
+    if (current ~= goal) then
+      return true, 1, quest_objective or { numFulfilled = current, numRequired = goal, type = objective_type }
+    end
+  else
+    -- Line after quest title with quest information, so we can stop here
+    return false
+  end
+
+  -- returns nil if nothing was found or only completed quests were found
+end
+
+local function IsQuestUnit(unit)
   -- Tooltip data can be nil here as it seems - there was a bug with this when a player left a battleground
   local tooltip_data = unit.unitid and C_TooltipInfo_GetUnit(unit.unitid)
   if not tooltip_data then return false end
@@ -194,59 +223,43 @@ function IsQuestUnit(unit)
 
   for i = 3, #tooltip_data.lines do
     local line = tooltip_data.lines[i]
+
+    -- At list in Mists, tooltips are not guaranteed to have 5 lines min.
+    if IsSecretValue(line.leftText) or not line.leftText then break end
+
     local text = line.leftText
-    local text_r, text_g, text_b = line.leftColor.r, line.leftColor.g, line.leftColor.b
 
-    -- At list in Mists, tooltips are not guarantted to have 5 lines min.
-    if not text then break end
-
-    if text_r > 0.99 and text_g > 0.8 and text_b == 0 then
-      -- A line with this color is either the quest title or a player name (if on a group quest, but always after the quest title)
-      if text == PlayerName then
+    if Addon.ExpansionIsAtLeastMidnight then
+      if line.type == Enum.TooltipDataLineType.QuestPlayer then
         quest_progress_player = true
-      elseif not GroupMembers[text] then
+      elseif line.type == Enum.TooltipDataLineType.QuestTitle then
         quest_progress_player = true
         quest_title = text
+      elseif quest_progress_player and line.type == Enum.TooltipDataLineType.QuestObjective then
+        local show, quest_type, quest_objective = ParseObjectiveFromTooltipLine(quest_title, text)
+        if show ~= nil then
+          return show, quest_type, quest_objective
+        end
       else
         quest_progress_player = false
       end
-    elseif quest_progress_player then
-      local objective_name, current, goal
-      local objective_type = false
+    else
+      local text_r, text_g, text_b = line.leftColor.r, line.leftColor.g, line.leftColor.b
 
-      -- Check if area / progress quest
-      if string.find(text, "%%") then
-        objective_name, current, goal = string_match(text, "^(.*) %(?(%d+)%%%)?$")
-        objective_type = "area"
-      else
-        objective_name, current, goal = QuestObjectiveParser(text)
-      end
-
-      if objective_name then
-        current = tonumber(current)
-
-        if objective_type then
-          goal = 100
+      -- A line with this color is either the quest title or a player name (if on a group quest, but always after the quest title)
+      if text_r > 0.99 and text_g > 0.8 and text_b == 0 then
+        if text == PlayerName then
+          quest_progress_player = true
+        elseif not GroupMembers[text] then
+          quest_progress_player = true
+          quest_title = text
         else
-          goal = tonumber(goal)
+          quest_progress_player = false
         end
-
-        -- Note: "progressbar" type quest (area quest) progress cannot get via the API, so for this tooltips
-        -- must be used. That's also the reason why their progress is not cached.
-        local quest = QuestByTitle[quest_title]
-        local quest_objective
-        if quest then
-          quest_objective = quest.Objectives[objective_name]
-        end
-
-        -- A unit may be target of more than one quest, the quest indicator should be show if at least one quest is not completed.
-        if current and goal then
-          if (current ~= goal) then
-            return true, 1, quest_objective or { numFulfilled = current, numRequired = goal, type = objective_type }
-          end
-        else
-          -- Line after quest title with quest information, so we can stop here
-          return false
+      elseif quest_progress_player then
+        local show, quest_type, quest_objective = ParseObjectiveFromTooltipLine(quest_title, text)
+        if show ~= nil then
+          return show, quest_type, quest_objective
         end
       end
     end
@@ -288,6 +301,7 @@ local function CacheQuestObjectives(quest)
   quest.Objectives = quest.Objectives or {}
 
   local all_objectives = GetQuestObjectives(quest.questID)
+  if not all_objectives then return end
   
   local objective
   for objIndex = 1, #all_objectives do
@@ -549,7 +563,10 @@ function Widget:GROUP_ROSTER_UPDATE()
       --local unit_name = UnitName(group_type .. i)
       if UnitExists(group_type .. i) then
         --print("Adding member:", UnitName(group_type .. i))
-        GroupMembers[UnitName(group_type .. i)] = true
+        local unit_name = UnitName(group_type .. i)
+        if unit_name and not IsSecretValue(unit_name) then
+          GroupMembers[unit_name] = true
+        end
       end
     end
   end
@@ -640,15 +657,19 @@ function Widget:OnEnable()
   -- Also use ThreatUpdate Threatas new mobs may enter the combat mid-fight (PLAYER_REGEN_DISABLED already triggered)
   self:SubscribeEvent("ThreatUpdate")
 
-  -- To handle objectives correctly when quest objectives of group memebers are shown in the tooltip, we need to keep a
-  -- list of all players in the group
-  self:SubscribeEvent("GROUP_ROSTER_UPDATE")
-  self:SubscribeEvent("GROUP_LEFT")
+  if not Addon.ExpansionIsAtLeastMidnight then
+    -- To handle objectives correctly when quest objectives of group memebers are shown in the tooltip, we need to keep a
+    -- list of all players in the group
+    self:SubscribeEvent("GROUP_ROSTER_UPDATE")
+    self:SubscribeEvent("GROUP_LEFT")
+  end
 
   Addon.CVars:Overwrite("showQuestTrackingTooltips", 1)
 
   InCombat = InCombatLockdown()
-  self:GROUP_ROSTER_UPDATE()
+  if not Addon.ExpansionIsAtLeastMidnight then
+    self:GROUP_ROSTER_UPDATE()
+  end
 end
 
 -- function Widget:OnDisable()
@@ -752,10 +773,50 @@ local function tablelength(T)
   return count
 end
 
--- Load settings from the configuration which are shared across all aura widgets
--- used (for each widget) in UpdateWidgetConfig
-function Widget:UpdateSettings()
-  Font = Addon.LibSharedMedia:Fetch('font', Addon.db.profile.questWidget.Font)
+local function ParseObjectiveFromTooltipLineDebug(quest_title, text)
+  local objective_name, current, goal
+  local objective_type = false
+
+  -- Check if area / progress quest
+  if string.find(text, "%%") then
+    objective_name, current, goal = string_match(text, "^(.*) %(?(%d+)%%%)?$")
+    objective_type = "area"
+  else
+    objective_name, current, goal = QuestObjectiveParser(text)
+  end
+
+  if objective_name then
+    current = tonumber(current)
+
+    if objective_type then
+      goal = 100
+    else
+      goal = tonumber(goal)
+    end
+  end
+
+  local show, quest_type, quest_objective
+  if objective_name then
+    -- Note: "progressbar" type quest (area quest) progress cannot get via the API, so for this tooltips
+    -- must be used. That's also the reason why their progress is not cached.
+    local quest = QuestByTitle[quest_title]
+    if quest then
+      quest_objective = quest.Objectives[objective_name]
+    end
+
+    -- A unit may be target of more than one quest, the quest indicator should be show if at least one quest is not completed.
+    if current and goal then
+      if (current ~= goal) then
+        show, quest_type, quest_objective = true, 1, quest_objective or { numFulfilled = current, numRequired = goal, type = objective_type }
+      end
+    else
+      -- Line after quest title with quest information, so we can stop here
+      show = false
+    end
+  end
+
+  -- Debug helper returns parsing details in addition to normal result tuple.
+  return show, quest_type, quest_objective, objective_name, current, goal, objective_type
 end
 
 function Widget:PrintDebug(command)
@@ -775,79 +836,70 @@ function Widget:PrintDebug(command)
   elseif command == "tooltip" then
     if not UnitExists("target") then return end
 
-    for name, _ in pairs(GroupMembers) do
-      Addon.Logging.Debug("Character:", name)
-    end
-
     local quest_title
     local quest_progress_player = false
 
     local tooltip_data = C_TooltipInfo_GetUnit("target")
+    if not tooltip_data or not tooltip_data.lines then return end
+
     for i = 3, #tooltip_data.lines do
       local line = tooltip_data.lines[i]
+
+      if IsSecretValue(line.leftText) or not line.leftText then break end
+
       local text = line.leftText
-      local text_r, text_g, text_b = line.leftColor.r, line.leftColor.g, line.leftColor.b
 
       Addon.Logging.Debug("=== Line:", text)
-      if text_r > 0.99 and text_g > 0.8 and text_b == 0 then
-        -- A line with this color is either the quest title or a player name (if on a group quest, but always after the quest title)
-        -- if quest_title_found then
-        --   quest_player = (text == PlayerName)
-        -- else
-        if text == PlayerName then
+      if Addon.ExpansionIsAtLeastMidnight then
+        if line.type == Enum.TooltipDataLineType.QuestPlayer then
           quest_progress_player = true
           Addon.Logging.Debug("  Player:", text)
-        elseif not GroupMembers[text] then
-          Addon.Logging.Debug("Quest:", text)
+        elseif line.type == Enum.TooltipDataLineType.QuestTitle then
           quest_progress_player = true
           quest_title = text
+          Addon.Logging.Debug("Quest:", text)
+        elseif quest_progress_player and line.type == Enum.TooltipDataLineType.QuestObjective then
+          local show, _, quest_objective, objective_name, current, goal = ParseObjectiveFromTooltipLineDebug(quest_title, text)
+
+          Addon.Logging.Debug("    => Objective:", text)
+          if show then
+            Addon.Logging.Debug("    => Quest:", objective_name, "- Current:", current, "- Goal:", goal, "- Type:", quest_objective.type)
+          elseif current and goal then
+            Addon.Logging.Debug("    => Finished!")
+          end
         else
           quest_progress_player = false
-          Addon.Logging.Debug("  Character:", text)
         end
-      elseif quest_progress_player then
-        local objective_name, current, goal
-        local objective_type = false
+      else
+        local text_r, text_g, text_b = line.leftColor.r, line.leftColor.g, line.leftColor.b
 
-        Addon.Logging.Debug("    => Objective:", text)
-        -- Check if area / progress quest
-        if string.find(text, "%%") then
-          objective_name, current, goal = string_match(text, "^(.*) %(?(%d+)%%%)?$")
-          objective_type = "area"
-          Addon.Logging.Debug("    => Area: <" .. text .. ">", objective_name, current, goal)
-        else
-          -- Standard x/y /pe quest
-          objective_name, current, goal = QuestObjectiveParser(text)
-          Addon.Logging.Debug("    => Standard: <" .. text .. ">", objective_name, current, goal)
-        end
-
-        if objective_name then
-          current = tonumber(current)
-
-          if objective_type then
-            goal = 100
+        if text_r > 0.99 and text_g > 0.8 and text_b == 0 then
+          if text == PlayerName then
+            quest_progress_player = true
+            Addon.Logging.Debug("  Player:", text)
+          elseif not GroupMembers[text] then
+            Addon.Logging.Debug("Quest:", text)
+            quest_progress_player = true
+            quest_title = text
           else
-            goal = tonumber(goal)
+            quest_progress_player = false
+            Addon.Logging.Debug("  Character:", text)
           end
+        elseif quest_progress_player then
+          local show, _, quest_objective, objective_name, current, goal, objective_type = ParseObjectiveFromTooltipLineDebug(quest_title, text)
 
-          -- Note: "progressbar" type quest (area quest) progress cannot get via the API, so for this tooltips
-          -- must be used. That's also the reason why their progress is not cached.
-          local quest = QuestByTitle[quest_title]
-          local quest_objective
-          if quest then
-            quest_objective = quest.Objectives[objective_name]
-            --else
-            --  print ("<< Quest No Cached >> =>", quest_title)
+          Addon.Logging.Debug("    => Objective:", text)
+          if show then
+            Addon.Logging.Debug("    => Quest:", objective_name, "- Current:", current, "- Goal:", goal, "- Type:", quest_objective.type)
+          elseif current and goal then
+            Addon.Logging.Debug("    => Finished!")
+          elseif objective_type == "area" then
+            Addon.Logging.Debug("    => Area: <" .. text .. ">", objective_name, current, goal)
+          elseif objective_name then
+            Addon.Logging.Debug("    => Standard: <" .. text .. ">", objective_name, current, goal)
           end
-
-          -- A unit may be target of more than one quest, the quest indicator should be show if at least one quest is not completed.
-          if current and goal then
-            if (current ~= goal) then
-              Addon.Logging.Debug("    => Quest:", objective_name, "- Current:", current, "- Goal:", goal, "- Type:", objective_type)
-            else
-              Addon.Logging.Debug("    => Finished!")
-            end
-          end
+        else
+          quest_progress_player = false
         end
       end
     end
@@ -856,7 +908,7 @@ function Widget:PrintDebug(command)
     for quest_id, title in pairs(QuestByID) do
       if not command or string.find(title, command) then
         local quest = QuestByTitle[title]
-        if quest.Objectives then --and tablelength(quest.objectives) > 0 then
+        if quest then --and tablelength(quest.objectives) > 0 then
           Addon.Logging.Debug("*", title .. " [ID:" .. tostring(quest_id) .. "]")
           for name, val in pairs (quest.Objectives) do
             Addon.Logging.Debug("  - |" .. name .."| :", val.numFulfilled, "/", val.numRequired, "[" .. val.type .. "]")
