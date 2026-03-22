@@ -1,3 +1,4 @@
 # @project-version@ (@build-time@)
 
-* Fixed a Lua error that occurred when opening the options due to a typo [Comment #8112].
+* Fixed a Lua error that could occur when the player's faction changed, for example in arenas [GH-668].
+* The Quest widget now does work again in WoW Midnight.
