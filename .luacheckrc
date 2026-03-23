@@ -1,0 +1,22 @@
+std = "lua51"
+max_line_length = false
+
+exclude_files = {
+  "Libs/**",
+  "Test/**",
+  "Source/**",
+  ".release/**"
+}
+
+globals = {
+  "TidyPlatesThreat",
+  "TidyPlatesThreatDBM",
+  "TidyPlatesThreat_OnAddonCompartmentClick",
+  "SLASH_TPTPDPS1",
+  "SLASH_TPTPTANK1",
+  "SLASH_TPTPTOGGLE1",
+  "SLASH_TPTPOVERLAP1",
+  "SLASH_TPTPVERBOSE1",
+  "SlashCmdList",
+  "StaticPopupDialogs"
+}

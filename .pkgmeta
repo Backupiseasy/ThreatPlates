@@ -46,6 +46,8 @@ wowi-convert-changelog: yes
 ignore:
   - .git
   - .github
+  - .luacheckrc
+  - .luacheckrc.ci
   - .idea
   - .release
   - .env
