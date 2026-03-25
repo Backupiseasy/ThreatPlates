@@ -24,6 +24,7 @@ local ElementsPlateCreated, ElementsPlateUnitAdded, ElementsPlateUnitRemoved = A
 local ElementsUpdateStyle, ElementsUpdateSettings = Addon.Elements.UpdateStyle, Addon.Elements.UpdateSettings
 local TOTEMS = Addon.TOTEMS
 local GetUnitVisibility = Addon.GetUnitVisibility
+local IsSecretValue = Addon.IsSecretValue
 local Widgets = Addon.Widgets
 local TransparencyModule, ScalingModule = Addon.Transparency, Addon.Scaling
 local ThreatShowFeedback = Addon.Threat.ShowFeedback
@@ -99,6 +100,39 @@ local REMAP_UNSUPPORTED_UNIT_TYPES = {
   NeutralPet       = "FriendlyPet",      -- Sometimes, friendly pets turn into neutral pets when you lose control over them (e.g., in quests).
 }
 
+local IsTotemUnit, IsPlayerPetUnit
+
+if Addon.ExpansionIsAtLeastMidnight then
+  IsTotemUnit = function(unitid)
+    -- creature type ID was only added with TWW
+    local _, creature_type_id = UnitCreatureType(unitid)
+    if IsSecretValue(creature_type_id) then return false end
+    
+    return creature_type_id == 11 and UnitPlayerControlled(unitid) 
+  end
+
+  IsPlayerPetUnit = function(unitid)
+    if UnitIsOtherPlayersPet(unitid) then 
+      return true 
+    end
+    
+    -- ? Better to use UnitIsOwnerOrControllerOfUnit("player", unit.unitid) here (added with Legion)
+    local is_players_pet = UnitIsUnit(unitid, "pet")
+    if IsSecretValue(is_players_pet) then return false end
+    
+    return is_players_pet
+  end
+else
+  IsTotemUnit = function(unitid)
+    return UnitCreatureType(unitid) == Addon.TotemCreatureType and UnitPlayerControlled(unitid) 
+  end
+
+  IsPlayerPetUnit = function(unitid)
+    -- ? Better to use UnitIsOwnerOrControllerOfUnit("player", unit.unitid) here (added with Legion)
+    return UnitIsOtherPlayersPet(unitid) or UnitIsUnit(unitid, "pet")
+  end
+end
+
 local function GetUnitType(unit)
   -- Minions are:
   --   - totems: unit.TotemSettings
@@ -106,18 +140,18 @@ local function GetUnitType(unit)
   --   - pets: all other player controlled units
   -- Not sure if there are other types of minions
   local unit_class
+  local unitid = unit.unitid
+  
   -- not all combinations are possible in the game: Friendly Minus, Neutral Player/Totem/Pet
   if unit.type == "PLAYER" then
     unit_class = "Player"
   elseif unit.classification == "minus" then
     unit_class = "Minus"
-  --elseif unit.TotemSettings then
-  elseif not Addon.ExpansionIsAtLeastMidnight and UnitCreatureType(unit.unitid) == Addon.TotemCreatureType and UnitPlayerControlled(unit.unitid) and TOTEMS[unit.name] then
+  elseif IsTotemUnit(unitid) then
     unit_class = "Totem"
-  elseif UnitIsOtherPlayersPet(unit.unitid) or UnitIsUnit(unit.unitid, "pet") then -- player pets are also considered guardians, so this check has priority
-    -- ? Better to use UnitIsOwnerOrControllerOfUnit("player", unit.unitid) here?
+  elseif IsPlayerPetUnit(unitid) then -- player pets are also considered guardians, so this check has priority
     unit_class = "Pet"
-  elseif UnitPlayerControlled(unit.unitid) then
+  elseif UnitPlayerControlled(unitid) then
     unit_class = "Guardian"
   else
     unit_class = "NPC"
@@ -224,55 +258,56 @@ end
 -- Depends on:
 --   * unit.name
 local function ProcessNameTriggers(unit)
-  if Addon.ExpansionIsAtLeastMidnight then return end
-  
   -- Set these values to nil if not custom nameplate or totem
   unit.TotemSettings = nil
   --unit.CustomPlateSettings = nil
 
   local plate_style, custom_style
-  local name_custom_style = NameTriggers[unit.name] or NameTriggers[unit.NPCID] or NameTriggers[unit.basename]
-  if name_custom_style and name_custom_style.Enable.UnitReaction[unit.reaction] then
-    custom_style = name_custom_style
-    plate_style = GetStyleForPlate(custom_style)
-  elseif Addon.ActiveWildcardTriggers and unit.type == "NPC" then
-    local cached_custom_style = TriggerWildcardTests[unit.name]
+  
+  if not Addon.ExpansionIsAtLeastMidnight then 
+    local name_custom_style = NameTriggers[unit.name] or NameTriggers[unit.NPCID] or NameTriggers[unit.basename]
+    if name_custom_style and name_custom_style.Enable.UnitReaction[unit.reaction] then
+      custom_style = name_custom_style
+      plate_style = GetStyleForPlate(custom_style)
+    elseif Addon.ActiveWildcardTriggers and unit.type == "NPC" then
+      local cached_custom_style = TriggerWildcardTests[unit.name]
 
-    if cached_custom_style == nil then
-      cached_custom_style = false
+      if cached_custom_style == nil then
+        cached_custom_style = false
 
-      local trigger
-      for i = 1, #NameWildcardTriggers do
-        trigger = NameWildcardTriggers[i]
-        --print ("Name Wildcard: ", unit.name, "=>", trigger[1], unit.name:find(trigger[1]))
-        if unit.name:find(trigger[1]) then
+        local trigger
+        for i = 1, #NameWildcardTriggers do
+          trigger = NameWildcardTriggers[i]
+          --print ("Name Wildcard: ", unit.name, "=>", trigger[1], unit.name:find(trigger[1]))
+          if unit.name:find(trigger[1]) then
 
-          -- Static checks (based on not changing criterien (like unit type).
-          if trigger[2].Enable.UnitReaction[unit.reaction] then
-            custom_style = trigger[2]
-            plate_style = GetStyleForPlate(custom_style)
+            -- Static checks (based on not changing criterien (like unit type).
+            if trigger[2].Enable.UnitReaction[unit.reaction] then
+              custom_style = trigger[2]
+              plate_style = GetStyleForPlate(custom_style)
 
-            cached_custom_style = {
-              Style = plate_style,
-              CustomStyle = custom_style
-            }
+              cached_custom_style = {
+                Style = plate_style,
+                CustomStyle = custom_style
+              }
 
-            -- Breaking here without plate_style being set means that only the icon part will be used from the custom style
-            break
+              -- Breaking here without plate_style being set means that only the icon part will be used from the custom style
+              break
+            end
           end
         end
+
+        -- Add custom style, if one was found, or false if there is no custom style for this unit
+        TriggerWildcardTests[unit.name] = cached_custom_style
+      elseif cached_custom_style ~= false then
+        custom_style = cached_custom_style.CustomStyle
+        plate_style = cached_custom_style.Style
       end
-
-      -- Add custom style, if one was found, or false if there is no custom style for this unit
-      TriggerWildcardTests[unit.name] = cached_custom_style
-    elseif cached_custom_style ~= false then
-      custom_style = cached_custom_style.CustomStyle
-      plate_style = cached_custom_style.Style
     end
-  end
 
-  -- Set these values to nil if not custom nameplate or totem
-  unit.CustomPlateSettings = custom_style
+    -- Set these values to nil if not custom nameplate or totem
+    unit.CustomPlateSettings = custom_style
+  end
 
   -- Conditions:
   --   * custom_style == nil: No custom style found
@@ -281,7 +316,7 @@ local function ProcessNameTriggers(unit)
   if plate_style then return plate_style end
 
   -- Totems:
-  if unit.TP_DetailedUnitType ~= "Totem" then return end
+  if unit.TP_DetailedUnitType ~= "Totem" or IsSecretValue(unit.name) then return end
 
   -- Check for player totems and ignore NPC totems
   local totem_id = TOTEMS[unit.name]
@@ -498,7 +533,6 @@ end
 
 -- Define module API:
 StyleModule.UpdateName = UpdateName
-StyleModule.ProcessNameTriggers = ProcessNameTriggers
 StyleModule.PlateUnitAdded = PlateUnitAdded
 StyleModule.Update = Update
 StyleModule.SetStyle = SetStyle

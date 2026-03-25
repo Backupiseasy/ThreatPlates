@@ -77,6 +77,7 @@ Addon.ExpansionIsAtLeastMists = Addon.ExpansionIsAtLeast(LE_EXPANSION_MISTS_OF_P
 Addon.ExpansionIsAtLeastWoD = Addon.ExpansionIsAtLeast(LE_EXPANSION_WARLORDS_OF_DRAENOR)
 Addon.ExpansionIsAtLeastLegion = Addon.ExpansionIsAtLeast(LE_EXPANSION_LEGION)
 Addon.ExpansionIsAtLeastBfA = Addon.ExpansionIsAtLeast(LE_EXPANSION_BATTLE_FOR_AZEROTH)
+Addon.ExpansionIsAtLeastShadowlands = Addon.ExpansionIsAtLeast(LE_EXPANSION_SHADOWLANDS)
 Addon.ExpansionIsAtLeastDF = Addon.ExpansionIsAtLeast(LE_EXPANSION_DRAGONFLIGHT)
 Addon.ExpansionIsAtLeastTWW = Addon.ExpansionIsAtLeast(LE_EXPANSION_WAR_WITHIN)
 Addon.ExpansionIsAtLeastMidnight = Addon.IS_MIDNIGHT

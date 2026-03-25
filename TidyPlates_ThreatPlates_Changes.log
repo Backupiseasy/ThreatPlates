@@ -2,6 +2,7 @@
 13.0.7 (2026-03-25)
 ------------------------------------------------------
 * Fixed a bug that caused the interrupt shield to be displayed even when it was disabled [Comment #8162, #8163].<
+* Totems should now be recognized correctly in WoW Midnight again as long as they are not protected with secret values [Comment #8106].
 
 ------------------------------------------------------
 13.0.6 (2026-03-22)

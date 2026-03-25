@@ -280,6 +280,9 @@ Addon.NAME_ABBREVIATION = {
   -- { SpellID = 207399, ID = "R6", GroupColor = "4c9900", Icon = "spell_nature_reincarnation" },		-- Ancestral Protection Totem
   -- { SpellID = 16191,  ID = "R7", GroupColor = "4c9900", Icon = "ability_shaman_manatidetotem" }, -- Mana Tide Totem
   -- --{ SpellID = 343182, ID = "W4", GroupColor = "b8d1ff", Icon = "ability_shaman_manatidetotem" }, -- Mana Tide Totem
+  --{ SpellID = 108270,  ID = "T8", GroupColor = "b8d1ff", Icon = "ability_shaman_stonebulwark" },	   -- Stone Bulwark Totem, --! NO nameplate
+  --{ SpellID = 445034,  ID = "W2", GroupColor = "ffff00", Icon = "spell_fire_searingtotem" },             -- Lively Totems
+  --{ SpellID = 461242, ID = "F1", GroupColor = "ffff00", Icon ="spell_fire_searingtotem", }, 	           -- Searing Totem, summmoned by Lively Totems
   
   -- { SpellID = 204331, ID = "P1", GroupColor = "8a2be2", Icon = "spell_nature_wrathofair_totem" },	-- Counterstrike Totem
   -- { SpellID = 204330, ID = "P2", GroupColor = "8a2be2", Icon = "spell_fire_totemofwrath" },	      -- Skyfury Totem
@@ -296,22 +299,18 @@ local TOTEM_DATA_BY_EXPANSION = {
     { SpellID = 192077,  ID = "T3", GroupColor = "b8d1ff", Icon = "ability_shaman_windwalktotem" },		   -- Wind Rush Totem
     { SpellID = 383013,  ID = "T4", GroupColor = "b8d1ff", Icon = "spell_nature_poisoncleansingtotem" }, -- Poison Cleansing Totem
     { SpellID = 5394,	   ID = "T7", GroupColor = "b8d1ff", Icon = "inv_spear_04" },		                   -- Healing Stream Totem
-    --{ SpellID = 108270,  ID = "T8", GroupColor = "b8d1ff", Icon = "ability_shaman_stonebulwark" },	   -- Stone Bulwark Totem, --! NO nameplate
+    { SpellID = 1267016, ID = "T9", GroupColor = "b8d1ff", Icon = "inv12_apextalent_shaman_stormstreamtotem" }, -- Stormstream Totem
     -- Elemental
     { SpellID = 192222, ID = "E1", GroupColor = "2b76ff", Icon = "spell_shaman_spewlava" }, 	           -- Liquid Magma Totem
     -- Enhancement
     -- Restoration
-    { SpellID = 157153,  ID = "R1", GroupColor = "4c9900", Icon = "ability_shaman_condensationtotem" },		-- Cloudburst Totem
     { SpellID = 108280,  ID = "R4", GroupColor = "4c9900", Icon = "ability_shaman_healingtide" },		      -- Healing Tide Totem
     { SpellID = 51485,   ID = "R2", GroupColor = "4c9900", Icon = "spell_nature_stranglevines" },		      -- Earthgrab Totem
     { SpellID = 198838,  ID = "R3", GroupColor = "4c9900", Icon = "spell_nature_stoneskintotem" },		    -- Earthen Wall Totem
     { SpellID = 98008,   ID = "R5", GroupColor = "4c9900", Icon = "spell_shaman_spiritlink" },	          -- Spirit Link Totem
     { SpellID = 207399,  ID = "R6", GroupColor = "4c9900", Icon = "spell_nature_reincarnation" },		      -- Ancestral Protection Totem
-    { SpellID = 16191,   ID = "R7", GroupColor = "4c9900", Icon = "ability_shaman_manatidetotem" },       -- Mana Tide Totem
     -- Hero talent totems
     { SpellID = 444995,  ID = "W1", GroupColor = "ffff00", Icon = "inv_ability_totemicshaman_surgingtotem" }, -- Surging Totem
-    { SpellID = 445034,  ID = "W2", GroupColor = "ffff00", Icon = "spell_fire_searingtotem" },             -- Lively Totems
-    { SpellID = 461242, ID = "F1", GroupColor = "ffff00", Icon ="spell_fire_searingtotem", }, 	           -- Searing Totem, summmoned by Lively Totems
 
     -- Totems from PVP talents
     { SpellID = 204331, ID = "P1", GroupColor = "4c9900", Icon = "spell_nature_wrathofair_totem" },	-- Counterstrike Totem
@@ -321,11 +320,6 @@ local TOTEM_DATA_BY_EXPANSION = {
 
     -- Totems from other sources
     { SpellID = 324386, ID = "O1", GroupColor = "00ffff", Icon = "ability_bastion_shaman" },	  -- Vesper Totem (Kyrian Covenant)
-
-    -- Not existent in TWW:
-    -- { SpellID = 383019,  ID = "T5", GroupColor = "b8d1ff", Icon = "ability_shaman_tranquilmindtotem" },	 -- Tranquil Air Totem
-    -- { SpellID = 204330, ID = "P2", GroupColor = "8a2be2", Icon = "spell_fire_totemofwrath" },	      -- Skyfury Totem
-    -- { SpellID = 8512,   ID = "H1", GroupColor = "ffb31f", Icon = "spell_nature_windfury" },	  -- Windfury Totem
   },
 
   [LE_EXPANSION_MISTS_OF_PANDARIA] = {
