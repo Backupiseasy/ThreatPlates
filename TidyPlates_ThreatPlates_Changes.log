@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+13.0.7 (2026-03-25)
+------------------------------------------------------
+* Fixed a bug that caused the interrupt shield to be displayed even when it was disabled [Comment #8162, #8163].<
+
+------------------------------------------------------
 13.0.6 (2026-03-22)
 ------------------------------------------------------
 * Fixed a Lua error that could occur when the player's faction changed, for example in arenas [GH-668].

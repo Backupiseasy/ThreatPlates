@@ -139,17 +139,17 @@ local function UpdateForCast(self, unit)
 
   if db.castnostop.ShowInterruptShield then
     if Addon.ExpansionIsAtLeastMidnight then
-      self.InterruptBorder:SetAlphaFromBoolean(show, 1, 0)
+      self.InterruptShield:SetAlphaFromBoolean(show, 1, 0)
     end
-    self.InterruptBorder:Show()
+    self.InterruptShield:Show()
   else
-    self.InterruptBorder:Hide()
+    self.InterruptShield:Hide()
   end
 
   if db.castborder.show and db.castnostop.ShowOverlay then
     if Addon.ExpansionIsAtLeastMidnight then
+      self.InterruptBorder:SetAlphaFromBoolean(show, 1, 0)
       self.InterruptOverlay:SetAlphaFromBoolean(show, 1, 0)
-      self.InterruptShield:SetAlphaFromBoolean(show, 1, 0)
     end
     self.InterruptBorder:Show()
     self.InterruptOverlay:Show()
