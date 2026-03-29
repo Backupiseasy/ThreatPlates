@@ -466,9 +466,9 @@ end
 
 local function SetUnitAttributeHealth(unit, unitid)
   -- Health and Absorbs => UNIT_HEALTH_FREQUENT, UNIT_MAXHEALTH & UNIT_ABSORB_AMOUNT_CHANGED
-  unit.health = _G.UnitHealth(unitid) or 0
-  unit.healthmax = _G.UnitHealthMax(unitid) or 1
-  -- unit.Absorbs = UnitGetTotalAbsorbs(unitid) or 0
+  unit.health = _G.UnitHealth(unitid)
+  unit.healthmax = _G.UnitHealthMax(unitid)
+  -- unit.Absorbs = UnitGetTotalAbsorbs(unitid)
 end
 
 local function SetUnitAttributeTargetMarker(unit, unitid)
@@ -614,7 +614,10 @@ local function OnStartCasting(tp_frame, unitid, cast_guid, event_spell_id, castb
   if Addon.ExpansionIsAtLeastMidnight then
     local target_unit_name =  UnitSpellTargetName(unitid)
     if target_unit_name then
-      target_unit_name = UnitName(target_unit_name) or target_unit_name
+      local short_target_unit_name = UnitName(target_unit_name)
+      if short_target_unit_name then
+        target_unit_name = short_target_unit_name
+      end
       local class_name = UnitSpellTargetClass(unitid)
       if class_name then
         target_unit_name = WrapTextInColor(target_unit_name, GetClassColor(class_name))
@@ -1583,10 +1586,7 @@ function Addon:UNIT_HEALTH(unitid)
   local tp_frame = Addon:GetThreatPlateForUnit(unitid)
   if tp_frame then
     SetUnitAttributeHealth(tp_frame.unit, unitid)  
-
-    if tp_frame.Active then
-      StyleModule.Update(tp_frame)
-    end
+    StyleModule.Update(tp_frame)
   end
 end
 
