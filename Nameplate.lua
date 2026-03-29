@@ -1749,9 +1749,11 @@ Addon.UNIT_SPELLCAST_NOT_INTERRUPTIBLE = UnitSpellcastMidway
 
 Addon.UNIT_SPELLCAST_EMPOWER_START = Addon.UNIT_SPELLCAST_CHANNEL_START
 Addon.UNIT_SPELLCAST_EMPOWER_UPDATE = UnitSpellcastMidway
-Addon.UNIT_SPELLCAST_EMPOWER_STOP = Addon.UNIT_SPELLCAST_STOP
 
--- UNIT_SPELLCAST_FAILED
+function Addon:UNIT_SPELLCAST_EMPOWER_STOP(unitid, cast_guid, spell_id, complete, interrupted_by, castbar_id)
+  -- Function parameters between UNIT_SPELLCAST_CHANNEL_STOP and UNIT_SPELLCAST_EMPOWER_STOP are different
+  self:UNIT_SPELLCAST_CHANNEL_STOP(unitid, cast_guid, spell_id, interrupted_by, castbar_id)
+end
 
 function Addon:UNIT_SPELLCAST_INTERRUPTED(unitid, cast_guid, spell_id, interrupted_by, castbar_id)
   -- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED

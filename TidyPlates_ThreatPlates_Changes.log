@@ -2,6 +2,7 @@
 13.0.7 (2026-03-25)
 ------------------------------------------------------
 * Fixed a bug that caused the interrupt shield to be displayed even when it was disabled [Comment #8162, #8163].<
+* Fixed a bug where a Evoker's cast bar was not hidden after an empowered cast had finished [Comment #8126].
 * Totems should now be recognized correctly in WoW Midnight again as long as they are not protected with secret values [Comment #8106].
 
 ------------------------------------------------------
