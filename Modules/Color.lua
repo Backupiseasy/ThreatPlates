@@ -593,39 +593,40 @@ function ColorModule.UpdateSettings()
     end
   end
 
-  -- Subscribe/unsubscribe to events based on settings
-  if (SettingsBase.threat.useHPColor or SettingsBase.settings.threatborder.show) and
-    not (Settings.FriendlyUnitMode == "HEALTH" and Settings.EnemyUnitMode == "HEALTH" and
-      SettingsName.HealthbarMode.FriendlyUnitMode == "HEALTH" and SettingsName.HealthbarMode.EnemyUnitMode == "HEALTH" and
-      SettingsName.NameMode.FriendlyUnitMode == "HEALTH" and SettingsName.NameMode.EnemyUnitMode == "HEALTH") then
-    SubscribeEvent(ColorModule, "ThreatUpdate", ThreatUpdate)
-  else
-    UnsubscribeEvent(ColorModule, "ThreatUpdate")
-  end
+  SubscribeEvent(ColorModule, "ThreatUpdate", ThreatUpdate)
+  ColorByHealthIsEnabled = true
+  SubscribeEvent(ColorModule, "UNIT_HEALTH", UNIT_HEALTH)
+  SubscribeEvent(ColorModule, "UNIT_HEALTH_FREQUENT", UNIT_HEALTH)
 
-  local SettingsStatusText = Addon.db.profile.StatusText
-  if Settings.FriendlyUnitMode == "HEALTH" or Settings.EnemyUnitMode == "HEALTH" or
-    SettingsName.HealthbarMode.FriendlyUnitMode == "HEALTH" or SettingsName.HealthbarMode.EnemyUnitMode == "HEALTH" or
-    SettingsName.NameMode.FriendlyUnitMode == "HEALTH" or SettingsName.NameMode.EnemyUnitMode == "HEALTH" or
-    SettingsStatusText.HealthbarMode.FriendlySubtext == "HEALTH" or SettingsStatusText.HealthbarMode.EnemySubtext == "HEALTH" or
-    SettingsStatusText.NameMode.FriendlySubtext == "HEALTH" or SettingsStatusText.NameMode.EnemySubtext == "HEALTH" then
-    
-    ColorByHealthIsEnabled = true
-    
-    if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
-      SubscribeEvent(ColorModule, "UNIT_HEALTH_FREQUENT", UNIT_HEALTH)
-    else
-      SubscribeEvent(ColorModule, "UNIT_HEALTH", UNIT_HEALTH)
-    end
-  else
-    ColorByHealthIsEnabled = false
+    -- Subscribe/unsubscribe to events based on settings
+  -- if (SettingsBase.threat.useHPColor or SettingsBase.settings.threatborder.show) and
+  --   not (Settings.FriendlyUnitMode == "HEALTH" and Settings.EnemyUnitMode == "HEALTH" and
+  --     SettingsName.HealthbarMode.FriendlyUnitMode == "HEALTH" and SettingsName.HealthbarMode.EnemyUnitMode == "HEALTH" and
+  --     SettingsName.NameMode.FriendlyUnitMode == "HEALTH" and SettingsName.NameMode.EnemyUnitMode == "HEALTH") then
+  --   SubscribeEvent(ColorModule, "ThreatUpdate", ThreatUpdate)
+  -- else
+  --   UnsubscribeEvent(ColorModule, "ThreatUpdate")
+  -- end
 
-    if Addon.IS_MAINLINE then
-      UnsubscribeEvent(ColorModule, "UNIT_HEALTH", UNIT_HEALTH)
-    else
-      UnsubscribeEvent(ColorModule, "UNIT_HEALTH_FREQUENT", UNIT_HEALTH)
-    end
-  end
+  -- local SettingsStatusText = Addon.db.profile.StatusText
+  -- if Settings.FriendlyUnitMode == "HEALTH" or Settings.EnemyUnitMode == "HEALTH" or
+  --   SettingsName.HealthbarMode.FriendlyUnitMode == "HEALTH" or SettingsName.HealthbarMode.EnemyUnitMode == "HEALTH" or
+  --   SettingsName.NameMode.FriendlyUnitMode == "HEALTH" or SettingsName.NameMode.EnemyUnitMode == "HEALTH" or
+  --   SettingsStatusText.HealthbarMode.FriendlySubtext == "HEALTH" or SettingsStatusText.HealthbarMode.EnemySubtext == "HEALTH" or
+  --   SettingsStatusText.NameMode.FriendlySubtext == "HEALTH" or SettingsStatusText.NameMode.EnemySubtext == "HEALTH" then
+    
+  --   ColorByHealthIsEnabled = true
+    
+  --     SubscribeEvent(ColorModule, "UNIT_HEALTH_FREQUENT", UNIT_HEALTH)
+  --     SubscribeEvent(ColorModule, "UNIT_HEALTH", UNIT_HEALTH)
+  --   end
+  -- else
+  --   ColorByHealthIsEnabled = false
+
+  --     UnsubscribeEvent(ColorModule, "UNIT_HEALTH", UNIT_HEALTH)
+---  --     UnsubscribeEvent(ColorModule, "UNIT_HEALTH_FREQUENT", UNIT_HEALTH)
+  --   end
+  -- end
 
   SubscribeEvent(ColorModule, "TargetGained", SituationalColorUpdate)
   SubscribeEvent(ColorModule, "TargetLost", SituationalColorUpdate)
