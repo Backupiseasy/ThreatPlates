@@ -24,7 +24,8 @@ local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local GetPlayerInfoByGUID, UnitNameFromGUID = GetPlayerInfoByGUID, UnitNameFromGUID
 local IsInInstance, InCombatLockdown = IsInInstance, InCombatLockdown
 local NamePlateDriverFrame, UnitNameplateShowsWidgetsOnly = NamePlateDriverFrame, UnitNameplateShowsWidgetsOnly
-local GetSpecializationInfo, GetSpecialization = GetSpecializationInfo, GetSpecialization
+local GetSpecializationInfo = C_SpecializationInfo and C_SpecializationInfo.GetSpecializationInfo or _G.GetSpecializationInfo
+local GetSpecialization = C_SpecializationInfo and C_SpecializationInfo.GetSpecialization or _G.GetSpecialization
 local CastbarInterpolation = Enum.StatusBarInterpolation and Enum.StatusBarInterpolation.Immediate
 local CastbarCastingDirection = Enum.StatusBarTimerDirection and Enum.StatusBarTimerDirection.ElapsedTime
 local CastbarChannelDirection = Enum.StatusBarTimerDirection and Enum.StatusBarTimerDirection.RemainingTime
@@ -1208,6 +1209,12 @@ function Addon:PLAYER_LOGIN(...)
   -- Works now in all WoW versions
   if NamePlateDriverFrame and NamePlateDriverFrame.AcquireUnitFrame then
     hooksecurefunc(NamePlateDriverFrame, "AcquireUnitFrame", NamePlateDriverFrame_AcquireUnitFrame)
+  end
+
+  -- Initialize the player role here: GetSpecialization() returns nil/0 during OnInitialize
+  -- and ACTIVE_TALENT_GROUP_CHANGED does not reliably fire on initial login in modern WoW.
+  if Addon.ExpansionIsAtLeastMists then
+    self:ACTIVE_TALENT_GROUP_CHANGED()
   end
 end
 

@@ -4,6 +4,7 @@
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 local L = Addon.L
+local GetSpecialization = C_SpecializationInfo and C_SpecializationInfo.GetSpecialization or _G.GetSpecialization
 
 Addon.DEBUG = Addon.Meta("version") == "@project-version@"
 
@@ -329,10 +330,7 @@ local function ChatCommandDebug(cmd_list)
     local plate = C_NamePlate.GetNamePlateForUnit("target", true)
     if not plate then return end
 
-		print("IsForbidden:", plate:IsForbidden())
-		print("  TP State:", plate.TPFrame and "TPFrame" or "<>", "-", plate.TPFrame and Addon.PlatesByUnit[plate.UnitFrame.unit] and "PlatesByUnit" or "<>" )
-		print("Scale:", plate.TPFrame:GetScale())
-		print("UI Prent:", UIParent:GetEffectiveScale())
+		print("Player Role:", Addon.GetPlayerRole() == "tank" and "Tank" or "DPS/Healer")
 	else
 		Addon.Logging.Error(L["Unknown option: "] .. command)
 		PrintHelp()
