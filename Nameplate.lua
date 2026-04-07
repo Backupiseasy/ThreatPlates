@@ -344,7 +344,9 @@ local NON_NAMEPLATE_UNITIDs = {
 
 function Addon:GetThreatPlateForUnit(unitid)
   -- Skip special unitids (they are updated via their nameplate unitid) and personal nameplate
-  if not unitid or unitid == "player" or UnitIsUnit("player", unitid) then return end
+  if not unitid or unitid == "player" then return end
+  local is_player = UnitIsUnit("player", unitid)
+  if not issecretvalue(is_player) and is_player then return end
 
   -- Non-nameplate unitids (target, focus, ...) are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED 
   -- and need to be accessed via GetNamePlateForUnit

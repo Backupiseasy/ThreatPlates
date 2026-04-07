@@ -1,5 +1,6 @@
 # @project-version@ (@build-time@)
 
+* Fixed a Lua error in WoW Midnight that occurred when nameplates were accessed, which was caused by restrictions on secret values [GH-678, GH-677, GH-676, Comment #8210, #8209, #8205].
 * Fixed a bug that caused the interrupt shield to be displayed even when it was disabled [Comment #8162, #8163, GH-672].
 * Fixed a bug where a Evoker's cast bar was not hidden after an empowered cast had finished [Comment #8126].
 * Totems should now be recognized correctly in WoW Midnight again as long as they are not protected with secret values [Comment #8106].
