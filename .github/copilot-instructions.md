@@ -20,7 +20,35 @@ Short: This repository is a World of Warcraft AddOn named `TidyPlates_ThreatPlat
 
 - Target runtime: WoW in-game Lua environment. Avoid language features requiring newer Lua versions than WoW supports.
 - Local test: Existing WoW installation (`Interface/AddOns/...`) or test installation.
-- WoW API reference: `https://github.com/Gethe/wow-ui-source` (branch `main` for the current live version).
+- WoW API reference: Use **only** the following authoritative sources — no other sources:
+  - WoW Wiki: `https://warcraft.wiki.gg/`
+  - GitHub: `https://github.com/Gethe/wow-ui-source` (branch `live` for the current live version)
+  - **MCP Server `wow-api`** (preferred for quick lookups — see below)
+
+## WoW API MCP Server (`wow-api`)
+
+The `wow-api` MCP server is configured globally and available in all workspaces. It indexes 8,000+ WoW API functions from the `ketho.wow-api` VS Code extension and should be the **first tool to reach for** when looking up API signatures, deprecations, enums, or events.
+
+Available tools:
+
+| Tool | Wann verwenden |
+|---|---|
+| `lookup_api(name)` | Genaue Signatur, Deprecation-Status und Wiki-Link einer Funktion |
+| `search_api(query)` | Freitextsuche über alle API-Namen und Beschreibungen |
+| `list_deprecated(filter?)` | Veraltete Funktionen mit Ersatz und Patch-Version |
+| `get_namespace(name)` | Alle Funktionen eines `C_`-Namespace (z.B. `C_SpecializationInfo`) |
+| `get_widget_methods(type)` | Methoden eines UI-Widget-Typs (z.B. `Frame`, `Button`) |
+| `get_enum(name)` | Enum-Werte (z.B. `Enum.SpellBookSpellBank`) |
+| `get_event(name)` | Event-Payload-Parameter (z.B. `ACTIVE_TALENT_GROUP_CHANGED`) |
+
+**Kompatibilitäts-Shim-Muster** für APIs, die in Midnight unter `C_SpecializationInfo` verschoben wurden:
+
+```lua
+local GetSpecialization = C_SpecializationInfo and C_SpecializationInfo.GetSpecialization or _G.GetSpecialization
+local GetSpecializationInfo = C_SpecializationInfo and C_SpecializationInfo.GetSpecializationInfo or _G.GetSpecializationInfo
+```
+
+Dieses Muster ist verbindlich für alle Dateien, die diese APIs verwenden.
 
 ## Build / Validate / Test
 
@@ -270,12 +298,45 @@ Event Safety:
 - Revert only the smallest change causing the issue.
 - On Midnight, investigate secret-value behavior before assuming ordinary nil/boolean errors.
 
+## Changelog Guidelines
+
+Two changelog files must be kept in sync for every change:
+
+- `CHANGELOG.md` — used by the packager/release tool; contains only the entries for the **current (upcoming) release** under the `# @project-version@ (@build-time@)` header.
+- `TidyPlates_ThreatPlates_Changes.log` — the full project history; new entries are prepended at the top.
+
+### Entry Format
+
+- One bullet per logical change, starting with `* `.
+- Begin with a capital letter; no trailing period.
+- Reference CurseForge comments as `[Comment #NNNN]` (comma-separated for multiple: `[Comment #NNNN, #MMMM]`).
+- Reference GitHub issues/PRs as `[GH-NNN]` or `[PR GH-NNN by author]`.
+- Both reference types may be combined in one bracket: `[GH-NNN, Comment #MMMM]`.
+- Do **not** invent reference numbers; only include those explicitly provided.
+
+### Version Block Format (`TidyPlates_ThreatPlates_Changes.log`)
+
+```
+------------------------------------------------------
+<version> (<date YYYY-MM-DD>)
+------------------------------------------------------
+* Entry one.
+* Entry two [Comment #NNNN].
+```
+
+### Workflow
+
+1. Add the new entry to the **bottom** of the current version block in `TidyPlates_ThreatPlates_Changes.log`.
+2. Replace the full content of the `# @project-version@ (@build-time@)` block in `CHANGELOG.md` with **all** entries from that same version block (i.e. it always reflects exactly the entries for the upcoming release).
+3. Never carry over entries from older versions into `CHANGELOG.md`.
+
 ## Before Opening a PR
 
 1. No new lint warnings/errors.
 2. In-game reload test passes without Lua errors.
 3. PR description explains backward compatibility and manual validation performed.
 4. On Midnight, verify secret-value guards and avoid unsafe unit-value handling.
+5. Both `CHANGELOG.md` and `TidyPlates_ThreatPlates_Changes.log` are updated and consistent.
 
 ---
 
