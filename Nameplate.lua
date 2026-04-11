@@ -1436,6 +1436,15 @@ function Addon:NAME_PLATE_UNIT_REMOVED(unitid)
   local plate = GetNamePlateForUnit(unitid)
   local tp_frame = plate.TPFrame
 
+  -- Clean up the mouseover reference before wiping unit data. If this plate is currently the
+  -- mouseover plate, RemoveMouseoverFromNameplate must run while unit.style is still valid.
+  -- Without this, UPDATE_MOUSEOVER_UNIT (which can fire synchronously when a plate becomes
+  -- visible again after recycling) would call RemoveMouseoverFromNameplate on a wiped unit
+  -- table, causing a nil-style crash in Transparency.lua:GetTransparency.
+  if PlatesByUnit["mouseover"] == tp_frame then
+    RemoveMouseoverFromNameplate()
+  end
+
   tp_frame.Active = false
 
   PlatesByUnit[unitid] = nil

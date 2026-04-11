@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+13.0.8 (2026-04-11)
+------------------------------------------------------
+* Fixed a Lua error that occurred when hovering over a unit whose nameplate was being recycled, caused by a stale mouseover reference [GH-679].
+
+------------------------------------------------------
 13.0.7 (2026-04-07)
 ------------------------------------------------------
 * Fixed a Lua error in WoW Midnight that occurred when nameplates were accessed, which was caused by restrictions on secret values [GH-678, GH-677, GH-676, Comment #8210, #8209, #8205].
@@ -29,7 +34,7 @@
 13.0.3 (2026-03-12)
 ------------------------------------------------------
 * Fixed several issues related to castbars. Castbars shown be shown more consistently now. 
-* The interruptor of a cast is shown again in WoW Midnight.
+* The interrupter of a cast is shown again in WoW Midnight.
 * Fixed a Lua error in Resource widget in WoW Midnight due to restrictions on secret values.
 * Fixed a Lua error in the NPC Role status text in WoW Midnight due to restrictions on secret values [Comment ##8058].
 

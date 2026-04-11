@@ -266,13 +266,16 @@ Event Safety:
 - Widgets may omit `OnEnable`/`OnDisable` if no lifecycle logic is needed.
 - `Init.lua` has duplicate `IS_TBC_CLASSIC` definitions (non-breaking redundancy).
 
-## Known Open Issues (as of Feb 2026)
+## Known Open Issues (as of April 2026)
 
 - `AurasWidgetMidnight.lua` `FilterEnemyBuffsBySpell()`: logic issue around permanent-duration auras.
 - `Widgets/HealerTrackerWidget.lua:595`: possible secret GUID used as table key.
 - `Init.lua`: duplicate `IS_TBC_CLASSIC` definition should be consolidated.
+- `IgnoreUnitForThreatPlates` (`Nameplate.lua`): `UnitIsUnit("player", unitid)` result used directly in `or`-chain without `IsSecretValue` guard — affects `NAME_PLATE_UNIT_ADDED` and `FrameOnShow`.
+- `FrameOnShow` (`Nameplate.lua`): second bare `UnitIsUnit(unitid, "player")` call without `IsSecretValue` guard.
+- `FrameOnUpdate` (`Nameplate.lua`): `UnitIsUnit(plate.UnitFrame.unit or "", "player")` without `IsSecretValue` guard (fires every frame).
 
-## Findings from Current Analysis (March 2026)
+## Findings from Current Analysis (March–April 2026)
 
 - No direct `table[UnitName(...)]` usage found in the addon.
 - Confirmed open Midnight risks:
@@ -280,11 +283,26 @@ Event Safety:
   - `Widgets/SocialWidget.lua`: name/fullname concatenation and table-key lookups may still consume secret values.
   - `Elements/StatusText.lua`: `UnitSubtitles[tooltip_name] = subtitle` still needs a secret-value guard on the cache key.
   - `Elements/StatusText.lua`: `UnitHealthPercent(...)` is passed directly into `:format("%.f%%")`; keep this path open until `string.format` safety is proven.
-- Closed findings from the March 2026 audit:
+  - `IgnoreUnitForThreatPlates`, `FrameOnShow`, `FrameOnUpdate`: `UnitIsUnit("player", ...)` calls lack `IsSecretValue` guards (see Known Open Issues).
+- Closed findings from the March–April 2026 audit:
   - `Elements/Castbar.lua` / `Nameplate.lua` interruptibility handling is acceptable because downstream consumers use APIs documented with `SecretArguments = "AllowedWhenTainted"`.
   - `Nameplate.lua` cast-target display path is acceptable on Midnight because `UnitSpellTargetName()` returns a unit token and transliteration is a no-op on Midnight.
   - `Elements/Healthbar.lua` target-of-target text path is non-Midnight-only and not part of the Midnight risk surface.
+  - GH-679 fixed (13.0.8): `NAME_PLATE_UNIT_REMOVED` now clears the `PlatesByUnit["mouseover"]` stale reference before `wipe(unit)`, preventing a nil-style crash in `Transparency.lua:GetTransparency` when `UPDATE_MOUSEOVER_UNIT` fires synchronously during nameplate recycling.
 - For new implementations: avoid any name-based keys (`UnitName`, `unit.name`); prefer GUID-based keys.
+
+### Nameplate Recycling / Event Ordering (Nameplate.lua)
+
+WoW can synchronously fire events (e.g. `UPDATE_MOUSEOVER_UNIT`, `UNIT_FACTION`) inside a running Lua call when a C-side API like `plate.TPFrame:Show()` is invoked. This is documented in the existing `UNIT_FACTION` comment. Rule: always clear derived state (mouseover, focus, target references) **before** calling `wipe(unit)` in `NAME_PLATE_UNIT_REMOVED`, so that any re-entrant event handler still finds valid unit data.
+
+### Personal Nameplate Filter Points (Nameplate.lua)
+
+Five locations filter the player's own nameplate; all must stay consistent:
+1. `GetThreatPlateForUnit` line ~347: `unitid == "player"` (literal string guard).
+2. `GetThreatPlateForUnit` lines ~358–359: `UnitIsUnit` + `IsSecretValue` guard for nameplate tokens — **logically redundant** because the personal nameplate is never inserted into `PlatesByUnit`; safe to remove in a future cleanup.
+3. `IgnoreUnitForThreatPlates`: gate for `NAME_PLATE_UNIT_ADDED` and `FrameOnShow` — **missing `IsSecretValue` guard** (open issue).
+4. `FrameOnShow`: second direct `UnitIsUnit(unitid, "player")` — **missing guard** (open issue).
+5. `FrameOnUpdate`: `UnitIsUnit(plate.UnitFrame.unit or "", "player")` — **missing guard**, fires every frame (open issue).
 
 ## First Commands to Run
 
