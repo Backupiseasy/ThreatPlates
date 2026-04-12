@@ -24,7 +24,7 @@ local ElementsPlateCreated, ElementsPlateUnitAdded, ElementsPlateUnitRemoved = A
 local ElementsUpdateStyle, ElementsUpdateSettings = Addon.Elements.UpdateStyle, Addon.Elements.UpdateSettings
 local TOTEMS = Addon.TOTEMS
 local GetUnitVisibility = Addon.GetUnitVisibility
-local IsSecretValue = Addon.IsSecretValue
+local IsSecretValueTP = Addon.IsSecretValue
 local Widgets = Addon.Widgets
 local TransparencyModule, ScalingModule = Addon.Transparency, Addon.Scaling
 local ThreatShowFeedback = Addon.Threat.ShowFeedback
@@ -106,7 +106,7 @@ if Addon.ExpansionIsAtLeastMidnight then
   IsTotemUnit = function(unitid)
     -- creature type ID was only added with TWW
     local _, creature_type_id = UnitCreatureType(unitid)
-    if IsSecretValue(creature_type_id) then return false end
+    if IsSecretValueTP(creature_type_id) then return false end
     
     return creature_type_id == 11 and UnitPlayerControlled(unitid) 
   end
@@ -118,7 +118,7 @@ if Addon.ExpansionIsAtLeastMidnight then
     
     -- ? Better to use UnitIsOwnerOrControllerOfUnit("player", unit.unitid) here (added with Legion)
     local is_players_pet = UnitIsUnit(unitid, "pet")
-    if IsSecretValue(is_players_pet) then return false end
+    if IsSecretValueTP(is_players_pet) then return false end
     
     return is_players_pet
   end
@@ -316,7 +316,7 @@ local function ProcessNameTriggers(unit)
   if plate_style then return plate_style end
 
   -- Totems:
-  if unit.TP_DetailedUnitType ~= "Totem" or IsSecretValue(unit.name) then return end
+  if unit.TP_DetailedUnitType ~= "Totem" or IsSecretValueTP(unit.name) then return end
 
   -- Check for player totems and ignore NPC totems
   local totem_id = TOTEMS[unit.name]

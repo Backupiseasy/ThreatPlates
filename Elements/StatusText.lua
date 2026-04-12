@@ -26,7 +26,7 @@ local TransliterateCyrillicLetters = Addon.Localization.TransliterateCyrillicLet
 local L = Addon.L
 local GetColorByHealthDeficit = Addon.Color.GetColorByHealthDeficit
 local GetUnitNPCRole = Addon.C_TooltipInfo_GetUnit_NPCRole
-local IsSecretValue = Addon.IsSecretValue
+local IsSecretValueTP = Addon.IsSecretValue
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -96,7 +96,7 @@ end
 local function GetUnitSubtitle(unit)
   if UnitIsPlayer(unit.unitid) or UnitPlayerControlled(unit.unitid) or not UnitExists(unit.unitid) then return end
   
-  local subtitle = not IsSecretValue(unit.name) and UnitSubtitles[unit.name]	
+  local subtitle = not IsSecretValueTP(unit.name) and UnitSubtitles[unit.name]	
 	if not subtitle then
 		local tooltip_data = GetUnitNPCRole(unit.unitid)
     if tooltip_data then
@@ -115,7 +115,7 @@ local function GetUnitSubtitle(unit)
         
         -- Tooltip Format Priority: Faction, Description, Level
         local tooltip_subtitle = tooltip_data.lines[LineNoOfNPCRole].leftText or ""
-        if IsSecretValue(tooltip_subtitle) or string.match(tooltip_subtitle, UNIT_LEVEL_TEMPLATE) then return end
+        if IsSecretValueTP(tooltip_subtitle) or string.match(tooltip_subtitle, UNIT_LEVEL_TEMPLATE) then return end
 
         subtitle = tooltip_subtitle
         

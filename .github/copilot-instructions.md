@@ -50,6 +50,26 @@ local GetSpecializationInfo = C_SpecializationInfo and C_SpecializationInfo.GetS
 
 Dieses Muster ist verbindlich für alle Dateien, die diese APIs verwenden.
 
+**Kanonisches Muster für `UnitIsUnit` (Midnight-sicher):**
+
+Niemals `UnitIsUnit` direkt in Boolean-Kontexten aufrufen — immer `Addon.UnitIsUnit` (definiert in `Compatibility.lua`) verwenden:
+
+```lua
+-- Guard (boolean if-check):
+if Addon.UnitIsUnit("player", unitid) then ... end
+
+-- Stored result (boolean field):
+unit.isTarget = Addon.UnitIsUnit("target", unitid)
+```
+
+`Addon.UnitIsUnit` gibt `false` zurück, wenn das Ergebnis ein Secret Value ist.
+
+In Dateien mit vielen Aufrufen kann eine lokale Upvalue angelegt werden:
+
+```lua
+local UnitIsUnitTP = Addon.UnitIsUnit
+```
+
 ## Build / Validate / Test
 
 - No classic build pipeline is required. Typical workflow:
@@ -271,9 +291,6 @@ Event Safety:
 - `AurasWidgetMidnight.lua` `FilterEnemyBuffsBySpell()`: logic issue around permanent-duration auras.
 - `Widgets/HealerTrackerWidget.lua:595`: possible secret GUID used as table key.
 - `Init.lua`: duplicate `IS_TBC_CLASSIC` definition should be consolidated.
-- `IgnoreUnitForThreatPlates` (`Nameplate.lua`): `UnitIsUnit("player", unitid)` result used directly in `or`-chain without `IsSecretValue` guard — affects `NAME_PLATE_UNIT_ADDED` and `FrameOnShow`.
-- `FrameOnShow` (`Nameplate.lua`): second bare `UnitIsUnit(unitid, "player")` call without `IsSecretValue` guard.
-- `FrameOnUpdate` (`Nameplate.lua`): `UnitIsUnit(plate.UnitFrame.unit or "", "player")` without `IsSecretValue` guard (fires every frame).
 
 ## Findings from Current Analysis (March–April 2026)
 
@@ -283,13 +300,15 @@ Event Safety:
   - `Widgets/SocialWidget.lua`: name/fullname concatenation and table-key lookups may still consume secret values.
   - `Elements/StatusText.lua`: `UnitSubtitles[tooltip_name] = subtitle` still needs a secret-value guard on the cache key.
   - `Elements/StatusText.lua`: `UnitHealthPercent(...)` is passed directly into `:format("%.f%%")`; keep this path open until `string.format` safety is proven.
-  - `IgnoreUnitForThreatPlates`, `FrameOnShow`, `FrameOnUpdate`: `UnitIsUnit("player", ...)` calls lack `IsSecretValue` guards (see Known Open Issues).
+  - `IgnoreUnitForThreatPlates`, `FrameOnShow`, `FrameOnUpdate`: `UnitIsUnit("player", ...)` calls lack `IsSecretValue` guards — **fixed** by replacing all unsafe `UnitIsUnit` calls in `Nameplate.lua` with `Addon.UnitIsUnit` (defined in `Compatibility.lua`).
 - Closed findings from the March–April 2026 audit:
   - `Elements/Castbar.lua` / `Nameplate.lua` interruptibility handling is acceptable because downstream consumers use APIs documented with `SecretArguments = "AllowedWhenTainted"`.
   - `Nameplate.lua` cast-target display path is acceptable on Midnight because `UnitSpellTargetName()` returns a unit token and transliteration is a no-op on Midnight.
   - `Elements/Healthbar.lua` target-of-target text path is non-Midnight-only and not part of the Midnight risk surface.
   - GH-679 fixed (13.0.8): `NAME_PLATE_UNIT_REMOVED` now clears the `PlatesByUnit["mouseover"]` stale reference before `wipe(unit)`, preventing a nil-style crash in `Transparency.lua:GetTransparency` when `UPDATE_MOUSEOVER_UNIT` fires synchronously during nameplate recycling.
+  - All bare `UnitIsUnit` calls in `Nameplate.lua` replaced with `Addon.UnitIsUnit` (13.0.8): covers `GetThreatPlateForUnit`, `SetUnitAttributeTarget`, `SetUnitAttributes`, `UnitIsSoftTarget`, `IgnoreUnitForThreatPlates`, `FrameOnShow`, `FrameOnUpdate`, and `Addon.UnitIsTarget`. Use `Addon.UnitIsUnit` (defined in `Compatibility.lua`) as the canonical safe replacement for raw `UnitIsUnit` in all boolean contexts.
 - For new implementations: avoid any name-based keys (`UnitName`, `unit.name`); prefer GUID-based keys.
+- For new implementations: never call raw `UnitIsUnit` in a boolean context — always use `Addon.UnitIsUnit` instead.
 
 ### Nameplate Recycling / Event Ordering (Nameplate.lua)
 
@@ -299,10 +318,10 @@ WoW can synchronously fire events (e.g. `UPDATE_MOUSEOVER_UNIT`, `UNIT_FACTION`)
 
 Five locations filter the player's own nameplate; all must stay consistent:
 1. `GetThreatPlateForUnit` line ~347: `unitid == "player"` (literal string guard).
-2. `GetThreatPlateForUnit` lines ~358–359: `UnitIsUnit` + `IsSecretValue` guard for nameplate tokens — **logically redundant** because the personal nameplate is never inserted into `PlatesByUnit`; safe to remove in a future cleanup.
-3. `IgnoreUnitForThreatPlates`: gate for `NAME_PLATE_UNIT_ADDED` and `FrameOnShow` — **missing `IsSecretValue` guard** (open issue).
-4. `FrameOnShow`: second direct `UnitIsUnit(unitid, "player")` — **missing guard** (open issue).
-5. `FrameOnUpdate`: `UnitIsUnit(plate.UnitFrame.unit or "", "player")` — **missing guard**, fires every frame (open issue).
+2. `GetThreatPlateForUnit` line ~358: `Addon.UnitIsUnit("player", unitid)` — **not** redundant: GH-677 confirmed that `UnitIsUnit("player", unitid)` can return a secret value even with `"player"` as the first argument (crash with `unitid = "targettarget"` in a PvP/Encounter restriction context). `UnitIsUnitTP` is required here.
+3. `IgnoreUnitForThreatPlates`: gate for `NAME_PLATE_UNIT_ADDED` and `FrameOnShow` — uses `Addon.UnitIsUnit` (safe).
+4. `FrameOnShow`: `Addon.UnitIsUnit(unitid, "player")` — uses safe wrapper.
+5. `FrameOnUpdate`: `Addon.UnitIsUnit(plate.UnitFrame.unit or "", "player")` — uses safe wrapper.
 
 ## First Commands to Run
 

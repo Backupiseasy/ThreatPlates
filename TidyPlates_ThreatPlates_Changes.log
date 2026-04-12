@@ -1,7 +1,8 @@
 ﻿------------------------------------------------------
 13.0.8 (2026-04-11)
 ------------------------------------------------------
-* Fixed a Lua error that occurred when hovering over a unit whose nameplate was being recycled, caused by a stale mouseover reference [GH-679].
+* Fixed a Lua error that could occur when moving the mouse cursor away from a nameplate that was being removed at the same time [GH-679].
+* Fixed several Lua errors in WoW Midnight that could occur during combat or in instances.
 
 ------------------------------------------------------
 13.0.7 (2026-04-07)

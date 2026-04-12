@@ -31,7 +31,7 @@ local C_TooltipInfo_GetUnit = C_TooltipInfo and C_TooltipInfo.GetUnit -- Added i
 local PlayerName = Addon.PlayerName
 local RGB_P = Addon.RGB_P
 local UnitDetailedThreatSituationWrapper = Addon.UnitDetailedThreatSituationWrapper
-local IsSecretValue = Addon.IsSecretValue
+local IsSecretValueTP = Addon.IsSecretValue
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -225,7 +225,7 @@ local function IsQuestUnit(unit)
     local line = tooltip_data.lines[i]
 
     -- At list in Mists, tooltips are not guaranteed to have 5 lines min.
-    if IsSecretValue(line.leftText) or not line.leftText then break end
+    if IsSecretValueTP(line.leftText) or not line.leftText then break end
 
     local text = line.leftText
 
@@ -564,7 +564,7 @@ function Widget:GROUP_ROSTER_UPDATE()
       if UnitExists(group_type .. i) then
         --print("Adding member:", UnitName(group_type .. i))
         local unit_name = UnitName(group_type .. i)
-        if unit_name and not IsSecretValue(unit_name) then
+        if unit_name and not IsSecretValueTP(unit_name) then
           GroupMembers[unit_name] = true
         end
       end
@@ -845,7 +845,7 @@ function Widget:PrintDebug(command)
     for i = 3, #tooltip_data.lines do
       local line = tooltip_data.lines[i]
 
-      if IsSecretValue(line.leftText) or not line.leftText then break end
+      if IsSecretValueTP(line.leftText) or not line.leftText then break end
 
       local text = line.leftText
 

@@ -40,7 +40,8 @@ local CVars = Addon.CVars
 local RegisterEvent, UnregisterEvent = Addon.EventService.RegisterEvent, Addon.EventService.UnregisterEvent
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 local AnchorFrameTo = Addon.AnchorFrameTo
-local IsSecretValue = Addon.IsSecretValue
+local IsSecretValueTP = Addon.IsSecretValue
+local UnitIsUnitTP = Addon.UnitIsUnit
 
 local TransliterateCyrillicLetters = Addon.Localization.TransliterateCyrillicLetters
 local SetNamesFonts = Addon.Font.SetNamesFonts
@@ -329,38 +330,38 @@ end
 -- PlatesByUnit
 --   Nameplates can be in PlatesByUnit, but not Active (if Blizzard plates are shown for this unit type)
 
-local NON_NAMEPLATE_UNITIDs = {
-  target = true,
-  player = true,
-  focus =  true,
-  anyenemy = true,
-  anyfriend = true,
-  anyinteract = true,
-  softenemy = true,
-  softfriend = true,
+-- Positive allowlist: non-nameplate unit tokens that may be resolved via
+-- C_NamePlate.GetNamePlateForUnit.  All other tokens are silently skipped:
+--   boss<N>        always forbidden
+--   arena<N>       always forbidden
+--   party<N>/raid<N>  always forbidden
+--   compound tokens (e.g. "targettarget") contextually forbidden in restricted environments
+local ALLOWED_FOR_GET_NAMEPLATE = {
+  target       = true,
+  focus        = true,
+  mouseover    = true,
+  softenemy    = true,
+  softfriend   = true,
   softinteract = true,
-  mouseover = true,
 }
 
 function Addon:GetThreatPlateForUnit(unitid)
-  -- Skip special unitids (they are updated via their nameplate unitid) and personal nameplate
   if not unitid or unitid == "player" then return end
-  local is_player = UnitIsUnit("player", unitid)
-  if not issecretvalue(is_player) and is_player then return end
 
-  -- Non-nameplate unitids (target, focus, ...) are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED 
-  -- and need to be accessed via GetNamePlateForUnit
-  if NON_NAMEPLATE_UNITIDs[unitid] then
+  -- For the fixed set of alias tokens that are safe for GetNamePlateForUnit,
+  -- resolve via the API directly.  Everything else (forbidden token classes,
+  -- compound tokens) falls through and returns nil implicitly.
+  if ALLOWED_FOR_GET_NAMEPLATE[unitid] then
     local plate = GetNamePlateForUnit(unitid)
     local tp_frame = plate and plate.TPFrame
     if tp_frame and tp_frame.Active then
       return tp_frame
     end
   else
-    -- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED
+    -- nameplate<N> tokens are stored in PlatesByUnit via NAME_PLATE_UNIT_ADDED.
     local tp_frame = PlatesByUnit[unitid]
-    if tp_frame and tp_frame.Active then
-        return tp_frame
+    if tp_frame and tp_frame.Active and not UnitIsUnitTP("player", unitid) then
+      return tp_frame
     end
   end
 end
@@ -487,11 +488,11 @@ end
 
 local function SetUnitAttributeTarget(unit)
   local unitid = unit.unitid
-  unit.isTarget = UnitIsUnit("target", unitid) -- required here for config changes which reset all plates without calling TARGET_CHANGED, MOUSEOVER, ...
+  unit.isTarget = UnitIsUnitTP("target", unitid) -- required here for config changes which reset all plates without calling TARGET_CHANGED, MOUSEOVER, ...
   
-  unit.IsSoftEnemyTarget = UnitIsUnit("softenemy", unitid)
-  unit.IsSoftFriendTarget = UnitIsUnit("softfriend", unitid)
-  unit.IsSoftInteractTarget = UnitIsUnit("softinteract", unitid)
+  unit.IsSoftEnemyTarget = UnitIsUnitTP("softenemy", unitid)
+  unit.IsSoftFriendTarget = UnitIsUnitTP("softfriend", unitid)
+  unit.IsSoftInteractTarget = UnitIsUnitTP("softinteract", unitid)
 
   unit.IsSoftTarget = unit.isTarget or unit.IsSoftEnemyTarget or unit.IsSoftFriendTarget or unit.IsSoftInteractTarget
 end
@@ -535,8 +536,8 @@ local function SetUnitAttributes(unit, unitid)
 
   -- Target, Focus, and Mouseover => PLAYER_TARGET_CHANGED, UPDATE_MOUSEOVER_UNIT, PLAYER_FOCUS_CHANGED
   SetUnitAttributeTarget(unit, unitid)
-  unit.IsFocus = UnitIsUnit("focus", unitid) -- required here for config changes which reset all plates without calling TARGET_CHANGED, MOUSEOVER, ...
-  unit.isMouseover = UnitIsUnit("mouseover", unitid)
+  unit.IsFocus = UnitIsUnitTP("focus", unitid) -- required here for config changes which reset all plates without calling TARGET_CHANGED, MOUSEOVER, ...
+  unit.isMouseover = UnitIsUnitTP("mouseover", unitid)
   
   -- Target Mark => RAID_TARGET_UPDATE
   SetUnitAttributeTargetMarker(unit, unitid)
@@ -554,10 +555,10 @@ local function SoftTargetExists()
 end
 
 local function UnitIsSoftTarget(unitid)
-	return UnitIsUnit("target", unitid) or 
-		(TargetStyleForEnemy and UnitIsUnit("softenemy", unitid)) or 
-		(TargetStyleForFriend and UnitIsUnit("softfriend", unitid))	or 
-		(TargetStyleForInteract and UnitIsUnit("softinteract", unitid))
+	return UnitIsUnitTP("target", unitid) or 
+		(TargetStyleForEnemy and UnitIsUnitTP("softenemy", unitid)) or 
+		(TargetStyleForFriend and UnitIsUnitTP("softfriend", unitid))	or 
+		(TargetStyleForInteract and UnitIsUnitTP("softinteract", unitid))
 end
 
 ---------------------------------------------------------------------------------------------------------------------
@@ -643,7 +644,7 @@ local function OnStartCasting(tp_frame, unitid, cast_guid, event_spell_id, castb
     end
   else
     local target_unit_name = UnitName(unit.unitid .. "target")
-    if target_unit_name and not Addon.IsSecretValue(target_unit_name) then
+    if target_unit_name and not IsSecretValueTP(target_unit_name) then
       -- There are situations when UnitName returns nil (OnHealthUpdate, hypothesis: health update when the unit died tiggers this, but then there is no target any more)
       local _, class_name = UnitClass(target_unit_name)
       castbar.CastTarget:SetText(Addon.ColorByClass(class_name, TransliterateCyrillicLetters(target_unit_name)))
@@ -730,7 +731,7 @@ end
 ---------------------------------------------------------------------------------------------------------------------
 
 local function IgnoreUnitForThreatPlates(unitid)
-  return UnitIsUnit("player", unitid) or UnitNameplateShowsWidgetsOnly(unitid)
+  return UnitIsUnitTP("player", unitid) or UnitNameplateShowsWidgetsOnly(unitid)
 end
 
 local SetShownBlizzardPlate
@@ -819,7 +820,7 @@ local function FrameOnShow(UnitFrame)
   end
 
 
-  if UnitIsUnit(unitid, "player") then -- or: ns.PlayerNameplate == GetNamePlateForUnit(UnitFrame.unit)
+  if UnitIsUnitTP(unitid, "player") then -- or: ns.PlayerNameplate == GetNamePlateForUnit(UnitFrame.unit)
     -- Skip the personal resource bar of the player character, don't unhook scripts as nameplates, even the personal
     -- resource bar, get re-used
     if SettingsHideBuffsOnPersonalNameplate then
@@ -838,7 +839,7 @@ end
 local function FrameOnUpdate(plate, elapsed)
   -- Skip nameplates not handled by TP: Blizzard default plates (if configured) and the personal nameplate
   local tp_frame = plate.TPFrame
-  if not tp_frame.Active or UnitIsUnit(plate.UnitFrame.unit or "", "player") then
+  if not tp_frame.Active or UnitIsUnitTP(plate.UnitFrame.unit or "", "player") then
     return
   end
 
@@ -969,7 +970,7 @@ local function HandlePlateUnitAdded(plate, unitid)
   SetUnitAttributes(unit, unitid)
   PlatesByUnit[unitid] = tp_frame
   local guid = unit.guid
-  if guid and not IsSecretValue(guid) then
+  if guid and not IsSecretValueTP(guid) then
     PlatesByGUID[guid] = plate
   end
   
@@ -1131,7 +1132,7 @@ function Addon:UpdateSettings()
     Addon.UnitIsTarget = UnitIsSoftTarget
   else
     Addon.TargetUnitExists = function() return UnitExists("target") end
-    Addon.UnitIsTarget = function(unitid) return UnitIsUnit("target", unitid) end
+    Addon.UnitIsTarget = function(unitid) return UnitIsUnitTP("target", unitid) end
   end
 
   if db.settings.castnostop.ShowInterruptSource then
@@ -1542,7 +1543,6 @@ function Addon:PLAYER_FOCUS_CHANGED()
     LastFocusPlate = tp_frame
   end
 end
-
 
 local function RemoveMouseoverFromNameplate()
   local tp_frame = PlatesByUnit["mouseover"]

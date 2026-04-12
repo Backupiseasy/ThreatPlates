@@ -213,7 +213,14 @@ end
 
 Addon.IsSecretValue = _G.issecretvalue or function() return false end
 
-Addon.EvaluateColorValueFromBoolean = function(boolean, color_if_true, color_if_false)
+-- Safe wrapper for UnitIsUnit: returns false instead of a secret value when the result is restricted.
+-- Use this instead of the raw UnitIsUnit() call wherever the result is used in a boolean context.
+function Addon.UnitIsUnit(unit1, unit2)
+  local result = UnitIsUnit(unit1, unit2)
+  return not Addon.IsSecretValue(result) and result
+end
+
+function Addon.EvaluateColorValueFromBoolean(boolean, color_if_true, color_if_false)
   local r = EvaluateColorValueFromBoolean(boolean, color_if_true.r, color_if_false.r)
   local g = EvaluateColorValueFromBoolean(boolean, color_if_true.g, color_if_false.g)
   local b = EvaluateColorValueFromBoolean(boolean, color_if_true.b, color_if_false.b)

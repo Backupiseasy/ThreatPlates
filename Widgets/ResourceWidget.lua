@@ -21,7 +21,7 @@ local ScaleTo100 = CurveConstants and CurveConstants.ScaleTo100
 
 -- ThreatPlates APIs
 local BackdropTemplate = Addon.BackdropTemplate
-local IsSecretValue = Addon.IsSecretValue
+local IsSecretValueTP = Addon.IsSecretValue
 local Truncate = Addon.Truncate
 
 local _G =_G
@@ -111,7 +111,7 @@ function Widget:SetTargetPowerType(widget_frame, unit)
 
   local target_max_power = UnitPowerMax("target")
 
-  if IsSecretValue(target_max_power) or not target_max_power or target_max_power == 0 then return end
+  if IsSecretValueTP(target_max_power) or not target_max_power or target_max_power == 0 then return end
 
   -- The code to determine the power type could be moved to OnUnitAdded, but then code is necessary to determine when
   -- the power type on the unit changes (e.g., a druid that shapeshifts). Mabe there's even bosses that do that?!?

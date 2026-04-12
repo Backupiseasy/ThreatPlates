@@ -39,7 +39,7 @@ local AuraTriggerInitialize, AuraTriggerUpdateStyle, AuraTriggerCheckIfActive = 
 local CUSTOM_GLOW_FUNCTIONS, CUSTOM_GLOW_WRAPPER_FUNCTIONS = Addon.CUSTOM_GLOW_FUNCTIONS, Addon.CUSTOM_GLOW_WRAPPER_FUNCTIONS
 local BackdropTemplate = Addon.BackdropTemplate
 local MODE_FOR_STYLE, AnchorFrameTo = Addon.MODE_FOR_STYLE, Addon.AnchorFrameTo
-local IsSecretValue, EvaluateColorValueFromBoolean = Addon.IsSecretValue, Addon.EvaluateColorValueFromBoolean
+local IsSecretValueTP, EvaluateColorValueFromBoolean = Addon.IsSecretValue, Addon.EvaluateColorValueFromBoolean
 local AbbreviateNumbers = AbbreviateNumbers
 
 local _G =_G
@@ -1026,7 +1026,7 @@ local function UpdateAuraInformationIconMode(self, aura_frame) -- texture, durat
     end
   end
 
-  if not IsSecretValue(duration) then
+  if not IsSecretValueTP(duration) then
     if AuraHighlightEnabled then
       if aura_frame.AuraData.isStealable then
         AuraHighlightStart(aura_frame.Highlight, AuraHighlightColor, 0)
@@ -1254,7 +1254,7 @@ local function UpdateAuraInformationBarMode(self, aura_frame) -- texture, durati
     aura_frame.Icon:SetTexture(aura_frame.AuraData.icon)
   end
 
-  if not IsSecretValue(duration) then
+  if not IsSecretValueTP(duration) then
     -- if AuraHighlightEnabled then
     --   if aura_frame.AuraData.isStealable then
     --     AuraHighlightStart(aura_frame.Highlight, AuraHighlightColor, 0)
