@@ -1433,6 +1433,20 @@ function Addon:NAME_PLATE_UNIT_ADDED(unitid)
   end
 end
 
+local function RemoveMouseoverFromNameplate()
+  local tp_frame = PlatesByUnit["mouseover"]
+  if not tp_frame then return end
+
+  -- Do this even if nameplate is not active as otherwise, mouseover is not shown correctly
+  -- when switching between TP plates and Blizzard plates
+  tp_frame.unit.isMouseover = false
+  if tp_frame.Active then
+    PublishEvent("MouseoverOnLeave", tp_frame)
+  end
+
+  PlatesByUnit["mouseover"] = nil
+end
+
 function Addon:NAME_PLATE_UNIT_REMOVED(unitid)
   local plate = GetNamePlateForUnit(unitid)
   local tp_frame = plate.TPFrame
@@ -1544,20 +1558,6 @@ function Addon:PLAYER_FOCUS_CHANGED()
   end
 end
 
-local function RemoveMouseoverFromNameplate()
-  local tp_frame = PlatesByUnit["mouseover"]
-  if not tp_frame then return end
-  
-  -- Do this even if nameplate is not active as otherwise, mouseover is not shown correctly
-  -- when switching between TP plates and Blizzard plates
-  tp_frame.unit.isMouseover = false
-  if tp_frame.Active then
-    PublishEvent("MouseoverOnLeave", tp_frame)
-  end
-
-  PlatesByUnit["mouseover"] = nil
-end
-  
 local MouseoverMonitor
 
 function Addon:UPDATE_MOUSEOVER_UNIT()

@@ -363,9 +363,20 @@ Two changelog files must be kept in sync for every change:
 
 ### Workflow
 
-1. Add the new entry to the **bottom** of the current version block in `TidyPlates_ThreatPlates_Changes.log`.
+**If the change is the first change after a release (i.e. the last released tag matches the current top version block in `Changes.log`):**
+
+1. Create a **new version block** at the top of `TidyPlates_ThreatPlates_Changes.log` with an incremented patch version (e.g. `13.0.8` → `13.0.9`) and today's date.
+2. Add the new entry to that new block.
+3. Replace the full content of the `# @project-version@ (@build-time@)` block in `CHANGELOG.md` with **only** the entries from the new version block.
+
+**If there are already unreleased entries in the top version block (no matching tag yet):**
+
+1. Add the new entry to the **bottom** of the current (top) version block in `TidyPlates_ThreatPlates_Changes.log`.
 2. Replace the full content of the `# @project-version@ (@build-time@)` block in `CHANGELOG.md` with **all** entries from that same version block (i.e. it always reflects exactly the entries for the upcoming release).
-3. Never carry over entries from older versions into `CHANGELOG.md`.
+
+**Always:**
+- Never carry over entries from older (released) version blocks into `CHANGELOG.md`.
+- `CHANGELOG.md` always reflects exactly the entries of the single upcoming (unreleased) version block.
 
 ## Before Opening a PR
 
