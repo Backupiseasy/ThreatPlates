@@ -85,7 +85,7 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
   target_marker:SetSize(target_marker_style.width, target_marker_style.height)
   target_marker:ClearAllPoints()
   target_marker:SetPoint(target_marker_style.anchor, tp_frame, target_marker_style.anchor, target_marker_style.x, target_marker_style.y)
-  target_marker:SetShown(tp_frame.unit.TargetMarker)
+  target_marker:SetShown(tp_frame.unit.TargetMarkerIcon ~= nil or tp_frame.unit.MentorIcon ~= nil)
 end
 
 SubscribeEvent(Element, "TargetMarkerUpdate", Element.TargetMarkerUpdate)
