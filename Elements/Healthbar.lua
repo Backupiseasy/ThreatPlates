@@ -17,6 +17,8 @@ local FontUpdateText, FontUpdateTextSize = Addon.Font.UpdateText, Addon.Font.Upd
 local SubscribeEvent, UnsubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Unsubscribe, Addon.EventService.Publish
 local BackdropTemplate = Addon.BackdropTemplate
 local TransliterateCyrillicLetters = Addon.Localization.TransliterateCyrillicLetters
+local UnitIsTarget = Addon.UnitIsTarget
+local UnitIsUnitTP = Addon.UnitIsUnit
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -223,7 +225,7 @@ local function ShowTargetUnit(healthbar, unitid)
   -- If just the color should be updated, unitid will be nil
   if unitid then
     local target_of_target_unit = unitid .. "target"
-    if not SettingsTargetUnit.ShowNotMyself or not UnitIsUnit("player", target_of_target_unit) then
+    if not SettingsTargetUnit.ShowNotMyself or not UnitIsUnitTP("player", target_of_target_unit) then
       local target_of_target_name = UnitName(target_of_target_unit)
       if target_of_target_name then
         target_of_target_name = 
@@ -287,7 +289,7 @@ end
 
 -- The event triggering this function is only subscribed for when target unit is enabled
 local function PlayerTargetLost(tp_frame)
-  if SettingsShowOnlyForTarget and not Addon.UnitIsTarget(unit.unitid) then
+  if SettingsShowOnlyForTarget and not UnitIsTarget(tp_frame.unit.unitid) then
     HideTargetUnit(tp_frame.visual.Healthbar)
   end
 end
