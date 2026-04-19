@@ -510,7 +510,7 @@ function Widget:UPDATE_BATTLEFIELD_SCORE()
       local is_healer_spec = HEALER_SPECS[talentSpec]
       UnitIsHealer[name] = (is_healer_spec and "HEALER") or "DPS"
 
-      local unit_guid = UnitGUIDByName[unit_name]
+      local unit_guid = UnitGUIDByName[name]
       if unit_guid and is_healer_spec then
         UpdateNameplateByGUID(unit_guid)
       end
