@@ -236,7 +236,7 @@ end
 -- Unsubscribes to all events (including unit-based events) for a subscriber
 function EventService.UnsubscribeAll(subscriber)
   for event, subscribers_for_event in pairs(SubscribersByEvent) do
-    if Addon:ExpansionSupportsEvent(event) then     
+    if INTERNAL_EVENTS[event] or Addon:ExpansionSupportsEvent(event) then
       UnregisterGameEvent(event, subscribers_for_event, subscriber, EventHandlerFrame)
     end
   end

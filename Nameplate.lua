@@ -1402,6 +1402,7 @@ end
 
 function Addon:NAME_PLATE_CREATED(plate)
   HandlePlateCreated(plate)
+  PlatesCreated[plate] = plate.TPFrame
 
   -- NamePlateDriverFrame.AcquireUnitFrame is not used in Classic before Mists
   if not Addon.ExpansionIsAtLeastMists and plate.UnitFrame then
@@ -1410,8 +1411,6 @@ function Addon:NAME_PLATE_CREATED(plate)
 
   plate:HookScript('OnHide', FrameOnHide)
   plate:HookScript('OnUpdate', FrameOnUpdate)
-  
-  PlatesCreated[plate] = plate.TPFrame
 end
 
 -- Payload: { Name = "unitToken", Type = "string", Nilable = false },

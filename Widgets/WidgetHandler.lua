@@ -359,13 +359,6 @@ function WidgetHandler:OnUnitAdded(tp_frame, unit)
   for widget_name, widget in pairs(self.EnabledWidgets) do
     local widget_frame = plate_widgets[widget_name]
 
-    -- I think it could happen that a nameplate was created, then a widget is enabled, and afterwise the unit is
-    -- added to the nameplate, i.e., InitializedWidgets is called.
-    --    if plate_widgets[widget_name] == nil then
-    --      Addon.db.global.Unit = tp_frame
-    --    end
-    --    assert (plate_widgets[widget_name] ~= nil, "Uninitialized widget found: " .. widget_name .. " for unit " .. unit.name .. " (" .. tp_frame:GetName() .. ")")
-
     widget_frame.Active = tp_frame.stylename ~= "empty" and widget:EnabledForStyle(tp_frame.stylename, unit)
     widget_frame.unit = unit
 
