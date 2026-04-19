@@ -178,6 +178,12 @@ function Element.PlateCreated(tp_frame)
   castbar.InterruptBorder = CreateFrame("Frame", nil, castbar, BackdropTemplate)
   castbar.Overlay = CreateFrame("Frame", nil, castbar, BackdropTemplate)
 
+  -- Static anchors and colors that never change (style-independent):
+  castbar.Background:SetPoint("BOTTOMRIGHT", castbar, "BOTTOMRIGHT")
+  castbar.Border:SetBackdropBorderColor(0, 0, 0, 1)
+  castbar.InterruptBorder:SetBackdrop(INTERRUPT_BORDER_BACKDROP)
+  castbar.InterruptBorder:SetBackdropBorderColor(1, 0, 0, 1)
+
   castbar.InterruptOverlay = castbar.Overlay:CreateTexture(nil, "ARTWORK", nil, 2)
   castbar.InterruptShield = castbar.Overlay:CreateTexture(nil, "OVERLAY", nil, 0)
 
@@ -200,7 +206,7 @@ function Element.PlateCreated(tp_frame)
 
   local spell_text = castbar.Overlay:CreateFontString(nil, "ARTWORK", "GameFontNormal")
   spell_text:SetTextColor(1, 1, 1, 1)
-  spell_text:SetWordWrap(false) -- otherwise text is wrapped when plate is scaled down
+  spell_text:SetWordWrap(false) -- otherwise text is wrapped when plate is scaled down; never changes
 
   -- Remaining cast time
   castbar.CastTime = castbar.Overlay:CreateFontString(nil, "ARTWORK", "GameFontNormal")
@@ -249,46 +255,44 @@ function Element.UpdateStyle(tp_frame, style)
   end
 
   local castbar, castbar_style = tp_frame.visual.Castbar, style.castbar
+  local castborder_style = style.castborder
+
+  -- Always set up layout so the castbar displays correctly if made visible by a cast trigger,
+  -- even when castbar_style.show is false for the current style.
+  local scale_factor = castbar_style.height / 10
+  castbar.InterruptShield:SetSize(14 * scale_factor, 16 * scale_factor)
+  castbar.Spark:SetSize(3, castbar_style.height)
+
+  castbar:ClearAllPoints()
+  castbar:SetSize(castbar_style.width, castbar_style.height)
+  castbar:SetPoint(castbar_style.anchor, tp_frame, castbar_style.anchor, castbar_style.x + target_offset_x, castbar_style.y + target_offset_y)
+  castbar:SetStatusBarTexture(castbar_style.texture)
+
+  local background = castbar.Background
+  background:SetTexture(castbar_style.backdrop)
+  background:SetPoint("TOPLEFT", castbar:GetStatusBarTexture(), "TOPRIGHT")
+
+  local offset = castborder_style.offset
+  local border = castbar.Border
+  border:SetBackdrop({
+    edgeFile = castborder_style.texture,
+    edgeSize = castborder_style.edgesize,
+    insets = { left = offset, right = offset, top = offset, bottom = offset },
+  })
+  border:ClearAllPoints()
+  border:SetPoint("TOPLEFT", castbar, "TOPLEFT", - offset, offset)
+  border:SetPoint("BOTTOMRIGHT", castbar, "BOTTOMRIGHT", offset, - offset)
+  border:SetShown(castborder_style.show)
+
+  border = castbar.InterruptBorder
+  border:ClearAllPoints()
+  border:SetPoint("TOPLEFT", castbar, "TOPLEFT", - offset - 1, offset + 1)
+  border:SetPoint("BOTTOMRIGHT", castbar, "BOTTOMRIGHT", offset + 1, - offset - 1)
+
+  -- Set castbar color here otherwise it may be shown sometimes with non-initialized backdrop color (white)
+  SetCastbarColor(castbar, unit)
+
   if castbar_style.show then
-    local castborder_style = style.castborder
-
-    -- Set castbar color here otherwise it may be shown sometimes with non-initialized backdrop color (white)
-    castbar:ClearAllPoints()
-    castbar:SetSize(castbar_style.width, castbar_style.height)
-    castbar:SetPoint(castbar_style.anchor, tp_frame, castbar_style.anchor, castbar_style.x + target_offset_x, castbar_style.y + target_offset_y)
-    castbar:SetStatusBarTexture(castbar_style.texture)
-
-    local background = castbar.Background
-    background:SetTexture(castbar_style.backdrop)
-    background:SetPoint("TOPLEFT", castbar:GetStatusBarTexture(), "TOPRIGHT")
-    background:SetPoint("BOTTOMRIGHT", castbar, "BOTTOMRIGHT")
-
-    local offset = castborder_style.offset
-    local border = castbar.Border
-    border:SetBackdrop({
-      edgeFile = castborder_style.texture,
-      edgeSize = castborder_style.edgesize,
-      insets = { left = offset, right = offset, top = offset, bottom = offset },
-    })
-    border:SetBackdropBorderColor(0, 0, 0, 1)
-    border:ClearAllPoints()
-    border:SetPoint("TOPLEFT", castbar, "TOPLEFT", - offset, offset)
-    border:SetPoint("BOTTOMRIGHT", castbar, "BOTTOMRIGHT", offset, - offset)
-    border:SetShown(castborder_style.show)
-
-    border = castbar.InterruptBorder
-    border:ClearAllPoints()
-    border:SetPoint("TOPLEFT", castbar, "TOPLEFT", - offset - 1, offset + 1)
-    border:SetPoint("BOTTOMRIGHT", castbar, "BOTTOMRIGHT", offset + 1, - offset - 1)
-    border:SetBackdrop(INTERRUPT_BORDER_BACKDROP)
-    border:SetBackdropBorderColor(1, 0, 0, 1)
-
-    SetCastbarColor(castbar, unit)
-
-    local scale_factor = castbar_style.height / 10
-    castbar.InterruptShield:SetSize(14 * scale_factor, 16 * scale_factor)
-    castbar.Spark:SetSize(3, castbar_style.height)
-
     castbar:Show()
   else
     castbar:Hide()
@@ -311,8 +315,6 @@ function Element.UpdateStyle(tp_frame, style)
     spell_text:ClearAllPoints()
     spell_text:SetSize(spell_text_style.width, spell_text_style.height)
     spell_text:SetPoint(spell_text_style.anchor, castbar, spell_text_style.anchor, db.SpellNameText.HorizontalOffset, db.SpellNameText.VerticalOffset)
-
-    spell_text:SetWordWrap(false)
 
     spell_text:Show()
   else
