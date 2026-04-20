@@ -140,8 +140,10 @@ local function UpdateForCast(self, unit)
   if db.castnostop.ShowInterruptShield then
     if Addon.ExpansionIsAtLeastMidnight then
       self.InterruptShield:SetAlphaFromBoolean(show, 1, 0)
+      self.InterruptShield:Show()
+    else
+      self.InterruptShield:SetShown(show)
     end
-    self.InterruptShield:Show()
   else
     self.InterruptShield:Hide()
   end
@@ -150,9 +152,12 @@ local function UpdateForCast(self, unit)
     if Addon.ExpansionIsAtLeastMidnight then
       self.InterruptBorder:SetAlphaFromBoolean(show, 1, 0)
       self.InterruptOverlay:SetAlphaFromBoolean(show, 1, 0)
+      self.InterruptBorder:Show()
+      self.InterruptOverlay:Show()
+    else
+      self.InterruptBorder:SetShown(show)
+      self.InterruptOverlay:SetShown(show)
     end
-    self.InterruptBorder:Show()
-    self.InterruptOverlay:Show()
   else
     self.InterruptBorder:Hide()
     self.InterruptOverlay:Hide()
@@ -179,8 +184,6 @@ function Element.PlateCreated(tp_frame)
   castbar.Overlay = CreateFrame("Frame", nil, castbar, BackdropTemplate)
 
   -- Static anchors and colors that never change (style-independent):
-  castbar.Background:SetPoint("BOTTOMRIGHT", castbar, "BOTTOMRIGHT")
-  castbar.Border:SetBackdropBorderColor(0, 0, 0, 1)
   castbar.InterruptBorder:SetBackdrop(INTERRUPT_BORDER_BACKDROP)
   castbar.InterruptBorder:SetBackdropBorderColor(1, 0, 0, 1)
 
@@ -257,12 +260,6 @@ function Element.UpdateStyle(tp_frame, style)
   local castbar, castbar_style = tp_frame.visual.Castbar, style.castbar
   local castborder_style = style.castborder
 
-  -- Always set up layout so the castbar displays correctly if made visible by a cast trigger,
-  -- even when castbar_style.show is false for the current style.
-  local scale_factor = castbar_style.height / 10
-  castbar.InterruptShield:SetSize(14 * scale_factor, 16 * scale_factor)
-  castbar.Spark:SetSize(3, castbar_style.height)
-
   castbar:ClearAllPoints()
   castbar:SetSize(castbar_style.width, castbar_style.height)
   castbar:SetPoint(castbar_style.anchor, tp_frame, castbar_style.anchor, castbar_style.x + target_offset_x, castbar_style.y + target_offset_y)
@@ -271,6 +268,7 @@ function Element.UpdateStyle(tp_frame, style)
   local background = castbar.Background
   background:SetTexture(castbar_style.backdrop)
   background:SetPoint("TOPLEFT", castbar:GetStatusBarTexture(), "TOPRIGHT")
+  background:SetPoint("BOTTOMRIGHT", castbar, "BOTTOMRIGHT")
 
   local offset = castborder_style.offset
   local border = castbar.Border
@@ -279,6 +277,7 @@ function Element.UpdateStyle(tp_frame, style)
     edgeSize = castborder_style.edgesize,
     insets = { left = offset, right = offset, top = offset, bottom = offset },
   })
+  border:SetBackdropBorderColor(0, 0, 0, 1)
   border:ClearAllPoints()
   border:SetPoint("TOPLEFT", castbar, "TOPLEFT", - offset, offset)
   border:SetPoint("BOTTOMRIGHT", castbar, "BOTTOMRIGHT", offset, - offset)
@@ -292,11 +291,11 @@ function Element.UpdateStyle(tp_frame, style)
   -- Set castbar color here otherwise it may be shown sometimes with non-initialized backdrop color (white)
   SetCastbarColor(castbar, unit)
 
-  if castbar_style.show then
-    castbar:Show()
-  else
-    castbar:Hide()
-  end
+  local scale_factor = castbar_style.height / 10
+  castbar.InterruptShield:SetSize(14 * scale_factor, 16 * scale_factor)
+  castbar.Spark:SetSize(3, castbar_style.height)
+
+  castbar:SetShown(castbar_style.show)
 
   local spell_text, spell_text_style = tp_frame.visual.SpellText, style.spelltext
 
