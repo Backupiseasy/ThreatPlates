@@ -918,7 +918,6 @@ local function GetFontFlags(info, flag)
 end
 
 local function SetFontFlags(info, flag, val)
-
   if flag == "Thick" then
     local outline = (val and "THICKOUTLINE") or (GetFontFlags(info, "Outline") and "OUTLINE") or ""
     local mono = (GetFontFlags(info, "Mono") and ", MONOCHROME") or ""
