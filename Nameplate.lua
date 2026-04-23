@@ -17,6 +17,7 @@ local UnitExists, UnitName, UnitReaction, UnitClass, UnitPVPName = UnitExists, U
 local UnitEffectiveLevel = UnitEffectiveLevel
 local UnitChannelInfo, UnitPlayerControlled = UnitChannelInfo, UnitPlayerControlled
 local UnitSpellTargetName, UnitSpellTargetClass = UnitSpellTargetName, UnitSpellTargetClass
+local UnitShouldDisplaySpellTargetName = UnitShouldDisplaySpellTargetName
 local UnitIsUnit, UnitIsPlayer = UnitIsUnit, UnitIsPlayer
 local GetCreatureDifficultyColor, GetRaidTargetIndex = GetCreatureDifficultyColor, GetRaidTargetIndex
 local GetTime, CombatLogGetCurrentEventInfo = GetTime, CombatLogGetCurrentEventInfo
@@ -616,12 +617,8 @@ local function OnStartCasting(tp_frame, unitid, cast_guid, event_spell_id, castb
   visual.SpellIcon:SetTexture(texture)
 
   if Addon.ExpansionIsAtLeastMidnight then
-    local target_unit_name =  UnitSpellTargetName(unitid)
-    if target_unit_name then
-      local short_target_unit_name = UnitName(target_unit_name)
-      if short_target_unit_name then
-        target_unit_name = short_target_unit_name
-      end
+    local target_unit_name = UnitSpellTargetName(unitid)
+    if target_unit_name and not IsSecretValueTP(target_unit_name) then
       local class_name = UnitSpellTargetClass(unitid)
       if class_name then
         target_unit_name = WrapTextInColor(target_unit_name, GetClassColor(class_name))

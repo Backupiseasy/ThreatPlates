@@ -6,3 +6,4 @@
 * Fixed the interrupt shield, interrupt border, and interrupt overlay being shown for interruptible casts in non-Midnight expansions [GH-675].
 * Updated TOC version for Patch 12.0.5 for WoW Mainline.
 * Fixed a Lua error when creating nameplates caused by an invalid default font flag value [GH-684].
+* Fixed a Lua error that occurred when cast target was enabled, which was caused by restrictions on secret values.
