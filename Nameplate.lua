@@ -1857,6 +1857,7 @@ function Addon:ARENA_OPPONENT_UPDATE(unitid, update_reason)
 end
 
 function Addon:UI_SCALE_CHANGED()
+  Addon:UIScaleChanged()  -- refresh Addon.UIScale before rescaling plates
   Addon:ForceUpdate()
 end
 
