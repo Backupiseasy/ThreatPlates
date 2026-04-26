@@ -260,10 +260,12 @@ Midnight note: `UNIT_SPELLCAST_INTERRUPTIBLE` and `UNIT_SPELLCAST_NOT_INTERRUPTI
 The following implementation rules were repeatedly observed in other AddOns with `Interface: 120001` and should be treated as practical safety constraints for Midnight code:
 
 Data Safety:
-- Always check potentially restricted values with `issecretvalue` / `Addon.IsSecretValue` before using them.
+- Check potentially restricted values with `issecretvalue` / `Addon.IsSecretValue` **before any Lua-side operation** on them (see below). Passing a secret value opaquely to a WoW C-API function is safe without a guard.
 - Never do Lua arithmetic (`+`, `-`, `*`, `/`) on secret values.
 - Never compare secret values with `<`, `>`, `==`, `~=`, or use them in ordering logic directly.
 - Never index a table that may itself be secret, and never use a secret value as a table key.
+- **Safe C-API pass-through**: Secret values may be passed directly to WoW C-API functions that accept them as parameters (e.g., `FontString:SetText`, `C_ColorUtil.WrapTextInColor`, `C_ClassColor.GetClassColor`, `Texture:SetTexture`, `StatusBar:SetValue`). No `IsSecretValueTP` guard is needed for pure pass-through paths. Example: `castbar.CastTarget:SetText(WrapTextInColor(UnitSpellTargetName(unitid), color))` is safe even if the return is a secret value, provided no Lua string op touches the value first.
+- Lua truthiness check (`if secret_value then`) is safe — secret values are truthy (neither `nil` nor `false`).
 - Blizzard localization helpers `AbbreviateNumbers`, `AbbreviateLargeNumbers`, and `BreakUpLargeNumbers` are documented with `SecretArguments = "AllowedWhenTainted"` and can be used as display sinks for secret numeric values.
 - There is no equivalent verified API metadata for Lua `string.format`; do not assume raw `format` on secret values is safe without explicit documentation or runtime proof.
 - For GUID/name/id processing, validate first, then parse/split/match.
@@ -272,7 +274,7 @@ Data Safety:
 UI Safety:
 - If values are secret in restricted contexts, degrade gracefully (skip/hide/fallback) instead of forcing computation.
 - For status bars, pass raw values to C-side frame APIs (`SetMinMaxValues`, `SetValue`) and avoid Lua-side fraction math.
-- For text output, prefer safe formatting/display paths over Lua-side value manipulation.
+- For text output, prefer safe formatting/display paths over Lua-side value manipulation. Passing a potentially-secret string directly to `FontString:SetText` or `C_ColorUtil.WrapTextInColor` is safe as long as no Lua string operation (`..`, `format`, `match`, `gsub`, `len`, `sub`) is applied to it first.
 - Sanitize external text/sender/message inputs before UI usage when values may be secret.
 
 Event Safety:
@@ -303,7 +305,7 @@ Event Safety:
   - `IgnoreUnitForThreatPlates`, `FrameOnShow`, `FrameOnUpdate`: `UnitIsUnit("player", ...)` calls lack `IsSecretValue` guards — **fixed** by replacing all unsafe `UnitIsUnit` calls in `Nameplate.lua` with `Addon.UnitIsUnit` (defined in `Compatibility.lua`).
 - Closed findings from the March–April 2026 audit:
   - `Elements/Castbar.lua` / `Nameplate.lua` interruptibility handling is acceptable because downstream consumers use APIs documented with `SecretArguments = "AllowedWhenTainted"`.
-  - `Nameplate.lua` cast-target display path is acceptable on Midnight because `UnitSpellTargetName()` returns a unit token and transliteration is a no-op on Midnight.
+  - `Nameplate.lua` cast-target display path is acceptable on Midnight: `UnitSpellTargetName()` returns the display name directly (not a unit token). Even if the return value is a secret value, it is only passed opaquely to C-API functions (`WrapTextInColor`, `GetClassColor`, `FontString:SetText`); `TransliterateCyrillicLetters` is a no-op on Midnight. No Lua-side string operations are performed on the value, so no `IsSecretValueTP` guard is needed.
   - `Elements/Healthbar.lua` target-of-target text path is non-Midnight-only and not part of the Midnight risk surface.
   - `NAME_PLATE_UNIT_REMOVED` now clears the `PlatesByUnit["mouseover"]` stale reference before `wipe(unit)`, preventing a nil-style crash in `Transparency.lua:GetTransparency` when `UPDATE_MOUSEOVER_UNIT` fires during nameplate recycling (between Lua event handler calls, before the next frame boundary).
   - All bare `UnitIsUnit` calls in `Nameplate.lua` replaced with `Addon.UnitIsUnit`: covers `GetThreatPlateForUnit`, `SetUnitAttributeTarget`, `SetUnitAttributes`, `UnitIsSoftTarget`, `IgnoreUnitForThreatPlates`, `FrameOnShow`, `FrameOnUpdate`, and `Addon.UnitIsTarget`. Use `Addon.UnitIsUnit` (defined in `Compatibility.lua`) as the canonical safe replacement for raw `UnitIsUnit` in all boolean contexts.

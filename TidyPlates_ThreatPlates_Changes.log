@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+13.0.11 (2026-04-26)
+------------------------------------------------------
+* Fixed a bug where the name of the target unit of a cast was not shown (a side-effect of the v13.0.19 bug fix)  [Comment #8286].
+
+------------------------------------------------------
 13.0.10 (2026-04-23)
 ------------------------------------------------------
 * Fixed a Lua error that could occur after leaving combat when the Quest widget was disabled [GH-674].
