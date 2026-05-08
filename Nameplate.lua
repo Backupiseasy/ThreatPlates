@@ -1686,6 +1686,20 @@ local function UnitSpellcastMidway(event, unitid, cast_guid, spell_id, castbar_i
   OnStartCasting(tp_frame, unitid, cast_guid, spell_id, castbar_id, castbar.IsChanneling)
 end
 
+local function UnitSpellcastInterruptible(event, unitid)
+  if IGNORED_UNITS[unitid] or not ShowCastBars then return end
+
+  local tp_frame = Addon:GetThreatPlateForUnit(unitid)
+  if not tp_frame then return end
+
+  -- Guard: castbar.CastbarID is set in OnStartCasting and cleared in UNIT_SPELLCAST_STOP,
+  -- independent of visibility — a style change may hide the castbar while a cast is still active.
+  local castbar = tp_frame.visual.Castbar
+  if not castbar.CastbarID then return end
+
+  OnStartCasting(tp_frame, unitid, nil, nil, castbar.CastbarID, castbar.IsChanneling)
+end
+
 function Addon:UNIT_SPELLCAST_START(unitid, cast_guid, spell_id, castbar_id)
   -- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED
   if IGNORED_UNITS[unitid] or not ShowCastBars then return end
@@ -1756,8 +1770,8 @@ end
 Addon.UNIT_SPELLCAST_CHANNEL_UPDATE = Addon.UNIT_SPELLCAST_CHANNEL_START
 
 Addon.UNIT_SPELLCAST_DELAYED = UnitSpellcastMidway
-Addon.UNIT_SPELLCAST_INTERRUPTIBLE = UnitSpellcastMidway
-Addon.UNIT_SPELLCAST_NOT_INTERRUPTIBLE = UnitSpellcastMidway
+Addon.UNIT_SPELLCAST_INTERRUPTIBLE = UnitSpellcastInterruptible
+Addon.UNIT_SPELLCAST_NOT_INTERRUPTIBLE = UnitSpellcastInterruptible
 --Addon.UNIT_SPELLCAST_FAILED = Addon.UNIT_SPELLCAST_STOP
 --Addon.UNIT_SPELLCAST_FAILED_QUIET = Addon.UNIT_SPELLCAST_STOP
 

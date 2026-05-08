@@ -226,7 +226,7 @@ if notInterruptible and not issecretvalue(notInterruptible) then
 end
 ```
 
-Midnight note: `UNIT_SPELLCAST_INTERRUPTIBLE` and `UNIT_SPELLCAST_NOT_INTERRUPTIBLE` no longer include `castbarID` in payload.
+Midnight note: `UNIT_SPELLCAST_INTERRUPTIBLE` and `UNIT_SPELLCAST_NOT_INTERRUPTIBLE` carry only `{ unitTarget }` in their payload — no `castGUID`, `spellID`, or `castBarID`. The addon handles this via `UnitSpellcastInterruptible` in `Nameplate.lua`, which guards on `castbar.CastbarID ~= nil` (set in `OnStartCasting`, cleared in `UNIT_SPELLCAST_STOP`) instead of the missing event parameter. Do **not** use `castbar:IsShown()` as guard here — a style change can hide the castbar while a cast is still active.
 
 ### Features Disabled on `feature/midnight`
 
@@ -252,7 +252,7 @@ Midnight note: `UNIT_SPELLCAST_INTERRUPTIBLE` and `UNIT_SPELLCAST_NOT_INTERRUPTI
 ### `Enum.TooltipDataLineType` Note
 
 - There is no dedicated unit-level line type (no `UnitLevel`).
-- Available level-like types include `ItemLevel`, `ItemUpgradeLevel`, and `RestrictedLevel`.
+- Available level-like types include `ItemLevel` and `ItemUpgradeLevel`. (`RestrictedLevel` was removed in 12.0.1.)
 - Unit level lines must be identified by tooltip context/text, not by a dedicated line type enum value.
 
 ### Additional Midnight Rules from AddOn Ecosystem Scan
@@ -278,7 +278,7 @@ UI Safety:
 - Sanitize external text/sender/message inputs before UI usage when values may be secret.
 
 Event Safety:
-- Keep castbar interruptibility handling robust and event-driven; do not depend on `castbarID` payload presence.
+- `UNIT_SPELLCAST_INTERRUPTIBLE` and `UNIT_SPELLCAST_NOT_INTERRUPTIBLE` carry only `unitTarget` on Midnight — no `castBarID`. Use `castbar.CastbarID` (set/cleared by `OnStartCasting`/`UNIT_SPELLCAST_STOP`) as the liveness guard, not `castbar:IsShown()`.
 - Treat `pcall` as a limited fallback only; it is not a full replacement for explicit secret-value checks.
 
 ## Architecture Notes
@@ -294,7 +294,7 @@ Event Safety:
 - `Widgets/HealerTrackerWidget.lua:595`: possible secret GUID used as table key.
 - `Init.lua`: duplicate `IS_TBC_CLASSIC` definition should be consolidated.
 
-## Findings from Current Analysis (March–April 2026)
+## Findings from Current Analysis (March–May 2026)
 
 - No direct `table[UnitName(...)]` usage found in the addon.
 - Confirmed open Midnight risks:
@@ -304,7 +304,8 @@ Event Safety:
   - `Elements/StatusText.lua`: `UnitHealthPercent(...)` is passed directly into `:format("%.f%%")`; keep this path open until `string.format` safety is proven.
   - `IgnoreUnitForThreatPlates`, `FrameOnShow`, `FrameOnUpdate`: `UnitIsUnit("player", ...)` calls lack `IsSecretValue` guards — **fixed** by replacing all unsafe `UnitIsUnit` calls in `Nameplate.lua` with `Addon.UnitIsUnit` (defined in `Compatibility.lua`).
 - Closed findings from the March–April 2026 audit:
-  - `Elements/Castbar.lua` / `Nameplate.lua` interruptibility handling is acceptable because downstream consumers use APIs documented with `SecretArguments = "AllowedWhenTainted"`.
+  - `Elements/Castbar.lua` / `Nameplate.lua` interruptibility — secret-value safety: downstream consumers use APIs documented with `SecretArguments = "AllowedWhenTainted"`, so no `IsSecretValue` guard is needed on that path.
+  - `UNIT_SPELLCAST_INTERRUPTIBLE` / `UNIT_SPELLCAST_NOT_INTERRUPTIBLE` on Midnight carry only `{ unitTarget }` — no `castBarID`. The generic `UnitSpellcastMidway` always bailed at the `castbar_id ~= castbar.CastbarID` check (nil ≠ ID), so interruptibility updates (castbar color, shield, overlay) were never applied. Fixed via `UnitSpellcastInterruptible` in `Nameplate.lua`, which skips the `castBarID` check and guards on `castbar.CastbarID ~= nil` instead.
   - `Nameplate.lua` cast-target display path is acceptable on Midnight: `UnitSpellTargetName()` returns the display name directly (not a unit token). Even if the return value is a secret value, it is only passed opaquely to C-API functions (`WrapTextInColor`, `GetClassColor`, `FontString:SetText`); `TransliterateCyrillicLetters` is a no-op on Midnight. No Lua-side string operations are performed on the value, so no `IsSecretValueTP` guard is needed.
   - `Elements/Healthbar.lua` target-of-target text path is non-Midnight-only and not part of the Midnight risk surface.
   - `NAME_PLATE_UNIT_REMOVED` now clears the `PlatesByUnit["mouseover"]` stale reference before `wipe(unit)`, preventing a nil-style crash in `Transparency.lua:GetTransparency` when `UPDATE_MOUSEOVER_UNIT` fires during nameplate recycling (between Lua event handler calls, before the next frame boundary).

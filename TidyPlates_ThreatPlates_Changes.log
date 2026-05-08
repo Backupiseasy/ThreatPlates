@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+13.0.12 (2026-05-08)
+------------------------------------------------------
+* Fixed castbar color, shield, and overlay not updating correctly when a cast changes to interruptible or non-interruptible.
+
+------------------------------------------------------
 13.0.11 (2026-04-26)
 ------------------------------------------------------
 * Fixed a bug where the name of the target unit of a cast was not shown (a side-effect of the v13.0.19 bug fix)  [Comment #8286].
