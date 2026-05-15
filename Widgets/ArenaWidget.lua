@@ -27,6 +27,7 @@ local GetAddOnEnableState = (C_AddOns and C_AddOns.GetAddOnEnableState)
     or function(name, character) return GetAddOnEnableState(character, name) end
 
 -- ThreatPlates APIs
+local IsSecretValueTP = Addon.IsSecretValue
 local FontUpdateText = Addon.Font.UpdateText
 
 local _G =_G
@@ -147,7 +148,9 @@ end
 function Widget:UpdateFriendyPlayerOrPet(unitid)
   if UnitExists(unitid) then
     local guid = _G.UnitGUID(unitid)
-    PlayerGUIDToNumber[guid] = ArenaUnitIdToNumber[unitid]
+    if guid and not IsSecretValueTP(guid) then
+      PlayerGUIDToNumber[guid] = ArenaUnitIdToNumber[unitid]
+    end
     local widget_frame = self:GetWidgetFrameForUnit(unitid)
     if widget_frame then
       self:OnUnitAdded(widget_frame, unitid)
@@ -160,7 +163,7 @@ end
 function Widget:ARENA_OPPONENT_UPDATE(unitid, update_reason)
   -- Only registered when in solo shuffles
   local guid = _G.UnitGUID(unitid)
-  if guid then
+  if guid and not IsSecretValueTP(guid) then
     if update_reason == "seen" then
       PlayerGUIDToNumber[guid] = ArenaUnitIdToNumber[unitid]
     else
@@ -305,8 +308,10 @@ function Widget:UpdateSettings()
   for unitid, _ in pairs(ArenaUnitIdToNumber) do
     if UnitExists(unitid) then
       local guid = _G.UnitGUID(unitid)
-      -- The nameplate is updated after the settings update by WidgetHandler
-      PlayerGUIDToNumber[guid] = ArenaUnitIdToNumber[unitid]
+      if guid and not IsSecretValueTP(guid) then
+        -- The nameplate is updated after the settings update by WidgetHandler
+        PlayerGUIDToNumber[guid] = ArenaUnitIdToNumber[unitid]
+      end
     end
   end
 end
