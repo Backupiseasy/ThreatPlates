@@ -1,5 +1,5 @@
 ------------------------------------------------------
-13.0.12 (2026-05-11)
+13.0.12 (2026-05-15)
 ------------------------------------------------------
 * Re-enabled separate healthbar and clickable-area sizes for friendly nameplates on WoW Midnight.
 * Fixed nameplate clickable areas being too small or misaligned on WoW Midnight [Comment #8307].
