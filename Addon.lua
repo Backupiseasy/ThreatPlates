@@ -8,13 +8,12 @@ local _, Addon = ...
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local tonumber, select, pairs = tonumber, select, pairs
+local max = math.max
+local select = select
 
 -- WoW APIs
-local SetNamePlateFriendlyClickThrough = C_NamePlate.SetNamePlateFriendlyClickThrough
-local SetNamePlateEnemyClickThrough = C_NamePlate.SetNamePlateEnemyClickThrough
 local GetCVar, IsAddOnLoaded = GetCVar, C_AddOns.IsAddOnLoaded
-local C_NamePlate, Lerp =  C_NamePlate, Lerp
+local C_NamePlate = C_NamePlate
 local C_Timer_After = C_Timer.After
 local NamePlateDriverFrame = NamePlateDriverFrame
 local UnitClass = UnitClass
@@ -153,10 +152,25 @@ elseif not Addon.ExpansionIsAtLeastMidnight then
   end
 else
   -- # Nameplate Hierarchy, Anchoring, and Scaling
-  Addon.SetBaseNamePlateSize = function(self) 
-    -- local extraXOffset = 10;
-		-- local extraYOffset = setupOptions.healthBarHeight / 2;
-    local width, height = self.db.profile.settings.healthbar.width, self.db.profile.settings.healthbar.height
+  Addon.SetBaseNamePlateSize = function(self)
+    local db_settings = self.db.profile.settings
+    local healthbar = db_settings.healthbar
+    local frame = db_settings.frame
+
+    -- Update SavedVariable dimensions (also consumed by UpdateHitTestFrame per plate).
+    -- Mirrors Blizzard's SetHitTestPoints formula (Blizzard_NamePlateUnitFrame.lua):
+    --   extraXOffset = 10
+    --   extraYOffset = healthBarHeight / 2  → hit region extends half the bar height above/below
+    if frame.SyncWithHealthbar then
+      frame.width        = healthbar.width        + 20
+      frame.height       = healthbar.height        * 2
+      frame.widthFriend  = healthbar.widthFriend   + 20
+      frame.heightFriend = healthbar.heightFriend  * 2
+    end
+
+    local width  = max(frame.widthFriend,  frame.width)
+    local height = max(frame.heightFriend, frame.height)
+
     if Addon.NameplateParentFrame == WorldFrame then
       local ui_scale = UIParent:GetEffectiveScale()
       C_NamePlate.SetNamePlateSize(width / ui_scale, height / ui_scale)
@@ -351,6 +365,12 @@ function TidyPlatesThreat:OnInitialize()
   RegisterCallback(Addon, 'OnProfileChanged', 'ProfChange')
   RegisterCallback(Addon, 'OnProfileCopied', 'ProfChange')
   RegisterCallback(Addon, 'OnProfileReset', 'ProfChange')
+  -- When reloading the UI or logging out, PLAYER_LOGOUT fires and AceDB strips defaults from the profile. 
+  -- Also, NAME_PLATE_UNIT_REMOVED fires for all visible nameplates. 
+  -- If a nameplate is still shown under the mouse cursor, TP hides the mouseover highlight and fires MouseoverOnLeave. 
+  -- This can result in a Lua error as profile defaults are no longer available (e.g. in Transparency). 
+  -- The solution is to stop publishing internal TP events (via EventService.Publish) once Addon.IsShuttingDown == true. 
+  RegisterCallback(Addon, 'OnDatabaseShutdown', function() Addon.IsShuttingDown = true end)
 
   -- Register callbacks at LSM, so that we can refresh everything if additional media is added after TP is loaded
   -- Register this callback after ReloadTheme as media will be updated there anyway

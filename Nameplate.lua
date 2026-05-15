@@ -42,6 +42,7 @@ local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventSe
 local AnchorFrameTo = Addon.AnchorFrameTo
 local IsSecretValueTP = Addon.IsSecretValue
 local UnitIsUnitTP = Addon.UnitIsUnit
+local ExpansionIsAtLeastMidnight = Addon.ExpansionIsAtLeastMidnight
 
 local TransliterateCyrillicLetters = Addon.Localization.TransliterateCyrillicLetters
 local SetNamesFonts = Addon.Font.SetNamesFonts
@@ -477,7 +478,7 @@ end
 
 local function SetUnitAttributeTargetMarker(unit, unitid)
   local raid_icon_index = GetRaidTargetIndex(unitid)
-  if Addon.ExpansionIsAtLeastMidnight then 
+  if ExpansionIsAtLeastMidnight then 
     unit.TargetMarkerIcon = raid_icon_index
     unit.MentorIcon = raid_icon_index
   else
@@ -517,7 +518,7 @@ local function SetUnitAttributes(unit, unitid)
     unit.class = ""
     unit.type = "NPC"
 
-    if not Addon.ExpansionIsAtLeastMidnight then
+    if not ExpansionIsAtLeastMidnight then
       local _, _, _, _, _, npc_id = strsplit("-", unit.guid or "")
       unit.NPCID = npc_id
     end
@@ -592,7 +593,7 @@ local function OnStartCasting(tp_frame, unitid, cast_guid, event_spell_id, castb
   end
 
   local unit = tp_frame.unit
-  if not Addon.ExpansionIsAtLeastMidnight then
+  if not ExpansionIsAtLeastMidnight then
     StyleModule.CastTriggerCheckIfActive(unit, spell_id, name)
   end
 
@@ -606,7 +607,7 @@ local function OnStartCasting(tp_frame, unitid, cast_guid, event_spell_id, castb
   unit.IsInterrupted = false
   unit.CastIsNotInterruptible = notInterruptible
 
-  if not Addon.ExpansionIsAtLeastMidnight then
+  if not ExpansionIsAtLeastMidnight then
     if StyleModule.CastTriggerUpdateStyle(unit) then
       StyleModule:Update(tp_frame)
     end
@@ -615,7 +616,7 @@ local function OnStartCasting(tp_frame, unitid, cast_guid, event_spell_id, castb
   visual.SpellText:SetText(text)
   visual.SpellIcon:SetTexture(texture)
 
-  if Addon.ExpansionIsAtLeastMidnight then
+  if ExpansionIsAtLeastMidnight then
     local target_unit_name = UnitSpellTargetName(unitid)
     if target_unit_name then
       local class_name = UnitSpellTargetClass(unitid)
@@ -733,7 +734,7 @@ end
 
 local SetShownBlizzardPlate
 
-if Addon.ExpansionIsAtLeastMidnight then
+if ExpansionIsAtLeastMidnight then
   SetShownBlizzardPlate = function(unit_frame, show)
     unit_frame:SetAlpha(show and 1 or 0)
   end
@@ -750,9 +751,14 @@ local function ShowBlizzardNameplate(plate, show_blizzard_plate)
   end
 
   if show_blizzard_plate then
-    WidgetContainerReset(plate)
     plate.TPFrame:Hide()
     plate.TPFrame.Active = false
+    -- Restore frames used from Blizzard namemplates
+    WidgetContainerReset(plate)
+    -- Clear the TP-managed hit-test so Blizzard's UnitFrame handles mouse events naturally.
+    if ExpansionIsAtLeastMidnight and plate:CanChangeHitTestPoints() then
+      plate:ClearAllHitTestPoints()
+    end
   else
     plate.TPFrame:Show()
     plate.TPFrame.Active = true
@@ -870,7 +876,7 @@ local function NamePlateDriverFrame_AcquireUnitFrame(_, plate)
     
     -- Shameless copy from Plater - prevent Blizzard plates from showing when their alpha is changed
     -- as they are currently hidden using with SetAlpha(0)
-    if Addon.ExpansionIsAtLeastMidnight then
+    if ExpansionIsAtLeastMidnight then
       local locked = false
       hooksecurefunc(unit_frame, "SetAlpha", function(self)
         if locked or self:IsForbidden() then return end
@@ -922,6 +928,11 @@ local	function HandlePlateCreated(plate)
   tp_frame.Parent = plate
   plate.TPFrame = tp_frame
   
+  if ExpansionIsAtLeastMidnight then
+    tp_frame.HitTestFrame = _G.CreateFrame("Frame", nil, tp_frame)
+    tp_frame.HitTestFrame:Hide()
+  end
+
   -- # Nameplate Hierarchy, Anchoring, and Scaling
   SetNameplateFrameProperties(tp_frame)
   -- Size is set in Styles.lua
@@ -954,13 +965,54 @@ local	function HandlePlateCreated(plate)
   Widgets:OnPlateCreated(tp_frame)
 end
 
+-- Applies the C++ hit-test link for a nameplate plate.
+-- Guards:
+--   • Active: skips when Blizzard plates are shown for this unit.
+--   • CanChangeHitTestPoints: skips in restricted C++ contexts.
+local function  ApplyPlateHitTest(tp_frame)
+  if not tp_frame.Active then return end
+
+  local plate = tp_frame.Parent
+  if not plate:CanChangeHitTestPoints() then return end
+
+  local db = Addon.db.profile
+  local is_friendly = (tp_frame.unit.reaction == "FRIENDLY")
+  local is_click_through = (is_friendly and db.NamePlateFriendlyClickThrough) or (not is_friendly and db.NamePlateEnemyClickThrough)
+  if is_click_through then
+    plate:ClearAllHitTestPoints()
+  else
+    local db_frame = db.settings.frame
+    local width  = (is_friendly and db_frame.widthFriend)  or db_frame.width
+    local height = (is_friendly and db_frame.heightFriend) or db_frame.height
+    tp_frame.HitTestFrame:ClearAllPoints()
+    tp_frame.HitTestFrame:SetSize(width, height)
+    tp_frame.HitTestFrame:SetPoint("CENTER", tp_frame, "CENTER")
+    plate:SetAllHitTestPoints(tp_frame.HitTestFrame)
+  end
+end
+
+-- Updates the click-through state for all active TP plates.
+-- Midnight: per-plate C++ hit-test API, unrestricted — works in combat.
+-- Pre-Midnight: global CVars, must be deferred out of combat.
+if ExpansionIsAtLeastMidnight then
+  Addon.SetNamePlateClickThrough = function()
+    for unitid, tp_frame in Addon:GetActiveThreatPlates() do
+      ApplyPlateHitTest(tp_frame)
+    end
+  end
+else
+  Addon.SetNamePlateClickThrough = function()
+    Addon:CallbackWhenOoC(function()
+      local db = Addon.db.profile
+      C_NamePlate.SetNamePlateFriendlyClickThrough(db.NamePlateFriendlyClickThrough)
+      C_NamePlate.SetNamePlateEnemyClickThrough(db.NamePlateEnemyClickThrough)
+    end, L["Nameplate clickthrough cannot be changed while in combat."])
+  end
+end
+
 local function HandlePlateUnitAdded(plate, unitid)
   local tp_frame = plate.TPFrame
   local unit = tp_frame.unit
-
-  if Addon.ExpansionIsAtLeastMidnight then
-    C_NamePlateManager.SetNamePlateSimplified(unitid, false)
-  end
 
   -- Initialize unit data for which there are no events when players enters world or that
   -- do not change over the nameplate lifetime
@@ -974,6 +1026,12 @@ local function HandlePlateUnitAdded(plate, unitid)
   -- Update modules, then elements, then widgets
   ThreatModule.SetUnitAttribute(tp_frame)
   SetNameplateVisibility(plate, unitid)
+
+  if ExpansionIsAtLeastMidnight then
+    C_NamePlateManager.SetNamePlateSimplified(unitid, false)
+    ApplyPlateHitTest(tp_frame)
+  end
+
   WidgetContainerAcquire(plate)
   -- Initialized nameplate style based on unit added
   -- ColorModule/TransparencyModule/ScalingModule are called in StyleModule.PlateUnitAdded
@@ -1044,9 +1102,9 @@ function Addon:ConfigClickableArea(toggle_show)
         tp_frame.Background:SetBackdropBorderColor(0, 0, 0, 0.8)
         tp_frame.Background:SetPoint("CENTER", ConfigModePlate.UnitFrame, "CENTER")
 
-        if Addon.ExpansionIsAtLeastMidnight then
+        if ExpansionIsAtLeastMidnight then
           tp_frame.Background:ClearAllPoints()
-          tp_frame.Background:SetAllPoints(ConfigModePlate.UnitFrame.HitTestFrame)
+          tp_frame.Background:SetAllPoints(ConfigModePlate.TPFrame.HitTestFrame)
         else
           local width, height
           if tp_frame.unit.reaction == "FRIENDLY" then          
@@ -1459,7 +1517,7 @@ function Addon:NAME_PLATE_UNIT_REMOVED(unitid)
   tp_frame.Active = false
 
   PlatesByUnit[unitid] = nil
-  if not Addon.ExpansionIsAtLeastMidnight then
+  if not ExpansionIsAtLeastMidnight then
     if tp_frame.unit.guid then -- maybe hide directly after create with unit added?
       PlatesByGUID[tp_frame.unit.guid] = nil
     end
@@ -1587,7 +1645,7 @@ function Addon:RAID_TARGET_UPDATE()
     local previous_target_marker_icon = unit.TargetMarkerIcon
     local previous_mentor_icon = unit.MentorIcon
     SetUnitAttributeTargetMarker(unit, unitid)
-    if Addon.ExpansionIsAtLeastMidnight or previous_target_marker_icon ~= unit.TargetMarkerIcon or previous_mentor_icon ~= unit.MentorIcon then
+    if ExpansionIsAtLeastMidnight or previous_target_marker_icon ~= unit.TargetMarkerIcon or previous_mentor_icon ~= unit.MentorIcon then
       PublishEvent("TargetMarkerUpdate", tp_frame)
     end
   end
@@ -1638,6 +1696,9 @@ function Addon:UNIT_FACTION(unitid)
       SetNameplateVisibility(tp_frame.Parent, plate_unitid)
       if tp_frame.Active then
         SetUnitAttributeReaction(tp_frame.unit, plate_unitid)
+        if ExpansionIsAtLeastMidnight then
+          ApplyPlateHitTest(tp_frame)
+        end
         StyleModule.Update(tp_frame)
         PublishEvent("FactionUpdate", tp_frame)
       end
@@ -1655,6 +1716,9 @@ function Addon:UNIT_FACTION(unitid)
       SetNameplateVisibility(tp_frame.Parent, unitid)
       if tp_frame.Active then
         SetUnitAttributeReaction(tp_frame.unit, unitid)
+        if ExpansionIsAtLeastMidnight then
+          ApplyPlateHitTest(tp_frame)
+        end
         StyleModule.Update(tp_frame)
         PublishEvent("FactionUpdate", tp_frame)
       end
@@ -1684,6 +1748,20 @@ local function UnitSpellcastMidway(event, unitid, cast_guid, spell_id, castbar_i
   if castbar_id ~= castbar.CastbarID then return end
   
   OnStartCasting(tp_frame, unitid, cast_guid, spell_id, castbar_id, castbar.IsChanneling)
+end
+
+local function UnitSpellcastInterruptible(event, unitid)
+  if IGNORED_UNITS[unitid] or not ShowCastBars then return end
+
+  local tp_frame = Addon:GetThreatPlateForUnit(unitid)
+  if not tp_frame then return end
+
+  -- Guard: castbar.CastbarID is set in OnStartCasting and cleared in UNIT_SPELLCAST_STOP,
+  -- independent of visibility — a style change may hide the castbar while a cast is still active.
+  local castbar = tp_frame.visual.Castbar
+  if not castbar.CastbarID then return end
+
+  OnStartCasting(tp_frame, unitid, nil, nil, castbar.CastbarID, castbar.IsChanneling)
 end
 
 function Addon:UNIT_SPELLCAST_START(unitid, cast_guid, spell_id, castbar_id)
@@ -1756,8 +1834,8 @@ end
 Addon.UNIT_SPELLCAST_CHANNEL_UPDATE = Addon.UNIT_SPELLCAST_CHANNEL_START
 
 Addon.UNIT_SPELLCAST_DELAYED = UnitSpellcastMidway
-Addon.UNIT_SPELLCAST_INTERRUPTIBLE = UnitSpellcastMidway
-Addon.UNIT_SPELLCAST_NOT_INTERRUPTIBLE = UnitSpellcastMidway
+Addon.UNIT_SPELLCAST_INTERRUPTIBLE = UnitSpellcastInterruptible
+Addon.UNIT_SPELLCAST_NOT_INTERRUPTIBLE = UnitSpellcastInterruptible
 --Addon.UNIT_SPELLCAST_FAILED = Addon.UNIT_SPELLCAST_STOP
 --Addon.UNIT_SPELLCAST_FAILED_QUIET = Addon.UNIT_SPELLCAST_STOP
 

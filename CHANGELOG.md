@@ -1,4 +1,6 @@
 # @project-version@ (@build-time@)
 
-* Fixed a bug where the name of the target unit of a cast was not shown (a side-effect of the v13.0.19 bug fix)  [Comment #8286].
-* Fixed nameplates doubling in size after a reload or login when UI scale is not 100% and "Ignore UI Scale" is disabled [Comment #8240].
+* Fixed castbar color, shield, and overlay not updating correctly when a cast changes to interruptible or non-interruptible.
+* Fixed nameplate clickable areas being too small or misaligned on WoW Midnight; the clickable area is now correctly sized and positioned to the configured dimensions per nameplate [Comment #8307]
+* Re-enabled separate healthbar and clickable-area sizes for friendly nameplates on WoW Midnight.
+* Fixed a Lua error that occurred during a UI reload or logout when a nameplate was still shown under the mouse cursor.
