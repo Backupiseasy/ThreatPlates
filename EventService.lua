@@ -193,6 +193,7 @@ end
 
 function EventService.Publish(event, ...)
   --print ("Publishing event", event, "=>", ...)
+  if Addon.IsShuttingDown then return end
 
   -- Process all subscribers that subscribed to the event
   local all_subscribers = SubscribersByEvent[event]

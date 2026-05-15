@@ -365,6 +365,12 @@ function TidyPlatesThreat:OnInitialize()
   RegisterCallback(Addon, 'OnProfileChanged', 'ProfChange')
   RegisterCallback(Addon, 'OnProfileCopied', 'ProfChange')
   RegisterCallback(Addon, 'OnProfileReset', 'ProfChange')
+  -- When reloading the UI or logging out, PLAYER_LOGOUT fires and AceDB strips defaults from the profile. 
+  -- Also, NAME_PLATE_UNIT_REMOVED fires for all visible nameplates. 
+  -- If a nameplate is still shown under the mouse cursor, TP hides the mouseover highlight and fires MouseoverOnLeave. 
+  -- This can result in a Lua error as profile defaults are no longer available (e.g. in Transparency). 
+  -- The solution is to stop publishing internal TP events (via EventService.Publish) once Addon.IsShuttingDown == true. 
+  RegisterCallback(Addon, 'OnDatabaseShutdown', function() Addon.IsShuttingDown = true end)
 
   -- Register callbacks at LSM, so that we can refresh everything if additional media is added after TP is loaded
   -- Register this callback after ReloadTheme as media will be updated there anyway
