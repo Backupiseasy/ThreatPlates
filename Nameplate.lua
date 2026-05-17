@@ -20,7 +20,10 @@ local UnitSpellTargetName, UnitSpellTargetClass = UnitSpellTargetName, UnitSpell
 local UnitIsUnit, UnitIsPlayer = UnitIsUnit, UnitIsPlayer
 local GetCreatureDifficultyColor, GetRaidTargetIndex = GetCreatureDifficultyColor, GetRaidTargetIndex
 local GetTime, CombatLogGetCurrentEventInfo = GetTime, CombatLogGetCurrentEventInfo
-local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
+local SetNamePlateSimplified = C_NamePlateManager and C_NamePlateManager.SetNamePlateSimplified
+local GetNamePlateForUnit = C_NamePlate and C_NamePlate.GetNamePlateForUnit
+local SetNamePlateFriendlyClickThrough, SetNamePlateEnemyClickThrough = C_NamePlate and C_NamePlate.SetNamePlateFriendlyClickThrough, C_NamePlate and C_NamePlate.SetNamePlateEnemyClickThrough
+local GetNamePlateFriendlySize, GetNamePlateEnemySize = C_NamePlate and C_NamePlate.GetNamePlateFriendlySize, C_NamePlate and C_NamePlate.GetNamePlateEnemySize
 local GetPlayerInfoByGUID, UnitNameFromGUID = GetPlayerInfoByGUID, UnitNameFromGUID
 local IsInInstance, InCombatLockdown = IsInInstance, InCombatLockdown
 local NamePlateDriverFrame, UnitNameplateShowsWidgetsOnly = NamePlateDriverFrame, UnitNameplateShowsWidgetsOnly
@@ -1004,8 +1007,8 @@ else
   Addon.SetNamePlateClickThrough = function()
     Addon:CallbackWhenOoC(function()
       local db = Addon.db.profile
-      C_NamePlate.SetNamePlateFriendlyClickThrough(db.NamePlateFriendlyClickThrough)
-      C_NamePlate.SetNamePlateEnemyClickThrough(db.NamePlateEnemyClickThrough)
+      SetNamePlateFriendlyClickThrough(db.NamePlateFriendlyClickThrough)
+      SetNamePlateEnemyClickThrough(db.NamePlateEnemyClickThrough)
     end, L["Nameplate clickthrough cannot be changed while in combat."])
   end
 end
@@ -1028,7 +1031,7 @@ local function HandlePlateUnitAdded(plate, unitid)
   SetNameplateVisibility(plate, unitid)
 
   if ExpansionIsAtLeastMidnight then
-    C_NamePlateManager.SetNamePlateSimplified(unitid, false)
+    SetNamePlateSimplified(unitid, false)
     ApplyPlateHitTest(tp_frame)
   end
 
@@ -1108,9 +1111,9 @@ function Addon:ConfigClickableArea(toggle_show)
         else
           local width, height
           if tp_frame.unit.reaction == "FRIENDLY" then          
-            width, height = C_NamePlate.GetNamePlateFriendlySize()
+            width, height = GetNamePlateFriendlySize()
           else
-            width, height = C_NamePlate.GetNamePlateEnemySize()
+            width, height = GetNamePlateEnemySize()
           end
           tp_frame.Background:SetSize(width, height)
 
