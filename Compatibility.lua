@@ -94,6 +94,7 @@ local WOW_EVENTS = {
   UNIT_SPELLCAST_SENT = Addon.ExpansionIsAtLeastMidnight,
   UNIT_TARGET = true,
   UNIT_THREAT_LIST_UPDATE = true,
+  UNIT_THREAT_SITUATION_UPDATE = true,
   UPDATE_BATTLEFIELD_SCORE = Addon.ExpansionIsAtLeastCata,
   UPDATE_MOUSEOVER_UNIT = true,
   UPDATE_SHAPESHIFT_FORM = true,  

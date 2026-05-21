@@ -1693,6 +1693,11 @@ function Addon:UNIT_THREAT_LIST_UPDATE(unitid)
   end
 end
 
+-- UNIT_THREAT_SITUATION_UPDATE fires when the player's threat situation (0-3) changes for a unit,
+-- which is distinct from UNIT_THREAT_LIST_UPDATE (membership changes). Both are needed to keep
+-- threat bar colors current when threat shifts gradually without units entering/leaving the table.
+Addon.UNIT_THREAT_SITUATION_UPDATE = Addon.UNIT_THREAT_LIST_UPDATE
+
 -- Update all elements that depend on the unit's reaction towards the player
 function Addon:UNIT_FACTION(unitid)
   -- Skip special unitids (they are updated via their nameplate unitid) and personal nameplate
@@ -1978,6 +1983,7 @@ local ENABLED_EVENTS = {
   "UNIT_HEALTH",
   "UNIT_HEALTH_FREQUENT",
   "UNIT_THREAT_LIST_UPDATE",
+  "UNIT_THREAT_SITUATION_UPDATE",
   "UNIT_FACTION",
   "UNIT_LEVEL",
   
