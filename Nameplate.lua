@@ -931,12 +931,14 @@ local	function HandlePlateCreated(plate)
   tp_frame.Parent = plate
   plate.TPFrame = tp_frame
   
+  -- # Nameplate Hierarchy, Anchoring, and Scaling
   if ExpansionIsAtLeastMidnight then
-    tp_frame.HitTestFrame = _G.CreateFrame("Frame", nil, tp_frame)
+    -- Parent must be plate (not tp_frame) so that HitTestFrame does not inherit tp_frame's scale.
+    -- Anchor must also target plate.UnitFrame (not tp_frame) to avoid cross-hierarchy layout
+    -- recalculations when tp_frame:SetScale() is called (e.g. during mouseover scale animation).
+    tp_frame.HitTestFrame = _G.CreateFrame("Frame", nil, plate)
     tp_frame.HitTestFrame:Hide()
   end
-
-  -- # Nameplate Hierarchy, Anchoring, and Scaling
   SetNameplateFrameProperties(tp_frame)
   -- Size is set in Styles.lua
 
@@ -989,7 +991,11 @@ local function  ApplyPlateHitTest(tp_frame)
     local height = (is_friendly and db_frame.heightFriend) or db_frame.height
     tp_frame.HitTestFrame:ClearAllPoints()
     tp_frame.HitTestFrame:SetSize(width, height)
-    tp_frame.HitTestFrame:SetPoint("CENTER", tp_frame, "CENTER")
+    -- Anchor to plate.UnitFrame (same hierarchy as HitTestFrame's parent) rather than tp_frame.
+    -- tp_frame may have a different scale (mouseover scaling), and a cross-hierarchy anchor to a
+    -- scaled frame causes WoW to re-evaluate HitTestFrame's layout bounds during each SetScale
+    -- call, which makes SetAllHitTestPoints briefly read incorrect bounds and fire UPDATE_MOUSEOVER_UNIT.
+    tp_frame.HitTestFrame:SetPoint("CENTER", plate.UnitFrame, "CENTER")
     plate:SetAllHitTestPoints(tp_frame.HitTestFrame)
   end
 end

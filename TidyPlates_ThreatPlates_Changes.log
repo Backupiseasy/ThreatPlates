@@ -1,4 +1,9 @@
 ------------------------------------------------------
+13.0.13 (2026-05-20)
+------------------------------------------------------
+* Fixed nameplates scaling in a non-stop loop when hovering the mouse cursor over a non-targeted unit on WoW Midnight (only when mouseover scaling is enabled) [Comment #8321].
+
+------------------------------------------------------
 13.0.12 (2026-05-15)
 ------------------------------------------------------
 * Re-enabled separate healthbar and clickable-area sizes for friendly nameplates on WoW Midnight.
