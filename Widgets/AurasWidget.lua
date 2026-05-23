@@ -1619,13 +1619,24 @@ end
 
 local AuraTooltip = CreateFrame("GameTooltip", "ThreatPlatesAuraTooltip", UIParent, "GameTooltipTemplate")
 local AuraFrameOnEnter
+local TooltipUsesAuraInstanceID = false
 
 local function AuraFrameOnLeave(self)
   AuraTooltip:Hide()
 end
 
+-- SetUnitAuraByAuraInstanceID: WoW Midnight
 -- SetUnitBuffByAuraInstanceID, SetUnitDebuffByAuraInstanceID: Dragonflight - Patch 10.0.0
-if Addon.IS_MAINLINE then
+-- Would show more information, but mainly about the spell, not the aura
+-- AuraTooltip:SetSpellByID(self.AuraData.spellId)
+if AuraTooltip.SetUnitAuraByAuraInstanceID then
+  TooltipUsesAuraInstanceID = true
+  AuraFrameOnEnter = function(self)
+    AuraTooltip:SetOwner(self, "ANCHOR_LEFT")
+    AuraTooltip:SetUnitAuraByAuraInstanceID(self:GetParent():GetParent().unit.unitid, self.AuraData.auraInstanceID)
+  end
+elseif AuraTooltip.SetUnitBuffByAuraInstanceID and AuraTooltip.SetUnitDebuffByAuraInstanceID then
+  TooltipUsesAuraInstanceID = true
   AuraFrameOnEnter = function(self)
     AuraTooltip:SetOwner(self, "ANCHOR_LEFT")
 
@@ -1635,11 +1646,8 @@ if Addon.IS_MAINLINE then
     else
       AuraTooltip:SetUnitDebuffByAuraInstanceID(self:GetParent():GetParent().unit.unitid, self.AuraData.auraInstanceID, self.AuraData.effect)
     end
-
-    -- Would show more information, but mainly about the spell, not the aura
-    --AuraTooltip:SetSpellByID(self.AuraData.spellId)
   end
-else  
+else
   AuraFrameOnEnter = function(self)
     AuraTooltip:SetOwner(self, "ANCHOR_LEFT")
     AuraTooltip:SetUnitAura(self:GetParent():GetParent().unit.unitid, self.AuraData.auraInstanceID, self.AuraData.effect)
@@ -1945,6 +1953,11 @@ local function ProcessAllUnitAuras(unitid, effect)
         -- Without this check, there will be a Lua error when a priest mindcontrolls another player as 
         -- unit_aura_info is nil here in this case
         if unit_aura_info then
+          -- For clients without ByAuraInstanceID tooltip APIs, SetUnitAura expects a slot index.
+          if not TooltipUsesAuraInstanceID then
+            unit_aura_info.auraInstanceID = slots[i]
+          end
+
           unit_aura_info.duration = unit_aura_info.duration or 0
           unit_auras[#unit_auras + 1] = unit_aura_info
           -- if unit_aura_info.sourcseeUnit == "player" then

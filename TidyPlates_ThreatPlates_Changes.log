@@ -1,4 +1,9 @@
 ------------------------------------------------------
+13.0.14 (2026-05-23)
+------------------------------------------------------
+* Fixed aura icon tooltips not showing reliably in WoW Classic versions [Comment #8183, #8226].
+
+------------------------------------------------------
 13.0.13 (2026-05-21)
 ------------------------------------------------------
 * Fixed healthbar color not updating correctly in TBC Classic when the player loses threat gradually [Comment #8288, #8296].

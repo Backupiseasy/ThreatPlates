@@ -126,16 +126,16 @@ local function AuraFrameOnLeave(self)
   AuraTooltip:Hide()
 end
 
+-- SetUnitAuraByAuraInstanceID: WoW Midnight
 -- SetUnitBuffByAuraInstanceID, SetUnitDebuffByAuraInstanceID: Dragonflight - Patch 10.0.0
-if Addon.ExpansionIsAtLeastMidnight then
+-- Would show more information, but mainly about the spell, not the aura
+-- AuraTooltip:SetSpellByID(self.AuraData.spellId)
+if AuraTooltip.SetUnitAuraByAuraInstanceID then
   AuraFrameOnEnter = function(self)
     AuraTooltip:SetOwner(self, "ANCHOR_LEFT")
     AuraTooltip:SetUnitAuraByAuraInstanceID(self:GetParent():GetParent().unit.unitid, self.AuraData.auraInstanceID)
-
-    -- Would show more information, but mainly about the spell, not the aura
-    -- AuraTooltip:SetSpellByID(self.AuraData.spellId)
   end
-elseif Addon.ExpansionIsAtLeastDF then
+elseif AuraTooltip.SetUnitBuffByAuraInstanceID and AuraTooltip.SetUnitDebuffByAuraInstanceID then
   AuraFrameOnEnter = function(self)
     AuraTooltip:SetOwner(self, "ANCHOR_LEFT")
 
@@ -146,7 +146,7 @@ elseif Addon.ExpansionIsAtLeastDF then
       AuraTooltip:SetUnitDebuffByAuraInstanceID(self:GetParent():GetParent().unit.unitid, self.AuraData.auraInstanceID, self.AuraData.effect)
     end
   end
-else  
+else
   AuraFrameOnEnter = function(self)
     AuraTooltip:SetOwner(self, "ANCHOR_LEFT")
     AuraTooltip:SetUnitAura(self:GetParent():GetParent().unit.unitid, self.AuraData.auraInstanceID, self.AuraData.effect)
