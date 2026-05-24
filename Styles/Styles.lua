@@ -8,7 +8,6 @@ local ADDON_NAME, Addon = ...
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local pairs = pairs
 
 -- WoW APIs
 local InCombatLockdown = InCombatLockdown
@@ -19,9 +18,7 @@ local UnitCanAttack = UnitCanAttack
 local GetSpellInfo = Addon.GetSpellInfo
 
 -- ThreatPlates APIs
-local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
-local ElementsPlateCreated, ElementsPlateUnitAdded, ElementsPlateUnitRemoved = Addon.Elements.PlateCreated, Addon.Elements.PlateUnitAdded, Addon.Elements.PlateUnitRemoved
-local ElementsUpdateStyle, ElementsUpdateSettings = Addon.Elements.UpdateStyle, Addon.Elements.UpdateSettings
+local ElementsUpdateStyle = Addon.Elements.UpdateStyle
 local TOTEMS = Addon.TOTEMS
 local GetUnitVisibility = Addon.GetUnitVisibility
 local IsSecretValueTP = Addon.IsSecretValue

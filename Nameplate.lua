@@ -1567,6 +1567,7 @@ local function PlayerTargetChanged(target_unitid)
   local tp_frame = plate and plate.TPFrame
   if tp_frame and tp_frame.Active then
     SetUnitAttributeTarget(tp_frame.unit)
+    StyleModule.Update(tp_frame)  -- re-evaluate style (e.g. ForceHealthbarOnTarget) before notifying subscribers
     PublishEvent("TargetLost", tp_frame)
 
     LastTargetPlate[target_unitid] = nil
@@ -1578,6 +1579,7 @@ local function PlayerTargetChanged(target_unitid)
     LastTargetPlate[target_unitid] = plate
 
     SetUnitAttributeTarget(tp_frame.unit)
+    StyleModule.Update(tp_frame)  -- re-evaluate style (e.g. ForceHealthbarOnTarget) before notifying subscribers
     PublishEvent("TargetGained", tp_frame)
   end
 end

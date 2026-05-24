@@ -78,7 +78,7 @@ local UnitIsUnitTP = Addon.UnitIsUnit
 3. Deploy/copy to `Interface/AddOns/`
 4. In-game `/reload`
 
-Recommended commands (Windows PowerShell/CMD):
+Recommended commands:
 
 - Optional lint:
   - Install: `luarocks install luacheck`
