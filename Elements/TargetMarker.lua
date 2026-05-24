@@ -60,6 +60,8 @@ end
 
 -- Called in processing event: NAME_PLATE_CREATED
 function Element.PlateCreated(tp_frame)
+  -- Keep marker above the healthbar: healthbar uses a higher frame level than tp_frame.
+  -- Using textframe as parent preserves overlay ordering across parent-frame changes.
   local target_marker = tp_frame.visual.textframe:CreateTexture(nil, "OVERLAY", nil, 7)
   target_marker:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
   tp_frame.visual.TargetMarker = target_marker
