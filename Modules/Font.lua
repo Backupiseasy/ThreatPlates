@@ -12,11 +12,14 @@ local ADDON_NAME, Addon = ...
 -- WoW APIs
 local SystemFont_NamePlate, SystemFont_NamePlateFixed = SystemFont_NamePlate, SystemFont_NamePlateFixed
 local SystemFont_LargeNamePlate, SystemFont_LargeNamePlateFixed = SystemFont_LargeNamePlate, SystemFont_LargeNamePlateFixed
+local SystemFont_NamePlate_Outlined = _G.SystemFont_NamePlate_Outlined
+local C_Timer_After = C_Timer.After
 
 -- ThreatPlates APIs
 local ANCHOR_POINT_TEXT = Addon.ANCHOR_POINT_TEXT
 
 -- Cached database settings
+local Settings
 
 ---------------------------------------------------------------------------------------------------
 -- Module Setup
@@ -42,6 +45,7 @@ local DefaultSystemFonts = {
   NamePlateFixed = BackupSystemFont(SystemFont_NamePlateFixed),
   LargeNamePlate = BackupSystemFont(SystemFont_LargeNamePlate),
   LargeNamePlateFixed = BackupSystemFont(SystemFont_LargeNamePlateFixed),
+  NamePlateOutlined = SystemFont_NamePlate_Outlined and BackupSystemFont(SystemFont_NamePlate_Outlined),
 }
 
 ---------------------------------------------------------------------------------------------------
@@ -135,14 +139,47 @@ local function UpdateSystemFont(obj, db)
   end
 end
 
-function FontModule.SetNamesFonts()
-  local db = Addon.db.profile.BlizzardSettings.Names
-  if db.Enabled then
-    db = db.Font
-    UpdateSystemFont(SystemFont_NamePlate, db)
-    UpdateSystemFont(SystemFont_NamePlateFixed, db)
-    UpdateSystemFont(SystemFont_LargeNamePlate, db)
-    UpdateSystemFont(SystemFont_LargeNamePlateFixed, db)
+local IsNameFontReapplyScheduled = false
+
+local function ReapplyNow()
+  if Settings.Enabled then
+    FontModule.SetNamesFonts(true)
+  end
+end
+
+local function ReapplyNowAndReset()
+  ReapplyNow()
+  IsNameFontReapplyScheduled = false
+end
+
+local function ReapplyNameFonts()
+  if IsNameFontReapplyScheduled then return end
+
+  IsNameFontReapplyScheduled = true
+
+  -- Blizzard resets SystemFont_NamePlate* asynchronously after certain UI events
+  -- (e.g. nameplate size changes, options panel show/hide). Two delayed passes are
+  -- needed to reliably override the font: one next-frame pass to catch the first
+  -- reset, and a second pass ~100 ms later to catch any further late resets before
+  -- clearing the guard flag.
+  C_Timer_After(0, ReapplyNow)
+  C_Timer_After(0.1, ReapplyNowAndReset)
+end
+
+function FontModule.SetNamesFonts(skip_reapply)
+  if not Settings.Enabled then return end
+
+  local db = Settings.Font
+  UpdateSystemFont(SystemFont_NamePlate, db)
+  UpdateSystemFont(SystemFont_NamePlateFixed, db)
+  UpdateSystemFont(SystemFont_LargeNamePlate, db)
+  UpdateSystemFont(SystemFont_LargeNamePlateFixed, db)
+  if SystemFont_NamePlate_Outlined then
+    UpdateSystemFont(SystemFont_NamePlate_Outlined, db)
+  end
+
+  if not skip_reapply then
+    ReapplyNameFonts()
   end
 end
 
@@ -151,11 +188,15 @@ function FontModule.ResetNamesFonts()
   UpdateSystemFont(SystemFont_NamePlateFixed, DefaultSystemFonts.NamePlateFixed)
   UpdateSystemFont(SystemFont_LargeNamePlate, DefaultSystemFonts.LargeNamePlate)
   UpdateSystemFont(SystemFont_LargeNamePlateFixed, DefaultSystemFonts.LargeNamePlateFixed)
+  if SystemFont_NamePlate_Outlined and DefaultSystemFonts.NamePlateOutlined then
+    UpdateSystemFont(SystemFont_NamePlate_Outlined, DefaultSystemFonts.NamePlateOutlined)
+  end
 end
 
 ---------------------------------------------------------------------------------------------------
 -- Update of settings
 ---------------------------------------------------------------------------------------------------
 
--- function FontModule:UpdateSettings()
--- end
+function FontModule.UpdateSettings()
+  Settings = Addon.db.profile.BlizzardSettings.Names
+end

@@ -1169,7 +1169,7 @@ function Addon:UpdateSettings()
   --wipe(PlateOnUpdateQueue)
 
   Addon.Localization.UpdateSettings()
-  --Font:UpdateSettings()
+  Addon.Font.UpdateSettings()
   Addon.Icon.UpdateSettings()
   Addon.Threat.UpdateSettings()
   Addon.Transparency.UpdateSettings()
