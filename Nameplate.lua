@@ -1565,22 +1565,26 @@ local function PlayerTargetChanged(target_unitid)
   -- If the previous target unit's nameplate is still shown, update it:
   local plate = LastTargetPlate[target_unitid]
   local tp_frame = plate and plate.TPFrame
-  if tp_frame and tp_frame.Active then
+  if tp_frame then
     SetUnitAttributeTarget(tp_frame.unit)
-    StyleModule.Update(tp_frame)  -- re-evaluate style (e.g. ForceHealthbarOnTarget) before notifying subscribers
-    PublishEvent("TargetLost", tp_frame)
-
     LastTargetPlate[target_unitid] = nil
+
+    if tp_frame.Active then
+      StyleModule.Update(tp_frame)  -- re-evaluate style (e.g. ForceHealthbarOnTarget) before notifying subscribers
+      PublishEvent("TargetLost", tp_frame)
+    end
   end
 
   plate = GetNamePlateForUnit(target_unitid)
   tp_frame = plate and plate.TPFrame
-  if tp_frame and tp_frame.Active then
+  if tp_frame then
+    SetUnitAttributeTarget(tp_frame.unit)
     LastTargetPlate[target_unitid] = plate
 
-    SetUnitAttributeTarget(tp_frame.unit)
-    StyleModule.Update(tp_frame)  -- re-evaluate style (e.g. ForceHealthbarOnTarget) before notifying subscribers
-    PublishEvent("TargetGained", tp_frame)
+    if tp_frame.Active then
+      StyleModule.Update(tp_frame)  -- re-evaluate style (e.g. ForceHealthbarOnTarget) before notifying subscribers
+      PublishEvent("TargetGained", tp_frame)
+    end
   end
 end
 

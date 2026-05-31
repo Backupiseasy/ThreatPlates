@@ -441,12 +441,10 @@ function Widget:UpdateTargetUnitHighlight(widget_frame, target_unitid, unit)
 end
 
 function Widget:OnTargetUnitAdded(tp_frame, unit)
-  -- For now, we must initialize all targets here as this is not only called when the target
-  -- changes, but also wenn initially initializing the unit or when there is a style update
-
-  -- This unit is only called when the current unit is also the current target
-  -- After login/reload, SOFT_TARGET events are fired, but GetNamePlateForUnit does not yet return a Nameplate
-  -- for these unitids ...
+  -- For now, we must initialize all targets here as this is not only called when the target changes,
+  -- but also when initially initializing the unit or when there is a style update
+  -- This function is only called when the current unit is also the current target
+  -- After login/reload, SOFT_TARGET events are fired, but GetNamePlateForUnit may not yet return a nameplate
   if unit.isTarget then    
     PlayerTargetChanged("target")
   elseif unit.IsSoftInteractTarget then
@@ -455,25 +453,22 @@ function Widget:OnTargetUnitAdded(tp_frame, unit)
     PlayerTargetChanged("softenemy")
   elseif unit.IsSoftFriendTarget then    
     PlayerTargetChanged("softfriend")
-  else
-    HideWidgetFrame(TargetHighlightFrames.target)
-    HideWidgetFrame(TargetHighlightFrames.softfriend)
-    HideWidgetFrame(TargetHighlightFrames.softenemy)
-    HideWidgetFrame(TargetHighlightFrames.softinteract)
   end
 end
 
 function Widget:OnTargetUnitRemoved(tp_frame, unit)
-  if unit.isTarget then    
+  -- Nameplates for former targets can be removed delayed (e.g., target-only plates out of range).
+  -- Hide only frames that are still parented to this exact plate to avoid clearing the new target highlight.
+  if TargetHighlightFrames.target:GetParent() == tp_frame then
     HideWidgetFrame(TargetHighlightFrames.target)
   end
-  if unit.IsSoftInteractTarget then
+  if TargetHighlightFrames.softfriend:GetParent() == tp_frame then
     HideWidgetFrame(TargetHighlightFrames.softfriend)
   end
-  if unit.IsSoftEnemyTarget then        
+  if TargetHighlightFrames.softenemy:GetParent() == tp_frame then
     HideWidgetFrame(TargetHighlightFrames.softenemy)
   end
-  if unit.IsSoftFriendTarget then    
+  if TargetHighlightFrames.softinteract:GetParent() == tp_frame then
     HideWidgetFrame(TargetHighlightFrames.softinteract)
   end
 end
