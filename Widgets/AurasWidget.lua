@@ -21,7 +21,14 @@ local tonumber = tonumber
 -- WoW APIs
 local BUFF_MAX_DISPLAY = BUFF_MAX_DISPLAY
 local GetFramerate = GetFramerate
-local DebuffTypeColor = DebuffTypeColor
+-- DebuffTypeColor may be nil on some WoW versions (e.g. MoP Classic PTR) at addon load time; use
+-- the standard Blizzard dispel-type colors as fallback so GetColorForAura never crashes on index.
+local DebuffTypeColor = DebuffTypeColor or {
+  Magic   = { r = 0.20, g = 0.60, b = 1.00 },
+  Disease = { r = 0.60, g = 0.40, b = 0.00 },
+  Poison  = { r = 0.00, g = 0.60, b = 0.00 },
+  Curse   = { r = 0.60, g = 0.00, b = 1.00 },
+}
 local UnitIsUnit = UnitIsUnit
 local UnitAura = UnitAura
 local GetAuraSlots = C_UnitAuras and C_UnitAuras.GetAuraSlots
@@ -1662,7 +1669,7 @@ function Widget:GetColorForAura(aura)
 	local db = self.db
 
   if aura.dispelName and db.ShowAuraType then
-    return DebuffTypeColor[aura.dispelName]
+    return DebuffTypeColor[aura.dispelName] or db.DefaultDebuffColor
   elseif aura.effect == "HARMFUL" then
     return db.DefaultDebuffColor
   else
