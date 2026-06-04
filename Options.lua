@@ -5914,6 +5914,8 @@ local function CreateVisibilityTab()
         order = 70,
         inline = true,
         width = "full",
+        -- Only Classic/TBC/Wrath/Cata have SetNamePlateFriendlyClickThrough / SetNamePlateEnemyClickThrough.
+        hidden = Addon.ExpansionIsAtLeastMidnight or Addon.IS_MISTS_CLASSIC,
         args = {
           ClickthroughFriendly = {
             name = L["Friendly Units"],
@@ -5926,12 +5928,8 @@ local function CreateVisibilityTab()
               Addon.SetNamePlateClickThrough()                 
             end,
             get = function(info) 
-              if Addon.ExpansionIsAtLeastMidnight then
-                return db.NamePlateFriendlyClickThrough
-              else
-                -- return in-game value for clickthrough as config values may be wrong because of in-combat restrictions when changing them
-                return C_NamePlate.GetNamePlateFriendlyClickThrough() 
-              end
+              -- return in-game value for clickthrough as config values may be wrong because of in-combat restrictions when changing them
+              return C_NamePlate.GetNamePlateFriendlyClickThrough() 
             end,
             arg = { "NamePlateFriendlyClickThrough" },
           },
@@ -5946,12 +5944,8 @@ local function CreateVisibilityTab()
               Addon.SetNamePlateClickThrough()
             end,
             get = function(info) 
-              if Addon.ExpansionIsAtLeastMidnight then
-                return db.NamePlateEnemyClickThrough
-              else
-                -- return in-game value for clickthrough as config values may be wrong because of in-combat restrictions when changing them
-                return C_NamePlate.GetNamePlateEnemyClickThrough() 
-              end
+              -- return in-game value for clickthrough as config values may be wrong because of in-combat restrictions when changing them
+              return C_NamePlate.GetNamePlateEnemyClickThrough() 
             end,
             arg = { "NamePlateEnemyClickThrough" },
           },

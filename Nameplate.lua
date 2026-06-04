@@ -1009,6 +1009,9 @@ if ExpansionIsAtLeastMidnight then
       ApplyPlateHitTest(tp_frame)
     end
   end
+elseif Addon.IS_MISTS_CLASSIC then
+  -- MoP Classic (5.5.x): C_NamePlate.SetNamePlateFriendlyClickThrough / SetNamePlateEnemyClickThrough do not exist.
+  Addon.SetNamePlateClickThrough = function() end
 else
   Addon.SetNamePlateClickThrough = function()
     Addon:CallbackWhenOoC(function()
