@@ -5914,8 +5914,9 @@ local function CreateVisibilityTab()
         order = 70,
         inline = true,
         width = "full",
-        -- Only Classic/TBC/Wrath/Cata have SetNamePlateFriendlyClickThrough / SetNamePlateEnemyClickThrough.
-        hidden = Addon.ExpansionIsAtLeastMidnight or Addon.IS_MISTS_CLASSIC,
+        -- Mists Classic does not have C_NamePlate.GetNamePlateFriendlyClickThrough/GetNamePlateEnemyClickThrough
+        -- and neither the Midnight HitTestFrame
+        hidden = Addon.IS_MISTS_CLASSIC,
         args = {
           ClickthroughFriendly = {
             name = L["Friendly Units"],
@@ -5928,8 +5929,12 @@ local function CreateVisibilityTab()
               Addon.SetNamePlateClickThrough()                 
             end,
             get = function(info) 
-              -- return in-game value for clickthrough as config values may be wrong because of in-combat restrictions when changing them
-              return C_NamePlate.GetNamePlateFriendlyClickThrough() 
+              if Addon.ExpansionIsAtLeastMidnight then
+                return db.NamePlateFriendlyClickThrough
+              else
+                -- return in-game value for clickthrough as config values may be wrong because of in-combat restrictions when changing them
+                return C_NamePlate.GetNamePlateFriendlyClickThrough() 
+              end
             end,
             arg = { "NamePlateFriendlyClickThrough" },
           },
@@ -5944,8 +5949,12 @@ local function CreateVisibilityTab()
               Addon.SetNamePlateClickThrough()
             end,
             get = function(info) 
-              -- return in-game value for clickthrough as config values may be wrong because of in-combat restrictions when changing them
-              return C_NamePlate.GetNamePlateEnemyClickThrough() 
+              if Addon.ExpansionIsAtLeastMidnight then
+                return db.NamePlateEnemyClickThrough
+              else
+                -- return in-game value for clickthrough as config values may be wrong because of in-combat restrictions when changing them
+                return C_NamePlate.GetNamePlateEnemyClickThrough() 
+              end
             end,
             arg = { "NamePlateEnemyClickThrough" },
           },
