@@ -95,13 +95,16 @@ local IGNORED_UNITS = {
 -- Local variables
 ---------------------------------------------------------------------------------------------------
 --local PlateOnUpdateQueue = {}
-local LastTargetPlate = {
+
+-- Consolidated array for meta-unit nameplates (target, focus, mouseover, softenemy, softfriend, softinteract)
+local PlatesByMetaUnit = {
   target = nil,
+  focus = nil,
+  mouseover = nil,
+  softenemy = nil,
   softfriend = nil,
   softinteract = nil,
-  softenemy = nil
 }
-local LastFocusPlate
 
 -- External references to internal data
 local PlatesCreated = Addon.PlatesCreated
@@ -1500,7 +1503,7 @@ function Addon:NAME_PLATE_UNIT_ADDED(unitid)
 end
 
 local function RemoveMouseoverFromNameplate()
-  local tp_frame = PlatesByUnit["mouseover"]
+  local tp_frame = PlatesByMetaUnit.mouseover
   if not tp_frame then return end
 
   -- Do this even if nameplate is not active as otherwise, mouseover is not shown correctly
@@ -1510,7 +1513,7 @@ local function RemoveMouseoverFromNameplate()
     PublishEvent("MouseoverOnLeave", tp_frame)
   end
 
-  PlatesByUnit["mouseover"] = nil
+  PlatesByMetaUnit.mouseover = nil
 end
 
 function Addon:NAME_PLATE_UNIT_REMOVED(unitid)
@@ -1522,7 +1525,7 @@ function Addon:NAME_PLATE_UNIT_REMOVED(unitid)
   -- Without this, UPDATE_MOUSEOVER_UNIT (which can fire synchronously when a plate becomes
   -- visible again after recycling) would call RemoveMouseoverFromNameplate on a wiped unit
   -- table, causing a nil-style crash in Transparency.lua:GetTransparency.
-  if PlatesByUnit["mouseover"] == tp_frame then
+  if PlatesByMetaUnit.mouseover == tp_frame then
     RemoveMouseoverFromNameplate()
   end
 
@@ -1546,16 +1549,12 @@ function Addon:NAME_PLATE_UNIT_REMOVED(unitid)
   -- If both are unique, the nameplate is not updated to the correct custom style, but uses the
   -- previous one, I think
   tp_frame.stylename = nil
-
-  -- plate.TPAnchorFrame:ClearAllPoints()
-  -- plate.TPAnchorFrame:SetParent(plate)
-  -- plate.TPAnchorFrame:SetSize(110, 45)
 end
 
 function Addon:UNIT_NAME_UPDATE(unitid)
-  -- Skip special unitids (they are updated via their nameplate unitid) and personal nameplate
+  -- Skip special unitids (they are updated via their nameplate unitid) and the personal nameplate
   if IGNORED_UNITS[unitid] then return end
-  
+
   local tp_frame = self:GetThreatPlateForUnit(unitid)
   if tp_frame then
     SetUnitAttributeName(tp_frame.unit, unitid)
@@ -1563,29 +1562,28 @@ function Addon:UNIT_NAME_UPDATE(unitid)
   end
 end
 
-
 local function PlayerTargetChanged(target_unitid)
-  -- If the previous target unit's nameplate is still shown, update it:
-  local plate = LastTargetPlate[target_unitid]
-  local tp_frame = plate and plate.TPFrame
+  -- Remove old reference and fire TargetLost if needed
+  local tp_frame = PlatesByMetaUnit[target_unitid]
   if tp_frame then
     SetUnitAttributeTarget(tp_frame.unit)
-    LastTargetPlate[target_unitid] = nil
+    PlatesByMetaUnit[target_unitid] = nil
 
     if tp_frame.Active then
-      StyleModule.Update(tp_frame)  -- re-evaluate style (e.g. ForceHealthbarOnTarget) before notifying subscribers
+      StyleModule.Update(tp_frame)
       PublishEvent("TargetLost", tp_frame)
     end
   end
 
-  plate = GetNamePlateForUnit(target_unitid)
-  tp_frame = plate and plate.TPFrame
+  -- Set new reference and fire TargetGained if needed
+  local plate = GetNamePlateForUnit(target_unitid)
+  local tp_frame = plate and plate.TPFrame
   if tp_frame then
     SetUnitAttributeTarget(tp_frame.unit)
-    LastTargetPlate[target_unitid] = plate
+    PlatesByMetaUnit[target_unitid] = tp_frame
 
     if tp_frame.Active then
-      StyleModule.Update(tp_frame)  -- re-evaluate style (e.g. ForceHealthbarOnTarget) before notifying subscribers
+      StyleModule.Update(tp_frame)
       PublishEvent("TargetGained", tp_frame)
     end
   end
@@ -1611,22 +1609,27 @@ function Addon:PLAYER_SOFT_INTERACT_CHANGED()
 end
 
 function Addon:PLAYER_FOCUS_CHANGED()
-  -- Don't check for Active here as we have to unset IsFocus 
-  if LastFocusPlate then
-    LastFocusPlate.unit.IsFocus = false
-    if LastFocusPlate.Active then
-      PublishEvent("FocusLost", LastFocusPlate)
+  -- Don't check for Active here, because we always need to reset IsFocus
+  local tp_frame = PlatesByMetaUnit.focus
+  if tp_frame then
+    tp_frame.unit.IsFocus = false
+    PlatesByMetaUnit.focus = nil
+
+    if tp_frame.Active then
+      --StyleModule.Update(tp_frame)
+      PublishEvent("FocusLost", tp_frame)
     end
-    LastFocusPlate = nil
-    -- Update mouseover, if the mouse was hovering over the targeted unit
-    Addon:UPDATE_MOUSEOVER_UNIT()
   end
 
   local tp_frame = Addon:GetThreatPlateForFocus()
   if tp_frame then
     tp_frame.unit.IsFocus = true
-    PublishEvent("FocusGained", tp_frame)
-    LastFocusPlate = tp_frame
+    PlatesByMetaUnit.focus = tp_frame
+
+    if tp_frame.Active then
+      --StyleModule.Update(tp_frame)
+      PublishEvent("FocusGained", tp_frame)
+    end
   end
 end
 
@@ -1638,7 +1641,7 @@ function Addon:UPDATE_MOUSEOVER_UNIT()
   -- Check for TPFrame.Active to prevent accessing the personal resource bar
   local tp_frame = self:GetThreatPlateForUnit("mouseover")
   if tp_frame then
-    PlatesByUnit["mouseover"] = tp_frame
+    PlatesByMetaUnit.mouseover = tp_frame
     tp_frame.unit.isMouseover = true
 
     PublishEvent("MouseoverOnEnter", tp_frame)
@@ -1651,7 +1654,7 @@ function Addon:UPDATE_MOUSEOVER_UNIT()
           RemoveMouseoverFromNameplate()
         end
       end)
-    end 
+    end
   end
 end
 
@@ -1728,7 +1731,7 @@ function Addon:UNIT_FACTION(unitid)
     end
   else
     -- It seems that (at least) in solo shuffles, the UNIT_FACTION event is fired in between the events
-    -- NAME_PLATE_UNIT_REMOVE and NAME_PLATE_UNIT_ADDED. As SetNameplateVisibility sets the TPFrame Active, this results 
+    -- NAME_PLATE_UNIT_REMOVED and NAME_PLATE_UNIT_ADDED. As SetNameplateVisibility sets the TPFrame Active, this results 
     -- in Lua errors, so basically we cannot use it here to check if the plate is active.    
     -- local plate = self:GetThreatPlateForUnit(unitid)
     local tp_frame = PlatesByUnit[unitid]
@@ -1887,7 +1890,7 @@ function Addon:UNIT_SPELLCAST_INTERRUPTED(unitid, cast_guid, spell_id, interrupt
     name = class_color:WrapTextInColorCode(name)
   end
   
-  tp_frame.visual.SpellText:SetText(INTERRUPTED .. " [" ..TransliterateCyrillicLetters(name) .. "]")
+  tp_frame.visual.SpellText:SetText(INTERRUPTED .. " [" .. TransliterateCyrillicLetters(name) .. "]")
 
   castbar:SetMinMaxValues(0, 1)
   castbar:SetValue(1)
