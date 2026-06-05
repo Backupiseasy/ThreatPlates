@@ -6,5 +6,6 @@
 * Fixed "Force View for Target" not switching from Headline View to Healthbar View when targeting a unit that was not taking damage (e.g. friendly units out of combat) [Comment #8308].
 * Fixed Blizzard name font changes not applying reliably by re-applying nameplate font overrides (including SystemFont_NamePlate_Outlined) after delayed UI updates [Comment #8230].
 * Fixed a Lua error caused by click-through nameplate APIs not available anymore in Mists Classic [GH-690].
+* Fixed a Lua error caused by changes to nameplate sizing APIs in Mists Classic [GH-690].
 * Fixed a Lua error caused by debuff type colors no longer available in the WoW API in Mists Classic.
 * Hopefully fixed enemy nameplates incorrectly showing friendly player names instead of correct enemy names in battlegrounds and arenas on WoW Midnight [Comment #8228].

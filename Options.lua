@@ -6402,11 +6402,11 @@ local function CreateBlizzardSettings()
             },
           },
           Insets = {
-            name = L["Insets"],
+            name = L["Insets2"],
             order = 40,
             type = "group",
             inline = true,
-            hidden = Addon.ExpansionIsAtLeastMidnight,
+            hidden = Addon.ExpansionIsAtLeastMidnight or Addon.IS_MISTS_CLASSIC,
             args = {
               OtherTopInset = {
                 name = L["Top Inset"],

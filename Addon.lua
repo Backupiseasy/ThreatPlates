@@ -18,6 +18,9 @@ local C_Timer_After = C_Timer.After
 local UnitClass = UnitClass
 local GetSpecializationInfo = C_SpecializationInfo and C_SpecializationInfo.GetSpecializationInfo or _G.GetSpecializationInfo
 local LoadAddOn = C_AddOns and C_AddOns.LoadAddOn or _G.LoadAddOn
+local SetNamePlateFriendlySize = C_NamePlate and C_NamePlate.SetNamePlateFriendlySize
+local SetNamePlateEnemySize = C_NamePlate and C_NamePlate.SetNamePlateEnemySize
+local SetNamePlateSize = C_NamePlate and C_NamePlate.SetNamePlateSize
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -49,7 +52,10 @@ Addon.PlayerIsInCombat = false
 -- Functions different depending on WoW version
 ---------------------------------------------------------------------------------------------------
 
+-- # Nameplate Hierarchy, Anchoring, and Scaling
 if Addon.WOW_USES_CLASSIC_NAMEPLATES then
+  -- Classic Era, TBC, Wrath, Cata and MoP Classic share the same synced nameplate size
+  -- (friendly and enemy nameplates have a single size in these versions).
   local function CalculateSynchedNameplateSize()
     local db = Addon.db.profile.settings
   
@@ -67,24 +73,33 @@ if Addon.WOW_USES_CLASSIC_NAMEPLATES then
     return width, height
   end
 
+  local SetBlizzardNameplateSize 
+
+  if Addon.IS_MISTS_CLASSIC then
+    SetBlizzardNameplateSize = SetNamePlateSize
+  else
+    -- Classic has the same nameplate size for friendly and enemy units, although separate functions are availabe.
+    -- So either set both or non at all (= set it to default values)
+    SetBlizzardNameplateSize = function(width, height)
+      SetNamePlateFriendlySize(width, height)
+      SetNamePlateEnemySize(width, height)
+    end
+  end
+
   Addon.SetBaseNamePlateSize = function(self)
     local db = self.db.profile
 
-    -- Classic has the same nameplate size for friendly and enemy units, so either set both or non at all (= set it to default values)
     if not db.ShowFriendlyBlizzardNameplates and not db.ShowEnemyBlizzardNameplates and not self.IsInPvEInstance then
-      local width, height = CalculateSynchedNameplateSize()
-      C_NamePlate.SetNamePlateFriendlySize(width, height)
-      C_NamePlate.SetNamePlateEnemySize(width, height)
+      local width, height = CalculateSynchedNameplateSize(false)
+      SetBlizzardNameplateSize(width, height)
     else
       -- Smaller nameplates are not available in Classic
-      C_NamePlate.SetNamePlateFriendlySize(128, 32)
-      C_NamePlate.SetNamePlateEnemySize(128, 32)
+      SetBlizzardNameplateSize(128, 32)
     end
 
     Addon:ConfigClickableArea(false)
-  end
+  end    
 else
-  -- # Nameplate Hierarchy, Anchoring, and Scaling
   Addon.SetBaseNamePlateSize = function(self)
     local db_settings = self.db.profile.settings
     local healthbar = db_settings.healthbar
@@ -106,9 +121,9 @@ else
 
     if Addon.NameplateParentFrame == WorldFrame then
       local ui_scale = UIParent:GetEffectiveScale()
-      C_NamePlate.SetNamePlateSize(width / ui_scale, height / ui_scale)
+      SetNamePlateSize(width / ui_scale, height / ui_scale)
     else
-      C_NamePlate.SetNamePlateSize(width + 10, height + 10)
+      SetNamePlateSize(width + 10, height + 10)
     end
     self.SetNamePlateClickThrough()
   end
