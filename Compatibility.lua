@@ -216,9 +216,13 @@ Addon.IsSecretValue = _G.issecretvalue or function() return false end
 
 -- Safe wrapper for UnitIsUnit: returns false instead of a secret value when the result is restricted.
 -- Use this instead of the raw UnitIsUnit() call wherever the result is used in a boolean context.
-function Addon.UnitIsUnit(unit1, unit2)
-  local result = UnitIsUnit(unit1, unit2)
-  return not Addon.IsSecretValue(result) and result
+if Addon.ExpansionIsAtLeastMidnight then
+  function Addon.UnitIsUnit(unit1, unit2)
+    local result = UnitIsUnit(unit1, unit2)
+    return not Addon.IsSecretValue(result) and result
+  end
+else
+  Addon.UnitIsUnit = UnitIsUnit
 end
 
 function Addon.EvaluateColorValueFromBoolean(boolean, color_if_true, color_if_false)

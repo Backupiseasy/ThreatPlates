@@ -1577,12 +1577,16 @@ local function PlayerTargetChanged(target_unitid)
   -- Remove old reference and fire TargetLost if needed
   local tp_frame = PlatesByMetaUnit[target_unitid]
   if tp_frame then
-    SetUnitAttributeTarget(tp_frame.unit)
     PlatesByMetaUnit[target_unitid] = nil
 
-    if tp_frame.Active then
-      StyleModule.Update(tp_frame)
-      PublishEvent("TargetLost", tp_frame)
+    -- At this point, the previous target's nameplate might no longer exist. In this case, unitid is nil
+    if tp_frame.unit.unitid then
+      SetUnitAttributeTarget(tp_frame.unit)
+
+      if tp_frame.Active then
+        StyleModule.Update(tp_frame)
+        PublishEvent("TargetLost", tp_frame)
+      end
     end
   end
 
@@ -1590,8 +1594,8 @@ local function PlayerTargetChanged(target_unitid)
   local plate = GetNamePlateForUnit(target_unitid)
   local tp_frame = plate and plate.TPFrame
   if tp_frame then
-    SetUnitAttributeTarget(tp_frame.unit)
     PlatesByMetaUnit[target_unitid] = tp_frame
+    SetUnitAttributeTarget(tp_frame.unit)
 
     if tp_frame.Active then
       StyleModule.Update(tp_frame)
@@ -1623,8 +1627,8 @@ function Addon:PLAYER_FOCUS_CHANGED()
   -- Don't check for Active here, because we always need to reset IsFocus
   local tp_frame = PlatesByMetaUnit.focus
   if tp_frame then
-    tp_frame.unit.IsFocus = false
     PlatesByMetaUnit.focus = nil
+    tp_frame.unit.IsFocus = false
 
     if tp_frame.Active then
       --StyleModule.Update(tp_frame)
@@ -1634,8 +1638,8 @@ function Addon:PLAYER_FOCUS_CHANGED()
 
   local tp_frame = Addon:GetThreatPlateForFocus()
   if tp_frame then
-    tp_frame.unit.IsFocus = true
     PlatesByMetaUnit.focus = tp_frame
+    tp_frame.unit.IsFocus = true
 
     if tp_frame.Active then
       --StyleModule.Update(tp_frame)
