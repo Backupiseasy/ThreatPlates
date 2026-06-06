@@ -978,10 +978,14 @@ end
 --   • Active: skips when Blizzard plates are shown for this unit.
 --   • CanChangeHitTestPoints: skips in restricted C++ contexts.
 local function  ApplyPlateHitTest(tp_frame)
-  if not tp_frame.Active then return end
-
   local plate = tp_frame.Parent
+
   if not plate:CanChangeHitTestPoints() then return end
+  
+  if not tp_frame.Active then 
+    plate:SetAllHitTestPoints(plate.UnitFrame)  
+    return 
+  end
 
   local db = Addon.db.profile
   local is_friendly = (tp_frame.unit.reaction == "FRIENDLY")
@@ -992,6 +996,7 @@ local function  ApplyPlateHitTest(tp_frame)
     local db_frame = db.settings.frame
     local width  = (is_friendly and db_frame.widthFriend)  or db_frame.width
     local height = (is_friendly and db_frame.heightFriend) or db_frame.height
+
     tp_frame.HitTestFrame:ClearAllPoints()
     tp_frame.HitTestFrame:SetSize(width, height)
     -- Anchor to plate.UnitFrame (same hierarchy as HitTestFrame's parent) rather than tp_frame.
