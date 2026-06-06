@@ -1095,46 +1095,6 @@ end
 
 local ConfigModePlate
 
-local function GetClickableAreaSizeForConfigMode(reaction)
-  if Addon.IS_MISTS_CLASSIC then
-    local db = Addon.db and Addon.db.profile
-    local settings = db and db.settings
-
-    if not db or not settings then
-      return 128, 32
-    end
-
-    if db.ShowFriendlyBlizzardNameplates or db.ShowEnemyBlizzardNameplates or Addon.IsInPvEInstance then
-      return 128, 32
-    end
-
-    local width = settings.healthbar.width
-    local height = settings.healthbar.height
-
-    if settings.frame.SyncWithHealthbar then
-      width = width + 6
-      height = height + 22
-    end
-
-    return width, height
-  end
-
-  if not GetNamePlateFriendlySize or not GetNamePlateEnemySize then
-    local frame_settings = Addon.db and Addon.db.profile and Addon.db.profile.settings and Addon.db.profile.settings.frame
-    if frame_settings then
-      return frame_settings.width or 128, frame_settings.height or 32
-    end
-
-    return 128, 32
-  end
-
-  if reaction == "FRIENDLY" then
-    return GetNamePlateFriendlySize()
-  end
-
-  return GetNamePlateEnemySize()
-end
-
 function Addon:ConfigClickableArea(toggle_show)
   if toggle_show then
     if ConfigModePlate then
@@ -1162,13 +1122,13 @@ function Addon:ConfigClickableArea(toggle_show)
         tp_frame.Background:SetBackdropBorderColor(0, 0, 0, 0.8)
         tp_frame.Background:SetPoint("CENTER", ConfigModePlate.UnitFrame, "CENTER")
 
+        -- Addon.WOW_USES_CLASSIC_NAMEPLATES would work as well, but maybe not in the future
         if ExpansionIsAtLeastMidnight then
           tp_frame.Background:ClearAllPoints()
           tp_frame.Background:SetAllPoints(ConfigModePlate.TPFrame.HitTestFrame)
         else
-          local width, height = GetClickableAreaSizeForConfigMode(tp_frame.unit.reaction)
-          tp_frame.Background:SetSize(width, height)
-
+          local db = Addon.db.profile.settings.frame
+          tp_frame.Background:SetSize(db.width, db.height)
         end
 
         tp_frame.Background:Show()

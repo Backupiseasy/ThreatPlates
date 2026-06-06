@@ -90,7 +90,7 @@ if Addon.WOW_USES_CLASSIC_NAMEPLATES then
     local db = self.db.profile
 
     if not db.ShowFriendlyBlizzardNameplates and not db.ShowEnemyBlizzardNameplates and not self.IsInPvEInstance then
-      local width, height = CalculateSynchedNameplateSize(false)
+      local width, height = CalculateSynchedNameplateSize()
       SetBlizzardNameplateSize(width, height)
     else
       -- Smaller nameplates are not available in Classic
@@ -104,27 +104,24 @@ else
     local db_settings = self.db.profile.settings
     local healthbar = db_settings.healthbar
     local frame = db_settings.frame
-
+    
     -- Update SavedVariable dimensions (also consumed by UpdateHitTestFrame per plate).
     -- Mirrors Blizzard's SetHitTestPoints formula (Blizzard_NamePlateUnitFrame.lua):
     --   extraXOffset = 10
     --   extraYOffset = healthBarHeight / 2  → hit region extends half the bar height above/below
     if frame.SyncWithHealthbar then
-      frame.width        = healthbar.width        + 20
-      frame.height       = healthbar.height        * 2
-      frame.widthFriend  = healthbar.widthFriend   + 20
-      frame.heightFriend = healthbar.heightFriend  * 2
+      local ui_scale = (Addon.NameplateParentFrame == WorldFrame and UIParent:GetEffectiveScale()) or 1
+      frame.width = (healthbar.width + 10) / ui_scale
+      frame.height = (healthbar.height * 2) / ui_scale
+      frame.widthFriend = (healthbar.widthFriend + 10) / ui_scale
+      frame.heightFriend = (healthbar.heightFriend * 2) / ui_scale
     end
 
     local width  = max(frame.widthFriend,  frame.width)
     local height = max(frame.heightFriend, frame.height)
 
-    if Addon.NameplateParentFrame == WorldFrame then
-      local ui_scale = UIParent:GetEffectiveScale()
-      SetNamePlateSize(width / ui_scale, height / ui_scale)
-    else
-      SetNamePlateSize(width + 10, height + 10)
-    end
+    -- As the clickable area is defined by the HItTestFrame, is the nameplate base size adjustment even necessary?
+    SetNamePlateSize(width, height)
     self.SetNamePlateClickThrough()
   end
 end

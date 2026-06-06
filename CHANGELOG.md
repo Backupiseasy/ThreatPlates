@@ -9,4 +9,5 @@
 * Fixed a Lua error caused by changes to nameplate sizing APIs in Mists Classic [GH-690].
 * Fixed a Lua error caused by debuff type colors no longer available in the WoW API in Mists Classic.
 * Fixed a bug where Blizzard default nameplates were not clickable when enabled for friendly or enemy units.
+* Fixed a bug where the clickable area was to small when WorldFrame was selected as parent frame for Threat Plates.
 * Hopefully fixed enemy nameplates incorrectly showing friendly player names instead of correct enemy names in battlegrounds and arenas on WoW Midnight [Comment #8228].

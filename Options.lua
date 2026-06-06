@@ -6817,7 +6817,7 @@ local function CreateAppearanceTab()
         inline = true,
         args = {
           ParentFrame = {
-            name = L["Anchor"],
+            name = L["Parent Frame"],
             type = "select",
             order = 10,
             set = function(info, val)
