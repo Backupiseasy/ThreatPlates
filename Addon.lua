@@ -120,7 +120,8 @@ else
     local width  = max(frame.widthFriend,  frame.width)
     local height = max(frame.heightFriend, frame.height)
 
-    -- As the clickable area is defined by the HItTestFrame, is the nameplate base size adjustment even necessary?
+    -- Nameplate size also needs to be adjusted for the HitTestFrame to work. Otherwise the bigger HitTestFrame size
+    -- will be ignored.
     SetNamePlateSize(width, height)
     self.SetNamePlateClickThrough()
   end

@@ -1177,6 +1177,9 @@ function Addon:UpdateNameplateFrameProperties()
   end
 
   Addon.NameplateFrameStrata = db.FrameStrata
+
+  -- Also update the nameplate size (incl. frame width/height) as the clickable area must be adjusted
+  Addon:SetBaseNamePlateSize()
 end
 
 function Addon:UpdateSettings()
