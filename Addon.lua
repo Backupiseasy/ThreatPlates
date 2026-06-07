@@ -134,26 +134,27 @@ if Addon.WOW_USES_CLASSIC_NAMEPLATES then
   end   
 else
   Addon.SetBaseNamePlateSize = function(self)
-    local db_settings = self.db.profile.settings
-    local healthbar = db_settings.healthbar
-    local frame = db_settings.frame
-    
-    -- Update SavedVariable dimensions (also consumed by UpdateHitTestFrame per plate).
-    -- Mirrors Blizzard's SetHitTestPoints formula (Blizzard_NamePlateUnitFrame.lua):
-    --   extraXOffset = 10
-    --   extraYOffset = healthBarHeight / 2  → hit region extends half the bar height above/below
-    if frame.SyncWithHealthbar then
+    local db = self.db.profile.settings
+    local db_frame = db.frame
+
+    if db_frame.SyncWithHealthbar then
+      local db_healthbar = db.healthbar
+      
+      -- Update SavedVariable dimensions (also consumed by UpdateHitTestFrame per plate).
+      -- Mirrors Blizzard's SetHitTestPoints formula (Blizzard_NamePlateUnitFrame.lua):
+      --   extraXOffset = 10
+      --   extraYOffset = healthBarHeight / 2  → hit region extends half the bar height above/below
       local ui_scale = (Addon.NameplateParentFrame == WorldFrame and UIParent:GetEffectiveScale()) or 1
-      frame.width = (healthbar.width + 10) / ui_scale
-      frame.height = (healthbar.height * 2) / ui_scale
-      frame.widthFriend = (healthbar.widthFriend + 10) / ui_scale
-      frame.heightFriend = (healthbar.heightFriend * 2) / ui_scale
+      db_frame.width = (db_healthbar.width + 10) / ui_scale
+      db_frame.height = (db_healthbar.height * 2) / ui_scale
+      db_frame.widthFriend = (db_healthbar.widthFriend + 10) / ui_scale
+      db_frame.heightFriend = (db_healthbar.heightFriend * 2) / ui_scale
     end
 
-    local width  = max(frame.widthFriend,  frame.width)
-    local height = max(frame.heightFriend, frame.height)
+    local width  = max(db_frame.widthFriend,  db_frame.width)
+    local height = max(db_frame.heightFriend, db_frame.height)
 
-    -- Nameplate size also needs to be adjusted for the HitTestFrame to work. Otherwise the bigger HitTestFrame size
+      -- Nameplate size also needs to be adjusted for the HitTestFrame to work. Otherwise the bigger HitTestFrame size
     -- will be ignored.
     SetNamePlateSize(width, height)
     self.SetNamePlateClickThrough()
