@@ -1153,9 +1153,8 @@ function Addon:ConfigClickableArea(toggle_show)
       background:ClearAllPoints()
       background:SetAllPoints(ConfigModePlate.TPFrame.HitTestFrame)
     else
-      local reaction = ConfigModePlate.TPFrame.unit and ConfigModePlate.TPFrame.unit.reaction
-      local width, height = GetClickableAreaSizeForConfigMode(reaction)
-      background:SetSize(width, height)
+      local db = Addon.db.profile.settings.frame
+      ConfigModePlate.TPFrame.Background:SetSize(db.width, db.height)
     end
   end
 end

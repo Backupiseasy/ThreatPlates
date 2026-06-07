@@ -11,6 +11,7 @@
 * Fixed a bug where Blizzard default nameplates were not clickable when enabled for friendly or enemy units.
 * Fixed a bug where the clickable area was to small when WorldFrame was selected as parent frame for Threat Plates.
 * Fixed a bug where the clickable area was not adjusted correctly when the parent frame for Threat Plates was switched until the UI was reloaded.
+* Fixed a bug where disabling the sync with healthbar option for the clickable area was not applied.
 * Hopefully fixed enemy nameplates incorrectly showing friendly player names instead of correct enemy names in battlegrounds and arenas on WoW Midnight [Comment #8228].
 
 ------------------------------------------------------
