@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+13.0.15 (2026-06-07)
+------------------------------------------------------
+* Fixed a Lua error that occurred when Threat Plates options were opened during combat.
+
+------------------------------------------------------
 13.0.14 (2026-06-07)
 ------------------------------------------------------
 * Fixed an issue where the target border could disappear after switching target from a distant mob (target-only nameplate) to a new target [Comment #8340].

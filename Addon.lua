@@ -77,16 +77,16 @@ if Addon.WOW_USES_CLASSIC_NAMEPLATES then
       return db.frame.width, db.frame.height
     end
     
-    SetBlizzardNameplateSize = SetNamePlateSize
-
     Addon.SetBaseNamePlateSize = function(self)
+      if InCombatLockdown() then return end
+
       local db = self.db.profile
   
       if db.ShowFriendlyBlizzardNameplates or db.ShowEnemyBlizzardNameplates or self.IsInPvEInstance then
-        SetBlizzardNameplateSize(152, 55)
+        SetNamePlateSize(152, 55)
       else
         local width, height = CalculateSynchedNameplateSize()
-        SetBlizzardNameplateSize(width, height)
+        SetNamePlateSize(width, height)
       end
   
       Addon:ConfigClickableArea(false)
@@ -112,21 +112,18 @@ if Addon.WOW_USES_CLASSIC_NAMEPLATES then
       return db.frame.width, db.frame.height
     end
     
-    -- Classic has the same nameplate size for friendly and enemy units, although separate functions are availabe.
-    -- So either set both or non at all (= set it to default values)
-    SetBlizzardNameplateSize = function(width, height)
-      SetNamePlateFriendlySize(width, height)
-      SetNamePlateEnemySize(width, height)
-    end
-
     Addon.SetBaseNamePlateSize = function(self)
+      if InCombatLockdown() then return end
+      
       local db = self.db.profile
   
       if db.ShowFriendlyBlizzardNameplates or db.ShowEnemyBlizzardNameplates or self.IsInPvEInstance then
-        SetBlizzardNameplateSize(128, 32)
+        SetNamePlateFriendlySize(128, 32)
+        SetNamePlateEnemySize(128, 32)
       else
         local width, height = CalculateSynchedNameplateSize()
-        SetBlizzardNameplateSize(width, height)
+        SetNamePlateFriendlySize(width, height)
+        SetNamePlateEnemySize(width, height)
       end
   
       Addon:ConfigClickableArea(false)
