@@ -113,7 +113,7 @@ AnimationFrame:Hide()
 -- Animation Functions
 ---------------------------------------------------------------------------------------------------
 
-function AnimationModule.CreateFlash(frame)
+local function CreateFlash(frame)
   frame.FlashAnimation = frame:CreateAnimationGroup("Flash")
   frame.FlashAnimation.FadeIn = frame.FlashAnimation:CreateAnimation("ALPHA", "FadeIn")
   frame.FlashAnimation.FadeIn:SetFromAlpha(0)
@@ -126,8 +126,8 @@ function AnimationModule.CreateFlash(frame)
   frame.FlashAnimation.FadeOut:SetOrder(1)
 end
 
-function AnimationModule.CreateFlashLoop(frame)
-  self:CreateFlash(frame)
+local function CreateFlashLoop(frame)
+  CreateFlash(frame)
 
   frame.FlashAnimation:SetScript("OnFinished", function(_, requested)
     if not requested then
@@ -138,8 +138,8 @@ end
 
 function AnimationModule.Flash(frame)
   if not frame.FlashAnimation then
-    self:CreateFlashLoop(frame)
-  end
+    CreateFlashLoop(frame)
+  end 
 
   local animation = frame.FlashAnimation
   if not animation.Playing then
