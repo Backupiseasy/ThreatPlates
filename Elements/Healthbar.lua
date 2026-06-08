@@ -17,7 +17,6 @@ local FontUpdateText, FontUpdateTextSize = Addon.Font.UpdateText, Addon.Font.Upd
 local SubscribeEvent, UnsubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Unsubscribe, Addon.EventService.Publish
 local BackdropTemplate = Addon.BackdropTemplate
 local TransliterateCyrillicLetters = Addon.Localization.TransliterateCyrillicLetters
-local UnitIsTarget = Addon.UnitIsTarget
 local UnitIsUnitTP = Addon.UnitIsUnit
 
 local _G =_G
@@ -289,7 +288,7 @@ end
 
 -- The event triggering this function is only subscribed for when target unit is enabled
 local function PlayerTargetLost(tp_frame)
-  if SettingsShowOnlyForTarget and not UnitIsTarget(tp_frame.unit.unitid) then
+  if SettingsShowOnlyForTarget and not Addon.UnitIsTarget(tp_frame.unit.unitid) then
     HideTargetUnit(tp_frame.visual.Healthbar)
   end
 end

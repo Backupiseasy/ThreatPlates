@@ -330,7 +330,8 @@ local function ChatCommandDebug(cmd_list)
     local plate = C_NamePlate.GetNamePlateForUnit("target", true)
     if not plate then return end
 
-		print(plate.TPFrame.visual.Healthbar:GetSize())
+		print("Addon.UnitIsTarget:", Addon.UnitIsTarget)
+		print("Addon.UnitIsUnit:", Addon.UnitIsUnit)
 	else
 		Addon.Logging.Error(L["Unknown option: "] .. command)
 		PrintHelp()

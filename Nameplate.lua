@@ -1207,6 +1207,8 @@ function Addon:UpdateSettings()
   TargetStyleForFriend = db.targetWidget.SoftTarget.TargetStyleForFriend
   TargetStyleForInteract = db.targetWidget.SoftTarget.TargetStyleForInteract
   
+  -- ! Addon.UnitIsTarget must be used as Addon.UnitIsTarget, storing it in a file-local variable does not work
+  -- ! as the value/reference might be change here after making it file-local!
   if TargetStyleForEnemy or TargetStyleForFriend or TargetStyleForInteract then
     Addon.TargetUnitExists = SoftTargetExists
     Addon.UnitIsTarget = UnitIsSoftTarget
@@ -1220,7 +1222,7 @@ function Addon:UpdateSettings()
   else
     UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
   end
-  
+
   ShowCastBars = db.settings.castbar.show or db.settings.castbar.ShowInHeadlineView
   
   -- ? Not sure if this is still necessary after moving registering events to Addon.lua - OnInitialize

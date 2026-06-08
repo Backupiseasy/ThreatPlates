@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+13.0.16 (2026-06-08)
+------------------------------------------------------
+* Fixed a Lua error that occurred when switching targets while target of target names were enabled [Comment ##8362].
+
+------------------------------------------------------
 13.0.15 (2026-06-07)
 ------------------------------------------------------
 * Fixed a Lua error that occurred when Flash when Expiring was enabled in the Auras Widget [GH-696].
