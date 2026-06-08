@@ -111,13 +111,16 @@ end
 function Element.UpdateSettings()
   local db = Addon.db.profile
 
-  TargetHighlightEnabledForStyle["NameOnly"] = db.targetWidget.ShowInHeadlineView
-  TargetHighlightEnabledForStyle["NameOnly-Unique"] = db.targetWidget.ShowInHeadlineView
-  TargetHighlightEnabledForStyle["dps"] = db.targetWidget.ON
-  TargetHighlightEnabledForStyle["tank"] = db.targetWidget.ON
-  TargetHighlightEnabledForStyle["normal"] = db.targetWidget.ON
-  TargetHighlightEnabledForStyle["totem"] = db.targetWidget.ON
-  TargetHighlightEnabledForStyle["unique"] = db.targetWidget.ON
+  local name_mode_enabled = db.HeadlineView.ShowTargetHighlight
+  local healthbar_mode_enabled = db.settings.highlight.show
+
+  TargetHighlightEnabledForStyle["NameOnly"] = name_mode_enabled
+  TargetHighlightEnabledForStyle["NameOnly-Unique"] = name_mode_enabled
+  TargetHighlightEnabledForStyle["dps"] = healthbar_mode_enabled
+  TargetHighlightEnabledForStyle["tank"] = healthbar_mode_enabled
+  TargetHighlightEnabledForStyle["normal"] = healthbar_mode_enabled
+  TargetHighlightEnabledForStyle["totem"] = healthbar_mode_enabled
+  TargetHighlightEnabledForStyle["unique"] = healthbar_mode_enabled
 end
 
 -- Registered in Nameplate.lua
