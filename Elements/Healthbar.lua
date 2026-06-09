@@ -361,6 +361,7 @@ function Element.PlateCreated(tp_frame)
 
   --frame:SetScript("OnSizeChanged", OnSizeChanged)
   tp_frame.visual.Healthbar = healthbar
+  tp_frame.visual.healthbar = healthbar -- for backwards compatibility with WeakAuras
 end
 
 -- Called in processing event: NAME_PLATE_UNIT_ADDED
