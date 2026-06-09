@@ -1022,7 +1022,7 @@ elseif Addon.IS_MISTS_CLASSIC then
   Addon.SetNamePlateClickThrough = function() end
 else
   Addon.SetNamePlateClickThrough = function()
-    Addon:CallbackWhenOoC(function()
+    Addon.ExecuteAfterCombatEnds(function()
       local db = Addon.db.profile
       SetNamePlateFriendlyClickThrough(db.NamePlateFriendlyClickThrough)
       SetNamePlateEnemyClickThrough(db.NamePlateEnemyClickThrough)
@@ -1178,7 +1178,7 @@ function Addon:UpdateNameplateFrameProperties()
   Addon.NameplateFrameStrata = db.FrameStrata
 
   -- Also update the nameplate size (incl. frame width/height) as the clickable area must be adjusted
-  Addon:SetBaseNamePlateSize()
+  Addon.ExecuteAfterCombatEnds(function() Addon:SetBaseNamePlateSize() end, L["Unable to change a setting while in combat."])
 end
 
 function Addon:UpdateSettings()
@@ -1274,12 +1274,20 @@ end
 
 local TaskQueueOoC = {}
 
-function Addon:CallbackWhenOoC(func, msg)
+function Addon.ExecuteAfterCombatEnds(func, msg)
   if InCombatLockdown() then
     if msg then
       Addon.Logging.Warning(msg .. L[" The change will be applied after you leave combat."])
     end
     TaskQueueOoC[#TaskQueueOoC + 1] = func
+  else
+    func()
+  end
+end
+
+function Addon.ExecuteOnlyOoC(func)
+  if InCombatLockdown() then
+    Addon.Logging.Error(L["Unable to change this setting while in combat"])
   else
     func()
   end

@@ -5856,12 +5856,12 @@ local function CreateVisibilityTab()
             type = "toggle",
             width = "full",
             set = function(info, val)
-              Addon:CallbackWhenOoC(function()
+              Addon.ExecuteOnlyOoC(function()
                 -- Not using SetValue here as it would require to upvalue info which results in an error
                 db.ShowFriendlyBlizzardNameplates = val
                 Addon:SetBaseNamePlateSize() -- adjust clickable area if switching from Blizzard plates to Threat Plate plates
                 Addon:ForceUpdate()
-              end, L["Unable to change a setting while in combat."])
+              end)
             end,
             get = GetValue,
             desc = L["Use Blizzard default nameplates for friendly nameplates and disable ThreatPlates for these units."],
@@ -5873,12 +5873,12 @@ local function CreateVisibilityTab()
             type = "toggle",
             width = "full",
             set = function(info, val)
-              Addon:CallbackWhenOoC(function()
+              Addon.ExecuteOnlyOoC(function()
                 -- Not using SetValue here as it would require to upvalue info (I think) which results in an error
                 db.ShowEnemyBlizzardNameplates = val
                 Addon:SetBaseNamePlateSize() -- adjust clickable area if switching from Blizzard plates to Threat Plate plates
                 Addon:ForceUpdate()
-              end, L["Unable to change a setting while in combat."])
+              end)
             end,
             get = GetValue,
             desc = L["Use Blizzard default nameplates for neutral and enemy nameplates and disable ThreatPlates for these units."],
@@ -6229,12 +6229,10 @@ local function CreateBlizzardSettings()
                 width = "double",
                 desc = L["The size of the clickable area is always derived from the current size of the healthbar."],
                 set = function(info, val)
-                  if InCombatLockdown() then
-                    Addon.Logging.Error(L["We're unable to change this while in combat"])
-                  else
+                  Addon.ExecuteOnlyOoC(function()
                     SetValue(info, val)
                     Addon:SetBaseNamePlateSize()
-                  end
+                  end)
                 end,
                 arg = { "settings", "frame", "SyncWithHealthbar"},
               },
@@ -6256,12 +6254,10 @@ local function CreateBlizzardSettings()
                 max = 500,
                 step = 1,
                 set = function(info, val)
-                  if InCombatLockdown() then
-                    Addon.Logging.Error(L["We're unable to change this while in combat"])
-                  else
+                  Addon.ExecuteOnlyOoC(function()
                     SetValue(info, val)
                     Addon:SetBaseNamePlateSize()
-                  end
+                  end)
                 end,
                 arg = { "settings", "frame", "width" },
                 disabled = function() return db.settings.frame.SyncWithHealthbar end,
@@ -6274,12 +6270,10 @@ local function CreateBlizzardSettings()
                 max = 100,
                 step = 1,
                 set = function(info, val)
-                  if InCombatLockdown() then
-                    Addon.Logging.Error(L["We're unable to change this while in combat"])
-                  else
+                  Addon.ExecuteOnlyOoC(function()
                     SetValue(info, val)
                     Addon:SetBaseNamePlateSize()
-                  end
+                  end)
                 end,
                 arg = { "settings", "frame", "height"},
                 disabled = function() return db.settings.frame.SyncWithHealthbar end,
@@ -6292,12 +6286,10 @@ local function CreateBlizzardSettings()
                 max = 500,
                 step = 1,
                 set = function(info, val)
-                  if InCombatLockdown() then
-                    Addon.Logging.Error(L["We're unable to change this while in combat"])
-                  else
+                  Addon.ExecuteOnlyOoC(function()
                     SetValue(info, val)
                     Addon:SetBaseNamePlateSize()
-                  end
+                  end)
                 end,
                 arg = { "settings", "frame", "widthFriend" },
                 disabled = function() return db.settings.frame.SyncWithHealthbar end,
@@ -6311,12 +6303,10 @@ local function CreateBlizzardSettings()
                 max = 100,
                 step = 1,
                 set = function(info, val)
-                  if InCombatLockdown() then
-                    Addon.Logging.Error(L["We're unable to change this while in combat"])
-                  else
+                  Addon.ExecuteOnlyOoC(function()
                     SetValue(info, val)
                     Addon:SetBaseNamePlateSize()
-                  end
+                  end)
                 end,
                 arg = { "settings", "frame", "heightFriend"},
                 disabled = function() return db.settings.frame.SyncWithHealthbar end,
@@ -6993,50 +6983,42 @@ local function CreateHealthbarOptions()
                 (Addon.WOW_USES_CLASSIC_NAMEPLATES and L["Bar Width"]) or L["Enemy Bar Width"], 
                 10, { "settings", "healthbar", "width" }, 5, 500,
                 function(info, val)
-                  if InCombatLockdown() then
-                    Addon.Logging.Error(L["We're unable to change this while in combat"])
-                  else
+                  Addon.ExecuteOnlyOoC(function()
                     SetValue(info, val)
                     Addon:SetBaseNamePlateSize()
                     -- Update Target Art widget because of border adjustments for small healthbar heights
                     Addon.Widgets:UpdateSettings("TargetArt")                    
-                  end
+                  end)
                 end),
               HeightEnemy = GetRangeEntry(
                 (Addon.WOW_USES_CLASSIC_NAMEPLATES and L["Bar Height"]) or L["Enemy Bar Height"], 
                 11, {"settings", "healthbar", "height" }, 1, 100,
                 function(info, val)
-                  if InCombatLockdown() then
-                    Addon.Logging.Error(L["We're unable to change this while in combat"])
-                  else
+                  Addon.ExecuteOnlyOoC(function()
                     SetValue(info, val)
                     Addon:SetBaseNamePlateSize()
                     -- Update Target Art widget because of border adjustments for small healthbar heights
                     Addon.Widgets:UpdateSettings("TargetArt")                    
-                  end
+                  end)
                 end),
               WidthFriendly = GetRangeEntry(L["Friend Bar Width"], 12, { "settings", "healthbar", "widthFriend" }, 5, 500,
                 function(info, val)
-                  if InCombatLockdown() then
-                    Addon.Logging.Error(L["We're unable to change this while in combat"])
-                  else
+                  Addon.ExecuteOnlyOoC(function()
                     SetValue(info, val)
                     Addon:SetBaseNamePlateSize()
                     -- Update Target Art widget because of border adjustments for small healthbar heights
                     Addon.Widgets:UpdateSettings("TargetArt")                    
-                  end
+                  end)
                 end,
                 function() return Addon.WOW_USES_CLASSIC_NAMEPLATES end),
               HeightFriendly = GetRangeEntry(L["Friend Bar Height"], 13, {"settings", "healthbar", "heightFriend" }, 1, 100,
                 function(info, val)
-                  if InCombatLockdown() then
-                    Addon.Logging.Error(L["We're unable to change this while in combat"])
-                  else
+                  Addon.ExecuteOnlyOoC(function()
                     SetValue(info, val)
                     Addon:SetBaseNamePlateSize()
                     -- Update Target Art widget because of border adjustments for small healthbar heights
                     Addon.Widgets:UpdateSettings("TargetArt")                    
-                  end
+                  end)
                 end,                
                 function() return Addon.WOW_USES_CLASSIC_NAMEPLATES end),
               Spacer1 = GetSpacerEntry(25),
@@ -7945,11 +7927,11 @@ local function CreateAnimationsOptions()
       --       width = "full",
       --       desc = L["This will reset all console variables (CVars) required for hiding nameplates to work to their default values."],
       --       func = function()
-      --         Addon:CallbackWhenOoC(function()
+      --         Addon.ExecuteOnlyOoC(function()
       --           CVars.FixCVarsForHidingNameplates()
       --           Addon.Scaling:UpdateSettings()
       --           --Addon:ForceUpdate()
-      --         end, L["Unable to change CVars for hiding nameplates while in combat."])
+      --         end)
       --       end,
       --       hidden = function() return not CVars.InvalidCVarsForHidingNameplates() end,
       --     },
@@ -10175,11 +10157,11 @@ local function CreateOptionsTable()
                       width = "full",
                       desc = L["This will reset all console variables (CVars) required for transparency for occluded units to work to their default values."],
                       func = function()
-                        Addon:CallbackWhenOoC(function()
+                        Addon.ExecuteOnlyOoC(function()
                           CVars.FixCVarsForOcclusionDetection()
                           Addon.Transparency:UpdateSettings()
                           --Addon:ForceUpdate()
-                        end, L["Unable to change CVars for transparency for occluded units while in combat."])
+                        end)
                       end,
                       hidden = function() return not CVars.InvalidCVarsForOcclusionDetection() end,
                     },

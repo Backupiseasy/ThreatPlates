@@ -204,7 +204,7 @@ function Addon:ReloadTheme()
 
   -- Do this after combat ends, not in PLAYER_ENTERING_WORLD as it won't get set if the player is on combat when
   -- that event fires.
-  Addon:CallbackWhenOoC(function() Addon:SetBaseNamePlateSize() end, L["Unable to change a setting while in combat."])
+  Addon.ExecuteAfterCombatEnds(function() Addon:SetBaseNamePlateSize() end, L["Unable to change a setting while in combat."])
   Addon.SetNamePlateClickThrough()
   
   -- Update all UI elements (frames, textures, ...)

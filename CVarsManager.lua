@@ -147,7 +147,7 @@ end
 
 function CVars:Set(cvar, value)
   if COMBAT_PROTECTED[cvar] then
-    Addon:CallbackWhenOoC(function()
+    Addon.ExecuteAfterCombatEnds(function()
       SetConsoleVariable(cvar, value)
     end, L["Unable to change the following console variable while in combat: "] .. cvar .. ". ")
   else
@@ -161,7 +161,7 @@ end
 
 function CVars:SetToDefault(cvar)
   if COMBAT_PROTECTED[cvar] then
-    Addon:CallbackWhenOoC(function()
+    Addon.ExecuteAfterCombatEnds(function()
       _G.SetCVar(cvar, GetCVarDefault(cvar))
       Addon.db.profile.CVarsBackup[cvar] = nil
     end, L["Unable to change the following console variable while in combat: "] .. cvar .. ". ")
@@ -173,7 +173,7 @@ end
 
 function CVars:Overwrite(cvar, value)
   if COMBAT_PROTECTED[cvar] then
-    Addon:CallbackWhenOoC(function()
+    Addon.ExecuteAfterCombatEnds(function()
       _G.SetCVar(cvar, value)
     end, L["Unable to change the following console variable while in combat: "] .. cvar .. ". ")
   else
