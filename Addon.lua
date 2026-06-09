@@ -54,81 +54,42 @@ Addon.PlayerIsInCombat = false
 
 -- # Nameplate Hierarchy, Anchoring, and Scaling
 if Addon.WOW_USES_CLASSIC_NAMEPLATES then
-  local SetBlizzardNameplateSize 
+  -- Classic Era, TBC, Wrath, Cata and MoP Classic share the same synced nameplate size
+  -- (friendly and enemy nameplates have a single size in these versions).
+  local function CalculateSynchedNameplateSize()
+    local db = Addon.db.profile.settings
 
-  if Addon.IS_MISTS_CLASSIC then
-    -- Classic Era, TBC, Wrath, Cata and MoP Classic share the same synced nameplate size
-    -- (friendly and enemy nameplates have a single size in these versions).
-    local function CalculateSynchedNameplateSize()
-      local db = Addon.db.profile.settings
-
-      if db.frame.SyncWithHealthbar then
-        local effective_scale = UIParent:GetEffectiveScale()
-        local ui_scale = (Addon.NameplateParentFrame == WorldFrame and effective_scale) or 1
-        
-        -- Update values in settings, so that the options dialog (clickable area) shows the correct values
-        -- Without multiplying with effective scale here (<= 1), the clickable area will be a lot wider that the nameplate width (no idea why)
-        -- When increasing width and height of base nameplate size, x offset is constant, but y offset scales with the height (no idea why)
-        -- In Classic, the nameplate parent also scales with effective scale
-        db.frame.width = (db.healthbar.width) / ui_scale
-        db.frame.height = (db.healthbar.height + 6) / ui_scale
-      end
-    
-      return db.frame.width, db.frame.height
-    end
-    
-    Addon.SetBaseNamePlateSize = function(self)
-      if InCombatLockdown() then return end
-
-      local db = self.db.profile
-  
-      if db.ShowFriendlyBlizzardNameplates or db.ShowEnemyBlizzardNameplates or self.IsInPvEInstance then
-        SetNamePlateSize(152, 55)
-      else
-        local width, height = CalculateSynchedNameplateSize()
-        SetNamePlateSize(width, height)
-      end
-  
-      Addon:ConfigClickableArea(false)
-    end    
-  else
-    -- Classic Era, TBC, Wrath, Cata and MoP Classic share the same synced nameplate size
-    -- (friendly and enemy nameplates have a single size in these versions).
-    local function CalculateSynchedNameplateSize()
-      local db = Addon.db.profile.settings
-
-      if db.frame.SyncWithHealthbar then
-        local effective_scale = UIParent:GetEffectiveScale()
-        local ui_scale = (Addon.NameplateParentFrame ~= UIParent and effective_scale) or 1
-        
-        -- Update values in settings, so that the options dialog (clickable area) shows the correct values
-        -- Without multiplying with effective scale here (<= 1), the clickable area will be a lot wider that the nameplate width (no idea why)
-        -- When increasing width and height of base nameplate size, x offset is constant, but y offset scales with the height (no idea why)
-        -- In Classic, the nameplate parent also scales with effective scale
-        db.frame.width = (db.healthbar.width * effective_scale + 10) / ui_scale
-        db.frame.height = (db.healthbar.height + 6) / ui_scale
-      end
-    
-      return db.frame.width, db.frame.height
-    end
-    
-    Addon.SetBaseNamePlateSize = function(self)
-      if InCombatLockdown() then return end
+    if db.frame.SyncWithHealthbar then
+      local effective_scale = UIParent:GetEffectiveScale()
+      local ui_scale = (Addon.NameplateParentFrame ~= UIParent and effective_scale) or 1
       
-      local db = self.db.profile
+      -- Update values in settings, so that the options dialog (clickable area) shows the correct values
+      -- Without multiplying with effective scale here (<= 1), the clickable area will be a lot wider that the nameplate width (no idea why)
+      -- When increasing width and height of base nameplate size, x offset is constant, but y offset scales with the height (no idea why)
+      -- In Classic, the nameplate parent also scales with effective scale
+      db.frame.width = (db.healthbar.width * effective_scale + 10) / ui_scale
+      db.frame.height = (db.healthbar.height + 6) / ui_scale
+    end
   
-      if db.ShowFriendlyBlizzardNameplates or db.ShowEnemyBlizzardNameplates or self.IsInPvEInstance then
-        SetNamePlateFriendlySize(128, 32)
-        SetNamePlateEnemySize(128, 32)
-      else
-        local width, height = CalculateSynchedNameplateSize()
-        SetNamePlateFriendlySize(width, height)
-        SetNamePlateEnemySize(width, height)
-      end
+    return db.frame.width, db.frame.height
+  end
   
-      Addon:ConfigClickableArea(false)
-    end    
-  end   
+  Addon.SetBaseNamePlateSize = function(self)
+    if InCombatLockdown() then return end
+    
+    local db = self.db.profile
+
+    if db.ShowFriendlyBlizzardNameplates or db.ShowEnemyBlizzardNameplates or self.IsInPvEInstance then
+      SetNamePlateFriendlySize(128, 32)
+      SetNamePlateEnemySize(128, 32)
+    else
+      local width, height = CalculateSynchedNameplateSize()
+      SetNamePlateFriendlySize(width, height)
+      SetNamePlateEnemySize(width, height)
+    end
+
+    Addon:ConfigClickableArea(false)
+  end    
 else
   Addon.SetBaseNamePlateSize = function(self)
     local db = self.db.profile.settings
