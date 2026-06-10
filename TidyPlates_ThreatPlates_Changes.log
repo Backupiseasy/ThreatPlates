@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+13.0.18 (2026-06-09)
+------------------------------------------------------
+Fixed a Lua error that occurred in when switching targets and the new target's nameplate was not yet fully initialized [GH-701].
+
+------------------------------------------------------
 13.0.17 (2026-06-09)
 ------------------------------------------------------
 * Fixed clickable area and click-through for Threat Plates in Mists Classic as WoW now uses the Midnight API for this.

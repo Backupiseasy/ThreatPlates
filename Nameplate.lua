@@ -1601,9 +1601,9 @@ local function PlayerTargetChanged(target_unitid)
   local tp_frame = plate and plate.TPFrame
   if tp_frame then
     PlatesByMetaUnit[target_unitid] = tp_frame
-    SetUnitAttributeTarget(tp_frame.unit)
-
+    
     if tp_frame.Active then
+      SetUnitAttributeTarget(tp_frame.unit)
       StyleModule.Update(tp_frame)
       PublishEvent("TargetGained", tp_frame)
     end
