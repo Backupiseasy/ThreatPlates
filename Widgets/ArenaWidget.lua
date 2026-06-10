@@ -79,6 +79,8 @@ end
 -- end
 
 local function GetUnitArenaNumber(guid)
+  if IsSecretValueTP(guid) then return end
+
   return PlayerGUIDToNumber[guid]
 
   -- If the arena id of this unit is aleady known, don't update the list. Otherweise check for new arena players/pets
@@ -269,9 +271,9 @@ function Widget:OnUnitAdded(widget_frame, unit)
   end
 
   if Settings.HideName then
-    widget_frame:GetParent().visual.Name:Hide()
+    widget_frame:GetParent().visual.NameText:Hide()
   elseif Addon.db.profile.Name.HealthbarMode.Enabled then
-    widget_frame:GetParent().visual.Name:Show()
+    widget_frame:GetParent().visual.NameText:Show()
   end
 
   widget_frame:Show()
