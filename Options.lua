@@ -3927,6 +3927,7 @@ local function CreateBossModsWidgetOptions()
     type = "group",
     childGroups = "tab",
     order = 30,
+    hidden = function() return not Addon.Widgets.Widgets.BossMods end,
     args = {
       Enable = GetEnableEntry(L["Enable Boss Mods Widget"], L["This widget shows auras from boss mods on your nameplates (since patch 7.2, hostile nameplates only in instances and raids)."], "BossModsWidget", true),
       Appearance = {
