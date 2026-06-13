@@ -113,7 +113,7 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
 end
 
 function Element.ThreatUpdate(tp_frame, unit)
-  if plate_style == "None" then
+  if tp_frame.PlateStyle == "None" then
     tp_frame.visual.ThreatGlow:Hide()
   else
     Element.PlateUnitAdded(tp_frame)
