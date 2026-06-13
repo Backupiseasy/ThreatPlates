@@ -22,7 +22,7 @@ local IsInGroup, IsInRaid, GetNumGroupMembers, GetNumSubgroupMembers = IsInGroup
 local UnitDetailedThreatSituationWrapper = Addon.UnitDetailedThreatSituationWrapper
 local FontUpdateText = Addon.Font.UpdateText
 local ThreatShowFeedback = Addon.Threat.ShowFeedback
-local TransliterateCyrillicLetters = Addon.TransliterateCyrillicLetters
+local TransliterateCyrillicLetters = Addon.Localization.TransliterateCyrillicLetters  --
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded

@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+13.0.19 (2026-06-13)
+------------------------------------------------------
+* Fixed a Lua error that occurred when tank-type threat values were enabled [Comment #8410, #8409].
+
+------------------------------------------------------
 13.0.18 (2026-06-10)
 ------------------------------------------------------
 * Fixed a Lua error that occurred in when switching targets and the new target's nameplate was not yet fully initialized [GH-701].
