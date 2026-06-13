@@ -1336,7 +1336,7 @@ local function UpdateWidgetTimeBarModeNoDuration(self, aura_frame, expiration, d
 
     local db = self.db_widget
     if db.FlashWhenExpiring and timeleft < db.FlashTime then
-      Animation:Flash(aura_frame)
+      AnimationFlash(aura_frame)
     end
 
     aura_frame.Statusbar:SetValue(timeleft * 100 / duration)

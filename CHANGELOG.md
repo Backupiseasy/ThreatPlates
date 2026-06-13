@@ -1,4 +1,4 @@
 
 # @project-version@ (@build-time@)
 
-* Fixed a Lua error caused by restrictions on secret values regarding tank information when tank-type threat values were enabled.
+* Fixed a Lua error in the Auras widget that occurred in Bar Mode with "Show Duration" disabled, or when an aura's flash-when-expiring animation triggered.
