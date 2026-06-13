@@ -22,7 +22,7 @@ local strbyte, strsub = strbyte, strsub
 local L = Addon.L
 local BackdropTemplate = Addon.BackdropTemplate
 local RGB, RGB_P, RGB_WITH_HEX = Addon.RGB, Addon.RGB_P, Addon.RGB_WITH_HEX
-local Font = Addon.Font
+local FontUpdateText = Addon.Font.UpdateText
 local MODE_FOR_STYLE, AnchorFrameTo = Addon.MODE_FOR_STYLE, Addon.AnchorFrameTo
 local CUSTOM_GLOW_FUNCTIONS, CUSTOM_GLOW_WRAPPER_FUNCTIONS = Addon.CUSTOM_GLOW_FUNCTIONS, Addon.CUSTOM_GLOW_WRAPPER_FUNCTIONS
 
@@ -71,7 +71,7 @@ local function UpdateIconFrameLayout(widget_frame, icon_frame, index)
   icon_frame.Time:SetTextColor(color.r, color.g, color.b)
 
   -- Label Text
-  Font:UpdateText(icon_frame, icon_frame.Label, Settings.LabelText)
+  FontUpdateText(icon_frame, icon_frame.Label, Settings.LabelText)
   icon_frame.Label:SetShown(Settings.LabelText.Show)
 
   icon_frame.Cooldown:SetShownSwipe(Settings.ShowCooldownSpiral, true)
