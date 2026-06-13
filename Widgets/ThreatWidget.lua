@@ -23,6 +23,7 @@ local UnitDetailedThreatSituationWrapper = Addon.UnitDetailedThreatSituationWrap
 local FontUpdateText = Addon.Font.UpdateText
 local ThreatShowFeedback = Addon.Threat.ShowFeedback
 local TransliterateCyrillicLetters = Addon.Localization.TransliterateCyrillicLetters  --
+local IsSecretValueTP = Addon.IsSecretValue
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -195,7 +196,7 @@ local function GetTankThreatPercentage(unitid, db_threat_value)
   local threat_value_text = ""
   local threat_value_delta = 0
 
-  if is_tanking then
+  if not IsSecretValueTP(is_tanking) and is_tanking then
     -- Tanking, so show difference to the 2nd player on the threat table, like: -50%
     local other_unitid, other_threat_value, other_threat_unit_name = GetTopThreatUnitBesidesPlayer(unitid, GetUnitThreatPercentage)
     if other_unitid then
@@ -225,7 +226,7 @@ local function GetTankThreatValue(unitid, db_threat_value)
   local threat_value_delta = 0
 
   -- Tanking: - second
-  if is_tanking then
+  if not IsSecretValueTP(is_tanking) and is_tanking then
     -- Tanking, so show difference to the 2nd player on the threat table, like: -1.5k
     local other_unitid, other_threat_value, other_threat_unit_name = GetTopThreatUnitBesidesPlayer(unitid, GetUnitThreatValue)
     if other_unitid then

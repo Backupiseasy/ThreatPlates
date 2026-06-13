@@ -1,4 +1,4 @@
 
 # @project-version@ (@build-time@)
 
-* Fixed a Lua error in BossMods widget that occurred when the widget was initialised for a new nameplate [Comment #8413].
+* Fixed a Lua error caused by restrictions on secret values regarding tank information when tank-type threat values were enabled.
