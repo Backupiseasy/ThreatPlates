@@ -513,13 +513,6 @@ local function FlagAuraGridForUpdate(aura_grid_update, is_crowdcontrol_aura, is_
   end
 end
 
-function Widget:UNIT_AURA(unitid, unit_aura_update_info)
-  local widget_frame = self:GetWidgetFrameForUnit(unitid)
-  if widget_frame then 
-    widget_frame.Widget:UpdateAuras(widget_frame, widget_frame.unit)
-  end
-end
-
 function Widget:UNIT_AURA(unitid, update_info)
   local widget_frame = self:GetWidgetFrameForUnit(unitid)
   if widget_frame then 

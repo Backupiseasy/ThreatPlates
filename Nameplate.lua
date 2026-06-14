@@ -52,7 +52,8 @@ local SetNamesFonts = Addon.Font.SetNamesFonts
 local StyleModule, ColorModule, ThreatModule = Addon.Style, Addon.Color, Addon.Threat
 local ScalingModule, TransparencyModule = Addon.Scaling, Addon.Transparency
 
-local ElementsPlateCreated, ElementsPlateUnitAdded, ElementsPlateUnitRemoved = Addon.Elements.PlateCreated, Addon.Elements.PlateUnitAdded, Addon.Elements.PlateUnitRemoved
+local ElementsPlateCreated, ElementsPlateUnitAdded = Addon.Elements.PlateCreated, Addon.Elements.PlateUnitAdded
+-- local ElementsPlateUnitRemoved = Addon.Elements.PlateUnitRemoved
 local ElementsUpdateStyle, ElementsUpdateSettings = Addon.Elements.UpdateStyle, Addon.Elements.UpdateSettings
 local BackdropTemplate = Addon.BackdropTemplate
 
@@ -1053,7 +1054,9 @@ local function HandlePlateUnitAdded(plate, unitid)
   -- Initialized nameplate style based on unit added
   -- ColorModule/TransparencyModule/ScalingModule are called in StyleModule.PlateUnitAdded
   StyleModule.PlateUnitAdded(tp_frame)
-  -- TODO: This is not ideal/correct as Style.Update calls ElementsUpdateStyle
+  -- Note: StyleModule.PlateUnitAdded already triggers ElementsUpdateStyle, which for some elements
+  -- (e.g. ThreatGlow) re-derives the same state that ElementsPlateUnitAdded sets up here, causing a
+  -- harmless double update for those elements on every NAME_PLATE_UNIT_ADDED.
   ElementsPlateUnitAdded(tp_frame)
 
   -- Check to see if there's a spell being cast.
@@ -1555,7 +1558,7 @@ function Addon:NAME_PLATE_UNIT_REMOVED(unitid)
     end
   end
 
-  ElementsPlateUnitRemoved(tp_frame)
+  --ElementsPlateUnitRemoved(tp_frame)
   Widgets:OnUnitRemoved(tp_frame, tp_frame.unit)
   
   WidgetContainerReset(plate)

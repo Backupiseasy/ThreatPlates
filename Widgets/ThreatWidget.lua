@@ -22,7 +22,7 @@ local IsInGroup, IsInRaid, GetNumGroupMembers, GetNumSubgroupMembers = IsInGroup
 local UnitDetailedThreatSituationWrapper = Addon.UnitDetailedThreatSituationWrapper
 local FontUpdateText = Addon.Font.UpdateText
 local ThreatShowFeedback = Addon.Threat.ShowFeedback
-local TransliterateCyrillicLetters = Addon.Localization.TransliterateCyrillicLetters  --
+local TransliterateCyrillicLetters = Addon.Localization.TransliterateCyrillicLetters
 local IsSecretValueTP = Addon.IsSecretValue
 
 local _G =_G

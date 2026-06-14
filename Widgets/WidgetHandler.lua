@@ -502,9 +502,3 @@ end
 --    end
 --  end
 --end
-
-function Addon:DebugWidgetHandler()
-  for event, _ in pairs(WidgetHandler.RegisteredEventsByWidget) do
-    Addon.Logging.Debug("    Event:", event)
-  end
-end

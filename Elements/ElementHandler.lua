@@ -57,16 +57,16 @@ function ElementHandler.PlateUnitAdded(frame)
   end
 end
 
-function ElementHandler.PlateUnitRemoved(frame)
-  if frame.PlateStyle == "None" then return end
+-- function ElementHandler.PlateUnitRemoved(frame)
+--   if frame.PlateStyle == "None" then return end
 
-  for i = 1, #ElementsPriority do
-    local element = ElementsPriority[i]
-    if element.PlateUnitRemoved then
-      element.PlateUnitRemoved(frame)
-    end
-  end
-end
+--   for i = 1, #ElementsPriority do
+--     local element = ElementsPriority[i]
+--     if element.PlateUnitRemoved then
+--       element.PlateUnitRemoved(frame)
+--     end
+--   end
+-- end
 
 function ElementHandler.UpdateStyle(frame, style)
   for i = 1, #ElementsPriority do

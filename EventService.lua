@@ -5,7 +5,8 @@ local _, Addon = ...
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local pairs, next = pairs, next
+local pairs, next, ipairs = pairs, next, ipairs
+local table_sort = table.sort
 
 -- WoW APIs
 local WorldFrame = WorldFrame
@@ -302,6 +303,60 @@ function Addon:PrintEventService()
       for subscriber, func in pairs(all_subscribers) do
         print ("      ->", subscriber.Name or subscriber)
       end
+    end
+  end
+end
+
+-- Returns a sorted list of events (WoW and internal) a subscriber is currently registered for.
+-- Unit-specific events are annotated with the unitid they were registered for.
+local function GetEventsForSubscriber(subscriber)
+  local events = {}
+
+  for event, all_subscribers in pairs(SubscribersByEvent) do
+    if all_subscribers[subscriber] then
+      events[#events + 1] = event
+    end
+  end
+
+  for unitid, event_handler_frame in pairs(RegisteredUnitEvents) do
+    for event, all_subscribers in pairs(event_handler_frame.Events) do
+      if all_subscribers[subscriber] then
+        events[#events + 1] = event .. " (" .. unitid .. ")"
+      end
+    end
+  end
+
+  table_sort(events)
+
+  return events
+end
+
+-- Prints, for each registered widget, whether it is enabled and which events it is subscribed to.
+function Addon:DebugWidgetHandler()
+  local WidgetHandler = Addon.Widgets
+
+  local widget_names = {}
+  for widget_name in pairs(WidgetHandler.Widgets) do
+    widget_names[#widget_names + 1] = widget_name
+  end
+  table_sort(widget_names)
+
+  for _, widget_name in ipairs(widget_names) do
+    local widget = WidgetHandler.Widgets[widget_name]
+
+    local status
+    if widget.TargetOnly then
+      status = WidgetHandler.EnabledTargetWidgets[widget_name] and "enabled" or "disabled"
+    elseif widget.FocusOnly then
+      status = (WidgetHandler.EnabledFocusWidget == widget) and "enabled" or "disabled"
+    else
+      status = WidgetHandler.EnabledWidgets[widget_name] and "enabled" or "disabled"
+    end
+
+    Addon.Logging.Debug(widget_name .. ":", status)
+
+    for _, event in ipairs(GetEventsForSubscriber(widget)) do
+      Addon.Logging.Debug("    Event:", event)
     end
   end
 end
