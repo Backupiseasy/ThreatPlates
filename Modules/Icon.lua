@@ -51,9 +51,9 @@ local function GetIconTexture(self)
   return (UseMasque and self.icon) or self
 end
 
-local function SetIconTexture(self, texture)
+local function SetTPIconTexture(self, texture)
   local icon_texture = self:GetIconTexture()
-
+  
   icon_texture:SetTexture(texture)
 
   if UseBorderlessIcons then
@@ -102,7 +102,7 @@ function IconModule.CreateIcon(widget, parent)
   icon.SetIconTexture = SetIconTexture
   icon.GetIconTexture = GetIconTexture
   icon.GetParentFrame = GetParentFrame
-  icon.SetTPIconTexture = SetIconTexture
+  icon.SetTPIconTexture = SetTPIconTexture
   --icon.ReSkin = ReSkin
 
   return icon
