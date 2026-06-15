@@ -492,9 +492,10 @@ local function ColorUpdate(tp_frame, color)
   healthbar.Background:SetVertexColor(color.r, color.g, color.b, 1 - SettingsHealthbar.BackgroundOpacity)
 
   -- For simplicity, border color is uneffected by marks, threat, etc.
-  local border_color  
+  local border_color
   if tp_frame.stylename == "unique" then
-    border_color = (unique_setting.UseBorderColor and unique_setting.BorderColor) or COLOR_BLACK
+    local unique_setting = tp_frame.unit.CustomPlateSettings
+    border_color = (unique_setting and unique_setting.UseBorderColor and unique_setting.BorderColor) or COLOR_BLACK
   elseif SettingsHealthbar.BorderUseForegroundColor then
     border_color = color
   else

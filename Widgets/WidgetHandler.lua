@@ -275,8 +275,8 @@ function WidgetHandler:EnableWidget(widget_name)
       if tp_frame.Active then
         local widget_frame = plate_widgets[widget_name]
 
-        widget_frame.Active = tp_frame.stylename ~= "empty" and widget:EnabledForStyle(tp_frame.stylename, tp_frame.unit)
         widget_frame.unit = tp_frame.unit
+        widget_frame.Active = tp_frame.stylename ~= "empty" and widget:EnabledForStyle(tp_frame.stylename, tp_frame.unit)
 
         if widget_frame.Active then
           widget:OnUnitAdded(widget_frame, tp_frame.unit)
@@ -430,9 +430,13 @@ function WidgetHandler:UpdateLayoutOfAllPlates(widget)
       -- might be re-used later by the game) - we need only re-evaluate active frames to check if they are again
       -- or no longer shown based on their style - after the settings change.
       if frame.Active then
-        widget_frame.Active = frame.stylename ~= "empty" and widget:EnabledForStyle(frame.stylename, widget_frame.unit)  
+        -- Keep widget_frame.unit in sync with the plate's unit, as in EnableWidget, since
+        -- frame.unit is always a valid table while the plate is Active, unlike widget_frame.unit.
+        widget_frame.unit = frame.unit
+        widget_frame.Active = frame.stylename ~= "empty" and widget:EnabledForStyle(frame.stylename, frame.unit)
+
         if widget_frame.Active then
-          widget:OnUnitAdded(widget_frame, widget_frame.unit)
+          widget:OnUnitAdded(widget_frame, frame.unit)
         else
           widget_frame:Hide()
         end
