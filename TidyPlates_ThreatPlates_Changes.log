@@ -1,4 +1,4 @@
-﻿------------------------------------------------------
+------------------------------------------------------
 13.0.22 (2026-06-15)
 ------------------------------------------------------
 * Fixed a Lua error in the Auras widget that occurred in Bar Mode with "Show Duration" disabled, or when an aura's flash-when-expiring animation triggered.
@@ -6,6 +6,7 @@
 * Fixed a Lua error on custom styles using the healthbar style [Comment #8438].
 * Fixed a Lua error that occurred when opening the options while a custom styles with an icon was shown [Comment #8439].
 * Fixed a bug where icons for custom styles and class icons were not displayed due to incorrect internal texture handling.
+* Hopefully fixed a bug preventing arena numbers from working in WoW Midnight [Comment #8310, GH-645].
 
 ------------------------------------------------------
 13.0.21 (2026-06-13)

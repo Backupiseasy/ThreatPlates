@@ -18,7 +18,6 @@ local pairs = pairs
 local IsInInstance = IsInInstance
 local UnitExists = UnitExists
 local IsInBrawl = C_PvP.IsInBrawl
-local UnitIsUnit = UnitIsUnit
 local UnitInParty = UnitInParty
 local UnitName = UnitName
 local MAX_ARENA_ENEMIES = MAX_ARENA_ENEMIES or 5 -- MAX_ARENA_ENEMIES is not defined in Wrath Clasic
@@ -28,6 +27,7 @@ local GetAddOnEnableState = (C_AddOns and C_AddOns.GetAddOnEnableState)
 
 -- ThreatPlates APIs
 local IsSecretValueTP = Addon.IsSecretValue
+local UnitIsUnitTP = Addon.UnitIsUnit
 local FontUpdateText = Addon.Font.UpdateText
 
 local _G =_G
@@ -78,14 +78,23 @@ end
 --   end
 -- end
 
-local function GetUnitArenaNumber(guid)
-  if IsSecretValueTP(guid) then return end
+local function GetUnitArenaNumber(unit)
+  local guid = unit.guid
+  if not IsSecretValueTP(guid) then
+    local arena_no = PlayerGUIDToNumber[guid]
+    if arena_no then 
+      return arena_no 
+    end
+  end
 
-  return PlayerGUIDToNumber[guid]
-
-  -- If the arena id of this unit is aleady known, don't update the list. Otherweise check for new arena players/pets
-  -- GetArenaOpponents()
-  --return ArenaID[guid]
+  -- Fallback: try a direct UnitIsUnit comparison if the GUID lookup failed (e.g. UnitGUID
+  -- returned a secret value when ARENA_OPPONENT_UPDATE fired). UnitIsUnitTP returns false
+  -- for secret results, so this degrades gracefully in fully-restricted contexts.
+  for unitid, num in pairs(ArenaUnitIdToNumber) do
+    if UnitIsUnitTP(unitid, unit.unitid) then
+      return num
+    end
+  end
 end
 
 local function GetFrameSortNumber(unitId)
@@ -105,7 +114,7 @@ local function GetFrameSortNumber(unitId)
   local units = UnitInParty(unitId) and fs.Sorting:GetFriendlyUnits() or fs.Sorting:GetEnemyUnits()
 
   for frameNumber, unit in ipairs(units) do
-    if UnitIsUnit(unitId, unit) then
+    if UnitIsUnitTP(unitId, unit) then
       return frameNumber
     end
   end
@@ -123,6 +132,17 @@ function Widget:PLAYER_ENTERING_WORLD()
     self:SubscribeEvent("ARENA_OPPONENT_UPDATE")
     -- Register GROUP_ROSTER_UPDATE here is it only should be used while in an arena, not in, e.g., a dungeon.
     self:SubscribeEvent("GROUP_ROSTER_UPDATE")
+
+    -- Scan arena unit tokens immediately. During the prep phase UnitGUID may still
+    -- return real (non-secret) values, so capture them before PvP restrictions activate.
+    for unitid, num in pairs(ArenaUnitIdToNumber) do
+      if UnitExists(unitid) then
+        local guid = _G.UnitGUID(unitid)
+        if guid and not IsSecretValueTP(guid) then
+          PlayerGUIDToNumber[guid] = num
+        end
+      end
+    end
   else
     self:UnsubscribeEvent("ARENA_OPPONENT_UPDATE")
     self:UnsubscribeEvent("GROUP_ROSTER_UPDATE")
@@ -131,10 +151,6 @@ function Widget:PLAYER_ENTERING_WORLD()
     PlayerGUIDToNumber = {}
     --ArenaID = {} -- Clear the table when we leave
   end
-end
-
-function Widget:PVP_MATCH_ACTIVE()
-  PlayerGUIDToNumber = {}
 end
 
 -- function Widget:ARENA_PREP_OPPONENT_SPECIALIZATIONS()
@@ -218,7 +234,6 @@ end
 
 function Widget:OnEnable()
   self:SubscribeEvent("PLAYER_ENTERING_WORLD")
-  self:SubscribeEvent("PVP_MATCH_ACTIVE")
 
   self:PLAYER_ENTERING_WORLD()
 end
@@ -237,32 +252,31 @@ function Widget:OnUnitAdded(widget_frame, unit)
     return
   end
 
-  local arena_no = GetUnitArenaNumber(unit.guid)
-
+  local arena_no = GetUnitArenaNumber(unit)
   if not arena_no then
     widget_frame:Hide()
     return
   end
 
-  local settings = SettingsByTeam[unit.reaction]
+  local settings_by_team = SettingsByTeam[unit.reaction]
 
-  if settings.UseFrameSort then
+  if settings_by_team.UseFrameSort then
     local fsNumber = GetFrameSortNumber(unit.unitid)
     arena_no = fsNumber or arena_no
   end
 
   widget_frame.Random = arena_no
 
-  if settings.ShowOrb then
-    local icon_color = settings.OrbColors[arena_no]
+  if settings_by_team.ShowOrb then
+    local icon_color = settings_by_team.OrbColors[arena_no]
     widget_frame.Icon:SetVertexColor(icon_color.r, icon_color.g, icon_color.b, icon_color.a)
     widget_frame.Icon:Show()
   else
     widget_frame.Icon:Hide()
   end
 
-  if settings.ShowNumber then
-    local number_color = settings.NumberColors[arena_no]
+  if settings_by_team.ShowNumber then
+    local number_color = settings_by_team.NumberColors[arena_no]
     widget_frame.NumText:SetTextColor(number_color.r, number_color.g, number_color.b)
     widget_frame.NumText:SetText(arena_no)
     widget_frame.NumText:Show()
@@ -270,7 +284,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
     widget_frame.NumText:Hide()
   end
 
-  if Settings.HideName then
+  if settings_by_team.HideName then
     widget_frame:GetParent().visual.NameText:Hide()
   elseif Addon.db.profile.Name.HealthbarMode.Enabled then
     widget_frame:GetParent().visual.NameText:Show()
