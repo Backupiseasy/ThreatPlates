@@ -1,5 +1,5 @@
 ﻿------------------------------------------------------
-13.0.22 (2026-06-13)
+13.0.22 (2026-06-15)
 ------------------------------------------------------
 * Fixed a Lua error in the Auras widget that occurred in Bar Mode with "Show Duration" disabled, or when an aura's flash-when-expiring animation triggered.
 * Fixed the threat glow border being shown on hidden nameplates (like totems without healthbar) in combat.
