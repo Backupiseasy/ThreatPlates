@@ -1,4 +1,4 @@
-## Interface: 120005
+## Interface: 120007
 
 ## Title: Threat Plates
 ## Version: @project-version@
