@@ -65,6 +65,7 @@ local WOW_EVENTS = {
   UNIT_AURA = true,
   UNIT_DISPLAYPOWER = true,
   UNIT_FACTION = true,
+  UNIT_FLAGS = true,
   UNIT_HEAL_ABSORB_AMOUNT_CHANGED = Addon.WOW_FEATURE_ABSORBS, -- Absorbs (or at least absorbs functions) were added in Mists
   UNIT_HEALTH = Addon.ExpansionIsAtLeastMists, -- Shadowlands Patch 9.0.1 (2020-10-13): Fully replaces UNIT_HEALTH_FREQUENT
   UNIT_HEALTH_FREQUENT = not Addon.ExpansionIsAtLeastMists,

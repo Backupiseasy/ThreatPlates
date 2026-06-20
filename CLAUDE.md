@@ -83,9 +83,15 @@ Central pub/sub for both real WoW events and internal TP events (`INTERNAL_EVENT
   the unit-added path must check `tp_frame.Active` first.
 - `PlayerTargetChanged(...)` is the shared handler for `PLAYER_TARGET_CHANGED`, `PLAYER_SOFT_FRIEND_CHANGED`,
   `PLAYER_SOFT_ENEMY_CHANGED`, and `PLAYER_SOFT_INTERACT_CHANGED`.
-- WoW script handlers (`OnShow`/`OnHide`/`OnEvent`) can fire **synchronously** inside another handler when a
-  C-side API like `Frame:Show()` is called — don't assume strictly sequential handler ordering when reasoning
-  about re-entrancy (e.g. target-change vs. nameplate-creation races).
+- **Stale unit data after nameplate recycling**: WoW can reassign a nameplate's unit token to a different unit
+  without firing `NAME_PLATE_UNIT_REMOVED` first, and `UNIT_FACTION`/`UNIT_FLAGS` can fire before the client has
+  actually received the server's updated name/health/GUID for that token (confirmed independently by Plater's
+  `Plater.ScheduleUpdateForNameplate`, which documents the same client/server sync lag). Symptom: a nameplate
+  shows the previous occupant's name and/or health (frozen, not updating) — reported in battlegrounds, arenas,
+  and raids [Comment #8228, #8363, #8408, #8433]. Mitigated by `ScheduleNameplateRevalidation(plate, unitid,
+  delay)` in `Nameplate.lua`, which re-runs `HandlePlateUnitAdded` after a short delay (0 frames for
+  `UNIT_FACTION`/`UNIT_FLAGS`, 0.5s for a detected double `NAME_PLATE_UNIT_ADDED` without an intervening
+  `REMOVED`), guarded against the plate having legitimately moved on in the meantime.
 
 ### Visual pipeline: Styles → Modules → Elements → Widgets
 

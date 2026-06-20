@@ -300,7 +300,7 @@ local function GetThreatPercentageDelta(unitid, db_threat_value)
   end
 end
 
-local THREAT_DETAILS_FUNTIONS = {
+local THREAT_DETAILS_FUNCTIONS = {
   SCALED_PERCENTAGE = function(unitid)
     local _, status, scaled_percentage, _, _ =  UnitDetailedThreatSituationWrapper("player", unitid)
     if status then 
@@ -402,7 +402,7 @@ end
 function Widget:UpdateLayout(widget_frame)
   -- widget_frame:ClearAllPoints()
   widget_frame:SetAllPoints(widget_frame:GetParent())
-
+  
   FontUpdateText(widget_frame, widget_frame.Percentage, Settings.ThreatPercentage)
 end
 
@@ -413,5 +413,5 @@ function Widget:UpdateSettings()
 
   ShowSecondPlayersName = Settings.ThreatPercentage.SecondPlayersName
 
-  ThreatDetailsFunction = THREAT_DETAILS_FUNTIONS[Settings.ThreatPercentage.Type]
+  ThreatDetailsFunction = THREAT_DETAILS_FUNCTIONS[Settings.ThreatPercentage.Type]
 end

@@ -1,4 +1,9 @@
 ------------------------------------------------------
+13.0.24 (2026-06-20)
+------------------------------------------------------
+* Fixed a bug where nameplates could show the wrong name and health (from a previous unit) after faction/reaction changes or nameplate recycling, primarily in battlegrounds, arenas, and raids [Comment #8228, #8363, #8408, #8433].
+
+------------------------------------------------------
 13.0.23 (2026-06-17)
 ------------------------------------------------------
 * Updated TOC version for Patch 12.0.7 for WoW Mainline.
