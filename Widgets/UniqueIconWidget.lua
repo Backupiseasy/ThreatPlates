@@ -2,7 +2,6 @@
 -- Unique Icon Widget
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
-local ThreatPlates = Addon.ThreatPlates
 
 local Widget = Addon.Widgets:NewWidget("UniqueIcon")
 
@@ -15,11 +14,11 @@ local type = type
 local pairs = pairs
 
 -- WoW APIs
-local PlatesByUnit = Addon.PlatesByUnit
-local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
+local SetStyle = Addon.Style.SetStyle
 
 -- ThreatPlates APIs
 local CUSTOM_GLOW_FUNCTIONS, CUSTOM_GLOW_WRAPPER_FUNCTIONS = Addon.CUSTOM_GLOW_FUNCTIONS, Addon.CUSTOM_GLOW_WRAPPER_FUNCTIONS
+local RegisterMasqueGroup, IconCreateIcon = Addon.Icon.RegisterMasqueGroup, Addon.Icon.CreateIcon
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -35,20 +34,22 @@ local DefaultGlowColor
 -- Widget functions for creation and update
 ---------------------------------------------------------------------------------------------------
 function Widget:Create(tp_frame)
-  -- Required Widget Code
   local widget_frame = _G.CreateFrame("Frame", nil, tp_frame)
   widget_frame:Hide()
 
   -- Custom Code
   --------------------------------------
   widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 14)
-  widget_frame.Icon = widget_frame:CreateTexture(nil, "ARTWORK")
-  widget_frame.Icon:SetAllPoints(widget_frame)
 
   widget_frame.Highlight = _G.CreateFrame("Frame", nil, widget_frame)
   widget_frame.Highlight:SetFrameLevel(tp_frame:GetFrameLevel() + 15)
-
   widget_frame.HighlightStop = Addon.LibCustomGlow.PixelGlow_Stop
+
+  widget_frame.Icon = IconCreateIcon(self, widget_frame) 
+  widget_frame.Icon:SetAllPoints()
+
+  widget_frame.HighlightBorder = widget_frame.Icon:GetParentFrame():CreateTexture(nil, "OVERLAY")
+  widget_frame.HighlightBorder:SetAllPoints(widget_frame.Icon:GetIconTexture())
   --------------------------------------
   -- End Custom Code
 
@@ -59,34 +60,38 @@ function Widget:IsEnabled()
   return Addon.UseUniqueWidget -- self.ON is also checked when scanning all custom nameplates
 end
 
+local function SetPortraitTexture(icon, unitid)
+  local icon_texture = icon:GetIconTexture()
+  _G.SetPortraitTexture(icon_texture, unitid)
+  icon_texture:SetTexCoord(0.14644660941, 0.85355339059, 0.14644660941, 0.85355339059)
+end
+
 -- Especially when entering an instance, the portrait might not yet be loaded, when OnUnitAdded is called.
 -- So, we have to listen for this event to update it when the portrait is available.
 function Widget:UNIT_PORTRAIT_UPDATE(unitid)
   if unitid == "player" or unitid == "target" then return end
 
-  local plate = GetNamePlateForUnit(unitid)
-  if plate and plate.TPFrame.Active then
-    local widget_frame = plate.TPFrame.widgets.UniqueIcon
-    if widget_frame.Active then
-      local unique_setting = plate.TPFrame.unit.CustomPlateSettings
-      if unique_setting and self.db.ON and unique_setting.showIcon and unique_setting.UseAutomaticIcon then
-        local icon = widget_frame.Icon
-        _G.SetPortraitTexture(icon, unitid)
-        icon:SetTexCoord(0.14644660941, 0.85355339059, 0.14644660941, 0.85355339059)
-      end
+  local widget_frame = self:GetWidgetFrameForUnit(unitid)
+  if widget_frame then
+    local unique_setting = widget_frame.unit.CustomPlateSettings
+    if unique_setting and self.db.ON and unique_setting.showIcon and unique_setting.UseAutomaticIcon then
+      SetPortraitTexture(widget_frame.Icon, unitid)
     end
   end
 end
 
-
 function Widget:OnEnable()
-  self:RegisterEvent("UNIT_PORTRAIT_UPDATE")
+  self:SubscribeEvent("UNIT_PORTRAIT_UPDATE")
+  -- Update the unique icon widget and style may be the same, but a different trigger might be active, e.g.,
+  -- if two aura triggers fired
+  self:SubscribeEvent("StyleUpdate")
+
+  RegisterMasqueGroup(self, "Custom Style")
 end
 
-function Widget:OnDisable()
-  self:UnregisterEvent("UNIT_PORTRAIT_UPDATE")
-end
-
+-- function Widget:OnDisable()
+--   self:UnsubscribeAllEvents()
+-- end
 
 function Widget:EnabledForStyle(style, unit)
   return style ~= "empty" -- (style == "unique" or style == "NameOnly-Unique" or style == "etotem")
@@ -95,6 +100,10 @@ end
 ---------------------------------------------------------------------------------------------------
 -- Aura Highlighting
 ---------------------------------------------------------------------------------------------------
+
+local function UpdateIconTexture(widget_frame, icon_texture, unique_setting)
+  widget_frame.Icon:SetTPIconTexture(icon_texture)
+end
 
 function Widget:OnUnitAdded(widget_frame, unit)
   local unique_setting = unit.CustomPlateSettings
@@ -116,31 +125,34 @@ function Widget:OnUnitAdded(widget_frame, unit)
       widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
     end
 
-    -- Updates based on settings
     widget_frame:SetSize(db.scale, db.scale)
 
-    local icon_texture = unique_setting.icon
     local icon = widget_frame.Icon
     if unique_setting.UseAutomaticIcon then
       if unique_setting.Trigger.Type == "Name" then
-        _G.SetPortraitTexture(icon, unit.unitid)
-        icon:SetTexCoord(0.14644660941, 0.85355339059, 0.14644660941, 0.85355339059)
-        --icon:SetTexCoord(0.15, 0.85, 0.15, 0.85)
+        SetPortraitTexture(widget_frame.Icon, unit.unitid)
       else
-        icon:SetTexture(unique_setting.AutomaticIcon or icon_texture)
-        icon:SetTexCoord(0, 1, 0, 1)
+        UpdateIconTexture(widget_frame, unique_setting.AutomaticIcon or unique_setting.icon, unique_setting)
       end
-    elseif type(icon_texture) == "string" and icon_texture:sub(-4) == ".blp" then
-      icon:SetTexture("Interface\\Icons\\" .. unique_setting.icon)
-      icon:SetTexCoord(0, 1, 0, 1)
     else
-      icon:SetTexture(icon_texture)
-      icon:SetTexCoord(0, 1, 0, 1)
+      local icon_texture = unique_setting.icon
+      if type(icon_texture) == "string" and icon_texture:sub(-4) == ".blp" then
+        icon_texture = "Interface\\Icons\\" .. unique_setting.icon
+      end
+      UpdateIconTexture(widget_frame, icon_texture, unique_setting)
+    end
+
+    if unique_setting.ShowHighlightBorder then
+      widget_frame.HighlightBorder:SetTexture(Addon.PATH_ARTWORK .. "HighlightBorder")
+      widget_frame.HighlightBorder:Show()
+    else
+      widget_frame.HighlightBorder:Hide()
     end
 
     icon:Show()
   else
     widget_frame.Icon:Hide()
+    widget_frame.HighlightBorder:Hide()
   end
 
   local glow_highlight = unique_setting.Effects.Glow
@@ -156,11 +168,11 @@ function Widget:OnUnitAdded(widget_frame, unit)
   local visual = widget_frame:GetParent().visual
   local frame_level_offset = 0
   if glow_frame == "Healthbar" and style.healthbar.show then
-    anchor_frame = visual.healthbar.Border
+    anchor_frame = visual.Healthbar.Border
     -- For healthbar, the Border glow should be shown above the healthbar (border is -1 framelevel)
     frame_level_offset = (glow_highlight.Type == "Button" and 1) or 0
-  elseif glow_frame == "Castbar" and style.castbar.show then
-    anchor_frame = visual.castbar.Border
+  elseif glow_frame == "Castbar" and style.Castbar.show then
+    anchor_frame = visual.Castbar.Border
   elseif glow_frame == "Icon" and show_icon then
     anchor_frame = widget_frame
   end
@@ -186,7 +198,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
   end
 end
 
-function Addon.UpdateCustomStyleIcon(tp_frame, unit)
+function Widget:StyleUpdate(tp_frame, unit)
   local widget_frame = tp_frame.widgets.UniqueIcon
   if widget_frame and widget_frame.Active then
     Widget:OnUnitAdded(widget_frame, unit)
@@ -199,15 +211,15 @@ function Widget:UpdateLayout(widget_frame)
 
   -- Update the style as custom nameplates might have been changed and some units no longer
   -- may be unique
+  -- TODO: This should not be done this way. It would be better to handle
+  -- TODO: a custom nameplate update in Nameplate.lua by re-styling all nameplates
   if widget_frame:GetParent().Active and widget_frame.Active then
-    Addon:SetStyle(widget_frame.unit)
+    SetStyle(widget_frame.unit)
   end
 end
 
--- Load settings from the configuration which are shared across all aura widgets
--- used (for each widget) in UpdateWidgetConfig
 function Widget:UpdateSettings()
   self.db = Addon.db.profile.uniqueWidget
 
-  DefaultGlowColor = ThreatPlates.DEFAULT_SETTINGS.profile.uniqueSettings["**"].Effects.Glow.Color
+  DefaultGlowColor = Addon.DEFAULT_SETTINGS.profile.uniqueSettings["**"].Effects.Glow.Color
 end

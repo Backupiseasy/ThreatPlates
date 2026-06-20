@@ -1,7 +1,6 @@
 local _, Addon = ...
-local t = Addon.ThreatPlates
 
-local EMPTY_TEXTURE = t.Art .. "Empty"
+local EMPTY_TEXTURE = Addon.PATH_ARTWORK .. "Empty"
 
 local function Create(name)
 	local db = Addon.db.profile.settings
@@ -16,21 +15,23 @@ local function Create(name)
 		healthbar = {
 			texture = EMPTY_TEXTURE,
 			backdrop = EMPTY_TEXTURE,
-			width = 120,
-			height = 10,
 			x = 0,
 			y = 0,
 			anchor = "CENTER",
 			orientation = "HORIZONTAL",
 			show = false,
-		},
-
-		healthbarFriendly = {
-			width = 120,
-			height = 10,
-			x = 0,
-			y = 0,
-			anchor = "CENTER",
+			HOSTILE = {
+				width = 120,
+				height = 10,
+      },
+      NEUTRAL = {
+				width = 120,
+				height = 10,
+      },
+      FRIENDLY = {
+				width = 120,
+				height = 10,
+      },
 		},
 
 		healthborder = {
@@ -56,11 +57,6 @@ local function Create(name)
 			x = 0,
 			y = 0,
 			anchor = "CENTER",
-      -- Texture Coordinates
-      left = 0,
-      right = 1,
-      top = 0,
-      bottom = 1,
 		},
 
 		highlight = {
@@ -93,21 +89,6 @@ local function Create(name)
 			show = false,
 		},
 
-		name = {
-			typeface =						Addon.LibSharedMedia:Fetch('font', db.name.typeface),
-			size = db.name.size,
-			width = db.name.width,
-			height = db.name.height,
-			x = db.name.x,
-			y = db.name.y,
-			align = db.name.align,
-			anchor = "CENTER",
-			vertical = db.name.vertical,
-			shadow = false,
-			flags = db.spelltext.flags,
-			show = false,
-		},
-
 		level = {
 			typeface =						Addon.LibSharedMedia:Fetch('font', db.level.typeface),
 			size = db.level.size,
@@ -119,21 +100,6 @@ local function Create(name)
 			anchor = "CENTER",
 			vertical = db.level.vertical,
 			shadow = false,
-			flags = db.spelltext.flags,
-			show = false,
-		},
-
-		customtext = {
-			typeface =						Addon.LibSharedMedia:Fetch('font', db.customtext.typeface),
-			size = db.customtext.size,
-			width = db.customtext.width,
-			height = db.customtext.height,
-			x = db.customtext.x,
-			y = db.customtext.y,
-			align = db.customtext.align,
-			anchor = "CENTER",
-			vertical = db.customtext.vertical,
-			shadow = true,
 			flags = db.spelltext.flags,
 			show = false,
 		},
@@ -171,11 +137,6 @@ local function Create(name)
 			x = 0,
 			y = 0,
 			anchor = "CENTER",
-			-- Texture Coordinates
-			left = 0,
-			right = 1,
-			top = 0,
-			bottom = 1,
 		},
 
 		spellicon = {
@@ -191,19 +152,12 @@ local function Create(name)
 		raidicon = {
 			show = false,
 			-- Not used:
-      texture = EMPTY_TEXTURE,
 			width = (db.raidicon.scale),
 			height = (db.raidicon.scale),
 			x = (db.raidicon.x),
 			y = (db.raidicon.y),
 			anchor = "CENTER", --(db.raidicon.anchor),
 		},
-
-		threatcolor = {
-			LOW = { r = 0, g = 0, b = 0, a = 0 },
-			MEDIUM = { r = 0, g = 0, b = 0, a = 0 },
-			HIGH = { r = 0, g = 0, b = 0, a = 0 },
-		}
 	}
 	return theme
 end

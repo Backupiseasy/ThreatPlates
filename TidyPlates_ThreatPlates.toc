@@ -1,10 +1,10 @@
-## Interface: 110207
-## Interface-Retail: 110207
+## Interface: 120007
+## Interface-Retail: 120007
 ## Interface-Vanilla: 11508
 ## Interface-TBC: 20505
 ## Interface-Wrath: 30405
 ## Interface-Cata: 40402
-## Interface-Mists: 50502
+## Interface-Mists: 50504
 
 ## Title: Threat Plates
 ## Version: @project-version@
@@ -35,10 +35,10 @@
 ## OptionalDeps: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate, LibDualSpec-1.0
 ## X-Embeds: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate, LibDualSpec-1.0
 #@end-version-classic@
-#@version-bcc@
+#@version-tbc@
 ## OptionalDeps: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate, LibDualSpec-1.0
 ## X-Embeds: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate, LibDualSpec-1.0
-#@end-version-bcc@
+#@end-version-tbc@
 #@version-wrath@
 ## OptionalDeps: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate, LibDualSpec-1.0
 ## X-Embeds: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate, LibDualSpec-1.0
@@ -58,24 +58,26 @@
 Libs\Libs.xml
 Locales\Locales.xml
 
+ThreatPlates.xml
+
 Init.lua
+Debug.lua
 Compatibility.lua
-Localization.lua
+Modules\Localization.lua
+EventService.lua
 CVarsManager.lua
 Media.lua
 Constants.lua
+Modules\Modules.xml
 Elements\Elements.xml
-
 Widgets\WidgetHandler.lua
 
-# Integration of TidyPlates for standalone version
-TidyPlatesInternal\TidyPlates.xml
-
+Nameplate.lua
 Database.lua
-Core.lua
+Addon.lua
 Commands.lua
+AceGUIPreviewImage.lua
 Options.lua
 
 Styles\Styles.xml
-Functions\Functions.xml
 Widgets\Widgets.xml

@@ -7,6 +7,8 @@ local ADDON_NAME, Addon = ...
 -- Lua APIs
 
 -- WoW APIs
+local EvaluateColorValueFromBoolean = C_CurveUtil and C_CurveUtil.EvaluateColorValueFromBoolean
+local CreateColor = CreateColor
 
 -- ThreatPlates APIs
 
@@ -25,7 +27,7 @@ local WOW_EVENTS = {
   BN_CONNECTED = true,
   BN_FRIEND_ACCOUNT_OFFLINE = true,
   BN_FRIEND_ACCOUNT_ONLINE = true,
-  COMBAT_LOG_EVENT_UNFILTERED = true,
+  COMBAT_LOG_EVENT_UNFILTERED = not Addon.ExpansionIsAtLeastMidnight, -- Removed in Midnight
   FRIENDLIST_UPDATE = true,
   GUILD_ROSTER_UPDATE = true,
   GROUP_LEFT = true,
@@ -40,7 +42,7 @@ local WOW_EVENTS = {
   PLAYER_FLAGS_CHANGED = true,
   PLAYER_FOCUS_CHANGED = Addon.ExpansionIsAtLeastTBC,
   PLAYER_LOGIN = true,
-  PLAYER_MAP_CHANGED = Addon.IS_MAINLINE, -- Added in 11.0.0 (TWW)
+  PLAYER_MAP_CHANGED = Addon.ExpansionIsAtLeastTWW, -- Added in 11.0.0 (TWW)
   PLAYER_REGEN_DISABLED = true,
   PLAYER_REGEN_ENABLED = true,
   PLAYER_SOFT_ENEMY_CHANGED = true,
@@ -59,11 +61,12 @@ local WOW_EVENTS = {
   RUNE_UPDATED = Addon.IS_CLASSIC_SOD, -- Only needed for Rogue rune detection in SoD Classic
   TRAIT_CONFIG_UPDATED = Addon.ExpansionIsAtLeastCata, 
   UI_SCALE_CHANGED = true,
-  UNIT_ABSORB_AMOUNT_CHANGED = Addon.WOW_FEATURE_ABSORBS,       -- Absorbs should have been added with Mists
+  UNIT_ABSORB_AMOUNT_CHANGED = Addon.WOW_FEATURE_ABSORBS, -- Absorbs (or at least absorbs functions) were added in Mists
   UNIT_AURA = true,
   UNIT_DISPLAYPOWER = true,
   UNIT_FACTION = true,
-  UNIT_HEAL_ABSORB_AMOUNT_CHANGED = Addon.WOW_FEATURE_ABSORBS,  -- Absorbs should have been added with Mists
+  UNIT_FLAGS = true,
+  UNIT_HEAL_ABSORB_AMOUNT_CHANGED = Addon.WOW_FEATURE_ABSORBS, -- Absorbs (or at least absorbs functions) were added in Mists
   UNIT_HEALTH = Addon.ExpansionIsAtLeastMists, -- Shadowlands Patch 9.0.1 (2020-10-13): Fully replaces UNIT_HEALTH_FREQUENT
   UNIT_HEALTH_FREQUENT = not Addon.ExpansionIsAtLeastMists,
   UNIT_LEVEL = true,
@@ -79,6 +82,9 @@ local WOW_EVENTS = {
   UNIT_SPELLCAST_CHANNEL_STOP = true,
   UNIT_SPELLCAST_CHANNEL_UPDATE = true,
   UNIT_SPELLCAST_DELAYED = true,
+  UNIT_SPELLCAST_INTERRUPTED = Addon.ExpansionIsAtLeastMidnight, 
+  --UNIT_SPELLCAST_FAILED = Addon.ExpansionIsAtLeastMidnight, 
+  --UNIT_SPELLCAST_FAILED_QUIET = Addon.ExpansionIsAtLeastMidnight, 
   UNIT_SPELLCAST_EMPOWER_START = Addon.ExpansionIsAtLeastDF,
   UNIT_SPELLCAST_EMPOWER_STOP = Addon.ExpansionIsAtLeastDF,
   UNIT_SPELLCAST_EMPOWER_UPDATE = Addon.ExpansionIsAtLeastDF,
@@ -86,8 +92,10 @@ local WOW_EVENTS = {
   UNIT_SPELLCAST_NOT_INTERRUPTIBLE = true,
   UNIT_SPELLCAST_START = true,
   UNIT_SPELLCAST_STOP = true,
+  UNIT_SPELLCAST_SENT = Addon.ExpansionIsAtLeastMidnight,
   UNIT_TARGET = true,
   UNIT_THREAT_LIST_UPDATE = true,
+  UNIT_THREAT_SITUATION_UPDATE = true,
   UPDATE_BATTLEFIELD_SCORE = Addon.ExpansionIsAtLeastCata,
   UPDATE_MOUSEOVER_UNIT = true,
   UPDATE_SHAPESHIFT_FORM = true,  
@@ -194,5 +202,34 @@ else
     
     return TooltipScannerData
   end
+end
 
+-- Quest widget is not available in Classic (Vanilla, TBC, Wrath)
+if not Addon.ExpansionIsAtLeastMists then
+  Addon.ShowQuestUnit = function(...) return false end
+end
+
+---------------------------------------------------------------------------------------------------
+-- Midnight
+---------------------------------------------------------------------------------------------------
+
+Addon.IsSecretValue = _G.issecretvalue or function() return false end
+
+-- Safe wrapper for UnitIsUnit: returns false instead of a secret value when the result is restricted.
+-- Use this instead of the raw UnitIsUnit() call wherever the result is used in a boolean context.
+if Addon.ExpansionIsAtLeastMidnight then
+  function Addon.UnitIsUnit(unit1, unit2)
+    local result = UnitIsUnit(unit1, unit2)
+    return not Addon.IsSecretValue(result) and result
+  end
+else
+  Addon.UnitIsUnit = UnitIsUnit
+end
+
+function Addon.EvaluateColorValueFromBoolean(boolean, color_if_true, color_if_false)
+  local r = EvaluateColorValueFromBoolean(boolean, color_if_true.r, color_if_false.r)
+  local g = EvaluateColorValueFromBoolean(boolean, color_if_true.g, color_if_false.g)
+  local b = EvaluateColorValueFromBoolean(boolean, color_if_true.b, color_if_false.b)
+  local a = EvaluateColorValueFromBoolean(boolean, color_if_true.a, color_if_false.a)
+  return CreateColor(r, g, b, a)
 end

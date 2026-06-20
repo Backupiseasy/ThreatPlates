@@ -1,7 +1,8 @@
 local ADDON_NAME, Addon = ...
-local ThreatPlates = Addon.ThreatPlates
 
-local Widget = (Addon.ExpansionIsAtLeastBfA and Addon.Widgets:NewWidget("Experience")) or {}
+if not Addon.ExpansionIsAtLeastBfA then return end
+
+local Widget = Addon.Widgets:NewWidget("Experience")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -107,13 +108,12 @@ function Widget:IsEnabled()
 end
 
 function Widget:OnEnable()
-  self:RegisterEvent("UPDATE_UI_WIDGET")
+  self:SubscribeEvent("UPDATE_UI_WIDGET")
 end
 
-function Widget:OnDisable()
-  self:UnregisterEvent("UPDATE_UI_WIDGET")
-  self:UpdateAllFrames()
-end
+-- function Widget:OnDisable()
+--   self:UnsubscribeAllEvents()
+-- end
 
 function Widget:UpdateFrame(widget_frame,  unit)
   -- Show nameplate widget for this unit, if Experience widget was shown before it was disabled

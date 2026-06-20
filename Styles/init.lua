@@ -1,5 +1,4 @@
 ﻿local _, Addon = ...
-local t = Addon.ThreatPlates
 
 local ThemeTable = {}
 

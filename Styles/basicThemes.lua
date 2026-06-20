@@ -1,8 +1,6 @@
 ﻿local ADDON_NAME, Addon = ...
-local ThreatPlates = Addon.ThreatPlates
 
-local ART_PATH = ThreatPlates.Art
-local EMPTY_TEXTURE = ART_PATH.."Empty"
+local EMPTY_TEXTURE = Addon.PATH_ARTWORK.."Empty"
 
 local function Create(name)
   local db = Addon.db.profile.settings
@@ -17,24 +15,26 @@ local function Create(name)
     healthbar = {
       texture = Addon.LibSharedMedia:Fetch('statusbar', db.healthbar.texture),
       backdrop = Addon.LibSharedMedia:Fetch('statusbar', db.healthbar.backdrop, true),
-      width = db.healthbar.width,
-      height = db.healthbar.height,
       x = 0,
       y = 0,
       anchor = "CENTER",
       show = true,
-    },
-
-    healthbarFriendly = {
-      width = (Addon.WOW_USES_CLASSIC_NAMEPLATES and db.healthbar.width) or db.healthbar.widthFriend,
-      height = (Addon.WOW_USES_CLASSIC_NAMEPLATES and db.healthbar.height) or db.healthbar.heightFriend,
-      x = 0,
-      y = 0,
-      anchor = "CENTER",
+      HOSTILE = {
+        width = db.healthbar.width,
+        height = db.healthbar.height,
+      },
+      NEUTRAL = {
+        width = db.healthbar.width,
+        height = db.healthbar.height,
+      },
+      FRIENDLY = {
+        width = (Addon.WOW_USES_CLASSIC_NAMEPLATES and db.healthbar.width) or db.healthbar.widthFriend,
+        height = (Addon.WOW_USES_CLASSIC_NAMEPLATES and db.healthbar.height) or db.healthbar.heightFriend,
+      },
     },
 
     healthborder = {
-      texture = (db.healthborder.show and ThreatPlates.Art .. db.healthborder.texture) or EMPTY_TEXTURE,
+      texture = (db.healthborder.show and Addon.PATH_ARTWORK .. db.healthborder.texture) or EMPTY_TEXTURE,
       edgesize = db.healthborder.EdgeSize,
       offset = db.healthborder.Offset,
       show = true,
@@ -46,18 +46,13 @@ local function Create(name)
     },
 
     threatborder = {
-      texture = ThreatPlates.Art.."TP_Threat",
+      texture = Addon.PATH_ARTWORK.."TP_Threat",
       width = 256,
       height = 64,
       x = 0,
       y = 0,
       anchor = "CENTER",
       show = db.threatborder.show,
-      -- Texture Coordinates
-      left = 0,
-      right = 1,
-      top = 0,
-      bottom = 1,
     },
 
     highlight = {
@@ -78,7 +73,7 @@ local function Create(name)
     },
 
     castborder = {
-      texture = (db.castborder.show and ThreatPlates.Art .. db.castborder.texture) or EMPTY_TEXTURE,
+      texture = (db.castborder.show and Addon.PATH_ARTWORK .. db.castborder.texture) or EMPTY_TEXTURE,
       edgesize = db.castborder.EdgeSize,
       offset = db.castborder.Offset,
       show = true,
@@ -86,21 +81,6 @@ local function Create(name)
 
     castnostop = {
       show = db.castborder.show and db.castnostop.ShowOverlay,
-    },
-
-    name = {
-      typeface = Addon.LibSharedMedia:Fetch('font', db.name.typeface),
-      size = db.name.size,
-      width = db.name.width,
-      height = db.name.height,
-      x = db.name.x,
-      y = db.name.y,
-      align = db.name.align,
-      anchor = "CENTER",
-      vertical = db.name.vertical,
-      shadow = db.name.shadow,
-      flags = db.name.flags,
-      show = db.name.show,
     },
 
     level = {
@@ -116,21 +96,6 @@ local function Create(name)
       shadow = db.level.shadow,
       flags = db.level.flags,
       show = db.level.show,
-    },
-
-    customtext = {
-      typeface = Addon.LibSharedMedia:Fetch('font', db.customtext.typeface),
-      size = db.customtext.size,
-      width = db.customtext.width,
-      height = db.customtext.height,
-      x = db.customtext.x,
-      y = db.customtext.y,
-      align = db.customtext.align,
-      anchor = "CENTER",
-      vertical = db.customtext.vertical,
-      shadow = db.customtext.shadow,
-      flags = db.customtext.flags,
-      show = true,
     },
 
     spelltext = {
@@ -164,11 +129,6 @@ local function Create(name)
       y = db.eliteicon.y,
       anchor = "CENTER",  --db.eliteicon.anchor,
       show = db.eliteicon.show,
-      -- Texture Coordinates
-      left = 0,
-      right = 1,
-      top = 0,
-      bottom = 1,
     },
 
     spellicon = {
@@ -181,7 +141,6 @@ local function Create(name)
     },
 
     raidicon = {
-      texture = "Interface\\TargetingFrame\\UI-RaidTargetingIcons",
       width = (db.raidicon.scale),
       height = (db.raidicon.scale),
       x = (db.raidicon.x),
@@ -191,27 +150,6 @@ local function Create(name)
     },
   }
 
-  local threat = db[name].threatcolor
-  theme.threatcolor = {
-    LOW = {
-      r = threat.LOW.r,
-      g = threat.LOW.g,
-      b = threat.LOW.b,
-      a = threat.LOW.a
-    },
-    MEDIUM = {
-      r = threat.MEDIUM.r,
-      g = threat.MEDIUM.g,
-      b = threat.MEDIUM.b,
-      a = threat.MEDIUM.a
-    },
-    HIGH = {
-      r = threat.HIGH.r,
-      g = threat.HIGH.g,
-      b = threat.HIGH.b,
-      a = threat.HIGH.a
-    },
-  }
   return theme
 end
 

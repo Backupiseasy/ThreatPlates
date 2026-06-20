@@ -2,7 +2,6 @@
 -- Threat Widget
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
-local ThreatPlates = Addon.ThreatPlates
 
 local Widget = Addon.Widgets:NewWidget("Threat")
 
@@ -20,9 +19,11 @@ local GetRaidTargetIndex = GetRaidTargetIndex
 local IsInGroup, IsInRaid, GetNumGroupMembers, GetNumSubgroupMembers = IsInGroup, IsInRaid, GetNumGroupMembers, GetNumSubgroupMembers
 
 -- ThreatPlates APIs
-local GetThreatSituation, UnitDetailedThreatSituationWrapper = Addon.GetThreatSituation, Addon.UnitDetailedThreatSituationWrapper
-local Font = Addon.Font
-local TransliterateCyrillicLetters = Addon.TransliterateCyrillicLetters
+local UnitDetailedThreatSituationWrapper = Addon.UnitDetailedThreatSituationWrapper
+local FontUpdateText = Addon.Font.UpdateText
+local ThreatShowFeedback = Addon.Threat.ShowFeedback
+local TransliterateCyrillicLetters = Addon.Localization.TransliterateCyrillicLetters
+local IsSecretValueTP = Addon.IsSecretValue
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -30,12 +31,6 @@ local _G =_G
 -- GLOBALS: CreateFrame
 
 local PATH = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ThreatWidget\\"
-local THREAT_REFERENCE = {
-  [0] = "LOW",
-  [1] = "MEDIUM",
-  [2] = "MEDIUM",
-  [3] = "HIGH",
-}
 local REVERSE_THREAT_SITUATION = {
   HIGH = "LOW",
   MEDIUM ="MEDIUM",
@@ -45,8 +40,7 @@ local REVERSE_THREAT_SITUATION = {
 ---------------------------------------------------------------------------------------------------
 -- Cached configuration settings
 ---------------------------------------------------------------------------------------------------
-local Settings, SettingsArt
-local ThreatColors, ThreatDetailsFunction, ShowSecondPlayersName
+local Settings, SettingsArt, ThreatColors, ThreatDetailsFunction, ShowSecondPlayersName
 
 ---------------------------------------------------------------------------------------------------
 -- Local variables
@@ -64,8 +58,11 @@ function Widget:UNIT_THREAT_LIST_UPDATE(unitid)
   end
 end
 
-function Widget:RAID_TARGET_UPDATE()
-  self:UpdateAllFrames()
+function Widget:TargetMarkerUpdate(tp_frame)
+  local widget_frame = self:GetWidgetFrameForUnit(tp_frame.unit.unitid)
+  if widget_frame then
+    self:UpdateFrame(widget_frame, widget_frame.unit)
+  end
 end
 
 function Widget:GROUP_ROSTER_UPDATE()
@@ -87,7 +84,7 @@ function Widget:Create(tp_frame)
   widget_frame:SetFrameLevel(tp_frame:GetFrameLevel() + 7)
   widget_frame.LeftTexture = widget_frame:CreateTexture(nil, "ARTWORK")
   widget_frame.RightTexture = widget_frame:CreateTexture(nil, "ARTWORK")
-  widget_frame.RightTexture:SetPoint("LEFT", tp_frame.visual.healthbar, "RIGHT", 4, 0)
+  widget_frame.RightTexture:SetPoint("LEFT", tp_frame.visual.Healthbar, "RIGHT", 4, 0)
   widget_frame.RightTexture:SetSize(64, 64)
 
   widget_frame.Percentage = widget_frame:CreateFontString(nil, "OVERLAY")
@@ -100,31 +97,27 @@ function Widget:Create(tp_frame)
   return widget_frame
 end
 
-function Widget:IsEnabled()
-  local db = Addon.db.profile.threatWidget.ThreatPercentage
-  return Addon.db.profile.threat.art.ON or db.ShowAlways or db.ShowInGroups or db.ShowWithPet
+function Widget:IsEnabled() 
+  local db = Addon.db.profile.threat
+  return db.art.ON or db.ThreatPercentage.ShowAlways or db.ThreatPercentage.ShowInGroups or db.ThreatPercentage.ShowWithPet
 end
 
 function Widget:OnEnable()
-  self:RegisterEvent("UNIT_THREAT_LIST_UPDATE")
-  self:RegisterEvent("RAID_TARGET_UPDATE")
-  self:RegisterEvent("GROUP_ROSTER_UPDATE")
+  self:SubscribeEvent("UNIT_THREAT_LIST_UPDATE")
+  self:SubscribeEvent("TargetMarkerUpdate")
+  self:SubscribeEvent("GROUP_ROSTER_UPDATE")
 end
 
-function Widget:OnDisable()
-  self:UnregisterEvent("UNIT_THREAT_LIST_UPDATE")
-  self:UnregisterEvent("RAID_TARGET_UPDATE")
-  self:UnregisterEvent("GROUP_ROSTER_UPDATE")
-end
+-- function Widget:OnDisable()
+--   self:UnsubscribeAllEvents()
+-- end
 
 function Widget:EnabledForStyle(style, unit)
   return not (unit.type == "PLAYER" or style == "NameOnly" or style == "NameOnly-Unique" or style == "etotem")
 end
 
 function Widget:OnUnitAdded(widget_frame, unit)
-  local db = Addon.db.profile.threat.art
-
-  if db.theme == "bar" then
+  if SettingsArt.theme == "bar" then
     widget_frame.LeftTexture:ClearAllPoints()
     widget_frame.LeftTexture:SetSize(265, 64)
     widget_frame.LeftTexture:SetPoint("CENTER", widget_frame:GetParent(), "CENTER")
@@ -134,7 +127,7 @@ function Widget:OnUnitAdded(widget_frame, unit)
   else
     widget_frame.LeftTexture:ClearAllPoints()
     widget_frame.LeftTexture:SetSize(64, 64)
-    widget_frame.LeftTexture:SetPoint("RIGHT", widget_frame:GetParent().visual.healthbar, "LEFT", -4, 0)
+    widget_frame.LeftTexture:SetPoint("RIGHT", widget_frame:GetParent().visual.Healthbar, "LEFT", -4, 0)
     widget_frame.LeftTexture:SetTexCoord(0, 0.25, 0, 1)
 
     widget_frame.RightTexture:SetTexCoord(0.75, 1, 0, 1)
@@ -203,7 +196,7 @@ local function GetTankThreatPercentage(unitid, db_threat_value)
   local threat_value_text = ""
   local threat_value_delta = 0
 
-  if is_tanking then
+  if not IsSecretValueTP(is_tanking) and is_tanking then
     -- Tanking, so show difference to the 2nd player on the threat table, like: -50%
     local other_unitid, other_threat_value, other_threat_unit_name = GetTopThreatUnitBesidesPlayer(unitid, GetUnitThreatPercentage)
     if other_unitid then
@@ -233,7 +226,7 @@ local function GetTankThreatValue(unitid, db_threat_value)
   local threat_value_delta = 0
 
   -- Tanking: - second
-  if is_tanking then
+  if not IsSecretValueTP(is_tanking) and is_tanking then
     -- Tanking, so show difference to the 2nd player on the threat table, like: -1.5k
     local other_unitid, other_threat_value, other_threat_unit_name = GetTopThreatUnitBesidesPlayer(unitid, GetUnitThreatValue)
     if other_unitid then
@@ -307,7 +300,7 @@ local function GetThreatPercentageDelta(unitid, db_threat_value)
   end
 end
 
-local THREAT_DETAILS_FUNTIONS = {
+local THREAT_DETAILS_FUNCTIONS = {
   SCALED_PERCENTAGE = function(unitid)
     local _, status, scaled_percentage, _, _ =  UnitDetailedThreatSituationWrapper("player", unitid)
     if status then 
@@ -327,21 +320,19 @@ local THREAT_DETAILS_FUNTIONS = {
 }
 
 function Widget:UpdateFrame(widget_frame, unit)
-  if Addon:ShowThreatFeedback(unit) then
-    local db = Addon.db.profile.threat
-
+  if ThreatShowFeedback(unit) then
     -- Show threat art (textures)
     -- unique_setting.useStyle is already checked when setting the style of the nameplate (to custom)
     local unique_setting = unit.CustomPlateSettings
-    if (not unique_setting or unique_setting.UseThreatColor) and SettingsArt.ON and not (GetRaidTargetIndex(unit.unitid) and db.marked.art) then
+    if (not unique_setting or unique_setting.UseThreatColor) and SettingsArt.ON and not (GetRaidTargetIndex(unit.unitid) and Settings.marked.art) then
       widget_frame.LeftTexture:Show()
-      widget_frame.RightTexture:SetShown(db.art.theme ~= "bar")
+      widget_frame.RightTexture:SetShown(SettingsArt.theme ~= "bar")
     else
       widget_frame.LeftTexture:Hide()
       widget_frame.RightTexture:Hide()
     end
-    
-    widget_frame.ThreatSituation = nil
+
+    widget_frame.ThreatLevel = nil
     self:UpdateThreatValue(widget_frame, unit)
 
     widget_frame:Show()
@@ -351,16 +342,13 @@ function Widget:UpdateFrame(widget_frame, unit)
 end 
 
 function Widget:UpdateThreatValue(widget_frame, unit)
-  local db = Addon.db.profile.threat
-  local db_threat_value = Settings.ThreatPercentage
+  local db = Settings.ThreatPercentage
 
-  -- If threat_situation is nil, there is nothing to do
-  local style = (Addon:PlayerRoleIsTank() and "tank") or "dps"
-  local threat_situation = GetThreatSituation(unit, style, db.toggle.OffTank)
+  local style = Addon.GetPlayerRole()
 
   -- Threat value has to be updated after every UNIT_THREAT_LIST_UPDATE event, not only when threat_situation changes
-  if db_threat_value.ShowAlways or (db_threat_value.ShowInGroups and PlayerIsInGroup) or (db_threat_value.ShowWithPet and UnitExists("pet")) then
-    local status, percentage_text = ThreatDetailsFunction(unit.unitid, db_threat_value)
+  if db.ShowAlways or (db.ShowInGroups and PlayerIsInGroup) or (db.ShowWithPet and UnitExists("pet")) then
+    local status, percentage_text = ThreatDetailsFunction(unit.unitid, db)
     if status then
       widget_frame.Percentage:SetText(percentage_text)
     else
@@ -374,34 +362,35 @@ function Widget:UpdateThreatValue(widget_frame, unit)
   end
 
   -- Textures are shown/hidden in UpdateFrame
-  if threat_situation and threat_situation ~= widget_frame.ThreatSituation then
-    widget_frame.ThreatSituation = threat_situation
+  local threat_level = unit.ThreatLevel
+  if threat_level and threat_level ~= widget_frame.ThreatLevel then
+    widget_frame.ThreatLevel = threat_level
 
     -- As the widget is enabled, textures or percentages must be enabled.
     if widget_frame.LeftTexture:IsShown() then
       local unique_setting = unit.CustomPlateSettings
-      if not unique_setting or unique_setting.UseThreatColor then        
+      if not unique_setting or unique_setting.UseThreatColor then           
         local texture = PATH
         if style ~= "tank" then
           -- Tanking uses regular textures / swapped for dps / healing
-          texture = texture .. db.art.theme.."\\".. REVERSE_THREAT_SITUATION[threat_situation]
+          texture = texture .. SettingsArt.theme.."\\".. REVERSE_THREAT_SITUATION[threat_level]
         else
-          texture = texture .. db.art.theme.."\\".. threat_situation
+          texture = texture .. SettingsArt.theme.."\\".. threat_level
         end
 
-        if db.art.theme == "bar" then
+        if SettingsArt.theme == "bar" then
           widget_frame.LeftTexture:SetTexture(texture)
         else
           widget_frame.LeftTexture:SetTexture(texture)
           widget_frame.RightTexture:SetTexture(texture)
         end
-      end
-    end 
-
+      end 
+    end
+    
     if widget_frame.Percentage:IsShown() then
       local color
       if Settings.ThreatPercentage.UseThreatColor then
-        color = ThreatColors[style].threatcolor[threat_situation]
+        color = ThreatColors[style].threatcolor[threat_level]
       else
         color = Settings.ThreatPercentage.CustomColor
       end
@@ -413,16 +402,16 @@ end
 function Widget:UpdateLayout(widget_frame)
   -- widget_frame:ClearAllPoints()
   widget_frame:SetAllPoints(widget_frame:GetParent())
-
-  Font:UpdateText(widget_frame, widget_frame.Percentage, Settings.ThreatPercentage)
+  
+  FontUpdateText(widget_frame, widget_frame.Percentage, Settings.ThreatPercentage)
 end
 
 function Widget:UpdateSettings()
-  Settings = Addon.db.profile.threatWidget
-  SettingsArt = Addon.db.profile.threat.art
+  Settings = Addon.db.profile.threat
+  SettingsArt = Settings.art
   ThreatColors = Addon.db.profile.settings
 
   ShowSecondPlayersName = Settings.ThreatPercentage.SecondPlayersName
 
-  ThreatDetailsFunction = THREAT_DETAILS_FUNTIONS[Settings.ThreatPercentage.Type]
+  ThreatDetailsFunction = THREAT_DETAILS_FUNCTIONS[Settings.ThreatPercentage.Type]
 end

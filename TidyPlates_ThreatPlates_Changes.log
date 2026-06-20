@@ -1,4 +1,189 @@
-﻿------------------------------------------------------
+------------------------------------------------------
+13.0.24 (2026-06-20)
+------------------------------------------------------
+* Fixed a bug where nameplates could show the wrong name and health (from a previous unit) after faction/reaction changes or nameplate recycling, primarily in battlegrounds, arenas, and raids [Comment #8228, #8363, #8408, #8433].
+
+------------------------------------------------------
+13.0.23 (2026-06-17)
+------------------------------------------------------
+* Updated TOC version for Patch 12.0.7 for WoW Mainline.
+
+------------------------------------------------------
+13.0.22 (2026-06-15)
+------------------------------------------------------
+* Fixed a Lua error in the Auras widget that occurred in Bar Mode with "Show Duration" disabled, or when an aura's flash-when-expiring animation triggered.
+* Fixed the threat glow border being shown on hidden nameplates (like totems without healthbar) in combat.
+* Fixed a Lua error on custom styles using the healthbar style [Comment #8438].
+* Fixed a Lua error that occurred when opening the options while a custom styles with an icon was shown [Comment #8439].
+* Fixed a bug where icons for custom styles and class icons were not displayed due to incorrect internal texture handling.
+* Hopefully fixed a bug preventing arena numbers from working in WoW Midnight [Comment #8310, GH-645].
+
+------------------------------------------------------
+13.0.21 (2026-06-13)
+------------------------------------------------------
+* Fixed a Lua error caused by restrictions on secret values regarding tank information when tank-type threat values were enabled.
+
+------------------------------------------------------
+13.0.20 (2026-06-13)
+------------------------------------------------------
+* Fixed a Lua error in BossMods widget that occurred when the widget was initialized for a new nameplate [Comment #8413].
+
+------------------------------------------------------
+13.0.19 (2026-06-13)
+------------------------------------------------------
+* Fixed a Lua error that occurred when tank-type threat values were enabled [Comment #8410, #8409].
+
+------------------------------------------------------
+13.0.18 (2026-06-10)
+------------------------------------------------------
+* Fixed a Lua error that occurred in when switching targets and the new target's nameplate was not yet fully initialized [GH-701].
+* Fixed Lua errors in Arena widget caused by incorrect handling of secret values and a typo [GH-700].
+
+------------------------------------------------------
+13.0.17 (2026-06-09)
+------------------------------------------------------
+* Fixed clickable area and click-through for Threat Plates in Mists Classic as WoW now uses the Midnight API for this.
+* Fixed a bug where the option to enable or disable the mouseover highlight was being ignored.
+* Fixed a bug where WeakAuras anchored to nameplates were not being displayed on Threat Plates by adding backwards compatibility to version 12.x of Threat Plates [Comment #8364; #8381].
+
+------------------------------------------------------
+13.0.16 (2026-06-08)
+------------------------------------------------------
+* Fixed a Lua error that occurred when switching targets while target of target names were enabled [Comment ##8362].
+
+------------------------------------------------------
+13.0.15 (2026-06-07)
+------------------------------------------------------
+* Fixed a Lua error that occurred when Flash when Expiring was enabled in the Auras Widget [GH-696].
+* Fixed a Lua error that occurred when Threat Plates options were opened during combat.
+
+------------------------------------------------------
+13.0.14 (2026-06-07)
+------------------------------------------------------
+* Fixed an issue where the target border could disappear after switching target from a distant mob (target-only nameplate) to a new target [Comment #8340].
+* Fixed aura icon tooltips not showing reliably in WoW Classic versions [Comment #8183, #8226].
+* Fixed "Force View for Target" not switching from Headline View to Healthbar View when targeting a unit that was not taking damage (e.g. friendly units out of combat) [Comment #8308].
+* Fixed Blizzard name font changes not applying reliably by re-applying nameplate font overrides (including SystemFont_NamePlate_Outlined) after delayed UI updates [Comment #8230].
+* Fixed a Lua error caused by click-through nameplate APIs not available anymore in Mists Classic [GH-690, GH-691, GH-686].
+* Fixed a Lua error caused by changes to nameplate sizing APIs in Mists Classic [GH-690, GH-691, GH-686].
+* Fixed a Lua error caused by debuff type colors no longer available in the WoW API in Mists Classic.
+* Fixed a bug where Blizzard default nameplates were not clickable when enabled for friendly or enemy units.
+* Fixed a bug where the clickable area was to small when WorldFrame was selected as parent frame for Threat Plates.
+* Fixed a bug where the clickable area was not adjusted correctly when the parent frame for Threat Plates was switched until the UI was reloaded.
+* Fixed a bug where disabling the sync with healthbar option for the clickable area was not applied.
+* Hopefully fixed enemy nameplates incorrectly showing friendly player names instead of correct enemy names in battlegrounds and arenas on WoW Midnight [Comment #8228].
+
+------------------------------------------------------
+13.0.13 (2026-05-21)
+------------------------------------------------------
+* Fixed healthbar color not updating correctly in TBC Classic when the player loses threat gradually [Comment #8288, #8296].
+* Fixed nameplates scaling in a non-stop loop when hovering the mouse cursor over a non-targeted unit on WoW Midnight (only when mouseover scaling is enabled) [Comment #8321].
+
+------------------------------------------------------
+13.0.12 (2026-05-15)
+------------------------------------------------------
+* Re-enabled separate healthbar and clickable-area sizes for friendly nameplates on WoW Midnight.
+* Fixed nameplate clickable areas being too small or misaligned on WoW Midnight [Comment #8307].
+* Fixed castbar color, shield, and overlay not updating correctly when a cast changes to interruptible or non-interruptible.
+* Fixed a Lua error that occurred during a UI reload or logout when a nameplate was still shown under the mouse cursor.
+* Fixed a Lua error in the Arena widget that occurred when initializing in an instanced environment on WoW Midnight.
+
+------------------------------------------------------
+13.0.11 (2026-04-26)
+------------------------------------------------------
+* Fixed a bug where the name of the target unit of a cast was not shown (a side-effect of the v13.0.19 bug fix)  [Comment #8286].
+* Fixed nameplates doubling in size after a reload or login when UI scale is not 100% and "Ignore UI Scale" is disabled [Comment #8240].
+
+------------------------------------------------------
+13.0.10 (2026-04-23)
+------------------------------------------------------
+* Fixed a Lua error that could occur after leaving combat when the Quest widget was disabled [GH-674].
+* Fixed a bug in the Healer Tracker widget that could prevent healer detection via the battleground scoreboard from working correctly.
+* Fixed the uninterruptible cast shield being displayed at incorrect size when shown via a cast trigger [GH-642].
+* Fixed the interrupt shield, interrupt border, and interrupt overlay being shown for interruptible casts in non-Midnight expansions [GH-675].
+* Updated TOC version for Patch 12.0.5 for WoW Mainline.
+* Fixed a Lua error when creating nameplates caused by an invalid default font flag value [GH-684].
+* Fixed a Lua error that occurred when cast target was enabled, which was caused by restrictions on secret values.
+
+------------------------------------------------------
+13.0.9 (2026-04-17)
+------------------------------------------------------
+* Fixed a Lua error that occurred when killing a mob while the mouse cursor was hovering over its nameplate [GH-682].
+
+------------------------------------------------------
+13.0.8 (2026-04-17)
+------------------------------------------------------
+* Fixed a Lua error that could occur when moving the mouse cursor away from a nameplate that was being removed at the same time [GH-679].
+* Fixed several Lua errors in WoW Midnight that could occur during combat or in instances.
+* Fixed a bug where raid target markers (skull, cross, etc.) on nameplates disappeared when entering combat [Comment #8189, #8190, #8204, #8211, #8219].
+
+------------------------------------------------------
+13.0.7 (2026-04-07)
+------------------------------------------------------
+* Fixed a Lua error in WoW Midnight that occurred when nameplates were accessed, which was caused by restrictions on secret values [GH-678, GH-677, GH-676, Comment #8210, #8209, #8205].
+* Fixed a bug that caused the interrupt shield to be displayed even when it was disabled [Comment #8162, #8163, GH-672].
+* Fixed a bug where a Evoker's cast bar was not hidden after an empowered cast had finished [Comment #8126].
+* Totems should now be recognized correctly in WoW Midnight again as long as they are not protected with secret values [Comment #8106].
+* Fixed threat colors/scale being stuck in DPS mode after login until the options dialog was opened or a setting was changed. The player role (tank vs. DPS/healer) is now correctly initialized on login [Comment #7947, #8086, #8184, #8187, #8190].
+
+------------------------------------------------------
+13.0.6 (2026-03-22)
+------------------------------------------------------
+* Fixed a Lua error that could occur when the player's faction changed, for example in arenas [GH-668].
+* The Quest widget now does work again in WoW Midnight.
+
+------------------------------------------------------
+13.0.5 (2026-03-17)
+------------------------------------------------------
+* Fixed a Lua error that occurred when the configuration mode for castbar was enabled [Comment #8111].
+* Fixed a Lua error that occurred when opening the options due to a typo [Comment #8112].
+
+------------------------------------------------------
+13.0.4 (2026-03-15)
+------------------------------------------------------
+* Fixed a bug where interruptible and non-interruptible casts were not displayed in the correct castbar color [GH-651, Comment #7907].
+* Fixed a bug where the warning about misconfigured CVars for occluded units was displayed even when transparency for occluded units was disabled [GH-665].
+
+------------------------------------------------------
+13.0.3 (2026-03-12)
+------------------------------------------------------
+* Fixed several issues related to castbars. Castbars shown be shown more consistently now. 
+* The interrupter of a cast is shown again in WoW Midnight.
+* Fixed a Lua error in Resource widget in WoW Midnight due to restrictions on secret values.
+* Fixed a Lua error in the NPC Role status text in WoW Midnight due to restrictions on secret values [Comment ##8058].
+
+------------------------------------------------------
+13.0.2 (2026-03-07)
+------------------------------------------------------
+* Disabled threat detection heuristic in WoW Midnight due to Lua errors caused by restrictions on secret values [GH-664].
+* Fixed a Lua error in Auras widget in WoW Midnight caused by legacy, unused code [GH-663].
+
+------------------------------------------------------
+13.0.1 (2026-03-06)
+------------------------------------------------------
+* Disabled status text option Everything in WoW Midnight due to restrictions on secret values.
+* Disabled showing the name of a unit's target in WoW Midnight due to restrictions on accessing a unit's target [GH-662].
+* Health status text can be hidden again at full health for WoW Midnight.
+* Fixed a Lua error that occurred when another addon tried to anchor itself to a Threat Plate [GH-660].
+* Disabled OmniCC option in Auras widget as OmniCC no longer is available in WoW Midnight [GH-659].
+* Updated integrated libraries (Ace3 r1390, LibCustomGlow to 1.0.4-9-g51de51c-alpha, LibDualSpec v1.29.0)
+
+------------------------------------------------------
+13.0.0 - Release for WoW Midnight (2026-03-03)
+------------------------------------------------------
+* Friendly and enemy unit coloring modes can now be configured separately in health bar and name-only modes.
+* Added a highlight border for custom style icons (like totems).
+* Added an option to show/hide the source unit for an interrupt.
+* Added animations for nameplates when they change size.
+* Added Masque support for (some) icons.
+* Added options to configure the parent frame and frame strata of Threat Plates [GH-193, GH-399].
+* Removed Disconnected option for healthbar coloring.
+* Fixed a bug that prevented the target highlight from being displayed in headline view mode.
+* Updated integrated libraries (Ace3 r1387-alpha, LibSharedMedia-3.0 v11.2.1)
+* Disabled features in WoW Midnight due to restrictions on secret values: off-tank detection, abbreviation for unit names and transliteration of cyrillic letters, HealerTracker/Quest/Experience widgets
+* Features not yet working in WoW Midnight: aura filtering, absorbs, Arena/Resource widgets
+
+------------------------------------------------------
 12.6.6 (2026-02-10)
 ------------------------------------------------------
 * Fixed a Lua error that occurred in WoW Classic in certain situations when units were channeling spells [Comment #7909].
@@ -10,9 +195,6 @@
 * Fixed a Lua error that occurred in rare circumstances in WoW Classic when a unit's castbar was shown.
 * Support for dual spec profiles has been enabled for WoW Classic.
 * Fixed a bug in Auras widget that prevented buffs of hostile units from being displayed. [PM].
-* Updated TOC version for Patch 5.5.3 for WoW Mists Classic.
-
-------------------------------------------------------
 12.6.4 (2025-12-06)
 ------------------------------------------------------
 * Updated integrated libraries (Ace3 r1377).

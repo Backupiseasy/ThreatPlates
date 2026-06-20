@@ -3,6 +3,8 @@
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
 
+if Addon.ExpansionIsAtLeastMidnight then return end
+
 local Widget = (Addon.IS_CLASSIC and {}) or Addon.Widgets:NewWidget("Stealth")
 
 ---------------------------------------------------------------------------------------------------

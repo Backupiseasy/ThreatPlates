@@ -1,5 +1,4 @@
 local ADDON_NAME, Addon = ...
-local ThreatPlates = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Stuff for handling the configuration of Threat Plates - ThreatPlatesDB
@@ -9,24 +8,24 @@ local ThreatPlates = Addon.ThreatPlates
 -- Imported functions and constants
 ---------------------------------------------------------------------------------------------------
 
+local L = Addon.L
+
 -- WoW APIs
 local RAID_CLASS_COLORS, CLASS_SORT_ORDER = RAID_CLASS_COLORS, CLASS_SORT_ORDER
 local GetSpellInfo = Addon.GetSpellInfo
 
-local L = ThreatPlates.L
-local RGB, RGB_P, RGB_WITH_HEX = ThreatPlates.RGB, ThreatPlates.RGB_P, ThreatPlates.RGB_WITH_HEX
-local HEX2RGB = ThreatPlates.HEX2RGB
+local RGB, RGB_P, RGB_WITH_HEX, HEX2RGB = Addon.RGB, Addon.RGB_P, Addon.RGB_WITH_HEX, Addon.HEX2RGB
 
 ---------------------------------------------------------------------------------------------------
 -- Global contstants
 ---------------------------------------------------------------------------------------------------
 
-ThreatPlates.ADDON_NAME = "Threat Plates"
+Addon.ADDON_NAME = "Threat Plates"
 
 Addon.ADDON_DIRECTORY = "Interface\\AddOns\\TidyPlates_ThreatPlates\\"
 
 -- Define names for keybindings
-_G["BINDING_HEADER_" .. "THREATPLATES"] = ThreatPlates.ADDON_NAME
+_G["BINDING_HEADER_" .. "THREATPLATES"] = Addon.ADDON_NAME
 _G["BINDING_NAME_" .. "THREATPLATES_NAMEPLATE_MODE_FOR_FRIENDLY_UNITS"] = L["Toggle Friendly Headline View"]
 _G["BINDING_NAME_" .. "THREATPLATES_NAMEPLATE_MODE_FOR_NEUTRAL_UNITS"] = L["Toggle Neutral Headline View"]
 _G["BINDING_NAME_" .. "THREATPLATES_NAMEPLATE_MODE_FOR_ENEMY_UNITS"] = L["Toggle Enemy Headline View"]
@@ -54,11 +53,11 @@ end
 ---------------------------------------------------------------------------------------------------
 -- Global contstants for various stuff
 ---------------------------------------------------------------------------------------------------
-Addon.ON_UPDATE_PER_FRAME = 1 / GetFramerate()
-Addon.ON_UPDATE_INTERVAL = 0.25 -- minimum number of seconds between each update of a frame for OnUpdate handlers
-Addon.PLATE_FADE_IN_TIME = 0.5
+Addon.ON_UPDATE_INTERVAL = 0.1 -- minimum number of seconds between each update of a frame for OnUpdate handlers
 Addon.CASTBAR_INTERRUPT_HOLD_TIME = 1
 
+Addon.NameplateParentFrame = WorldFrame
+Addon.NameplateFrameStrata = "BACKGROUND"
 Addon.UIScale = 1
 
 Addon.TotemInformation = {} -- basic totem information
@@ -100,10 +99,10 @@ Addon.ANCHOR_POINT_TEXT = {
   BOTTOMRIGHT = {"BOTTOMRIGHT", "TOPLEFT"}
 }
 
-ThreatPlates.AlignH = {LEFT = L["Left"], CENTER = L["Center"], RIGHT = L["Right"]}
-ThreatPlates.AlignV = {BOTTOM = L["Bottom"], MIDDLE = L["Middle"], TOP = L["Top"]}
+Addon.AlignH = {LEFT = L["Left"], CENTER = L["Center"], RIGHT = L["Right"]}
+Addon.AlignV = {BOTTOM = L["Bottom"], MIDDLE = L["Middle"], TOP = L["Top"]}
 
-ThreatPlates.AUTOMATION = {
+Addon.AUTOMATION = {
   NONE = "No Automation",
   SHOW_COMBAT = "Show during Combat, Hide when Combat ends",
   HIDE_COMBAT = "Hide when Combat starts, Show when Combat ends",
@@ -163,10 +162,19 @@ Addon.IGNORED_STYLES_WITH_NAMEMODE = {
 }
 
 ----------------------------------------------------------------------------------------------------
--- Paths
+-- Constants for threat/combat handling stuff
 ---------------------------------------------------------------------------------------------------
 
-ThreatPlates.Widgets = "Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Widgets\\"
+Addon.THREAT_REFERENCE = {
+  [0] = "LOW",    -- not tanking, lower threat than tank.
+  [1] = "MEDIUM", -- not tanking, higher threat than tank.
+  [2] = "MEDIUM", -- insecurely tanking, another unit have higher threat but not tanking.
+  [3] = "HIGH",   -- securely tanking, highest threat
+}
+
+----------------------------------------------------------------------------------------------------
+-- Paths
+---------------------------------------------------------------------------------------------------
 
 ---------------------------------------------------------------------------------------------------
 -- Global contstants for options dialog
@@ -178,40 +186,45 @@ Addon.AurasFilterMode = {
   None = L["None"],
 }
 
--- SPEC_ROLES is only used in Retail currently
-ThreatPlates.SPEC_ROLES = {
-  DEATHKNIGHT = { true, false, false },
-  DEMONHUNTER = { false, true },
-  DRUID 			= { false, false, true, false },
-  EVOKER      = { false, false, false },
-  HUNTER			= { false, false, false },
-  MAGE				= { false, false, false },
-  MONK 				= { true, false, false },
-  PALADIN 		= { false, true, false },
-  PRIEST			= { false, false, false },
-  ROGUE				= { false, false, false },
-  SHAMAN			= { false, false, false },
-  WARLOCK			= { false, false, false },
-  WARRIOR			= { false, false, true },
+Addon.FontStyle = {
+  NONE = L["None"],
+  OUTLINE = L["Outline"],
+  THICKOUTLINE = L["Thick Outline"],
+  ["NONE, MONOCHROME"] = L["No Outline, Monochrome"],
+  ["OUTLINE, MONOCHROME"] = L["Outline, Monochrome"],
+  ["THICKOUTLINE, MONOCHROME"] = L["Thick Outline, Monochrome"]
 }
 
 -- "By Threat", "By Level Color", "By Normal/Elite/Boss"
-ThreatPlates.ENEMY_TEXT_COLOR = {
+Addon.ENEMY_HEALTHBAR_COLOR = {
+  REACTION = L["By Reaction"],
+  CLASS = L["By Class"],
+  HEALTH = L["By Health"],
+}
+
+Addon.FRIENDLY_HEALTHBAR_COLOR = {
+  REACTION = L["By Reaction"],
+  CLASS = L["By Class"],
+  HEALTH = L["By Health"],
+}
+
+Addon.ENEMY_NAME_COLOR = {
   CLASS = L["By Class"],
   CUSTOM = L["By Custom Color"],
   REACTION = L["By Reaction"],
   HEALTH = L["By Health"],
 }
 
-ThreatPlates.FRIENDLY_TEXT_COLOR = {
+Addon.FRIENDLY_NAME_COLOR = {
   CLASS = L["By Class"],
   CUSTOM = L["By Custom Color"],
   REACTION = L["By Reaction"],
   HEALTH = L["By Health"],
 }
+
 
 -- NPC Role, Guild, or Quest", "Quest",
-ThreatPlates.ENEMY_SUBTEXT = {
+Addon.ENEMY_SUBTEXT = {
   NONE = L["None"],
   HEALTH = L["Health"],
   ROLE = L["NPC Role"],
@@ -223,7 +236,7 @@ ThreatPlates.ENEMY_SUBTEXT = {
 }
 
 -- "NPC Role, Guild, or Quest", "Quest"
-ThreatPlates.FRIENDLY_SUBTEXT = {
+Addon.FRIENDLY_SUBTEXT = {
   NONE = L["None"],
   HEALTH = L["Health"],
   ROLE = L["NPC Role"],
@@ -243,7 +256,7 @@ Addon.THREAT_VALUE_TYPE = {
   THREAT_PERCENTAGE_DELTA = L["Delta Percentage"],
 }
 
-ThreatPlates.NAME_ABBREVIATION = {
+Addon.NAME_ABBREVIATION = {
     FULL = L["Full Name"],
     INITIALS = L["Initials"],
     LAST = L["Last Word"],
@@ -267,6 +280,9 @@ ThreatPlates.NAME_ABBREVIATION = {
   -- { SpellID = 207399, ID = "R6", GroupColor = "4c9900", Icon = "spell_nature_reincarnation" },		-- Ancestral Protection Totem
   -- { SpellID = 16191,  ID = "R7", GroupColor = "4c9900", Icon = "ability_shaman_manatidetotem" }, -- Mana Tide Totem
   -- --{ SpellID = 343182, ID = "W4", GroupColor = "b8d1ff", Icon = "ability_shaman_manatidetotem" }, -- Mana Tide Totem
+  --{ SpellID = 108270,  ID = "T8", GroupColor = "b8d1ff", Icon = "ability_shaman_stonebulwark" },	   -- Stone Bulwark Totem, --! NO nameplate
+  --{ SpellID = 445034,  ID = "W2", GroupColor = "ffff00", Icon = "spell_fire_searingtotem" },             -- Lively Totems
+  --{ SpellID = 461242, ID = "F1", GroupColor = "ffff00", Icon ="spell_fire_searingtotem", }, 	           -- Searing Totem, summmoned by Lively Totems
   
   -- { SpellID = 204331, ID = "P1", GroupColor = "8a2be2", Icon = "spell_nature_wrathofair_totem" },	-- Counterstrike Totem
   -- { SpellID = 204330, ID = "P2", GroupColor = "8a2be2", Icon = "spell_fire_totemofwrath" },	      -- Skyfury Totem
@@ -283,22 +299,18 @@ local TOTEM_DATA_BY_EXPANSION = {
     { SpellID = 192077,  ID = "T3", GroupColor = "b8d1ff", Icon = "ability_shaman_windwalktotem" },		   -- Wind Rush Totem
     { SpellID = 383013,  ID = "T4", GroupColor = "b8d1ff", Icon = "spell_nature_poisoncleansingtotem" }, -- Poison Cleansing Totem
     { SpellID = 5394,	   ID = "T7", GroupColor = "b8d1ff", Icon = "inv_spear_04" },		                   -- Healing Stream Totem
-    { SpellID = 108270,  ID = "T8", GroupColor = "b8d1ff", Icon = "ability_shaman_stonebulwark" },	     -- Stone Bulwark Totem
+    { SpellID = 1267016, ID = "T9", GroupColor = "b8d1ff", Icon = "inv12_apextalent_shaman_stormstreamtotem" }, -- Stormstream Totem
     -- Elemental
     { SpellID = 192222, ID = "E1", GroupColor = "2b76ff", Icon = "spell_shaman_spewlava" }, 	           -- Liquid Magma Totem
     -- Enhancement
     -- Restoration
-    { SpellID = 157153,  ID = "R1", GroupColor = "4c9900", Icon = "ability_shaman_condensationtotem" },		-- Cloudburst Totem
     { SpellID = 108280,  ID = "R4", GroupColor = "4c9900", Icon = "ability_shaman_healingtide" },		      -- Healing Tide Totem
     { SpellID = 51485,   ID = "R2", GroupColor = "4c9900", Icon = "spell_nature_stranglevines" },		      -- Earthgrab Totem
     { SpellID = 198838,  ID = "R3", GroupColor = "4c9900", Icon = "spell_nature_stoneskintotem" },		    -- Earthen Wall Totem
     { SpellID = 98008,   ID = "R5", GroupColor = "4c9900", Icon = "spell_shaman_spiritlink" },	          -- Spirit Link Totem
     { SpellID = 207399,  ID = "R6", GroupColor = "4c9900", Icon = "spell_nature_reincarnation" },		      -- Ancestral Protection Totem
-    { SpellID = 16191,   ID = "R7", GroupColor = "4c9900", Icon = "ability_shaman_manatidetotem" },       -- Mana Tide Totem
     -- Hero talent totems
     { SpellID = 444995,  ID = "W1", GroupColor = "ffff00", Icon = "inv_ability_totemicshaman_surgingtotem" }, -- Surging Totem
-    { SpellID = 445034,  ID = "W2", GroupColor = "ffff00", Icon = "spell_fire_searingtotem" },             -- Lively Totems
-    { SpellID = 461242, ID = "F1", GroupColor = "ffff00", Icon ="spell_fire_searingtotem", }, 	           -- Searing Totem, summmoned by Lively Totems
 
     -- Totems from PVP talents
     { SpellID = 204331, ID = "P1", GroupColor = "4c9900", Icon = "spell_nature_wrathofair_totem" },	-- Counterstrike Totem
@@ -308,11 +320,6 @@ local TOTEM_DATA_BY_EXPANSION = {
 
     -- Totems from other sources
     { SpellID = 324386, ID = "O1", GroupColor = "00ffff", Icon = "ability_bastion_shaman" },	  -- Vesper Totem (Kyrian Covenant)
-
-    -- Not existent in TWW:
-    -- { SpellID = 383019,  ID = "T5", GroupColor = "b8d1ff", Icon = "ability_shaman_tranquilmindtotem" },	 -- Tranquil Air Totem
-    -- { SpellID = 204330, ID = "P2", GroupColor = "8a2be2", Icon = "spell_fire_totemofwrath" },	      -- Skyfury Totem
-    -- { SpellID = 8512,   ID = "H1", GroupColor = "ffb31f", Icon = "spell_nature_windfury" },	  -- Windfury Totem
   },
 
   [LE_EXPANSION_MISTS_OF_PANDARIA] = {
@@ -527,7 +534,7 @@ end
 -- Default settings for ThreatPlates
 ---------------------------------------------------------------------------------------------------
 
-ThreatPlates.DEFAULT_SETTINGS = {
+Addon.DEFAULT_SETTINGS = {
   global = {
     version = "",
     DefaultsVersion = "SMOOTH",
@@ -535,51 +542,27 @@ ThreatPlates.DEFAULT_SETTINGS = {
     ScriptingIsEnabled = false,
   },
   char = {
-    welcome = false,
-    specInfo = {
-      [1] = {
-        name = "",
-        role = "",
-      },
-      [2] = {
-        name = "",
-        role = "",
-      },
-    },
+    --welcome = false, -- no longer used since 9.2.0
+    spec = {} -- true => Tank, false => DPS/Heal }
     -- Still using table here for compatibility with non-classic version of Threat Plates, although only [1] is used in classic.
-    spec = {
-      [1] = false,
-      [2] = false,
-    },
   },
   profile = {
     CheckForIncompatibleAddons = true,
-    -- cache = {}, - removed in 9.3.0
-    -- OldSetting = true, - removed in 8.7.0
     verbose = false,
-    -- blizzFadeA = { -- removed in 8.5.1
-    --   toggle  = true,
-    --   amount = 0.7
-    -- },
-    blizzFadeS = {
-      toggle  = true,
-      amount = -0.3
-    },
-    -- tidyplatesFade = false, -- removed in 10.1.0 as it was no longer used
-    healthColorChange = false,
-    customColor =  false,
-    allowClass = true, -- old default: false,
-    friendlyClass = true, -- old default: false,
     friendlyClassIcon = false,
     HostileClassIcon = true,
-    cacheClass = false,
     optionRoleDetectionAutomatic = true, -- old default: false,
-    ShowThreatGlowOnAttackedUnitsOnly = true,
-    ShowThreatGlowOffTank = true,
+    -- ShowThreatGlowOnAttackedUnitsOnly = true, -- Removed in 10.5
     NamePlateEnemyClickThrough = false,
     NamePlateFriendlyClickThrough = false,
     ShowFriendlyBlizzardNameplates = false,
     ShowEnemyBlizzardNameplates = false,
+    Appearance = {
+      AnchorFrame = "WORLD_FRAME",
+      FrameStrata = "BACKGROUND",
+      UseMasque = false,
+      UseBorderlessIcons = false,
+    },
     Automation = {
       FriendlyUnits = "NONE",
       EnemyUnits = "NONE",
@@ -591,64 +574,126 @@ ThreatPlates.DEFAULT_SETTINGS = {
       IgnoreUIScale = true,
       PixelPerfectUI = false,
     },
+    Healthbar = {
+      FriendlyUnitMode = "CLASS",
+      EnemyUnitMode = "CLASS",
+      UseRaidMarkColoring = false,
+      BackgroundUseForegroundColor = false,
+      BackgroundOpacity = 0.7, -- old default: 1,
+      BackgroundColor = RGB(0, 0, 0),
+      BorderUseForegroundColor = false,
+      BorderColor = RGB(0, 0, 0),
+    },
+    Name = {
+      HealthbarMode = {
+        Enabled = true,
+        FriendlyUnitMode = "CUSTOM",
+        FriendlyTextColor = RGB(255, 255, 255, 1),
+        EnemyUnitMode = "CUSTOM",
+        EnemyTextColor = RGB(255, 255, 255, 1),
+        UseRaidMarkColoring = false,
+        AbbreviationForEnemyUnits = "FULL",
+        AbbreviationForFriendlyUnits = "FULL",
+        ShowTitle = false,
+        ShowRealm = false,
+        -- Font anchoring and format
+        -- Anchor = "CENTER",
+        -- InsideAnchor = true,
+        HorizontalOffset = 0,
+        VerticalOffset = 13,
+        Font = {
+          Typeface = Addon.DEFAULT_FONT, -- old default: "Accidental Presidency",
+          Size = 10, -- old default: 14
+          flags = "",
+          Shadow = true,
+          HorizontalAlignment = "CENTER",
+          VerticalAlignment = "MIDDLE",
+          Width = 140, -- old default: 116,
+          Height = 14,
+        },
+      },
+      NameMode = {
+        Enabled = true, -- Must be true as name must always be shown in Headline View - no config option for it
+        FriendlyUnitMode = "CLASS",
+        FriendlyTextColor = RGB(0, 255, 0, 1),
+        EnemyUnitMode = "CLASS",
+        EnemyTextColor = RGB(0, 255, 0, 1),
+        UseRaidMarkColoring = false,
+        -- Font anchoring and format
+        -- Anchor = "CENTER",
+        -- InsideAnchor = true,
+        HorizontalOffset = 0,
+        VerticalOffset = 4,
+        Font = {
+          Size = 10,
+          -- Width = 140, -- same as for healthbar view -- old default: 116,
+          -- Height = 14, -- same as for healthbar view
+          HorizontalAlignment = "CENTER",
+          VerticalAlignment = "MIDDLE",
+        },
+      },
+    },
+    StatusText = {
+      HealthbarMode = {
+        FriendlySubtext = "HEALTH",
+        FriendlySubtextCustom = "",
+        EnemySubtext = "HEALTH",
+        EnemySubtextCustom = "",
+        SubtextCofffffffffflorUseHeadline = false,
+        SubtextColorUseSpecific = false,
+        SubtextColor =  RGB(255, 255, 255, 1),
+        -- Font anchoring and format
+        Anchor = "CENTER",
+        InsideAnchor = true,
+        HorizontalOffset = 0,
+        VerticalOffset = 0, -- old default: 1,
+        Font = {
+          Typeface = Addon.DEFAULT_FONT, -- old default: "Accidental Presidency",
+          Size = 9, -- old default: 12,
+          flags = "",
+          Shadow = true,
+          HorizontalAlignment = "CENTER",
+          VerticalAlignment = "MIDDLE",
+          Width = 110,
+          Height = 14,
+        },
+      },
+      NameMode = {
+        FriendlySubtext = "ROLE_GUILD",
+        FriendlySubtextCustom = "",
+        EnemySubtext = "ROLE_GUILD_LEVEL",
+        EnemySubtextCustom = "",
+        SubtextColorUseHeadline = false,
+        SubtextColorUseSpecific = true,
+        SubtextColor =  RGB(255, 255, 255, 1),
+        --
+        Anchor = "CENTER",
+        InsideAnchor = true,
+        HorizontalOffset = 0,
+        VerticalOffset = -6,
+        Font = {
+          Size = 8,
+          HorizontalAlignment = "CENTER",
+          VerticalAlignment = "MIDDLE",
+        },
+      },
+    },
     HeadlineView = {
-      -- ON = false, -- removed in 9.1.0
-      name = {
-        size = 10,
-        -- width = 140, -- same as for healthbar view -- old default: 116,
-        -- height = 14, -- same as for healthbar view
-        x = 0,
-        y = 4,
-        align = "CENTER",
-        vertical = "MIDDLE",
-      },
-      customtext = {
-        size = 8,
-        -- shadow = true,  -- never used
-        -- flags = "", -- never used
-        -- width = 140,    -- never used, same as for healthbar view
-        -- height = 14,    -- never used, same as for healthbar view
-        x = 0,
-        y = -6,
-        align = "CENTER",
-        vertical = "MIDDLE",
-      },
       useAlpha = false,
-      -- blizzFading = true, -- removed in 8.5.1
-      -- blizzFadingAlpha = 1, -- removed in 8.5.1
       useScaling = false,
-      ShowTargetHighlight = true,
-      ShowFocusHighlight = true,
       ShowMouseoverHighlight = true,
       ForceHealthbarOnTarget = false,
       ForceOutOfCombat = false,
       ForceNonAttackableUnits = false,
       ForceFriendlyInCombat = "NONE",
-      --
-      EnemyTextColorMode = "CLASS",
-      EnemyTextColor = RGB(0, 255, 0, 1),
-      FriendlyTextColorMode = "CLASS",
-      FriendlyTextColor = RGB(0, 255, 0, 1),
-      UseRaidMarkColoring = false,
-      SubtextColorUseHeadline = false,
-      SubtextColorUseSpecific = true,
-      SubtextColor =  RGB(255, 255, 255, 1),
-      --
-      EnemySubtext = "ROLE_GUILD_LEVEL",
-      EnemySubtextCustom = "",
-      FriendlySubtext = "ROLE_GUILD",
-      FriendlySubtextCustom = "",
     },
     Visibility = {
-      --				showNameplates = true,
-      --				showHostileUnits = true,
-      --				showFriendlyUnits = false,
-      FriendlyPlayer = { Show = true, UseHeadlineView = false },
-      FriendlyNPC = { Show = "nameplateShowFriendlyNPCs", UseHeadlineView = false },
-      FriendlyMinion = { Show = "nameplateShowFriendlyMinions",  },
-      FriendlyPet = { Show = "nameplateShowFriendlyPets", UseHeadlineView = false },
-      FriendlyGuardian = { Show = "nameplateShowFriendlyGuardians", UseHeadlineView = false },
-      FriendlyTotem = { Show = "nameplateShowFriendlyTotems", UseHeadlineView = false },
+      FriendlyPlayer = { Show = (Addon.ExpansionIsAtLeastMidnight and "nameplateShowFriendlyPlayers") or true, UseHeadlineView = false },
+      FriendlyNPC = { Show = (Addon.ExpansionIsAtLeastMidnight and "nameplateShowFriendlyNpcs") or "nameplateShowFriendlyNPCs", UseHeadlineView = false },
+      FriendlyMinion = { Show = (Addon.ExpansionIsAtLeastMidnight and "nameplateShowFriendlyPlayerMinions") or "nameplateShowFriendlyMinions", UseHeadlineView = false },
+      FriendlyPet = { Show = (Addon.ExpansionIsAtLeastMidnight and "nameplateShowFriendlyPlayerPets") or "nameplateShowFriendlyPets", UseHeadlineView = false },
+      FriendlyGuardian = { Show = (Addon.ExpansionIsAtLeastMidnight and "nameplateShowFriendlyPlayerGuardians") or "nameplateShowFriendlyGuardians", UseHeadlineView = false },
+      FriendlyTotem = { Show = (Addon.ExpansionIsAtLeastMidnight and "nameplateShowFriendlyPlayerTotems") or "nameplateShowFriendlyTotems", UseHeadlineView = false },
       FriendlyMinus = { Show = true, UseHeadlineView = false },
       EnemyPlayer = { Show = true, UseHeadlineView = false },
       EnemyNPC = { Show = true, UseHeadlineView = false },
@@ -669,36 +714,18 @@ ThreatPlates.DEFAULT_SETTINGS = {
       HideFriendlyInCombat = false,
     },
     castbarColor = {
-      -- toggle = true, -- removed in 8.7.0
       r = 1,
       g = 0.56,
       b = 0.06,
       a = 1
     },
     castbarColorShield = {
-      --toggle = true,  -- removed in 8.7.0
       r = 1,
       g = 0,
       b = 0,
       a = 1
     },
     castbarColorInterrupted = RGB(255, 0, 255, 1),
-    aHPbarColor = RGB_P(0, 1, 0),
-    bHPbarColor = RGB_P(1, 1, 0),
---    cHPbarColor = {
---      r = 1,
---      g = 0,
---      b = 0
---    },
---    fHPbarColor = RGB(0, 255, 0),
---    nHPbarColor = RGB(255, 255, 0),
---    tapHPbarColor = RGB(100, 100, 100),
---    HPbarColor = RGB(255, 0, 0),
---    tHPbarColor = {
---      r = 0,
---      g = 0.5,
---      b = 1,
---    },
     ColorByReaction = {
       -- Only tables for colors are allowed here, otherwise resetting these colors in the options will result in a Lua error
       FriendlyPlayer = RGB(0, 0, 255),           -- PlayerPvPOff, Mainline: purple, Classic: blue
@@ -712,6 +739,10 @@ ThreatPlates.DEFAULT_SETTINGS = {
       FriendlyPlayerPvPOn = RGB(0, 255, 0),              -- green - Same faction, PVP flagged
       HostilePlayerPvPOnSelfPvPOff = RGB(255, 255, 0),   -- yellow - Opposite faction, they are PVP flagged but you are NOT PVP flagged so they can't attack you. You can attack them, though. (Which will immediately flag you)
       IgnorePvPStatus = false,
+    },
+    ColorByHealth = {
+      Low = RGB_P(0, 1, 0),
+      High = RGB_P(1, 1, 0),
     },
     Colors = {
       Classes = GetDefaultColorsForClasses()
@@ -846,12 +877,10 @@ ThreatPlates.DEFAULT_SETTINGS = {
         FilterMode = "Block",
         FilterBySpell = {},
         FilterByType = {
-          --[1] = true, -- Removed in 8.8.0
           [1] = false,  -- Moved to Debuffs and negated meaning in 8.8.0
           [2] = false,  -- Moved to Debuffs and negated meaning in 8.8.0
           [3] = false,  -- Moved to Debuffs and negated meaning in 8.8.0
           [4] = false,  -- Moved to Debuffs and negated meaning in 8.8.0
-          --[6] = true, -- Removed in 8.8.0
         },
         -- Positioning
         AlignmentH = "LEFT",
@@ -1179,7 +1208,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
             HorizontalOffset = 0,
             VerticalOffset = -4,
             Font = {
-              Typeface = Addon.DEFAULT_DEFAULT_SMALL_FONTFONT,
+              Typeface = Addon.DEFAULT_SMALL_FONT,
               Size = 10,
               Transparency = 1,
               Color = RGB(255, 255, 255),
@@ -1277,6 +1306,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
     },
     targetWidget = {
       ON = true,
+      ShowInHeadlineView = true,
       theme = "default",
       r = 1,
       g = 1,
@@ -1319,6 +1349,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
     },
     FocusWidget = {
       ON = true,
+      ShowInHeadlineView = true,
       theme = "arrow_down",
       r = 0,
       g = 0.8,
@@ -1330,43 +1361,6 @@ ThreatPlates.DEFAULT_SETTINGS = {
       Size = 38,
       HorizontalOffset = 0,
       VerticalOffset = 12,
-    },
-    threatWidget = {
-      ON = false,
-      x = 0,
-      y = 26,
-      anchor = "CENTER",
-      ThreatPercentage = {
-        CustomColor = RGB(255, 255, 255),
-        UseThreatColor = true,
-        Type = "SCALED_PERCENTAGE",
-        SecondPlayersName = true,
-        ShowAlways = false,
-        ShowInGroups = true,
-        ShowWithPet = true,
-        -- Layout
-        Anchor = "LEFT",
-        InsideAnchor = false,
-        HorizontalOffset = -6,
-        VerticalOffset = 0,
-        Font = {
-          Typeface = Addon.DEFAULT_FONT,
-          Size = 9,
-          Transparency = 1,
-          --Color = RGB(255, 255, 255),
-          flags = "",
-          Shadow = true,
-          HorizontalAlignment = "RIGHT",
-          VerticalAlignment = "MIDDLE",
-        }
-      },
-    },
-    tankedWidget = {
-      ON = false,
-      scale = 1,
-      x = 65,
-      y = 6,
-      anchor = "CENTER",
     },
     ComboPoints = {
       ON = false,
@@ -1484,7 +1478,6 @@ ThreatPlates.DEFAULT_SETTINGS = {
       y = 6,
       x_hv = 65,
       y_hv = 6,
-      --anchor = "Top",
       ShowInHeadlineView = false,
       ShowFriendIcon = true,
       ShowFactionIcon = true,
@@ -1494,13 +1487,11 @@ ThreatPlates.DEFAULT_SETTINGS = {
       GuildmateColor = RGB(60, 168, 255), -- light blue, color for healthbars of guildmembers
     },
     FactionWidget = {
-      --ON = false,
       scale = 16,
       x = 0,
       y = 28,
       x_hv = 0,
       y_hv = 20,
-      --anchor = "Top",
     },
     questWidget = {
       ON = true, -- old default: false
@@ -1536,8 +1527,6 @@ ThreatPlates.DEFAULT_SETTINGS = {
     },
     ResourceWidget  = {
       ON = false,
-      --ShowInHeadlineView = false,
-      --scale = 28,
       x = 0,
       y = -18,
       ShowFriendly = false,
@@ -1557,8 +1546,6 @@ ThreatPlates.DEFAULT_SETTINGS = {
       BorderUseForegroundColor = false,
       BorderUseBackgroundColor = false,
       BorderColor = RGB(0, 0, 0, 1),
-      --BorderInset = 4,
-      --BorderTileSize = 16,
       ShowText = true,
       Font = Addon.DEFAULT_FONT,
       FontSize = 10,
@@ -1683,18 +1670,6 @@ ThreatPlates.DEFAULT_SETTINGS = {
         }
       },
     },
---    TestWidget = {
---      ON = true,
---      BarWidth = 120,
---      BarHeight = 10,
---      BarTexture = "Smooth",
---      BorderTexture = "TP_Border_1px",
---      BorderBackground = "ThreatPlatesEmpty",
---      EdgeSize = 5,
---      Offset = 5,
---      Inset = 5,
---      Scale = 1,
---    },
     PersonalNameplate = {
       HideBuffs = false,
       ShowResourceOnTarget = false,
@@ -1781,6 +1756,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         overrideScale = false,
         overrideAlpha = false,
         UseAutomaticIcon = true,
+        ShowHighlightBorder = false,
         -- AutomaticIcon = "number",
         icon = "INV_Misc_QuestionMark.blp",
         -- SpellID = "number",
@@ -1817,7 +1793,6 @@ ThreatPlates.DEFAULT_SETTINGS = {
         SyncWithHealthbar = true,
       },
       highlight = {
-        -- texture = "TP_HealthBarHighlight", -- removed in 8.7.0
         show = true,
       },
       elitehealthborder = {
@@ -1841,11 +1816,6 @@ ThreatPlates.DEFAULT_SETTINGS = {
         heightFriend = 10,
         texture = "Smooth", -- old default: "ThreatPlatesBar",
         backdrop = "Smooth", -- old default: "ThreatPlatesEmpty",
-        BackgroundUseForegroundColor = false,
-        BackgroundOpacity = 0.7, -- old default: 1,
-        BackgroundColor = RGB(0, 0, 0),
-        BorderUseForegroundColor = false,
-        BorderColor = RGB(0, 0, 0),
         ShowHealAbsorbs = true,
         ShowAbsorbs = true,
         AbsorbColor = RGB(0, 255, 255, 1),
@@ -1884,6 +1854,7 @@ ThreatPlates.DEFAULT_SETTINGS = {
         show = true, -- no longer used
         ShowOverlay = true,
         ShowInterruptShield = false,
+        ShowInterruptSource = true,
       },
       castborder = {
         texture = "TP_Castbar_Border_Thin", -- old default: "TP_CastBarOverlay",
@@ -1943,29 +1914,6 @@ ThreatPlates.DEFAULT_SETTINGS = {
           }
         },
       },
-      name = { -- Names for Healthbar View
-        show = true,
-        typeface = Addon.DEFAULT_FONT, -- old default: "Accidental Presidency",
-        size = 10, -- old default: 14
-        shadow = true,
-        flags = "",
-        width = 140, -- old default: 116,
-        height = 14,
-        x = 0,
-        y = 13,
-        align = "CENTER",
-        vertical = "MIDDLE",
-        ShowTitle = false,
-        ShowRealm = false,
-        --
-        EnemyTextColorMode = "CUSTOM",
-        EnemyTextColor = RGB(255, 255, 255, 1),
-        FriendlyTextColorMode = "CUSTOM",
-        FriendlyTextColor = RGB(255, 255, 255, 1),
-        UseRaidMarkColoring = false,
-        AbbreviationForEnemyUnits = "FULL",
-        AbbreviationForFriendlyUnits = "FULL",
-      },
       level = {
         typeface = Addon.DEFAULT_FONT, -- old default: "Accidental Presidency",
         size = 9, -- old default: 12,
@@ -1987,26 +1935,6 @@ ThreatPlates.DEFAULT_SETTINGS = {
         y = 7, -- old default: 9
         level = 22,
         anchor = "CENTER"
-      },
-      customtext = {
-        typeface = Addon.DEFAULT_FONT, -- old default: "Accidental Presidency",
-        size = 9, -- old default: 12,
-        width = 110,
-        height = 14,
-        x = 0,
-        y = 0, -- old default: 1,
-        align = "CENTER",
-        vertical = "MIDDLE",
-        shadow = true,
-        flags = "",
-        --
-        FriendlySubtext = "HEALTH",
-        FriendlySubtextCustom = "",
-        EnemySubtext = "HEALTH",
-        EnemySubtextCustom = "",
-        SubtextColorUseHeadline = false,
-        SubtextColorUseSpecific = false,
-        SubtextColor =  RGB(255, 255, 255, 1),
       },
       spelltext = {
         typeface = Addon.DEFAULT_FONT, -- old default: "Accidental Presidency",
@@ -2030,7 +1958,6 @@ ThreatPlates.DEFAULT_SETTINGS = {
         x_hv = 0,
         y_hv = 25,
         anchor = "CENTER",
-        hpColor = true,
         show = true,
         ShowInHeadlineView = false,
         hpMarked = {
@@ -2067,50 +1994,26 @@ ThreatPlates.DEFAULT_SETTINGS = {
         anchor = "CENTER",
         show = true,
       },
-      unique = {
-        threatcolor = {
-          LOW = RGB_P(0, 0, 0, 0),
-          MEDIUM = RGB_P(0, 0, 0, 0),
-          HIGH = RGB_P(0, 0, 0, 0),
-        },
-      },
-      totem = {
-        threatcolor = {
-          LOW = RGB_P(0, 0, 0, 0),
-          MEDIUM = RGB_P(0, 0, 0, 0),
-          HIGH = RGB_P(0, 0, 0, 0),
-        },
-      },
-      normal = {
-        threatcolor = {
-          LOW = RGB_P(1, 1, 1, 1),
-          MEDIUM = RGB_P(1, 1, 0, 1),
-          HIGH = RGB_P(1, 0, 0, 1),
-        },
-      },
+      -- Needed in themes (e.g., basicTheme) for creating
       dps = {
         threatcolor = {
-          LOW = RGB_P(0, 1, 0, 1),
-          MEDIUM = RGB_P(1, 1, 0, 1),
-          HIGH = RGB_P(1, 0, 0, 1),
+          LOW = RGB(0, 255, 0, 1),
+          MEDIUM = RGB(255, 255, 0, 1),
+          HIGH = RGB(255, 0, 0, 1),
         },
       },
       tank = {
         threatcolor = {
-          LOW = RGB_P(1, 0, 0, 1),
-          MEDIUM = RGB_P(1, 1, 0, 1),
-          HIGH = RGB_P(0, 1, 0, 1),
+          LOW = RGB(255, 0, 0, 1),
+          MEDIUM = RGB(255, 255, 0, 1),
+          HIGH = RGB(0, 255, 0, 1),
           OFFTANK = RGB(15, 170, 200, 1),
         },
       },
     },
     threat = {
-      ON = true,
-      -- marked = false, -- not used at all, removed in 9.2.0
-      -- nonCombat = true, -- removed in 9.1.3
       UseThreatTable = true,
       UseHeuristicInInstances = false,
-      -- hideNonCombat = false, -- no longer used, removed in 9.1.3
       useType = true,
       useScale = true,
       AdditiveScale = false,
@@ -2121,12 +2024,30 @@ ThreatPlates.DEFAULT_SETTINGS = {
         ON = true,
         theme = "default",
       },
-      --        scaleType = {
-      --          ["Normal"] = -0.2,
-      --          ["Elite"] = 0,
-      --          ["Boss"] = 0.2,
-      --          ["Minus"] = -0.2,
-      --        },
+      ThreatPercentage = {
+        CustomColor = RGB(255, 255, 255),
+        UseThreatColor = true,
+        Type = "SCALED_PERCENTAGE",
+        SecondPlayersName = true,
+        ShowAlways = false,
+        ShowInGroups = true,
+        ShowWithPet = true,
+        -- Layout
+        Anchor = "LEFT",
+        InsideAnchor = false,
+        HorizontalOffset = -6,
+        VerticalOffset = 0,
+        Font = {
+          Typeface = Addon.DEFAULT_FONT,
+          Size = 9,
+          Transparency = 1,
+          --Color = RGB(255, 255, 255),
+          flags = "OUTLINE",
+          Shadow = true,
+          HorizontalAlignment = "RIGHT",
+          VerticalAlignment = "MIDDLE",
+        }
+      },
       toggle = {
         ["Boss"]	= true,
         ["Elite"]	= true,
@@ -2241,8 +2162,16 @@ ThreatPlates.DEFAULT_SETTINGS = {
         OccludedUnits        = 0,
       },
     },
-    Transparency = {
-      Fadeing = true,
+    Animations = {
+      -- ShowPlateDuration = 0.3, -- Blizzard: 0.3
+      -- HidePlateDuration = 0.3, -- Blizzard: 0.3
+      -- HidePlateFadeOut = true,
+      -- HidePlateScaleDown = true,
+      FadeToDuration = 0.15,   -- Blizzard: 0.25
+      FadeInOccludedUnits = true,
+      FadeOutOccludedUnits = true,
+      ScaleToDuration = 0.15,  -- Blizzard: 0.25
+      FlashDuration = 0.4,
     },
     Localization = {
       TransliterateCyrillicLetters = false,

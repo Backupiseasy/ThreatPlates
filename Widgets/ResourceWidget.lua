@@ -14,60 +14,53 @@ local format = format
 local ceil = ceil
 
 -- WoW APIs
-local UnitPower, UnitPowerMax = UnitPower, UnitPowerMax
+local UnitPower, UnitPowerMax, UnitPowerPercent = UnitPower, UnitPowerMax, UnitPowerPercent
 local PowerBarColor = PowerBarColor
 local SPELL_POWER_MANA = SPELL_POWER_MANA
-local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
+local ScaleTo100 = CurveConstants and CurveConstants.ScaleTo100
 
 -- ThreatPlates APIs
 local BackdropTemplate = Addon.BackdropTemplate
+local IsSecretValueTP = Addon.IsSecretValue
+local Truncate = Addon.Truncate
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
 -- List them here for Mikk's FindGlobals script
 -- GLOBALS: CreateFrame, UnitPowerType
 
+local WidgetFrame
+
 ---------------------------------------------------------------------------------------------------
 -- Resource Widget Functions
 ---------------------------------------------------------------------------------------------------
 
 local function HideWidgetFrame()
-  local widget_frame = Widget.WidgetFrame
+  local widget_frame = WidgetFrame
   widget_frame:Hide()
   widget_frame:SetParent(nil)
 end
 
--- TODO: Use function from Localization (with one decimal)
-local function ShortNumber(no)
-  if no <= 9999 then
-    return no
-  elseif no >= 1000000000 then
-    return format("%.0fb", no /1000000000)
-  elseif no >= 1000000 then
-    return format("%.0fm", no /1000000)
-  elseif no >= 10000 then
-    return format("%.0fk", no /1000)
+if not UnitPowerPercent then
+  UnitPowerPercent = function(unitid, power_type, ...)
+    local absolute_value = UnitPower(unitid, power_type)
+    local max_value = UnitPowerMax(unitid, power_type)
+    return ceil(100 * (absolute_value / max_value))
   end
 end
 
-function Widget:PowerMana()
-  local SPELL_POWER = SPELL_POWER_MANA
-  local res_value = UnitPower("target", SPELL_POWER)
-  local res_max = UnitPowerMax("target", SPELL_POWER)
-  local res_perc = ceil(100 * (res_value / res_max))
-
-  local bar_value = res_perc
-  local text_value = ShortNumber(res_value)
-
-  return bar_value, text_value
+local function PowerMana()
+  local absolute_value = UnitPower("target", SPELL_POWER_MANA)
+  local percentage_value = UnitPowerPercent("target", SPELL_POWER_MANA, false, ScaleTo100)
+  
+  return percentage_value, Truncate(absolute_value)
 end
 
-function Widget:PowerGeneric()
-  local res_value = UnitPower("target")
-  local res_max = UnitPowerMax("target")
-  local res_perc = ceil(100 * (res_value / res_max))
+local function PowerGeneric()  
+  local absolute_value = UnitPower("target")
+  local percentage_value = UnitPowerPercent("target", nil, false, ScaleTo100)
 
-  return res_perc, res_value
+  return percentage_value, absolute_value
 end
 
 --INDEX_VARIABLE              INDEX   TOKEN
@@ -93,36 +86,38 @@ end
 --SPELL_POWER_PAIN            18      "PAIN"
 
 Widget.POWER_FUNCTIONS = {
-  MANA = Widget.PowerMana,
-  RAGE = Widget.PowerGeneric,
-  FOCUS = Widget.PowerGeneric,
-  ENERGY = Widget.PowerGeneric,
-  COMBO_POINTS = Widget.PowerGeneric,
-  RUNES = Widget.PowerGeneric,
-  RUNIC_POWER = Widget.PowerGeneric,
-  SOUL_SHARDS = Widget.PowerGeneric,
-  LUNAR_POWER = Widget.PowerGeneric,
-  HOLY_POWER = Widget.PowerGeneric,
+  MANA = PowerMana,
+  RAGE = PowerGeneric,
+  FOCUS = PowerGeneric,
+  ENERGY = PowerGeneric,
+  COMBO_POINTS = PowerGeneric,
+  RUNES = PowerGeneric,
+  RUNIC_POWER = PowerGeneric,
+  SOUL_SHARDS = PowerGeneric,
+  LUNAR_POWER = PowerGeneric,
+  HOLY_POWER = PowerGeneric,
   --ALTERNATE_POWER = PowerGeneric,
-  MAELSTROM = Widget.PowerGeneric,
-  CHI = Widget.PowerGeneric,
-  INSANITY = Widget.PowerGeneric,
-  ARCANE_CHARGES = Widget.PowerGeneric,
-  FURY = Widget.PowerGeneric,
-  PAIN = Widget.PowerGeneric,
+  MAELSTROM = PowerGeneric,
+  CHI = PowerGeneric,
+  INSANITY = PowerGeneric,
+  ARCANE_CHARGES = PowerGeneric,
+  FURY = PowerGeneric,
+  PAIN = PowerGeneric,
 }
 
 function Widget:SetTargetPowerType(widget_frame, unit)
   -- Reset the power function by default; it will be reassigned if appropriate
   self.PowerFunction = nil
 
-  if UnitPowerMax("target") == 0 then return end
+  local target_max_power = UnitPowerMax("target")
+
+  if IsSecretValueTP(target_max_power) or not target_max_power or target_max_power == 0 then return end
 
   -- The code to determine the power type could be moved to OnUnitAdded, but then code is necessary to determine when
   -- the power type on the unit changes (e.g., a druid that shapeshifts). Mabe there's even bosses that do that?!?
   local powerType, powerToken, altR, altG, altB = _G.UnitPowerType("target")
   -- Fallback to generic function if at least alternate color exists
-  local power_func = self.POWER_FUNCTIONS[powerToken] or Widget.PowerGeneric
+  local power_func = self.POWER_FUNCTIONS[powerToken] or PowerGeneric
   
   -- Alternate power detection:
   -- For normal resources, altR, altG, and altB are nil, but PowerBarColor[powerToken] is set.
@@ -145,32 +140,30 @@ function Widget:SetTargetPowerType(widget_frame, unit)
 end
 
 function Widget:UpdateResourceBar()
-  local widget_frame = self.WidgetFrame
-
   local bar_value, text_value = self:PowerFunction()
 
   local db = self.db
   if db.ShowBar then
-    widget_frame.Bar:SetValue(bar_value)
+    WidgetFrame.Bar:SetValue(bar_value)
   end
 
   if db.ShowText then
-    widget_frame.Text:SetText(text_value)
+    WidgetFrame.Text:SetText(text_value)
   end
 end
 
 -- UNIT_POWER_UPDATE is only registered for target unit
 function Widget:UNIT_POWER_UPDATE(unitid, powerType)
-  local tp_frame = self:GetThreatPlateForUnit("target")
+  local tp_frame = Addon:GetThreatPlateForTarget()
 
-  if tp_frame and self.WidgetFrame:IsShown() then
+  if tp_frame and WidgetFrame:IsShown() then
     self:UpdateResourceBar()
   end
 end
 
 -- UNIT_DISPLAYPOWER is only registered for target unit
 function Widget:UNIT_DISPLAYPOWER(unitid)
-  local tp_frame = self:GetThreatPlateForUnit("target")
+  local tp_frame = Addon:GetThreatPlateForTarget()
 
   if tp_frame then
     self:OnTargetUnitAdded(tp_frame, tp_frame.unit)
@@ -178,7 +171,7 @@ function Widget:UNIT_DISPLAYPOWER(unitid)
 end
 
 function Widget:PLAYER_TARGET_CHANGED()
-  local tp_frame = self:GetThreatPlateForUnit("target")
+  local tp_frame = Addon:GetThreatPlateForTarget()
 
   if tp_frame then
     self:OnTargetUnitAdded(tp_frame, tp_frame.unit)
@@ -192,11 +185,11 @@ end
 ---------------------------------------------------------------------------------------------------
 
 function Widget:Create()
-  if not self.WidgetFrame then
+  if not WidgetFrame then
     local widget_frame = _G.CreateFrame("Frame", nil)
     widget_frame:Hide()
 
-    self.WidgetFrame = widget_frame
+    WidgetFrame = widget_frame
 
     widget_frame.Text = widget_frame:CreateFontString(nil, "OVERLAY")
 
@@ -222,10 +215,14 @@ end
 
 -- EVENT: UNIT_POWER_UPDATE: "unitID", "powerType"
 function Widget:OnEnable()
-  self:RegisterEvent("PLAYER_TARGET_CHANGED")
-  self:RegisterUnitEvent("UNIT_POWER_UPDATE", "target")
-  self:RegisterUnitEvent("UNIT_DISPLAYPOWER", "target")
+  self:SubscribeEvent("PLAYER_TARGET_CHANGED")
+  self:SubscribeUnitEvent("UNIT_POWER_UPDATE", "target")
+  self:SubscribeUnitEvent("UNIT_DISPLAYPOWER", "target")
 end
+
+-- function Widget:OnDisable()
+--   self:UnsubscribeAllEvents()
+-- end
 
 function Widget:EnabledForStyle(style, unit)
   return not (style == "NameOnly" or style == "NameOnly-Unique" or style == "etotem")
@@ -234,7 +231,7 @@ end
 function Widget:OnTargetUnitAdded(tp_frame, unit)
   if not unit.isTarget then return end
 
-  local widget_frame = self.WidgetFrame
+  local widget_frame = WidgetFrame
   if not self:EnabledForStyle(unit.style, unit) then 
     HideWidgetFrame()
     return
@@ -297,13 +294,13 @@ end
 function Widget:OnTargetUnitRemoved(tp_frame, unit)
   -- OnTargetUnitAdded and OnTargetUnitRemoved are called for all target units including soft-target units. 
   -- Only hide the widget if the nameplate for the unit is removed that shows the widget
-  if tp_frame == self.WidgetFrame:GetParent() then
+  if tp_frame == WidgetFrame:GetParent() then
     HideWidgetFrame()
   end  
 end
 
 function Widget:UpdateLayout()
-  local widget_frame = self.WidgetFrame
+  local widget_frame = WidgetFrame
 
   -- Updates based on settings
   local db = self.db
@@ -353,11 +350,13 @@ end
 
 function Widget:UpdateSettings()
   self.db = Addon.db.profile.ResourceWidget
-
-  -- Update the widget if it was already created (not true for immediately after Reload UI or if it was never enabled
-  -- in this since last Reload UI)
-  if self.WidgetFrame then
-    self:UpdateLayout()
-    self:PLAYER_TARGET_CHANGED()
-  end
 end
+
+--function Widget:UpdateAllFramesAfterSettingsUpdate()
+--  -- Update the widget if it was already created (not true for immediately after Reload UI or if it was never enabled
+--  -- in this since last Reload UI)
+--  if WidgetFrame then
+--    self:UpdateLayout()
+--    self:PLAYER_TARGET_CHANGED()
+--  end
+--end

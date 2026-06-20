@@ -18,6 +18,8 @@
 -----------------------
 local ADDON_NAME, Addon = ...
 
+if Addon.ExpansionIsAtLeastMidnight then return end
+
 local Widget = Addon.Widgets:NewWidget("HealerTracker")
 
 ---------------------------------------------------------------------------------------------------
@@ -508,7 +510,7 @@ function Widget:UPDATE_BATTLEFIELD_SCORE()
       local is_healer_spec = HEALER_SPECS[talentSpec]
       UnitIsHealer[name] = (is_healer_spec and "HEALER") or "DPS"
 
-      local unit_guid = UnitGUIDByName[unit_name]
+      local unit_guid = UnitGUIDByName[name]
       if unit_guid and is_healer_spec then
         UpdateNameplateByGUID(unit_guid)
       end
@@ -545,9 +547,9 @@ function Widget:PLAYER_ENTERING_WORLD()
   PlayerIsInWorldPvPArea = (instance_type == "none")
 
   if PlayerIsInBattleground then
-    self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+    self:SubscribeEvent("COMBAT_LOG_EVENT_UNFILTERED")
   else
-    self:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+    self:UnsubscribeEvent("COMBAT_LOG_EVENT_UNFILTERED")
   end
 end
 
@@ -557,12 +559,12 @@ function Widget:PLAYER_REGEN_DISABLED()
   -- in world PvP.
   if CombatLogParsingIsEnabled or not PlayerIsInWorldPvPArea or UnitIsPVPSanctuary("player") then return end
 
-  Widget:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+  Widget:SubscribeEvent("COMBAT_LOG_EVENT_UNFILTERED")
   CombatLogParsingIsEnabled = true
 end
 
 local function DisableCombatLogParsing()
-  Widget:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+  Widget:UnsubscribeEvent("COMBAT_LOG_EVENT_UNFILTERED")
   CombatLogParsingIsEnabled = false
 end
 
@@ -600,14 +602,14 @@ function Widget:PLAYER_FLAGS_CHANGED(unitid)
   -- unitid here
   if UnitIsPVP("player") then
     if not CheckPvPStateIsEnabled then
-      self:RegisterEvent("PLAYER_REGEN_ENABLED")
-      self:RegisterEvent("PLAYER_REGEN_DISABLED")
+      self:SubscribeEvent("PLAYER_REGEN_ENABLED")
+      self:SubscribeEvent("PLAYER_REGEN_DISABLED")
       CheckPvPStateIsEnabled = true
     end
   else
     if CheckPvPStateIsEnabled then
-      self:UnregisterEvent("PLAYER_REGEN_ENABLED")
-      self:UnregisterEvent("PLAYER_REGEN_DISABLED")
+      self:UnsubscribeEvent("PLAYER_REGEN_ENABLED")
+      self:UnsubscribeEvent("PLAYER_REGEN_DISABLED")
       DisableCombatLogParsing()
       CheckPvPStateIsEnabled = false
     end
@@ -638,20 +640,24 @@ function Widget:IsEnabled()
 end
 
 function Widget:OnEnable()
-  self:RegisterEvent("PLAYER_ENTERING_WORLD")
-  self:RegisterUnitEvent("PLAYER_FLAGS_CHANGED", "player")
+  self:SubscribeEvent("PLAYER_ENTERING_WORLD")
+  self:SubscribeUnitEvent("PLAYER_FLAGS_CHANGED", "player")
 
   -- We could register/unregister this when entering/leaving the battlefield, but as it only fires when
   -- in a bg, that does not really matter
   -- Before Mists, UPDATE_BATTLEFIELD_SCORE will not work, as GetBattlefieldScore does not return talentSpec information.
-  self:RegisterEvent("UPDATE_BATTLEFIELD_SCORE", Addon.ExpansionIsAtLeastMists)
+  self:SubscribeEvent("UPDATE_BATTLEFIELD_SCORE", Addon.ExpansionIsAtLeastMists)
   -- Before Mists, ARENA_OPPONENT_UPDATE will not work, as it uses a player's spec to determine its role. 
-  self:RegisterEvent("ARENA_OPPONENT_UPDATE", Addon.ExpansionIsAtLeastMists)
+  self:SubscribeEvent("ARENA_OPPONENT_UPDATE", Addon.ExpansionIsAtLeastMists)
 
   -- It seems that PLAYER_FLAGS_CHANGED does not fire when loggin in/reloading the UI, so we need to call it
   -- directly here to initialize combat log parsing.
   self:PLAYER_FLAGS_CHANGED("player")
 end
+
+-- function Widget:OnDisable()
+--   self:UnsubscribeAllEvents()
+-- end
 
 function Widget:EnabledForStyle(style, unit)
   if (style == "NameOnly" or style == "NameOnly-Unique") then

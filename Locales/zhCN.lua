@@ -48,24 +48,24 @@ Blacksalsify
 Blacksalsify
 
 (最开始的作者: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=]
-L[ [=[
-
---
-
-Backupiseasy
-
+L[ [=[
+
+--
+
+Backupiseasy
+
 (Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=] ] = [=[-- 
 
 Backupiseasy 
 (原作者: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=]
-L[ [=[
-
-Feel free to email me at |cff00ff00threatplates@gmail.com|r
-
---
-
-Blacksalsify
-
+L[ [=[
+
+Feel free to email me at |cff00ff00threatplates@gmail.com|r
+
+--
+
+Blacksalsify
+
 (Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=] ] = [=[欢迎写 Email 给我 |cff00ff00threatplates@gmail.com|r 
 
 -- 
@@ -91,11 +91,11 @@ L["|cff89F559Threat Plates|r: Tank switch detected, you are now in your |cff00ff
 L["|cff89F559Threat Plates|r: Unknown profile: "] = "|cff89F559Threat Plates|r: 未知配置文件:"
 L[ [=[|cff89f559Welcome to |r|cff89f559Threat Plates!
 This is your first time using Threat Plates and you are a(n):
-|r|cff]=] ] = [=[|cff89f559欢迎使用 |r|cff89f559Threat Plates!
-这是第一次使用Threat Plates，你是：
+|r|cff]=] ] = [=[|cff89f559欢迎使用 |r|cff89f559Threat Plates!
+这是第一次使用Threat Plates，你是：
 |r|cff]=]
-L[ [=[|cff89f559Welcome to |r|cff89f559Threat Plates!
-This is your first time using Threat Plates and you are a(n):
+L[ [=[|cff89f559Welcome to |r|cff89f559Threat Plates!
+This is your first time using Threat Plates and you are a(n):
 |r|cff]=] ] = [=[|cff89f559欢迎使用 |r|cff89f559Threat Plates 威力血条!
 这是你第一次使用威力血条，你是：
 |r|cff]=]
@@ -104,7 +104,7 @@ L[ [=[|cffFF0000DELETE CUSTOM NAMEPLATE|r
 Are you sure you want to delete the selected custom nameplate?]=] ] = [=[|cffFF0000删除自定义血条|r
 
 是否确定要删除选择的自定义血条?]=]
-L[ [=[|cffFF0000DELETE CUSTOM NAMEPLATE|r
+L[ [=[|cffFF0000DELETE CUSTOM NAMEPLATE|r
 Are you sure you want to delete the selected custom nameplate?]=] ] = [=[|cffFF0000删除自定义血条|r
 
 是否确定要删除选择的自定义血条?]=]
@@ -283,11 +283,11 @@ L["Clean"] = "简约"
 L["Clean Border"] = "简约边框"
 L[ [=[Clear and easy to use threat-reactive nameplates.
 
-Current version: ]=] ] = [=[简单好用又清楚，能与仇恨值互动的血条。
-
+Current version: ]=] ] = [=[简单好用又清楚，能与仇恨值互动的血条。
+
 当前版本: ]=]
-L[ [=[Clear and easy to use threat-reactive nameplates.
-
+L[ [=[Clear and easy to use threat-reactive nameplates.
+
 Current version: ]=] ] = [=[简单好用又清晰，能反应出仇恨值变化的血条。
 
 当前版本: ]=]
@@ -348,10 +348,10 @@ Remember to press ENTER after filling out this box or it will not save.]=] ] = [
 请输入 /dogtag 获取标签信息
 
 输入完成后请记得按 ENTER 键，否则不会保存。]=]
-L[ [=[Define a custom status text using LibDogTag markup language.
-
-Type /dogtag for tag info.
-
+L[ [=[Define a custom status text using LibDogTag markup language.
+
+Type /dogtag for tag info.
+
 Remember to press ENTER after filling out this box or it will not save.]=] ] = [=[使用LibDogTag标记语言自定义状态文本。
 
 请输入 /dogtag 获取标签信息
@@ -436,21 +436,21 @@ L["Enable Threat Textures"] = "启用仇恨值材质"
 L["Enable Threat Transparency"] = "启用仇恨值透明度"
 L["Enemies"] = "敌方"
 L["Enemy"] = "敌人"
-L["Enemy Bar Height"] = [=[敌方血条高度
-
-
-
-
-
-
+L["Enemy Bar Height"] = [=[敌方血条高度
+
+
+
+
+
+
 ]=]
-L["Enemy Bar Width"] = [=[敌方血条宽度
-
-
-
-
-
-
+L["Enemy Bar Width"] = [=[敌方血条宽度
+
+
+
+
+
+
 ]=]
 L["Enemy Casting"] = "敌方施法"
 L["Enemy Height"] = "敌方高度"

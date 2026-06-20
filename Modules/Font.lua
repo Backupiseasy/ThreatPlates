@@ -1,5 +1,7 @@
+---------------------------------------------------------------------------------------------------
+-- Module: Font
+---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
-local ThreatPlates = Addon.ThreatPlates
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -10,14 +12,19 @@ local ThreatPlates = Addon.ThreatPlates
 -- WoW APIs
 local SystemFont_NamePlate, SystemFont_NamePlateFixed = SystemFont_NamePlate, SystemFont_NamePlateFixed
 local SystemFont_LargeNamePlate, SystemFont_LargeNamePlateFixed = SystemFont_LargeNamePlate, SystemFont_LargeNamePlateFixed
+local SystemFont_NamePlate_Outlined = _G.SystemFont_NamePlate_Outlined
+local C_Timer_After = C_Timer.After
 
 -- ThreatPlates APIs
 local ANCHOR_POINT_TEXT = Addon.ANCHOR_POINT_TEXT
 
 -- Cached database settings
+local Settings
 
-local Font = {}
-Addon.Font = Font
+---------------------------------------------------------------------------------------------------
+-- Module Setup
+---------------------------------------------------------------------------------------------------
+local FontModule = Addon.Font
 
 ---------------------------------------------------------------------------------------------------
 -- Backup system fonts for recovery if necessary
@@ -33,11 +40,12 @@ local function BackupSystemFont(font_instance)
   }
 end
 
-Font.DefaultSystemFonts = {
+local DefaultSystemFonts = {
   NamePlate = BackupSystemFont(SystemFont_NamePlate),
   NamePlateFixed = BackupSystemFont(SystemFont_NamePlateFixed),
   LargeNamePlate = BackupSystemFont(SystemFont_LargeNamePlate),
   LargeNamePlateFixed = BackupSystemFont(SystemFont_LargeNamePlateFixed),
+  NamePlateOutlined = SystemFont_NamePlate_Outlined and BackupSystemFont(SystemFont_NamePlate_Outlined),
 }
 
 ---------------------------------------------------------------------------------------------------
@@ -62,7 +70,20 @@ local AnchorFrameTo = Addon.AnchorFrameTo
 -- Element code
 ---------------------------------------------------------------------------------------------------
 
-function Font:UpdateTextFont(font, db)
+function FontModule.SetJustify(font_string, horz, vert)
+  local align_horz, align_vert = font_string:GetJustifyH(), font_string:GetJustifyV()
+  if align_horz ~= horz or align_vert ~= vert then
+    font_string:SetJustifyH(horz)
+    font_string:SetJustifyV(vert)
+
+    -- Set text to nil to enforce text string update, otherwise updates to justification will not take effect
+    local text = font_string:GetText()
+    font_string:SetText(nil)
+    font_string:SetText(text)
+  end
+end
+
+local function UpdateTextFont(font, db)
   font:SetFont(Addon.LibSharedMedia:Fetch('font', db.Typeface), db.Size, db.flags)
 
   if db.Shadow then
@@ -76,8 +97,7 @@ function Font:UpdateTextFont(font, db)
     font:SetTextColor(db.Color.r, db.Color.g, db.Color.b, db.Transparency or 1)
   end
 
-  font:SetJustifyH(db.HorizontalAlignment or "CENTER")
-  font:SetJustifyV(db.VerticalAlignment or "MIDDLE")
+  FontModule.SetJustify(font, db.HorizontalAlignment or "CENTER", db.VerticalAlignment or "MIDDLE")
 
   -- Set text to nil to enforce text string update, otherwise updates to justification will not take effect
   local text = font:GetText()
@@ -85,12 +105,12 @@ function Font:UpdateTextFont(font, db)
   font:SetText(text)
 end
 
-function Font:UpdateText(parent, font, db)
-  self:UpdateTextFont(font, db.Font)
+function FontModule.UpdateText(parent, font, db)
+  UpdateTextFont(font, db.Font)
   AnchorFrameTo(db, font, parent)
 end
 
-function Font:UpdateTextSize(parent, font, db)
+function FontModule.UpdateTextSize(parent, font, db)
   local width, height = parent:GetSize()
   if db.AutoSizing == nil or db.AutoSizing then
     font:SetSize(width, height)
@@ -119,27 +139,64 @@ local function UpdateSystemFont(obj, db)
   end
 end
 
-function Font:SetNamesFonts()
-  local db = Addon.db.profile.BlizzardSettings.Names
-  if db.Enabled then
-    db = db.Font
-    UpdateSystemFont(SystemFont_NamePlate, db)
-    UpdateSystemFont(SystemFont_NamePlateFixed, db)
-    UpdateSystemFont(SystemFont_LargeNamePlate, db)
-    UpdateSystemFont(SystemFont_LargeNamePlateFixed, db)
+local IsNameFontReapplyScheduled = false
+
+local function ReapplyNow()
+  if Settings.Enabled then
+    FontModule.SetNamesFonts(true)
   end
 end
 
-function Font:ResetNamesFonts()
-  UpdateSystemFont(SystemFont_NamePlate, self.DefaultSystemFonts.NamePlate)
-  UpdateSystemFont(SystemFont_NamePlateFixed, self.DefaultSystemFonts.NamePlateFixed)
-  UpdateSystemFont(SystemFont_LargeNamePlate, self.DefaultSystemFonts.LargeNamePlate)
-  UpdateSystemFont(SystemFont_LargeNamePlateFixed, self.DefaultSystemFonts.LargeNamePlateFixed)
+local function ReapplyNowAndReset()
+  ReapplyNow()
+  IsNameFontReapplyScheduled = false
+end
+
+local function ReapplyNameFonts()
+  if IsNameFontReapplyScheduled then return end
+
+  IsNameFontReapplyScheduled = true
+
+  -- Blizzard resets SystemFont_NamePlate* asynchronously after certain UI events
+  -- (e.g. nameplate size changes, options panel show/hide). Two delayed passes are
+  -- needed to reliably override the font: one next-frame pass to catch the first
+  -- reset, and a second pass ~100 ms later to catch any further late resets before
+  -- clearing the guard flag.
+  C_Timer_After(0, ReapplyNow)
+  C_Timer_After(0.1, ReapplyNowAndReset)
+end
+
+function FontModule.SetNamesFonts(skip_reapply)
+  if not Settings.Enabled then return end
+
+  local db = Settings.Font
+  UpdateSystemFont(SystemFont_NamePlate, db)
+  UpdateSystemFont(SystemFont_NamePlateFixed, db)
+  UpdateSystemFont(SystemFont_LargeNamePlate, db)
+  UpdateSystemFont(SystemFont_LargeNamePlateFixed, db)
+  if SystemFont_NamePlate_Outlined then
+    UpdateSystemFont(SystemFont_NamePlate_Outlined, db)
+  end
+
+  if not skip_reapply then
+    ReapplyNameFonts()
+  end
+end
+
+function FontModule.ResetNamesFonts()
+  UpdateSystemFont(SystemFont_NamePlate, DefaultSystemFonts.NamePlate)
+  UpdateSystemFont(SystemFont_NamePlateFixed, DefaultSystemFonts.NamePlateFixed)
+  UpdateSystemFont(SystemFont_LargeNamePlate, DefaultSystemFonts.LargeNamePlate)
+  UpdateSystemFont(SystemFont_LargeNamePlateFixed, DefaultSystemFonts.LargeNamePlateFixed)
+  if SystemFont_NamePlate_Outlined and DefaultSystemFonts.NamePlateOutlined then
+    UpdateSystemFont(SystemFont_NamePlate_Outlined, DefaultSystemFonts.NamePlateOutlined)
+  end
 end
 
 ---------------------------------------------------------------------------------------------------
 -- Update of settings
 ---------------------------------------------------------------------------------------------------
 
--- function Font:UpdateConfiguration()
--- end
+function FontModule.UpdateSettings()
+  Settings = Addon.db.profile.BlizzardSettings.Names
+end

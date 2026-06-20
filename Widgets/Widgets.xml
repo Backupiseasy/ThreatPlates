@@ -2,8 +2,8 @@
 xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
 <!--<Script file="WidgetHandler.lua"/>--> <!-- Loaded in TOC file because of dependencies to the TidyPlatesCore.lua file -->
-<Script file="TidyPlatesExtensions.lua"/>
 <Script file="AurasWidget.lua"/>
+<Script file="AurasWidgetMidnight.lua"/>
 <Script file="ArenaWidget.lua"/>
 <Script file="ClassIconWidget.lua"/>
 <Script file="ComboPointsWidget.lua"/>
@@ -19,8 +19,4 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 <Script file="HealerTrackerWidget.lua"/>
 <Script file="ExperienceWidget.lua"/>
 <Script file="ScriptWidget.lua"/>
-
-<!-- Just for testing -->
-<!--<Script file="TestWidget.lua"/>-->
-
 </Ui>

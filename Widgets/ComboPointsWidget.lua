@@ -28,8 +28,8 @@ local InCombatLockdown = InCombatLockdown
 local GetSpecialization = C_SpecializationInfo and C_SpecializationInfo.GetSpecialization or _G.GetSpecialization
 
 -- ThreatPlates APIs
-local RGB = Addon.ThreatPlates.RGB
-local Font = Addon.Font
+local RGB = Addon.RGB
+local FontUpdateText = Addon.Font.UpdateText
 local PlayerClass = Addon.PlayerClass
 
 local _G =_G
@@ -226,6 +226,7 @@ Widget.Colors = {
 }
 Widget.ShowInShapeshiftForm = true
 
+local WidgetFrame
 -- WoW Clasic only knows one spec, so set default to 1 which is never changed as ACTIVE_TALENT_GROUP_CHANGED is never fired
 local ActiveSpec = 1
 local RuneCooldowns = { 0, 0, 0, 0, 0, 0 }
@@ -813,14 +814,14 @@ local function EventHandler(event, unitid, power_type)
   -- UNIT_POWER_FREQUENT is only registred for Evoker, so no need to check here
   -- if event == "UNIT_POWER_FREQUENT" and not WATCH_POWER_TYPES[power_type] then return end
 
-  local widget_frame = Widget.WidgetFrame
+  local widget_frame = WidgetFrame
   if widget_frame:IsShown() then
     Widget:UpdateUnitResource(widget_frame)
   end
 end
 
 local function EventHandlerEvoker(event, unitid, power_type)
-  local widget_frame = Widget.WidgetFrame
+  local widget_frame = WidgetFrame
   if widget_frame:IsShown() then
     Widget:UpdateUnitResource(widget_frame)
   else
@@ -842,7 +843,7 @@ local function UpdateWidgetAfterTalentChange()
 
   -- Update the widget if it was already created (not true for immediately after Reload UI or if it was never enabled
   -- in this since last Reload UI)
-  if Widget.WidgetFrame then
+  if WidgetFrame then
     Widget:PLAYER_TARGET_CHANGED()
   end
 end
@@ -877,7 +878,7 @@ function Widget:UNIT_MAXPOWER(unitid, power_type)
     self:UpdateLayout()
 
     -- remove excessive CP frames (when called after talent change)
-    local widget_frame = self.WidgetFrame
+    local widget_frame = WidgetFrame
     for i = self.UnitPowerMax + 1, #widget_frame.ComboPoints do
       widget_frame.ComboPoints[i]:Hide()
       widget_frame.ComboPoints[i] = nil
@@ -892,7 +893,7 @@ end
 
 local function PlayerTargetChanged(tp_frame, unit)
   local widget = Widget
-  local widget_frame = widget.WidgetFrame
+  local widget_frame = WidgetFrame
 
   -- If this is an update because nameplate style switched from healthbar to headline view, 
   -- the widget might be needed to be shown/hidden depending on settings
@@ -922,11 +923,11 @@ end
 -- ! So, don't check for WidgetFrame:IsShown() here
 function Widget:PLAYER_TARGET_CHANGED()
   local target_unitid = GetCurrentTargetUnitID()
-  local tp_frame = target_unitid and Widget:GetThreatPlateForUnit(target_unitid)
+  local tp_frame = target_unitid and Addon:GetThreatPlateForUnit(target_unitid)
   if tp_frame then
     PlayerTargetChanged(tp_frame, tp_frame.unit)
   else
-    HideWidgetFrame(self.WidgetFrame)
+    HideWidgetFrame(WidgetFrame)
   end
 end
 
@@ -948,7 +949,7 @@ function Widget:UPDATE_SHAPESHIFT_FORM()
   if self.ShowInShapeshiftForm then
     self:PLAYER_TARGET_CHANGED()
   else
-    HideWidgetFrame(self.WidgetFrame)
+    HideWidgetFrame(WidgetFrame)
   end
 end
 
@@ -969,13 +970,14 @@ function Widget:IsEnabled()
     -- If you then switch to a spec with talent points, the widget won't be enabled.
     -- ACTIVE_TALENT_GROUP_CHANGED requires dual spec which was added with Wrath
     -- TRAIT_CONFIG_UPDATED is only required for detecting enabling/disabling Rogue talent Supercharger
-    self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", Addon.ExpansionIsAtLeastMists)  -- Added in patch 3.2.0 / 1.14.4
-    self:RegisterEvent("TRAIT_CONFIG_UPDATED", Addon.ExpansionIsAtLeastMists) -- Added in patch 10.0.0 / 1.14.4
+    self:SubscribeEvent("ACTIVE_TALENT_GROUP_CHANGED", Addon.ExpansionIsAtLeastMists)  -- Added in patch 3.2.0 / 1.14.4
+    self:SubscribeEvent("TRAIT_CONFIG_UPDATED", Addon.ExpansionIsAtLeastMists) -- Added in patch 10.0.0 / 1.14.4
   end
 
-  self:DetermineUnitPower()
+  -- TODO: Better write a dedicated function to test if the player/spec used combo points and move DetermineUnitPower to OnEnable
+  self:DetermineUnitPower() -- must be done here, not in the if-part, so that PowerType is set to nil correctly (?)
 
-  return self.PowerType and enabled
+  return self.PowerType ~= nil and enabled
 end
 
 -- EVENTS:
@@ -987,51 +989,57 @@ end
 -- UNIT_FLAGS: unitID
 -- UNIT_POWER_FREQUENT: unitToken, powerToken
 function Widget:OnEnable()
-  self:RegisterEvent("PLAYER_ENTERING_WORLD")
-  self:RegisterEvent("PLAYER_TARGET_CHANGED")
-  self:RegisterEvent("PLAYER_SOFT_ENEMY_CHANGED")
-  self:RegisterUnitEvent("UNIT_MAXPOWER", "player")
+  self:SubscribeEvent("PLAYER_ENTERING_WORLD")
+  self:SubscribeEvent("PLAYER_TARGET_CHANGED")
+  self:SubscribeEvent("PLAYER_SOFT_ENEMY_CHANGED")
+  self:SubscribeUnitEvent("UNIT_MAXPOWER", "player")
   
 
   if PlayerClass == "EVOKER" then
     -- Using UNIT_POWER_FREQUENT seems to reduce some lags with essence updates that are 
     -- otherwise happening compared to Blizzard essences (Blizzard_ClassNameplateBar uses this also)
-    self:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player", EventHandlerEvoker)
+    self:SubscribeUnitEvent("UNIT_POWER_FREQUENT", "player", EventHandlerEvoker)
   else
-    self:RegisterUnitEvent("UNIT_POWER_UPDATE", "player", EventHandler)
-    self:RegisterUnitEvent("UNIT_DISPLAYPOWER", "player", EventHandler)
-    self:RegisterUnitEvent("UNIT_POWER_POINT_CHARGE", "player", EventHandler)
+    self:SubscribeUnitEvent("UNIT_POWER_UPDATE", "player", EventHandler)
+    self:SubscribeUnitEvent("UNIT_DISPLAYPOWER", "player", EventHandler)
+    self:SubscribeUnitEvent("UNIT_POWER_POINT_CHARGE", "player", EventHandler)
 
     if PlayerClass == "DRUID" then
-      self:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
+      self:SubscribeEvent("UPDATE_SHAPESHIFT_FORM")
       self.ShowInShapeshiftForm = (GetShapeshiftFormID() == 1)
     elseif PlayerClass == "DEATHKNIGHT" then
       -- Never registered for Classic, as there is no Death Knight class
-      self:RegisterEvent("RUNE_POWER_UPDATE", EventHandler)
-      self:RegisterEvent("RUNE_TYPE_UPDATE", EventHandler)
+      self:SubscribeEvent("RUNE_POWER_UPDATE", EventHandler)
+      self:SubscribeEvent("RUNE_TYPE_UPDATE", EventHandler)
     end
   end
 
-  -- self:RegisterUnitEvent("UNIT_FLAGS", "player", EventHandler)
+  -- self:SubscribeUnitEvent("UNIT_FLAGS", "player", EventHandler)
 end
 
 function Widget:OnDisable()
-  self:UnregisterEvent("PLAYER_ENTERING_WORLD")
-  self:UnregisterEvent("PLAYER_TARGET_CHANGED")
-  self:UnregisterEvent("PLAYER_SOFT_ENEMY_CHANGED")
-  self:UnregisterEvent("UNIT_MAXPOWER")
+  self:UnsubscribeEvent("PLAYER_ENTERING_WORLD")
+  self:UnsubscribeEvent("PLAYER_TARGET_CHANGED")
+  self:UnsubscribeEvent("PLAYER_SOFT_ENEMY_CHANGED")
+  self:UnsubscribeEvent("UNIT_MAXPOWER")
 
   
-  self:UnregisterEvent("UNIT_POWER_FREQUENT")
-  self:UnregisterEvent("UNIT_POWER_UPDATE")
-  self:UnregisterEvent("UNIT_DISPLAYPOWER")
-  self:UnregisterEvent("UNIT_POWER_POINT_CHARGE")
+  self:UnsubscribeEvent("UNIT_POWER_FREQUENT")
+  self:UnsubscribeEvent("UNIT_POWER_UPDATE")
+  self:UnsubscribeEvent("UNIT_DISPLAYPOWER")
+  self:UnsubscribeEvent("UNIT_POWER_POINT_CHARGE")
   
-  self:UnregisterEvent("UPDATE_SHAPESHIFT_FORM")
-  self:UnregisterEvent("RUNE_POWER_UPDATE")
-  self:UnregisterEvent("RUNE_TYPE_UPDATE")
+  self:UnsubscribeEvent("UPDATE_SHAPESHIFT_FORM")
+  self:UnsubscribeEvent("RUNE_POWER_UPDATE")
+  self:UnsubscribeEvent("RUNE_TYPE_UPDATE")
 
-  HideWidgetFrame(self.WidgetFrame)
+  -- Disable ACTIVE_TALENT_GROUP_CHANGED only if the widget is completely disabled, not if just the
+  -- curent spec does not support combo points
+  if not self.db.ON and not self.db.ShowInHeadlineView then
+    self:UnsubscribeEvent("ACTIVE_TALENT_GROUP_CHANGED")
+  end
+
+  HideWidgetFrame(WidgetFrame)
 end
 
 function Widget:EnabledForStyle(style, unit)
@@ -1046,11 +1054,11 @@ function Widget:EnabledForStyle(style, unit)
 end
 
 function Widget:Create()
-  if not self.WidgetFrame then
+  if not WidgetFrame then
     local widget_frame = _G.CreateFrame("Frame", nil)
     widget_frame:Hide()
 
-    self.WidgetFrame = widget_frame
+    WidgetFrame = widget_frame
     widget_frame.ComboPoints = {}
     widget_frame.ComboPointsOff = {}
 
@@ -1085,9 +1093,9 @@ end
 function Widget:OnTargetUnitRemoved(tp_frame, unit)
   -- OnTargetUnitAdded and OnTargetUnitRemoved are called for all target units including soft-target units. 
   -- Only hide the widget if the nameplate for the unit is removed that shows the widget
-  if tp_frame ~= self.WidgetFrame:GetParent() then return end
+  if tp_frame ~= WidgetFrame:GetParent() then return end
   
-  HideWidgetFrame(self.WidgetFrame)
+  HideWidgetFrame(WidgetFrame)
 end
 
 local function UpdateTexturePosition(texture, resource_index)
@@ -1097,7 +1105,7 @@ local function UpdateTexturePosition(texture, resource_index)
   local scaled_spacing = scale * Widget.db.HorizontalSpacing
 
   texture:SetSize(scaled_icon_width, scaled_icon_height)
-  texture:SetPoint("LEFT", Widget.WidgetFrame, "LEFT", (Widget.WidgetFrame:GetWidth() / Widget.UnitPowerMax) * (resource_index-1) + (scaled_spacing / 2), 0)
+  texture:SetPoint("LEFT", WidgetFrame, "LEFT", (WidgetFrame:GetWidth() / Widget.UnitPowerMax) * (resource_index-1) + (scaled_spacing / 2), 0)
 end
 
 local function UpdateTexture(cp_status, texture, texture_path, resource_index)
@@ -1195,7 +1203,7 @@ local function CreateResourceTextureEssence(widget_frame, resource_index)
 end
 
 function Widget:UpdateLayout()
-  local widget_frame = self.WidgetFrame
+  local widget_frame = WidgetFrame
 
   -- Updates based on settings
   local db = self.db
@@ -1227,9 +1235,20 @@ function Widget:UpdateLayout()
     end
 
     if ShowCooldownDuration then
-      Font:UpdateText(widget_frame.ComboPoints[resource_index],  widget_frame.ComboPointsOff[resource_index].Time, SettingsCooldown)
+      FontUpdateText(widget_frame.ComboPoints[resource_index],  widget_frame.ComboPointsOff[resource_index].Time, SettingsCooldown)
     end
   end
+end
+
+-- Do this here, not in UpdateSettings as it does not change with settings, but only with player class and WoW version
+if PlayerClass == "DEATHKNIGHT" and Addon.IS_WRATH_CLASSIC then
+  GetRuneStatus = GetRuneStateWrath
+  UpdateRuneStatusActive = UpdateRuneStatusActiveWrath
+  UpdateRuneStatusInactive = UpdateRuneStatusInactiveWrath
+else
+  GetRuneStatus = GetRuneStateMainline
+  UpdateRuneStatusActive = UpdateRuneStatusActiveMainline
+  UpdateRuneStatusInactive = UpdateRuneStatusInactiveMainline
 end
 
 function Widget:UpdateSettings()
@@ -1318,9 +1337,13 @@ function Widget:UpdateSettings()
     self.UpdateUnitResource = self.UpdateComboPoints
   end
 
+  self:UpdateAllFramesAfterSettingsUpdate()
+end
+
+function Widget:UpdateAllFramesAfterSettingsUpdate()
   -- Update the widget if it was already created (not true for immediately after Reload UI or if it was never enabled
   -- in this since last Reload UI)
-  if self.WidgetFrame then
+  if WidgetFrame then
     self:UpdateLayout()
     self:PLAYER_TARGET_CHANGED()
   end

@@ -12,3 +12,7 @@ always looking for ways to improve this addon.
   - Major versions (7.x, 8.x, 9.x, ...) for every WoW expansion.
   - Minor version for releasing new functionality (8.0, 8.1, 8.2, ...).
   - Patch levels (8.0.1, 8.0.2, 8.0.3, ...) for bugfix releases.
+
+- Luacheck
+  - Local full scan: `luacheck . --config .luacheckrc`
+  - CI gate (global write checks): `luacheck . --config .luacheckrc.ci`

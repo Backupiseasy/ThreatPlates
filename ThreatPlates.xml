@@ -7,7 +7,4 @@
         </SwipeTexture>
         <EdgeTexture file="Interface\Addons\TidyPlates_ThreatPlates\Artwork\Edge"/>
     </Cooldown>
-
-    <Script file="TidyPlatesStatusbar.lua"/>
-    <Script file="TidyPlatesCore.lua"/>
 </Ui>

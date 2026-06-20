@@ -1,8 +1,7 @@
 ---------------------------------------------------------------------------------------------------
--- Quest Widget
+-- Script Widget
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
-local ThreatPlates = Addon.ThreatPlates
 
 local Widget = Addon.Widgets:NewWidget("Script")
 
@@ -21,7 +20,7 @@ local CreateFrame = CreateFrame
 local loadstring, setfenv = loadstring, setfenv
 
 -- ThreatPlates APIs
-local L = ThreatPlates.L
+local L = Addon.L
 
 local _G =_G
 
@@ -368,7 +367,6 @@ local function GetScriptEnvironment(custom_style)
             -- HEX2RGB
             -- CopyTable
             -- MergeIntoTable
-            -- ConcatTables
             -- PrintTable
           --},
           --Debug = {}
@@ -459,7 +457,7 @@ function Widget:OnDisable()
   for _, custom_style in ipairs(Addon.Cache.CustomPlateTriggers.Script) do
     for event, _ in pairs(custom_style.Scripts.Code.Events) do
       --print ("Unregistering:", event)
-      self:UnregisterEvent(event)
+      self:UnsubscribeEvent(event)
     end
   end
 
@@ -641,7 +639,7 @@ function Widget:UpdateSettings()
         if func then
           ScriptsForWoWEvents[event] = ScriptsForWoWEvents[event] or {}
           ScriptsForWoWEvents[event][custom_style] = func
-          if not pcall(self.RegisterEvent, self, event, HandleWoWEvent) then
+          if not pcall(self.SubscribeEvent, self, event, HandleWoWEvent) then
             Addon.Logging.Error(string_format(L["Attempt to register script for unknown WoW event \"%s\""], event))
           end
         end
