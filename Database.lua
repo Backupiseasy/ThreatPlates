@@ -499,8 +499,8 @@ Addon.GetDefaultSettingsV1 = function(defaults)
   db.settings.eliteicon.y = 9
   db.settings.skullicon.x = 55
   db.settings.raidicon.y = 27
-  db.threat.dps.HIGH = 1.25
-  db.threat.tank.LOW = 1.25
+  db.threat.dps.scale.HIGH = 1.25
+  db.threat.tank.scale.LOW = 1.25
 
   return new_defaults
 end
@@ -1137,6 +1137,7 @@ local function MigrateAurasWidgetV2(_, profile)
     if DatabaseEntryExists(profile, { "AuraWidget", "ModeBar"} ) then
       profile.AuraWidget.Buffs.ModeBar.Enabled = GetValueOrDefault(profile.AuraWidget.ModeBar.Enabled, default_profile.AuraWidget.Buffs.ModeBar.Enabled)
       profile.AuraWidget.Debuffs.ModeBar.Enabled = GetValueOrDefault(profile.AuraWidget.ModeBar.Enabled, default_profile.AuraWidget.Debuffs.ModeBar.Enabled)
+      profile.AuraWidget.CrowdControl.ModeBar.Enabled = GetValueOrDefault(profile.AuraWidget.ModeBar.Enabled, default_profile.AuraWidget.CrowdControl.ModeBar.Enabled)
     end
 
     DatabaseEntryDelete(profile, { "AuraWidget", "x" })
@@ -1426,7 +1427,7 @@ local MIGRATION_FUNCTIONS_BY_VERSION = {
     { Type = "Migrate", Name = "Custom Styles", Function = MigrateCustomStyles, NoDefaultProfile = true },
   },
   ["10.2.1"] = {
-    { Type = "Migrate", Name = "Disable Show Blizzard Auras", Function = DisableShowBlizzardAurasForClassic, Version = WOW_USES_CLASSIC_NAMEPLATES },
+    { Type = "Migrate", Name = "Disable Show Blizzard Auras", Function = DisableShowBlizzardAurasForClassic, Version = Addon.WOW_USES_CLASSIC_NAMEPLATES },
   },
   ["10.3.0-beta2"] = {
     { Type = "Migrate", Name = "Auras Widget V2", Function = MigrateAurasWidgetV2, NoDefaultProfile = true },

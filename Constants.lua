@@ -639,7 +639,7 @@ Addon.DEFAULT_SETTINGS = {
         FriendlySubtextCustom = "",
         EnemySubtext = "HEALTH",
         EnemySubtextCustom = "",
-        SubtextCofffffffffflorUseHeadline = false,
+        SubtextColorUseHeadline = false,
         SubtextColorUseSpecific = false,
         SubtextColor =  RGB(255, 255, 255, 1),
         -- Font anchoring and format
