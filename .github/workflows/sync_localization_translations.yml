@@ -34,9 +34,20 @@ on:
       - "**.lua"
       - "Locales/**"
 
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   sync:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CF_API_KEY: ${{ secrets.CF_API_KEY }}
 
     steps:
       - name: Clone project
@@ -55,13 +66,9 @@ jobs:
 
       - name: Upload new phrase keys to CurseForge
         run: python Source/localization_tool.py upload --token "$CF_API_KEY"
-        env:
-          CF_API_KEY: ${{ secrets.CF_API_KEY }}
 
       - name: Pull current CurseForge translations into Locales/*.lua
         run: python Source/localization_tool.py pull --token "$CF_API_KEY"
-        env:
-          CF_API_KEY: ${{ secrets.CF_API_KEY }}
 
       - name: Open pull request with updated translations
         uses: peter-evans/create-pull-request@v6
