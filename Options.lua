@@ -2287,7 +2287,7 @@ local function CreateComboPointsWidgetOptions()
         hidden = function() return not Addon.ExpansionIsAtLeastWrath end,
         args = {
           RuneCooldown= {
-            name = L["Death Knigh Rune Cooldown"],
+            name = L["Death Knight Rune Cooldown"],
             order = 70,
             type = "group",
             inline = true,
@@ -2835,7 +2835,7 @@ local function CreateTargetArtWidgetOptions()
     childGroups = "tab",
     order = 90,
     args = {
-      Enable = GetEnableEntry(L["Enable Target Highlight"], L["This widget highlights the nameplate of your current target by showing a border around the healthbar and by coloring the nameplate's healtbar and/or name with a custom color."], "targetWidget", false),
+      Enable = GetEnableEntry(L["Enable Target Highlight"], L["This widget highlights the nameplate of your current target by showing a border around the healthbar and by coloring the nameplate's healthbar and/or name with a custom color."], "targetWidget", false),
       Indicator = {
         name = L["Highlight"],
         order = 10,
@@ -3512,7 +3512,7 @@ local function CreateFocusWidgetOptions()
     order = 55,
     hidden = function() return not Addon.Widgets.Widgets.Focus end,
     args = {
-      Enable = GetEnableEntry(L["Enable Focus Widget"], L["This widget highlights the nameplate of your current focus target by showing a border around the healthbar and by coloring the nameplate's healtbar and/or name with a custom color."], "FocusWidget", false),
+      Enable = GetEnableEntry(L["Enable Focus Widget"], L["This widget highlights the nameplate of your current focus target by showing a border around the healthbar and by coloring the nameplate's healthbar and/or name with a custom color."], "FocusWidget", false),
       Texture = {
         name = L["Texture"],
         order = 10,
@@ -3754,7 +3754,7 @@ local function CreateResourceWidgetOptions()
             name = L["Only Alternate Power"],
             order = 50,
             type = "toggle",
-            desc = L["Shows resource information only for alternatve power (of bosses or rares, mostly)."],
+            desc = L["Shows resource information only for alternative power (of bosses or rares, mostly)."],
             arg = { "ResourceWidget", "ShowOnlyAltPower" },
           },
         },
@@ -3823,7 +3823,7 @@ local function CreateResourceWidgetOptions()
             order = 230,
             type = "toggle",
             width = "half",
-            desc = L["Use a custom color for the healtbar's background."],
+            desc = L["Use a custom color for the healthbar's background."],
             set = function(info, val) SetValue(info, not val) end,
             get = function(info, val) return not GetValue(info, val) end,
             arg = { "ResourceWidget", "BackgroundUseForegroundColor" },
@@ -3881,7 +3881,7 @@ local function CreateResourceWidgetOptions()
             order = 330,
             type = "toggle",
             width = "half",
-            desc = L["Use a custom color for the healtbar's border."],
+            desc = L["Use a custom color for the healthbar's border."],
             set = function(info, val) db.ResourceWidget.BorderUseForegroundColor = false; db.ResourceWidget.BorderUseBackgroundColor = false; Addon:ForceUpdate() end,
             get = function(info, val) return not (db.ResourceWidget.BorderUseForegroundColor or db.ResourceWidget.BorderUseBackgroundColor) end,
             arg = { "ResourceWidget", "BackgroundUseForegroundColor" },
@@ -4564,7 +4564,7 @@ local function CreateAurasWidgetOptions()
               },
               ReverseOrder = {
                 name = L["Reverse"], type = "toggle", order = 50,
-                desc = L['Reverse the sort order (e.g., "A to Z" becomes "Z to A").'],
+                desc = L["Reverse the sort order (e.g., \"A to Z\" becomes \"Z to A\")."],
                 arg = { "AuraWidget", "SortReverse" }
               },
             },
@@ -5164,7 +5164,7 @@ local function CreateAurasWidgetOptions()
                     name = L["Boss"],
                     order = 45,
                     type = "toggle",
-                    desc = L["Show debuffs that where applied by bosses."],
+                    desc = L["Show debuffs that were applied by bosses."],
                     set = function(info, val)
                       local db = db.AuraWidget.Debuffs
                         db.ShowAllFriendly = not (val or db.ShowBlizzardForFriendly or db.ShowDispellable or
@@ -5496,7 +5496,7 @@ local function CreateAurasWidgetOptions()
                     name = L["Boss"],
                     order = 50,
                     type = "toggle",
-                    desc = L["Show crowd control auras that where applied by bosses."],
+                    desc = L["Show crowd control auras that were applied by bosses."],
                     set = function(info, val)
                       local db = db.AuraWidget.CrowdControl
                       db.ShowAllFriendly = not (val or db.ShowBlizzardForFriendly or db.ShowDispellable)
@@ -5583,7 +5583,7 @@ local function CreateAurasWidgetOptions()
                     name = L["Blizzard"],
                     order = 30,
                     type = "toggle",
-                    desc = L["Show crowd control auras hat are shown on Blizzard's default nameplates."],
+                    desc = L["Show crowd control auras that are shown on Blizzard's default nameplates."],
                     set = function(info, val)
                       local db = db.AuraWidget.CrowdControl
                       db.ShowAllEnemy = not (val)
@@ -5805,7 +5805,7 @@ local function CreateVisibilityTab()
           Description = GetDescriptionEntry(L["These options allow you to control which nameplates are visible within the game field while you play."]),
           Spacer0 = GetSpacerEntry(1),
           AllPlates = {
-            name = L["Always Show Nameplate"],
+            name = L["Always Show Nameplates"],
             desc = L["Show nameplates at all times."],
             type = "toggle",
             order = 10,
@@ -6547,7 +6547,7 @@ local function CreateBlizzardSettings()
             type = "toggle",
             order = 20,
             name = L["Resources on Targets"],
-            desc = L["Enable this if you want to show Blizzards special resources above the target nameplate."],
+            desc = L["Enable this if you want to show Blizzard's special resources above the target nameplate."],
             width = "double",
             set = function(info, val)
               SetValueGeneral(info, val)
@@ -6783,7 +6783,7 @@ local function CreateAppearanceTab()
             name = L["Look and Feel"],
             order = 1,
             type = "select",
-            desc = L["Changes the default settings to the selected design. Some of your custom settings may get overwritten if you switch back and forth.."],
+            desc = L["Changes the default settings to the selected design. Some of your custom settings may get overwritten if you switch back and forth."],
             values = { CLASSIC = "Classic", SMOOTH = "Smooth" } ,
             set = function(info, val)
               Addon.db.global.DefaultsVersion = val
@@ -7203,7 +7203,7 @@ local function CreateHealthbarOptions()
                     name = L["Full Absorbs"],
                     order = 120,
                     type = "toggle",
-                    desc = L["Always shows the full amount of absorbs on a unit. In overabsorb situations, the absorbs bar ist shifted to the left."],
+                    desc = L["Always shows the full amount of absorbs on a unit. In overabsorb situations, the absorbs bar is shifted to the left."],
                     arg = { "settings", "healthbar", "AlwaysFullAbsorb" },
                   },
                   OverlayTexture = {
@@ -8721,7 +8721,7 @@ CreateCustomNameplateEntry = function(index)
             type = "input",
             order = 20,
             width = "full",
-            desc = L["Apply these custom settings to the nameplate of a unit with a particular name or NPC ID. You can add multiple entries separated by a semicolon. You can use use * as wildcard character in names."],
+            desc = L["Apply these custom settings to the nameplate of a unit with a particular name or NPC ID. You can add multiple entries separated by a semicolon. You can use * as wildcard character in names."],
             set = function(info, val)
               -- Only "*" and "." should be allowed, so check for other magic characters: ( ) . % + ? [ ^ $
               -- "." is allowed as there a units names with this character
@@ -9671,7 +9671,7 @@ CreateCustomNameplatesGroup = function()
               order = 20,
               width = "double",
               type = "execute",
-              desc = L["Import custom nameplate settings from a string. The custom namneplates will be added to your current custom nameplates."],
+              desc = L["Import custom nameplate settings from a string. The custom nameplates will be added to your current custom nameplates."],
               func = function()
                 ImportExportFrame = ImportExportFrame or CreateImportExportFrame()
 
@@ -10111,7 +10111,7 @@ local function CreateOptionsTable()
                     AlphaNoTargetSet = GetTransparencyEntryOffset(32, { "nameplate", "alpha", "NoTarget" }),
                     Spacer = GetSpacerEntry(40),
                     AddTargetAlpha = {
-                      --name = L["Absolut Transparency"],
+                      --name = L["Absolute Transparency"],
                       name = L["Use target-based transparency as absolute transparency and ignore unit base transparency."],
                       order = 50,
                       type = "toggle",
@@ -11018,7 +11018,7 @@ local function CreateOptionsTable()
                       arg = { "threat", "marked", "scale" }
                     },
                     AbsoluteThreatScale = {
-                      name = L["Use threat scale as additive scale and add or substract it from the general scale settings."],
+                      name = L["Use threat scale as additive scale and add or subtract it from the general scale settings."],
                       order = 20,
                       type = "toggle",
                       width = "full",
@@ -11092,7 +11092,7 @@ local function CreateOptionsTable()
                       arg = { "threat", "marked", "alpha" }
                     },
                     AbsoluteThreatAlpha = {
-                      name = L["Use threat transparency as additive transparency and add or substract it from the general transparency settings."],
+                      name = L["Use threat transparency as additive transparency and add or subtract it from the general transparency settings."],
                       order = 20,
                       type = "toggle",
                       width = "full",

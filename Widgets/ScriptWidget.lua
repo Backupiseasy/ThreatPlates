@@ -264,7 +264,7 @@ local EnvironmentGetGlobal
 --    end,
 --    __newindex = function(table, key, value)
 --      if _G[key] then
---        Addon.PrintMessage("Warning", string.format(L["The script has overwritten the global '%s', this might affect other scripts ."], key))
+--        Addon.PrintMessage("Warning", string.format(L["The script has overwritten the global '%s', this might affect other scripts."], key))
 --      end
 --      rawset(table, key, value)
 --    end,
@@ -292,7 +292,7 @@ local ScriptEnvironment =
     end,
     __newindex = function(table, key, value)
       if _G[key] then
-        Addon.Logging.Warning(string_format(L["A script has overwritten the global '%s'. This might affect other scripts ."], key))
+        Addon.Logging.Warning(string_format(L["A script has overwritten the global '%s'. This might affect other scripts."], key))
       end
       rawset(table, key, value)
     end,

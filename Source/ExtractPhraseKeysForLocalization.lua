@@ -4,8 +4,11 @@ local lfs = require("lfs")
 local BLOCK_FILES_AND_DIRS = {
   ".git",
   ".github",
+  ".claude",
   ".idea",
   ".release",
+  ".vscode",
+  "Artwork",
   "Libs",
   "Locales",
   "Source",
@@ -15,9 +18,8 @@ local BLOCK_FILES_AND_DIRS = {
 local ALLOW_FILES_AND_DIRS = {
   "Elements",
   "Fonts",
-  "Functions",
+  "Modules",
   "Styles",
-  "TidyPlatesInternal",
   "Widgets",
   -- Also, all Lua files in the working directory are scanned.
 }

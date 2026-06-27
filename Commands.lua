@@ -24,7 +24,7 @@ local function toggleTANK()
     Addon.Logging.Warning(L["Role toggle not supported because automatic role detection is enabled."])
   else
     Addon.db.char.spec[GetSpecialization()] = true
-		Addon.Logging.Info(L["cff00ff00Tank Plates Enabled|r"])
+		Addon.Logging.Info(L["|cff00ff00Tank Plates Enabled|r"])
 		Addon.Logging.Info(L["Tank switch detected, you are now in your |cff00ff00tanking|r role."])
     Addon:ForceUpdate()
   end
