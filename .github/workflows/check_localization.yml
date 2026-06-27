@@ -1,0 +1,79 @@
+name: Check localization completeness
+
+# Fails the build if any L["..."] string used in the addon's Lua files has no
+# corresponding entry in Locales/enUS.lua. This is the regression that used to
+# accumulate silently for years (dozens of missing strings found and fixed by
+# hand before this check existed) - see Source/localization_tool.py's `check`
+# subcommand.
+#
+# On pull_request events, the findings (if any) are also posted as a single,
+# self-updating PR comment (via marocchino/sticky-pull-request-comment) so
+# reviewers see the concrete missing keys without digging through CI logs.
+# This applies to every PR that touches **.lua or Locales/** - including the
+# bot-generated localization-sync PR from sync_localization_translations.yml,
+# but also catches a human PR that adds a new string without translating it.
+
+on:
+  pull_request:
+    paths:
+      - "**.lua"
+      - "Locales/**"
+  push:
+    paths:
+      - "**.lua"
+      - "Locales/**"
+
+permissions:
+  pull-requests: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clone project
+        uses: actions/checkout@v4
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install luaparser
+        run: pip install luaparser
+
+      - name: Run localization check
+        id: check
+        run: |
+          if python Source/localization_tool.py check > check_output.txt 2>&1; then
+            echo "passed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "passed=false" >> "$GITHUB_OUTPUT"
+          fi
+          cat check_output.txt
+
+      - name: Build PR comment body
+        if: always()
+        run: |
+          if [ "${{ steps.check.outputs.passed }}" = "true" ]; then
+            echo "✅ Localization check passed - no missing keys." > comment_body.md
+          else
+            {
+              echo "### ⚠️ Localization check found issues"
+              echo
+              echo '```'
+              cat check_output.txt
+              echo '```'
+            } > comment_body.md
+          fi
+
+      - name: Post or update PR comment
+        if: always() && github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: localization-check
+          path: comment_body.md
+
+      - name: Fail the job if the check failed
+        if: steps.check.outputs.passed != 'true'
+        run: exit 1
