@@ -2,6 +2,7 @@
 .release/
 .env
 .vscode/
+.claude
 workspace.code-workspace
 *.code-workspace
 *.tmp.driveupload/
