@@ -23,6 +23,7 @@ Subcommands:
 """
 import argparse
 import os
+import re
 import sys
 import urllib.error
 import urllib.request
@@ -316,6 +317,56 @@ def existing_header(locale_path):
     return "".join(lines[:2]) if len(lines) >= 2 else None
 
 
+_LOCALE_ENTRY_RE = re.compile(r'^L\[("(?:[^"\\]|\\.)*")\]\s*=\s*("(?:[^"\\]|\\.)*")\s*$')
+
+
+def _index_translated_entries(lines):
+    """Map literal `L["key"]` source text -> full source line, for every
+    single-line `L["key"] = "value"` entry whose value differs from its key
+    (i.e. an actual translation, not a missing-translation placeholder)."""
+    index = {}
+    for line in lines:
+        m = _LOCALE_ENTRY_RE.match(line.strip())
+        if m and m.group(1) != m.group(2):
+            index.setdefault(m.group(1), line)
+    return index
+
+
+def preserve_existing_translations(existing_lines, incoming_lines):
+    """CurseForge marks an untranslated key with a `--[[Translation missing --]]`
+    comment followed by `L["key"] = "key"` (value identical to key). Blindly
+    overwriting the locale file with that placeholder would regress an already
+    correct translation if one exists locally - e.g. because it was edited
+    directly and never re-uploaded to CurseForge, or because the English key
+    text changed and CurseForge's translation pool hasn't caught up yet. Where
+    that's the case, keep the existing translation and drop the now-inaccurate
+    comment instead of pulling in the placeholder.
+
+    Only handles single-line `L["..."] = "..."` entries (the vast majority) -
+    multi-line long-bracket string values are left as CurseForge sent them,
+    same as before this safeguard existed.
+
+    Returns (merged_lines, preserved_count)."""
+    existing_by_key = _index_translated_entries(existing_lines)
+    result = []
+    preserved = 0
+    i, n = 0, len(incoming_lines)
+    while i < n:
+        line = incoming_lines[i]
+        if line.strip() == "--[[Translation missing --]]" and i + 1 < n:
+            m = _LOCALE_ENTRY_RE.match(incoming_lines[i + 1].strip())
+            if m and m.group(1) == m.group(2):
+                existing_line = existing_by_key.get(m.group(1))
+                if existing_line is not None:
+                    result.append(existing_line)
+                    preserved += 1
+                    i += 2
+                    continue
+        result.append(line)
+        i += 1
+    return result, preserved
+
+
 def cmd_pull(args):
     locales_xml = os.path.join(args.root, "Locales", "Locales.xml")
     locales = [l for l in enabled_locales(locales_xml) if l != "enUS"]
@@ -356,6 +407,14 @@ def cmd_pull(args):
         # meant for inline @localization@ substitution into an existing file;
         # drop it, we already declare our own local L in the header above.
         body_lines = [ln for ln in body.splitlines() if ln.strip() != "L = L or {}"]
+
+        existing_lines = []
+        if os.path.exists(locale_path):
+            with open(locale_path, encoding="utf-8-sig") as f:
+                existing_lines = f.read().splitlines()
+        body_lines, preserved = preserve_existing_translations(existing_lines, body_lines)
+        if preserved:
+            print(f"  Kept {preserved} existing translation(s) CurseForge reported as missing.")
 
         with open(locale_path, "w", encoding="utf-8", newline="\n") as f:
             f.write(header)
