@@ -6,3 +6,6 @@ workspace.code-workspace
 *.code-workspace
 *.tmp.driveupload/
 *.tmp.drivedownload/
+__pycache__/
+.pytest_cache/
+phrase_keys_export_file.txt

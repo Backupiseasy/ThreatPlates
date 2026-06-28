@@ -1,22 +1,19 @@
-# Packages and publishes a stable release to CurseForge, WoWInterface, Wago, and GitHub.
-# Triggers on a version tag (e.g. "13.0.24") - explicitly excluding "-alpha"/"-beta" tags,
-# which are handled by build_alpha.yml/build_beta.yml instead. Builds separate packages
-# per game flavor (retail/classic/bcc/mists) from the same multi-version .toc.
+# Packages and publishes a beta build to CurseForge, Wago, and GitHub - but not
+# WoWInterface (WOWI_API_TOKEN intentionally not forwarded for beta).
+# Triggers on any tag containing "-beta" (e.g. "13.0.24-beta1").
 #
 # Actual packaging logic lives in the reusable workflow _package_release.yml - this file
 # only owns the release-channel-specific trigger, naming, and which secrets are forwarded.
-name: Package and release version
+name: Package and release alpha and beta version
 
 on:
   push:
     tags:
-      - "[0-9]+.[0-9]+.[0-9]+"
-      - "!**-beta**"
-      - "!**-alpha**"
+      - "**-beta**"
   workflow_dispatch:
     inputs:
       tag:
-        description: "Tag to package and release (e.g. 13.0.24)"
+        description: "Beta tag to package and release (e.g. 13.0.24-beta1)"
         required: true
 
 concurrency:
@@ -30,5 +27,5 @@ jobs:
       ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
     secrets:
       CF_API_KEY: ${{ secrets.CF_API_KEY }}
-      WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
       WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
+      # WOWI_API_TOKEN intentionally not passed - beta is not published to WoWInterface.

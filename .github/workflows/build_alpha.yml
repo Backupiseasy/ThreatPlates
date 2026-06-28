@@ -1,0 +1,30 @@
+# Packages and publishes an alpha build to GitHub only - no CurseForge/WoWInterface/Wago
+# upload, since alpha is for early testing rather than wide distribution.
+# Triggers on any tag containing "-alpha" (e.g. "13.0.24-alpha1").
+#
+# Actual packaging logic lives in the reusable workflow _package_release.yml - this file
+# only owns the release-channel-specific trigger, naming, and which secrets are forwarded.
+name: Package and release alpha version
+
+on:
+  push:
+    tags:
+      - "**-alpha**"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Alpha tag to package and release (e.g. 13.0.24-alpha1)"
+        required: true
+
+concurrency:
+  group: release-${{ github.workflow }}-${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    uses: ./.github/workflows/_package_release.yml
+    with:
+      ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
+    # No secrets passed: GITHUB_TOKEN is automatically available inside the called
+    # workflow without being threaded through here. CF_API_KEY/WOWI_API_TOKEN/WAGO_API_TOKEN
+    # are intentionally omitted - alpha publishes to GitHub only.

@@ -1,0 +1,88 @@
+name: Sync localization strings with CurseForge
+
+# Full localization sync loop:
+#   1. Extract every L["..."] string used in the addon's Lua files.
+#   2. Upload new/unknown strings to CurseForge so translators have something to translate.
+#   3. Pull the current translations back down and update Locales/*.lua via a PR.
+#
+# Only locales that are actually <Script>-loaded in Locales/Locales.xml are touched. Several
+# locale files exist in the repo but are commented out there on purpose (translation quality too
+# low to ship) - this workflow must never re-enable them or overwrite that decision, and never
+# touches Locales.xml itself. enUS.lua is the hand-maintained source of truth and is never
+# regenerated from CurseForge either.
+#
+# All three steps are implemented by Source/localization_tool.py (AST-based - see that file's
+# docstring for why this replaced the old regex-based Source/ExtractPhraseKeysForLocalization.lua
+# + Source/import_localization_phrase_keys.sh + inline bash pull-back).
+#
+# Triggers:
+#   - push to main: pick up new strings as soon as they land.
+#   - weekly schedule: catches translation updates made directly on CurseForge, which can happen
+#     without any code commit here.
+#   - workflow_dispatch: manual run.
+# The push trigger is scoped to `main` only (not "all branches"): the PR step below pushes its own
+# commits to the `localization-sync` branch, and a trigger that also matched that branch would
+# re-run this workflow on its own output.
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1"
+  push:
+    branches: [main]
+    paths:
+      - "**.lua"
+      - "Locales/**"
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CF_API_KEY: ${{ secrets.CF_API_KEY }}
+
+    steps:
+      - name: Clone project
+        uses: actions/checkout@v4
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install luaparser
+        run: pip install luaparser
+
+      - name: Extract phrase keys (strings that have to be translated) from lua files
+        run: python Source/localization_tool.py extract
+
+      - name: Upload new phrase keys to CurseForge
+        run: python Source/localization_tool.py upload --token "$CF_API_KEY"
+
+      - name: Pull current CurseForge translations into Locales/*.lua
+        run: python Source/localization_tool.py pull --token "$CF_API_KEY"
+
+      - name: Open pull request with updated translations
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "Update localization files from CurseForge"
+          title: "Update localization files from CurseForge"
+          body: |
+            Automated sync of community translations from CurseForge.
+
+            - Only updates locales currently enabled in `Locales/Locales.xml`.
+            - `enUS.lua` is never touched (hand-maintained source of truth).
+            - Disabled locales (commented out in `Locales.xml`, e.g. for translation-quality
+              reasons) are intentionally skipped.
+
+            Please review the diff for translation quality before merging.
+          branch: localization-sync
+          delete-branch: true
