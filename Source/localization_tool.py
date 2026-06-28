@@ -245,7 +245,12 @@ def cmd_upload(args):
         body = f.read()
 
     boundary = "----localizationtoolboundary"
-    metadata = '{ language: "enUS", "missing-phrase-handling": "DoNothing" }'
+    # DeletePhrase (not DoNothing) so phrases no longer in the current upload - e.g. a
+    # typo fix or rewording that changes the English key text - get purged from
+    # CurseForge instead of lingering forever as stale, never-matched duplicates that
+    # resurface in every future pull. Matches the upstream WeakAuras script this
+    # project's old import_localization_phrase_keys.sh was derived from.
+    metadata = '{ language: "enUS", "missing-phrase-handling": "DeletePhrase" }'
 
     parts = [
         f"--{boundary}\r\n"
