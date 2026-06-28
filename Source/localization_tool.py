@@ -252,8 +252,11 @@ def cmd_upload(args):
         f'Content-Disposition: form-data; name="metadata"\r\n\r\n'
         f"{metadata}\r\n".encode(),
         f"--{boundary}\r\n"
-        f'Content-Disposition: form-data; name="localizations"; '
-        f'filename="{os.path.basename(args.file)}"\r\n\r\n'.encode(),
+        # No filename= here: CurseForge expects "localizations" as a plain form field
+        # (matching curl's -F "localizations=<file" from the old import script), not a
+        # file attachment - with filename= set, CurseForge fails to parse any phrase
+        # content out of it and rejects the request as "empty or all whitespace".
+        f'Content-Disposition: form-data; name="localizations"\r\n\r\n'.encode(),
         body,
         f"\r\n--{boundary}--\r\n".encode(),
     ]
