@@ -1,0 +1,64 @@
+# Reusable workflow: actual packaging/release logic shared by build.yml, build_alpha.yml,
+# and build_beta.yml. Only triggered via workflow_call - never runs on its own. Each caller
+# owns its trigger (tag pattern / workflow_dispatch), naming, and which secrets it forwards;
+# this file owns everything about HOW a release gets built and published.
+name: Package release (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: "Git ref (tag) to check out and package"
+        required: true
+        type: string
+    secrets:
+      CF_API_KEY:
+        required: false
+      WOWI_API_TOKEN:
+        required: false
+      WAGO_API_TOKEN:
+        required: false
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    strategy:
+      max-parallel: 1   # Packager's first invocation creates the GitHub Release for this
+                         # tag; later invocations just attach more assets to it. Concurrent
+                         # invocations racing to create the same release are not known to be
+                         # safe, so this intentionally trades parallel speed for the
+                         # known-working sequential behavior used before this refactor.
+      matrix:
+        game_version: [retail, classic, bcc, mists]
+        # - wrath  # not yet supported - intentionally left out, matching commented-out
+        # - cata   # packager steps in the pre-refactor build*.yml history
+    env:
+      CF_API_KEY: ${{ secrets.CF_API_KEY }}
+      GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
+      WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
+      WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
+
+    steps:
+      - name: Clone project
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.ref }}
+
+      - name: Verify changelog placeholder exists
+        run: |
+          grep -q '@build-time@' CHANGELOG.md || { echo "::error file=CHANGELOG.md::Missing @build-time@ placeholder"; exit 1; }
+          grep -q '@build-time@' TidyPlates_ThreatPlates_Changes.log || { echo "::error file=TidyPlates_ThreatPlates_Changes.log::Missing @build-time@ placeholder"; exit 1; }
+
+      - name: Update Build Date in release changelog
+        run: |
+          sed -i "s/@build-time@/$(date +%Y-%m-%d)/" CHANGELOG.md
+          sed -i "s/@build-time@/$(date +%Y-%m-%d)/" TidyPlates_ThreatPlates_Changes.log
+
+      - name: Create ${{ matrix.game_version }} package
+        uses: BigWigsMods/packager@v2
+        with:
+          args: -e -l -n "ThreatPlates-{project-version}{classic}" -g ${{ matrix.game_version }}
