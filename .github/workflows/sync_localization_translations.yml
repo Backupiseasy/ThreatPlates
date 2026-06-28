@@ -51,10 +51,10 @@ jobs:
 
     steps:
       - name: Clone project
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.x"
 
@@ -71,7 +71,7 @@ jobs:
         run: python Source/localization_tool.py pull --token "$CF_API_KEY"
 
       - name: Open pull request with updated translations
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v8
         with:
           commit-message: "Update localization files from CurseForge"
           title: "Update localization files from CurseForge"
