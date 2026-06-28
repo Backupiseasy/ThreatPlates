@@ -1,6 +1,7 @@
 local L = LibStub("AceLocale-3.0"):NewLocale("TidyPlatesThreat", "zhTW", false)
 if not L then return end
 
+L["    Deleting "] = "正在刪除"
 L["  /tptpdps       Toggles DPS/Healing threat plates"] = "/tptpdps 切換顯示 DPS/治療仇恨系統的血條"
 L["  /tptpol        Toggles nameplate overlapping"] = "/tptpol 切換開關血條重疊"
 L["  /tptptank      Toggles Tank threat plates"] = "/tptptank 切換顯示坦克仇恨值系統的血條"
@@ -10,6 +11,7 @@ L["  <no option>             Displays options dialog"] = "<沒有選項> 顯示�
 L["  help                    Prints this help message"] = "help 顯示此說明訊息"
 L["  legacy-custom-styles    Adds (legacy) default custom styles for nameplates that are deleted when migrating custom nameplates to the current format"] = "'傳統自訂樣式' 會幫轉移自訂血條到新格式時所刪除的血條加入預設的自訂樣式。"
 L["  profile <name>          Switch the current profile to <name>"] = "profile <名稱> 將目前的設定檔切換成 <名稱>"
+L["  Profile: "] = "設定檔:"
 L["  toggle-scripting        Enable or disable scripting support (for beta testing)"] = "啟用開關程式碼，或停用支援程式碼 (供 beta 測試使用)"
 L[" (Elite)"] = "(精英)"
 L[" (Rare Elite)"] = "(稀有精英)"
@@ -24,12 +26,12 @@ L[ [=[
 
 Backupiseasy
 
-(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=] ] = [=[
-
---
-
-Backupiseasy
-
+(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=] ] = [=[
+
+--
+
+Backupiseasy
+
 (Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=]
 L[ [=[
 
@@ -39,46 +41,49 @@ Feel free to email me at |cff00ff00threatplates@gmail.com|r
 
 Blacksalsify
 
-(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=] ] = [=[
-
-隨時歡迎 Email 給我 |cff00ff00threatplates@gmail.com|r
-
---
-
-Blacksalsify
-
+(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=] ] = [=[
+
+隨時歡迎 Email 給我 |cff00ff00threatplates@gmail.com|r
+
+--
+
+Blacksalsify
+
 (原作者: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=]
-L[ [=[
-
---
-
-Backupiseasy
-
-(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=] ] = [=[
--- 
-
-Backupiseasy 
+L[ [=[
+
+--
+
+Backupiseasy
+
+(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=] ] = [=[
+-- 
+
+Backupiseasy 
 (原作者: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=]
-L[ [=[
-
-Feel free to email me at |cff00ff00threatplates@gmail.com|r
-
---
-
-Blacksalsify
-
-(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=] ] = [=[
-隨時歡迎 Email 給我 |cff00ff00threatplates@gmail.com|r 
-
--- 
-
-Blacksalsify 
+L[ [=[
+
+Feel free to email me at |cff00ff00threatplates@gmail.com|r
+
+--
+
+Blacksalsify
+
+(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=] ] = [=[
+隨時歡迎 Email 給我 |cff00ff00threatplates@gmail.com|r 
+
+-- 
+
+Blacksalsify 
 (原作者: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=]
 L["%s already anchored to %s"] = "%s 已經對齊到 %s"
 L["%s already anchored to %s."] = "%s 已經對齊到 %s。"
+L["."] = "."
 L[". You cannot use two custom nameplates with the same trigger. The imported custom nameplate will be disabled."] = "。同一個觸發條件無法使用兩個自訂血條，匯入的自訂血條將會被停用。"
 L["|cff00ff00High Threat|r"] = "|cff00ff00高仇恨|r"
 L["|cff00ff00Low Threat|r"] = "|cff00ff00低仇恨|r"
+--[[Translation missing --]]
+L["|cff00ff00Tank Plates Enabled|r"] = "|cff00ff00Tank Plates Enabled|r"
 L["|cff00ff00Tank|r"] = "|cff00ff00坦克|r"
 L["|cff00ff00tanking|r"] = "|cff00ff00坦克|r"
 L["|cff0faac8Off-Tank|r"] = "|cff0faac8副坦克|r"
@@ -93,26 +98,29 @@ L["|cff89F559Threat Plates|r: Tank switch detected, you are now in your |cff00ff
 L["|cff89F559Threat Plates|r: Unknown profile: "] = "|cff89F559威力血條|r: 未知的設定檔: "
 L[ [=[|cff89f559Welcome to |r|cff89f559Threat Plates!
 This is your first time using Threat Plates and you are a(n):
-|r|cff]=] ] = [=[|cff89f559歡迎使用 |r|cff89f559Threat Plates 威力血條!
-這是第一次使用威力血條，你是：
+|r|cff]=] ] = [=[|cff89f559歡迎使用 |r|cff89f559Threat Plates 威力血條!
+這是第一次使用威力血條，你是：
 |r|cff]=]
-L[ [=[|cff89f559Welcome to |r|cff89f559Threat Plates!
-This is your first time using Threat Plates and you are a(n):
-|r|cff]=] ] = [=[|cff89f559歡迎使用威力血條 |r|cff89f559Threat Plates!
-這是第一次使用威力血條，你是:
+L[ [=[|cff89f559Welcome to |r|cff89f559Threat Plates!
+This is your first time using Threat Plates and you are a(n):
+|r|cff]=] ] = [=[|cff89f559歡迎使用威力血條 |r|cff89f559Threat Plates!
+這是第一次使用威力血條，你是:
 |r|cff]=]
 L["|cff89f559You are currently in your "] = "|cff89f559你目前是 "
 L[ [=[|cffFF0000DELETE CUSTOM NAMEPLATE|r
-Are you sure you want to delete the selected custom nameplate?]=] ] = [=[|cffFF0000刪除自訂血條|r
-
+Are you sure you want to delete the selected custom nameplate?]=] ] = [=[|cffFF0000刪除自訂血條|r
+
 是否確定要刪除選擇的自訂血條?]=]
-L[ [=[|cffFF0000DELETE CUSTOM NAMEPLATE|r
-Are you sure you want to delete the selected custom nameplate?]=] ] = [=[|cffFF0000刪除自訂血條|r
-
+L[ [=[|cffFF0000DELETE CUSTOM NAMEPLATE|r
+Are you sure you want to delete the selected custom nameplate?]=] ] = [=[|cffFF0000刪除自訂血條|r
+
 是否確定要刪除選擇的自訂血條?]=]
+L["|cffff0000DPS Plates Enabled|r"] = "|cffff0000已啟用 DPS 血條|r"
 L["|cffff0000DPS/Healing|r"] = "|cffff0000DPS/治療|r"
 L["|cffff0000dpsing / healing|r"] = "|cffff0000輸出 / 治療|r"
 L["|cffff0000High Threat|r"] = "|cffff0000高仇恨|r"
+L["|cffff0000IMPORTANT: Currently, this feature is disabled as certain console variables (CVars) related to nameplate scaling are set in a way to prevent this feature from working. Clicking the button below will fix this and reset these CVars to their default values. This will change the appearance (scaling) of default Blizzard nameplates.|r"] = "|cffff0000重要：目前此功能已停用，因為某些與血條縮放相關的遊戲參數 (CVars) 設定方式會阻止此功能運作。點擊下方按鈕將修復此問題，並將這些 CVars 重設為預設值。這將改變暴雪預設血條的外觀（縮放）。|r"
+L["|cffff0000IMPORTANT: Currently, this feature is disabled as certain console variables (CVars) related to nameplate transparency are set in a way to prevent this feature from working. Clicking the button below will fix this and reset these CVars to their default values. This might change the appearance (transparency) of default Blizzard nameplates.|r"] = "|cffff0000重要：目前此功能已停用，因為某些與血條透明度相關的遊戲參數 (CVars) 設定方式會阻止此功能運作。點擊下方按鈕將修復此問題，並將這些 CVars 重設為預設值。這可能會改變暴雪預設血條的外觀（透明度）。|r"
 L["|cffff0000IMPORTANT: Enabling this feature changes console variables (CVars) which will change the appearance of default Blizzard nameplates. Disabling this feature will reset these CVars to the original value they had when you enabled this feature.|r"] = "|cffff0000重要: 啟用這個功能會更改遊戲參數 (CVars)，同時也會影響遊戲內建血條的外觀。停用這個功能時會將遊戲參數恢復成啟用前的原始數值。|r"
 L["|cffff0000Low Threat|r"] = "|cffff0000低仇恨|r"
 L["|cffFF0000The Auras widget must be enabled (see Widgets - Auras) to use auras as trigger for custom nameplates.|r"] = "|cffFF0000要使用光環做為自訂血條的觸發條件，必須先啟用光環套件 (從 套件 > 光環 )。|r"
@@ -131,6 +139,8 @@ L["A custom nameplate with these triggers already exists: %s. You cannot use two
 L["A custom nameplate with these triggers already exists: %s. You cannot use two custom nameplates with the same trigger. The current custom nameplate was therefore disabled."] = "已有自訂血條使用這些觸發: %s。因為不能有兩個自訂血條使用相同的觸發，目前的自訂血條已被停用。"
 L["A custom nameplate with this trigger already exists: "] = "已有自訂血條使用這個觸發條件: "
 L["A script has overwritten the global '%s'. This might affect other scripts ."] = "有程式碼覆寫了全域的 '%s'，將會影響其他程式碼。"
+--[[Translation missing --]]
+L["A script has overwritten the global '%s'. This might affect other scripts."] = "A script has overwritten the global '%s'. This might affect other scripts."
 L["A to Z"] = "A 到 Z"
 L["Abbreviation"] = "縮寫"
 L["About"] = "關於"
@@ -143,12 +153,14 @@ L["Add thick black outline."] = "加上粗的黑色外框。"
 L["Adding legacy custom nameplate for %s ..."] = "正在為 %s 新增傳統自訂血條..."
 L["Additional Adjustments"] = "額外調整"
 L["Additional chat commands:"] = "額外聊天指令:"
+L["Additionally color the healthbar based on the target mark if the unit is marked."] = "如果單位已被標記，則依據目標標記額外為血條上色。"
 L["Additionally color the name based on the target mark if the unit is marked."] = "單位有標記圖示時，依據圖示類型額外調整名字顏色。"
 L["Additionally color the nameplate's healthbar or name based on the target mark if the unit is marked."] = "單位有標記圖示時，依據圖示類型額外調整血條或名字顏色。"
 L["Alignment"] = "對齊"
 L["All"] = "全部"
 L["All Minions"] = "所有小怪"
 L["All on NPCs"] = "NPC 全部"
+L["All restriction CVars are now |cffff0000OFF!|r"] = "所有限制性 CVar 現在都|cffff0000關閉!|r"
 L["Allies"] = "盟友"
 L["Allow"] = "允許"
 L["Allow action target selection while player has a locked target."] = "當玩家有鎖定的目標時，仍允許選擇行動目標。"
@@ -158,20 +170,26 @@ L["Alpha multiplier of nameplates for occluded units."] = "被擋住的單位的
 L["Always"] = "總是"
 L["Always do action targeting"] = "總是使用行動目標"
 L["Always do soft targeting"] = "總是使用軟選取目標"
+L["Always Show Nameplate"] = "總是顯示名條"
 L["Always Show Nameplates"] = "總是顯示血條"
 L["Always show nameplates for soft enemy target."] = "總是顯示敵方軟目標的名條。"
 L["Always show nameplates for soft friend target."] = "總是顯示友方軟目標的名條。"
 L["Always show nameplates for soft interact target."] = "總是顯示互動軟目標的名條。"
+--[[Translation missing --]]
+L["Always shows the full amount of absorbs on a unit. In overabsorb situations, the absorbs bar is shifted to the left."] = "Always shows the full amount of absorbs on a unit. In overabsorb situations, the absorbs bar is shifted to the left."
 L["Always shows the full amount of absorbs on a unit. In overabsorb situations, the absorbs bar ist shifted to the left."] = "總是顯示單位的吸收盾總量。在過度吸收的情況下，吸收條會向左移動。"
 L["Amount"] = "數值"
 L["Anchor"] = "對齊"
 L["Anchor Point"] = "對齊點"
 L["Anchor to"] = "對齊到"
 L["Animacharge"] = "動畫"
+L["Animations"] = "動畫效果"
+L["Animations for hiding nameplates are being disabled as certain console variables (CVars) related to nameplate scaling are set in a way to prevent this feature from working."] = "由於某些與血條縮放相關的遊戲參數 (CVars) 設定方式會阻止此功能運作，隱藏血條的動畫已被停用。"
 L["Appearance"] = "外觀"
 L["Apply these custom settings to a nameplate when a particular spell is cast by the unit. You can add multiple entries separated by a semicolon"] = "當單位施放特定的法術時，將這些自訂設定套用到血條。要加入多個項目請用分號分隔。"
 --[[Translation missing --]]
-L["Apply these custom settings to the nameplate of a unit with a particular name or NPC ID. You can add multiple entries separated by a semicolon. You can use use * as wildcard character in names."] = "Apply these custom settings to the nameplate of a unit with a particular name or NPC ID. You can add multiple entries separated by a semicolon. You can use use * as wildcard character in names."
+L["Apply these custom settings to the nameplate of a unit with a particular name or NPC ID. You can add multiple entries separated by a semicolon. You can use * as wildcard character in names."] = "Apply these custom settings to the nameplate of a unit with a particular name or NPC ID. You can add multiple entries separated by a semicolon. You can use * as wildcard character in names."
+L["Apply these custom settings to the nameplate of a unit with a particular name or NPC ID. You can add multiple entries separated by a semicolon. You can use use * as wildcard character in names."] = "將這些自訂設定套用到特定名字或 NPC ID 的血條，使用分號做分隔便能輸入多個項目。名字中可以使用星號 * 做為萬用字元。"
 L["Apply these custom settings to the nameplate of a unit with a particular name. You can add multiple entries separated by a semicolon. You can use use * as wildcard character."] = "當單位施放特定的法術時，將這些自訂設定套用到血條。要加入多個項目請用分號分隔，可以使用 * 作為萬用字元。"
 L["Apply these custom settings to the nameplate when a particular aura is present on the unit. You can add multiple entries separated by a semicolon."] = "當單位有特定光環時，將這些自訂設定套用到血條。要加入多個項目請用分號分隔。"
 L["Arcane Mage"] = "祕法法師"
@@ -191,6 +209,7 @@ L["Artwork"] = "美術圖案"
 L["Attempt to register script for unknown WoW event \"%s\""] = "嘗試替未知的魔獸事件 \"%s\" 註冊程式碼"
 L["Attempt to register script for unknown WoW event '%s'"] = "嘗試替未知的魔獸事件 '%s' 登錄腳本程式碼"
 L["Aura"] = "光環"
+L["Aura Flashing"] = "光環閃爍"
 L["Aura Icon"] = "光環圖示"
 L["Aura: "] = "光環: "
 L["Auras"] = "光環"
@@ -220,12 +239,14 @@ L["Bar Style"] = "風格"
 L["Bar Width"] = "寬度"
 L["Bars"] = "條列"
 L["Because of side effects with Blizzard nameplates, this function is disabled in instances or when Blizzard nameplates are used for friendly or neutral/enemy units (see General - Visibility)."] = "因為遊戲內建血條的副作用，這個功能會在副本內，或是友方/中立/敵方單位顯示遊戲內建的血條時停用 (請看 一般 > 可見性 的設定)。"
+L["Big Defensives"] = "大型防禦圖示"
 L["Blizzard"] = "暴雪"
 L["Blizzard Settings"] = "暴雪設定"
 L["Block"] = "阻擋"
 L["Bone Spike"] = "骸骨尖刺"
 L["Border"] = "邊框"
 L["Border Color:"] = "邊框顏色"
+L["Borderless"] = "無邊框"
 L["Boss"] = "首領"
 L["Boss Mods"] = "首領模組"
 L["Bosses"] = "首領"
@@ -236,8 +257,7 @@ L["Bottom Left"] = "左下"
 L["Bottom Right"] = "右下"
 L["Bottom-to-top"] = "由下到上"
 L["Boundaries"] = "範圍"
---[[Translation missing --]]
-L["Brackets"] = "Brackets"
+L["Brackets"] = "括號"
 L["Bubble"] = "泡泡"
 L["Buff Color"] = "增益顏色"
 L["Buffs"] = "增益"
@@ -259,6 +279,7 @@ L["Castbar"] = "施法條"
 L["Castbar, Healthbar"] = "施法條, 血量條"
 L["Center"] = "中"
 L["Center Auras"] = "光環置中"
+L["cff00ff00Tank Plates Enabled|r"] = "|cff00ff00已啟用坦克血條|r"
 L["Change the color depending on the amount of health points the nameplate shows."] = "依據血條所顯示的血量區間變換顏色。"
 L["Change the color depending on the reaction of the unit (friendly, hostile, neutral)."] = "依據單位的互動關係 (友善、敵對、中立) 變換顏色。"
 L["Change the scale of nameplates depending on whether a target unit is selected or not. As default, this scale is added to the unit base scale."] = "依據目標單位是否被選取來變化血條的縮放大小，預設會將這個值和單位基礎縮放大小相加或相減。"
@@ -266,14 +287,15 @@ L["Change the scale of nameplates in certain situations, overwriting all other s
 L["Change the transparency of nameplates depending on whether a target unit is selected or not. As default, this transparency is added to the unit base transparency."] = "依據目標單位是否被選取來變化血條的透明度，預設會將這個值和單位基礎透明度相加或相減。"
 L["Change the transparency of nameplates for occluded units (e.g., units behind walls)."] = "更改被擋住的單位的血條透明度 (例如在牆後面的單位)。"
 L["Change the transparency of nameplates in certain situations, overwriting all other settings."] = "依據特定的情況來變化血條的透明度，會取代其他所有的設定。"
+--[[Translation missing --]]
+L["Changes the default settings to the selected design. Some of your custom settings may get overwritten if you switch back and forth."] = "Changes the default settings to the selected design. Some of your custom settings may get overwritten if you switch back and forth."
 L["Changes the default settings to the selected design. Some of your custom settings may get overwritten if you switch back and forth.."] = "將預設值更改成所選擇的外觀設計，切換外觀時有些自訂的設定可能會被取代。"
 L["Changing these options may interfere with other nameplate addons or Blizzard default nameplates as console variables (CVars) are changed."] = "更改這些選項可能會影響其他血條插件或遊戲內建的血條，讓使用到遊戲控制參數 (CVars) 的設定一併變更。"
 L["Changing these settings will alter the placement of the nameplates, however the mouseover area does not follow. |cffff0000Use with caution!|r"] = "更改這些設定會變動血條的位置，但是滑鼠的感應區域不會跟著變動。|cffff0000請謹慎使用!|r"
 L["Clamp Target Nameplate to Screen"] = "當前目標血條不要超出畫面"
 L["Clamps the target's nameplate to the edges of the screen, even if the target is off-screen."] = "當前目標的血條不要超出螢幕畫面，即使當前目標在螢幕畫面之外。"
 L["Class"] = "職業"
---[[Translation missing --]]
-L["Class Color"] = "Class Color"
+L["Class Color"] = "職業顏色"
 L["Class Color for Players"] = "玩家的職業顏色"
 L["Class Icon"] = "職業圖示"
 L["Clean"] = "簡約"
@@ -281,10 +303,10 @@ L["Clean Border"] = "簡約邊框"
 L[ [=[Clear and easy to use threat-reactive nameplates.
 
 Current version: ]=] ] = "簡單好用又清楚，能與仇恨值互動的血條。"
-L[ [=[Clear and easy to use threat-reactive nameplates.
-
-Current version: ]=] ] = [=[簡單好用又清楚，能反應出仇恨值變化的血條。
-
+L[ [=[Clear and easy to use threat-reactive nameplates.
+
+Current version: ]=] ] = [=[簡單好用又清楚，能反應出仇恨值變化的血條。
+
 目前版本: ]=]
 L["Clickable Area"] = "可點擊區域"
 L["Color"] = "顏色"
@@ -325,33 +347,36 @@ L["Cyclic anchoring of aura areas to each other is not possible."] = "光環區�
 L["Darnavan"] = "達納凡"
 L["Death Knigh Rune Cooldown"] = "死亡騎士符文冷卻"
 L["Death Knight"] = "死亡騎士"
+--[[Translation missing --]]
+L["Death Knight Rune Cooldown"] = "Death Knight Rune Cooldown"
 L["Death Rune"] = "死亡符文"
 L["Debuff Color"] = "減益顏色"
 L["Debuffs"] = "減益"
---[[Translation missing --]]
-L["Debuffs on Friendly"] = "Debuffs on Friendly"
+L["Debuffs on Friendly"] = "友方減益"
 L["Default"] = "預設"
+L["Default Design (All Profiles)"] = "預設設計 (所有設定檔)"
 L["Default Settings (All Profiles)"] = "預設的設定 (所有設定檔)"
 L["Deficit"] = "失血量"
+L["Define a custom color for this border and overwrite any other color settings."] = "為此邊框定義自訂顏色，並覆蓋任何其他顏色設定。"
 L["Define a custom color for this nameplate and overwrite any other color settings."] = "設定這個血條的自訂顏色，並且取代其他所有的顏色設定。"
 L["Define a custom scaling for this nameplate and overwrite any other scaling settings."] = "設定這個血條的自訂縮放大小，並且取代其他所有的縮放大小設定。"
 L[ [=[Define a custom status text using LibDogTag markup language.
 
 Type /dogtag for tag info.
 
-Remember to press ENTER after filling out this box or it will not save.]=] ] = [=[自訂狀態文字使用 LibDogTag 標記語言。
-
-請輸入 /dogtag 查看可使用的文字標籤資訊。
-
+Remember to press ENTER after filling out this box or it will not save.]=] ] = [=[自訂狀態文字使用 LibDogTag 標記語言。
+
+請輸入 /dogtag 查看可使用的文字標籤資訊。
+
 輸入完成後請記得按 ENTER 鍵，否則不會儲存。]=]
-L[ [=[Define a custom status text using LibDogTag markup language.
-
-Type /dogtag for tag info.
-
-Remember to press ENTER after filling out this box or it will not save.]=] ] = [=[使用 LibDogTag 標記語言來自訂狀態文字。
-
-輸入 /dogtag 查看可使用的文字標籤資訊。
-
+L[ [=[Define a custom status text using LibDogTag markup language.
+
+Type /dogtag for tag info.
+
+Remember to press ENTER after filling out this box or it will not save.]=] ] = [=[使用 LibDogTag 標記語言來自訂狀態文字。
+
+輸入 /dogtag 查看可使用的文字標籤資訊。
+
 在文字欄位中輸入完成後請記得按 ENTER 鍵，否則不會儲存。]=]
 L["Define a custom transparency for this nameplate and overwrite any other transparency settings."] = "自訂這個血條的透明度，並且取代其他所有透明度的設定。"
 L["Define base alpha settings for various unit types. Only one of these settings is applied to a unit at the same time, i.e., they are mutually exclusive."] = "設定多種單位類型的基礎透明度。一次只會套用一種設定到單位，也就是說，它們不會同時套用。"
@@ -375,8 +400,7 @@ L["Disconnected Units"] = "離線的單位"
 L["Disease"] = "疾病"
 L["Dispel Type"] = "驅散類型"
 L["Dispellable"] = "可驅散"
---[[Translation missing --]]
-L["Display"] = "Display"
+L["Display"] = "顯示"
 L["Display absorbs amount text."] = "顯示吸收量數值文字。"
 L["Display absorbs percentage text."] = "顯示吸收量百分比文字。"
 L["Display health amount text."] = "顯示血量數值文字。"
@@ -394,8 +418,13 @@ L["Drudge Ghoul"] = "苦工食屍鬼"
 L["Druid"] = "德魯伊"
 L["Duplicate"] = "多複製一份"
 L["Duration"] = "持續時間"
+L["Duration (in seconds) for fading in a nameplate when it is displayed. Default duration is "] = "顯示血條時淡入的持續時間（以秒為單位）。預設持續時間為"
+L["Duration (in seconds) for fading in or out a nameplate when its transparency is changed. Default duration is "] = "當血條透明度改變時，淡入或淡出的持續時間（以秒為單位）。預設持續時間為"
+L["Duration (in seconds) for scaling up or down a nameplate when its size is changed. Default duration is "] = "當血條大小改變時，放大或縮小的持續時間（以秒為單位）。預設持續時間為"
+L["Duration (in seconds) of the animation for fading out and scaling down a nameplate when it is hidden. Default duration is "] = "當血條被隱藏時，淡出並縮小的動畫持續時間（以秒為單位）。預設持續時間為"
 L["Ebon Gargoyle"] = "黯黑石像鬼"
 L["Edge Size"] = "邊緣大小"
+L["Effects"] = "效果"
 L["Elite Border"] = "精英邊框"
 L["Empowered Adherent"] = "強化的擁護者"
 L["Enable"] = "啟用"
@@ -420,11 +449,16 @@ L["Enable Stealth Widget"] = "啟用隱形套件"
 L["Enable Target Highlight"] = "啟用目標顯著標示"
 L["Enable Target Widget"] = "啟用當前目標套件"
 L["Enable Text"] = "啟用文字"
+L["Enable the fade-in animation when a nameplate is displayed by setting the duration to a value greater than 0 (maximum is 1). Disable it by setting the duration to 0. The default duration is shown in the duration option's tooltip."] = "當血條顯示時，將持續時間設定為大於 0（最大值為 1）即可啟用淡入動畫。將持續時間設定為 0 則停用此功能。預設持續時間會顯示在持續時間選項的提示中。"
+L["Enable the fade-out or scale-down animation when a nameplate is hidden by setting the duration to a value greater than 0 (maximum is 1). Disable it by setting the duration to 0. The default duration is shown in the duration option's tooltip."] = "當血條被隱藏時，將持續時間設定為大於 0（最大值為 1）即可啟用淡出或縮小動畫。將持續時間設定為 0 則停用此功能。預設持續時間會顯示在持續時間選項的提示中。"
+L["Enable the fading or scaling animation when a nameplate changes it's transparency or scaling by setting the duration to a value greater than 0 (maximum is 1). Disable it by setting the duration to 0. The default duration is shown in the duration option's tooltip."] = "當血條透明度或縮放改變時，將持續時間設定為大於 0（最大值為 1）即可啟用淡化或縮放動畫。將持續時間設定為 0 則停用此功能。預設持續時間會顯示在持續時間選項的提示中。"
 L["Enable this custom nameplate for friendly units."] = "友方單位要使用這個自訂血條。"
 L["Enable this custom nameplate for neutral and hostile units."] = "中立和敵方單位要使用這個自訂血條。"
 L["Enable this custom nameplate in instances."] = "在副本內要使用這個自訂血條。"
 L["Enable this custom nameplate out of instances (in the wider game world)."] = "在副本外 (野外) 要使用這個自訂血條。"
 L["Enable this if you want to show Blizzards special resources above the target nameplate."] = "啟用時，暴雪的特殊資源會顯示在目標血條上面。"
+--[[Translation missing --]]
+L["Enable this if you want to show Blizzard's special resources above the target nameplate."] = "Enable this if you want to show Blizzard's special resources above the target nameplate."
 L["Enable Threat Coloring of Healthbar"] = "啟用仇恨值血條顏色"
 L["Enable Threat Scale"] = "啟用仇恨值縮放大小"
 L["Enable Threat System"] = "啟用仇恨值系統"
@@ -435,6 +469,7 @@ L["Enemy"] = "敵方"
 L["Enemy Bar Height"] = "敵方血條高度"
 L["Enemy Bar Width"] = "敵方血條寬度"
 L["Enemy Casting"] = "敵方施法"
+L["Enemy Healthbar Color"] = "敵方血量條顏色"
 L["Enemy Height"] = "敵方高度"
 L["Enemy Name Color"] = "敵方名字顏色"
 L["Enemy NPCs"] = "敵方 NPC"
@@ -461,7 +496,9 @@ L["Export profile"] = "匯出設定檔"
 L["Export the current profile into a string that can be imported by other players."] = "將目前的設定檔匯出成文字字串，以便讓其他玩家能夠匯入。"
 L["Extend"] = "擴充"
 L["Faction Icon"] = "陣營圖示"
+L["Fade-In Duration"] = "淡入持續時間"
 L["Fading"] = "淡出"
+L["Fading Duration"] = "淡化持續時間"
 L["Failed to migrate the imported profile to the current settings format because of an internal error. Please report this issue at the Threat Plates homepage at CurseForge: "] = "因為內部的錯誤，無法將匯入的設定檔轉移成目前的設定格式，請到 CurseForge 網站的 Threat Plates 插件頁面回報此問題。"
 L["Fanged Pit Viper"] = "尖牙深淵毒蛇"
 L["FAQ"] = "FAQ"
@@ -469,9 +506,10 @@ L["Filter"] = "過濾方式"
 L["Filter by Spell"] = "過濾法術"
 L["Filtered Auras"] = "要過濾的光環"
 L["Find a suitable icon based on the current trigger. For Name trigger, the preview does not work. For multi-value triggers, the preview always is the icon of the first trigger entered."] = "依據當前觸發尋找合適的圖示。名字觸發是無法預覽的，對於多個值的觸發，預覽永遠會是所輸入的第一個觸發的圖示。"
---[[Translation missing --]]
-L["Find a suitable icon based on the current trigger. For Unit triggers, the preview does not work. For multi-value triggers, the preview always is the icon of the first trigger entered."] = "Find a suitable icon based on the current trigger. For Unit triggers, the preview does not work. For multi-value triggers, the preview always is the icon of the first trigger entered."
+L["Find a suitable icon based on the current trigger. For Unit triggers, the preview does not work. For multi-value triggers, the preview always is the icon of the first trigger entered."] = "根據當前的觸發尋找適合的圖示。單位觸發無法預覽，多個值的觸發預覽永遠是第一個輸入的觸發的圖示。"
 L["Five"] = "五"
+L["Fix Configuration Variables for Hiding Nameplates"] = "修復隱藏血條的設定變數"
+L["Fix Configuration Variables for Occluded Units"] = "修復被遮蔽單位的設定變數"
 L["Flash Time"] = "閃爍時間"
 L["Flash When Expiring"] = "快結束時閃爍"
 L["Focus"] = "專注目標"
@@ -486,6 +524,7 @@ L["Foreground Texture"] = "前景材質"
 L["Format"] = "樣式"
 L["Four"] = "四"
 L["Frame Order"] = "框架順序"
+L["Frame Strata"] = "框架層級"
 L["Frequently Asked Questions"] = "常見問題"
 L["Friend"] = "友方"
 L["Friend Bar Height"] = "友方血條高度"
@@ -494,6 +533,7 @@ L["Friend Height"] = "友方高度"
 L["Friend Width"] = "友方寬度"
 L["Friendly & Neutral Units"] = "友方 & 中立單位"
 L["Friendly Casting"] = "友方施法"
+L["Friendly Healthbar Color"] = "友方血量條顏色"
 L["Friendly Name Color"] = "友方名字顏色"
 L["Friendly Names Color"] = "友方名字顏色"
 L["Friendly NPCs"] = "友方 NPC"
@@ -543,6 +583,7 @@ L["Heuristic In Instances"] = "副本中使用啟發式"
 L["Hide Buffs"] = "隱藏增益"
 L["Hide Friendly Nameplates"] = "隱藏友方血條"
 L["Hide Healthbars"] = "隱藏血條"
+L["Hide healthbars of friendly units"] = "隱藏友方單位的血量條"
 L["Hide in Combat"] = "戰鬥中隱藏"
 L["Hide in Instance"] = "副本中隱藏"
 L["Hide Name"] = "隱藏名字"
@@ -550,8 +591,10 @@ L["Hide Nameplate"] = "隱藏名條"
 L["Hide Nameplates"] = "隱藏血條"
 L["Hide on Attacked Units"] = "已攻擊的單位隱藏"
 L["Hide the Blizzard default nameplates for friendly units in instances."] = "副本中隱藏遊戲內建的友方血條。"
+L["Hiding Nameplates"] = "隱藏名條"
 L["High Threat"] = "高仇恨值"
 L["Highlight"] = "顯著標示"
+L["Highlight Border"] = "顯著標示外框"
 L["Highlight for Expiring Icons"] = "顯著標示即將過期的圖示"
 L["Highlight Mobs on Off-Tanks"] = "顯著標示副坦克的怪"
 L["Highlight Texture"] = "顯著標示材質"
@@ -579,16 +622,18 @@ L["If checked, threat feedback from neutral mobs will be shown."] = "啟用時�
 L["If checked, threat feedback from normal mobs will be shown."] = "啟用時，普通怪會顯示仇恨值系統的變化。"
 L["If checked, threat feedback from tapped mobs will be shown regardless of unit type."] = "啟用時，(灰色血條) 他人目標的怪會顯示仇恨值系統的變化。"
 L["If checked, threat feedback will only be shown in instances (dungeons, raids, arenas, battlegrounds), not in the open world."] = "啟用時，只有在副本中 (5人地城、團隊、競技場、戰場) 才會顯示仇恨值系統的變化，在野外不會。"
+L["If enabled, icons are skinned with Masque (requires UI reload)."] = "啟用時，圖示將套用 Masque 外觀（需要重新載入介面）。"
 L["If enabled, the truncated health text will be localized, i.e. local metric unit symbols (like k for thousands) will be used."] = "啟用時，簡短血量文字會使用中文單位 (萬 或 億)。"
 L["Ignore Marked Units"] = "忽略被標記圖示的單位"
 L["Ignore PvP Status"] = "忽略 PvP 狀態"
 L["Ignore UI Scale"] = "忽略使用者介面縮放"
 L["Illegal character used in Name trigger at position: "] = "名字觸發中的這個位置有不可使用的字元:"
---[[Translation missing --]]
-L["Illegal character used in Unit trigger at position: "] = "Illegal character used in Unit trigger at position: "
+L["Illegal character used in Unit trigger at position: "] = "單位觸發中使用了無效的字元，位於:"
 L["Immortal Guardian"] = "不朽守護者"
 L["Import a profile from another player from an import string."] = "從另一位玩家的匯入字串匯入設定檔。"
 L["Import and export profiles to share them with other players."] = "匯入和匯出設定檔，以便和其他玩家分享。"
+--[[Translation missing --]]
+L["Import custom nameplate settings from a string. The custom nameplates will be added to your current custom nameplates."] = "Import custom nameplate settings from a string. The custom nameplates will be added to your current custom nameplates."
 L["Import custom nameplate settings from a string. The custom namneplates will be added to your current custom nameplates."] = "從文字字串匯入自訂血條設定，匯入的自訂血條將會加入到你目前的自訂血條中。"
 L["Import Custom Nameplates"] = "匯入自訂血條"
 L["Import profile"] = "匯入設定檔"
@@ -611,6 +656,7 @@ L["Interact"] = "互動"
 L["Interact Icon"] = "互動圖示"
 L["Interrupt Overlay"] = "無法打斷條紋材質"
 L["Interrupt Shield"] = "無法打斷盾牌圖示"
+L["Interrupt Source"] = "打斷來源"
 L["Interruptable"] = "可打斷"
 L["Interrupted"] = "已打斷"
 L["Kinetic Bomb"] = "動能炸彈"
@@ -637,6 +683,8 @@ L["Low Priority"] = "低優先順序"
 L["Low Threat"] = "低仇恨值"
 L["Magic"] = "魔法"
 L["Marked Immortal Guardian"] = "標記的不朽守護者"
+L["Masque"] = "按鈕外觀 (Masque)"
+L["Masque (Not installed)"] = "按鈕外觀 (未安裝 Masque)"
 L["Match appropriate action target to locked target."] = "將適合的行動目標設為鎖定目標。"
 L["Match appropriate soft target to locked target."] = "將適合的軟目標變成鎖定的目標"
 L["Max Alpha"] = "最大透明度"
@@ -674,9 +722,11 @@ L["Nameplate Clickthrough"] = "點擊穿透血條"
 L["Nameplate clickthrough cannot be changed while in combat."] = "戰鬥中無法更改點擊穿透血條。"
 L["Nameplate Color"] = "血條顏色"
 L["Nameplate Mode for Friendly Units in Combat"] = "戰鬥中友方單位的血條模式"
+L["Nameplate Overlapping is now |cff00ff00ON!|r"] = "血條重疊已經 |cff00ff00啟用！|r"
+L["Nameplate Overlapping is now |cffff0000OFF!|r"] = "血條重疊已經 |cff00ff00關閉！|r"
 L["Nameplate Style"] = "血條樣式"
---[[Translation missing --]]
-L["Nameplates"] = "Nameplates"
+L["Nameplate Transparency & Scaling"] = "名條透明度 & 縮放大小"
+L["Nameplates"] = "血條"
 L["Names"] = "名字"
 L["Neutral"] = "中立"
 L["Neutral NPCs"] = "中立 NPC"
@@ -722,8 +772,8 @@ L["Only In Combat"] = "只有在戰鬥中"
 L["Only in Groups"] = "只有在隊伍中時"
 L["Only in Instances"] = "只在副本內"
 L["Only Mine"] = "只有我的"
---[[Translation missing --]]
-L["Only Names"] = "Only Names"
+L["Only Names"] = "只有名字"
+L["Only Names for Friendly Players"] = "友方玩家只顯示名字"
 L["Onyxian Whelp"] = "奧妮克希亞幼龍"
 L["Open Blizzard Settings"] = "打開遊戲內建的設定"
 L["Open Options"] = "開啟設定選項"
@@ -736,6 +786,8 @@ L["Outline"] = "外框"
 L["Outline, Monochrome"] = "外框、單色"
 L["Overlapping"] = "重疊"
 L["Paladin"] = "聖騎士"
+--[[Translation missing --]]
+L["Parent Frame"] = "Parent Frame"
 L["Paste"] = "貼上"
 L["Paste the Threat Plates profile string into the text field below and then close the window"] = "在下方的文字區域內貼上威力血條的設定檔字串，然後關閉視窗。"
 L["Percentage"] = "百分比"
@@ -750,6 +802,7 @@ L["Pixel-Perfect UI"] = "完全符合螢幕像素"
 L["Placement"] = "位置"
 L["Players"] = "玩家"
 L["Players in Instances"] = "副本內的玩家"
+L["Please select a target unit to enable configuration mode."] = "請選擇一個目標單位以啟用設定模式。"
 L["Please select a target unit with a nameplate to enable configuration mode."] = "請選擇一個有名條的目標來啟用設定模式。"
 L["Poison"] = "中毒"
 L["Position"] = "位置"
@@ -759,9 +812,9 @@ L["Preview Elite"] = "預覽精英怪"
 L["Preview Rare"] = "預覽稀有怪"
 L["Preview Rare Elite"] = "預覽稀有精英"
 L["Priority"] = "優先順序"
+L["Profile %s: Migrating settings to version %s"] = "設定檔 %s：正在將設定遷移至版本 %s"
 L["PvP Off"] = "PvP 關閉"
---[[Translation missing --]]
-L["PvP Rank"] = "PvP Rank"
+L["PvP Rank"] = "PvP 等級"
 L["Quest"] = "任務"
 L["Quest Progress"] = "任務進度"
 L["Raging Spirit"] = "狂怒的鬼魂"
@@ -770,8 +823,7 @@ L["Rares & Bosses"] = "稀有怪 & 首領"
 L["Rares & Elites"] = "稀有怪 & 精英"
 L["Raw Percentage"] = "原始的百分比"
 L["Reaction"] = "互動關係"
---[[Translation missing --]]
-L["Realm"] = "Realm"
+L["Realm"] = "伺服器"
 L["Reanimated Adherent"] = "再活化的擁護者"
 L["Reanimated Fanatic"] = "再活化的狂熱者"
 L["Render font without antialiasing."] = "文字不要消除鋸齒。"
@@ -796,6 +848,7 @@ L["Same as Name"] = "和名字相同"
 L["Scale"] = "縮放大小"
 L["Scaled Percentage"] = "調整過的百分比"
 L["Scaled Percentage Delta"] = "調整過的百分比 Delta"
+L["Scaling Duration"] = "縮放持續時間"
 L["Scriping for custom styles for nameplates is now |cff00ff00enabled!|r."] = "自訂血條樣式的程式碼現在|cff00ff00已啟用!|。"
 L["Scriping for custom styles for nameplates is now |cffff0000disabled!|r."] = "自訂血條樣式的程式碼現在|cff00ff00已停用!|。"
 L["Script"] = "程式碼"
@@ -803,6 +856,7 @@ L["Scripts"] = "程式碼"
 L["Second Player"] = "第二名玩家"
 L["Second Player's Name"] = "第二名玩家的名字"
 L["Set Icon"] = "設定圖示"
+L["Set restriction: "] = "設定限制:"
 L["Set scale settings for different threat levels."] = "替不同的仇恨程度設定縮放大小。"
 L["Set the roles your specs represent."] = "設定專精所代表的角色職責。"
 L["Set threat textures and their coloring options here."] = "仇恨材質和顏色的設定選項。"
@@ -817,6 +871,11 @@ L["Shadowy Apparition"] = "暗影幻靈"
 L["Shambling Horror"] = "蹣跚的恐獸"
 L["Shorten"] = "簡短"
 L["Show"] = "顯示"
+L["Show a cooldown swipe on the icon."] = "在圖示上顯示冷卻轉圈效果。"
+L["Show a fade-in animation when an occluded nameplate gets displayed again."] = "當被遮蔽的血條再次顯示時，顯示淡入動畫。"
+L["Show a fade-out animation when a nameplate is hidden."] = "當血條被隱藏時，顯示淡出動畫。"
+L["Show a fade-out animation when an occluded nameplate gets hidden or faded-out."] = "當被遮蔽的血條被隱藏或淡出時，顯示淡出動畫。"
+L["Show a scale-down animation when a nameplate is hidden."] = "當血條被隱藏時，顯示縮小動畫。"
 L["Show a tooltip when hovering above an aura."] = "滑鼠指向光環時顯示滑鼠提示說明。"
 L["Show all buffs on enemy units."] = "顯示敵方單位身上全部的增益效果。"
 L["Show all buffs on friendly units."] = "顯示友方單位身上全部的增益效果。"
@@ -825,12 +884,14 @@ L["Show all crowd control auras on enemy units."] = "顯示敵方單位身上全
 L["Show all crowd control auras on friendly units."] = "顯示友方單位身上全部的控場效果光環。"
 L["Show all debuffs on enemy units."] = "顯示敵方單位身上全部的減益效果。"
 L["Show all debuffs on friendly units."] = "顯示友方單位身上全部的減益效果。"
+L["Show All Nameplates (Friendly and Enemy Units)"] = "顯示所有名條 (友方與敵方單位)"
 L["Show All Nameplates (Friendly and Enemy Units) (CTRL-V)"] = "顯示所有血條 (友方和敵方單位) (CTRL-V)"
 L["Show Always"] = "總是顯示"
 L["Show an quest icon at the nameplate for quest mobs."] = "任務怪的血條上方顯示任務圖示。"
 L["Show auras as bars (with optional icons)."] = "光環顯示為進度條 (可選擇是否要圖示)。"
 L["Show auras as icons in a grid configuration."] = "光環顯示為網格狀的圖示。"
 L["Show auras in order created with oldest aura first."] = "依據光環獲得的先後順序排列。"
+L["Show big defensive buffs."] = "顯示較大的防禦增益效果。"
 L["Show Blizzard Nameplates for Friendly Units"] = "友方單位顯示遊戲內建的血條"
 L["Show Blizzard Nameplates for Neutral and Enemy Units"] = "中立和敵方單位顯示遊戲內建的血條"
 L["Show Buffs"] = "顯示增益"
@@ -843,22 +904,28 @@ L["Show By Unit Type"] = "依據單位類型顯示"
 L["Show Crowd Control"] = "顯示控場"
 L["Show crowd control auras hat are shown on Blizzard's default nameplates."] = "顯示遊戲內建血條會顯示出的控場效果光環。"
 L["Show crowd control auras that are shown on Blizzard's default nameplates."] = "顯示遊戲內建血條會顯示出的控場效果光環。"
+--[[Translation missing --]]
+L["Show crowd control auras that were applied by bosses."] = "Show crowd control auras that were applied by bosses."
 L["Show crowd control auras that where applied by bosses."] = "顯示首領施放的控場效果光環。"
 L["Show crowd control auras that you can dispell."] = "顯示你可以驅散的控場效果光環。"
 L["Show Debuffs"] = "顯示減益"
 L["Show debuffs that are shown on Blizzard's default nameplates."] = "顯示遊戲內建血條會顯示出的減益效果。"
+--[[Translation missing --]]
+L["Show debuffs that were applied by bosses."] = "Show debuffs that were applied by bosses."
 L["Show debuffs that were applied by you."] = "顯示你施放的減益效果。"
 L["Show debuffs that where applied by bosses."] = "顯示首領施放的減益效果。"
 L["Show debuffs that you can dispell."] = "顯示你可以驅散的減益效果。"
+L["Show Enemy Nameplates"] = "顯示敵方名條"
 L["Show Enemy Nameplates (ALT-V)"] = "顯示敵方血條 (ALT-V)"
 L["Show Enemy Units"] = "顯示敵方單位"
 L["Show Focus"] = "顯示專注目標"
 L["Show For"] = "顯示"
---[[Translation missing --]]
-L["Show Friendly Nameplates"] = "Show Friendly Nameplates"
+L["Show Friendly Nameplates"] = "顯示友方血條"
 L["Show Friendly Nameplates (SHIFT-V)"] = "顯示友方血條 (SHIFT-V)"
---[[Translation missing --]]
-L["Show friendly players' and totems' names in instances."] = "Show friendly players' and totems' names in instances."
+L["Show Friendly NPC Nameplates"] = "顯示友方 NPC 名條"
+L["Show Friendly Player Nameplates"] = "顯示友方玩家名條"
+L["Show Friendly Player Nameplates (SHIFT-V)"] = "顯示友方玩家名條 (SHIFT-V)"
+L["Show friendly players' and totems' names in instances."] = "在副本內顯示友方玩家和圖騰的名字。"
 L["Show Friendly Units"] = "顯示友方單位"
 L["Show Health Text"] = "顯示血量文字"
 L["Show Icon for Rares & Elites"] = "顯示稀有怪 & 精英怪圖示"
@@ -874,18 +941,15 @@ L["Show Nameplate"] = "顯示血條"
 L["Show nameplates at all times."] = "任何時候都要顯示血條。"
 L["Show Neutral Units"] = "顯示中立單位"
 L["Show Number"] = "顯示數字"
---[[Translation missing --]]
-L["Show only unit names and hide healthbars (requires /reload). Note that the clickable area of friendly nameplates will also be set to zero so that they don't interfere with enemy nameplates stacking (not in Classic or TBC Classic)."] = "Show only unit names and hide healthbars (requires /reload). Note that the clickable area of friendly nameplates will also be set to zero so that they don't interfere with enemy nameplates stacking (not in Classic or TBC Classic)."
---[[Translation missing --]]
-L["Show only unit names and hide nameplate bars (requires /reload). Note that the clickable area of friendly nameplates will also be set to zero so that they don't interfere with enemy nameplates stacking (not in Classic or TBC Classic)."] = "Show only unit names and hide nameplate bars (requires /reload). Note that the clickable area of friendly nameplates will also be set to zero so that they don't interfere with enemy nameplates stacking (not in Classic or TBC Classic)."
+L["Show only unit names and hide healthbars (requires /reload). Note that the clickable area of friendly nameplates will also be set to zero so that they don't interfere with enemy nameplates stacking (not in Classic or TBC Classic)."] = "只顯示單位名字、隱藏血條 (需要重新載入介面)。特別注意，友方血條的可點擊區域將會被設為 0，以避免干擾到敵方血條堆疊 (經典版和燃燒的遠征經典版除外)。"
+L["Show only unit names and hide nameplate bars (requires /reload). Note that the clickable area of friendly nameplates will also be set to zero so that they don't interfere with enemy nameplates stacking (not in Classic or TBC Classic)."] = "只顯示單位名字、隱藏血條 (需要重新載入介面)。特別注意，友方血條的可點擊區域將會被設為 0，以避免干擾到敵方血條堆疊 (經典版和燃燒的遠征經典版除外)。"
 L["Show Orb"] = "顯示圓球"
 L["Show shadow with text."] = "顯示文字陰影"
 L["Show Skull Icon"] = "顯示骷髏圖示"
 L["Show stack count on auras."] = "顯示光環的堆疊次數。"
 L["Show Target"] = "顯示當前目標"
 L["Show the amount you need to loot or kill"] = "顯示需要拾取或擊殺的數量"
---[[Translation missing --]]
-L["Show the Blizzard default nameplates for friendly units in instances."] = "Show the Blizzard default nameplates for friendly units in instances."
+L["Show the Blizzard default nameplates for friendly units in instances."] = "副本內的友方單位顯示遊戲內建血條。"
 L["Show the mouseover highlight on all units."] = "所有單位都要顯示滑鼠指向時的顯著標示效果。"
 L["Show the OmniCC cooldown count instead of the built-in duration text on auras."] = "光環上面顯示冷卻時間插件 OmniCC 的數字，而不是預設的持續時間文字。"
 L["Show the player's threat percentage (scaled or raw) or threat delta to the second player on the threat table (percentage or threat value) against the enemy unit."] = "顯示玩家對敵方單位的仇恨百分比 (調整過或原始的) 或仇恨表中第二個玩家的仇恨增量 (百分比或仇恨值)。"
@@ -897,6 +961,7 @@ L["Show time left on auras that have a duration."] = "有持續時間的光環�
 L["Show unlimited buffs in combat."] = "在戰鬥中顯示沒有時間限制的增益效果。"
 L["Show unlimited buffs in instances (e.g., dungeons or raids)."] = "在副本內顯示沒有時間限制的增益效果 (例如地城和團隊)。"
 L["Show unlimited buffs on bosses and rares."] = "顯示首領和稀有怪身上沒有時間限制的增益效果。"
+L["Showing Nameplates"] = "正在顯示名條"
 L["Shows a border around the castbar of nameplates (requires /reload)."] = "在血條的施法條周圍顯示邊框 (需要 /reload)。"
 L["Shows a faction icon next to the nameplate of players."] = "在玩家血條旁顯示陣營圖示。"
 L["Shows a glow based on threat level around the nameplate's healthbar (in combat)."] = "依據仇恨程度在血條周圍顯示發光效果 (戰鬥中)。"
@@ -904,7 +969,12 @@ L["Shows a glow effect on auras that you can steal or purge."] = "你可以竊�
 L["Shows a glow effect on this custom nameplate."] = "在這個自訂血條上顯示發光效果。"
 L["Shows an icon for friends and guild members next to the nameplate of players."] = "在玩家血條旁顯示好友和公會成員圖示。"
 L["Shows resource information for bosses and rares."] = "顯示首領和稀有怪的資源。"
+--[[Translation missing --]]
+L["Shows resource information only for alternative power (of bosses or rares, mostly)."] = "Shows resource information only for alternative power (of bosses or rares, mostly)."
 L["Shows resource information only for alternatve power (of bosses or rares, mostly)."] = "顯示特殊能量的資源 (大多是首領和稀有怪，例如腐化值、威脅值...)。"
+--[[Translation missing --]]
+L["Shows the name of the player that interrupted the spell."] = "Shows the name of the player that interrupted the spell."
+L["Shows the name of the player that interrupted the spell. |cffff0000IMPORTANT: This parses the Combat Log and therefore is a CPU-instensive functionality.|r"] = "顯示打斷法術的玩家名稱。|cffff0000重要：此功能會解析戰鬥記錄，因此相當耗用 CPU 資源。|r"
 L["Situational Scale"] = "不同情況的縮放大小"
 L["Situational Transparency"] = "不同情況的透明度"
 L["Six"] = "六"
@@ -984,8 +1054,7 @@ L["Texts"] = "文字"
 L["Texture"] = "材質"
 L["Textures"] = "材質"
 L["The (friendly or hostile) player is not flagged for PvP or the player is in a sanctuary."] = "(友方或敵方) 玩家未標記為 PvP，或玩家在聖域中。"
---[[Translation missing --]]
-L["The font for unit names can only be changed if nameplates and names are be enabled for these units. Names can be enabled in \"Game Menu - Interface - Names\"."] = "The font for unit names can only be changed if nameplates and names are be enabled for these units. Names can be enabled in \"Game Menu - Interface - Names\"."
+L["The font for unit names can only be changed if nameplates and names are be enabled for these units. Names can be enabled in \"Game Menu - Interface - Names\"."] = "只有已經啟用名條和名字的單位，才能更改單位名字的字體。可以在 \"Esc > 介面 > 名稱\" 啟用名字。"
 L["The import string contains a profile from an different Threat Plates version. The profile will still be imported (and migrated as far as possible), but some settings from the imported profile might be lost."] = "匯入的字串包含來自不同版本的威力血條的設定檔。設定檔仍然會被匯入 (並且盡可能的轉換)，但是可能會遺失某些在匯入的設定檔中的設定。"
 L["The import string contains custom nameplate settings from a different Threat Plates version. The custom nameplates will still be imported (and migrated as far as possible), but some settings from the imported custom nameplates might be lost."] = "匯入的字串包含來自不同版本的威力血條的自訂血條設定。自訂血條仍然會被匯入 (並且盡可能的轉換)，但是可能會遺失某些在匯入的自訂血條中的設定。"
 L["The import string has an invalid format and cannot be imported. Verify that the import string was generated from the same Threat Plates version that you are using currently."] = "匯入字串包含無效的格式，無法匯入。請確認匯入字串是由相同版本的威力血條所產生的。"
@@ -1039,7 +1108,11 @@ L["This setting will disable threat scale for target marked, mouseover or castin
 L["This setting will disable threat transparency for target marked, mouseover or casting units and instead use the general transparency settings."] = "這個設定會停用被標記目標、滑鼠指向或正在施法單位的仇恨值透明度變化，改為使用一般的透明度設定。"
 L["This settings changes CVars related to action targeting and are not stored in the profile, but by WoW itself (character-specific settings)."] = "這些設定會更改和行動目標有關的 CVars 控制變數，會儲存在遊戲本身 (角色專用設定) 而不是儲存在插件的設定檔。"
 L["This widget highlights the nameplate of your current focus target by showing a border around the healthbar and by coloring the nameplate's healtbar and/or name with a custom color."] = "這個套件會明顯的標示出專注目標，在血條周圍顯示外框，並且使用自訂顏色來顯示血條和名字。"
+--[[Translation missing --]]
+L["This widget highlights the nameplate of your current focus target by showing a border around the healthbar and by coloring the nameplate's healthbar and/or name with a custom color."] = "This widget highlights the nameplate of your current focus target by showing a border around the healthbar and by coloring the nameplate's healthbar and/or name with a custom color."
 L["This widget highlights the nameplate of your current target by showing a border around the healthbar and by coloring the nameplate's healtbar and/or name with a custom color."] = "這個套件會明顯的標示出當前目標，在血條周圍顯示外框，並且使用自訂顏色來顯示血條和名字。"
+--[[Translation missing --]]
+L["This widget highlights the nameplate of your current target by showing a border around the healthbar and by coloring the nameplate's healthbar and/or name with a custom color."] = "This widget highlights the nameplate of your current target by showing a border around the healthbar and by coloring the nameplate's healthbar and/or name with a custom color."
 L["This widget shows a class icon on the nameplates of players."] = "這個套件會在玩家的名條上顯示職業圖示。"
 L["This widget shows a quest icon above unit nameplates or colors the nameplate healthbar of units that are involved with any of your current quests."] = "這個套件會在和當前任務相關的單位血條上方顯示任務圖示或變換血條顏色。"
 L["This widget shows a stealth icon on nameplates of units that can detect stealth."] = "這個套件會在能夠偵測到的隱形單位血條上顯示隱形圖示。"
@@ -1057,6 +1130,8 @@ L["This will format text to a simpler format using M or K for millions and thous
 L["This will format text to a simpler format using M or K for millions and thousands. Disabling this will show exact health amounts."] = "使用簡短的格式 (M 或 K) 來顯示數值，停用時會顯示精確的血量。"
 L["This will format text to show both the maximum hp and current hp."] = "同時顯示目前血量和最大血量數值。"
 L["This will format text to show hp as a value the target is missing."] = "顯示目標損失的血量數值。"
+L["This will reset all console variables (CVars) required for hiding nameplates to work to their default values."] = "這將把所有與隱藏血條功能相關的遊戲參數（CVars）重設為預設值。"
+L["This will reset all console variables (CVars) required for transparency for occluded units to work to their default values."] = "這將把所有與被遮蔽單位透明度功能相關的遊戲參數（CVars）重設為預設值。"
 L["This will toggle the auras widget to only show for your current target."] = "切換光環套件只顯示於當前目標。"
 L["This will toggle the auras widget to show the cooldown spiral on auras."] = "切換光環套件在光環上顯示旋轉倒數動畫。"
 L["Threat Detection"] = "仇恨偵測"
@@ -1064,6 +1139,8 @@ L["Threat Detection Heuristic"] = "啟發式仇恨偵測"
 L["Threat Glow"] = "仇恨值發光效果"
 L["Threat Plates is currently maintained by Backup (CurseForge). It was originally written by Suicidal Katt (CurseForge)."] = "Threat Plates 威力血條目前是由 Backup (CurseForge) 更新維護，最原始的作者是 Suicidal Katt (CurseForge)。"
 L["Threat Plates Script Editor"] = "威力血條程式碼編輯器"
+L["Threat Plates verbose is now |cff00ff00ON!|r"] = "威力血條詳細模式已經 |cff00ff00啟用！|r"
+L["Threat Plates verbose is now |cffff0000OFF!|r"] = "威力血條詳細模式已經 |cff00ff00關閉！|r"
 L["Threat System"] = "仇恨值系統"
 L["Threat Table"] = "仇恨值表"
 L["Threat Value Delta"] = "仇恨值增量"
@@ -1091,6 +1168,7 @@ L["Translators"] = "翻譯"
 L["Transliterate Cyrillic Letters"] = "音譯西里爾字母"
 L["Transparency"] = "透明"
 L["Transparency & Scaling"] = "透明度 & 縮放大小"
+L["Transparency for occluded units is being disabled as certain console variables (CVars) related to nameplate transparency are set in a way to prevent this feature from working."] = "由於某些與血條透明度相關的遊戲參數（CVars）設定方式會阻止此功能運作，已停用被遮蔽單位的透明度功能。"
 L["Transparent"] = "透明"
 L["Treant"] = "樹人"
 L["Trigger"] = "觸發條件"
@@ -1099,20 +1177,22 @@ L["Type"] = "類型"
 L["Typeface"] = "字體"
 L["UI Scale"] = "使用者介面縮放"
 L["Unable to change a setting while in combat."] = "戰更中無法變更設定。"
+L["Unable to change CVars for hiding nameplates while in combat."] = "戰鬥中無法變更用於隱藏血條的 CVars。"
+L["Unable to change CVars for transparency for occluded units while in combat."] = "戰鬥中無法變更用於被遮蔽單位透明度的 CVars。"
 L["Unable to change the following console variable while in combat: "] = "戰鬥中無法更改下列的遊戲參數:"
+--[[Translation missing --]]
+L["Unable to change this setting while in combat"] = "Unable to change this setting while in combat"
 L["Unable to change transparency for occluded units while in combat."] = "戰鬥中無法更改被擋住的單位的透明度。"
 L["Undetermined"] = "尚未決定"
 L["Unfriendly"] = "不友好"
 L["Uniform Color"] = "單一顏色"
---[[Translation missing --]]
-L["Unit"] = "Unit"
---[[Translation missing --]]
-L["Unit (Names or NPC IDs)"] = "Unit (Names or NPC IDs)"
+L["Unit"] = "單位"
+L["Unit (Names or NPC IDs)"] = "單位 (名字或 NPC ID)"
 L["Unit Base Scale"] = "單位基礎縮放大小"
 L["Unit Base Transparency"] = "使用基礎透明度"
---[[Translation missing --]]
-L["Unit: "] = "Unit: "
+L["Unit: "] = "單位:"
 L["Unknown option: "] = "未知的選項："
+L["Unknown restrictions type: "] = "未知限制類型:"
 L["Unlimited Duration"] = "沒有時間限制"
 L["Usage: /tptp [options]"] = "指令用法： /tptp [options]"
 L["Use a custom color for healthbar (in healthbar view) or name (in headline view) of friends and/or guild members."] = "好友/公會成員的血條 (在血條檢視時) 或名字 (在名字檢視時) 使用自訂顏色。"
@@ -1125,6 +1205,8 @@ L["Use a custom color for the healtbar's border."] = "血條邊框使用自訂�
 L["Use a custom color for the healthbar of quest mobs."] = "任務怪的血條使用自訂顏色。"
 L["Use a custom color for the healthbar of your current focus target."] = "專注目標的血條使用自訂顏色。"
 L["Use a custom color for the healthbar of your current target."] = "當前目標的血條使用自訂顏色。"
+L["Use a custom color for the healthbar's background."] = "血條背景使用自訂顏色。"
+L["Use a custom color for the healthbar's border."] = "血條邊框使用自訂顏色。"
 L["Use a custom color for the name of your current focus target (in healthbar view and in headline view)."] = "專注目標的名字使用自訂顏色 (在血條檢視和名字檢視時)。"
 L["Use a custom color for the name of your current target (in healthbar view and in headline view)."] = "當前目標的名字使用自訂顏色 (在血條檢視和名字檢視時)。"
 L["Use a heuristic instead of a mob's threat table to detect if you are in combat with a mob (see Threat System - General Settings for a more detailed explanation)."] = "使用啟發式仇恨偵測來判斷與你戰鬥的怪物，而不是怪物的仇恨值表 (更詳細的說明請看仇恨值系統 > 一般設定)。"
@@ -1151,9 +1233,14 @@ L["Use the healthbar's foreground color also for the border."] = "邊框使用�
 L["Use the same color for all combo points shown."] = "所有連擊點數都顯示相同的顏色。"
 L["Use Threat Color"] = "使用仇恨值顏色"
 L["Use threat scale as additive scale and add or substract it from the general scale settings."] = "將仇恨值縮放大小變化視為附加的值，會和一般縮放大小的設定值相加或相減。"
+--[[Translation missing --]]
+L["Use threat scale as additive scale and add or subtract it from the general scale settings."] = "Use threat scale as additive scale and add or subtract it from the general scale settings."
 L["Use threat transparency as additive transparency and add or substract it from the general transparency settings."] = "將仇恨值透明度變化視為附加的值，會和一般透明度的設定值相加或相減。"
+--[[Translation missing --]]
+L["Use threat transparency as additive transparency and add or subtract it from the general transparency settings."] = "Use threat transparency as additive transparency and add or subtract it from the general transparency settings."
 L["Use transparency settings of Healthbar View also for Headline View."] = "血條檢視的透明度設定也要套用到名字檢視。"
 L["Uses the target-based transparency as absolute transparency and ignore unit base transparency."] = "只使用是否有選取目標的相關透明度設定，當作絕對透明度，忽略單位基礎透明度。"
+L["Valid types: combat, encounter, challenge, pvp, map"] = "有效類型: 戰鬥、首領戰、挑戰、PvP、地圖"
 L["Val'kyr Shadowguard"] = "華爾琪影衛"
 L["Value"] = "數值"
 L["Value Format"] = "數值格式"
@@ -1169,10 +1256,12 @@ L["Viper"] = "響尾蛇"
 L["Visibility"] = "可見性"
 L["Volatile Ooze"] = "暴躁軟泥怪"
 L["Warlock"] = "術士"
+L["Warning Glow"] = "警告發光"
 L["Warning Glow for Threat"] = "仇恨值發光警告"
 L["Water Elemental"] = "水元素"
 L["Web Wrap"] = "纏繞之網"
 L["We're unable to change this while in combat"] = "戰鬥中無法更改"
+L["Which frame strata the nameplate will be placed in."] = "名條將會被放置於哪個框架層級。"
 L["Wide"] = "較寬"
 L["Widgets"] = "套件"
 L["Width"] = "寬度"
