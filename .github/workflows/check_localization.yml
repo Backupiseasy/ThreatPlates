@@ -12,6 +12,11 @@ name: Check localization completeness
 # This applies to every PR that touches **.lua or Locales/** - including the
 # bot-generated localization-sync PR from sync_localization_translations.yml,
 # but also catches a human PR that adds a new string without translating it.
+#
+# The comment also always includes a per-locale translation-completeness table
+# (how many enUS keys each active, non-commented-out locale is missing, and
+# the resulting percentage) - purely informational, never affects pass/fail,
+# since community translations land asynchronously via CurseForge.
 
 on:
   pull_request:
@@ -61,16 +66,17 @@ jobs:
         if: always()
         run: |
           if [ "${{ steps.check.outputs.passed }}" = "true" ]; then
-            echo "✅ Localization check passed - no missing keys." > comment_body.md
+            HEADER="✅ Localization check passed - no missing keys."
           else
-            {
-              echo "### ⚠️ Localization check found issues"
-              echo
-              echo '```'
-              cat check_output.txt
-              echo '```'
-            } > comment_body.md
+            HEADER="### ⚠️ Localization check found issues"
           fi
+          {
+            echo "$HEADER"
+            echo
+            echo '```'
+            cat check_output.txt
+            echo '```'
+          } > comment_body.md
 
       - name: Post or update PR comment
         if: always() && github.event_name == 'pull_request'

@@ -15,7 +15,8 @@ are not part of the AST at all).
 
 Subcommands:
   extract  Scan Lua source for L["..."] keys, write phrase_keys_export_file.txt
-  check    Diff extracted keys against Locales/enUS.lua, fail on missing keys
+  check    Diff extracted keys against Locales/enUS.lua, fail on missing keys;
+           also reports per-locale translation completeness (informational)
   upload   POST phrase_keys_export_file.txt to CurseForge as new enUS phrases
   pull     Download current translations for each Locales.xml-enabled locale
            and rewrite Locales/<locale>.lua
@@ -158,9 +159,11 @@ def cmd_extract(args):
 # check
 # ---------------------------------------------------------------------------
 
-def parse_enus_keys(enus_path):
+def parse_locale_keys(locale_path):
+    """Every L["key"] = ... assignment target in a Locales/<locale>.lua file.
+    Works for any locale, not just enUS - the AceLocale file format is the same."""
     keys = set()
-    tree = parse_lua_file(enus_path)
+    tree = parse_lua_file(locale_path)
     for node in ast.walk(tree):
         if not isinstance(node, ast.Assign):
             continue
@@ -171,13 +174,34 @@ def parse_enus_keys(enus_path):
     return keys
 
 
+def locale_translation_stats(root, enus_keys):
+    """Per active (non-enUS, non-commented-out in Locales.xml) locale: how many of the
+    current enUS keys have a translated entry. Denominator is always len(enus_keys) - a
+    locale file can contain stale entries for keys no longer in enUS, which must not
+    inflate its completion percentage."""
+    locales_xml = os.path.join(root, "Locales", "Locales.xml")
+    if not os.path.exists(locales_xml):
+        return []
+    locales = [l for l in enabled_locales(locales_xml) if l != "enUS"]
+    stats = []
+    for locale in locales:
+        locale_path = os.path.join(root, "Locales", f"{locale}.lua")
+        locale_keys = parse_locale_keys(locale_path)
+        translated = len(enus_keys & locale_keys)
+        total = len(enus_keys)
+        missing = total - translated
+        pct = (translated / total * 100) if total else 100.0
+        stats.append((locale, translated, total, missing, pct))
+    return stats
+
+
 def cmd_check(args):
     static_keys, _ = scan_repository(args.root)
     reg_path = registry_path_for(args.root)
     registry_keys = set(extract_registry_keys(reg_path)) if os.path.exists(reg_path) else set()
 
     used_keys = set(static_keys) | registry_keys
-    enus_keys = parse_enus_keys(os.path.join(args.root, "Locales", "enUS.lua"))
+    enus_keys = parse_locale_keys(os.path.join(args.root, "Locales", "enUS.lua"))
 
     missing = sorted(used_keys - enus_keys)
     unused = sorted(enus_keys - used_keys)
@@ -191,15 +215,25 @@ def cmd_check(args):
             print(f"  ... and {len(unused) - 50} more")
         print()
 
+    rc = 0
     if missing:
         print(f"ERROR: {len(missing)} key(s) used in code but missing from Locales/enUS.lua:")
         for k in missing:
             files = ", ".join(static_keys.get(k, ["(registry)"])[:3])
             print(f"  {k!r}  (used in: {files})")
-        return 1
+        rc = 1
+    else:
+        print("OK: every statically-extracted key has a Locales/enUS.lua entry.")
 
-    print("OK: every statically-extracted key has a Locales/enUS.lua entry.")
-    return 0
+    stats = locale_translation_stats(args.root, enus_keys)
+    if stats:
+        print()
+        print(f"Translation status (of {len(enus_keys)} enUS keys):")
+        width = max(len(s[0]) for s in stats)
+        for locale, translated, total, miss, pct in stats:
+            print(f"  {locale.ljust(width)} : {translated:4d}/{total} ({pct:5.1f}%)  {miss} missing")
+
+    return rc
 
 
 # ---------------------------------------------------------------------------
@@ -246,10 +280,18 @@ def cmd_upload(args):
 def enabled_locales(locales_xml_path):
     """Locales actually <Script>-loaded in Locales.xml. ElementTree does not
     expose XML comments as elements, so commented-out <Script> tags (disabled
-    on purpose, e.g. for translation quality) are automatically excluded."""
+    on purpose, e.g. for translation quality) are automatically excluded.
+
+    Locales.xml declares a default xmlns (http://www.blizzard.com/wow/ui/) on
+    its root, so every <Script> element is namespaced
+    ({http://www.blizzard.com/wow/ui/}Script) - match by local name (ignoring
+    any namespace) rather than an exact tag, otherwise iter("Script") silently
+    matches nothing against the real file."""
     tree = ET.parse(locales_xml_path)
     locales = []
-    for el in tree.getroot().iter("Script"):
+    for el in tree.getroot().iter():
+        if el.tag.rsplit("}", 1)[-1] != "Script":
+            continue
         fn = el.get("file", "")
         if fn.endswith(".lua"):
             locales.append(fn[:-4])
@@ -340,7 +382,8 @@ def build_parser():
     p_extract.add_argument("--out", default=DEFAULT_EXPORT_FILE)
     p_extract.set_defaults(func=cmd_extract)
 
-    p_check = sub.add_parser("check", help="Fail if code uses keys missing from enUS.lua")
+    p_check = sub.add_parser("check", help="Fail if code uses keys missing from enUS.lua; "
+                                            "also reports per-locale translation completeness")
     p_check.add_argument("--root", default=".")
     p_check.set_defaults(func=cmd_check)
 

@@ -12,9 +12,11 @@ import pytest
 from localization_tool import (
     cmd_check,
     cmd_extract,
+    enabled_locales,
     extract_l_calls,
+    locale_translation_stats,
     lua_quote,
-    parse_enus_keys,
+    parse_locale_keys,
     scan_repository,
 )
 
@@ -198,8 +200,102 @@ def test_check_does_not_flag_dynamic_registry_keys_as_missing(tmp_path):
     assert cmd_check(Args()) == 0
 
 
-def test_parse_enus_keys_handles_long_bracket_entries(tmp_path):
+def test_check_does_not_crash_without_a_locales_xml(tmp_path):
+    # Locales.xml is only needed for the (informational) translation-status
+    # block; its absence must not take down the hard missing-key check.
+    write(str(tmp_path / "Options.lua"), 'x = L["Foo"]\n')
+    make_enus(tmp_path, "Foo")
+
+    class Args:
+        root = str(tmp_path)
+
+    assert cmd_check(Args()) == 0
+
+
+def test_parse_locale_keys_handles_long_bracket_entries(tmp_path):
     p = write(str(tmp_path / "enUS.lua"),
               'L[ [=[Multi\nLine]=] ] = [=[Multi\nLine]=]\n')
-    keys = parse_enus_keys(p)
+    keys = parse_locale_keys(p)
     assert keys == {"Multi\nLine"}
+
+
+# ---------------------------------------------------------------------------
+# locale_translation_stats: per-locale translation completeness vs enUS
+# ---------------------------------------------------------------------------
+
+def make_locales_xml(tmp_path, *locales, commented_out=()):
+    # Mirrors the real Locales/Locales.xml: a default xmlns on the root, which
+    # namespaces every <Script> child ({http://www.blizzard.com/wow/ui/}Script)
+    # - a fixture without this xmlns would not have caught the namespace bug
+    # below.
+    scripts = "\n".join(f'<Script file="{l}.lua"/>' for l in locales)
+    comments = "\n".join(f'<!-- <Script file="{l}.lua"/> -->' for l in commented_out)
+    write(str(tmp_path / "Locales" / "Locales.xml"),
+          f'<Ui xmlns="http://www.blizzard.com/wow/ui/">\n{scripts}\n{comments}\n</Ui>\n')
+
+
+def test_enabled_locales_matches_namespaced_script_elements(tmp_path):
+    # Locales.xml's default xmlns namespaces every <Script> element
+    # ({http://www.blizzard.com/wow/ui/}Script) - enabled_locales must match by
+    # local name, not by an exact "Script" tag, or it silently finds nothing
+    # against the real file.
+    make_locales_xml(tmp_path, "enUS", "deDE", commented_out=["zhCN"])
+    locales = enabled_locales(str(tmp_path / "Locales" / "Locales.xml"))
+    assert locales == ["enUS", "deDE"]
+
+
+def test_locale_translation_stats_counts_missing_and_percentage(tmp_path):
+    make_enus(tmp_path, "Foo", "Bar", "Baz", "Qux")
+    make_locales_xml(tmp_path, "enUS", "deDE")
+    write(str(tmp_path / "Locales" / "deDE.lua"), 'L["Foo"] = "Foo-de"\nL["Bar"] = "Bar-de"\n')
+
+    enus_keys = parse_locale_keys(str(tmp_path / "Locales" / "enUS.lua"))
+    stats = locale_translation_stats(str(tmp_path), enus_keys)
+
+    assert stats == [("deDE", 2, 4, 2, 50.0)]
+
+
+def test_locale_translation_stats_ignores_stale_keys_no_longer_in_enus(tmp_path):
+    # A locale file can contain translations for keys that were since removed
+    # from enUS - those must not inflate the denominator or the translated count.
+    make_enus(tmp_path, "Foo")
+    make_locales_xml(tmp_path, "enUS", "deDE")
+    write(str(tmp_path / "Locales" / "deDE.lua"),
+          'L["Foo"] = "Foo-de"\nL["RemovedFromEnus"] = "Stale-de"\n')
+
+    enus_keys = parse_locale_keys(str(tmp_path / "Locales" / "enUS.lua"))
+    stats = locale_translation_stats(str(tmp_path), enus_keys)
+
+    assert stats == [("deDE", 1, 1, 0, 100.0)]
+
+
+def test_locale_translation_stats_skips_commented_out_locales(tmp_path):
+    make_enus(tmp_path, "Foo")
+    # zhCN is commented out in Locales.xml (e.g. translation quality too low
+    # to ship) - it must not appear in the stats at all, even though a
+    # zhCN.lua file still exists on disk (the commented-out tag, not file
+    # absence, is what disables it).
+    make_locales_xml(tmp_path, "enUS", "deDE", commented_out=["zhCN"])
+    write(str(tmp_path / "Locales" / "deDE.lua"), 'L["Foo"] = "Foo-de"\n')
+    write(str(tmp_path / "Locales" / "zhCN.lua"), 'L["Foo"] = "Foo-zh"\n')
+
+    enus_keys = parse_locale_keys(str(tmp_path / "Locales" / "enUS.lua"))
+    stats = locale_translation_stats(str(tmp_path), enus_keys)
+
+    assert [s[0] for s in stats] == ["deDE"]
+
+
+def test_cmd_check_output_includes_translation_status(tmp_path, capsys):
+    write(str(tmp_path / "Options.lua"), 'x = L["Foo"]\n')
+    make_enus(tmp_path, "Foo", "Bar")
+    make_locales_xml(tmp_path, "enUS", "deDE")
+    write(str(tmp_path / "Locales" / "deDE.lua"), 'L["Foo"] = "Foo-de"\n')
+
+    class Args:
+        root = str(tmp_path)
+
+    assert cmd_check(Args()) == 0
+    out = capsys.readouterr().out
+    assert "Translation status (of 2 enUS keys):" in out
+    assert "deDE" in out
+    assert "1 missing" in out
