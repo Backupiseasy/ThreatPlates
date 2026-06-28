@@ -1,0 +1,100 @@
+# GitHub-only test build packaged from a PR's code, for reviewers/testers to try out a PR
+# without it counting as a real CurseForge/WoWInterface/Wago release. Never runs automatically
+# on PR creation or push - only via a "/buildtest" PR comment from a maintainer or a manual
+# workflow_dispatch run (both require repo write access). Reuses _package_release.yml (no
+# CF/WOWI/WAGO secrets forwarded -> GitHub-only, same as build_alpha.yml), then explicitly marks
+# the resulting release as a prerelease so it can never become the repo's "Latest release", and
+# links it back on the PR.
+name: Build PR test release
+
+on:
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "PR number to build a test release for"
+        required: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: pr-test-build-${{ github.event.issue.number || inputs.pr_number }}
+  cancel-in-progress: false
+
+jobs:
+  resolve:
+    # Gate: workflow_dispatch requires repo write access (enforced by GitHub); issue_comment is
+    # additionally restricted to the "/buildtest" command from an OWNER/MEMBER/COLLABORATOR
+    # (write-access roles), since issue_comment is otherwise triggerable by anyone on a public repo.
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'issue_comment' &&
+       github.event.issue.pull_request != null &&
+       startsWith(github.event.comment.body, '/buildtest') &&
+       contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association))
+    runs-on: ubuntu-latest
+    outputs:
+      pr_number: ${{ steps.resolve.outputs.pr_number }}
+      tag: ${{ steps.resolve.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Tag the PR head commit for packaging
+        id: resolve
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          DISPATCH_PR_NUMBER: ${{ inputs.pr_number }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            pr_number="$DISPATCH_PR_NUMBER"
+          else
+            pr_number="$ISSUE_NUMBER"
+          fi
+
+          # refs/pull/<n>/head resolves correctly for forked PRs too, no fork remote needed.
+          git fetch origin "refs/pull/${pr_number}/head"
+
+          # No "alpha"/"beta" substring on purpose - that would additionally trigger
+          # build_alpha.yml/build_beta.yml's own tag-push triggers for the same tag.
+          tag="pr${pr_number}-test${RUN_NUMBER}"
+          git tag "$tag" FETCH_HEAD
+          git push origin "$tag"
+
+          echo "pr_number=$pr_number" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+  release:
+    needs: resolve
+    uses: ./.github/workflows/_package_release.yml
+    with:
+      ref: ${{ needs.resolve.outputs.tag }}
+    # No secrets forwarded -> GitHub-only, same convention as build_alpha.yml.
+
+  notify:
+    needs: [resolve, release]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mark release as prerelease and link it on the PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          TAG: ${{ needs.resolve.outputs.tag }}
+          PR_NUMBER: ${{ needs.resolve.outputs.pr_number }}
+        run: |
+          set -euo pipefail
+          # file_type/prerelease detection in the packager keys off "alpha"/"beta" substrings in
+          # the tag, which this tag intentionally avoids - so prerelease is set explicitly here
+          # instead, guaranteeing this build can never become the repo's "Latest release".
+          gh release edit "$TAG" --prerelease --repo "$REPO"
+          body="🧪 Test-Build verfügbar: https://github.com/$REPO/releases/tag/$TAG
+
+          Inoffizieller Build zum Testen dieses PRs — kein CurseForge/Wago/WoWInterface-Release."
+          gh pr comment "$PR_NUMBER" --repo "$REPO" --body "$body"
