@@ -117,7 +117,26 @@ end
 -- 
 ---------------------------------------------------------------------------------------------------
 
+-- Blizzard's NamePlateDriverMixin recomputes and re-applies the native plate size via
+-- C_NamePlate.SetNamePlateSize whenever any of these CVars change (see UpdateNamePlateOptions /
+-- UpdateNamePlateSize in Blizzard_NamePlates.lua), which can leave already-active plates with a
+-- stale hit-test region until TidyPlates re-asserts its own size (see SetCVarHook below)
+local RESYNC_NATIVE_SIZE_CVARS = {
+  nameplateSize = true,
+  nameplateStyle = true,
+  nameplateShowClassColor = true,
+  nameplateShowFriendlyClassColor = true,
+  nameplateDebuffPadding = true,
+  nameplateAuraScale = true,
+}
+
 local MONITORED_CVARS = {
+  nameplateSize = true,
+  nameplateStyle = true,
+  nameplateShowClassColor = true,
+  nameplateShowFriendlyClassColor = true,
+  nameplateDebuffPadding = true,
+  nameplateAuraScale = true,
   nameplateMinScale = true,
   nameplateMaxScale = true,
   nameplateLargerScale = true,
@@ -260,6 +279,14 @@ end
 
 local function SetCVarHook(name, value, c)
   if not MONITORED_CVARS[name] then return end
+
+  -- Re-assert Threat Plates' own nameplate size/hit-test for all active plates; otherwise Blizzard's
+  -- resize leaves already-active plates with a stale clickable area until the next reload.
+  if RESYNC_NATIVE_SIZE_CVARS[name] then
+    Addon.ExecuteAfterCombatEnds(function()
+      Addon:SetBaseNamePlateSize()
+    end, L["Unable to change a setting while in combat."])
+  end
 
   -- if name == "nameplateMinScale" or name == "nameplateMaxScale" or name == "nameplateLargerScale" or name == "nameplateSelectedScale" then
   --   -- Update Hiding Nameplates only if something changed
