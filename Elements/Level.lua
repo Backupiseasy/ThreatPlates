@@ -85,7 +85,7 @@ end
 
 local function UNIT_LEVEL(unitid)
   local tp_frame = Addon:GetThreatPlateForUnit(unitid)
-  if tp_frame then
+  if tp_frame and tp_frame.PlateStyle ~= "None" then
     Element.PlateUnitAdded(tp_frame)
   end
 end

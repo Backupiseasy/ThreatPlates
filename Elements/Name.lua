@@ -59,7 +59,7 @@ function Element.PlateUnitAdded(tp_frame)
     local unit_name = TransliterateCyrillicLetters(unit.name)
     
     -- Full names in headline view, otherwise
-    if unit.type ~= "PLAYER" and tp_frame.PlateStyle ~= "NameMode" then 
+    if unit.type ~= "PLAYER" and tp_frame.PlateStyle == "HealthbarMode" then
       local db = ModeSettings[tp_frame.PlateStyle]
       local name_setting = (unit.reaction == "FRIENDLY" and db.AbbreviationForFriendlyUnits) or db.AbbreviationForEnemyUnits
       if name_setting ~= "FULL" then
@@ -116,7 +116,7 @@ end
 
 local function UNIT_NAME_UPDATE(unitid)
   local tp_frame = Addon:GetThreatPlateForUnit(unitid)
-  if tp_frame then
+  if tp_frame and tp_frame.PlateStyle ~= "None" then
     Element.PlateUnitAdded(tp_frame)
   end
 end
