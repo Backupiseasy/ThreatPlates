@@ -32,8 +32,8 @@ externals:
   Libs/LibDualSpec-1.0: https://repos.wowace.com/wow/libdualspec-1-0
 
 embedded-libraries:
-  # - ForAllIndentsAndPurposes
-  # - UTF8
+  - ForAllIndentsAndPurposes
+  - UTF8
 
 enable-nolib-creation: no
 
@@ -44,18 +44,11 @@ manual-changelog:
 wowi-convert-changelog: yes
 
 ignore:
-  - .git
-  - .github
-  - .luacheckrc
-  - .luacheckrc.ci
-  - .idea
-  - .release
-  - .env
-  - .gitignore
-  - .pkgmeta
+  # The packager auto-excludes anything starting with a dot, so they don't need to be listed here explicitly.
   - Source
   - Test
   - README.md
+  - CLAUDE.md
   - TidyPlates_ThreatPlates.iml
   - TidyPlates_ThreatPlates-Mainline.toc
   - TidyPlates_ThreatPlates-Vanilla.toc
@@ -64,4 +57,4 @@ ignore:
   - TidyPlates_ThreatPlates-Cata.toc
   - TidyPlates_ThreatPlates-Mists.toc
 
-move-folders:
+# move-folders:  # not needed - single top-level addon folder, kept as placeholder
