@@ -1057,6 +1057,21 @@ local function DisableShowBlizzardAurasForClassic(profile_name, profile)
   end
 end
 
+local function MigrateAnchorFrameToNameplateSize(profile_name, profile)
+  if DatabaseEntryExists(profile, { "Appearance", "AnchorFrame" }) then
+    local old_value = profile.Appearance.AnchorFrame
+    if old_value == "UI_PARENT" then
+      profile.Appearance.NameplateSize = "NORMAL"
+    elseif old_value == "PLATE" then
+      -- PLATE rendered "Big" (like WorldFrame) on the old nameplate API, but "Small"
+      -- (like UIParent) on the new one.
+      profile.Appearance.NameplateSize = (Addon.WOW_USES_CLASSIC_NAMEPLATES and "BIG") or "NORMAL"
+    else -- "WORLD_FRAME" or any unrecognized/missing value
+      profile.Appearance.NameplateSize = "BIG"
+    end
+  end
+end
+
 local function MigrateAurasWidgetV2(_, profile)
   local default_profile = Addon.DEFAULT_SETTINGS.profile
 
@@ -1564,6 +1579,9 @@ local MIGRATION_FUNCTIONS_BY_VERSION = {
     { Type = "Delete", Key = { "settings", "totem" } },
     { Type = "Delete", Key = { "settings", "normal" } },
     { Type = "Delete", Key = { "settings", "threat", "scaleType" } },
+  },
+  ["13.0.25"] = {
+    { Type = "Migrate", Name = "Anchor Frame to Nameplate Size", Function = MigrateAnchorFrameToNameplateSize },
   },
 }
 

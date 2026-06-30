@@ -56,8 +56,6 @@ end
 Addon.ON_UPDATE_INTERVAL = 0.1 -- minimum number of seconds between each update of a frame for OnUpdate handlers
 Addon.CASTBAR_INTERRUPT_HOLD_TIME = 1
 
-Addon.NameplateParentFrame = WorldFrame
-Addon.NameplateFrameStrata = "BACKGROUND"
 Addon.UIScale = 1
 
 Addon.TotemInformation = {} -- basic totem information
@@ -558,8 +556,8 @@ Addon.DEFAULT_SETTINGS = {
     ShowFriendlyBlizzardNameplates = false,
     ShowEnemyBlizzardNameplates = false,
     Appearance = {
-      AnchorFrame = "WORLD_FRAME",
       FrameStrata = "BACKGROUND",
+      NameplateSize = "BIG",
       UseMasque = false,
       UseBorderlessIcons = false,
     },

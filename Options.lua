@@ -6345,7 +6345,7 @@ local function CreateBlizzardSettings()
                 order = 30,
                 type = "range",
                 min = 0,
-                max = 1.5,
+                max = 2,
                 step = 0.01,
                 isPercent = true,
                 desc = L["Percentage amount for horizontal overlap of nameplates."],
@@ -6357,7 +6357,7 @@ local function CreateBlizzardSettings()
                 order = 40,
                 type = "range",
                 min = 0,
-                max = 1.5,
+                max = 2,
                 step = 0.01,
                 isPercent = true,
                 desc = L["Percentage amount for vertical overlap of nameplates."],
@@ -6798,23 +6798,25 @@ local function CreateAppearanceTab()
           },
         },
       },
-      FrameStrata = {
-        name = L["Frame Strata"],
+      NameplateDisplay = {
+        name = L["Nameplate Display"],
         type = "group",
-        order = 25,
+        order = 20,
         inline = true,
         args = {
-          ParentFrame = {
-            name = L["Parent Frame"],
+          NameplateSize = {
+            name = L["Nameplate Size"],
             type = "select",
             order = 10,
+            desc = L["Big matches the previous default size; normal keeps nameplates more compact, scaled down by the UI scale."],
             set = function(info, val)
               SetValueGeneral(info, val)
-              Addon:UpdateNameplateFrameProperties()
+              Addon:UIScaleChanged()
               Addon:UpdateFramePropertiesOfPlatesCreated()
+              Addon:ForceUpdate()
             end,
-            values = { WORLD_FRAME = "World Frame", UI_PARENT = "UI Parent",  PLATE = "Nameplate"},
-            arg = { "Appearance", "AnchorFrame" }
+            values = { BIG = L["Big"], NORMAL = L["Normal"] },
+            arg = { "Appearance", "NameplateSize" }
           },
           FrameStrata = {
             name = L["Frame Strata"],
@@ -6822,7 +6824,7 @@ local function CreateAppearanceTab()
             order = 20,
             set = function(info, val)
               SetValueGeneral(info, val)
-              Addon:UpdateNameplateFrameProperties()
+              Addon.ExecuteAfterCombatEnds(function() Addon:SetBaseNamePlateSize() end, L["Unable to change a setting while in combat."])
               Addon:UpdateFramePropertiesOfPlatesCreated()
             end,
             values = { BACKGROUND = "BACKGROUND", LOW = "LOW",  MEDIUM = "MEDIUM", HIGH = "HIGH", DIALOG = "DIALOG", TOOLTIP = "TOOLTIP" } ,
@@ -6834,7 +6836,7 @@ local function CreateAppearanceTab()
       Icons = {
         name = L["Icons"],
         type = "group",
-        order = 20,
+        order = 30,
         inline = true,
         args = {
           BorderlessStyle = {

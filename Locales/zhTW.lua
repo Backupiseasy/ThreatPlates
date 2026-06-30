@@ -617,8 +617,6 @@ L["Outline"] = "外框"
 L["Outline, Monochrome"] = "外框、單色"
 L["Overlapping"] = "重疊"
 L["Paladin"] = "聖騎士"
---[[Translation missing --]]
-L["Parent Frame"] = "Parent Frame"
 L["Paste"] = "貼上"
 L["Paste the Threat Plates profile string into the text field below and then close the window"] = "在下方的文字區域內貼上威力血條的設定檔字串，然後關閉視窗。"
 L["Percentage"] = "百分比"
