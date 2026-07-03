@@ -25,6 +25,7 @@ local IsSecretValueTP = Addon.IsSecretValue
 local Widgets = Addon.Widgets
 local TransparencyModule, ScalingModule = Addon.Transparency, Addon.Scaling
 local ThreatShowFeedback = Addon.Threat.ShowFeedback
+local ThreatSetUnitAttribute = Addon.Threat.SetUnitAttribute
 
 local ColorModule = Addon.Color
 
@@ -237,7 +238,12 @@ end
 local function GetThreatStyle(unit)
   -- style tank/dps only used for NPCs/non-player units
   if ThreatShowFeedback(unit) then
-    return Addon.GetPlayerRole()
+    local role = Addon.GetPlayerRole()
+    -- "OFFTANK" is tank-only; recalculate when role switched to dps before the next threat event fired
+    if unit.ThreatLevel == "OFFTANK" and role == "dps" then
+      ThreatSetUnitAttribute(unit)
+    end
+    return role
   end
 
   return "normal"

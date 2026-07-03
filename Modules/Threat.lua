@@ -133,7 +133,7 @@ local function CheckIfUnitIsOfftanked(unit, threat_level, other_player_has_aggro
   -- Reset IsOfftanked if the player is tanking
   -- Off-tank detection does not work in Midnight because of secret values
   if other_player_has_aggro then
-    if unit.style == "tank" and ShowOffTank then
+    if Addon.GetPlayerRole() == "tank" and ShowOffTank then
       local target_unit = unit.unitid .. "target"
 
       -- Player does not tank the unit, so check if it is off-tanked:
@@ -189,7 +189,7 @@ local function UpdateThreatStatusHeuristic(unit)
         threat_level = "LOW"
       end
     else
-      threat_level = unit.ThreatLevel or "LOW"
+      threat_level = (unit.ThreatLevel ~= "OFFTANK" and unit.ThreatLevel) or "LOW"
     end
 
     return CheckIfUnitIsOfftanked(unit, threat_level, (threat_level == "LOW"))
@@ -209,14 +209,9 @@ end
 --   ThreatLevel
 --   IsOfftanked
 --   HasThreatTable
-function ThreatModule.SetUnitAttribute(tp_frame)
-  local unit = tp_frame.unit
-  
-  -- As the unit is initialized (everything is nil) here, if threat_level is not nil here, HasThreatTable is true, 
-  -- so no need to check it here
-  local threat_level = UpdateThreatStatus(unit) or UpdateThreatStatusHeuristic(unit)
-  -- Don't call UpdateThreatLevel here as we don't have to update style or fire a ThreatUpdate event here
-  unit.ThreatLevel = threat_level
+function ThreatModule.SetUnitAttribute(unit)
+  -- Don't call UpdateThreatLevel here — no style update or ThreatUpdate event needed during unit initialization.
+  unit.ThreatLevel = UpdateThreatStatus(unit) or UpdateThreatStatusHeuristic(unit)
 end
 
 -- threat_level is nil when UNIT_THREAT_LIST_UPDATE fires at the beginning or end of combat
@@ -292,6 +287,12 @@ local function RegisterEventsforThreatHeuristic()
   end
 end
 
+local function UpdateAllActivePlates()
+  for _, tp_frame in Addon:GetActiveThreatPlates() do
+    StyleModule.Update(tp_frame)
+  end
+end
+
 function ThreatModule.UpdateSettings()
   Settings = Addon.db.profile.threat
 
@@ -299,6 +300,16 @@ function ThreatModule.UpdateSettings()
   UseHeuristicInInstances = Settings.UseHeuristicInInstances and not Addon.ExpansionIsAtLeastMidnight
   ShowOffTank = Settings.toggle.OffTank and not Addon.ExpansionIsAtLeastMidnight
   ShowInstancesOnly = Settings.toggle.InstancesOnly
+
+  -- "OFFTANK" is only valid while the player is in tank role; recalculate when the role changes.
+  -- Only relevant before Mists: GetPlayerRole() reads live stance data there. From Mists onwards the
+  -- role is spec-based (cached in Addon.PlayerRole via ACTIVE_TALENT_GROUP_CHANGED), so stance changes
+  -- do not affect role and subscribing to UPDATE_SHAPESHIFT_FORM would be a no-op.
+  if ShowOffTank and not Addon.ExpansionIsAtLeastMists then
+    SubscribeEvent(ThreatModule, "UPDATE_SHAPESHIFT_FORM", UpdateAllActivePlates)
+  else
+    UnsubscribeEvent(ThreatModule, "UPDATE_SHAPESHIFT_FORM", UpdateAllActivePlates)
+  end
 
   -- SubscribeEvent(ThreatModule, "UNIT_THREAT_SITUATION_UPDATE", function(unitid) end)
 

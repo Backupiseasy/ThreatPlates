@@ -1042,7 +1042,7 @@ local function HandlePlateUnitAdded(plate, unitid)
   end
   
   -- Update modules, then elements, then widgets
-  ThreatModule.SetUnitAttribute(tp_frame)
+  ThreatModule.SetUnitAttribute(tp_frame.unit)
   SetNameplateVisibility(plate, unitid)
 
   if not Addon.WOW_USES_CLASSIC_NAMEPLATES then
