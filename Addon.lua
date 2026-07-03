@@ -61,14 +61,13 @@ if Addon.WOW_USES_CLASSIC_NAMEPLATES then
 
     if db.frame.SyncWithHealthbar then
       local effective_scale = UIParent:GetEffectiveScale()
-      local ui_scale = (Addon.NameplateParentFrame ~= UIParent and effective_scale) or 1
-      
+
       -- Update values in settings, so that the options dialog (clickable area) shows the correct values
       -- Without multiplying with effective scale here (<= 1), the clickable area will be a lot wider that the nameplate width (no idea why)
       -- When increasing width and height of base nameplate size, x offset is constant, but y offset scales with the height (no idea why)
       -- In Classic, the nameplate parent also scales with effective scale
-      db.frame.width = (db.healthbar.width * effective_scale + 10) / ui_scale
-      db.frame.height = (db.healthbar.height + 6) / ui_scale
+      db.frame.width = (db.healthbar.width * effective_scale + 10) / effective_scale
+      db.frame.height = (db.healthbar.height + 6) / effective_scale
     end
   
     return db.frame.width, db.frame.height
@@ -94,26 +93,24 @@ else
   Addon.SetBaseNamePlateSize = function(self)
     local db = self.db.profile.settings
     local db_frame = db.frame
-
     if db_frame.SyncWithHealthbar then
       local db_healthbar = db.healthbar
-      
-      -- Update SavedVariable dimensions (also consumed by UpdateHitTestFrame per plate).
       -- Mirrors Blizzard's SetHitTestPoints formula (Blizzard_NamePlateUnitFrame.lua):
-      --   extraXOffset = 10
-      --   extraYOffset = healthBarHeight / 2  → hit region extends half the bar height above/below
-      local ui_scale = (Addon.NameplateParentFrame == WorldFrame and UIParent:GetEffectiveScale()) or 1
-      db_frame.width = (db_healthbar.width + 10) / ui_scale
-      db_frame.height = (db_healthbar.height * 2) / ui_scale
-      db_frame.widthFriend = (db_healthbar.widthFriend + 10) / ui_scale
-      db_frame.heightFriend = (db_healthbar.heightFriend * 2) / ui_scale
+      --   extraXOffset = 10 per side → total width + 20
+      --   extraYOffset = healthBarHeight / 2 per side → total height * 2
+      -- For "Big", divide by plate_scale so the screen-space hit area equals healthbar.width + 6.
+      -- For "Normal", no division: visual is scaled down by plate_scale via UIScaleChanged.
+      local plate_scale = (Addon.db.profile.Appearance.NameplateSize == "BIG" and UIParent:GetEffectiveScale()) or 1
+      db_frame.width = (db_healthbar.width + 20) / plate_scale
+      db_frame.height = (db_healthbar.height * 2) / plate_scale
+      db_frame.widthFriend = (db_healthbar.widthFriend + 20) / plate_scale
+      db_frame.heightFriend = (db_healthbar.heightFriend * 2) / plate_scale
     end
 
     local width  = max(db_frame.widthFriend,  db_frame.width)
     local height = max(db_frame.heightFriend, db_frame.height)
-
-      -- Nameplate size also needs to be adjusted for the HitTestFrame to work. Otherwise the bigger HitTestFrame size
-    -- will be ignored.
+    -- Nameplate size also needs to be adjusted for the HitTestFrame to work. Otherwise the
+    -- bigger HitTestFrame size will be ignored.
     SetNamePlateSize(width, height)
     self.SetNamePlateClickThrough()
   end

@@ -12,7 +12,7 @@ local next = next
 
 -- WoW APIs
 local wipe, strsplit = wipe, strsplit
-local WorldFrame, UIParent, INTERRUPTED = WorldFrame, UIParent, INTERRUPTED
+local UIParent, INTERRUPTED = UIParent, INTERRUPTED
 local UnitExists, UnitName, UnitReaction, UnitClass, UnitPVPName = UnitExists, UnitName, UnitReaction, UnitClass, UnitPVPName
 local UnitEffectiveLevel = UnitEffectiveLevel
 local UnitChannelInfo, UnitPlayerControlled = UnitChannelInfo, UnitPlayerControlled
@@ -903,9 +903,14 @@ end
 
 -- # Nameplate Hierarchy, Anchoring, and Scaling
 local function SetNameplateFrameProperties(tp_frame)
-  -- Parent could be: WorldFrame, UIParent, plate
-  tp_frame:SetParent(Addon.NameplateParentFrame or tp_frame.Parent)
-  tp_frame:SetFrameStrata(Addon.NameplateFrameStrata)
+  tp_frame:SetFrameStrata(Addon.db.profile.Appearance.FrameStrata)
+
+  -- plate's own alpha/scale (Blizzard CVars / UI Scale slider) would otherwise multiply
+  -- into tp_frame's effective alpha/scale on top of TidyPlates' own logic. Always
+  -- neutralize both; "Nameplate Size" (UIScaleChanged) controls the visible size difference
+  -- instead, independent of how plate itself behaves on a given client.
+  tp_frame:SetIgnoreParentAlpha(true)
+  tp_frame:SetIgnoreParentScale(true)
 end
 
 local function GetAnchorForThreatPlateFrame(self)
@@ -929,7 +934,7 @@ local function GetAnchorForThreatPlateExternal(self)
 end
 
 local	function HandlePlateCreated(plate)
-  local tp_frame = _G.CreateFrame("Frame",  "ThreatPlatesFrame" .. GetNameForNameplate(plate), WorldFrame, BackdropTemplate)
+  local tp_frame = _G.CreateFrame("Frame",  "ThreatPlatesFrame" .. GetNameForNameplate(plate), plate, BackdropTemplate)
   tp_frame:EnableMouse(false)
 
   tp_frame.Parent = plate
@@ -1096,16 +1101,21 @@ end
 function Addon:UIScaleChanged()
   local db = Addon.db.profile.Scale
   if db.IgnoreUIScale then
-    self.UIScale = 1  -- Code for anchoring TPFrame to WorldFrame/Blizzard nameplate instead of UIParent
-    --self.UIScale = 1 / UIParent:GetEffectiveScale()
+    self.UIScale = 1
   else
-    --self.UIScale = 1
-    self.UIScale = UIParent:GetEffectiveScale() -- Code for anchoring TPFrame to WorldFrame/Blizzard nameplate instead of UIParent
+    self.UIScale = UIParent:GetEffectiveScale()
 
     if db.PixelPerfectUI then
       local physicalScreenHeight = select(2, GetPhysicalScreenSize())
       self.UIScale = 768.0 / physicalScreenHeight
     end
+  end
+
+  -- "Normal" reproduces what UI_PARENT parenting always gave (UIParent's effective scale
+  -- is the UI Scale slider value everywhere), now that plate's own scale is always
+  -- neutralized regardless of what plate itself does.
+  if Addon.db.profile.Appearance.NameplateSize == "NORMAL" then
+    self.UIScale = self.UIScale * UIParent:GetEffectiveScale()
   end
 end
 
@@ -1180,23 +1190,6 @@ end
 -- Useful to make a theme respond to externally-captured data (such as the combat log)
 --------------------------------------------------------------------------------------------------------------
 
-function Addon:UpdateNameplateFrameProperties()
-  local db = self.db.profile.Appearance
-
-  if db.AnchorFrame == "WORLD_FRAME" then
-    Addon.NameplateParentFrame = WorldFrame
-  elseif db.AnchorFrame == "UI_PARENT" then
-    Addon.NameplateParentFrame = UIParent
-  else
-    Addon.NameplateParentFrame = nil
-  end
-
-  Addon.NameplateFrameStrata = db.FrameStrata
-
-  -- Also update the nameplate size (incl. frame width/height) as the clickable area must be adjusted
-  Addon.ExecuteAfterCombatEnds(function() Addon:SetBaseNamePlateSize() end, L["Unable to change a setting while in combat."])
-end
-
 function Addon:UpdateSettings()
   --wipe(PlateOnUpdateQueue)
 
@@ -1210,7 +1203,8 @@ function Addon:UpdateSettings()
   Addon.Color.UpdateSettings()
   ElementsUpdateSettings()
 
-  Addon:UpdateNameplateFrameProperties()
+  -- Also update the nameplate size (incl. frame width/height) as the clickable area must be adjusted
+  Addon.ExecuteAfterCombatEnds(function() Addon:SetBaseNamePlateSize() end, L["Unable to change a setting while in combat."])
 
   local db = Addon.db.profile
 
@@ -1241,8 +1235,9 @@ function Addon:UpdateSettings()
 
   ShowCastBars = db.settings.castbar.show or db.settings.castbar.ShowInHeadlineView
   
-  -- ? Not sure if this is still necessary after moving registering events to Addon.lua - OnInitialize
-  if Addon.IS_MAINLINE then
+  -- Addon:ACTIVE_TALENT_GROUP_CHANGED is only defined from Mists onward (it uses
+  -- GetSpecialization, see below), same guard as the equivalent call in PLAYER_LOGIN.
+  if Addon.ExpansionIsAtLeastMists then
     self:ACTIVE_TALENT_GROUP_CHANGED() -- to update the player's role
   end
 end

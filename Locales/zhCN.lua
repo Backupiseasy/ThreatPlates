@@ -681,8 +681,6 @@ L["Outline"] = "轮廓"
 L["Outline, Monochrome"] = "轮廓，单色"
 L["Overlapping"] = "重叠"
 L["Paladin"] = "圣骑士"
---[[Translation missing --]]
-L["Parent Frame"] = "Parent Frame"
 L["Paste"] = "粘贴"
 L["Paste the Threat Plates profile string into the text field below and then close the window"] = "将威力血条配置文件字符串粘贴到下面的文本字段中，然后关闭窗口。"
 L["Percentage"] = "百分比"

@@ -637,8 +637,6 @@ L["Outline"] = "Contorno"
 L["Outline, Monochrome"] = "Contorno, Monocromático"
 L["Overlapping"] = "Superposición"
 L["Paladin"] = "Paladín"
---[[Translation missing --]]
-L["Parent Frame"] = "Parent Frame"
 L["Paste"] = "Pegar"
 L["Paste the Threat Plates profile string into the text field below and then close the window"] = "Pega la cadena de perfil de Threat Plates en la entrada de texto a continuación y luego cierra la ventana"
 L["Percentage"] = "Porcentaje"
