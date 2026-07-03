@@ -32,7 +32,10 @@ externals:
   Libs/LibDualSpec-1.0: https://repos.wowace.com/wow/libdualspec-1-0
 
 embedded-libraries:
-  - ForAllIndentsAndPurposes
+  # ForAllIndentsAndPurposes was removed from CurseForge (slug no longer exists → Error 1018).
+  # The library is still embedded in Libs/ForAllIndentsAndPurposes/indent.lua and loaded via Libs/Libs.xml.
+  # Re-enable this line once/if the project reappears on CurseForge under the correct slug.
+  # - ForAllIndentsAndPurposes
   - UTF8
 
 enable-nolib-creation: no
