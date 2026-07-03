@@ -148,6 +148,10 @@ L["Bar Style"] = "风格"
 L["Bar Width"] = "条的宽度"
 L["Bars"] = "条列"
 L["Because of side effects with Blizzard nameplates, this function is disabled in instances or when Blizzard nameplates are used for friendly or neutral/enemy units (see General - Visibility)."] = "因为游戏内建血条的副作用，这个功能会在副本内，或是友方/中立/敌方单位显示游戏内建的血条时停用 (请看 一般 > 可见性 的设定)。"
+--[[Translation missing --]]
+L["Big"] = "Big"
+--[[Translation missing --]]
+L["Big matches the previous default size; normal keeps nameplates more compact, scaled down by the UI scale."] = "Big matches the previous default size; normal keeps nameplates more compact, scaled down by the UI scale."
 L["Blizzard"] = "暴雪"
 L["Blizzard Settings"] = "暴雪设定"
 L["Block"] = "阻挡"
@@ -616,11 +620,15 @@ L["Nameplate"] = "姓名板"
 L["Nameplate Clickthrough"] = "血条穿透点击"
 L["Nameplate clickthrough cannot be changed while in combat."] = "战斗中无法更改血条穿透点击。"
 L["Nameplate Color"] = "姓名板颜色"
+--[[Translation missing --]]
+L["Nameplate Display"] = "Nameplate Display"
 L["Nameplate Mode for Friendly Units in Combat"] = "战斗中友方单位的姓名版模式"
 --[[Translation missing --]]
 L["Nameplate Overlapping is now |cff00ff00ON!|r"] = "Nameplate Overlapping is now |cff00ff00ON!|r"
 --[[Translation missing --]]
 L["Nameplate Overlapping is now |cffff0000OFF!|r"] = "Nameplate Overlapping is now |cffff0000OFF!|r"
+--[[Translation missing --]]
+L["Nameplate Size"] = "Nameplate Size"
 L["Nameplate Style"] = "姓名板风格"
 --[[Translation missing --]]
 L["Nameplate Transparency & Scaling"] = "Nameplate Transparency & Scaling"
@@ -638,6 +646,8 @@ L["No target found."] = "未发现目标。"
 L["None"] = "无"
 L["Non-Interruptable"] = "无法打断"
 L["Non-Target"] = "非当前目标"
+--[[Translation missing --]]
+L["Normal"] = "Normal"
 L["Normal Units"] = "普通单位"
 L["Not Myself"] = "不是我自己"
 L["Note"] = "注意"

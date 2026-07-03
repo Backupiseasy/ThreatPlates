@@ -137,6 +137,10 @@ L["Bar Style"] = "Estilo de barra"
 L["Bar Width"] = "Anchura de Barra"
 L["Bars"] = "Barras"
 L["Because of side effects with Blizzard nameplates, this function is disabled in instances or when Blizzard nameplates are used for friendly or neutral/enemy units (see General - Visibility)."] = "Por razón de conflictos con las placas identificativas de Blizzard, esta función está deshabilitada en las mazmorras o cuando se utiliza las placas identificativas de Blizzard para unidades (ver General - Visibilidad)."
+--[[Translation missing --]]
+L["Big"] = "Big"
+--[[Translation missing --]]
+L["Big matches the previous default size; normal keeps nameplates more compact, scaled down by the UI scale."] = "Big matches the previous default size; normal keeps nameplates more compact, scaled down by the UI scale."
 L["Blizzard"] = "Blizzard"
 L["Blizzard Settings"] = "Configuración Blizzard"
 L["Block"] = "Bloquear"
@@ -574,11 +578,15 @@ L["Nameplate"] = "Placa de nombre"
 L["Nameplate Clickthrough"] = "Clics en la Placa Identificativa"
 L["Nameplate clickthrough cannot be changed while in combat."] = "Clics en la placa identificativa no puede cambiarse en combate."
 L["Nameplate Color"] = "Color de placa identificativa"
+--[[Translation missing --]]
+L["Nameplate Display"] = "Nameplate Display"
 L["Nameplate Mode for Friendly Units in Combat"] = "Modo de placa identificativa para unidades aliadas en combate"
 --[[Translation missing --]]
 L["Nameplate Overlapping is now |cff00ff00ON!|r"] = "Nameplate Overlapping is now |cff00ff00ON!|r"
 --[[Translation missing --]]
 L["Nameplate Overlapping is now |cffff0000OFF!|r"] = "Nameplate Overlapping is now |cffff0000OFF!|r"
+--[[Translation missing --]]
+L["Nameplate Size"] = "Nameplate Size"
 L["Nameplate Style"] = "Estilo de placa identificativa"
 --[[Translation missing --]]
 L["Nameplate Transparency & Scaling"] = "Nameplate Transparency & Scaling"
@@ -596,6 +604,8 @@ L["No target found."] = "No se encuentra un objetivo."
 L["None"] = "Ninguno"
 L["Non-Interruptable"] = "No Interrumpible"
 L["Non-Target"] = "No-Objetivo"
+--[[Translation missing --]]
+L["Normal"] = "Normal"
 L["Normal Units"] = "Unidades Normales"
 L["Not Myself"] = "No a mi mismo"
 L["Note"] = "Nota"
