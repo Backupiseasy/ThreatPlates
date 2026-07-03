@@ -1,6 +1,6 @@
 
 ------------------------------------------------------
-13.0.25 (2026-06-29)
+13.0.25 (2026-07-03)
 ------------------------------------------------------
 * Fixed settings migration bugs that could silently reset some Aura and Threat display options after updating.
 * Fixed a bug where clicking on nameplates no longer worked correctly after changing certain Blizzard nameplate settings (e.g. Nameplate Size or Style), without needing a UI reload [Comment #8482].

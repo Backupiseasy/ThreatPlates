@@ -66,8 +66,11 @@ if Addon.WOW_USES_CLASSIC_NAMEPLATES then
       -- Without multiplying with effective scale here (<= 1), the clickable area will be a lot wider that the nameplate width (no idea why)
       -- When increasing width and height of base nameplate size, x offset is constant, but y offset scales with the height (no idea why)
       -- In Classic, the nameplate parent also scales with effective scale
-      db.frame.width = (db.healthbar.width * effective_scale + 10) / effective_scale
-      db.frame.height = (db.healthbar.height + 6) / effective_scale
+      -- For "Normal", Addon.UIScale = effective_scale^2 so the visual is effective_scale times smaller than "Big".
+      -- Match the click area by scaling down the plate size by the same factor.
+      local size_scale = (Addon.db.profile.Appearance.NameplateSize == "NORMAL" and effective_scale) or 1
+      db.frame.width = (db.healthbar.width * effective_scale * size_scale + 10) / effective_scale
+      db.frame.height = (db.healthbar.height * size_scale + 6) / effective_scale
     end
   
     return db.frame.width, db.frame.height
