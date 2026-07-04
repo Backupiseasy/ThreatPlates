@@ -30,12 +30,6 @@ local IGNORED_STYLES = Addon.IGNORED_STYLES_WITH_NAMEMODE
 -- Local variables
 ---------------------------------------------------------------------------------------------------
 local Settings, SettingsHealthbar, SettingsTargetUnit, SettingsTargetUnitHide, SettingsShowOnlyForTarget
-local BorderBackdrop = {
-  bgFile = "",
-  edgeFile = "",
-  edgeSize = 0,
-  insets = { left = 0, right = 0, top = 0, bottom = 0 }
-}
 
 local COLOR_BLACK = Addon.RGB(0, 0, 0)
 
@@ -292,6 +286,38 @@ local function PlayerTargetLost(tp_frame)
     HideTargetUnit(tp_frame.visual.Healthbar)
   end
 end
+
+-- Also called directly from Element.UpdateStyle to restore the border color after SetBackdrop
+-- resets it to white.
+local function ColorUpdate(tp_frame, color)
+  if tp_frame.PlateStyle ~= "HealthbarMode" then return end
+
+  local healthbar = tp_frame.visual.Healthbar
+  if Addon.ExpansionIsAtLeastMidnight then
+    healthbar:GetStatusBarTexture():SetVertexColor(color.r, color.g, color.b)
+  else
+    healthbar:SetStatusBarColor(color.r, color.g, color.b, 1)
+  end
+
+  if not SettingsHealthbar.BackgroundUseForegroundColor then
+    color = SettingsHealthbar.BackgroundColor
+  end
+  healthbar.Background:SetVertexColor(color.r, color.g, color.b, 1 - SettingsHealthbar.BackgroundOpacity)
+
+  -- For simplicity, border color is uneffected by marks, threat, etc.
+  local border_color
+  if tp_frame.stylename == "unique" then
+    local unique_setting = tp_frame.unit.CustomPlateSettings
+    border_color = (unique_setting and unique_setting.UseBorderColor and unique_setting.BorderColor) or COLOR_BLACK
+  elseif SettingsHealthbar.BorderUseForegroundColor then
+    border_color = color
+  else
+    border_color = SettingsHealthbar.BorderColor
+  end
+  -- 100% color values are not saved in the database
+  healthbar.Border:SetBackdropBorderColor(border_color.r or 1, border_color.g or 1, border_color.b or 1, 1)
+end
+
 ---------------------------------------------------------------------------------------------------
 -- Core element code
 ---------------------------------------------------------------------------------------------------
@@ -307,8 +333,6 @@ function Element.PlateCreated(tp_frame)
 
   local border = _G.CreateFrame("Frame", nil, healthbar, BackdropTemplate)
   border:SetFrameLevel(healthbar:GetFrameLevel())
-  border:SetBackdrop(BorderBackdrop)
-  border:SetBackdropBorderColor(0, 0, 0, 1)
   healthbar.Border = border
 
   healthbar.Background = healthbar:CreateTexture(nil, "ARTWORK")
@@ -403,9 +427,20 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
 
   local border = healthbar.Border
   local offset = healthborder_style.offset
+  -- A fresh table is passed every time (rather than reusing/mutating one shared table) because
+  -- SetBackdrop no-ops when given the same table reference it already has applied, which would
+  -- prevent already-created borders from picking up texture/size changes (e.g., re-enabling the
+  -- border after disabling it) until the nameplate frame is recreated.
+  border:SetBackdrop({
+    edgeFile = healthborder_style.texture,
+    edgeSize = healthborder_style.edgesize,
+    insets = { left = offset, right = offset, top = offset, bottom = offset },
+  })
   border:ClearAllPoints()
   border:SetPoint("TOPLEFT", healthbar, "TOPLEFT", - offset, offset)
   border:SetPoint("BOTTOMRIGHT", healthbar, "BOTTOMRIGHT", offset, - offset)
+  -- SetBackdrop resets the border color to white, so restore it right after
+  ColorUpdate(tp_frame, tp_frame.HealthbarColor)
 
   if Addon.IS_MAINLINE then
     -- Absorbs
@@ -476,46 +511,9 @@ local function UnitHealthbarUpdate(unitid)
   end
 end
 
-local function ColorUpdate(tp_frame, color)
-  if tp_frame.PlateStyle ~= "HealthbarMode" then return end
-  
-  local healthbar = tp_frame.visual.Healthbar
-  if Addon.ExpansionIsAtLeastMidnight then
-    healthbar:GetStatusBarTexture():SetVertexColor(color.r, color.g, color.b)
-  else
-    healthbar:SetStatusBarColor(color.r, color.g, color.b, 1)
-  end
-  
-  if not SettingsHealthbar.BackgroundUseForegroundColor then
-    color = SettingsHealthbar.BackgroundColor
-  end
-  healthbar.Background:SetVertexColor(color.r, color.g, color.b, 1 - SettingsHealthbar.BackgroundOpacity)
-
-  -- For simplicity, border color is uneffected by marks, threat, etc.
-  local border_color
-  if tp_frame.stylename == "unique" then
-    local unique_setting = tp_frame.unit.CustomPlateSettings
-    border_color = (unique_setting and unique_setting.UseBorderColor and unique_setting.BorderColor) or COLOR_BLACK
-  elseif SettingsHealthbar.BorderUseForegroundColor then
-    border_color = color
-  else
-    border_color = SettingsHealthbar.BorderColor
-  end 
-  -- 100% color values are not saved in the database
-  healthbar.Border:SetBackdropBorderColor(border_color.r or 1, border_color.g or 1, border_color.b or 1, 1)
-end
-
 function Element.UpdateSettings()
   Settings = Addon.db.profile.settings.healthbar
   SettingsHealthbar = Addon.db.profile.Healthbar
-
-  local db = Addon.db.profile.settings.healthborder
-  BorderBackdrop.edgeFile = (db.show and Addon.PATH_ARTWORK .. db.texture) or nil
-  BorderBackdrop.edgeSize = db.EdgeSize
-  BorderBackdrop.insets.left = db.Offset
-  BorderBackdrop.insets.right = db.Offset
-  BorderBackdrop.insets.top = db.Offset
-  BorderBackdrop.insets.bottom = db.Offset
 
   SettingsTargetUnit = Settings.TargetUnit
   SettingsTargetUnitHide = not SettingsTargetUnit.Show

@@ -1,5 +1,10 @@
 
 ------------------------------------------------------
+13.0.27 (2026-07-04)
+------------------------------------------------------
+* Fixed a bug where the healthbar border did not reappear after being disabled and re-enabled, without needing a UI reload.
+
+------------------------------------------------------
 13.0.25 (2026-07-03)
 ------------------------------------------------------
 * Fixed settings migration bugs that could silently reset some Aura and Threat display options after updating.
