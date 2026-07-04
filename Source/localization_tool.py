@@ -160,26 +160,42 @@ def cmd_extract(args):
 # check
 # ---------------------------------------------------------------------------
 
-def parse_locale_keys(locale_path):
-    """Every L["key"] = ... assignment target in a Locales/<locale>.lua file.
+def parse_locale_entries(locale_path):
+    """Every L["key"] = ... assignment in a Locales/<locale>.lua file, as a
+    key -> value dict (value is None for a non-string RHS, e.g. a variable).
     Works for any locale, not just enUS - the AceLocale file format is the same."""
-    keys = set()
+    entries = {}
     tree = parse_lua_file(locale_path)
     for node in ast.walk(tree):
         if not isinstance(node, ast.Assign):
             continue
-        for target in node.targets:
-            if isinstance(target, ast.Index) and getattr(target.value, "id", None) == "L":
-                if isinstance(target.idx, ast.String):
-                    keys.add(_decode(target.idx.s))
-    return keys
+        for target, value in zip(node.targets, node.values):
+            if not (isinstance(target, ast.Index) and getattr(target.value, "id", None) == "L"):
+                continue
+            if not isinstance(target.idx, ast.String):
+                continue
+            key = _decode(target.idx.s)
+            entries[key] = _decode(value.s) if isinstance(value, ast.String) else None
+    return entries
+
+
+def parse_locale_keys(locale_path):
+    """Every L["key"] assignment target in a Locales/<locale>.lua file, regardless
+    of translation status - see parse_locale_entries() to also get the value."""
+    return set(parse_locale_entries(locale_path))
 
 
 def locale_translation_stats(root, enus_keys):
     """Per active (non-enUS, non-commented-out in Locales.xml) locale: how many of the
-    current enUS keys have a translated entry. Denominator is always len(enus_keys) - a
-    locale file can contain stale entries for keys no longer in enUS, which must not
-    inflate its completion percentage."""
+    current enUS keys have an actual translated entry. Denominator is always
+    len(enus_keys) - a locale file can contain stale entries for keys no longer in
+    enUS, which must not inflate its completion percentage.
+
+    An entry whose value is identical to its key is CurseForge's
+    `--[[Translation missing --]]` placeholder (English fallback, comment stripped
+    by the AST parser) rather than a real translation, and must not count as
+    translated - otherwise every locale always reports ~100%, since CurseForge
+    fills in every key regardless of whether it's actually translated."""
     locales_xml = os.path.join(root, "Locales", "Locales.xml")
     if not os.path.exists(locales_xml):
         return []
@@ -187,8 +203,9 @@ def locale_translation_stats(root, enus_keys):
     stats = []
     for locale in locales:
         locale_path = os.path.join(root, "Locales", f"{locale}.lua")
-        locale_keys = parse_locale_keys(locale_path)
-        translated = len(enus_keys & locale_keys)
+        entries = parse_locale_entries(locale_path)
+        translated_keys = {k for k, v in entries.items() if v is not None and v != k}
+        translated = len(enus_keys & translated_keys)
         total = len(enus_keys)
         missing = total - translated
         pct = (translated / total * 100) if total else 100.0
