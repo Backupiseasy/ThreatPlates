@@ -291,6 +291,16 @@ function TidyPlatesThreat:OnInitialize()
   local db = LibStub('AceDB-3.0'):New('ThreatPlatesDB', defaults, 'Default')
   Addon.db = db
 
+  -- Register the database with LibDualSpec right away, so automatic spec-based profile
+  -- switching works immediately after login/reload, instead of only once the options window
+  -- has been opened (which lazily calls EnhanceOptions on this same lib, see Options.lua) [GH-685].
+  Addon.LibDualSpec = LibStub:GetLibrary("LibDualSpec-1.0", true)
+  if Addon.LibDualSpec then
+    Addon.LibDualSpec:EnhanceDatabase(db, Addon.ADDON_NAME)
+  else
+    Addon.Logging.Error("LibDualSpec-1.0 cannot be loaded, dual-spec support will not be available.")
+  end
+
   Addon.LibAceConfigDialog = LibStub("AceConfigDialog-3.0")
   Addon.LibAceConfigRegistry = LibStub("AceConfigRegistry-3.0")
   Addon.LibSharedMedia = LibStub("LibSharedMedia-3.0")

@@ -11477,13 +11477,9 @@ local function CreateOptionsTable()
   options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(Addon.db)
   options.args.profiles.order = 10000
 
-  -- Add dual-spec support, no also available in Classic
-  local LibDualSpec = LibStub:GetLibrary("LibDualSpec-1.0", true)
-  if LibDualSpec then
-    LibDualSpec:EnhanceDatabase(Addon.db, Addon.ADDON_NAME)
-    LibDualSpec:EnhanceOptions(options.args.profiles, Addon.db)
-  else
-    Addon.Logging.Error("LibDualSpec-1.0 cannot be loaded, dual-spec support will not be available.")
+  -- LibDualSpec is loaded and EnhanceDatabase is called for Addon.db in Addon:OnInitialize(), see Addon.lua.
+  if Addon.LibDualSpec then
+    Addon.LibDualSpec:EnhanceOptions(options.args.profiles, Addon.db)
   end
   
   AddImportExportOptions(options.args.profiles)
