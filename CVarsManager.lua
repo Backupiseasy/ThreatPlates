@@ -31,8 +31,8 @@ local COMBAT_PROTECTED = {
   nameplateMaxAlpha = true,
   nameplateMaxDistance = true,
   nameplateMinAlpha = true,
-  nameplateMotion = true,
-  nameplateMotionSpeed = true,
+  nameplateMotion = true,      -- Removed in Midnight
+  nameplateMotionSpeed = true, -- Removed in Midnight
   nameplateOccludedAlphaMult = true,
   nameplateOtherBottomInset = true,
   nameplateOtherTopInset = true,
@@ -252,11 +252,13 @@ function CVars:CVarExists(cvar)
 end
 
 local RESET_TO_DEFAULT = {
-  "nameplateMotion", "nameplateMotionSpeed", "nameplateOverlapH", "nameplateOverlapV",
+  "nameplateOverlapH", "nameplateOverlapV",
   "nameplateMaxDistance", "nameplateTargetBehindMaxDistance",
-  "nameplateShowOnlyNames", 
+  "nameplateShowOnlyNames",
   "clampTargetNameplateToScreen",
   "nameplateResourceOnTarget",
+  (not Addon.ExpansionIsAtLeastMidnight and "nameplateMotion") or nil, -- Removed in Midnight
+  (not Addon.ExpansionIsAtLeastMidnight and "nameplateMotionSpeed") or nil, -- Removed in Midnight
   (not Addon.ExpansionIsAtLeastMidnight and "nameplateLargeTopInset") or nil, -- Removed in Midnight
   (not Addon.ExpansionIsAtLeastMidnight and "nameplateLargeBottomInset") or nil, -- Removed in Midnight
   (not Addon.ExpansionIsAtLeastMidnight and "nameplateOtherTopInset") or nil, -- Removed in Midnight
