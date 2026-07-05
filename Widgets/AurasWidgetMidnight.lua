@@ -21,7 +21,6 @@ local tonumber = tonumber
 -- WoW APIs
 local BUFF_MAX_DISPLAY = BUFF_MAX_DISPLAY
 local GetFramerate = GetFramerate
-local UnitIsUnit = UnitIsUnit
 local GetAuraSlots = C_UnitAuras and C_UnitAuras.GetAuraSlots
 local GetAuraDataBySlot, GetAuraDataByAuraInstanceID = C_UnitAuras and C_UnitAuras.GetAuraDataBySlot, C_UnitAuras and C_UnitAuras.GetAuraDataByAuraInstanceID
 local IsAuraFilteredOutByInstanceID, GetAuraDuration = C_UnitAuras.IsAuraFilteredOutByInstanceID, C_UnitAuras.GetAuraDuration
@@ -40,6 +39,7 @@ local CUSTOM_GLOW_FUNCTIONS, CUSTOM_GLOW_WRAPPER_FUNCTIONS = Addon.CUSTOM_GLOW_F
 local BackdropTemplate = Addon.BackdropTemplate
 local MODE_FOR_STYLE, AnchorFrameTo = Addon.MODE_FOR_STYLE, Addon.AnchorFrameTo
 local IsSecretValueTP, EvaluateColorValueFromBoolean = Addon.IsSecretValue, Addon.EvaluateColorValueFromBoolean
+local UnitIsUnitTP = Addon.UnitIsUnit
 local AbbreviateNumbers = AbbreviateNumbers
 
 local _G =_G
@@ -468,7 +468,7 @@ end
 
 local function IgnoreAuraUpdateForUnit(widget_frame, unit)
   -- ! "Target Only" only supports the direct target, not action targets
-  local unit_is_target = UnitIsUnit("target", unit.unitid)
+  local unit_is_target = UnitIsUnitTP("target", unit.unitid)
   if Widget.db.ShowTargetOnly then
     if unit_is_target then
       Widget.CurrentTarget = widget_frame

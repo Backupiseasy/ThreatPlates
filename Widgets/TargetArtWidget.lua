@@ -15,7 +15,7 @@ local abs, max, min = abs, max, min
 
 -- WoW APIs
 local SetUnitCursorTexture, PixelUtil_SetPoint = SetUnitCursorTexture, PixelUtil.SetPoint
-local UnitIsUnit = UnitIsUnit
+local UnitIsUnitTP = Addon.UnitIsUnit
 
 -- ThreatPlates APIs
 local BackdropTemplate = Addon.BackdropTemplate
@@ -285,7 +285,7 @@ local function PlayerTargetChanged(target_unitid)
   
   -- ! Don't overwrite the target with a style if it's becoming a action target as well
   local tp_frame = Addon:GetThreatPlateForUnit(target_unitid)
-  if tp_frame and (not UnitIsUnit("target", tp_frame.unit.unitid) or target_unitid == "target") then
+  if tp_frame and (not UnitIsUnitTP("target", tp_frame.unit.unitid) or target_unitid == "target") then
     local unit = tp_frame.unit
     if Widget:EnabledForStyle(unit.style, unit) then
       widget_frame:SetParent(tp_frame)

@@ -14,7 +14,8 @@ local tostring = tostring
 local string_format = string.format
 
 -- WoW APIs
-local UnitIsUnit, UnitName, UnitExists = UnitIsUnit, UnitName, UnitExists
+local UnitName, UnitExists = UnitName, UnitExists
+local UnitIsUnitTP = Addon.UnitIsUnit
 local GetRaidTargetIndex = GetRaidTargetIndex
 local IsInGroup, IsInRaid, GetNumGroupMembers, GetNumSubgroupMembers = IsInGroup, IsInRaid, GetNumGroupMembers, GetNumSubgroupMembers
 
@@ -165,7 +166,7 @@ local function GetTopThreatUnitBesidesPlayer(unitid, threat_value_func)
    
     -- Only compare player's threat values to other group memebers, not to the player itself (in raid with GetNumGroupMembers)
     local _, group_unit_threat_value
-    if not UnitIsUnit("player", group_unit_id) then
+    if not UnitIsUnitTP("player", group_unit_id) then
       _, _, group_unit_threat_value = threat_value_func(group_unit_id, unitid)
       if group_unit_threat_value and group_unit_threat_value > top_threat_value then
         top_threat_value = group_unit_threat_value

@@ -10,7 +10,7 @@ local ipairs, type, insert = ipairs, type, table.insert
 local string, floor = string, floor
 
 -- WoW APIs
-local UnitIsUnit, UnitClass, UnitExists = UnitIsUnit, UnitClass, UnitExists
+local UnitClass, UnitExists = UnitClass, UnitExists
 
 -- ThreatPlates APIs
 local UnitDetailedThreatSituation = UnitDetailedThreatSituation

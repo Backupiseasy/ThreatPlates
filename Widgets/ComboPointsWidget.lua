@@ -19,7 +19,8 @@ local tostring, string_format = tostring, string.format
 
 -- WoW APIs
 local GetTime, tContains = GetTime, tContains
-local UnitCanAttack, UnitIsUnit = UnitCanAttack, UnitIsUnit
+local UnitCanAttack = UnitCanAttack
+local UnitIsUnitTP = Addon.UnitIsUnit
 local UnitPower, UnitPowerMax, GetComboPoints, GetRuneCooldown, GetRuneType = UnitPower, UnitPowerMax, GetComboPoints, GetRuneCooldown, GetRuneType
 local GetUnitChargedPowerPoints, GetPowerRegenForPowerType = GetUnitChargedPowerPoints, GetPowerRegenForPowerType
 local IsSpellUsable = C_Spell and C_Spell.IsSpellUsable
@@ -1082,7 +1083,7 @@ end
   --   - the unit is the current soft-enemy target and the current target cannot be attacked
 function Widget:OnTargetUnitAdded(tp_frame, unit)
   local target_unitid = GetCurrentTargetUnitID()
-  if target_unitid and UnitIsUnit(target_unitid, unit.unitid) then 
+  if target_unitid and UnitIsUnitTP(target_unitid, unit.unitid) then 
     PlayerTargetChanged(tp_frame, unit)
   end
 end

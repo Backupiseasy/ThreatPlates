@@ -13,7 +13,7 @@ local string_format = string.format
 -- WoW APIs
 local CreateFrame = CreateFrame
 local GetSpellTexture = C_Spell and C_Spell.GetSpellTexture or _G.GetSpellTexture -- Retail now uses C_Spell.GetSpellTexture
-local UnitIsUnit = UnitIsUnit
+local UnitIsUnitTP = Addon.UnitIsUnit
 local GetTimePreciseSec = GetTimePreciseSec
 
 -- ThreatPlates APIs
@@ -252,7 +252,7 @@ function Element.UpdateStyle(tp_frame, style)
   local db = Addon.db.profile.settings.castbar
 
   local target_offset_x, target_offset_y = 0, 0
-  if UnitIsUnit("target", unit.unitid) then
+  if UnitIsUnitTP("target", unit.unitid) then
     target_offset_x = db.x_target
     target_offset_y = db.y_target
   end
