@@ -14,11 +14,10 @@ local string_format = string.format
 local CreateFrame = CreateFrame
 local GetSpellTexture = C_Spell and C_Spell.GetSpellTexture or _G.GetSpellTexture -- Retail now uses C_Spell.GetSpellTexture
 local UnitIsUnitTP = Addon.UnitIsUnit
-local GetTimePreciseSec = GetTimePreciseSec
 
 -- ThreatPlates APIs
 local FontSetJustify, FontUpdateText, FontUpdateTextSize = Addon.Font.SetJustify, Addon.Font.UpdateText, Addon.Font.UpdateTextSize
-local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
+local SubscribeEvent = Addon.EventService.Subscribe
 local BackdropTemplate = Addon.BackdropTemplate
 local L = Addon.L
 local EvaluateColorValueFromBoolean = Addon.EvaluateColorValueFromBoolean

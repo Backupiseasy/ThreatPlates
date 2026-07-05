@@ -10,7 +10,6 @@ local Widget = Addon.Widgets:NewTargetWidget("Resource")
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local format = format
 local ceil = ceil
 
 -- WoW APIs

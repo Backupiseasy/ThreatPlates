@@ -14,11 +14,10 @@ local CreateFrame = CreateFrame
 
 -- ThreatPlates APIs
 local RGB = Addon.RGB
-local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
+local SubscribeEvent = Addon.EventService.Subscribe
 local GetThreatColor = Addon.Color.GetThreatColor
 local BackdropTemplate = Addon.BackdropTemplate
 
-local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
 -- List them here for Mikk's FindGlobals script
 -- GLOBALS: UnitAffectingCombat

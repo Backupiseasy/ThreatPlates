@@ -30,12 +30,10 @@ local DebuffTypeColor = DebuffTypeColor or {
   Curse   = { r = 0.60, g = 0.00, b = 1.00 },
 }
 local UnitIsUnit = UnitIsUnit
-local UnitAura = UnitAura
 local GetAuraSlots = C_UnitAuras and C_UnitAuras.GetAuraSlots
 local GetAuraDataBySlot, GetAuraDataByAuraInstanceID = C_UnitAuras and C_UnitAuras.GetAuraDataBySlot, C_UnitAuras and C_UnitAuras.GetAuraDataByAuraInstanceID
 
 -- ThreatPlates APIs
-local TidyPlatesThreat = TidyPlatesThreat
 local AnimationStopFlash, AnimationFlash = Addon.Animation.StopFlash, Addon.Animation.Flash
 local FontUpdateText = Addon.Font.UpdateText
 local AuraTriggerInitialize, AuraTriggerUpdateStyle, AuraTriggerCheckIfActive = Addon.Style.AuraTriggerInitialize, Addon.Style.AuraTriggerUpdateStyle, Addon.Style.AuraTriggerCheckIfActive
@@ -188,11 +186,9 @@ local CROWD_CONTROL_SPELLS_BY_EXPANSION = {
     [279303] = PC_SNARE,            -- Frost Breath from Frostwyrm's Fury
     --[211793] = PC_SNARE,            -- Remorseless Winter - not shown because uptime to high
     [200646] = PC_SNARE,            -- Unholy Mutation
-    [204206] = PC_SNARE,            -- Chilled from Chill Streak
     [444005] = PC_SNARE,            -- Chains of Ice from Rider's Champion
     [208278] = PC_SNARE,            -- Debilitating Infestation
     [143375] = PC_SNARE,            -- Tightening Grasp from Gorefiend's Grasp
-    [208278] = CC_SILENCE,          -- Tightening Grasp from Gorefiend's Grasp
     [207171] = PC_ROOT,             -- Winter is Coming from Remorseless Winter
     [287254] = LOC_STUN,            -- Dead of Winter from Remorseless Winter
     -- TWW
@@ -231,7 +227,7 @@ local CROWD_CONTROL_SPELLS_BY_EXPANSION = {
     [360806] = LOC_SLEEP,           -- Sleep Walk
     [383005] = LOC_CHARM,           -- Chrono Loop
     [378441] = LOC_STUN,            -- Time Stop
-    [378441] = PC_SNARE,            -- Disintegrate
+    --[] = PC_SNARE,            -- Disintegrate
 
     ---------------------------------------------------------------------------------------------------
     -- Hunter
@@ -275,8 +271,6 @@ local CROWD_CONTROL_SPELLS_BY_EXPANSION = {
     [160065] = PC_SNARE,          -- Tendon Rip (Pet)
     [1513] = LOC_FEAR,            -- Scare Beast (Pet)
     [459690] = LOC_STUN,          -- Spearhead (Pet)
-    -- TWW
-    [459690] = LOC_STUN,          -- Spearhead
 
     ---------------------------------------------------------------------------------------------------
     -- Mage
@@ -440,7 +434,6 @@ local CROWD_CONTROL_SPELLS_BY_EXPANSION = {
     [710] = LOC_BANISH,         -- Banish (Blizzard)
     [30283] = LOC_STUN,         -- Shadowfury (Blizzard)
     -- [19647] = LOC_STUN,         -- Spell Lock aura from Call Felhunter
-    [1098] = LOC_CHARM,         -- Enslave Demon
     [6358] = LOC_SLEEP,         -- Seduction from Command Demon (Blizzard)
     [261589] = LOC_SLEEP,       -- Seduction from Command Demon (Blizzard)
     [278350] = PC_SNARE,        -- Vile Taint
@@ -642,7 +635,6 @@ local CROWD_CONTROL_SPELLS_BY_EXPANSION = {
     [710] = LOC_BANISH,         -- Banish (Blizzard)
     [30283] = LOC_STUN,         -- Shadowfury (Blizzard)
     -- [19647] = LOC_STUN,         -- Spell Lock aura from Call Felhunter
-    [1098] = LOC_CHARM,         -- Enslave Demon
     [6358] = LOC_DISORIENT,     -- Seduction from Command Demon (Apply Aura: Stun) (Blizzard)
     [5484] = LOC_FEAR,          -- Howl of Terror
     [22703] = LOC_STUN,         -- Infernal Awakening
@@ -1328,7 +1320,7 @@ local CROWD_CONTROL_SPELLS_BY_EXPANSION = {
       [17925] = LOC_FEAR,                      -- Rank 2
       [17926] = LOC_FEAR,                      -- Rank 3
       [27223] = LOC_FEAR,                      -- Rank 4
-    [1098] = LOC_CHARM,                      -- Enslave Demon
+    [1098] = LOC_CHARM,                      -- Subjugate Demon
       [11725] = LOC_CHARM,                     -- Rank 2
       [11726] = LOC_CHARM,                     -- Rank 3
     [5782] = LOC_FEAR,                       -- Fear
@@ -1554,7 +1546,7 @@ local CROWD_CONTROL_SPELLS_BY_EXPANSION = {
     [6789] = LOC_FEAR,                       -- Death Coil
       [17925] = LOC_FEAR,                      -- Rank 2
       [17926] = LOC_FEAR,                      -- Rank 3
-    [1098] = LOC_CHARM,                      -- Enslave Demon
+    [1098] = LOC_CHARM,                      -- Subjugate Demon
       [11725] = LOC_CHARM,                     -- Rank 2
       [11726] = LOC_CHARM,                     -- Rank 3
     [5782] = LOC_FEAR,                       -- Fear

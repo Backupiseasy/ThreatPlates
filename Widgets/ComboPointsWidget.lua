@@ -32,6 +32,7 @@ local GetSpecialization = C_SpecializationInfo and C_SpecializationInfo.GetSpeci
 local RGB = Addon.RGB
 local FontUpdateText = Addon.Font.UpdateText
 local PlayerClass = Addon.PlayerClass
+local IsPlayerSpellTP = Addon.IsPlayerSpell
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -344,7 +345,7 @@ local function UpdateComboPointsFunctionForRogues()
 
   -- Check for spell Supercharge: 470398 -- added with 11.0.5
   -- Check for spell Echoing Reprimand: 323547
-  if IsPlayerSpell(470347) or IsSpellUsable(323547) then
+  if IsPlayerSpellTP(470347) or IsSpellUsable(323547) then
     Widget.UpdateUnitResource = Widget.UpdateComboPointsRogueWithAnimacharge
 
     TEXTURE_INFO.Script["ComboPoint.Charged.On"]  = Addon:GetIconTexture("ComboPoint.Charged.On")

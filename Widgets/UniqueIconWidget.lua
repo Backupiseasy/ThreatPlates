@@ -11,7 +11,6 @@ local Widget = Addon.Widgets:NewWidget("UniqueIcon")
 
 -- Lua APIs
 local type = type
-local pairs = pairs
 
 -- WoW APIs
 local SetStyle = Addon.Style.SetStyle

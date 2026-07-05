@@ -12,7 +12,7 @@ local ADDON_NAME, Addon = ...
 -- ThreatPlates APIs
 local UnitIsUnitTP = Addon.UnitIsUnit
 local BackdropTemplate = Addon.BackdropTemplate
-local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
+local SubscribeEvent = Addon.EventService.Subscribe
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded

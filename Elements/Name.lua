@@ -14,7 +14,7 @@ local string_sub  = Addon.LibUTF8.utf8sub
 -- WoW APIs
 
 -- ThreatPlates APIs
-local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
+local SubscribeEvent = Addon.EventService.Subscribe
 local FontUpdateText = Addon.Font.UpdateText
 local TransliterateCyrillicLetters = Addon.Localization.TransliterateCyrillicLetters
 local SplitByWhitespace = Addon.SplitByWhitespace

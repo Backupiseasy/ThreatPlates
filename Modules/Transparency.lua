@@ -16,7 +16,7 @@ local UnitExists = UnitExists
 local Style = Addon.Style
 local AnimationFadePlate, AnimationStopFade = Addon.Animation.FadePlate, Addon.Animation.StopFade
 local CVars = Addon.CVars
-local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
+local SubscribeEvent = Addon.EventService.Subscribe
 local MathClamp = Addon.Clamp
 
 ---------------------------------------------------------------------------------------------------

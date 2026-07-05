@@ -8,7 +8,7 @@ local ADDON_NAME, Addon = ...
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local strsplit, pairs = strsplit, pairs
+local strsplit = strsplit
 
 -- WoW APIs
 local UnitIsPlayer, UnitPlayerControlled = UnitIsPlayer, UnitPlayerControlled

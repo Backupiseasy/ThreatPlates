@@ -32,13 +32,14 @@ local Widget = Addon.Widgets:NewWidget("HealerTracker")
 local IsInInstance, InCombatLockdown = IsInInstance, InCombatLockdown
 local UnitIsPVP, UnitIsPVPSanctuary = UnitIsPVP, UnitIsPVPSanctuary
 local GetUnitName = GetUnitName
-local RequestBattlefieldScoreData, GetNumBattlefieldScores, GetBattlefieldScore = RequestBattlefieldScoreData, GetNumBattlefieldScores, GetBattlefieldScore
-local CombatLogGetCurrentEventInfo = CombatLogGetCurrentEventInfo
+local RequestBattlefieldScoreData, GetNumBattlefieldScores = RequestBattlefieldScoreData, GetNumBattlefieldScores
 local GetArenaOpponentSpec = GetArenaOpponentSpec
 local C_Timer_After = C_Timer.After
 
 -- ThreatPlates APIs
 local PlatesByGUID = Addon.PlatesByGUID
+local GetBattlefieldScoreTP = Addon.GetBattlefieldScore
+local CombatLogGetCurrentEventInfoTP = Addon.CombatLogGetCurrentEventInfo
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -505,7 +506,7 @@ end
 function Widget:UPDATE_BATTLEFIELD_SCORE()
   --look at the scoreboard and assign healers from there
   for i = 1, GetNumBattlefieldScores() do
-    local name, _, _, _, _, _, _, _, _, _, _, _, _, _, _, talentSpec = GetBattlefieldScore(i)
+    local name, talentSpec = GetBattlefieldScoreTP(i)
     if UnitIsHealer[name] == nil then
       local is_healer_spec = HEALER_SPECS[talentSpec]
       UnitIsHealer[name] = (is_healer_spec and "HEALER") or "DPS"
@@ -527,7 +528,7 @@ end
 --   sanctuaries
 --   when leaving combat with a delay of 5 min
 function Widget:COMBAT_LOG_EVENT_UNFILTERED(...)
-  local _, combatevent, _, sourceGUID, _, _, _, _, _, _, _, spellid = CombatLogGetCurrentEventInfo()
+  local _, combatevent, _, sourceGUID, _, _, _, _, _, _, _, spellid = CombatLogGetCurrentEventInfoTP()
   if sourceGUID and SPELL_EVENTS[combatevent] and not UnitIsHealer[sourceGUID] and HEALER_SPELLS[spellid] then
     UnitIsHealer[sourceGUID] = "HEALER"
 

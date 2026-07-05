@@ -13,21 +13,7 @@ local ADDON_NAME, Addon = ...
 local SetRaidTargetIconTexture = SetRaidTargetIconTexture
 
 -- ThreatPlates APIs
-local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
-
--- Raid Icon Reference
-local RAID_ICON_COORDINATE = {
-  ["STAR"] = { x = 0, y =0 },
-  ["CIRCLE"] = { x = 0.25, y = 0 },
-  ["DIAMOND"] = { x = 0.5, y = 0 },
-  ["TRIANGLE"] = { x = 0.75, y = 0},
-  ["MOON"] = { x = 0, y = 0.25},
-  ["SQUARE"] = { x = .25, y = 0.25},
-  ["CROSS"] = { x = .5, y = 0.25},
-  ["SKULL"] = { x = .75, y = 0.25},
-  ["GREEN_FLAG"] = { x = 0.5, y = 0.75 },
-  ["MURLOC"] = { x = 0.75, y = 0.75 },
-}
+local SubscribeEvent = Addon.EventService.Subscribe
 
 ---------------------------------------------------------------------------------------------------
 -- Local variables

@@ -202,21 +202,6 @@ local function ChatCommandDebug(cmd_list)
 		Addon.Logging.Debug("  WOW_FEATURE_ABSORBS:", Addon.WOW_FEATURE_ABSORBS)
 		Addon.Logging.Debug("  WOW_FEATURE_BLIZZARD_AURA_FILTER:", Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER)
 		Addon.Logging.Debug("  NAMEPLATE_MAX_DISTANCE_MAX_VALUE:", Addon.NAMEPLATE_MAX_DISTANCE_MAX_VALUE[Addon.GetExpansionLevel()])
-	elseif command == "debug" then
-		local plate = C_NamePlate.GetNamePlateForUnit("target")
-		if not plate then return end
-
-		local tp_frame = plate.TPFrame
-		local unit = tp_frame.unit
-		local stylename = tp_frame.stylename
-		local nameplate_style = ((stylename == "NameOnly" or stylename == "NameOnly-Unique") and "NameMode") or "HealthbarMode"
-
-		print ("Unit Name:", unit.name)
-		print ("Unit Reaction:", unit.reaction)
-		print ("Frame Style:", stylename)
-		print ("Plate Style:", nameplate_style)
-		print ("Color Statusbar:", Addon.Debug:ColorToString(tp_frame.visual.Healthbar:GetStatusBarColor()))
-		print ("Color Border:", Addon.Debug:ColorToString(tp_frame.visual.Healthbar.Border:GetBackdropColor()))
 	elseif command == "version" then
 		--		local unique_unit = Addon.CopyTable(Addon.db.profile.uniqueSettings[1])
 		--		unique_unit.UseAutomaticIcon = nil

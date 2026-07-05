@@ -8,7 +8,7 @@ local ADDON_NAME, Addon = ...
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local pairs, next = pairs, next
+local pairs = pairs
 
 -- WoW APIs
 

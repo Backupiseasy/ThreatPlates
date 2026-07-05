@@ -9,16 +9,14 @@ local ADDON_NAME, Addon = ...
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local floor, select, unpack, type, min, pairs = floor, select, unpack, type, min, pairs
+local floor, type, pairs = floor, type, pairs
 
 -- WoW APIs
 local GetCVar = GetCVar
 
 -- ThreatPlates APIs
 local L = Addon.L
-local RGB = Addon.RGB
 
-local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
 -- List them here for Mikk's FindGlobals script
 -- GLOBALS:

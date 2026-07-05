@@ -21,7 +21,7 @@ local strbyte, strsub = strbyte, strsub
 -- ThreatPlates APIs
 local L = Addon.L
 local BackdropTemplate = Addon.BackdropTemplate
-local RGB, RGB_P, RGB_WITH_HEX = Addon.RGB, Addon.RGB_P, Addon.RGB_WITH_HEX
+local RGB, RGB_P = Addon.RGB, Addon.RGB_P
 local FontUpdateText = Addon.Font.UpdateText
 local MODE_FOR_STYLE, AnchorFrameTo = Addon.MODE_FOR_STYLE, Addon.AnchorFrameTo
 local CUSTOM_GLOW_FUNCTIONS, CUSTOM_GLOW_WRAPPER_FUNCTIONS = Addon.CUSTOM_GLOW_FUNCTIONS, Addon.CUSTOM_GLOW_WRAPPER_FUNCTIONS

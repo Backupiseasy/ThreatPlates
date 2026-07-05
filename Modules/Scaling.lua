@@ -13,12 +13,10 @@ local ADDON_NAME, Addon = ...
 local UnitExists = UnitExists
 
 -- ThreatPlates APIs
-local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
+local SubscribeEvent = Addon.EventService.Subscribe
 local Style = Addon.Style
-local TransparencyModule, ScalingModule = Addon.Transparency, Addon.Scaling
 local AnimationScalePlate, AnimationStopScale = Addon.Animation.ScalePlate, Addon.Animation.StopScale
 --local AnimationHidePlate = Addon.Animation.HidePlate
-local CVars = Addon.CVars
 local MathClamp = Addon.Clamp
 
 ---------------------------------------------------------------------------------------------------

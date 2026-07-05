@@ -8,7 +8,7 @@ local ADDON_NAME, Addon = ...
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local format, pairs = format, pairs
+local format = format
 
 -- WoW APIs
 local AbbreviateNumbers = AbbreviateNumbers

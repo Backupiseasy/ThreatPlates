@@ -18,10 +18,7 @@ local GetStatusBarWidgetVisualizationInfo = C_UIWidgetManager.GetStatusBarWidget
 local UnitPlayerControlled, UnitIsOwnerOrControllerOfUnit = UnitPlayerControlled, UnitIsOwnerOrControllerOfUnit
 
 -- ThreatPlates APIs
-local ANCHOR_POINT_TEXT = Addon.ANCHOR_POINT_TEXT
-local IGNORED_STYLES = Addon.IGNORED_STYLES
 
-local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
 -- List them here for Mikk's FindGlobals script
 -- GLOBALS:

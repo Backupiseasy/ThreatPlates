@@ -11,16 +11,15 @@ local ADDON_NAME, Addon = ...
 local abs, floor, ceil, pairs = abs, floor, ceil, pairs
 
 -- WoW APIs
-local UnitCanAttack, UnitIsPVP, UnitPlayerControlled = UnitCanAttack, UnitIsPVP, UnitPlayerControlled
+local UnitIsPVP, UnitPlayerControlled = UnitIsPVP, UnitPlayerControlled
 
 -- WoW Classic APIs:
 
 -- ThreatPlates APIs
-local SubscribeEvent, PublishEvent,  UnsubscribeEvent = Addon.EventService.Subscribe, Addon.EventService.Publish, Addon.EventService.Unsubscribe
+local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 local StyleModule = Addon.Style
 local RGB_P = Addon.RGB_P
 
-local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
 -- List them here for Mikk's FindGlobals script
 -- GLOBALS: UnitAffectingCombat
@@ -35,12 +34,11 @@ local ColorModule = Addon.Color
 ---------------------------------------------------------------------------------------------------
 
 local TRANSPARENT_COLOR = Addon.RGB(0, 0, 0, 0)
-local MIDNIGHT_HEALTH_COLOR_WRAPPER = Addon.RGB(1, 1, 1)
 
 ---------------------------------------------------------------------------------------------------
 -- Cached configuration settings (for performance reasons)
 ---------------------------------------------------------------------------------------------------
-local ColorByHealthIsEnabled = false
+--local ColorByHealthIsEnabled = false
 local SettingsBase, Settings, SettingsName
 local ColorByReaction, ColorByHealth
 local HealthbarColorFunctions = {}
@@ -53,10 +51,10 @@ local NameColorFunctions = {
   HealthbarMode = {},
   NameMode = {},
 }
-local NameModeSettings = {
-  HealthbarMode = {},
-  NameMode = {},
-}
+-- local NameModeSettings = {
+--   HealthbarMode = {},
+--   NameMode = {},
+-- }
 
 ---------------------------------------------------------------------------------------------------
 -- Color by health
@@ -594,7 +592,7 @@ function ColorModule.UpdateSettings()
   end
 
   SubscribeEvent(ColorModule, "ThreatUpdate", ThreatUpdate)
-  ColorByHealthIsEnabled = true
+  --ColorByHealthIsEnabled = true
   SubscribeEvent(ColorModule, "UNIT_HEALTH", UNIT_HEALTH)
   SubscribeEvent(ColorModule, "UNIT_HEALTH_FREQUENT", UNIT_HEALTH)
 

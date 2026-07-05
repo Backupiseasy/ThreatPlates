@@ -38,7 +38,6 @@ local WOW_EVENTS = {
   PLAYER_CONTROL_GAINED = true,
   PLAYER_CONTROL_LOST = true,
   PLAYER_ENTERING_WORLD = true,
-  RUNE_UPDATED = Addon.IS_CLASSIC_SOD, -- Only needed for Rogue rune detection in SoD Classic
   PLAYER_FLAGS_CHANGED = true,
   PLAYER_FOCUS_CHANGED = Addon.ExpansionIsAtLeastTBC,
   PLAYER_LOGIN = true,
@@ -232,4 +231,54 @@ function Addon.EvaluateColorValueFromBoolean(boolean, color_if_true, color_if_fa
   local b = EvaluateColorValueFromBoolean(boolean, color_if_true.b, color_if_false.b)
   local a = EvaluateColorValueFromBoolean(boolean, color_if_true.a, color_if_false.a)
   return CreateColor(r, g, b, a)
+end
+
+---------------------------------------------------------------------------------------------------
+-- Deprecated Blizzard API compatibility wrappers
+---------------------------------------------------------------------------------------------------
+-- These old globals are being replaced by namespaced C_* APIs, but the C_* replacements are not yet
+-- available on all currently supported clients (e.g. C_CombatLog/C_PvP are missing on Classic Era/
+-- Anniversary as of this writing). Fall back to the old global if the new API is not present.
+
+-- IsSpellKnown/IsPlayerSpell -> C_SpellBook: confirmed available on all currently supported clients,
+-- including Classic Era.
+if C_SpellBook then
+  local IsSpellInSpellBook = C_SpellBook.IsSpellInSpellBook
+  local IsSpellKnown = C_SpellBook.IsSpellKnown
+  -- Enum.SpellBookSpellBank ships together with C_SpellBook, so it is guaranteed to exist whenever C_SpellBook does.
+  local SPELLBOOK_BANK_PET = Enum.SpellBookSpellBank.Pet
+  local SPELLBOOK_BANK_PLAYER = Enum.SpellBookSpellBank.Player
+
+  function Addon.IsSpellKnown(spellID, isPet)
+    return IsSpellInSpellBook(spellID, isPet and SPELLBOOK_BANK_PET or SPELLBOOK_BANK_PLAYER, false)
+  end
+
+  function Addon.IsPlayerSpell(spellID)
+    return IsSpellKnown(spellID, SPELLBOOK_BANK_PLAYER)
+  end
+else
+  Addon.IsSpellKnown = IsSpellKnown
+  Addon.IsPlayerSpell = IsPlayerSpell
+end
+
+-- CombatLogGetCurrentEventInfo -> C_CombatLog.GetCurrentEventInfo: confirmed missing on Classic Era/Anniversary.
+Addon.CombatLogGetCurrentEventInfo = (C_CombatLog and C_CombatLog.GetCurrentEventInfo) or CombatLogGetCurrentEventInfo
+
+-- GetBattlefieldScore -> C_PvP.GetScoreInfo: confirmed missing on all Classic clients so far. Only name and
+-- talentSpec are used anywhere in this addon, so the wrapper returns just those two values instead of the
+-- full legacy 17-value tuple.
+if C_PvP and C_PvP.GetScoreInfo then
+  local GetScoreInfo = C_PvP.GetScoreInfo
+
+  function Addon.GetBattlefieldScore(playerIndex)
+    local scoreInfo = GetScoreInfo(playerIndex)
+    return scoreInfo and scoreInfo.name, scoreInfo and scoreInfo.talentSpec
+  end
+else
+  local GetBattlefieldScore = GetBattlefieldScore
+
+  function Addon.GetBattlefieldScore(playerIndex)
+    local name, _, _, _, _, _, _, _, _, _, _, _, _, _, _, talentSpec = GetBattlefieldScore(playerIndex)
+    return name, talentSpec
+  end
 end

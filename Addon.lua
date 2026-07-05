@@ -12,7 +12,7 @@ local max = math.max
 local select = select
 
 -- WoW APIs
-local GetCVar, IsAddOnLoaded = GetCVar, C_AddOns.IsAddOnLoaded
+local IsAddOnLoaded = C_AddOns.IsAddOnLoaded
 local C_NamePlate = C_NamePlate
 local C_Timer_After = C_Timer.After
 local UnitClass = UnitClass
@@ -29,7 +29,6 @@ local L = Addon.L
 local Meta = Addon.Meta
 local CVars = Addon.CVars
 
-local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
 -- List them here for Mikk's FindGlobals script
 -- GLOBALS:

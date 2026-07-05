@@ -13,34 +13,28 @@ local Widget = Addon.Widgets:NewWidget("Auras")
 
 -- Lua APIs
 local GetTime = GetTime
-local pairs, ipairs = pairs, ipairs
+local pairs = pairs
 local floor, ceil, min = floor, ceil, min
 local sort = sort
 local tonumber = tonumber
 
 -- WoW APIs
-local BUFF_MAX_DISPLAY = BUFF_MAX_DISPLAY
 local GetFramerate = GetFramerate
-local GetAuraSlots = C_UnitAuras and C_UnitAuras.GetAuraSlots
-local GetAuraDataBySlot, GetAuraDataByAuraInstanceID = C_UnitAuras and C_UnitAuras.GetAuraDataBySlot, C_UnitAuras and C_UnitAuras.GetAuraDataByAuraInstanceID
 local IsAuraFilteredOutByInstanceID, GetAuraDuration = C_UnitAuras.IsAuraFilteredOutByInstanceID, C_UnitAuras.GetAuraDuration
 local GetAuraApplicationDisplayCount = C_UnitAuras.GetAuraApplicationDisplayCount
 local GetAuraDispelTypeColor = C_UnitAuras.GetAuraDispelTypeColor
 local AuraBarInterpolation = Enum.StatusBarInterpolation and Enum.StatusBarInterpolation.Immediate
-local ElapsedTimeDirection = Enum.StatusBarTimerDirection and Enum.StatusBarTimerDirection.ElapsedTime
 local RemainingTimeDirection = Enum.StatusBarTimerDirection and Enum.StatusBarTimerDirection.RemainingTime
 
 -- ThreatPlates APIs
-local TidyPlatesThreat = TidyPlatesThreat
 local AnimationStopFlash, AnimationFlash = Addon.Animation.StopFlash, Addon.Animation.Flash
 local FontUpdateText = Addon.Font.UpdateText
-local AuraTriggerInitialize, AuraTriggerUpdateStyle, AuraTriggerCheckIfActive = Addon.Style.AuraTriggerInitialize, Addon.Style.AuraTriggerUpdateStyle, Addon.Style.AuraTriggerCheckIfActive
+local AuraTriggerInitialize, AuraTriggerUpdateStyle = Addon.Style.AuraTriggerInitialize, Addon.Style.AuraTriggerUpdateStyle
 local CUSTOM_GLOW_FUNCTIONS, CUSTOM_GLOW_WRAPPER_FUNCTIONS = Addon.CUSTOM_GLOW_FUNCTIONS, Addon.CUSTOM_GLOW_WRAPPER_FUNCTIONS
 local BackdropTemplate = Addon.BackdropTemplate
 local MODE_FOR_STYLE, AnchorFrameTo = Addon.MODE_FOR_STYLE, Addon.AnchorFrameTo
 local IsSecretValueTP, EvaluateColorValueFromBoolean = Addon.IsSecretValue, Addon.EvaluateColorValueFromBoolean
 local UnitIsUnitTP = Addon.UnitIsUnit
-local AbbreviateNumbers = AbbreviateNumbers
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded

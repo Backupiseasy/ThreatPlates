@@ -13,7 +13,6 @@ local ADDON_NAME, Addon = ...
 local CreateFrame = CreateFrame
 
 -- ThreatPlates APIs
-local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 local BackdropTemplate = Addon.BackdropTemplate
 
 local ELITE_BACKDROP = {

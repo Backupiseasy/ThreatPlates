@@ -34,7 +34,6 @@ local NameTriggers, AuraTriggers, CastTriggers = Addon.Cache.CustomPlateTriggers
 local NameWildcardTriggers, TriggerWildcardTests = Addon.Cache.CustomPlateTriggers.NameWildcard, Addon.Cache.TriggerWildcardTests
 local CustomStylesForAllInstances, CustomStylesForCurrentInstance = Addon.Cache.Styles.ForAllInstances, Addon.Cache.Styles.ForCurrentInstance
 
-local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
 -- List them here for Mikk's FindGlobals script
 -- GLOBALS: UnitIsTapDenied
@@ -61,15 +60,6 @@ local REACTION_MAPPING = {
   FRIENDLY = "Friendly",
   HOSTILE = "Enemy",
   NEUTRAL = "Neutral",
-}
-
-local INSTANCE_TYPES = {
-  none = false,
-  pvp = false,
-  arena = false,
-  party = true,
-  raid = true,
-  scenario = true,
 }
 
 -- Mapping necessary - to removed it, config settings must be changed/migrated

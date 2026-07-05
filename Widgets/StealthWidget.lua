@@ -12,7 +12,6 @@ local Widget = (Addon.IS_CLASSIC and {}) or Addon.Widgets:NewWidget("Stealth")
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local strsplit = strsplit
 
 -- WoW APIs
 

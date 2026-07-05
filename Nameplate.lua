@@ -7,7 +7,7 @@ local ADDON_NAME, Addon = ...
 -- Lua APIs
 local _
 local type, select, pairs, tostring  = type, select, pairs, tostring
-local max, gsub, tonumber, math_abs = math.max, string.gsub, tonumber, math.abs
+local gsub = string.gsub
 local next = next
 
 -- WoW APIs
@@ -17,13 +17,12 @@ local UnitExists, UnitName, UnitReaction, UnitClass, UnitPVPName = UnitExists, U
 local UnitEffectiveLevel = UnitEffectiveLevel
 local UnitChannelInfo, UnitPlayerControlled = UnitChannelInfo, UnitPlayerControlled
 local UnitSpellTargetName, UnitSpellTargetClass = UnitSpellTargetName, UnitSpellTargetClass
-local UnitIsUnit, UnitIsPlayer = UnitIsUnit, UnitIsPlayer
+local UnitIsPlayer = UnitIsPlayer
 local GetCreatureDifficultyColor, GetRaidTargetIndex = GetCreatureDifficultyColor, GetRaidTargetIndex
-local GetTime, CombatLogGetCurrentEventInfo = GetTime, CombatLogGetCurrentEventInfo
+local GetTime = GetTime
 local SetNamePlateSimplified = C_NamePlateManager and C_NamePlateManager.SetNamePlateSimplified
 local GetNamePlateForUnit = C_NamePlate and C_NamePlate.GetNamePlateForUnit
 local SetNamePlateFriendlyClickThrough, SetNamePlateEnemyClickThrough = C_NamePlate and C_NamePlate.SetNamePlateFriendlyClickThrough, C_NamePlate and C_NamePlate.SetNamePlateEnemyClickThrough
-local GetNamePlateFriendlySize, GetNamePlateEnemySize = C_NamePlate and C_NamePlate.GetNamePlateFriendlySize, C_NamePlate and C_NamePlate.GetNamePlateEnemySize
 local GetPlayerInfoByGUID, UnitNameFromGUID = GetPlayerInfoByGUID, UnitNameFromGUID
 local IsInInstance, InCombatLockdown = IsInInstance, InCombatLockdown
 local NamePlateDriverFrame, UnitNameplateShowsWidgetsOnly = NamePlateDriverFrame, UnitNameplateShowsWidgetsOnly
@@ -41,20 +40,22 @@ local L = Addon.L
 local Widgets = Addon.Widgets
 local CVars = Addon.CVars
 local RegisterEvent, UnregisterEvent = Addon.EventService.RegisterEvent, Addon.EventService.UnregisterEvent
-local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
+local PublishEvent = Addon.EventService.Publish
 local AnchorFrameTo = Addon.AnchorFrameTo
 local IsSecretValueTP = Addon.IsSecretValue
 local UnitIsUnitTP = Addon.UnitIsUnit
+local CombatLogGetCurrentEventInfoTP = Addon.CombatLogGetCurrentEventInfo
+local IsSpellKnownTP = Addon.IsSpellKnown
 local ExpansionIsAtLeastMidnight = Addon.ExpansionIsAtLeastMidnight
 
 local TransliterateCyrillicLetters = Addon.Localization.TransliterateCyrillicLetters
 local SetNamesFonts = Addon.Font.SetNamesFonts
-local StyleModule, ColorModule, ThreatModule = Addon.Style, Addon.Color, Addon.Threat
-local ScalingModule, TransparencyModule = Addon.Scaling, Addon.Transparency
+local StyleModule, ThreatModule = Addon.Style, Addon.Threat
+local TransparencyModule = Addon.Transparency
 
 local ElementsPlateCreated, ElementsPlateUnitAdded = Addon.Elements.PlateCreated, Addon.Elements.PlateUnitAdded
 -- local ElementsPlateUnitRemoved = Addon.Elements.PlateUnitRemoved
-local ElementsUpdateStyle, ElementsUpdateSettings = Addon.Elements.UpdateStyle, Addon.Elements.UpdateSettings
+local ElementsUpdateSettings = Addon.Elements.UpdateSettings
 local BackdropTemplate = Addon.BackdropTemplate
 
 local GetNameForNameplate
@@ -1966,7 +1967,7 @@ function Addon:UNIT_SPELLCAST_INTERRUPTED(unitid, cast_guid, spell_id, interrupt
 end
 
 function Addon:COMBAT_LOG_EVENT_UNFILTERED()
-  local timeStamp, event, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags = CombatLogGetCurrentEventInfo()
+  local timeStamp, event, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags = CombatLogGetCurrentEventInfoTP()
 
   if event == "SPELL_INTERRUPT" then
     local tp_frame = self:GetThreatPlateForGUID(destGUID)
@@ -2186,7 +2187,7 @@ else
   end
 
   function Addon:RUNE_UPDATED()
-    Addon.PlayerIsTank = IsSpellKnown(400014, false) -- Just a Flesh Wound (Season of Discovery)
+    Addon.PlayerIsTank = IsSpellKnownTP(400014, false) -- Just a Flesh Wound (Season of Discovery)
   end
 
   Addon.PLAYER_EQUIPMENT_CHANGED = Addon.RUNE_UPDATED
