@@ -1,7 +1,7 @@
 ## Interface: 120007
 ## Interface-Retail: 120007
 ## Interface-Vanilla: 11508
-## Interface-TBC: 20505
+## Interface-TBC: 20506
 ## Interface-Wrath: 30405
 ## Interface-Cata: 40402
 ## Interface-Mists: 50504
