@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+13.0.28 (2026-07-10)
+------------------------------------------------------
+* Fixed a bug where crowd control auras on TBC Classic and Mists Classic were always shown as normal debuffs instead of in the Crowd Control aura area [Comment #8537].
+
+------------------------------------------------------
 13.0.27 (2026-07-09)
 ------------------------------------------------------
 * Fixed a bug where the healthbar border did not reappear after being disabled and re-enabled, without needing a UI reload.

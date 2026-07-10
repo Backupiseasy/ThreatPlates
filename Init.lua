@@ -69,7 +69,11 @@ Addon.WOW_USES_CLASSIC_NAMEPLATES = Addon.ExpansionIsBetween(LE_EXPANSION_CLASSI
   and not Addon.IS_MISTS_CLASSIC and not Addon.IS_TBC_CLASSIC_ANNIVERSARY
 -- Absorbs bug in Mists: https://github.com/Stanzilla/WoWUIBugs/issues/736
 Addon.WOW_FEATURE_ABSORBS = Addon.ExpansionIsAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA)
-Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER =  not Addon.WOW_USES_CLASSIC_NAMEPLATES
+-- aura.nameplateShowAll/nameplateShowPersonal are a Legion+ feature - confirmed to
+-- always be false on both TBC Classic Anniversary and Mists Classic. So this must not be
+-- derived from WOW_USES_CLASSIC_NAMEPLATES (the nameplate API distinction), but from the actual expansion
+-- level instead.
+Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER = Addon.ExpansionIsAtLeast(LE_EXPANSION_LEGION)
 
 Addon.ExpansionIsAtLeastTBC = Addon.ExpansionIsAtLeast(LE_EXPANSION_BURNING_CRUSADE)
 Addon.ExpansionIsAtLeastWrath = Addon.ExpansionIsAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING)

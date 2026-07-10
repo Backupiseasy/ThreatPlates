@@ -225,6 +225,55 @@ local function ChatCommandDebug(cmd_list)
 		if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC and not Addon.IS_WRATH_CLASSIC then
 			print("    UnitSelectionType = ", UnitSelectionType("target"))
 		end
+	elseif command == "auras" then
+		-- Temporary diagnostic: dumps the same aura fields ProcessAllUnitAuras() in AurasWidget.lua reads,
+		-- to check whether nameplateShowAll/nameplateShowPersonal are actually populated by the client.
+		if not C_UnitAuras or not C_UnitAuras.GetAuraSlots then
+			print("C_UnitAuras.GetAuraSlots not available on this client.")
+			return
+		end
+
+		local unitid = "target"
+		print("Auras for", UnitName(unitid) or unitid, "- WOW_FEATURE_BLIZZARD_AURA_FILTER =", Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER)
+
+		for _, filter in ipairs({ "HARMFUL", "HELPFUL" }) do
+			print("--", filter, "--")
+			local continuation_token
+			repeat
+				local slots = { C_UnitAuras.GetAuraSlots(unitid, filter, 40, continuation_token) }
+				continuation_token = slots[1]
+
+				for i = 2, #slots do
+					local aura = C_UnitAuras.GetAuraDataBySlot(unitid, slots[i])
+					if aura then
+						print(string.format("  %s (spellId=%s)", tostring(aura.name), tostring(aura.spellId)))
+						print("    nameplateShowAll:", aura.nameplateShowAll)
+						print("    nameplateShowPersonal:", aura.nameplateShowPersonal)
+						print("    isBossAura:", aura.isBossAura, " isStealable:", aura.isStealable)
+						print("    sourceUnit:", aura.sourceUnit, " duration:", aura.duration)
+
+						-- Checks whether the modern aura filter tokens used in AurasWidgetMidnight.lua (PLAYER,
+						-- RAID, INCLUDE_NAME_PLATE_ONLY, EXTERNAL_DEFENSIVE, CROWD_CONTROL, RAID_IN_COMBAT,
+						-- RAID_PLAYER_DISPELLABLE, BIG_DEFENSIVE, IMPORTANT) are also usable on this client.
+						if C_UnitAuras.IsAuraFilteredOutByInstanceID then
+							for _, token in ipairs({
+								"PLAYER", "RAID", "INCLUDE_NAME_PLATE_ONLY", "EXTERNAL_DEFENSIVE", "CROWD_CONTROL",
+								"RAID_IN_COMBAT", "RAID_PLAYER_DISPELLABLE", "BIG_DEFENSIVE", "IMPORTANT",
+							}) do
+								local call_ok, is_filtered_out = pcall(C_UnitAuras.IsAuraFilteredOutByInstanceID, unitid, aura.auraInstanceID, filter .. "|" .. token)
+								if call_ok then
+									print("    " .. token .. ":", not is_filtered_out)
+								else
+									print("    " .. token .. " errored:", is_filtered_out)
+								end
+							end
+						else
+							print("    C_UnitAuras.IsAuraFilteredOutByInstanceID not available on this client.")
+						end
+					end
+				end
+			until continuation_token == nil
+		end
 	elseif command == "threat" then
     local plate = C_NamePlate.GetNamePlateForUnit("target")
     if not plate then return end
