@@ -1,5 +1,11 @@
+﻿------------------------------------------------------
+13.0.29 (2026-07-12)
 ------------------------------------------------------
-13.0.28 (2026-07-10)
+* Re-enabled absorb effects on WoW Midnight, caused by secret value restrictions [GH-689].
+* Fixed absorb and heal absorb display not working on Mists Classic despite the options being available
+
+------------------------------------------------------
+13.0.28 (2026-07-11)
 ------------------------------------------------------
 * Fixed a bug where crowd control auras on TBC Classic and Mists Classic were always shown as normal debuffs instead of in the Crowd Control aura area [Comment #8537].
 * Fixed a bug where the target highlight did not reappear after being disabled and re-enabled while a unit remained targeted.
@@ -124,6 +130,7 @@
 ------------------------------------------------------
 * Fixed a bug where the name of the target unit of a cast was not shown (a side-effect of the v13.0.19 bug fix)  [Comment #8286].
 * Fixed nameplates doubling in size after a reload or login when UI scale is not 100% and "Ignore UI Scale" is disabled [Comment #8240].
+* Implemented damage absorb shield display for WoW Midnight using UnitHealPredictionCalculator and StatusBar frames, replacing the previous Lua-arithmetic texture approach that was unsafe with secret values.
 
 ------------------------------------------------------
 13.0.10 (2026-04-23)

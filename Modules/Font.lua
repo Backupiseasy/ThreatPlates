@@ -86,12 +86,18 @@ end
 local function UpdateTextFont(font, db)
   font:SetFont(Addon.LibSharedMedia:Fetch('font', db.Typeface), db.Size, db.flags)
 
+  font:SetShadowOffset(0, 0)
+  font:SetShadowColor(1, 0, 0, 0)
+
   if db.Shadow then
     font:SetShadowOffset(1, -1)
     font:SetShadowColor(0, 0, 0, 1)
   else
     font:SetShadowColor(0, 0, 0, 0)
   end
+
+  font:SetShadowOffset(3, -3)
+  font:SetShadowColor(0, 0, 0, 1)
 
   if db.Color then
     font:SetTextColor(db.Color.r, db.Color.g, db.Color.b, db.Transparency or 1)

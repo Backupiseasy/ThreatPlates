@@ -7243,6 +7243,7 @@ local function CreateHealthbarOptions()
               },
             }
           },
+
         },
       },
       -- Layout = {
