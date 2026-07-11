@@ -408,8 +408,8 @@ function Addon:ConfigCastbar()
 
             self:SetMinMaxValues(0, 100)
             self:SetValue(50)
-            visual.SpellIcon:SetTexture(GetSpellTexture(252616))
-            visual.SpellText:SetText("Cosmic Beacon")
+            visual.SpellIcon:SetTexture(GetSpellTexture(11419))
+            visual.SpellText:SetText("Portal: Darnassus")
             self.CastTime:SetText(3.5)
             self.CastTarget:SetText("Temple Guard")
 
