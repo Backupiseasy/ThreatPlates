@@ -51,6 +51,11 @@ SLASH_TPTPTOGGLE1 = "/tptptoggle"
 SlashCmdList["TPTPTOGGLE"] = TPTPTOGGLE
 
 local function TPTPOVERLAP()
+	if Addon.ExpansionIsAtLeastMidnight then
+		Addon.Logging.Warning(L["Nameplate Overlapping toggle is not available on this client."])
+		return
+	end
+
 	if GetCVar("nameplateMotion") == "0" then
 		if InCombatLockdown() then
 			Addon.Logging.Warning(L["We're unable to change this while in combat"])
@@ -206,38 +211,38 @@ local function ChatCommandDebug(cmd_list)
 		--		local unique_unit = Addon.CopyTable(Addon.db.profile.uniqueSettings[1])
 		--		unique_unit.UseAutomaticIcon = nil
 		--		print (Addon.CheckTableStructure(TP.DEFAULT_SETTINGS.profile.uniqueSettings["**"], unique_unit))
-		print ("10.2.11 < 10.3.0:", Addon.CurrentVersionIsOlderThan("10.2.11", "10.3.0"))
-		print ("10.2.11 < 10.3.0-beta2:", Addon.CurrentVersionIsOlderThan("10.2.11", "10.3.0-beta2"))
-		print ("10.3.0-beta2 < 9.3.0:", Addon.CurrentVersionIsOlderThan("10.3.0-beta2", "10.3.0"))
-		print ("10.3.0-beta2 < 10.3.0-beta3:", Addon.CurrentVersionIsOlderThan("10.3.0-beta2", "10.3.0-beta3"))
+		Addon.Logging.Debug("10.2.11 < 10.3.0:", Addon.CurrentVersionIsOlderThan("10.2.11", "10.3.0"))
+		Addon.Logging.Debug("10.2.11 < 10.3.0-beta2:", Addon.CurrentVersionIsOlderThan("10.2.11", "10.3.0-beta2"))
+		Addon.Logging.Debug("10.3.0-beta2 < 9.3.0:", Addon.CurrentVersionIsOlderThan("10.3.0-beta2", "10.3.0"))
+		Addon.Logging.Debug("10.3.0-beta2 < 10.3.0-beta3:", Addon.CurrentVersionIsOlderThan("10.3.0-beta2", "10.3.0-beta3"))
 	elseif command == "reaction" then
     local plate = C_NamePlate.GetNamePlateForUnit("target")
     if not plate then return end
     local unit = plate.TPFrame.unit
 
-		print("Name:", unit.name)
-		print("  Reaction:", unit.reaction)
-		print("    UnitReaction:", Addon.GetUnitReactionToPlayer("target"))
-    print("    UnitCanAttack = ", UnitCanAttack("target", "player"))
-    print("    UnitIsFriend = ", UnitIsFriend("target", "player"))
-		print("    UnitSelectionColor = ", UnitSelectionColor("target"))
-		print("    UnitIsPVP = ", UnitIsPVP("target"))
+		Addon.Logging.Debug("Name:", unit.name)
+		Addon.Logging.Debug("  Reaction:", unit.reaction)
+		Addon.Logging.Debug("    UnitReaction:", Addon.GetUnitReactionToPlayer("target"))
+    Addon.Logging.Debug("    UnitCanAttack = ", UnitCanAttack("target", "player"))
+    Addon.Logging.Debug("    UnitIsFriend = ", UnitIsFriend("target", "player"))
+		Addon.Logging.Debug("    UnitSelectionColor = ", UnitSelectionColor("target"))
+		Addon.Logging.Debug("    UnitIsPVP = ", UnitIsPVP("target"))
 		if not Addon.IS_CLASSIC and not Addon.IS_TBC_CLASSIC and not Addon.IS_WRATH_CLASSIC then
-			print("    UnitSelectionType = ", UnitSelectionType("target"))
+			Addon.Logging.Debug("    UnitSelectionType = ", UnitSelectionType("target"))
 		end
 	elseif command == "auras" then
 		-- Temporary diagnostic: dumps the same aura fields ProcessAllUnitAuras() in AurasWidget.lua reads,
 		-- to check whether nameplateShowAll/nameplateShowPersonal are actually populated by the client.
 		if not C_UnitAuras or not C_UnitAuras.GetAuraSlots then
-			print("C_UnitAuras.GetAuraSlots not available on this client.")
+			Addon.Logging.Debug("C_UnitAuras.GetAuraSlots not available on this client.")
 			return
 		end
 
 		local unitid = "target"
-		print("Auras for", UnitName(unitid) or unitid, "- WOW_FEATURE_BLIZZARD_AURA_FILTER =", Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER)
+		Addon.Logging.Debug("Auras for", UnitName(unitid) or unitid, "- WOW_FEATURE_BLIZZARD_AURA_FILTER =", Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER)
 
 		for _, filter in ipairs({ "HARMFUL", "HELPFUL" }) do
-			print("--", filter, "--")
+			Addon.Logging.Debug("--", filter, "--")
 			local continuation_token
 			repeat
 				local slots = { C_UnitAuras.GetAuraSlots(unitid, filter, 40, continuation_token) }
@@ -246,11 +251,11 @@ local function ChatCommandDebug(cmd_list)
 				for i = 2, #slots do
 					local aura = C_UnitAuras.GetAuraDataBySlot(unitid, slots[i])
 					if aura then
-						print(string.format("  %s (spellId=%s)", tostring(aura.name), tostring(aura.spellId)))
-						print("    nameplateShowAll:", aura.nameplateShowAll)
-						print("    nameplateShowPersonal:", aura.nameplateShowPersonal)
-						print("    isBossAura:", aura.isBossAura, " isStealable:", aura.isStealable)
-						print("    sourceUnit:", aura.sourceUnit, " duration:", aura.duration)
+						Addon.Logging.Debug(string.format("  %s (spellId=%s)", tostring(aura.name), tostring(aura.spellId)))
+						Addon.Logging.Debug("    nameplateShowAll:", aura.nameplateShowAll)
+						Addon.Logging.Debug("    nameplateShowPersonal:", aura.nameplateShowPersonal)
+						Addon.Logging.Debug("    isBossAura:", aura.isBossAura, " isStealable:", aura.isStealable)
+						Addon.Logging.Debug("    sourceUnit:", aura.sourceUnit, " duration:", aura.duration)
 
 						-- Checks whether the modern aura filter tokens used in AurasWidgetMidnight.lua (PLAYER,
 						-- RAID, INCLUDE_NAME_PLATE_ONLY, EXTERNAL_DEFENSIVE, CROWD_CONTROL, RAID_IN_COMBAT,
@@ -262,13 +267,13 @@ local function ChatCommandDebug(cmd_list)
 							}) do
 								local call_ok, is_filtered_out = pcall(C_UnitAuras.IsAuraFilteredOutByInstanceID, unitid, aura.auraInstanceID, filter .. "|" .. token)
 								if call_ok then
-									print("    " .. token .. ":", not is_filtered_out)
+									Addon.Logging.Debug("    " .. token .. ":", not is_filtered_out)
 								else
-									print("    " .. token .. " errored:", is_filtered_out)
+									Addon.Logging.Debug("    " .. token .. " errored:", is_filtered_out)
 								end
 							end
 						else
-							print("    C_UnitAuras.IsAuraFilteredOutByInstanceID not available on this client.")
+							Addon.Logging.Debug("    C_UnitAuras.IsAuraFilteredOutByInstanceID not available on this client.")
 						end
 					end
 				end
@@ -293,10 +298,10 @@ local function ChatCommandDebug(cmd_list)
 	elseif command == "role" then
 		local spec_roles = Addon.db.char.spec
 		for i, is_tank in pairs(spec_roles) do
-			print (i, "=", is_tank)
+			Addon.Logging.Debug(i, "=", is_tank)
 		end
 
-		local spec_roles = self.db.char.spec
+		local spec_roles = Addon.db.char.spec
 		if #spec_roles + 1 ~= GetNumSpecializations() then
 			for i = 1, GetNumSpecializations() do
 				local is_tank = spec_roles[i]
@@ -304,9 +309,9 @@ local function ChatCommandDebug(cmd_list)
 					local id, spec_name, _, _, role = GetSpecializationInfo(i)
 					local role = (role == "TANK" and true) or false
 					spec_roles[i] = role
-					print ("Role", i, " => ", is_tank, " to ", role)
+					Addon.Logging.Debug("Role", i, " => ", is_tank, " to ", role)
 				else
-					print ("Role", i, " => ", is_tank)
+					Addon.Logging.Debug("Role", i, " => ", is_tank)
 				end
 			end
 		end
@@ -364,8 +369,8 @@ local function ChatCommandDebug(cmd_list)
     local plate = C_NamePlate.GetNamePlateForUnit("target", true)
     if not plate then return end
 
-		print("Addon.UnitIsTarget:", Addon.UnitIsTarget)
-		print("Addon.UnitIsUnit:", Addon.UnitIsUnit)
+		Addon.Logging.Debug("Addon.UnitIsTarget:", Addon.UnitIsTarget)
+		Addon.Logging.Debug("Addon.UnitIsUnit:", Addon.UnitIsUnit)
 	else
 		Addon.Logging.Error(L["Unknown option: "] .. command)
 		PrintHelp()
