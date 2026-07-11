@@ -505,9 +505,7 @@ function Widget:UpdateAllFramesAfterSettingsUpdate()
   -- in this since last Reload UI)
   for target_unitid, widget_frame in pairs(TargetHighlightFrames) do
     UpdateTargetHighlightFrame(widget_frame)
-    if widget_frame:GetParent() then
-      PlayerTargetChanged(target_unitid)
-    end
+    PlayerTargetChanged(target_unitid)
   end
 end
 
