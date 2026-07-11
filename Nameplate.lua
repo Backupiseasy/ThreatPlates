@@ -47,6 +47,7 @@ local UnitIsUnitTP = Addon.UnitIsUnit
 local CombatLogGetCurrentEventInfoTP = Addon.CombatLogGetCurrentEventInfo
 local IsSpellKnownTP = Addon.IsSpellKnown
 local ExpansionIsAtLeastMidnight = Addon.ExpansionIsAtLeastMidnight
+local WOW_USES_SHOW_FRIENDLY_PLAYERS_CVAR = Addon.WOW_USES_SHOW_FRIENDLY_PLAYERS_CVAR
 
 local TransliterateCyrillicLetters = Addon.Localization.TransliterateCyrillicLetters
 local SetNamesFonts = Addon.Font.SetNamesFonts
@@ -1341,12 +1342,44 @@ local PVP_INSTANCE_TYPES = {
   --scenario = false,
 }
 
+-- On WoW versions without the nameplateShowFriends catch-all CVar, friendly nameplate
+-- visibility is controlled via the split nameplateShowFriendlyPlayers/nameplateShowFriendlyNPCs CVars instead.
+local function SetFriendlyNameplatesShown(value)
+  if WOW_USES_SHOW_FRIENDLY_PLAYERS_CVAR then
+    CVars:Set("nameplateShowFriendlyPlayers", value)
+    CVars:Set("nameplateShowFriendlyNPCs", value)
+  else
+    CVars:Set("nameplateShowFriends", value)
+  end
+end
+
+local function RestoreFriendlyNameplatesShown()
+  if WOW_USES_SHOW_FRIENDLY_PLAYERS_CVAR then
+    CVars:RestoreFromProfile("nameplateShowFriendlyPlayers")
+    CVars:RestoreFromProfile("nameplateShowFriendlyNPCs")
+  else
+    CVars:RestoreFromProfile("nameplateShowFriends")
+  end
+end
+
+-- Same as SetFriendlyNameplatesShown, but sets the CVar(s) directly, bypassing the combat-protection queue in
+-- CVars:Set. Used exactly at the PLAYER_REGEN_ENABLED/DISABLED combat boundary, where the change is safe to
+-- apply immediately.
+local function RawSetFriendlyNameplatesShown(value)
+  if WOW_USES_SHOW_FRIENDLY_PLAYERS_CVAR then
+    _G.SetCVar("nameplateShowFriendlyPlayers", value)
+    _G.SetCVar("nameplateShowFriendlyNPCs", value)
+  else
+    _G.SetCVar("nameplateShowFriends", value)
+  end
+end
+
 -- Fired when the player enters the world, reloads the UI, enters/leaves an instance or battleground, or respawns at a graveyard.
 -- Also fires any other time the player sees a loading screen
 function Addon:PLAYER_ENTERING_WORLD(initialLogin, reloadingUI)
   -- This code must be executed every time the player enters a instance (dungeon, raid, ...)
   local db = Addon.db.profile.Automation
-  
+
   local is_in_instance, instance_type = IsInInstance()
   Addon.IsInInstance = is_in_instance
   Addon.IsInPvEInstance = PVE_INSTANCE_TYPES[instance_type]
@@ -1354,17 +1387,17 @@ function Addon:PLAYER_ENTERING_WORLD(initialLogin, reloadingUI)
 
   if db.ShowFriendlyUnitsInInstances then
     if Addon.IsInPvEInstance then
-      CVars:Set("nameplateShowFriends", 1)
+      SetFriendlyNameplatesShown(1)
     else
       -- Restore the value from before entering the instance
-      CVars:RestoreFromProfile("nameplateShowFriends")
+      RestoreFriendlyNameplatesShown()
     end
   elseif db.HideFriendlyUnitsInInstances then
-    if Addon.IsInPvEInstance then  
-      CVars:Set("nameplateShowFriends", 0)
+    if Addon.IsInPvEInstance then
+      SetFriendlyNameplatesShown(0)
     else
       -- Restore the value from before entering the instance
-      CVars:RestoreFromProfile("nameplateShowFriends")
+      RestoreFriendlyNameplatesShown()
     end
   end
 
@@ -1472,7 +1505,7 @@ function Addon:PLAYER_REGEN_ENABLED()
 
   -- Dont't use automation for friendly nameplates if in an instance and Hide Friendly Nameplates is enabled
   if db.FriendlyUnits ~= "NONE" and not (Addon.IsInInstance and db.HideFriendlyUnitsInInstances) then
-    _G.SetCVar("nameplateShowFriends", (db.FriendlyUnits == "SHOW_COMBAT" and 0) or 1)
+    RawSetFriendlyNameplatesShown((db.FriendlyUnits == "SHOW_COMBAT" and 0) or 1)
   end
   if db.EnemyUnits ~= "NONE" then
     _G.SetCVar("nameplateShowEnemies", (db.EnemyUnits == "SHOW_COMBAT" and 0) or 1)
@@ -1490,7 +1523,7 @@ function Addon:PLAYER_REGEN_DISABLED()
 
   -- Dont't use automation for friendly nameplates if in an instance and Hide Friendly Nameplates is enabled
   if db.FriendlyUnits ~= "NONE" and not (Addon.IsInInstance and db.HideFriendlyUnitsInInstances) then
-    _G.SetCVar("nameplateShowFriends", (db.FriendlyUnits == "SHOW_COMBAT" and 1) or 0)
+    RawSetFriendlyNameplatesShown((db.FriendlyUnits == "SHOW_COMBAT" and 1) or 0)
   end
 
   if db.EnemyUnits ~= "NONE" then

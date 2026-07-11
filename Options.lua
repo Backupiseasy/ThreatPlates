@@ -5818,7 +5818,7 @@ local function CreateVisibilityTab()
             type = "toggle",
             width = "full",
             set = function(info, value)
-              if Addon.ExpansionIsAtLeastMidnight then
+              if Addon.WOW_USES_SHOW_FRIENDLY_PLAYERS_CVAR then
                 CVars:OverwriteBool("nameplateShowFriendlyPlayers", value)
                 CVars:OverwriteBool("nameplateShowFriendlyNPCs", value)
                 CVars:OverwriteBool("nameplateShowEnemies", value)
@@ -5828,7 +5828,7 @@ local function CreateVisibilityTab()
               end
             end,
             get = function(info)
-              if Addon.ExpansionIsAtLeastMidnight then
+              if Addon.WOW_USES_SHOW_FRIENDLY_PLAYERS_CVAR then
                 return GetCVarBool("nameplateShowFriendlyPlayers") and GetCVarBool("nameplateShowFriendlyNPCs") and GetCVarBool("nameplateShowEnemies")
               else
                 return GetCVarBool("nameplateShowFriends") and GetCVarBool("nameplateShowEnemies")
@@ -5841,7 +5841,7 @@ local function CreateVisibilityTab()
             order = 30,
             width = "full",
             arg = "nameplateShowFriends",
-            hidden = Addon.ExpansionIsAtLeastMidnight
+            hidden = Addon.WOW_USES_SHOW_FRIENDLY_PLAYERS_CVAR
           },
           AllHostile = {
             name = L["Show Enemy Nameplates"],
