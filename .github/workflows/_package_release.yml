@@ -25,16 +25,6 @@ jobs:
     timeout-minutes: 15
     permissions:
       contents: write
-    strategy:
-      max-parallel: 1   # Packager's first invocation creates the GitHub Release for this
-                         # tag; later invocations just attach more assets to it. Concurrent
-                         # invocations racing to create the same release are not known to be
-                         # safe, so this intentionally trades parallel speed for the
-                         # known-working sequential behavior used before this refactor.
-      matrix:
-        game_version: [retail, classic, bcc, mists]
-        # - wrath  # not yet supported - intentionally left out, matching commented-out
-        # - cata   # packager steps in the pre-refactor build*.yml history
     env:
       CF_API_KEY: ${{ secrets.CF_API_KEY }}
       GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
@@ -61,7 +51,11 @@ jobs:
           sed -i "s/@build-time@/$(date +%Y-%m-%d)/" CHANGELOG.md
           sed -i "s/@build-time@/$(date +%Y-%m-%d)/" TidyPlates_ThreatPlates_Changes.log
 
-      - name: Create ${{ matrix.game_version }} package
+      - name: Create package
+        # The TOC's comma-delimited "## Interface:" line (e.g. "120007, 11508, 20506, 50504")
+        # is natively read by WoW clients (Mainline 10.2.7+, Classic Progression 4.4.0+,
+        # Classic Era 1.14.0+) to determine compatibility, so a single plain package works
+        # for every supported game version - no per-flavor matrix/-g build needed.
         uses: BigWigsMods/packager@v2
         with:
-          args: -e -l -n "ThreatPlates-{project-version}{classic}" -g ${{ matrix.game_version }}
+          args: -e -l -n "ThreatPlates-{project-version}"
