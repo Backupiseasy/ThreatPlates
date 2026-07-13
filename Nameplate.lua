@@ -668,9 +668,14 @@ local function OnStartCasting(tp_frame, unitid, cast_guid, event_spell_id, castb
     local current_time = GetTime()
     endTime = endTime or current_time
     startTime = startTime or current_time
-    castbar.Value = current_time - (startTime / 1000)
 
-    castbar.MaxValue = (endTime - startTime) / 1000   
+    if castbar.IsCasting then
+      castbar.Value = current_time - (startTime / 1000)
+    else
+      castbar.Value = (endTime / 1000) - current_time
+    end
+
+    castbar.MaxValue = (endTime - startTime) / 1000
     castbar:SetMinMaxValues(0, castbar.MaxValue)
     castbar:SetValue(castbar.Value)
   end

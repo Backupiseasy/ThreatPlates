@@ -43,7 +43,7 @@ local Element = Addon.Elements.NewElement("Castbar")
 ---------------------------------------------------------------------------------------------------
 
 local function OnUpdate(self, elapsed)
-  if self.IsCasting or self.IsChanneling then
+  if self.IsCasting then
     self.Value = self.Value + elapsed
 
     local current_value = self.MaxValue - self.Value
@@ -55,6 +55,17 @@ local function OnUpdate(self, elapsed)
     end
 
     self:SetValue(self.MaxValue)
+  elseif self.IsChanneling then
+    self.Value = self.Value - elapsed
+
+    if self.Value > 0 then
+      self:SetValue(self.Value)
+      self.CastTime:SetText(string_format("%.1f", self.Value))
+      self.Spark:SetPoint("CENTER", self:GetStatusBarTexture(), "RIGHT")
+      return
+    end
+
+    self:SetValue(0)
   elseif (self.FlashTime > 0) then
     self.CastTime:SetText("")
     self.FlashTime = self.FlashTime - elapsed

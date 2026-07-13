@@ -1,8 +1,4 @@
 
 # @project-version@ (@build-time@)
 
-* Fixed a bug where crowd control auras on TBC Classic and Mists Classic were always shown as normal debuffs instead of in the Crowd Control aura area [Comment #8537].
-* Fixed a bug where the target highlight did not reappear after being disabled and re-enabled while a unit remained targeted.
-* Fixed a bug where friendly nameplate visibility settings no longer worked on TBC Classic and Mists Classic.
-* Fixed a bug where automatically showing/hiding friendly nameplates in instances and during combat did not work on Midnight, TBC Classic, and Mists Classic.
-* Fixed a bug where the castbar's configuration mode preview did not show a spell icon on Classic clients, caused by a hardcoded Retail-only spell ID [Comment #8488].
+* Fixed a bug where channeled spells filled the castbar instead of emptying it on WoW Classic versions [Comment #8411].
