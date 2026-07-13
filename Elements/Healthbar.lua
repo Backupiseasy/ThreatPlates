@@ -82,7 +82,7 @@ if Addon.WOW_FEATURE_ABSORBS then
         local absorb_max, absorb_val, absorb_clamped
         if ABSORBS_TEST_MODE then
           -- Fake HP is also written to healthbar so AbsorbStatusBar anchor lands correctly.
-          --   NPC        0% HP, 20% absorb → missing=100%, absorb<missing → val=20, no spark
+          --   NPC        10% HP, 20% absorb → missing=90%, absorb<missing → val=20, no spark
           --   Friendly  30% HP, 40% absorb → missing=70%,  absorb<missing → val=40, no spark
           --   Enemy     70% HP, 50% absorb → missing=30%,  absorb>missing → val=30, spark
           local fake_health, fake_health_max
@@ -103,8 +103,8 @@ if Addon.WOW_FEATURE_ABSORBS then
           else
             healthbar._test_npc_variant = healthbar._test_npc_variant or (math.random(2) == 1)
             if healthbar._test_npc_variant then
-              -- A: 0% HP, 20% absorb → fill visible, no spark
-              fake_health, fake_health_max = 0, 100000
+              -- A: 10% HP, 20% absorb → fill visible, no spark
+              fake_health, fake_health_max = 10000, 100000
               absorb_max, absorb_val, absorb_clamped = 100, 20, false
             else
               -- B: 100% HP, 20% absorb → missing=0, fill invisible, spark only
@@ -148,7 +148,7 @@ if Addon.WOW_FEATURE_ABSORBS then
     local health, health_max, heal_absorb, absorb
     if ABSORBS_TEST_MODE then
       -- Fake HP also written to healthbar so AbsorbStatusBar anchor lands correctly.
-      --   NPC        0% HP, 20% absorb (absorb < missing → no spark)
+      --   NPC        10% HP, 20% absorb (absorb < missing → no spark)
       --   Friendly  30% HP, 40% absorb (absorb < missing → no spark)
       --   Enemy     70% HP, 50% absorb (absorb > missing → spark)
       if tp_frame.unit.type == "PLAYER" and tp_frame.unit.reaction == "FRIENDLY" then
@@ -172,8 +172,8 @@ if Addon.WOW_FEATURE_ABSORBS then
       else
         healthbar._test_npc_variant = healthbar._test_npc_variant or (math.random(2) == 1)
         if healthbar._test_npc_variant then
-          -- A: 0% HP, 20% absorb → fill visible, no spark
-          health, health_max, heal_absorb, absorb = 0, 100000, 0, 20000
+          -- A: 10% HP, 20% absorb → fill visible, no spark
+          health, health_max, heal_absorb, absorb = 10000, 100000, 0, 20000
         else
           -- B: 100% HP, 20% absorb → missing=0, fill invisible, spark only
           health, health_max, heal_absorb, absorb = 100000, 100000, 0, 20000
@@ -187,6 +187,17 @@ if Addon.WOW_FEATURE_ABSORBS then
       health_max = _G.UnitHealthMax(unitid) or 0
       heal_absorb = UnitGetTotalHealAbsorbs(unitid) or 0
       absorb = _G.UnitGetTotalAbsorbs(unitid) or 0
+    end
+
+    if health == 0 or health_max == 0 then
+      healthbar.HealAbsorbGlow:Hide()
+      healthbar.HealAbsorb:Hide()
+      healthbar.HealAbsorbLeftShadow:Hide()
+      healthbar.HealAbsorbRightShadow:Hide()
+      healthbar.AbsorbStatusBar:Hide()
+      healthbar.AbsorbStatusBar.Overlay:Hide()
+      healthbar.AbsorbStatusBar.Spark:Hide()
+      return
     end
 
     if Settings.ShowHealAbsorbs and heal_absorb > 0 then
