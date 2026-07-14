@@ -7205,7 +7205,7 @@ local function CreateHealthbarOptions()
                     name = L["Full Absorbs"],
                     order = 120,
                     type = "toggle",
-                    desc = L["Always shows the full amount of absorbs on a unit. In overabsorb situations, the absorbs bar is shifted to the left."],
+                    desc = L["In over-absorb situations (shield larger than missing health), moves the over-absorb spark to indicate the actual shield magnitude, instead of pinning it to the bar's right edge."],
                     arg = { "settings", "healthbar", "AlwaysFullAbsorb" },
                   },
                   OverlayTexture = {

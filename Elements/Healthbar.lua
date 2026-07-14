@@ -41,32 +41,107 @@ local Element = Addon.Elements.NewElement("Healthbar")
 ---------------------------------------------------------------------------------------------------
 -- Additional functions
 ---------------------------------------------------------------------------------------------------
--- Set to true to show hardcoded test values for all absorb UI elements (no target needed).
-local ABSORBS_TEST_MODE = true
-
 local UpdateAbsorbs
 
 -- UnitGetTotalAbsorbs: Mists - Patch 5.2.0 (2013-03-05): Added.
 -- UnitGetTotalHealAbsorbs: Mists - Patch 5.4.0 (2013-09-10): Added.
 if Addon.WOW_FEATURE_ABSORBS then
-  UpdateAbsorbs = function(tp_frame)
-    local healthbar = tp_frame.visual.Healthbar
+  local function HideAllAbsorbElements(healthbar)
+    healthbar.HealAbsorbGlow:Hide()
+    healthbar.HealAbsorb:Hide()
+    healthbar.HealAbsorbLeftShadow:Hide()
+    healthbar.HealAbsorbRightShadow:Hide()
+    healthbar.AbsorbStatusBar:Hide()
+    healthbar.AbsorbStatusBar.Overlay:Hide()
+    healthbar.AbsorbStatusBar.Spark:Hide()
+  end
 
-    if IGNORED_STYLES[tp_frame.style] then
-      healthbar.HealAbsorbGlow:Hide()
-      healthbar.HealAbsorb:Hide()
-      healthbar.HealAbsorbLeftShadow:Hide()
-      healthbar.HealAbsorbRightShadow:Hide()
-      healthbar.AbsorbStatusBar:Hide()
-      healthbar.AbsorbStatusBar.Overlay:Hide()
-      healthbar.AbsorbStatusBar.Spark:Hide()
-      return
+  local function ShowAbsorbStatusBar(healthbar)
+    healthbar.AbsorbStatusBar:Show()
+    healthbar.AbsorbStatusBar.Overlay:SetShown(Settings.OverlayTexture)
+  end
+
+  -- Test helpers: inject fake absorb values so absorb UI can be verified without a real target.
+  -- To enable: uncomment the matching call site in UpdateAbsorbs below.
+  local function TestAbsorbsMidnight(tp_frame, healthbar)
+    local fake_health, fake_health_max, absorb_max, absorb_val, absorb_clamped
+    if tp_frame.unit.type == "PLAYER" and tp_frame.unit.reaction == "FRIENDLY" then
+      healthbar._test_friendly_variant = healthbar._test_friendly_variant or (math.random(2) == 1)
+      if healthbar._test_friendly_variant then
+        -- A: 30% HP, 40% shield → fill, no spark
+        fake_health, fake_health_max = 30000, 100000
+        absorb_max, absorb_val, absorb_clamped = 100, 40, false
+      else
+        -- B: 70% HP, 20% shield → fill, no spark
+        fake_health, fake_health_max = 70000, 100000
+        absorb_max, absorb_val, absorb_clamped = 100, 20, false
+      end
+    elseif tp_frame.unit.type == "PLAYER" then
+      -- Enemy: 70% HP, 30% shield, over-absorb → spark
+      fake_health, fake_health_max = 70000, 100000
+      absorb_max, absorb_val, absorb_clamped = 100, 30, true
+    else
+      healthbar._test_npc_variant = healthbar._test_npc_variant or (math.random(2) == 1)
+      if healthbar._test_npc_variant then
+        -- NPC-A: 10% HP, 20% shield → fill visible, no spark
+        fake_health, fake_health_max = 10000, 100000
+        absorb_max, absorb_val, absorb_clamped = 100, 20, false
+      else
+        -- NPC-B: 100% HP, 20% shield → missing=0, fill invisible, spark only
+        fake_health, fake_health_max = 100000, 100000
+        absorb_max, absorb_val, absorb_clamped = 100, 0, true
+      end
     end
+    healthbar:SetMinMaxValues(0, fake_health_max)
+    healthbar:SetValue(fake_health)
+    return absorb_max, absorb_val, absorb_clamped
+  end
 
-    if Addon.ExpansionIsAtLeastMidnight then
-      -- Midnight path: use UnitHealPredictionCalculator.
-      -- Values from the calculator are passed directly to C-API StatusBar methods (SetMinMaxValues,
-      -- SetValue) and are safe to use even when they are secret values.
+  local function TestAbsorbs(tp_frame, healthbar)
+    local health, health_max, heal_absorb, absorb
+    if tp_frame.unit.type == "PLAYER" and tp_frame.unit.reaction == "FRIENDLY" then
+      healthbar._test_friendly_variant = healthbar._test_friendly_variant or math.random(4)
+      local fv = healthbar._test_friendly_variant
+      if fv == 1 then
+        -- 30% HP, 40% shield → fill, no spark, no heal absorb
+        health, health_max, heal_absorb, absorb = 30000, 100000, 0, 40000
+      elseif fv == 2 then
+        -- 70% HP, 20% shield → fill, no spark, no heal absorb
+        health, health_max, heal_absorb, absorb = 70000, 100000, 0, 20000
+      elseif fv == 3 then
+        -- 70% HP, 20% heal absorb + 20% shield → HealAbsorb (no glow) + both shadows + fill
+        health, health_max, heal_absorb, absorb = 70000, 100000, 20000, 20000
+      else
+        -- 30% HP, 40% heal absorb → heal_absorb > health → HealAbsorbGlow + LeftShadow
+        health, health_max, heal_absorb, absorb = 30000, 100000, 40000, 0
+      end
+    elseif tp_frame.unit.type == "PLAYER" then
+      -- Enemy: 70% HP, 50% shield → over-absorb spark
+      health, health_max, heal_absorb, absorb = 70000, 100000, 0, 50000
+    else
+      healthbar._test_npc_variant = healthbar._test_npc_variant or (math.random(2) == 1)
+      if healthbar._test_npc_variant then
+        -- NPC-A: 10% HP, 20% shield → fill visible, no spark
+        health, health_max, heal_absorb, absorb = 10000, 100000, 0, 20000
+      else
+        -- NPC-B: 100% HP, 20% shield → missing=0, fill invisible, spark only
+        health, health_max, heal_absorb, absorb = 100000, 100000, 0, 20000
+      end
+    end
+    healthbar:SetMinMaxValues(0, health_max)
+    healthbar:SetValue(health)
+    return health, health_max, heal_absorb, absorb
+  end
+
+  if Addon.ExpansionIsAtLeastMidnight then
+    UpdateAbsorbs = function(tp_frame)
+      local healthbar = tp_frame.visual.Healthbar
+
+      if IGNORED_STYLES[tp_frame.style] then
+        HideAllAbsorbElements(healthbar)
+        return
+      end
+
       local calc = healthbar.HealPredictionCalculator
 
       -- Heal absorbs: hidden on Midnight.
@@ -77,58 +152,18 @@ if Addon.WOW_FEATURE_ABSORBS then
 
       if not calc then healthbar.AbsorbStatusBar:Hide(); return end
 
-      -- Damage absorbs (shields): passed directly to C-API, safe with secret values.
+      -- Damage absorbs (shields): values from the calculator are passed directly to C-API StatusBar
+      -- methods (SetMinMaxValues, SetValue), safe with secret values.
       if Settings.ShowAbsorbs then
-        local absorb_max, absorb_val, absorb_clamped
-        if ABSORBS_TEST_MODE then
-          -- Fake HP is also written to healthbar so AbsorbStatusBar anchor lands correctly.
-          --   NPC        10% HP, 20% absorb → missing=90%, absorb<missing → val=20, no spark
-          --   Friendly  30% HP, 40% absorb → missing=70%,  absorb<missing → val=40, no spark
-          --   Enemy     70% HP, 50% absorb → missing=30%,  absorb>missing → val=30, spark
-          local fake_health, fake_health_max
-          if tp_frame.unit.type == "PLAYER" and tp_frame.unit.reaction == "FRIENDLY" then
-            healthbar._test_friendly_variant = healthbar._test_friendly_variant or (math.random(2) == 1)
-            if healthbar._test_friendly_variant then
-              -- A: 30% HP, 40% shield absorb, no heal absorb
-              fake_health, fake_health_max = 30000, 100000
-              absorb_max, absorb_val, absorb_clamped = 100, 40, false
-            else
-              -- B: 70% HP, 20% shield absorb (heal absorb hidden on Midnight)
-              fake_health, fake_health_max = 70000, 100000
-              absorb_max, absorb_val, absorb_clamped = 100, 20, false
-            end
-          elseif tp_frame.unit.type == "PLAYER" then
-            fake_health, fake_health_max = 70000, 100000
-            absorb_max, absorb_val, absorb_clamped = 100, 30, true
-          else
-            healthbar._test_npc_variant = healthbar._test_npc_variant or (math.random(2) == 1)
-            if healthbar._test_npc_variant then
-              -- A: 10% HP, 20% absorb → fill visible, no spark
-              fake_health, fake_health_max = 10000, 100000
-              absorb_max, absorb_val, absorb_clamped = 100, 20, false
-            else
-              -- B: 100% HP, 20% absorb → missing=0, fill invisible, spark only
-              fake_health, fake_health_max = 100000, 100000
-              absorb_max, absorb_val, absorb_clamped = 100, 0, true
-            end
-          end
-          healthbar:SetMinMaxValues(0, fake_health_max)
-          healthbar:SetValue(fake_health)
-        else
-          local unitid = tp_frame.unit.unitid
-          _G.UnitGetDetailedHealPrediction(unitid, nil, calc)
-          calc:SetMaximumHealthMode(Enum.UnitMaximumHealthMode.Default)
-          absorb_max = calc:GetMaximumHealth()
-          absorb_val, absorb_clamped = calc:GetDamageAbsorbs()
-        end
+        local unitid = tp_frame.unit.unitid
+        _G.UnitGetDetailedHealPrediction(unitid, nil, calc)
+        calc:SetMaximumHealthMode(Enum.UnitMaximumHealthMode.Default)
+        local absorb_max = calc:GetMaximumHealth()
+        local absorb_val, absorb_clamped = calc:GetDamageAbsorbs()
+        -- absorb_max, absorb_val, absorb_clamped = TestAbsorbsMidnight(tp_frame, healthbar)
         healthbar.AbsorbStatusBar:SetMinMaxValues(0, absorb_max)
         healthbar.AbsorbStatusBar:SetValue(absorb_val)
-        healthbar.AbsorbStatusBar:Show()
-        if Settings.OverlayTexture then
-          healthbar.AbsorbStatusBar.Overlay:Show()
-        else
-          healthbar.AbsorbStatusBar.Overlay:Hide()
-        end
+        ShowAbsorbStatusBar(healthbar)
         -- Spark: SetAlphaFromBoolean passes the secret 'clamped' bool directly to C-side alpha,
         -- avoiding a Lua branch on a potentially-secret value. Position is fixed (AlwaysFullAbsorb
         -- repositioning would require arithmetic on secret amounts).
@@ -139,133 +174,91 @@ if Addon.WOW_FEATURE_ABSORBS then
         healthbar.AbsorbStatusBar.Overlay:Hide()
         healthbar.AbsorbStatusBar.Spark:SetAlpha(0)
       end
-
-      return
     end
+  else
+    UpdateAbsorbs = function(tp_frame)
+      local healthbar = tp_frame.visual.Healthbar
 
-    -- Non-Midnight path
-    -- Code for absorb calculation see CompactUnitFrame.lua
-    local health, health_max, heal_absorb, absorb
-    if ABSORBS_TEST_MODE then
-      -- Fake HP also written to healthbar so AbsorbStatusBar anchor lands correctly.
-      --   NPC        10% HP, 20% absorb (absorb < missing → no spark)
-      --   Friendly  30% HP, 40% absorb (absorb < missing → no spark)
-      --   Enemy     70% HP, 50% absorb (absorb > missing → spark)
-      if tp_frame.unit.type == "PLAYER" and tp_frame.unit.reaction == "FRIENDLY" then
-        healthbar._test_friendly_variant = healthbar._test_friendly_variant or math.random(4)
-        local fv = healthbar._test_friendly_variant
-        if fv == 1 then
-          -- 30% HP, 40% shield → fill, no spark, no heal absorb
-          health, health_max, heal_absorb, absorb = 30000, 100000, 0, 40000
-        elseif fv == 2 then
-          -- 70% HP, 20% shield → fill, no spark, no heal absorb
-          health, health_max, heal_absorb, absorb = 70000, 100000, 0, 20000
-        elseif fv == 3 then
-          -- 70% HP, 20% heal absorb + 20% shield → HealAbsorb (no glow) + both shadows + fill
-          health, health_max, heal_absorb, absorb = 70000, 100000, 20000, 20000
-        else
-          -- 30% HP, 40% heal absorb, no shield → heal_absorb > health → HealAbsorbGlow + LeftShadow
-          health, health_max, heal_absorb, absorb = 30000, 100000, 40000, 0
-        end
-      elseif tp_frame.unit.type == "PLAYER" then
-        health, health_max, heal_absorb, absorb = 70000, 100000, 0, 50000
-      else
-        healthbar._test_npc_variant = healthbar._test_npc_variant or (math.random(2) == 1)
-        if healthbar._test_npc_variant then
-          -- A: 10% HP, 20% absorb → fill visible, no spark
-          health, health_max, heal_absorb, absorb = 10000, 100000, 0, 20000
-        else
-          -- B: 100% HP, 20% absorb → missing=0, fill invisible, spark only
-          health, health_max, heal_absorb, absorb = 100000, 100000, 0, 20000
-        end
+      if IGNORED_STYLES[tp_frame.style] then
+        HideAllAbsorbElements(healthbar)
+        return
       end
-      healthbar:SetMinMaxValues(0, health_max)
-      healthbar:SetValue(health)
-    else
+
+      -- Code for absorb calculation see CompactUnitFrame.lua
       local unitid = tp_frame.unit.unitid
-      health = _G.UnitHealth(unitid) or 0
-      health_max = _G.UnitHealthMax(unitid) or 0
-      heal_absorb = UnitGetTotalHealAbsorbs(unitid) or 0
-      absorb = _G.UnitGetTotalAbsorbs(unitid) or 0
-    end
+      local health = _G.UnitHealth(unitid) or 0
+      local health_max = _G.UnitHealthMax(unitid) or 0
+      local heal_absorb = UnitGetTotalHealAbsorbs(unitid) or 0
+      local absorb = _G.UnitGetTotalAbsorbs(unitid) or 0
+      -- health, health_max, heal_absorb, absorb = TestAbsorbs(tp_frame, healthbar)
 
-    if health == 0 or health_max == 0 then
-      healthbar.HealAbsorbGlow:Hide()
-      healthbar.HealAbsorb:Hide()
-      healthbar.HealAbsorbLeftShadow:Hide()
-      healthbar.HealAbsorbRightShadow:Hide()
-      healthbar.AbsorbStatusBar:Hide()
-      healthbar.AbsorbStatusBar.Overlay:Hide()
-      healthbar.AbsorbStatusBar.Spark:Hide()
-      return
-    end
-
-    if Settings.ShowHealAbsorbs and heal_absorb > 0 then
-      healthbar.HealAbsorbGlow:SetShown(heal_absorb > health)
-
-      if heal_absorb > health then
-        heal_absorb = health
+      if health == 0 or health_max == 0 then
+        HideAllAbsorbElements(healthbar)
+        return
       end
 
-      local heal_absorb_pct = heal_absorb / health_max
-      local healthbar_texture = healthbar:GetStatusBarTexture()
-      healthbar.HealAbsorb:SetSize(heal_absorb_pct * healthbar:GetWidth(), healthbar:GetHeight())
-      healthbar.HealAbsorb:SetPoint("TOPRIGHT", healthbar_texture, "TOPRIGHT", 0, 0)
-      healthbar.HealAbsorb:SetPoint("BOTTOMRIGHT", healthbar_texture, "BOTTOMRIGHT", 0, 0)
-      healthbar.HealAbsorb:Show()
+      if Settings.ShowHealAbsorbs and heal_absorb > 0 then
+        healthbar.HealAbsorbGlow:SetShown(heal_absorb > health)
 
-      local healabsorb_texture = healthbar.HealAbsorb
-      healthbar.HealAbsorbLeftShadow:SetPoint("TOPLEFT", healabsorb_texture, "TOPLEFT", 0, 0);
-      healthbar.HealAbsorbLeftShadow:SetPoint("BOTTOMLEFT", healabsorb_texture, "BOTTOMLEFT", 0, 0)
-      healthbar.HealAbsorbLeftShadow:Show()
+        if heal_absorb > health then
+          heal_absorb = health
+        end
 
-      -- The right shadow is only shown if there are absorbs on the health bar.
-      if absorb > 0 and Settings.ShowAbsorbs then
-        healthbar.HealAbsorbRightShadow:SetPoint("TOPLEFT", healabsorb_texture, "TOPRIGHT", -8, 0)
-        healthbar.HealAbsorbRightShadow:SetPoint("BOTTOMLEFT", healabsorb_texture, "BOTTOMRIGHT", -8, 0)
-        healthbar.HealAbsorbRightShadow:Show()
+        local heal_absorb_pct = heal_absorb / health_max
+        local healthbar_texture = healthbar:GetStatusBarTexture()
+        healthbar.HealAbsorb:SetSize(heal_absorb_pct * healthbar:GetWidth(), healthbar:GetHeight())
+        healthbar.HealAbsorb:SetPoint("TOPRIGHT", healthbar_texture, "TOPRIGHT", 0, 0)
+        healthbar.HealAbsorb:SetPoint("BOTTOMRIGHT", healthbar_texture, "BOTTOMRIGHT", 0, 0)
+        healthbar.HealAbsorb:Show()
+
+        local healabsorb_texture = healthbar.HealAbsorb
+        healthbar.HealAbsorbLeftShadow:SetPoint("TOPLEFT", healabsorb_texture, "TOPLEFT", 0, 0)
+        healthbar.HealAbsorbLeftShadow:SetPoint("BOTTOMLEFT", healabsorb_texture, "BOTTOMLEFT", 0, 0)
+        healthbar.HealAbsorbLeftShadow:Show()
+
+        -- The right shadow is only shown if there are absorbs on the health bar.
+        if absorb > 0 and Settings.ShowAbsorbs then
+          healthbar.HealAbsorbRightShadow:SetPoint("TOPLEFT", healabsorb_texture, "TOPRIGHT", -8, 0)
+          healthbar.HealAbsorbRightShadow:SetPoint("BOTTOMLEFT", healabsorb_texture, "BOTTOMRIGHT", -8, 0)
+          healthbar.HealAbsorbRightShadow:Show()
+        else
+          healthbar.HealAbsorbRightShadow:Hide()
+        end
       else
+        healthbar.HealAbsorbGlow:Hide()
+        healthbar.HealAbsorb:Hide()
+        healthbar.HealAbsorbLeftShadow:Hide()
         healthbar.HealAbsorbRightShadow:Hide()
       end
-    else
-      healthbar.HealAbsorbGlow:Hide()
-      healthbar.HealAbsorb:Hide()
-      healthbar.HealAbsorbLeftShadow:Hide()
-      healthbar.HealAbsorbRightShadow:Hide()
-    end
 
-    -- Shield absorbs: StatusBar-based, clamped to missing health.
-    if Settings.ShowAbsorbs and absorb > 0 and health_max > 0 then
-      local missing_health = health_max - health
-      healthbar.AbsorbStatusBar:SetMinMaxValues(0, health_max)
-      healthbar.AbsorbStatusBar:SetValue(math.min(absorb, missing_health))
-      healthbar.AbsorbStatusBar:Show()
-      if Settings.OverlayTexture then
-        healthbar.AbsorbStatusBar.Overlay:Show()
-      else
-        healthbar.AbsorbStatusBar.Overlay:Hide()
-      end
-      -- Spark: shown when absorb exceeds remaining health (over-absorb).
-      if absorb > missing_health then
-        local spark = healthbar.AbsorbStatusBar.Spark
-        spark:ClearAllPoints()
-        if Settings.AlwaysFullAbsorb then
-          -- Position spark to indicate actual absorb amount (may extend left of right edge).
-          local absorb_offset = math.min(absorb / health_max, 1) * healthbar:GetWidth()
-          spark:SetPoint("BOTTOMLEFT", healthbar, "BOTTOMRIGHT", -4 - absorb_offset, -1)
-          spark:SetPoint("TOPLEFT", healthbar, "TOPRIGHT", -4 - absorb_offset, 1)
+      -- Shield absorbs: StatusBar-based, clamped to missing health.
+      if Settings.ShowAbsorbs and absorb > 0 and health_max > 0 then
+        local missing_health = health_max - health
+        healthbar.AbsorbStatusBar:SetMinMaxValues(0, health_max)
+        healthbar.AbsorbStatusBar:SetValue(math.min(absorb, missing_health))
+        ShowAbsorbStatusBar(healthbar)
+        -- Spark: shown when absorb exceeds remaining health (over-absorb).
+        if absorb > missing_health then
+          local spark = healthbar.AbsorbStatusBar.Spark
+          spark:ClearAllPoints()
+          if Settings.AlwaysFullAbsorb then
+            -- Position spark to indicate actual absorb amount (may extend left of right edge).
+            local absorb_offset = math.min(absorb / health_max, 1) * healthbar:GetWidth()
+            spark:SetPoint("BOTTOMLEFT", healthbar, "BOTTOMRIGHT", -4 - absorb_offset, -1)
+            spark:SetPoint("TOPLEFT", healthbar, "TOPRIGHT", -4 - absorb_offset, 1)
+          else
+            spark:SetPoint("BOTTOMLEFT", healthbar, "BOTTOMRIGHT", -4, -1)
+            spark:SetPoint("TOPLEFT", healthbar, "TOPRIGHT", -4, 1)
+          end
+          spark:Show()
         else
-          spark:SetPoint("BOTTOMLEFT", healthbar, "BOTTOMRIGHT", -4, -1)
-          spark:SetPoint("TOPLEFT", healthbar, "TOPRIGHT", -4, 1)
+          healthbar.AbsorbStatusBar.Spark:Hide()
         end
-        spark:Show()
       else
+        healthbar.AbsorbStatusBar:Hide()
+        healthbar.AbsorbStatusBar.Overlay:Hide()
         healthbar.AbsorbStatusBar.Spark:Hide()
       end
-    else
-      healthbar.AbsorbStatusBar:Hide()
-      healthbar.AbsorbStatusBar.Overlay:Hide()
-      healthbar.AbsorbStatusBar.Spark:Hide()
     end
   end
 else
