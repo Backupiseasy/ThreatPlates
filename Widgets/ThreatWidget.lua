@@ -107,11 +107,18 @@ function Widget:OnEnable()
   self:SubscribeEvent("UNIT_THREAT_LIST_UPDATE")
   self:SubscribeEvent("TargetMarkerUpdate")
   self:SubscribeEvent("GROUP_ROSTER_UPDATE")
+  Addon.EventService.SubscribeConfig(self, "threat", function(p) self:OnConfigChanged(p) end)
 end
 
--- function Widget:OnDisable()
---   self:UnsubscribeAllEvents()
--- end
+function Widget:OnDisable()
+  self:UnsubscribeAllEvents()
+  Addon.EventService.UnsubscribeAllConfig(self)
+end
+
+function Widget:OnConfigChanged(changedPath)
+  self:UpdateSettings()
+  Addon:ScheduleRepaint()
+end
 
 function Widget:EnabledForStyle(style, unit)
   return not (unit.type == "PLAYER" or style == "NameOnly" or style == "NameOnly-Unique" or style == "etotem")

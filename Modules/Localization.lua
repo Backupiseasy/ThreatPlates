@@ -180,3 +180,11 @@ function LocalizationModule.UpdateSettings()
   -- Clear cache for texts as e.g., abbreviation mode might have changed
   wipe(TextCache)
 end
+
+---------------------------------------------------------------------------------------------------
+-- Config Pub/Sub
+---------------------------------------------------------------------------------------------------
+Addon.EventService.SubscribeConfig(LocalizationModule, "text", function(changedPath)
+  LocalizationModule.UpdateSettings()
+  Addon:ScheduleRepaint()
+end)

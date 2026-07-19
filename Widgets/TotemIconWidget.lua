@@ -55,6 +55,16 @@ end
 
 function Widget:OnEnable()
   self:SubscribeEvent("UNIT_NAME_UPDATE")
+  Addon.EventService.SubscribeConfig(self, "totemWidget", function(p) self:OnConfigChanged(p) end)
+end
+
+function Widget:OnDisable()
+  self:UnsubscribeAllEvents()
+  Addon.EventService.UnsubscribeAllConfig(self)
+end
+
+function Widget:OnConfigChanged(changedPath)
+  Addon:ScheduleRepaint()
 end
 
 function Widget:EnabledForStyle(style, unit)

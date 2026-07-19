@@ -150,3 +150,11 @@ function Element.UpdateSettings()
   -- Update TargetArt widget as it depends on some settings here
   Addon.Widgets:UpdateSettings("TargetArt")
 end
+
+---------------------------------------------------------------------------------------------------
+-- Config Pub/Sub
+---------------------------------------------------------------------------------------------------
+Addon.EventService.SubscribeConfig(Element, "Name", function(changedPath)
+  Element.UpdateSettings()
+  Addon:ScheduleRepaint()
+end)

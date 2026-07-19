@@ -130,6 +130,18 @@ function Widget:IsEnabled()
   return db.ON or db.ShowInHeadlineView
 end
 
+function Widget:OnEnable()
+  Addon.EventService.SubscribeConfig(self, "stealthWidget", function(p) self:OnConfigChanged(p) end)
+end
+
+function Widget:OnDisable()
+  Addon.EventService.UnsubscribeAllConfig(self)
+end
+
+function Widget:OnConfigChanged(changedPath)
+  Addon:ScheduleRepaint()
+end
+
 function Widget:EnabledForStyle(style, unit)
   --if unit.reaction == "FRIENDLY" or unit.type == "PLAYER" then return false end
 

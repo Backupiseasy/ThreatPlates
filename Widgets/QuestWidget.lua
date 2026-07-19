@@ -670,11 +670,18 @@ function Widget:OnEnable()
   if not Addon.ExpansionIsAtLeastMidnight then
     self:GROUP_ROSTER_UPDATE()
   end
+  Addon.EventService.SubscribeConfig(self, "questWidget", function(p) self:OnConfigChanged(p) end)
 end
 
--- function Widget:OnDisable()
---   self:UnsubscribeAllEvents()
--- end
+function Widget:OnDisable()
+  self:UnsubscribeAllEvents()
+  Addon.EventService.UnsubscribeAllConfig(self)
+end
+
+function Widget:OnConfigChanged(changedPath)
+  self:UpdateSettings()
+  Addon:PublishToEachPlate("SituationalColorUpdate")
+end
 
 function Widget:EnabledForStyle(style, unit)
   if (style == "NameOnly" or style == "NameOnly-Unique") then

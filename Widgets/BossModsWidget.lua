@@ -635,6 +635,18 @@ function Widget:UpdateLayout(widget_frame)
   end
 end
 
+function Widget:OnEnable()
+  Addon.EventService.SubscribeConfig(self, "BossModsWidget", function(p) self:OnConfigChanged(p) end)
+end
+
+function Widget:OnDisable()
+  Addon.EventService.UnsubscribeAllConfig(self)
+end
+
+function Widget:OnConfigChanged(changedPath)
+  Addon:ScheduleRepaint()
+end
+
 function Widget:UpdateSettings()
   Settings = Addon.db.profile.BossModsWidget
 

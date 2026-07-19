@@ -1382,6 +1382,16 @@ function Widget:OnEnable()
   self:SubscribeEvent("UNIT_AURA")
   -- LOSS_OF_CONTROL_ADDED
   -- LOSS_OF_CONTROL_UPDATE
+  Addon.EventService.SubscribeConfig(self, "AuraWidget", function(p) self:OnConfigChanged(p) end)
+end
+
+function Widget:OnDisable()
+  self:UnsubscribeAllEvents()
+  Addon.EventService.UnsubscribeAllConfig(self)
+end
+
+function Widget:OnConfigChanged(changedPath)
+  self:UpdateSettings()
 end
 
 function Widget:EnabledForStyle(style, unit)

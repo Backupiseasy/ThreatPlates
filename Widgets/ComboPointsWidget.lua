@@ -1017,6 +1017,7 @@ function Widget:OnEnable()
   end
 
   -- self:SubscribeUnitEvent("UNIT_FLAGS", "player", EventHandler)
+  Addon.EventService.SubscribeConfig(self, "ComboPoints", function(p) self:OnConfigChanged(p) end)
 end
 
 function Widget:OnDisable()
@@ -1042,6 +1043,11 @@ function Widget:OnDisable()
   end
 
   HideWidgetFrame(WidgetFrame)
+  Addon.EventService.UnsubscribeAllConfig(self)
+end
+
+function Widget:OnConfigChanged(changedPath)
+  self:UpdateSettings()
 end
 
 function Widget:EnabledForStyle(style, unit)

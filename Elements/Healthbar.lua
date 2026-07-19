@@ -539,5 +539,15 @@ SubscribeEvent(Element, "UNIT_HEALTH", UnitHealthbarUpdate)
 SubscribeEvent(Element, "UNIT_HEALTH_FREQUENT", UnitHealthbarUpdate)
 -- UnitGetTotalAbsorbs: Mists - Patch 5.2.0 (2013-03-05): Added.
 SubscribeEvent(Element, "UNIT_ABSORB_AMOUNT_CHANGED", UnitHealthbarUpdate)
+
+---------------------------------------------------------------------------------------------------
+-- Config Pub/Sub
+---------------------------------------------------------------------------------------------------
+for _, path in ipairs({ "settings.healthbar", "settings.healthborder", "Healthbar" }) do
+  Addon.EventService.SubscribeConfig(Element, path, function(changedPath)
+    Element.UpdateSettings()
+    Addon:ScheduleRepaint()
+  end)
+end
 -- UnitGetTotalHealAbsorbs: Mists - Patch 5.4.0 (2013-09-10): Added.
 SubscribeEvent(Element, "UNIT_HEAL_ABSORB_AMOUNT_CHANGED", UnitHealthbarUpdate)

@@ -658,3 +658,13 @@ function ColorModule.PrintDebug()
 
   UpdatePlateColors(tp_frame)
 end
+
+---------------------------------------------------------------------------------------------------
+-- Config Pub/Sub
+---------------------------------------------------------------------------------------------------
+for _, path in ipairs({ "ColorByReaction", "ColorByHealth", "Healthbar", "Name", "threat", "settings", "StatusText", "Colors" }) do
+  Addon.EventService.SubscribeConfig(ColorModule, path, function(changedPath)
+    ColorModule.UpdateSettings()
+    Addon:ScheduleRepaint()
+  end)
+end

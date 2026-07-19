@@ -560,3 +560,13 @@ SubscribeEvent(Element, "UNIT_LEVEL", StatusTextUpdateByUnit)
 
 -- For now: ignore Guild Roster events
 --SubscribeEvent(Element, "GUILD_ROSTER_UPDATE", StatusTextUpdateByUnit)
+
+---------------------------------------------------------------------------------------------------
+-- Config Pub/Sub
+---------------------------------------------------------------------------------------------------
+for _, path in ipairs({ "StatusText", "text" }) do
+  Addon.EventService.SubscribeConfig(Element, path, function(changedPath)
+    Element.UpdateSettings()
+    Addon:ScheduleRepaint()
+  end)
+end

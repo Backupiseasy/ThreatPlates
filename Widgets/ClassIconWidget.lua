@@ -32,6 +32,15 @@ local _G =_G
 
 function Widget:OnEnable()
   RegisterMasqueGroup(self, "Class Icon")
+  Addon.EventService.SubscribeConfig(self, "classWidget", function(p) self:OnConfigChanged(p) end)
+end
+
+function Widget:OnDisable()
+  Addon.EventService.UnsubscribeAllConfig(self)
+end
+
+function Widget:OnConfigChanged(changedPath)
+  Addon:ScheduleRepaint()
 end
 
 function Widget:Create(tp_frame)

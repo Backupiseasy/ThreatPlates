@@ -265,11 +265,19 @@ function Widget:OnEnable()
   else
     self:UnsubscribeAllEvents()
   end
+  Addon.EventService.SubscribeConfig(self, "socialWidget", function(p) self:OnConfigChanged(p) end)
+  Addon.EventService.SubscribeConfig(self, "FactionWidget", function(p) self:OnConfigChanged(p) end)
 end
 
--- function Widget:OnDisable()
---   self:UnsubscribeAllEvents()
--- end
+function Widget:OnDisable()
+  self:UnsubscribeAllEvents()
+  Addon.EventService.UnsubscribeAllConfig(self)
+end
+
+function Widget:OnConfigChanged(changedPath)
+  self:UpdateSettings()
+  Addon:PublishToEachPlate("ClassColorUpdate")
+end
 
 function Widget:EnabledForStyle(style, unit)
   if unit.type ~= "PLAYER" then return false end

@@ -28,6 +28,16 @@ local RegisteredUnitEvents = {}
 local SubscribersByEvent = {}
 
 ---------------------------------------------------------------------------------------------------
+-- Data structure for Config Pub/Sub
+---------------------------------------------------------------------------------------------------
+-- Flat hashtable: Key = dot-notation path string, Value = { [subscriber] = func }
+-- Examples:
+--   ""                      => path = "", matches all config changes
+--   "AuraWidget"            => path = {"AuraWidget"}
+--   "AuraWidget.Debuffs"    => path = {"AuraWidget", "Debuffs"}
+local ConfigSubscriptions = {}
+
+---------------------------------------------------------------------------------------------------
 -- WoW Event Handler
 ---------------------------------------------------------------------------------------------------
 
@@ -209,6 +219,65 @@ function EventService.Publish(event, ...)
   end
 end
 
+---------------------------------------------------------------------------------------------------
+-- Config Pub/Sub
+---------------------------------------------------------------------------------------------------
+
+-- Subscribe to config changes for a given settings path (dot-notation string).
+-- path: dot-notation string, e.g. "AuraWidget.Debuffs" or "" (matches all changes)
+-- func: called as func(changedPath) where changedPath is a dot-notation string, or nil on profile change
+function EventService.SubscribeConfig(subscriber, path, func)
+  ConfigSubscriptions[path] = ConfigSubscriptions[path] or {}
+  ConfigSubscriptions[path][subscriber] = func
+end
+
+-- Unsubscribe a subscriber from all config paths it is registered for. Subscribers always
+-- subscribe/unsubscribe as a unit (e.g. a widget's OnEnable/OnDisable), so there is no use case
+-- for unsubscribing from a single path only.
+function EventService.UnsubscribeAllConfig(subscriber)
+  for path, subscribers in pairs(ConfigSubscriptions) do
+    subscribers[subscriber] = nil
+    if not next(subscribers) then
+      ConfigSubscriptions[path] = nil
+    end
+  end
+end
+
+-- Publish a config change event.
+-- path: array (info.arg), e.g. {"AuraWidget", "Debuffs", "ShowEnemy"}, or nil on profile change
+function EventService.PublishConfig(path)
+  if path == nil then
+    -- Profile change: notify all config subscribers
+    for _, subscribers in pairs(ConfigSubscriptions) do
+      for _, func in pairs(subscribers) do
+        func(nil)
+      end
+    end
+  else
+    local dotPath = table.concat(path, ".")
+
+    -- Always notify root subscribers (path = "")
+    local root_subscribers = ConfigSubscriptions[""]
+    if root_subscribers then
+      for _, func in pairs(root_subscribers) do
+        func(dotPath)
+      end
+    end
+
+    -- Walk the path and notify subscribers at each prefix level
+    local prefix = ""
+    for i, segment in ipairs(path) do
+      prefix = (i == 1) and segment or (prefix .. "." .. segment)
+      local subscribers = ConfigSubscriptions[prefix]
+      if subscribers then
+        for _, func in pairs(subscribers) do
+          func(dotPath)
+        end
+      end
+    end
+  end
+end
+
 -- Unregister the event if the last subscriber was removed an there is no main subscriber
 local function UnregisterGameEvent(event, subscribers_for_event, subscriber, event_handler_frame)
   subscribers_for_event[subscriber] = nil
@@ -303,6 +372,15 @@ function Addon:PrintEventService()
       for subscriber, func in pairs(all_subscribers) do
         print ("      ->", subscriber.Name or subscriber)
       end
+    end
+  end
+
+  print ("EventService: Config Subscriptions")
+  for path, subscribers in PairsByKeys(ConfigSubscriptions) do
+    local label = (path == "") and "[root]" or path
+    print ("  " .. label .. ": #Subscribers =", Addon.Debug:TableSize(subscribers))
+    for subscriber, func in PairsByKeys(subscribers) do
+      print ("    ->", subscriber.Name or subscriber)
     end
   end
 end
