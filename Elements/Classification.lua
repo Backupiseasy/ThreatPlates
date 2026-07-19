@@ -127,3 +127,9 @@ end
 --end
 
 --SubscribeEvent(Element, "PLAYER_TARGET_CHANGED", Element.UPDATE_MOUSEOVER_UNIT)
+
+-- UpdateStyle reads Addon.IconTextures["UnitClassification.Rare"], which is updated synchronously
+-- in the Options setter before this callback fires via the deferred ScheduleRepaint.
+Addon.EventService.SubscribeConfig(Element, "settings.eliteicon", function(changedPath)
+  Addon:ScheduleRepaint()
+end)

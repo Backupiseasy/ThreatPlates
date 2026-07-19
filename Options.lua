@@ -168,22 +168,22 @@ local CreateCustomNameplateEntry, CreateCustomNameplatesGroup
 
 -- Key is key from options data structure for the widget, value is widget name as used in NewWidget
 local WIDGET_INFO = {
-  arenaWidget = { Name = "Arena", UpdateSettings = true },
-  AuraWidget = { Name = "Auras", UpdateSettings = true },
-  BossModsWidget = { Name = "BossMods", UpdateSettings = false },
-  classWidget = { Name = "ClassIcon", UpdateSettings = false },
-  ComboPoints = { Name = "ComboPoints", UpdateSettings = true },
-  ExperienceWidget = { Name = "Experience", UpdateSettings = true, ForceUpdate = true, },
-  FocusWidget = { Name = "Focus", UpdateSettings = true, UpdateAllSettings = true, PublishEvent = "SituationalColorUpdate" },
-  ResourceWidget = { Name = "Resource", UpdateSettings = true,  },
-  socialWidget = { Name = "Social", UpdateSettings = true, PublishEvent = "ClassColorUpdate" },
-  stealthWidget = { Name = "Stealth", UpdateSettings = false, },
-  targetWidget = { Name = "TargetArt", UpdateSettings = true, UpdateAllSettings = true, PublishEvent = "SituationalColorUpdate" },
-  questWidget = { Name = "Quest", UpdateSettings = true, PublishEvent = "SituationalColorUpdate" },
-  healerTracker = { Name = "HealerTracker", UpdateSettings = false },
-  totemWidget = { Name = "TotemIcon", UpdateSettings = false, },
-  uniqueWidget = { Name = "UniqueIcon", UpdateSettings = true, },
-  threat = { Name = "Threat", UpdateSettings = true, ForceUpdate = true, }, -- ThreatWidget and more
+  arenaWidget =       { Name = "Arena" },
+  AuraWidget =        { Name = "Auras" },
+  BossModsWidget =    { Name = "BossMods" },
+  classWidget =       { Name = "ClassIcon" },
+  ComboPoints =       { Name = "ComboPoints" },
+  ExperienceWidget =  { Name = "Experience", ForceUpdate = true, },
+  FocusWidget =       { Name = "Focus", PublishEvent = "SituationalColorUpdate" },
+  ResourceWidget =    { Name = "Resource", },
+  socialWidget =      { Name = "Social", PublishEvent = "ClassColorUpdate" },
+  stealthWidget =     { Name = "Stealth", },
+  targetWidget =      { Name = "TargetArt", PublishEvent = "SituationalColorUpdate" },
+  questWidget =       { Name = "Quest", PublishEvent = "SituationalColorUpdate" },
+  healerTracker =     { Name = "HealerTracker" },
+  totemWidget =       { Name = "TotemIcon", },
+  uniqueWidget =      { Name = "UniqueIcon", },
+  threat =            { Name = "Threat", ForceUpdate = true, }, -- ThreatWidget and more
 }
 
 ---------------------------------------------------------------------------------------------------
@@ -583,6 +583,14 @@ local SET_FUNCTIONS = {
   color = SetValueColor,
 }
 
+-- Write a value directly into a SavedVariables (sub-)table and publish the config change in one step.
+-- Use this instead of a bare "t[key] = value" for writes that don't go through SetValue (info.arg
+-- doesn't map cleanly, e.g. dynamic indices), so the PublishConfig call can't be forgotten.
+local function SetDBValue(t, key, path, value)
+  t[key] = value
+  Addon.EventService.PublishConfig(path)
+end
+
 local function SetValue(info, ...)
   --print ("SetValue: Function =", "{ " .. table.concat(info.arg, ".") .. " }")
 
@@ -598,6 +606,8 @@ local function SetValue(info, ...)
 
   local setter_function = SET_FUNCTIONS[info.type] or SetValueGeneral
   setter_function(info, ...)
+
+  Addon.EventService.PublishConfig(info.arg)
 
   -- Update the corresponding parts of Threat Plates based on the setting
   if widget_info then
@@ -615,23 +625,8 @@ local function SetValue(info, ...)
       if widget_info.PublishEvent then
         Addon:PublishToEachPlate(widget_info.PublishEvent)
       end
-    elseif widget_info.UpdateSettings then
-      --print ("SetValue: Widget =>", info[2])
-      Addon.Widgets:UpdateSettings(widget_info.Name)
-      if widget_info.ForceUpdate then
-        -- If also core parts of the nameplate need to be udpated
-        Addon:ForceUpdate()
-      elseif widget_info.UpdateAllSettings then
-        -- Some elements also use widget settings. In this case, update them
-        Addon:UpdateSettings()
-      end
-      -- Required for some widgets that also update aspects of the healthbar (e.g., Quest, Social)
-      if widget_info.PublishEvent then
-        Addon:PublishToEachPlate(widget_info.PublishEvent)
-      end
-    else
-      Addon:ForceUpdate()
     end
+    -- Settings changes are handled by each widget's OnConfigChanged via PublishConfig above
   else
     --print ("SetValue: Normal =>", info[2])
 
@@ -640,7 +635,8 @@ local function SetValue(info, ...)
       Addon:SetThemes()
     end
 
-    Addon:ForceUpdate()
+    -- UpdateSettings for modules/elements is handled by their own PublishConfig subscriptions above
+    Addon:ScheduleRepaint()
   end
 end
 
@@ -2131,8 +2127,7 @@ local function CreateComboPointsWidgetOptions()
                   return color.r, color.g, color.b
                 end,
                 set = function(info, r, g, b)
-                  db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][1] = Addon.RGB(r * 255, g * 255, b * 255)
-                  Addon.Widgets:UpdateSettings("ComboPoints")
+                  SetDBValue(db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization], 1, { "ComboPoints", "ColorBySpec" }, Addon.RGB(r * 255, g * 255, b * 255))
                 end,
                 hasAlpha = false,
               },
@@ -2145,8 +2140,7 @@ local function CreateComboPointsWidgetOptions()
                   return color.r, color.g, color.b
                 end,
                 set = function(info, r, g, b)
-                  db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][2] = Addon.RGB(r * 255, g * 255, b * 255)
-                  Addon.Widgets:UpdateSettings("ComboPoints")
+                  SetDBValue(db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization], 2, { "ComboPoints", "ColorBySpec" }, Addon.RGB(r * 255, g * 255, b * 255))
                 end,
                 hasAlpha = false,
               },
@@ -2159,8 +2153,7 @@ local function CreateComboPointsWidgetOptions()
                   return color.r, color.g, color.b
                 end,
                 set = function(info, r, g, b)
-                  db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][3] = Addon.RGB(r * 255, g * 255, b * 255)
-                  Addon.Widgets:UpdateSettings("ComboPoints")
+                  SetDBValue(db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization], 3, { "ComboPoints", "ColorBySpec" }, Addon.RGB(r * 255, g * 255, b * 255))
                 end,
                 hasAlpha = false,
               },
@@ -2173,8 +2166,7 @@ local function CreateComboPointsWidgetOptions()
                   return color.r, color.g, color.b
                 end,
                 set = function(info, r, g, b)
-                  db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][4] = Addon.RGB(r * 255, g * 255, b * 255)
-                  Addon.Widgets:UpdateSettings("ComboPoints")
+                  SetDBValue(db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization], 4, { "ComboPoints", "ColorBySpec" }, Addon.RGB(r * 255, g * 255, b * 255))
                 end,
                 hasAlpha = false,
               },
@@ -2187,8 +2179,7 @@ local function CreateComboPointsWidgetOptions()
                   return color.r, color.g, color.b
                 end,
                 set = function(info, r, g, b)
-                  db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][5] = Addon.RGB(r * 255, g * 255, b * 255)
-                  Addon.Widgets:UpdateSettings("ComboPoints")
+                  SetDBValue(db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization], 5, { "ComboPoints", "ColorBySpec" }, Addon.RGB(r * 255, g * 255, b * 255))
                 end,
                 hasAlpha = false,
                 disabled = function() return #db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization] < 5 end
@@ -2202,8 +2193,7 @@ local function CreateComboPointsWidgetOptions()
                   return color.r, color.g, color.b
                 end,
                 set = function(info, r, g, b)
-                  db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][6] = Addon.RGB(r * 255, g * 255, b * 255)
-                  Addon.Widgets:UpdateSettings("ComboPoints")
+                  SetDBValue(db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization], 6, { "ComboPoints", "ColorBySpec" }, Addon.RGB(r * 255, g * 255, b * 255))
                 end,
                 hasAlpha = false,
                 disabled = function() return #db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization] < 6 end
@@ -2217,8 +2207,7 @@ local function CreateComboPointsWidgetOptions()
                   return color.r, color.g, color.b
                 end,
                 set = function(info, r, g, b)
-                  db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization][7] = Addon.RGB(r * 255, g * 255, b * 255)
-                  Addon.Widgets:UpdateSettings("ComboPoints")
+                  SetDBValue(db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization], 7, { "ComboPoints", "ColorBySpec" }, Addon.RGB(r * 255, g * 255, b * 255))
                 end,
                 hasAlpha = false,
                 disabled = function() return #db.ComboPoints.ColorBySpec[db.ComboPoints.Specialization] < 7 end
@@ -2232,8 +2221,7 @@ local function CreateComboPointsWidgetOptions()
                   return color.r, color.g, color.b
                 end,
                 set = function(info, r, g, b)
-                  db.ComboPoints.ColorBySpec.ROGUE.Animacharge = Addon.RGB(r * 255, g * 255, b * 255)
-                  Addon.Widgets:UpdateSettings("ComboPoints")
+                  SetDBValue(db.ComboPoints.ColorBySpec.ROGUE, "Animacharge", { "ComboPoints", "ColorBySpec" }, Addon.RGB(r * 255, g * 255, b * 255))
                 end,
                 hasAlpha = false,
                 -- Charged Combo Points were introduced with Battle for Azerorth  
@@ -2248,8 +2236,7 @@ local function CreateComboPointsWidgetOptions()
                   return color.r, color.g, color.b
                 end,
                 set = function(info, r, g, b)
-                  db.ComboPoints.ColorBySpec.DEATHKNIGHT.DeathRune = Addon.RGB(r * 255, g * 255, b * 255)
-                  Addon.Widgets:UpdateSettings("ComboPoints")
+                  SetDBValue(db.ComboPoints.ColorBySpec.DEATHKNIGHT, "DeathRune", { "ComboPoints", "ColorBySpec" }, Addon.RGB(r * 255, g * 255, b * 255))
                 end,
                 hasAlpha = false,
                 -- Deathrunes were available from Wrath to WoD
@@ -3222,7 +3209,7 @@ local function CreateTargetArtWidgetOptions()
             inline = true,
             set = function(info, val)
               CVarsManagerSetBool(info, val)
-              Addon.Widgets:UpdateSettings("TargetArt")
+              Addon.EventService.PublishConfig({ "targetWidget" })
             end,
             get = GetValueCVarBool,
             args = {
@@ -3882,7 +3869,7 @@ local function CreateResourceWidgetOptions()
             type = "toggle",
             width = "half",
             desc = L["Use a custom color for the healthbar's border."],
-            set = function(info, val) db.ResourceWidget.BorderUseForegroundColor = false; db.ResourceWidget.BorderUseBackgroundColor = false; Addon:ForceUpdate() end,
+            set = function(info, val) db.ResourceWidget.BorderUseForegroundColor = false; db.ResourceWidget.BorderUseBackgroundColor = false; Addon.EventService.PublishConfig({ "ResourceWidget" }) end,
             get = function(info, val) return not (db.ResourceWidget.BorderUseForegroundColor or db.ResourceWidget.BorderUseBackgroundColor) end,
             arg = { "ResourceWidget", "BackgroundUseForegroundColor" },
           },
@@ -4008,7 +3995,7 @@ local function CreateBossModsWidgetOptions()
                     set = function(info, r, g, b, a)
                       local color = db.BossModsWidget.Glow.Color
                       color[1], color[2], color[3], color[4] = r, g, b, a
-                      Addon.Widgets:UpdateSettings("BossMods")
+                      Addon.EventService.PublishConfig(info.arg)
                     end,
                     get = function(info)
                       local color = db.BossModsWidget.Glow.Color
@@ -5185,7 +5172,7 @@ local function CreateAurasWidgetOptions()
                     values = Addon.AurasFilterMode,
                     set = function(info, val)
                       db.AuraWidget.Buffs.FilterMode = val
-                      Addon.Widgets:UpdateSettings("Auras")
+                      Addon.EventService.PublishConfig(info.arg)
                     end,
                     arg = { "AuraWidget", "Buffs", "FilterMode" },
                   },
@@ -5199,9 +5186,7 @@ local function CreateAurasWidgetOptions()
                       return Addon.TTS(db.AuraWidget.Buffs.FilterBySpell)
                     end,
                     set = function(info, v)
-                      local table = { strsplit("\n", v) };
-                      db.AuraWidget.Buffs.FilterBySpell = table
-                      Addon.Widgets:UpdateSettings("Auras")
+                      SetDBValue(db.AuraWidget.Buffs, "FilterBySpell", { "AuraWidget", "Buffs", "FilterBySpell" }, { strsplit("\n", v) })
                     end,
                   },
                 },
@@ -5316,7 +5301,7 @@ local function CreateAurasWidgetOptions()
                     get = function(info) return db.AuraWidget.Debuffs.FilterByType[1] end,
                     set = function(info, val)
                       db.AuraWidget.Debuffs.FilterByType[1] = val
-                      Addon.Widgets:UpdateSettings("Auras")
+                      Addon.EventService.PublishConfig({ "AuraWidget", "Debuffs", "FilterByType" })
                     end,
                     disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly or not db.AuraWidget.Debuffs.ShowDispellable end,
                   },
@@ -5328,7 +5313,7 @@ local function CreateAurasWidgetOptions()
                     get = function(info) return db.AuraWidget.Debuffs.FilterByType[2] end,
                     set = function(info, val)
                       db.AuraWidget.Debuffs.FilterByType[2] = val
-                      Addon.Widgets:UpdateSettings("Auras")
+                      Addon.EventService.PublishConfig({ "AuraWidget", "Debuffs", "FilterByType" })
                     end,
                     disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly or not db.AuraWidget.Debuffs.ShowDispellable end,
                   },
@@ -5340,7 +5325,7 @@ local function CreateAurasWidgetOptions()
                     get = function(info) return db.AuraWidget.Debuffs.FilterByType[3] end,
                     set = function(info, val)
                       db.AuraWidget.Debuffs.FilterByType[3] = val
-                      Addon.Widgets:UpdateSettings("Auras")
+                      Addon.EventService.PublishConfig({ "AuraWidget", "Debuffs", "FilterByType" })
                     end,
                     disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly or not db.AuraWidget.Debuffs.ShowDispellable end,
                   },
@@ -5352,7 +5337,7 @@ local function CreateAurasWidgetOptions()
                     get = function(info) return db.AuraWidget.Debuffs.FilterByType[4] end,
                     set = function(info, val)
                       db.AuraWidget.Debuffs.FilterByType[4] = val
-                      Addon.Widgets:UpdateSettings("Auras")
+                      Addon.EventService.PublishConfig({ "AuraWidget", "Debuffs", "FilterByType" })
                     end,
                     disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly or not db.AuraWidget.Debuffs.ShowDispellable end,
                   },
@@ -5716,7 +5701,7 @@ local function CreateAurasWidgetOptions()
                     values = Addon.AurasFilterMode,
                     set = function(info, val)
                       db.AuraWidget.Debuffs.FilterMode = val
-                      Addon.Widgets:UpdateSettings("Auras")
+                      Addon.EventService.PublishConfig(info.arg)
                     end,
                     arg = { "AuraWidget", "Debuffs", "FilterMode" },
                   },
@@ -5728,9 +5713,7 @@ local function CreateAurasWidgetOptions()
                     width = "full",
                     get = function(info) return Addon.TTS(db.AuraWidget.Debuffs.FilterBySpell) end,
                     set = function(info, v)
-                      local table = { strsplit("\n", v) };
-                      db.AuraWidget.Debuffs.FilterBySpell = table
-                      Addon.Widgets:UpdateSettings("Auras")
+                      SetDBValue(db.AuraWidget.Debuffs, "FilterBySpell", { "AuraWidget", "Debuffs", "FilterBySpell" }, { strsplit("\n", v) })
                     end,
                   },
                 },
@@ -5966,7 +5949,7 @@ local function CreateAurasWidgetOptions()
                     values = Addon.AurasFilterMode,
                     set = function(info, val)
                       db.AuraWidget.CrowdControl.FilterMode = val
-                      Addon.Widgets:UpdateSettings("Auras")
+                      Addon.EventService.PublishConfig(info.arg)
                     end,
                     arg = { "AuraWidget", "CrowdControl", "FilterMode" },
                   },
@@ -5978,9 +5961,7 @@ local function CreateAurasWidgetOptions()
                     width = "full",
                     get = function(info) return Addon.TTS(db.AuraWidget.CrowdControl.FilterBySpell) end,
                     set = function(info, v)
-                      local table = { strsplit("\n", v) };
-                      db.AuraWidget.CrowdControl.FilterBySpell = table
-                      Addon.Widgets:UpdateSettings("Auras")
+                      SetDBValue(db.AuraWidget.CrowdControl, "FilterBySpell", { "AuraWidget", "CrowdControl", "FilterBySpell" }, { strsplit("\n", v) })
                     end,
                   },
                 },
@@ -6853,7 +6834,7 @@ local function CreateColorsSettings()
                   db.ColorByReaction[name] = Addon.CopyTable(color)
                 end
               end
-              Addon:ForceUpdate()
+              Addon.EventService.PublishConfig({ "ColorByReaction" })
             end,
           },
         },
@@ -6874,7 +6855,7 @@ local function CreateColorsSettings()
               for name, color in pairs(Addon.DEFAULT_SETTINGS.profile.Colors.Classes) do
                 db.Colors.Classes[name] = Addon.CopyTable(color)
               end
-              Addon:ForceUpdate()
+              Addon.EventService.PublishConfig({ "Colors", "Classes" })
             end,
           },
         },
@@ -6942,7 +6923,7 @@ local function CreateColorsSettings()
               for name, color in pairs(Addon.DEFAULT_SETTINGS.profile.settings.raidicon.hpMarked) do
                 db.settings.raidicon.hpMarked[name] = Addon.CopyTable(color)
               end
-              Addon:ForceUpdate()
+              Addon.EventService.PublishConfig({ "settings", "raidicon", "hpMarked" })
             end,
           },
         },
@@ -6960,7 +6941,7 @@ local function CreateColorsSettings()
         order = 10 + i,
         set = function(info, r, g, b)
           db.Colors.Classes[class_name] = RGB_WITH_HEX(r * 255, g * 255, b * 255)
-          Addon:ForceUpdate()
+          Addon.EventService.PublishConfig({ "Colors", "Classes" })
         end,
         arg = { "Colors", "Classes", class_name },
       }
@@ -7191,7 +7172,7 @@ local function CreateHealthbarOptions()
                     SetValue(info, val)
                     Addon:SetBaseNamePlateSize()
                     -- Update Target Art widget because of border adjustments for small healthbar heights
-                    Addon.Widgets:UpdateSettings("TargetArt")                    
+                    Addon.EventService.PublishConfig({ "targetWidget" })
                   end)
                 end),
               HeightEnemy = GetRangeEntry(
@@ -7202,7 +7183,7 @@ local function CreateHealthbarOptions()
                     SetValue(info, val)
                     Addon:SetBaseNamePlateSize()
                     -- Update Target Art widget because of border adjustments for small healthbar heights
-                    Addon.Widgets:UpdateSettings("TargetArt")                    
+                    Addon.EventService.PublishConfig({ "targetWidget" })
                   end)
                 end),
               WidthFriendly = GetRangeEntry(L["Friend Bar Width"], 12, { "settings", "healthbar", "widthFriend" }, 5, 500,
@@ -7211,7 +7192,7 @@ local function CreateHealthbarOptions()
                     SetValue(info, val)
                     Addon:SetBaseNamePlateSize()
                     -- Update Target Art widget because of border adjustments for small healthbar heights
-                    Addon.Widgets:UpdateSettings("TargetArt")
+                    Addon.EventService.PublishConfig({ "targetWidget" })
                   end)
                 end),
               HeightFriendly = GetRangeEntry(L["Friend Bar Height"], 13, {"settings", "healthbar", "heightFriend" }, 1, 100,
@@ -7220,7 +7201,7 @@ local function CreateHealthbarOptions()
                     SetValue(info, val)
                     Addon:SetBaseNamePlateSize()
                     -- Update Target Art widget because of border adjustments for small healthbar heights
-                    Addon.Widgets:UpdateSettings("TargetArt")
+                    Addon.EventService.PublishConfig({ "targetWidget" })
                   end)
                 end),
               Spacer1 = GetSpacerEntry(25),
@@ -8433,7 +8414,7 @@ local function CreateSpecRolesClassic()
           get = function()
             return Addon.db.char.spec[1]
           end,
-          set = function() Addon.db.char.spec[1] = true; Addon:ForceUpdate() end,
+          set = function() Addon.db.char.spec[1] = true; Addon.EventService.PublishConfig({ "threat" }) end,
         },
         DPS = {
           name = L["DPS/Healing"],
@@ -8443,7 +8424,7 @@ local function CreateSpecRolesClassic()
           get = function()
             return not Addon.db.char.spec[1]
           end,
-          set = function() Addon.db.char.spec[1] = false; Addon:ForceUpdate() end,
+          set = function() Addon.db.char.spec[1] = false; Addon.EventService.PublishConfig({ "threat" }) end,
         },
       }
     }
@@ -8604,7 +8585,7 @@ local function CreateSpecRolesRetail()
             local spec = Addon.db.char.spec[index]
             return (spec == nil and role == "TANK") or spec
           end,
-          set = function(info, val) Addon.db.char.spec[index] = true; Addon:ForceUpdate() end,
+          set = function(info, val) Addon.db.char.spec[index] = true; Addon.EventService.PublishConfig({ "threat" }) end,
         },
         DPS = {
           name = L["DPS/Healing"],
@@ -8615,7 +8596,7 @@ local function CreateSpecRolesRetail()
             local spec = Addon.db.char.spec[index]
             return (spec == nil and role ~= "TANK") or not spec
           end,
-          set = function() Addon.db.char.spec[index] = false; Addon:ForceUpdate() end,
+          set = function() Addon.db.char.spec[index] = false; Addon.EventService.PublishConfig({ "threat" }) end,
         },
       },
     }
@@ -9356,7 +9337,7 @@ CreateCustomNameplateEntry = function(index)
                   local color = db.uniqueSettings[index].Effects.Glow.Color
                   color[1], color[2], color[3], color[4] = r, g, b, a
 
-                  Addon.Widgets:UpdateSettings("UniqueIcon")
+                  Addon.EventService.PublishConfig(info.arg)
                 end,
                 get = function(info)
                   local color = db.uniqueSettings[index].Effects.Glow.Color
@@ -10643,7 +10624,7 @@ local function CreateOptionsTable()
                           set = function(info, val)
                             Addon.db.profile.StatusText.HealthbarMode.SubtextColorUseHeadline = false
                             Addon.db.profile.StatusText.HealthbarMode.SubtextColorUseSpecific = false
-                            Addon:ForceUpdate()
+                            Addon.EventService.PublishConfig({ "StatusText" })
                           end,
                           get = function(info) return not (Addon.db.profile.StatusText.HealthbarMode.SubtextColorUseHeadline or Addon.db.profile.StatusText.HealthbarMode.SubtextColorUseSpecific) end,
                         },
@@ -10744,7 +10725,7 @@ local function CreateOptionsTable()
                           set = function(info, val)
                             Addon.db.profile.StatusText.NameMode.SubtextColorUseHeadline = false
                             Addon.db.profile.StatusText.NameMode.SubtextColorUseSpecific = false
-                            Addon:ForceUpdate()
+                            Addon.EventService.PublishConfig({ "StatusText" })
                           end,
                           get = function(info) return not (Addon.db.profile.StatusText.NameMode.SubtextColorUseHeadline or Addon.db.profile.StatusText.NameMode.SubtextColorUseSpecific) end,
                         },
@@ -10950,7 +10931,6 @@ local function CreateOptionsTable()
                       set = function(info, val)
                         SetValue(info, val)
                         UpdateUnitClassificationIconTextures(val, options)
-                        Addon:ForceUpdate()
                       end,
                       arg = { "settings", "eliteicon", "theme" },
                     },
@@ -11764,6 +11744,8 @@ function Addon:ProfChange()
   end
 
   Addon:ReloadTheme()
+
+  Addon.EventService.PublishConfig(nil)
 end
 
 local function RegisterOptionsTable()

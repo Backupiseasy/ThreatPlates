@@ -324,3 +324,11 @@ function ThreatModule.UpdateSettings()
     UnsubscribeEvent(ThreatModule, "PLAYER_ENTERING_WORLD", RegisterEventsforThreatHeuristic)
   end
 end
+
+---------------------------------------------------------------------------------------------------
+-- Config Pub/Sub
+---------------------------------------------------------------------------------------------------
+Addon.EventService.SubscribeConfig(ThreatModule, "threat", function(changedPath)
+  ThreatModule.UpdateSettings()
+  Addon:ScheduleRepaint()
+end)

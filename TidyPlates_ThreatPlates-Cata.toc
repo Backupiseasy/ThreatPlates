@@ -35,8 +35,8 @@ ThreatPlates.xml
 Init.lua
 Debug.lua
 Compatibility.lua
-Modules\Localization.lua
 EventService.lua
+Modules\Localization.lua
 CVarsManager.lua
 Media.lua
 Constants.lua

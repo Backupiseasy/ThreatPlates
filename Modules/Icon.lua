@@ -112,3 +112,11 @@ function IconModule.UpdateSettings()
   UseMasque = Addon.db.profile.Appearance.UseMasque and Addon.LibMasque
   UseBorderlessIcons = Addon.db.profile.Appearance.UseBorderlessIcons
 end
+
+---------------------------------------------------------------------------------------------------
+-- Config Pub/Sub
+---------------------------------------------------------------------------------------------------
+Addon.EventService.SubscribeConfig(IconModule, "Appearance", function(changedPath)
+  IconModule.UpdateSettings()
+  Addon:ScheduleRepaint()
+end)

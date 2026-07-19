@@ -1329,6 +1329,17 @@ function Addon:ForceUpdate()
   Addon:UpdatePlatesVisible()
 end
 
+local repaintScheduled = false
+function Addon:ScheduleRepaint()
+  if not repaintScheduled then
+    repaintScheduled = true
+    C_Timer.After(0, function()
+      repaintScheduled = false
+      Addon:UpdatePlatesVisible()
+    end)
+  end
+end
+
 function Addon:ForceUpdateOnNameplate(tp_frame)
   RefreshPlatePresentation(tp_frame, tp_frame.Parent, tp_frame.unit.unitid)
 end

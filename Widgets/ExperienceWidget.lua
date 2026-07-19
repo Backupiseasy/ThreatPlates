@@ -106,11 +106,18 @@ end
 
 function Widget:OnEnable()
   self:SubscribeEvent("UPDATE_UI_WIDGET")
+  Addon.EventService.SubscribeConfig(self, "ExperienceWidget", function(p) self:OnConfigChanged(p) end)
 end
 
--- function Widget:OnDisable()
---   self:UnsubscribeAllEvents()
--- end
+function Widget:OnDisable()
+  self:UnsubscribeAllEvents()
+  Addon.EventService.UnsubscribeAllConfig(self)
+end
+
+function Widget:OnConfigChanged(changedPath)
+  self:UpdateSettings()
+  Addon:ScheduleRepaint()
+end
 
 function Widget:UpdateFrame(widget_frame,  unit)
   -- Show nameplate widget for this unit, if Experience widget was shown before it was disabled

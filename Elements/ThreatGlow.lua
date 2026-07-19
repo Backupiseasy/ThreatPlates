@@ -127,3 +127,13 @@ function Element.UpdateSettings()
 
   SubscribeEvent(Element, "ThreatUpdate", Element.ThreatUpdate)
 end
+
+---------------------------------------------------------------------------------------------------
+-- Config Pub/Sub
+---------------------------------------------------------------------------------------------------
+for _, path in ipairs({ "threat", "ColorByReaction" }) do
+  Addon.EventService.SubscribeConfig(Element, path, function(changedPath)
+    Element.UpdateSettings()
+    Addon:ScheduleRepaint()
+  end)
+end
