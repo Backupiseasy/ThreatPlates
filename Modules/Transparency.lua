@@ -406,3 +406,13 @@ SubscribeEvent(TransparencyModule, "TargetGained", TargetGained)
 SubscribeEvent(TransparencyModule, "TargetLost", TargetLost)
 SubscribeEvent(TransparencyModule, "FactionUpdate", SituationalEvent)
 SubscribeEvent(TransparencyModule, "ThreatUpdate", SituationalEvent)
+
+---------------------------------------------------------------------------------------------------
+-- Config Pub/Sub
+---------------------------------------------------------------------------------------------------
+for _, path in ipairs({ "nameplate", "Animations" }) do
+  Addon.EventService.SubscribeConfig(TransparencyModule, path, function(changedPath)
+    TransparencyModule.UpdateSettings()
+    Addon:ScheduleRepaint()
+  end)
+end

@@ -274,3 +274,12 @@ function AnimationModule.UpdateSettings()
   ScaleToDuration = Settings.ScaleToDuration
   FlashDuration = Settings.FlashDuration
 end
+
+---------------------------------------------------------------------------------------------------
+-- Config Pub/Sub
+---------------------------------------------------------------------------------------------------
+-- No ScheduleRepaint here: this only updates timing variables for future animations, no visible
+-- state changes for currently displayed nameplates.
+Addon.EventService.SubscribeConfig(AnimationModule, "Animations", function(changedPath)
+  AnimationModule.UpdateSettings()
+end)

@@ -83,11 +83,17 @@ function Widget:OnEnable()
   self:SubscribeEvent("UNIT_PORTRAIT_UPDATE")
 
   RegisterMasqueGroup(self, "Custom Style")
+  Addon.EventService.SubscribeConfig(self, "uniqueWidget", function(p) self:OnConfigChanged(p) end)
 end
 
--- function Widget:OnDisable()
---   self:UnsubscribeAllEvents()
--- end
+function Widget:OnDisable()
+  self:UnsubscribeAllEvents()
+  Addon.EventService.UnsubscribeAllConfig(self)
+end
+
+function Widget:OnConfigChanged(changedPath)
+  self:UpdateSettings()
+end
 
 function Widget:EnabledForStyle(style, unit)
   return style ~= "empty" -- (style == "unique" or style == "NameOnly-Unique" or style == "etotem")

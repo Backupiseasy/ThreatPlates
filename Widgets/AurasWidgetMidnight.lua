@@ -1174,6 +1174,8 @@ function Widget:OnEnable()
   self:SubscribeEvent("PLAYER_REGEN_DISABLED")
 
   PreallocateAuraContainers()
+
+  Addon.EventService.SubscribeConfig(self, "AuraWidget", function(p) self:OnConfigChanged(p) end)
 end
 
 function Widget:EnabledForStyle(style, unit)
@@ -1232,6 +1234,15 @@ function Widget:PLAYER_REGEN_ENABLED()
 end
 
 Widget.PLAYER_REGEN_DISABLED = Widget.PLAYER_REGEN_ENABLED
+
+function Widget:OnDisable()
+  self:UnsubscribeAllEvents()
+  Addon.EventService.UnsubscribeAllConfig(self)
+end
+
+function Widget:OnConfigChanged(changedPath)
+  self:UpdateSettings()
+end
 
 -- Load settings from the configuration which are shared across all aura widgets
 -- used (for each widget) in UpdateWidgetConfig

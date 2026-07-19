@@ -234,13 +234,20 @@ end
 
 function Widget:OnEnable()
   self:SubscribeEvent("PLAYER_ENTERING_WORLD")
+  self:SubscribeEvent("PVP_MATCH_ACTIVE")
+  Addon.EventService.SubscribeConfig(self, "arenaWidget", function(p) self:OnConfigChanged(p) end)
 
   self:PLAYER_ENTERING_WORLD()
 end
 
--- function Widget:OnDisable()
---   self:UnsubscribeAllEvents()
--- end
+function Widget:OnDisable()
+  self:UnsubscribeAllEvents()
+  Addon.EventService.UnsubscribeAllConfig(self)
+end
+
+function Widget:OnConfigChanged(changedPath)
+  self:UpdateSettings()
+end
 
 function Widget:EnabledForStyle(style, unit)
   return unit.reaction ~= "NEUTRAL" and not (style == "NameOnly" or style == "NameOnly-Unique" or style == "etotem")

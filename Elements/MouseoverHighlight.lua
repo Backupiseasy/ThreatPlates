@@ -143,3 +143,11 @@ SubscribeEvent(Element, "MouseoverOnEnter", MouseoverOnEnter)
 SubscribeEvent(Element, "MouseoverOnLeave", MouseoverOnLeave)
 SubscribeEvent(Element, "TargetGained", MouseoverOnLeave)
 SubscribeEvent(Element, "TargetLost", TargetLost)
+
+---------------------------------------------------------------------------------------------------
+-- Config Pub/Sub
+---------------------------------------------------------------------------------------------------
+Addon.EventService.SubscribeConfig(Element, "targetWidget", function(changedPath)
+  Element.UpdateSettings()
+  Addon:ScheduleRepaint()
+end)

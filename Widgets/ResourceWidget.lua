@@ -217,11 +217,19 @@ function Widget:OnEnable()
   self:SubscribeEvent("PLAYER_TARGET_CHANGED")
   self:SubscribeUnitEvent("UNIT_POWER_UPDATE", "target")
   self:SubscribeUnitEvent("UNIT_DISPLAYPOWER", "target")
+  Addon.EventService.SubscribeConfig(self, "ResourceWidget", function(p) self:OnConfigChanged(p) end)
 end
 
--- function Widget:OnDisable()
---   self:UnsubscribeAllEvents()
--- end
+function Widget:OnDisable()
+  self:UnsubscribeAllEvents()
+  Addon.EventService.UnsubscribeAllConfig(self)
+end
+
+function Widget:OnConfigChanged(changedPath)
+  self:UpdateSettings()
+  self:UpdateLayout()
+  self:PLAYER_TARGET_CHANGED()
+end
 
 function Widget:EnabledForStyle(style, unit)
   return not (style == "NameOnly" or style == "NameOnly-Unique" or style == "etotem")

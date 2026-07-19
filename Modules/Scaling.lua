@@ -305,3 +305,12 @@ SubscribeEvent(ScalingModule, "TargetGained", TargetGained)
 SubscribeEvent(ScalingModule, "TargetLost", TargetLost)
 SubscribeEvent(ScalingModule, "FactionUpdate", SituationalEvent)
 SubscribeEvent(ScalingModule, "ThreatUpdate", SituationalEvent)
+
+---------------------------------------------------------------------------------------------------
+-- Config Pub/Sub
+---------------------------------------------------------------------------------------------------
+-- No ScheduleRepaint here: this only selects a function reference (ScalePlate), no visible
+-- state changes for currently displayed nameplates.
+Addon.EventService.SubscribeConfig(ScalingModule, "Animations", function(changedPath)
+  ScalingModule.UpdateSettings()
+end)

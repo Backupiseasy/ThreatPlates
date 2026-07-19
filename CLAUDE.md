@@ -68,7 +68,7 @@ line (see the comment above it in the TOC).
 ### Load order (see `TidyPlates_ThreatPlates.toc`)
 
 `Libs/` → `Locales/` → `ThreatPlates.xml` (shared templates) → `Init.lua` (expansion flags/globals) →
-`Debug.lua` → `Compatibility.lua` (event/version shims) → `Modules/Localization.lua` → `EventService.lua` →
+`Debug.lua` → `Compatibility.lua` (event/version shims) → `EventService.lua` → `Modules/Localization.lua` →
 `CVarsManager.lua` → `Media.lua` → `Constants.lua` → `Modules/*.lua` → `Elements/*.lua` →
 `Widgets/WidgetHandler.lua` → `Nameplate.lua` → `Database.lua` → `Addon.lua` → `Commands.lua` → `Options.lua` →
 `Styles/*.lua` → `Widgets/*.lua`.
@@ -76,6 +76,12 @@ line (see the comment above it in the TOC).
 - `EventService.lua` is the obsolete old event handler code's replacement — the old code in
   `Widgets/WidgetHandler.lua` is intentionally commented out, not dead code to clean up casually.
 - Widgets may omit `OnEnable`/`OnDisable` entirely if no lifecycle logic is needed.
+
+`Modules/Localization.lua` loads standalone, between `EventService.lua` and `CVarsManager.lua` — not via
+`Modules/Modules.xml` like the other modules. It must load after `EventService.lua` (its Config Pub/Sub
+subscription needs `Addon.EventService` to exist) but before `Constants.lua` (which reads
+`Addon.DEFAULT_FONT`/`Addon.DEFAULT_SMALL_FONT`, set by Localization.lua, directly into `Addon.DEFAULT_SETTINGS`
+at load time).
 
 ### Expansion / version compatibility (`Init.lua`, `Compatibility.lua`)
 

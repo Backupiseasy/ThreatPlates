@@ -654,11 +654,17 @@ function Widget:OnEnable()
   -- It seems that PLAYER_FLAGS_CHANGED does not fire when loggin in/reloading the UI, so we need to call it
   -- directly here to initialize combat log parsing.
   self:PLAYER_FLAGS_CHANGED("player")
+  Addon.EventService.SubscribeConfig(self, "healerTracker", function(p) self:OnConfigChanged(p) end)
 end
 
--- function Widget:OnDisable()
---   self:UnsubscribeAllEvents()
--- end
+function Widget:OnDisable()
+  self:UnsubscribeAllEvents()
+  Addon.EventService.UnsubscribeAllConfig(self)
+end
+
+function Widget:OnConfigChanged(changedPath)
+  Addon:ScheduleRepaint()
+end
 
 function Widget:EnabledForStyle(style, unit)
   if (style == "NameOnly" or style == "NameOnly-Unique") then

@@ -395,11 +395,19 @@ function Widget:OnEnable()
   self:SubscribeEvent("PLAYER_SOFT_FRIEND_CHANGED")
   self:SubscribeEvent("PLAYER_SOFT_ENEMY_CHANGED")
   self:SubscribeEvent("PLAYER_SOFT_INTERACT_CHANGED")
+  Addon.EventService.SubscribeConfig(self, "targetWidget", function(p) self:OnConfigChanged(p) end)
 end
 
--- function Widget:OnDisable()
---   self:UnsubscribeAllEvents()
--- end
+function Widget:OnDisable()
+  self:UnsubscribeAllEvents()
+  Addon.EventService.UnsubscribeAllConfig(self)
+end
+
+function Widget:OnConfigChanged(changedPath)
+  self:UpdateSettings()
+  Addon:UpdateSettings()
+  Addon:PublishToEachPlate("SituationalColorUpdate")
+end
 
 function Widget:EnabledForStyle(style, unit)
   if (style == "NameOnly" or style == "NameOnly-Unique") then
@@ -555,11 +563,19 @@ end
 
 function FocusWidget:OnEnable()
   self:SubscribeEvent("PLAYER_FOCUS_CHANGED")
+  Addon.EventService.SubscribeConfig(self, "FocusWidget", function(p) self:OnConfigChanged(p) end)
 end
 
--- function Widget:OnDisable()
---   self:UnsubscribeAllEvents()
--- end
+function FocusWidget:OnDisable()
+  self:UnsubscribeAllEvents()
+  Addon.EventService.UnsubscribeAllConfig(self)
+end
+
+function FocusWidget:OnConfigChanged(changedPath)
+  self:UpdateSettings()
+  Addon:UpdateSettings()
+  Addon:PublishToEachPlate("SituationalColorUpdate")
+end
 
 function FocusWidget:EnabledForStyle(style, unit)
   if (style == "NameOnly" or style == "NameOnly-Unique") then
