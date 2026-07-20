@@ -7027,7 +7027,7 @@ local function CreateHealthbarOptions()
                 order = 29,
                 type = "toggle",
                 arg = { "settings", "healthbar", "ShowHealAbsorbs" },
-                hidden = function() return not Addon.WOW_FEATURE_ABSORBS end, -- Absorbs were added with Mists
+                hidden = function() return not Addon.WOW_FEATURE_ABSORBS or Addon.ExpansionIsAtLeastMidnight end, -- Absorbs were added with Mists; heal absorbs not available on Midnight
               },
               ShowAbsorbs = {
                 name = L["Absorbs"],
@@ -7205,6 +7205,7 @@ local function CreateHealthbarOptions()
                     name = L["Full Absorbs"],
                     order = 120,
                     type = "toggle",
+                    hidden = function() return Addon.ExpansionIsAtLeastMidnight end,
                     desc = L["In over-absorb situations (shield larger than missing health), moves the over-absorb spark to indicate the actual shield magnitude, instead of pinning it to the bar's right edge."],
                     arg = { "settings", "healthbar", "AlwaysFullAbsorb" },
                   },
@@ -7212,9 +7213,8 @@ local function CreateHealthbarOptions()
                     name = L["Striped Texture"],
                     order = 130,
                     type = "toggle",
-                    desc = L["Use a striped texture for the absorbs overlay. Always enabled if full absorbs are shown."],
-                    get = function(info) return GetValue(info) or db.settings.healthbar.AlwaysFullAbsorb end,
-                    disabled = function() return db.settings.healthbar.AlwaysFullAbsorb end,
+                    desc = L["Use a striped texture for the absorbs overlay."] .. (Addon.ExpansionIsAtLeastMidnight and "" or L["Always enabled if full absorbs are shown."]),
+                    disabled = function() return not Addon.ExpansionIsAtLeastMidnight and db.settings.healthbar.AlwaysFullAbsorb end,
                     arg = { "settings", "healthbar", "OverlayTexture" },
                   },
                   OverlayColor = {
@@ -7242,6 +7242,23 @@ local function CreateHealthbarOptions()
                 arg = { "HeadlineView", "ForceHealthbarOnTarget" }
               },
             }
+          },
+          Config = {
+            name = L["Configuration Mode"],
+            order = 50,
+            type = "group",
+            inline = true,
+            args = {
+              Toggle = {
+                name = L["Toggle"],
+                type = "execute",
+                order = 1,
+                width = "full",
+                func = function()
+                  Addon:ConfigHealthbar()
+                end,
+              },
+            },
           },
 
         },
