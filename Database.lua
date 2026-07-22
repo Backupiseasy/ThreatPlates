@@ -1027,43 +1027,15 @@ local function MigrateCustomStyles(profile_name, profile)
   end
 end
 
-local function DisableShowBlizzardAurasForClassic(profile_name, profile)
-  if DatabaseEntryExists(profile, { "AuraWidget", "Debuffs", } ) then
-    if profile.AuraWidget.Debuffs.ShowBlizzardForFriendly then
-      profile.AuraWidget.Debuffs.ShowAllFriendly = true
-      profile.AuraWidget.Debuffs.ShowBlizzardForFriendly = false
-      profile.AuraWidget.Debuffs.ShowDispellable = false
-      profile.AuraWidget.Debuffs.ShowBoss = false
-    end
-
-    if profile.AuraWidget.Debuffs.ShowBlizzardForEnemy then
-      profile.AuraWidget.Debuffs.ShowOnlyMine = true
-    end
-  end
-  if DatabaseEntryExists(profile, { "AuraWidget", "CrowdControl", } ) then
-    if profile.AuraWidget.CrowdControl.ShowBlizzardForFriendly then
-      profile.AuraWidget.CrowdControl.ShowAllFriendly = true
-      profile.AuraWidget.CrowdControl.ShowBlizzardForFriendly = false
-      profile.AuraWidget.CrowdControl.ShowDispellable = false
-      profile.AuraWidget.CrowdControl.ShowBoss = false
-    end
-
-    if profile.AuraWidget.CrowdControl.ShowBlizzardForEnemy then
-      profile.AuraWidget.CrowdControl.ShowAllEnemy = true
-      profile.AuraWidget.CrowdControl.ShowBlizzardForEnemy = false
-    end
-  end
-end
-
 local function MigrateAnchorFrameToNameplateSize(profile_name, profile)
   if DatabaseEntryExists(profile, { "Appearance", "AnchorFrame" }) then
     local old_value = profile.Appearance.AnchorFrame
     if old_value == "UI_PARENT" then
       profile.Appearance.NameplateSize = "NORMAL"
     elseif old_value == "PLATE" then
-      -- PLATE rendered "Big" (like WorldFrame) on the old nameplate API, but "Small"
-      -- (like UIParent) on the new one.
-      profile.Appearance.NameplateSize = (Addon.WOW_USES_CLASSIC_NAMEPLATES and "BIG") or "NORMAL"
+      -- PLATE rendered "Big" (like WorldFrame) on the old classic-style nameplate API, which no
+      -- longer exists on any WoW version; the modern API renders it "Small" (like UIParent).
+      profile.Appearance.NameplateSize = "NORMAL"
     else -- "WORLD_FRAME" or any unrecognized/missing value
       profile.Appearance.NameplateSize = "BIG"
     end
@@ -1438,9 +1410,6 @@ local MIGRATION_FUNCTIONS_BY_VERSION = {
   ["10.2.0"] = {
     { Type = "Migrate", Name = "Custom Styles V1", Function = MigrationCustomPlatesV1, NoDefaultProfile = true },
     { Type = "Migrate", Name = "Custom Styles", Function = MigrateCustomStyles, NoDefaultProfile = true },
-  },
-  ["10.2.1"] = {
-    { Type = "Migrate", Name = "Disable Show Blizzard Auras", Function = DisableShowBlizzardAurasForClassic, Version = Addon.WOW_USES_CLASSIC_NAMEPLATES },
   },
   ["10.3.0-beta2"] = {
     { Type = "Migrate", Name = "Auras Widget V2", Function = MigrateAurasWidgetV2, NoDefaultProfile = true },

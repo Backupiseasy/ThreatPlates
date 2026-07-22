@@ -26,16 +26,10 @@ local COMBAT_PROTECTED = {
   -- Miscellaneous
   uiScale = true,
   -- Nameplate CVars
-  nameplateLargeBottomInset = true, -- Removed in Midnight
-  nameplateLargeTopInset = true,    -- Removed in Midnight
   nameplateMaxAlpha = true,
   nameplateMaxDistance = true,
   nameplateMinAlpha = true,
-  nameplateMotion = true,      -- Removed in Midnight
-  nameplateMotionSpeed = true, -- Removed in Midnight
   nameplateOccludedAlphaMult = true,
-  nameplateOtherBottomInset = true,
-  nameplateOtherTopInset = true,
   nameplateOverlapH = true,
   nameplateOverlapV = true,
   nameplateResourceOnTarget = true,
@@ -44,7 +38,6 @@ local COMBAT_PROTECTED = {
   nameplateTargetBehindMaxDistance = true,
   -- Nameplate Visibility CVars
   nameplateShowAll = true,
-  nameplateShowFriends = true,
   nameplateShowEnemies = true,
   nameplateShowEnemyGuardians = true,
   nameplateShowEnemyMinions = true,
@@ -255,14 +248,7 @@ local RESET_TO_DEFAULT = {
   "nameplateOverlapH", "nameplateOverlapV",
   "nameplateMaxDistance", "nameplateTargetBehindMaxDistance",
   "nameplateShowOnlyNames",
-  "clampTargetNameplateToScreen",
   "nameplateResourceOnTarget",
-  (not Addon.ExpansionIsAtLeastMidnight and "nameplateMotion") or nil, -- Removed in Midnight
-  (not Addon.ExpansionIsAtLeastMidnight and "nameplateMotionSpeed") or nil, -- Removed in Midnight
-  (not Addon.ExpansionIsAtLeastMidnight and "nameplateLargeTopInset") or nil, -- Removed in Midnight
-  (not Addon.ExpansionIsAtLeastMidnight and "nameplateLargeBottomInset") or nil, -- Removed in Midnight
-  (not Addon.ExpansionIsAtLeastMidnight and "nameplateOtherTopInset") or nil, -- Removed in Midnight
-  (not Addon.ExpansionIsAtLeastMidnight and "nameplateOtherBottomInset") or nil, -- Removed in Midnight
   -- "nameplateGlobalScale" -- Reset it to 1, if it get's somehow corrupted
   -- Action Target
   "SoftTargetEnemy", "SoftTargetNameplateEnemy", "SoftTargetIconEnemy",

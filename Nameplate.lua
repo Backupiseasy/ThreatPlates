@@ -22,7 +22,6 @@ local GetCreatureDifficultyColor, GetRaidTargetIndex = GetCreatureDifficultyColo
 local GetTime = GetTime
 local SetNamePlateSimplified = C_NamePlateManager and C_NamePlateManager.SetNamePlateSimplified
 local GetNamePlateForUnit = C_NamePlate and C_NamePlate.GetNamePlateForUnit
-local SetNamePlateFriendlyClickThrough, SetNamePlateEnemyClickThrough = C_NamePlate and C_NamePlate.SetNamePlateFriendlyClickThrough, C_NamePlate and C_NamePlate.SetNamePlateEnemyClickThrough
 local GetPlayerInfoByGUID, UnitNameFromGUID = GetPlayerInfoByGUID, UnitNameFromGUID
 local IsInInstance, InCombatLockdown = IsInInstance, InCombatLockdown
 local NamePlateDriverFrame, UnitNameplateShowsWidgetsOnly = NamePlateDriverFrame, UnitNameplateShowsWidgetsOnly
@@ -47,7 +46,6 @@ local UnitIsUnitTP = Addon.UnitIsUnit
 local CombatLogGetCurrentEventInfoTP = Addon.CombatLogGetCurrentEventInfo
 local IsSpellKnownTP = Addon.IsSpellKnown
 local ExpansionIsAtLeastMidnight = Addon.ExpansionIsAtLeastMidnight
-local WOW_USES_SHOW_FRIENDLY_PLAYERS_CVAR = Addon.WOW_USES_SHOW_FRIENDLY_PLAYERS_CVAR
 
 local TransliterateCyrillicLetters = Addon.Localization.TransliterateCyrillicLetters
 local SetNamesFonts = Addon.Font.SetNamesFonts
@@ -798,11 +796,7 @@ local function ThreatPlatesIsActive(unitid)
 end
 
 local function ClassicBlizzardNameplatesSetAlpha(UnitFrame, alpha)
-  if Addon.WOW_USES_CLASSIC_NAMEPLATES then
-    UnitFrame.LevelFrame:SetAlpha(alpha)
-  else
-    UnitFrame.ClassificationFrame:SetAlpha(alpha)
-  end
+  UnitFrame.ClassificationFrame:SetAlpha(alpha)
 end
 
 -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly/enemy units
@@ -948,13 +942,11 @@ local	function HandlePlateCreated(plate)
   plate.TPFrame = tp_frame
   
   -- # Nameplate Hierarchy, Anchoring, and Scaling
-  if not Addon.WOW_USES_CLASSIC_NAMEPLATES then
-    -- Parent must be plate (not tp_frame) so that HitTestFrame does not inherit tp_frame's scale.
-    -- Anchor must also target plate.UnitFrame (not tp_frame) to avoid cross-hierarchy layout
-    -- recalculations when tp_frame:SetScale() is called (e.g. during mouseover scale animation).
-    tp_frame.HitTestFrame = _G.CreateFrame("Frame", nil, plate)
-    tp_frame.HitTestFrame:Hide()
-  end
+  -- Parent must be plate (not tp_frame) so that HitTestFrame does not inherit tp_frame's scale.
+  -- Anchor must also target plate.UnitFrame (not tp_frame) to avoid cross-hierarchy layout
+  -- recalculations when tp_frame:SetScale() is called (e.g. during mouseover scale animation).
+  tp_frame.HitTestFrame = _G.CreateFrame("Frame", nil, plate)
+  tp_frame.HitTestFrame:Hide()
   SetNameplateFrameProperties(tp_frame)
   -- Size is set in Styles.lua
 
@@ -1022,21 +1014,10 @@ local function ApplyPlateHitTest(tp_frame)
 end
 
 -- Updates the click-through state for all active TP plates.
--- Midnight: per-plate C++ hit-test API, unrestricted — works in combat.
--- Pre-Midnight: global CVars, must be deferred out of combat.
-if not Addon.WOW_USES_CLASSIC_NAMEPLATES then
-  Addon.SetNamePlateClickThrough = function()
-    for unitid, tp_frame in Addon:GetActiveThreatPlates() do
-      ApplyPlateHitTest(tp_frame)
-    end
-  end
-else
-  Addon.SetNamePlateClickThrough = function()
-    Addon.ExecuteAfterCombatEnds(function()
-      local db = Addon.db.profile
-      SetNamePlateFriendlyClickThrough(db.NamePlateFriendlyClickThrough)
-      SetNamePlateEnemyClickThrough(db.NamePlateEnemyClickThrough)
-    end, L["Nameplate clickthrough cannot be changed while in combat."])
+-- Per-plate C++ hit-test API, unrestricted — works in combat.
+function Addon.SetNamePlateClickThrough()
+  for unitid, tp_frame in Addon:GetActiveThreatPlates() do
+    ApplyPlateHitTest(tp_frame)
   end
 end
 
@@ -1057,10 +1038,8 @@ local function HandlePlateUnitAdded(plate, unitid)
   ThreatModule.SetUnitAttribute(tp_frame.unit)
   SetNameplateVisibility(plate, unitid)
 
-  if not Addon.WOW_USES_CLASSIC_NAMEPLATES then
-    SetNamePlateSimplified(unitid, false)
-    ApplyPlateHitTest(tp_frame)
-  end
+  SetNamePlateSimplified(unitid, false)
+  ApplyPlateHitTest(tp_frame)
 
   WidgetContainerAcquire(plate)
   -- Initialized nameplate style based on unit added
@@ -1155,14 +1134,8 @@ function Addon:ConfigClickableArea(toggle_show)
         tp_frame.Background:SetBackdropBorderColor(0, 0, 0, 0.8)
         tp_frame.Background:SetPoint("CENTER", ConfigModePlate.UnitFrame, "CENTER")
 
-        -- Addon.WOW_USES_CLASSIC_NAMEPLATES would work as well, but maybe not in the future
-        if not Addon.WOW_USES_CLASSIC_NAMEPLATES then
-          tp_frame.Background:ClearAllPoints()
-          tp_frame.Background:SetAllPoints(ConfigModePlate.TPFrame.HitTestFrame)
-        else
-          local db = Addon.db.profile.settings.frame
-          tp_frame.Background:SetSize(db.width, db.height)
-        end
+        tp_frame.Background:ClearAllPoints()
+        tp_frame.Background:SetAllPoints(ConfigModePlate.TPFrame.HitTestFrame)
 
         tp_frame.Background:Show()
 
@@ -1182,13 +1155,8 @@ function Addon:ConfigClickableArea(toggle_show)
     local background = ConfigModePlate.TPFrame.Background
     background:SetPoint("CENTER", ConfigModePlate.UnitFrame, "CENTER")
 
-    if not Addon.WOW_USES_CLASSIC_NAMEPLATES then
-      background:ClearAllPoints()
-      background:SetAllPoints(ConfigModePlate.TPFrame.HitTestFrame)
-    else
-      local db = Addon.db.profile.settings.frame
-      ConfigModePlate.TPFrame.Background:SetSize(db.width, db.height)
-    end
+    background:ClearAllPoints()
+    background:SetAllPoints(ConfigModePlate.TPFrame.HitTestFrame)
   end
 end
 
@@ -1217,7 +1185,7 @@ function Addon:UpdateSettings()
 
   SettingsShowFriendlyBlizzardNameplates = db.ShowFriendlyBlizzardNameplates
   SettingsShowEnemyBlizzardNameplates = db.ShowEnemyBlizzardNameplates
-  SettingsHideBuffsOnPersonalNameplate = db.PersonalNameplate.HideBuffs -- Check for Addon.WOW_USES_CLASSIC_NAMEPLATES not necessary as there is no player nameplate with classic nameplates
+  SettingsHideBuffsOnPersonalNameplate = db.PersonalNameplate.HideBuffs
   SettingsShowOnlyNames = CVars:GetAsBool("nameplateShowOnlyNames") and Addon.db.profile.BlizzardSettings.Names.Enabled
 
   TargetStyleForEnemy = db.targetWidget.SoftTarget.TargetStyleForEnemy
@@ -1347,36 +1315,22 @@ local PVP_INSTANCE_TYPES = {
   --scenario = false,
 }
 
--- On WoW versions without the nameplateShowFriends catch-all CVar, friendly nameplate
--- visibility is controlled via the split nameplateShowFriendlyPlayers/nameplateShowFriendlyNPCs CVars instead.
 local function SetFriendlyNameplatesShown(value)
-  if WOW_USES_SHOW_FRIENDLY_PLAYERS_CVAR then
-    CVars:Set("nameplateShowFriendlyPlayers", value)
-    CVars:Set("nameplateShowFriendlyNPCs", value)
-  else
-    CVars:Set("nameplateShowFriends", value)
-  end
+  CVars:Set("nameplateShowFriendlyPlayers", value)
+  CVars:Set("nameplateShowFriendlyNPCs", value)
 end
 
 local function RestoreFriendlyNameplatesShown()
-  if WOW_USES_SHOW_FRIENDLY_PLAYERS_CVAR then
-    CVars:RestoreFromProfile("nameplateShowFriendlyPlayers")
-    CVars:RestoreFromProfile("nameplateShowFriendlyNPCs")
-  else
-    CVars:RestoreFromProfile("nameplateShowFriends")
-  end
+  CVars:RestoreFromProfile("nameplateShowFriendlyPlayers")
+  CVars:RestoreFromProfile("nameplateShowFriendlyNPCs")
 end
 
 -- Same as SetFriendlyNameplatesShown, but sets the CVar(s) directly, bypassing the combat-protection queue in
 -- CVars:Set. Used exactly at the PLAYER_REGEN_ENABLED/DISABLED combat boundary, where the change is safe to
 -- apply immediately.
 local function RawSetFriendlyNameplatesShown(value)
-  if WOW_USES_SHOW_FRIENDLY_PLAYERS_CVAR then
-    _G.SetCVar("nameplateShowFriendlyPlayers", value)
-    _G.SetCVar("nameplateShowFriendlyNPCs", value)
-  else
-    _G.SetCVar("nameplateShowFriends", value)
-  end
+  _G.SetCVar("nameplateShowFriendlyPlayers", value)
+  _G.SetCVar("nameplateShowFriendlyNPCs", value)
 end
 
 -- Fired when the player enters the world, reloads the UI, enters/leaves an instance or battleground, or respawns at a graveyard.
@@ -1804,9 +1758,7 @@ function Addon:UNIT_FACTION(unitid)
       SetNameplateVisibility(tp_frame.Parent, plate_unitid)
       if tp_frame.Active then
         SetUnitAttributeReaction(tp_frame.unit, plate_unitid)
-        if not Addon.WOW_USES_CLASSIC_NAMEPLATES then
-          ApplyPlateHitTest(tp_frame)
-        end
+        ApplyPlateHitTest(tp_frame)
         StyleModule.Update(tp_frame)
         PublishEvent("FactionUpdate", tp_frame)
       end
@@ -1824,9 +1776,7 @@ function Addon:UNIT_FACTION(unitid)
       SetNameplateVisibility(tp_frame.Parent, unitid)
       if tp_frame.Active then
         SetUnitAttributeReaction(tp_frame.unit, unitid)
-        if not Addon.WOW_USES_CLASSIC_NAMEPLATES then
-          ApplyPlateHitTest(tp_frame)
-        end
+        ApplyPlateHitTest(tp_frame)
         StyleModule.Update(tp_frame)
         PublishEvent("FactionUpdate", tp_frame)
       end

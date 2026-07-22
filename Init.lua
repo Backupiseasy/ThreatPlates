@@ -77,22 +77,11 @@ Addon.ExpansionIsAtLeastDF = Addon.ExpansionIsAtLeast(LE_EXPANSION_DRAGONFLIGHT)
 Addon.ExpansionIsAtLeastTWW = Addon.ExpansionIsAtLeast(LE_EXPANSION_WAR_WITHIN)
 Addon.ExpansionIsAtLeastMidnight = Addon.IS_MIDNIGHT
 
--- Classic Era is the only WoW Classic version that still uses the old classic-style nameplate API - every
--- other Classic re-release (TBC Classic Anniversary, Mists Classic, and presumably future Wrath/Cata Classic
--- re-releases) uses the modern nameplate API shared with Retail/Midnight. Confirmed via WOW_PROJECT_ID, which
--- differs between Classic Era (WOW_PROJECT_CLASSIC) and TBC Classic (a distinct project id).
-Addon.WOW_USES_CLASSIC_NAMEPLATES = Addon.IS_CLASSIC
 -- aura.nameplateShowAll/nameplateShowPersonal are a Legion+ feature - confirmed to
--- always be false on both TBC Classic Anniversary and Mists Classic. So this must not be
--- derived from WOW_USES_CLASSIC_NAMEPLATES (the nameplate API distinction), but from the actual expansion
--- level instead.
+-- always be false on both TBC Classic Anniversary and Mists Classic.
 Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER = Addon.ExpansionIsAtLeast(LE_EXPANSION_LEGION)
 -- Absorbs bug in Mists: https://github.com/Stanzilla/WoWUIBugs/issues/736
 Addon.WOW_FEATURE_ABSORBS = Addon.ExpansionIsAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA)
--- Only Classic Era still has the nameplateShowFriends catch-all CVar; every other Classic re-release and
--- Retail/Midnight use the separate console variables instead (nameplateShowFriendlyPlayers,
--- nameplateShowFriendlyNPCs, ...) - same boundary as WOW_USES_CLASSIC_NAMEPLATES above.
-Addon.WOW_USES_SHOW_FRIENDLY_PLAYERS_CVAR = not Addon.IS_CLASSIC
 
 ---------------------------------------------------------------------------------------------------
 -- Constants with different values in different expansions

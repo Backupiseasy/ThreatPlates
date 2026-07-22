@@ -5818,30 +5818,13 @@ local function CreateVisibilityTab()
             type = "toggle",
             width = "full",
             set = function(info, value)
-              if Addon.WOW_USES_SHOW_FRIENDLY_PLAYERS_CVAR then
-                CVars:OverwriteBool("nameplateShowFriendlyPlayers", value)
-                CVars:OverwriteBool("nameplateShowFriendlyNPCs", value)
-                CVars:OverwriteBool("nameplateShowEnemies", value)
-              else
-                CVars:OverwriteBool("nameplateShowFriends", value)
-                CVars:OverwriteBool("nameplateShowEnemies", value)
-              end
+              CVars:OverwriteBool("nameplateShowFriendlyPlayers", value)
+              CVars:OverwriteBool("nameplateShowFriendlyNPCs", value)
+              CVars:OverwriteBool("nameplateShowEnemies", value)
             end,
             get = function(info)
-              if Addon.WOW_USES_SHOW_FRIENDLY_PLAYERS_CVAR then
-                return GetCVarBool("nameplateShowFriendlyPlayers") and GetCVarBool("nameplateShowFriendlyNPCs") and GetCVarBool("nameplateShowEnemies")
-              else
-                return GetCVarBool("nameplateShowFriends") and GetCVarBool("nameplateShowEnemies")
-              end
+              return GetCVarBool("nameplateShowFriendlyPlayers") and GetCVarBool("nameplateShowFriendlyNPCs") and GetCVarBool("nameplateShowEnemies")
             end,
-          },
-          AllFriendly = {
-            name = L["Show Friendly Nameplates"],
-            type = "toggle",
-            order = 30,
-            width = "full",
-            arg = "nameplateShowFriends",
-            hidden = Addon.WOW_USES_SHOW_FRIENDLY_PLAYERS_CVAR
           },
           AllHostile = {
             name = L["Show Enemy Nameplates"],
@@ -5926,13 +5909,8 @@ local function CreateVisibilityTab()
               SetValue(info, val)
               Addon.SetNamePlateClickThrough()                 
             end,
-            get = function(info) 
-              if not Addon.WOW_USES_CLASSIC_NAMEPLATES then
-                return db.NamePlateFriendlyClickThrough
-              else
-                -- return in-game value for clickthrough as config values may be wrong because of in-combat restrictions when changing them
-                return C_NamePlate.GetNamePlateFriendlyClickThrough() 
-              end
+            get = function(info)
+              return db.NamePlateFriendlyClickThrough
             end,
             arg = { "NamePlateFriendlyClickThrough" },
           },
@@ -5946,13 +5924,8 @@ local function CreateVisibilityTab()
               SetValue(info, val)
               Addon.SetNamePlateClickThrough()
             end,
-            get = function(info) 
-              if not Addon.WOW_USES_CLASSIC_NAMEPLATES then
-                return db.NamePlateEnemyClickThrough
-              else
-                -- return in-game value for clickthrough as config values may be wrong because of in-combat restrictions when changing them
-                return C_NamePlate.GetNamePlateEnemyClickThrough() 
-              end
+            get = function(info)
+              return db.NamePlateEnemyClickThrough
             end,
             arg = { "NamePlateEnemyClickThrough" },
           },
@@ -6211,15 +6184,7 @@ local function CreateBlizzardSettings()
             type = "group",
             inline = true,
             get = GetValue,
-            disabled = function() return Addon.WOW_USES_CLASSIC_NAMEPLATES and (db.ShowFriendlyBlizzardNameplates or db.ShowEnemyBlizzardNameplates) end,
             args = {
-              Description = {
-                type = "description",
-                order = 1,
-                name = L["Because of side effects with Blizzard nameplates, this function is disabled in instances or when Blizzard nameplates are used for friendly or neutral/enemy units (see General - Visibility)."],
-                hidden = function() return not Addon.WOW_USES_CLASSIC_NAMEPLATES or (not db.ShowFriendlyBlizzardNameplates and not db.ShowEnemyBlizzardNameplates) end,
-                width = "full",
-              },
               ToggleSync = {
                 name = L["Healthbar Sync"],
                 order = 10,
@@ -6245,7 +6210,7 @@ local function CreateBlizzardSettings()
               },
               Spacer1 = GetSpacerEntry(18),
               EnemyWidth = {
-                name = (Addon.WOW_USES_CLASSIC_NAMEPLATES and L["Width"]) or L["Enemy Width"],
+                name = L["Enemy Width"],
                 order = 20,
                 type = "range",
                 min = 1,
@@ -6261,7 +6226,7 @@ local function CreateBlizzardSettings()
                 disabled = function() return db.settings.frame.SyncWithHealthbar end,
               },
               EnemyHeight = {
-                name = (Addon.WOW_USES_CLASSIC_NAMEPLATES and L["Height"]) or L["Enemy Height"],
+                name = L["Enemy Height"],
                 order = 25,
                 type = "range",
                 min = 1,
@@ -6291,7 +6256,6 @@ local function CreateBlizzardSettings()
                 end,
                 arg = { "settings", "frame", "widthFriend" },
                 disabled = function() return db.settings.frame.SyncWithHealthbar end,
-                hidden = Addon.WOW_USES_CLASSIC_NAMEPLATES,
               },
               FriendHeight = {
                 name = L["Friend Height"],
@@ -6308,8 +6272,7 @@ local function CreateBlizzardSettings()
                 end,
                 arg = { "settings", "frame", "heightFriend"},
                 disabled = function() return db.settings.frame.SyncWithHealthbar end,
-                hidden = Addon.WOW_USES_CLASSIC_NAMEPLATES,
-              },              
+              },
             },
           },
           Motion = {
@@ -6318,28 +6281,6 @@ local function CreateBlizzardSettings()
             type = "group",
             inline = true,
             args = {
-              Motion = {
-                name = L["Movement Model"],
-                order = 10,
-                type = "select",
-                desc = L["Defines the movement/collision model for nameplates."],
-                values = { Overlapping = L["Overlapping"], Stacking = L["Stacking"] },
-                set = function(info, value) SetValueCVar(info, (value == "Overlapping" and "0") or "1") end,
-                get = function(info) return (GetValueCVarBool(info) and "Stacking") or "Overlapping" end,
-                arg = "nameplateMotion",
-                hidden = CVarIsUnavailable,
-              },
-              MotionSpeed = {
-                name = L["Motion Speed"],
-                order = 20,
-                type = "range",
-                min = 0,
-                max = 1,
-                step = 0.01,
-                desc = L["Controls the rate at which nameplate animates into their target locations [0.0-1.0]."],
-                arg = "nameplateMotionSpeed",
-                hidden = CVarIsUnavailable,
-              },
               OverlapH = {
                 name = L["Horizontal Overlap"],
                 order = 30,
@@ -6394,72 +6335,6 @@ local function CreateBlizzardSettings()
                 width = "double",
                 desc = L["The max distance to show the target nameplate when the target is behind the camera."],
                 arg = "nameplateTargetBehindMaxDistance",
-                hidden = CVarIsUnavailable,
-              },
-            },
-          },
-          Insets = {
-            name = L["Insets"],
-            order = 40,
-            type = "group",
-            inline = true,
-            hidden = Addon.ExpansionIsAtLeastMidnight or Addon.IS_MISTS_CLASSIC,
-            args = {
-              OtherTopInset = {
-                name = L["Top Inset"],
-                order = 10,
-                type = "range",
-                min = -0.2,
-                max = 0.3,
-                step = 0.01,
-                isPercent = true,
-                desc = L["The inset from the top (in screen percent) that the non-self nameplates are clamped to."],
-                arg = "nameplateOtherTopInset",
-                hidden = CVarIsUnavailable,
-              },
-              OtherBottomInset = {
-                name = L["Bottom Inset"],
-                order = 20,
-                type = "range",
-                min = -0.2,
-                max = 0.3,
-                step = 0.01,
-                isPercent = true,
-                desc = L["The inset from the bottom (in screen percent) that the non-self nameplates are clamped to."],
-                arg = "nameplateOtherBottomInset",
-                hidden = CVarIsUnavailable,
-              },
-              LargeTopInset = {
-                name = L["Large Top Inset"],
-                order = 30,
-                type = "range",
-                min = -0.2,
-                max = 0.3,
-                step = 0.01,
-                isPercent = true,
-                desc = L["The inset from the top (in screen percent) that large nameplates are clamped to."],
-                arg = "nameplateLargeTopInset",
-                hidden = CVarIsUnavailable,
-              },
-              LargeBottomInset = {
-                name = L["Large Bottom Inset"],
-                order = 40,
-                type = "range",
-                min = -0.2,
-                max = 0.3,
-                step = 0.01,
-                isPercent = true,
-                desc = L["The inset from the bottom (in screen percent) that large nameplates are clamped to."],
-                arg = "nameplateLargeBottomInset",
-                hidden = CVarIsUnavailable,
-              },
-              ClampTarget = {
-                name = L["Clamp Target Nameplate to Screen"],
-                order = 50,
-                type = "toggle",
-                width = "full",
-                desc = L["Clamps the target's nameplate to the edges of the screen, even if the target is off-screen."],
-                arg = "clampTargetNameplateToScreen",
                 hidden = CVarIsUnavailable,
               },
             },
@@ -6525,7 +6400,6 @@ local function CreateBlizzardSettings()
         order = 50,
         type = "group",
         inline = false,
-        hidden = function() return Addon.WOW_USES_CLASSIC_NAMEPLATES end,
         args = {
           HideBuffs = {
             type = "toggle",
@@ -6980,7 +6854,7 @@ local function CreateHealthbarOptions()
             inline = true,
             args = {
               WidthEnemy = GetRangeEntry(
-                (Addon.WOW_USES_CLASSIC_NAMEPLATES and L["Bar Width"]) or L["Enemy Bar Width"], 
+                L["Enemy Bar Width"],
                 10, { "settings", "healthbar", "width" }, 5, 500,
                 function(info, val)
                   Addon.ExecuteOnlyOoC(function()
@@ -6991,7 +6865,7 @@ local function CreateHealthbarOptions()
                   end)
                 end),
               HeightEnemy = GetRangeEntry(
-                (Addon.WOW_USES_CLASSIC_NAMEPLATES and L["Bar Height"]) or L["Enemy Bar Height"], 
+                L["Enemy Bar Height"],
                 11, {"settings", "healthbar", "height" }, 1, 100,
                 function(info, val)
                   Addon.ExecuteOnlyOoC(function()
@@ -7007,20 +6881,18 @@ local function CreateHealthbarOptions()
                     SetValue(info, val)
                     Addon:SetBaseNamePlateSize()
                     -- Update Target Art widget because of border adjustments for small healthbar heights
-                    Addon.Widgets:UpdateSettings("TargetArt")                    
+                    Addon.Widgets:UpdateSettings("TargetArt")
                   end)
-                end,
-                function() return Addon.WOW_USES_CLASSIC_NAMEPLATES end),
+                end),
               HeightFriendly = GetRangeEntry(L["Friend Bar Height"], 13, {"settings", "healthbar", "heightFriend" }, 1, 100,
                 function(info, val)
                   Addon.ExecuteOnlyOoC(function()
                     SetValue(info, val)
                     Addon:SetBaseNamePlateSize()
                     -- Update Target Art widget because of border adjustments for small healthbar heights
-                    Addon.Widgets:UpdateSettings("TargetArt")                    
+                    Addon.Widgets:UpdateSettings("TargetArt")
                   end)
-                end,                
-                function() return Addon.WOW_USES_CLASSIC_NAMEPLATES end),
+                end),
               Spacer1 = GetSpacerEntry(25),
               ShowHealAbsorbs = {
                 name = L["Heal Absorbs"],

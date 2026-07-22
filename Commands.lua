@@ -50,32 +50,6 @@ end
 SLASH_TPTPTOGGLE1 = "/tptptoggle"
 SlashCmdList["TPTPTOGGLE"] = TPTPTOGGLE
 
-local function TPTPOVERLAP()
-	if Addon.ExpansionIsAtLeastMidnight then
-		Addon.Logging.Warning(L["Nameplate Overlapping toggle is not available on this client."])
-		return
-	end
-
-	if GetCVar("nameplateMotion") == "0" then
-		if InCombatLockdown() then
-			Addon.Logging.Warning(L["We're unable to change this while in combat"])
-		else
-			SetCVar("nameplateMotion", 1)
-			Addon.Logging.Info(L["Nameplate Overlapping is now |cffff0000OFF!|r"])
-		end
-	else
-		if InCombatLockdown() then
-			Addon.Logging.Warning(L["We're unable to change this while in combat"])
-		else
-			SetCVar("nameplateMotion", 0)
-			Addon.Logging.Info(L["Nameplate Overlapping is now |cff00ff00ON!|r"])
-		end
-	end
-end
-
-SLASH_TPTPOVERLAP1 = "/tptpol"
-SlashCmdList["TPTPOVERLAP"] = TPTPOVERLAP
-
 local function TPTPVERBOSE()
 	if Addon.db.profile.verbose then
 		Addon.Logging.Print(L["Threat Plates verbose is now |cffff0000OFF!|r"])
@@ -101,7 +75,6 @@ local function PrintHelp()
 	Addon.Logging.Print(L["  /tptptoggle    Toggle Role from one to the other"])
 	Addon.Logging.Print(L["  /tptpdps       Toggles DPS/Healing threat plates"])
 	Addon.Logging.Print(L["  /tptptank      Toggles Tank threat plates"])
-	Addon.Logging.Print(L["  /tptpol        Toggles nameplate overlapping"])
 end
 
 local function SearchDBForString(db, prefix, keyword)
@@ -203,7 +176,6 @@ local function ChatCommandDebug(cmd_list)
 		end
 
 		Addon.Logging.Debug("-- Enabled Features --")
-		Addon.Logging.Debug("  WOW_USES_CLASSIC_NAMEPLATES:", Addon.WOW_USES_CLASSIC_NAMEPLATES)
 		Addon.Logging.Debug("  WOW_FEATURE_ABSORBS:", Addon.WOW_FEATURE_ABSORBS)
 		Addon.Logging.Debug("  WOW_FEATURE_BLIZZARD_AURA_FILTER:", Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER)
 		Addon.Logging.Debug("  NAMEPLATE_MAX_DISTANCE_MAX_VALUE:", Addon.NAMEPLATE_MAX_DISTANCE_MAX_VALUE[Addon.GetExpansionLevel()])
