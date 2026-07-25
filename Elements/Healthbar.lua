@@ -60,7 +60,7 @@ local function HideAllAbsorbElements(healthbar)
   healthbar.HealAbsorbRightShadow:Hide()
   healthbar.AbsorbStatusBar:Hide()
   healthbar.AbsorbStatusBar.Overlay:Hide()
-  healthbar.AbsorbStatusBar.Spark:Hide()
+  healthbar.AbsorbStatusBar.Spark:SetAlpha(0)
 end
 
 local function RenderMidnightAbsorbs(healthbar, absorb_max, absorb_val, absorb_clamped)

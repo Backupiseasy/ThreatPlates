@@ -1,7 +1,7 @@
 ﻿------------------------------------------------------
 13.0.29 (2026-07-12)
 ------------------------------------------------------
-* Re-enabled absorb effects on WoW Midnight, caused by secret value restrictions [GH-689].
+* Re-enabled absorb effects on WoW Midnight, caused by secret value restrictions [GH-689 plus lots of Comments].
 * Fixed absorb and heal absorb display not working on Mists Classic despite the options being available
 
 ------------------------------------------------------
