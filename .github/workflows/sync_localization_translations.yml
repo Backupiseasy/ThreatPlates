@@ -16,20 +16,20 @@ name: Sync localization strings with CurseForge
 # + Source/import_localization_phrase_keys.sh + inline bash pull-back).
 #
 # Triggers:
-#   - push to main: pick up new strings as soon as they land.
+#   - push to main or release/*: pick up new strings as soon as they land.
 #   - weekly schedule: catches translation updates made directly on CurseForge, which can happen
 #     without any code commit here.
 #   - workflow_dispatch: manual run.
-# The push trigger is scoped to `main` only (not "all branches"): the PR step below pushes its own
-# commits to the `localization-sync` branch, and a trigger that also matched that branch would
-# re-run this workflow on its own output.
+# The push trigger is scoped to `main`/`release/*` (not "all branches"): the PR step below pushes
+# its own commits to the `localization-sync` branch, and a trigger that also matched that branch
+# would re-run this workflow on its own output.
 
 on:
   workflow_dispatch:
   schedule:
     - cron: "0 6 * * 1"
   push:
-    branches: [main]
+    branches: [main, "release/*"]
     paths:
       - "**.lua"
       - "Locales/**"
