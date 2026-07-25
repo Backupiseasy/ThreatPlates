@@ -1861,11 +1861,7 @@ function Addon:UNIT_SPELLCAST_STOP(unitid, cast_guid, spell_id, castbar_id)
   castbar.CastbarID = nil
   castbar.IsChanneling = false
   castbar.IsCasting = false
-  -- On Classic, SPELL_INTERRUPT (COMBAT_LOG_EVENT_UNFILTERED) is the only source for who
-  -- interrupted a cast and is queued independently of UNIT_SPELLCAST_STOP, so it can arrive
-  -- a frame or more later, after OnUpdate has already hidden this castbar. Remember when the
-  -- cast stopped so Addon:COMBAT_LOG_EVENT_UNFILTERED can still attribute a late SPELL_INTERRUPT
-  -- to it and re-show it.
+  -- Remember stop time so a late SPELL_INTERRUPT (COMBAT_LOG_EVENT_UNFILTERED) can still find and re-show this castbar.
   castbar.LastStopTime = GetTime()
 
   tp_frame.unit.isCasting = false
@@ -1972,9 +1968,11 @@ function Addon:COMBAT_LOG_EVENT_UNFILTERED()
       local visual = tp_frame.visual
 
       local castbar = visual.Castbar
-      -- castbar.CastbarID being nil means no new cast started since the stop, so this
-      -- SPELL_INTERRUPT still belongs to the cast that (already) hid the castbar.
-      local pending_stop = castbar.CastbarID == nil and castbar.LastStopTime and
+      -- castbar.CastbarID is not usable here: on Classic, no event/API ever sets it to a
+      -- non-nil value (it is tied to Midnight's concurrent-cast-bar feature), so it can't
+      -- signal whether a new cast has started since the stop. IsCasting/IsChanneling are set
+      -- unconditionally in OnStartCasting on every expansion, so they are the reliable signal.
+      local pending_stop = not castbar.IsCasting and not castbar.IsChanneling and castbar.LastStopTime and
         (GetTime() - castbar.LastStopTime) < CASTBAR_INTERRUPT_PENDING_TIME
       if castbar:IsShown() or pending_stop then
         sourceName = gsub(sourceName, "%-[^|]+", "") -- UnitName(sourceName) only works in groups
