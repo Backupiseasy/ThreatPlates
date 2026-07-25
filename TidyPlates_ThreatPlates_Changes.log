@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+13.0.30 (2026-07-25)
+------------------------------------------------------
+* Fixed a bug on WoW Classic versions where the castbar sometimes did not show who interrupted a cast [Comment #8481, Comment #8489].
+
+------------------------------------------------------
 13.0.29 (2026-07-22)
 ------------------------------------------------------
 * Fixed a bug where channeled spells filled the castbar instead of emptying it on WoW Classic versions [Comment #8411].

@@ -80,6 +80,9 @@ local _G =_G
 
 -- Constants
 local CASTBAR_INTERRUPT_HOLD_TIME = Addon.CASTBAR_INTERRUPT_HOLD_TIME
+-- Grace window for a SPELL_INTERRUPT combat log event that arrives after UNIT_SPELLCAST_STOP
+-- already hid the castbar (see Addon:UNIT_SPELLCAST_STOP / Addon:COMBAT_LOG_EVENT_UNFILTERED).
+local CASTBAR_INTERRUPT_PENDING_TIME = 0.3
 
 local IGNORED_UNITS = {
   target = true,
@@ -1858,7 +1861,13 @@ function Addon:UNIT_SPELLCAST_STOP(unitid, cast_guid, spell_id, castbar_id)
   castbar.CastbarID = nil
   castbar.IsChanneling = false
   castbar.IsCasting = false
-  
+  -- On Classic, SPELL_INTERRUPT (COMBAT_LOG_EVENT_UNFILTERED) is the only source for who
+  -- interrupted a cast and is queued independently of UNIT_SPELLCAST_STOP, so it can arrive
+  -- a frame or more later, after OnUpdate has already hidden this castbar. Remember when the
+  -- cast stopped so Addon:COMBAT_LOG_EVENT_UNFILTERED can still attribute a late SPELL_INTERRUPT
+  -- to it and re-show it.
+  castbar.LastStopTime = GetTime()
+
   tp_frame.unit.isCasting = false
 
   if StyleModule.CastTriggerReset(tp_frame.unit) then
@@ -1963,7 +1972,11 @@ function Addon:COMBAT_LOG_EVENT_UNFILTERED()
       local visual = tp_frame.visual
 
       local castbar = visual.Castbar
-      if castbar:IsShown() then
+      -- castbar.CastbarID being nil means no new cast started since the stop, so this
+      -- SPELL_INTERRUPT still belongs to the cast that (already) hid the castbar.
+      local pending_stop = castbar.CastbarID == nil and castbar.LastStopTime and
+        (GetTime() - castbar.LastStopTime) < CASTBAR_INTERRUPT_PENDING_TIME
+      if castbar:IsShown() or pending_stop then
         sourceName = gsub(sourceName, "%-[^|]+", "") -- UnitName(sourceName) only works in groups
         local _, class_name = GetPlayerInfoByGUID(sourceGUID)
         visual.SpellText:SetText(INTERRUPTED .. " [" .. Addon.ColorByClass(class_name, TransliterateCyrillicLetters(sourceName)) .. "]")
