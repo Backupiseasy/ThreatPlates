@@ -18,3 +18,14 @@ function Addon:SetThemes()
 		self.Theme[v.name] = v.create(v.name)
 	end
 end
+
+---------------------------------------------------------------------------------------------------
+-- Config Pub/Sub
+---------------------------------------------------------------------------------------------------
+
+local function OnConfigChanged(changedPath)
+	Addon:SetThemes()
+end
+
+Addon.EventService.SubscribeConfig(Addon, "settings", OnConfigChanged)
+Addon.EventService.SubscribeConfig(Addon, "HeadlineView.ShowMouseoverHighlight", OnConfigChanged)
