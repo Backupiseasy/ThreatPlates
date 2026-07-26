@@ -1,0 +1,30 @@
+# Deletes all pr<number>-test* tags/releases created by build_pr_test.yml for a PR once that PR
+# is closed or merged, so ephemeral test builds don't linger on the Tags/Releases pages.
+name: Cleanup PR test releases
+
+on:
+  pull_request_target:
+    types: [closed]
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Delete this PR's test tags and releases
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          for tag in $(git tag -l "pr${PR_NUMBER}-test*"); do
+            gh release delete "$tag" --yes --repo "$REPO" || true
+            git push origin ":refs/tags/$tag" || true
+          done
