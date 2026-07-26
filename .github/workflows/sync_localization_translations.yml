@@ -3,33 +3,40 @@ name: Sync localization strings with CurseForge
 # Full localization sync loop:
 #   1. Extract every L["..."] string used in the addon's Lua files.
 #   2. Upload new/unknown strings to CurseForge so translators have something to translate.
-#   3. Pull the current translations back down and update Locales/*.lua via a PR.
+#   3. Regenerate Locales/enUS.lua from the same code scan (mechanical - see
+#      Source/localization_tool.py's cmd_generate_enus docstring), pull the current
+#      translations for the other locales back down, and propose both via a PR.
 #
 # Only locales that are actually <Script>-loaded in Locales/Locales.xml are touched. Several
 # locale files exist in the repo but are commented out there on purpose (translation quality too
 # low to ship) - this workflow must never re-enable them or overwrite that decision, and never
-# touches Locales.xml itself. enUS.lua is the hand-maintained source of truth and is never
-# regenerated from CurseForge either.
+# touches Locales.xml itself. enUS.lua is no longer hand-edited - it's fully derived from the code
+# scan (plus Source/LocalizationSpecialPhraseKeys.lua for documented key != value overrides like
+# L["Minuss"] = "Minors") - but still goes through the same PR review as every other locale rather
+# than being committed directly, so an unexpected regeneration (e.g. a key that should have been
+# added to LocalizationSpecialPhraseKeys.lua as a documented override, but wasn't) can be caught
+# before merge. Note: generate-enus runs without --prune here, so keys the scan no longer finds
+# are kept, not deleted - see cmd_generate_enus's docstring for why.
 #
-# All three steps are implemented by Source/localization_tool.py (AST-based - see that file's
+# All steps are implemented by Source/localization_tool.py (AST-based - see that file's
 # docstring for why this replaced the old regex-based Source/ExtractPhraseKeysForLocalization.lua
 # + Source/import_localization_phrase_keys.sh + inline bash pull-back).
 #
 # Triggers:
-#   - push to main or release/*: pick up new strings as soon as they land.
+#   - push to main, release/* or hotfix/*: pick up new strings as soon as they land.
 #   - weekly schedule: catches translation updates made directly on CurseForge, which can happen
 #     without any code commit here.
 #   - workflow_dispatch: manual run.
-# The push trigger is scoped to `main`/`release/*` (not "all branches"): the PR step below pushes
-# its own commits to the `localization-sync` branch, and a trigger that also matched that branch
-# would re-run this workflow on its own output.
+# The push trigger is scoped to these branches (not "all branches"): the PR step below pushes its
+# own commits to a localization-sync-* branch, and a trigger that also matched that branch would
+# re-run this workflow on its own output.
 
 on:
   workflow_dispatch:
   schedule:
     - cron: "0 6 * * 1"
   push:
-    branches: [main, "release/*"]
+    branches: [main, "release/*", "hotfix/*"]
     paths:
       - "**.lua"
       - "Locales/**"
@@ -67,6 +74,9 @@ jobs:
       - name: Upload new phrase keys to CurseForge
         run: python Source/localization_tool.py upload --token "$CF_API_KEY"
 
+      - name: Regenerate Locales/enUS.lua from the code scan
+        run: python Source/localization_tool.py generate-enus
+
       - name: Pull current CurseForge translations into Locales/*.lua
         run: python Source/localization_tool.py pull --token "$CF_API_KEY"
 
@@ -78,11 +88,15 @@ jobs:
           body: |
             Automated sync of community translations from CurseForge.
 
-            - Only updates locales currently enabled in `Locales/Locales.xml`.
-            - `enUS.lua` is never touched (hand-maintained source of truth).
+            - `Locales/enUS.lua` is regenerated mechanically from the current code scan
+              (`L["key"] = "key"`, with documented overrides from
+              `Source/LocalizationSpecialPhraseKeys.lua` applied) - review before merging like
+              any other change, it is not committed directly.
+            - Other locale files are only updated for locales currently enabled in
+              `Locales/Locales.xml`.
             - Disabled locales (commented out in `Locales.xml`, e.g. for translation-quality
               reasons) are intentionally skipped.
 
             Please review the diff for translation quality before merging.
-          branch: localization-sync
+          branch: localization-sync-${{ github.ref_name }}
           delete-branch: true

@@ -255,6 +255,73 @@ def cmd_check(args):
 
 
 # ---------------------------------------------------------------------------
+# generate-enus
+# ---------------------------------------------------------------------------
+
+def cmd_generate_enus(args):
+    """Regenerate Locales/enUS.lua from the current code scan.
+
+    Mechanical output: every extracted key becomes L["key"] = "key" - the
+    standard AceLocale enUS pattern, verified to hold for 1005 of 1006
+    existing entries. The one exception (L["Minuss"] = "Minors") is not a
+    stray edit to preserve - it's documented as an explicit override in
+    Source/LocalizationSpecialPhraseKeys.lua (a string RHS there, vs. the
+    `= true` used for plain dynamic-key documentation), so that registry file
+    is the authoritative source for key != value overrides, not whatever
+    happens to already be sitting in enUS.lua.
+
+    Keys no longer found in the code scan are kept (not deleted) unless
+    --prune is passed, since a key may still be reached via a dynamic
+    L[expr] the AST scan can't resolve (same caveat as cmd_check's "may be
+    used dynamically" list) - this tool never destroys content it can't
+    prove is truly dead.
+    """
+    static_keys, _ = scan_repository(args.root)
+    reg_path = registry_path_for(args.root)
+    registry_entries = parse_locale_entries(reg_path) if os.path.exists(reg_path) else {}
+    registry_overrides = {k: v for k, v in registry_entries.items() if v is not None}
+    used_keys = set(static_keys) | set(registry_entries)
+
+    enus_path = os.path.join(args.root, "Locales", "enUS.lua")
+    existing = parse_locale_entries(enus_path) if os.path.exists(enus_path) else {}
+
+    stale = sorted(set(existing) - used_keys)
+    if stale:
+        if args.prune:
+            print(f"Pruning {len(stale)} key(s) no longer found in the code scan.", file=sys.stderr)
+        else:
+            print(f"INFO: keeping {len(stale)} key(s) in enUS.lua not found in current code scan "
+                  f"(may be used dynamically - pass --prune to drop them):", file=sys.stderr)
+            for k in stale[:50]:
+                print(f"  {k!r}", file=sys.stderr)
+
+    final_keys = used_keys if args.prune else (used_keys | set(existing))
+
+    header = existing_header(enus_path) or (
+        'local L = LibStub("AceLocale-3.0"):NewLocale("TidyPlatesThreat", "enUS", true, true)\n'
+        "if not L then return end\n"
+    )
+
+    overridden = 0
+    lines = []
+    for key in sorted(final_keys):
+        value = registry_overrides.get(key, existing.get(key, key))
+        if value != key:
+            overridden += 1
+        lines.append(f'L["{lua_quote(key)}"] = "{lua_quote(value)}"')
+
+    with open(enus_path, "w", encoding="utf-8", newline="\n") as f:
+        f.write(header)
+        f.write("\n")
+        f.write("\n".join(lines))
+        f.write("\n")
+
+    print(f"Wrote {len(final_keys)} key(s) to {enus_path} "
+          f"({overridden} preserved override(s) where value != key).")
+    return 0
+
+
+# ---------------------------------------------------------------------------
 # upload
 # ---------------------------------------------------------------------------
 
@@ -470,6 +537,12 @@ def build_parser():
                                             "also reports per-locale translation completeness")
     p_check.add_argument("--root", default=".")
     p_check.set_defaults(func=cmd_check)
+
+    p_gen = sub.add_parser("generate-enus", help="Regenerate Locales/enUS.lua mechanically from the code scan")
+    p_gen.add_argument("--root", default=".")
+    p_gen.add_argument("--prune", action="store_true",
+                        help="Drop keys no longer found in the code scan instead of keeping them")
+    p_gen.set_defaults(func=cmd_generate_enus)
 
     p_upload = sub.add_parser("upload", help="Upload phrase keys to CurseForge")
     p_upload.add_argument("--file", default=DEFAULT_EXPORT_FILE)
