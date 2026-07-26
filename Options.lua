@@ -183,6 +183,7 @@ local WIDGET_INFO = {
   healerTracker =     { Name = "HealerTracker" },
   totemWidget =       { Name = "TotemIcon", },
   uniqueWidget =      { Name = "UniqueIcon", },
+  uniqueSettings =    { Name = "UniqueIcon", },
   threat =            { Name = "Threat", ForceUpdate = true, }, -- ThreatWidget and more
 }
 
@@ -594,14 +595,18 @@ end
 local function SetValue(info, ...)
   --print ("SetValue: Function =", "{ " .. table.concat(info.arg, ".") .. " }")
 
-  -- For widgets: check if the widget if enabled or disabled. If so, call InitializeWidget additionally
-  -- Also: Fix some bad configuration settings design by me:
-  local widget_info_key = info.arg[1]
-  if widget_info_key == "Custom" then
-    widget_info_key = "UniqueIcon"
+  -- If arg describes a CVar, set it directly and return
+  if type(info.arg) == "table" and info.arg.Cvar then
+    if info.type == "toggle" then
+      CVars:OverwriteBool(info.arg.Cvar, ...) -- Booleans should be written as 1/0
+    else
+      CVars:Overwrite(info.arg.Cvar, ...)
+    end
+    return
   end
 
-  local widget_info = WIDGET_INFO[widget_info_key]
+  -- For widgets: check if the widget if enabled or disabled. If so, call InitializeWidget additionally
+  local widget_info = WIDGET_INFO[info.arg[1]]
   local widget_is_enabled = widget_info and Addon.Widgets:IsEnabled(widget_info.Name)
 
   local setter_function = SET_FUNCTIONS[info.type] or SetValueGeneral
@@ -611,6 +616,12 @@ local function SetValue(info, ...)
 
   -- Update the corresponding parts of Threat Plates based on the setting
   if widget_info then
+    -- UseUniqueWidget is a cached flag (see Addon:UpdateUseUniqueWidget), not read live from the
+    -- profile, so it must be refreshed before comparing enabled-state for custom nameplate changes
+    if widget_info.Name == "UniqueIcon" then
+      Addon:UpdateUseUniqueWidget()
+    end
+
     --print ("SetValue: Enabling/Disabling Widget =>",widget_is_enabled, Addon.Widgets:IsEnabled(widget_info.Name))
     if widget_is_enabled ~= Addon.Widgets:IsEnabled(widget_info.Name) then
       --print ("SetValue: Enabling/Disabling Widget =>", widget_info.Name)
@@ -630,34 +641,14 @@ local function SetValue(info, ...)
   else
     --print ("SetValue: Normal =>", info[2])
 
-    if info.arg[1] == "settings" or (info.arg[1] == "HeadlineView" and (info.arg[2] == "name" or info.arg[2] == "ShowMouseoverHighlight")) then
-      --print ("SetValue: Theme =>", info.arg[2])
-      Addon:SetThemes()
-    end
-
     -- UpdateSettings for modules/elements is handled by their own PublishConfig subscriptions above
     Addon:ScheduleRepaint()
   end
 end
 
-local function SetValueCVar(info, value)
-  CVars:Overwrite(info.arg, value)
-end
-
-local function SetValueCVarBool(info, value)
-  CVars:Overwrite(info.arg, (value and 1) or 0)
-end
-
-local function CVarsManagerSetBool(info, value)
-  if type(info) == "table" then
-    info = info.arg
-  end
-  CVars:SetBool(info, value)
-  --Addon:ForceUpdate()
-end
-
-local function CVarIsUnavailable(info) 
-  return C_CVar.GetCVarInfo(info.arg) == nil 
+local function CVarIsUnavailable(info)
+  local cvar = (type(info.arg) == "table" and info.arg.Cvar) or info.arg
+  return C_CVar.GetCVarInfo(cvar) == nil
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -689,6 +680,15 @@ end
 local function GetValue(info, ...)
   --print ("GetValue: Function =", info.type)
 
+  -- If arg describes a CVar, read it directly
+  if type(info.arg) == "table" and info.arg.Cvar then
+    if info.type == "toggle" then
+      return GetCVarBool(info.arg.Cvar)
+    else
+      return tonumber(GetCVar(info.arg.Cvar))
+    end
+  end
+
   if info.type == "color" then
     return GetValueColor(info)
   else
@@ -696,12 +696,9 @@ local function GetValue(info, ...)
   end
 end
 
-local function GetValueCVarNumber(info)
-  return tonumber(GetCVar(info.arg))
-end
-
 local function GetValueCVarBool(info)
-  return GetCVarBool(info.arg)
+  local cvar = (type(info.arg) == "table" and info.arg.Cvar) or info.arg
+  return GetCVarBool(cvar)
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -748,6 +745,27 @@ function Addon.CustomPlateGetHeaderName(index)
   return custom_style_name
 end
 
+-- Addon.UseUniqueWidget is a cached flag (true if the global custom nameplate icon widget is
+-- enabled, or if any enabled custom nameplate uses a glow effect) read by
+-- Widgets/UniqueIconWidget.lua's IsEnabled(). It is not derived live from the profile, so callers
+-- that change a relevant setting (uniqueWidget.ON, or a custom nameplate's Effects.Glow.Type/
+-- Enable.Never) must refresh it explicitly instead of relying on it to already be current.
+function Addon:UpdateUseUniqueWidget()
+  local db = Addon.db.profile
+  local use_widget = db.uniqueWidget.ON
+
+  if not use_widget then
+    for index, custom_style in pairs(db.uniqueSettings) do
+      if type(index) == "number" and not custom_style.Enable.Never and custom_style.Effects.Glow.Type ~= "None" then
+        use_widget = true
+        break
+      end
+    end
+  end
+
+  Addon.UseUniqueWidget = use_widget
+end
+
 function Addon:InitializeCustomNameplates()
   local db = Addon.db.profile
 
@@ -755,7 +773,6 @@ function Addon:InitializeCustomNameplates()
   Addon.ActiveCastTriggers = false
   Addon.ActiveWildcardTriggers = false
   Addon.ActiveScriptTrigger = false
-  Addon.UseUniqueWidget = db.uniqueWidget.ON
 
   -- Use wipe to keep references intact
   local custom_style_triggers = Addon.Cache.CustomPlateTriggers
@@ -791,10 +808,6 @@ function Addon:InitializeCustomNameplates()
         end
       end
 
-      if custom_style.Effects.Glow.Type ~= "None" then
-        Addon.UseUniqueWidget = true
-      end
-
       -- Add the style to instance-based caches for faster access
       if custom_style.Enable.InInstances then
         if custom_style.Enable.InstanceIDs.Enabled then
@@ -822,6 +835,7 @@ function Addon:InitializeCustomNameplates()
   Addon.ActiveCastTriggers = next(custom_style_triggers.Cast) ~= nil
   Addon.ActiveWildcardTriggers = next(custom_style_triggers.NameWildcard) ~= nil
   Addon.ActiveScriptTrigger = next(custom_style_triggers.Script) ~= nil
+  Addon:UpdateUseUniqueWidget()
   Addon.UpdateStylesForCurrentInstance()
 end
 
@@ -2950,12 +2964,12 @@ local function CreateTargetArtWidgetOptions()
                 order = 10,
                 type = "toggle",
                 set = function(info, val)
-                  CVars:Set(info.arg, (val and "3") or "0")
+                  CVars:Set(info.arg.Cvar, (val and "3") or "0")
                 end,
                 get = function(info)
-                  return CVars:GetAsNumber(info.arg) == Enum.SoftTargetEnableFlags.Any
+                  return CVars:GetAsNumber(info.arg.Cvar) == Enum.SoftTargetEnableFlags.Any
                 end,
-                arg = "SoftTargetEnemy",
+                arg = { Cvar = "SoftTargetEnemy", },
               },
               Highlight = {
                 name = L["Highlight"],
@@ -2983,9 +2997,8 @@ local function CreateTargetArtWidgetOptions()
                 desc = L["Always show nameplates for soft enemy target."],
                 order = 50,
                 type = "toggle",
-                set = CVarsManagerSetBool,
                 get = GetValueCVarBool,
-                arg = "SoftTargetNameplateEnemy",
+                arg = { Cvar = "SoftTargetNameplateEnemy", },
               },
             },
           },
@@ -3000,12 +3013,12 @@ local function CreateTargetArtWidgetOptions()
                 order = 10,
                 type = "toggle",
                 set = function(info, val)
-                  CVars:Set(info.arg, (val and "3") or "0")
+                  CVars:Set(info.arg.Cvar, (val and "3") or "0")
                 end,
                 get = function(info)
-                  return CVars:GetAsNumber(info.arg) == Enum.SoftTargetEnableFlags.Any
+                  return CVars:GetAsNumber(info.arg.Cvar) == Enum.SoftTargetEnableFlags.Any
                 end,
-                arg = "SoftTargetFriend",
+                arg = { Cvar = "SoftTargetFriend", },
               },
               Highlight = {
                 name = L["Highlight"],
@@ -3033,9 +3046,8 @@ local function CreateTargetArtWidgetOptions()
                 desc = L["Always show nameplates for soft friend target."],
                 order = 50,
                 type = "toggle",
-                set = CVarsManagerSetBool,
                 get = GetValueCVarBool,
-                arg = "SoftTargetNameplateFriend",
+                arg = { Cvar = "SoftTargetNameplateFriend", },
               },
             },
           },
@@ -3050,12 +3062,12 @@ local function CreateTargetArtWidgetOptions()
                 order = 10,
                 type = "toggle",
                 set = function(info, val)
-                  CVars:Set(info.arg, (val and "3") or "0")
+                  CVars:Set(info.arg.Cvar, (val and "3") or "0")
                 end,
                 get = function(info)
-                  return CVars:GetAsNumber(info.arg) == Enum.SoftTargetEnableFlags.Any
+                  return CVars:GetAsNumber(info.arg.Cvar) == Enum.SoftTargetEnableFlags.Any
                 end,
-                arg = "SoftTargetInteract",
+                arg = { Cvar = "SoftTargetInteract", },
               },
               Highlight = {
                 name = L["Highlight"],
@@ -3083,9 +3095,8 @@ local function CreateTargetArtWidgetOptions()
                 desc = L["Always show nameplates for soft interact target."],
                 order = 50,
                 type = "toggle",
-                set = CVarsManagerSetBool,
                 get = GetValueCVarBool,
-                arg = "SoftTargetNameplateInteract",
+                arg = { Cvar = "SoftTargetNameplateInteract", },
               },
             },
           },
@@ -3105,28 +3116,28 @@ local function CreateTargetArtWidgetOptions()
                     name = L["None"],
                     order = 10,
                     type = "toggle",
-                    set = function(info, val) CVars:Set(info.arg, 0) end,
-                    get = function(info) 
-                      local value = CVars:Get(info.arg)
+                    set = function(info, val) CVars:Set(info.arg.Cvar, 0) end,
+                    get = function(info)
+                      local value = CVars:Get(info.arg.Cvar)
                       return value ~= "1" and value ~= "2"
                     end,
-                    arg = "SoftTargetForce",
+                    arg = { Cvar = "SoftTargetForce", },
                   },
                   Enemies = {
                     name = L["Enemies"],
                     order = 20,
                     type = "toggle",
-                    set = function(info, val) CVars:Set(info.arg, 1) end,
-                    get = function(info) return CVars:Get(info.arg) == "1" end,
-                    arg = "SoftTargetForce",
+                    set = function(info, val) CVars:Set(info.arg.Cvar, 1) end,
+                    get = function(info) return CVars:Get(info.arg.Cvar) == "1" end,
+                    arg = { Cvar = "SoftTargetForce", },
                   },
                   Friends = {
                     name = L["Friends"],
                     order = 30,
                     type = "toggle",
-                    set = function(info, val) CVars:Set(info.arg, 2) end,
-                    get = function(info) return CVars:Get(info.arg) == "2" end,
-                    arg = "SoftTargetForce",
+                    set = function(info, val) CVars:Set(info.arg.Cvar, 2) end,
+                    get = function(info) return CVars:Get(info.arg.Cvar) == "2" end,
+                    arg = { Cvar = "SoftTargetForce", },
                   },
                 },
               },
@@ -3140,28 +3151,28 @@ local function CreateTargetArtWidgetOptions()
                     name = L["No matching"],
                     order = 10,
                     type = "toggle",
-                    set = function(info, val) CVars:Set(info.arg, 0) end,
-                    get = function(info) 
-                      local value = CVars:Get(info.arg)
+                    set = function(info, val) CVars:Set(info.arg.Cvar, 0) end,
+                    get = function(info)
+                      local value = CVars:Get(info.arg.Cvar)
                       return value ~= "1" and value ~= "2"
                     end,
-                    arg = "SoftTargetMatchLocked",
+                    arg = { Cvar = "SoftTargetMatchLocked", },
                   },
                   HardLocked = {
                     name = L["Hard locked target only"],
                     order = 20,
                     type = "toggle",
-                    set = function(info, val) CVars:Set(info.arg, 1) end,
-                    get = function(info) return CVars:Get(info.arg) == "1" end,
-                    arg = "SoftTargetMatchLocked",
+                    set = function(info, val) CVars:Set(info.arg.Cvar, 1) end,
+                    get = function(info) return CVars:Get(info.arg.Cvar) == "1" end,
+                    arg = { Cvar = "SoftTargetMatchLocked", },
                   },
                   AttackTargets = {
                     name = L["Targets you attack"],
                     order = 30,
                     type = "toggle",
-                    set = function(info, val) CVars:Set(info.arg, 2) end,
-                    get = function(info) return CVars:Get(info.arg) == "2" end,
-                    arg = "SoftTargetMatchLocked",
+                    set = function(info, val) CVars:Set(info.arg.Cvar, 2) end,
+                    get = function(info) return CVars:Get(info.arg.Cvar) == "2" end,
+                    arg = { Cvar = "SoftTargetMatchLocked", },
                   },
                 },
               },              
@@ -3175,20 +3186,20 @@ local function CreateTargetArtWidgetOptions()
                     name = L["None"],
                     order = 10,
                     type = "toggle",
-                    set = function(info, val) CVars:Set(info.arg, 0) end,
-                    get = function(info) 
-                      local value = CVars:Get(info.arg)
+                    set = function(info, val) CVars:Set(info.arg.Cvar, 0) end,
+                    get = function(info)
+                      local value = CVars:Get(info.arg.Cvar)
                       return value ~= "2"
                     end,
-                    arg = "SoftTargetWithLocked",
+                    arg = { Cvar = "SoftTargetWithLocked", },
                   },
                   AlwaysSoftTargeting = {
                     name = L["Always do action targeting"],
                     order = 30,
                     type = "toggle",
-                    set = function(info, val) CVars:Set(info.arg, 2) end,
-                    get = function(info) return CVars:Get(info.arg) == "2" end,
-                    arg = "SoftTargetWithLocked",
+                    set = function(info, val) CVars:Set(info.arg.Cvar, 2) end,
+                    get = function(info) return CVars:Get(info.arg.Cvar) == "2" end,
+                    arg = { Cvar = "SoftTargetWithLocked", },
                   },
                 },
               },                
@@ -3208,7 +3219,7 @@ local function CreateTargetArtWidgetOptions()
             type = "group",
             inline = true,
             set = function(info, val)
-              CVarsManagerSetBool(info, val)
+              SetValue(info, val)
               Addon.EventService.PublishConfig({ "targetWidget" })
             end,
             get = GetValueCVarBool,
@@ -3225,34 +3236,34 @@ local function CreateTargetArtWidgetOptions()
                 name = L["Enemy"],
                 order = 2,
                 type = "toggle",
-                arg = "SoftTargetIconEnemy",
+                arg = { Cvar = "SoftTargetIconEnemy", },
               },
               SoftTargetIconFriend = {
                 name = L["Friend"],
                 order = 3,
                 type = "toggle",
-                arg = "SoftTargetIconFriend",
-              },              
+                arg = { Cvar = "SoftTargetIconFriend", },
+              },
               SoftTargetIconInteract = {
                 name = L["Interact"],
                 order = 4,
                 type = "toggle",
-                arg = "SoftTargetIconInteract",
+                arg = { Cvar = "SoftTargetIconInteract", },
               },
               SoftTargetIconGameObject = {
                 name = L["Game Object"],
                 order = 5,
                 type = "toggle",
                 desc = L["Show icon for soft interact game objects (interactable objects you cannot normally target)."],
-                arg = "SoftTargetIconGameObject",
+                arg = { Cvar = "SoftTargetIconGameObject", },
               },
               SoftTargetLowPriorityIcons = {
                 name = L["Low Priority"],
                 order = 6,
                 type = "toggle",
                 desc = L["Show interact icons even when there is other visual indicators, such as quest or loot effects."],
-                arg = "SoftTargetLowPriorityIcons",
-              },   
+                arg = { Cvar = "SoftTargetLowPriorityIcons", },
+              },
             },
           },                       
           Layout = {
@@ -5781,7 +5792,6 @@ local function CreateVisibilityTab()
         inline = true,
         width = "full",
         get = GetValueCVarBool,
-        set = SetValueCVarBool,
         args = {
           Description = GetDescriptionEntry(L["These options allow you to control which nameplates are visible within the game field while you play."]),
           Spacer0 = GetSpacerEntry(1),
@@ -5791,7 +5801,7 @@ local function CreateVisibilityTab()
             type = "toggle",
             order = 10,
             width = "full",
-            arg = "nameplateShowAll"
+            arg = { Cvar = "nameplateShowAll", }
           },
           AllUnits = {
             name = L["Show All Nameplates (Friendly and Enemy Units)"],
@@ -5821,7 +5831,7 @@ local function CreateVisibilityTab()
             type = "toggle",
             order = 30,
             width = "full",
-            arg = "nameplateShowFriends",
+            arg = { Cvar = "nameplateShowFriends", },
             hidden = Addon.WOW_USES_SHOW_FRIENDLY_PLAYERS_CVAR
           },
           AllHostile = {
@@ -5829,7 +5839,7 @@ local function CreateVisibilityTab()
             order = 40,
             type = "toggle",
             width = "full",
-            arg = "nameplateShowEnemies"
+            arg = { Cvar = "nameplateShowEnemies", }
           },
           Header = { type = "header", order = 45, name = "", },
           ShowBlizzardFriendlyNameplates = {
@@ -6024,8 +6034,6 @@ local function CreateBlizzardSettings()
     order = 140,
     type = "group",
     childGroups = "tab",
-    set = SetValueCVar,
-    get = GetValueCVarNumber,
     args = {
       Note = {
         name = L["Note"],
@@ -6085,7 +6093,7 @@ local function CreateBlizzardSettings()
                 max = 1,
                 step = 0.01,
                 disabled = function() return db.Scale.IgnoreUIScale or db.Scale.PixelPerfectUI end,
-                arg = "uiScale",
+                arg = { Cvar = "uiScale", },
               },
               IgnoreUIScale = {
                 name = L["Ignore UI Scale"],
@@ -6124,7 +6132,6 @@ local function CreateBlizzardSettings()
         inline = false,
         handler = func_handler,
         set = "SetValue",
-        get = GetValue,
         args = {
           Show = {
             name = L["Show"],
@@ -6139,12 +6146,12 @@ local function CreateBlizzardSettings()
                 width = "double",
                 set = function(info, val)
                   Addon.db.profile.BlizzardSettings.Names.ShowOnlyNames = val
-                  SetValueCVarBool(info, val)
+                  SetValue(info, val)
                   ReloadUI()
                 end,
                 get = GetValueCVarBool,
                 desc = L["Show only unit names and hide healthbars (requires /reload). Note that the clickable area of friendly nameplates will also be set to zero so that they don't interfere with enemy nameplates stacking (not in Classic or TBC Classic)."],
-                arg = "nameplateShowOnlyNames",
+                arg = { Cvar = "nameplateShowOnlyNames", },
                 hidden = Addon.ExpansionIsAtLeastMidnight,
               },
               ShowOnlyNameForFriendlyPlayerUnits = {
@@ -6152,10 +6159,10 @@ local function CreateBlizzardSettings()
                 order = 35,
                 type = "toggle",
                 width = "double",
-                set = SetValueCVarBool,
+                set = SetValue,
                 get = GetValueCVarBool,
                 desc = L["Hide healthbars of friendly units"],
-                arg = "nameplateShowOnlyNameForFriendlyPlayerUnits",    
+                arg = { Cvar = "nameplateShowOnlyNameForFriendlyPlayerUnits", },
                 hidden = not Addon.ExpansionIsAtLeastMidnight,        
               },                    
               DebuffsOnFriendly = {
@@ -6163,9 +6170,9 @@ local function CreateBlizzardSettings()
                 order = 40,
                 type = "toggle",
                 width = "double",
-                set = SetValueCVarBool,
+                set = SetValue,
                 get = GetValueCVarBool,
-                arg = "nameplateShowDebuffsOnFriendly",
+                arg = { Cvar = "nameplateShowDebuffsOnFriendly", },
               },
               OnlyInInstances = {
                 type = "toggle",
@@ -6305,9 +6312,9 @@ local function CreateBlizzardSettings()
                 type = "select",
                 desc = L["Defines the movement/collision model for nameplates."],
                 values = { Overlapping = L["Overlapping"], Stacking = L["Stacking"] },
-                set = function(info, value) SetValueCVar(info, (value == "Overlapping" and "0") or "1") end,
+                set = function(info, value) SetValue(info, (value == "Overlapping" and "0") or "1") end,
                 get = function(info) return (GetValueCVarBool(info) and "Stacking") or "Overlapping" end,
-                arg = "nameplateMotion",
+                arg = { Cvar = "nameplateMotion", },
                 hidden = CVarIsUnavailable,
               },
               MotionSpeed = {
@@ -6318,7 +6325,7 @@ local function CreateBlizzardSettings()
                 max = 1,
                 step = 0.01,
                 desc = L["Controls the rate at which nameplate animates into their target locations [0.0-1.0]."],
-                arg = "nameplateMotionSpeed",
+                arg = { Cvar = "nameplateMotionSpeed", },
                 hidden = CVarIsUnavailable,
               },
               OverlapH = {
@@ -6330,7 +6337,7 @@ local function CreateBlizzardSettings()
                 step = 0.01,
                 isPercent = true,
                 desc = L["Percentage amount for horizontal overlap of nameplates."],
-                arg = "nameplateOverlapH",
+                arg = { Cvar = "nameplateOverlapH", },
                 hidden = CVarIsUnavailable,
               },
               OverlapV = {
@@ -6342,7 +6349,7 @@ local function CreateBlizzardSettings()
                 step = 0.01,
                 isPercent = true,
                 desc = L["Percentage amount for vertical overlap of nameplates."],
-                arg = "nameplateOverlapV",
+                arg = { Cvar = "nameplateOverlapV", },
                 hidden = CVarIsUnavailable,
               },
             },
@@ -6362,7 +6369,7 @@ local function CreateBlizzardSettings()
                 step = 1,
                 width = "double",
                 desc = L["The max distance to show nameplates."],
-                arg = "nameplateMaxDistance",
+                arg = { Cvar = "nameplateMaxDistance", },
                 hidden = CVarIsUnavailable,            
               },
               MaxDistanceBehindCam = {
@@ -6374,7 +6381,7 @@ local function CreateBlizzardSettings()
                 step = 1,
                 width = "double",
                 desc = L["The max distance to show the target nameplate when the target is behind the camera."],
-                arg = "nameplateTargetBehindMaxDistance",
+                arg = { Cvar = "nameplateTargetBehindMaxDistance", },
                 hidden = CVarIsUnavailable,
               },
             },
@@ -6395,7 +6402,7 @@ local function CreateBlizzardSettings()
                 step = 0.01,
                 isPercent = true,
                 desc = L["The inset from the top (in screen percent) that the non-self nameplates are clamped to."],
-                arg = "nameplateOtherTopInset",
+                arg = { Cvar = "nameplateOtherTopInset", },
                 hidden = CVarIsUnavailable,
               },
               OtherBottomInset = {
@@ -6407,7 +6414,7 @@ local function CreateBlizzardSettings()
                 step = 0.01,
                 isPercent = true,
                 desc = L["The inset from the bottom (in screen percent) that the non-self nameplates are clamped to."],
-                arg = "nameplateOtherBottomInset",
+                arg = { Cvar = "nameplateOtherBottomInset", },
                 hidden = CVarIsUnavailable,
               },
               LargeTopInset = {
@@ -6419,7 +6426,7 @@ local function CreateBlizzardSettings()
                 step = 0.01,
                 isPercent = true,
                 desc = L["The inset from the top (in screen percent) that large nameplates are clamped to."],
-                arg = "nameplateLargeTopInset",
+                arg = { Cvar = "nameplateLargeTopInset", },
                 hidden = CVarIsUnavailable,
               },
               LargeBottomInset = {
@@ -6431,7 +6438,7 @@ local function CreateBlizzardSettings()
                 step = 0.01,
                 isPercent = true,
                 desc = L["The inset from the bottom (in screen percent) that large nameplates are clamped to."],
-                arg = "nameplateLargeBottomInset",
+                arg = { Cvar = "nameplateLargeBottomInset", },
                 hidden = CVarIsUnavailable,
               },
               ClampTarget = {
@@ -6440,7 +6447,7 @@ local function CreateBlizzardSettings()
                 type = "toggle",
                 width = "full",
                 desc = L["Clamps the target's nameplate to the edges of the screen, even if the target is off-screen."],
-                arg = "clampTargetNameplateToScreen",
+                arg = { Cvar = "clampTargetNameplateToScreen", },
                 hidden = CVarIsUnavailable,
               },
             },
@@ -6452,8 +6459,6 @@ local function CreateBlizzardSettings()
         order = 40,
         type = "group",
         inline = false,
-        set = SetValue,
-        get = GetValue,
         hidden = function() return not Addon.IS_MAINLINE end,
         args = {
           Scale = GetScaleEntry(L["Scale"], 10, { "BlizzardSettings", "Widgets", "Scale" }, nil, 0.3, 3.0),
@@ -11211,8 +11216,6 @@ local function CreateOptionsTable()
                       type = "toggle",
                       order = 1,
                       desc = L["This option allows you to control whether threat affects the healthbar color of nameplates."],
-                      get = GetValue,
-                      set = SetValue,
                       descStyle = "inline",
                       width = "full",
                       arg = { "threat", "useHPColor" }
@@ -11497,8 +11500,6 @@ end
 
 function Addon:ProfChange()
   db = Addon.db.profile
-
-  Addon:ReloadTheme()
 
   -- Update preview icons: EliteArtWidget, TargetHighlightWidget, ClassIconWidget, QuestWidget, Threat Textures, Totem Icons, Custom Nameplate Icons
   local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\"
