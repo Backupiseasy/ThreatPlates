@@ -51,6 +51,13 @@ permissions:
 
 jobs:
   sync:
+    # Skip the run created by merging this workflow's own localization-sync-* PR back into a
+    # trigger branch - that merge touches Locales/** so the push trigger above fires again, but
+    # re-running would just re-extract/re-upload/re-pull the same content that PR just landed
+    # (idempotent, no new PR gets opened) - wasted CI time and CF API calls. GitHub's default
+    # merge-commit, squash, and rebase messages all include the PR title, so matching that string
+    # catches all three merge strategies (breaks only if someone hand-edits the merge message).
+    if: github.event_name != 'push' || !contains(github.event.head_commit.message, 'Update localization files from CurseForge')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
