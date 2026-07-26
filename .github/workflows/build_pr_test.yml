@@ -94,7 +94,7 @@ jobs:
           # the tag, which this tag intentionally avoids - so prerelease is set explicitly here
           # instead, guaranteeing this build can never become the repo's "Latest release".
           gh release edit "$TAG" --prerelease --repo "$REPO"
-          body="🧪 Test-Build verfügbar: https://github.com/$REPO/releases/tag/$TAG
+          body="🧪 Test build available: https://github.com/$REPO/releases/tag/$TAG
 
-          Inoffizieller Build zum Testen dieses PRs — kein CurseForge/Wago/WoWInterface-Release."
+          Unofficial build for testing this PR — not published to CurseForge/Wago/WoWInterface."
           gh pr comment "$PR_NUMBER" --repo "$REPO" --body "$body"
