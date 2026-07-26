@@ -1,5 +1,11 @@
 Changes since tag 1.0.4
 
+commit 4f8f5c2607d7384b26df9175bb99fa3df891b015
+Author: Nnoggie <27819512+Nnoggie@users.noreply.github.com>
+Date:   Fri Jul 17 09:44:20 2026 +0200
+
+    Support namespaced AnimateTexCoords in 12.1 (#38)
+
 commit d2a5c2ef671cf43ae96c09e2670464cbf16a8328
 Author: Simpy <kodi03466@hotmail.com>
 Date:   Mon Jan 26 17:23:25 2026 -0500
