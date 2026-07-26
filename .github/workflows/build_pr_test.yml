@@ -40,7 +40,7 @@ jobs:
       pr_number: ${{ steps.resolve.outputs.pr_number }}
       tag: ${{ steps.resolve.outputs.tag }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
