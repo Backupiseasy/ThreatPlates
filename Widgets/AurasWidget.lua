@@ -2901,12 +2901,39 @@ local function CreateAuraGrid(self, parent)
   return aura_grid_frame
 end
 
+-- Only calls Start/Stop when actually changing highlight state, so LibCustomGlow never gets a
+-- Stop for a frame it already released on its own (async fade-out) - see [GH-719]
+local function AuraHighlightSaveStart(frame)
+  AuraHighlightStart(frame.Highlight, AuraHighlightColor, 0)
+  frame.Highlighted = true
+end
+
+local function AuraHighlightSaveStop(frame, stop_function)
+  if frame.Highlighted then
+    (stop_function or AuraHighlightStop)(frame.Highlight)
+    frame.Highlighted = false
+  end
+end
+
+-- Shared by icon and bar mode: highlights the aura frame if its aura is stealable, otherwise stops
+-- (or leaves off) any existing highlight.
+local function UpdateAuraHighlight(aura_frame)
+  if not AuraHighlightEnabled then return end
+
+  if aura_frame.AuraData.isStealable then
+    AuraHighlightSaveStart(aura_frame)
+  else
+    AuraHighlightSaveStop(aura_frame)
+  end
+end
+
 local function HideNonActiveAuras(self, aura_grid_frame, stop_highlight)
   local aura_frames = aura_grid_frame.AuraFrames
   for i = aura_grid_frame.ActiveAuras + 1, #aura_frames do
-    aura_frames[i]:Hide()
+    local aura_frame = aura_frames[i]
+    aura_frame:Hide()
     if stop_highlight then
-      AuraHighlightStop(aura_frames[i].Highlight)
+      AuraHighlightSaveStop(aura_frame)
     end
   end
 end
@@ -2956,6 +2983,10 @@ local function CreateAuraFrameIconMode(self, parent)
   frame.Highlight = _G.CreateFrame("Frame", nil, frame)
   frame.Highlight:SetFrameLevel(parent:GetFrameLevel())
   frame.Highlight:SetPoint("CENTER")
+  -- Tracks whether AuraHighlightStart was called without a matching Stop yet, so Stop/StopPrevious
+  -- are never invoked on a frame LibCustomGlow already released on its own (async fade-out), which
+  -- causes "Attempted to release object that doesn't belong to this pool"
+  frame.Highlighted = false
 
   -- Use a seperate frame for text elements as a) using frame as parent results in the text being shown below
   -- the cooldown frame and b) using the cooldown frame results in the text not being visible if there is no
@@ -3020,7 +3051,7 @@ local function UpdateAuraFrameIconMode(self, frame)
     frame.Border:Hide()
   end
 
-  AuraHighlightStopPrevious(frame.Highlight)
+  AuraHighlightSaveStop(frame, AuraHighlightStopPrevious)
   if AuraHighlightEnabled then
     frame.Highlight:SetSize(frame:GetWidth() + AuraHighlightOffset, frame:GetHeight() + AuraHighlightOffset)
   end
@@ -3054,14 +3085,8 @@ local function UpdateAuraInformationIconMode(self, aura_frame) -- texture, durat
     end
   end
 
-  if AuraHighlightEnabled then
-    if aura_frame.AuraData.isStealable then
-      AuraHighlightStart(aura_frame.Highlight, AuraHighlightColor, 0)
-    else
-      AuraHighlightStop(aura_frame.Highlight)
-    end
-  end
-  
+  UpdateAuraHighlight(aura_frame)
+
   aura_frame.Cooldown:Set(expiration - duration, duration + .25)
   AnimationStopFlash(aura_frame)
 
@@ -3108,6 +3133,10 @@ local function CreateAuraFrameBarMode(self, parent)
 
   frame.Highlight = _G.CreateFrame("Frame", nil, frame)
   frame.Highlight:SetFrameLevel(parent:GetFrameLevel())
+  -- Tracks whether AuraHighlightStart was called without a matching Stop yet, so Stop/StopPrevious
+  -- are never invoked on a frame LibCustomGlow already released on its own (async fade-out), which
+  -- causes "Attempted to release object that doesn't belong to this pool"
+  frame.Highlighted = false
 
   frame.Icon = frame:CreateTexture(nil, "ARTWORK", nil, -5)
 
@@ -3188,7 +3217,7 @@ local function UpdateAuraFrameBarMode(self, frame)
   FontUpdateText(frame.Statusbar, frame.LabelText, db.Label)
   FontUpdateText(frame.Statusbar, frame.TimeText, db.Duration)
 
-  AuraHighlightStopPrevious(frame.Highlight)
+  AuraHighlightSaveStop(frame, AuraHighlightStopPrevious)
   if AuraHighlightEnabled then
     local aura_highlight = frame.Highlight
 
@@ -3244,13 +3273,7 @@ local function UpdateAuraInformationBarMode(self, aura_frame) -- texture, durati
     aura_frame.Icon:SetTexture(aura_frame.AuraData.icon)
   end
 
-  if AuraHighlightEnabled then
-    if aura_frame.AuraData.isStealable then
-      AuraHighlightStart(aura_frame.Highlight, AuraHighlightColor, 0)
-    else
-      AuraHighlightStop(aura_frame.Highlight)
-    end
-  end
+  UpdateAuraHighlight(aura_frame)
 
   aura_frame.LabelText:SetText(aura_frame.AuraData.name)
   -- Highlight Coloring
