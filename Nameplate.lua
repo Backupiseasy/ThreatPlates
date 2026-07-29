@@ -1991,6 +1991,10 @@ function Addon:COMBAT_LOG_EVENT_UNFILTERED()
         -- _STOP events
         tp_frame.unit.IsInterrupted = true
 
+        -- Stop the cast right away instead of waiting for the (separately-timed) UNIT_SPELLCAST_STOP
+        -- event, otherwise OnUpdate keeps animating the bar (IsCasting/IsChanneling still true) even
+        -- though it was just set to the interrupted color/text. Mirrors Addon:UNIT_SPELLCAST_INTERRUPTED.
+        Addon:UNIT_SPELLCAST_STOP(tp_frame.unit.unitid, nil, nil, castbar.CastbarID)
         -- Should not be necessary any longer ... as OnStopCasting is not hiding the castbar anymore
         castbar:Show()
       end
