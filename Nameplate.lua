@@ -80,9 +80,6 @@ local _G =_G
 
 -- Constants
 local CASTBAR_INTERRUPT_HOLD_TIME = Addon.CASTBAR_INTERRUPT_HOLD_TIME
--- Grace window for a SPELL_INTERRUPT combat log event that arrives after UNIT_SPELLCAST_STOP
--- already hid the castbar (see Addon:UNIT_SPELLCAST_STOP / Addon:COMBAT_LOG_EVENT_UNFILTERED).
-local CASTBAR_INTERRUPT_PENDING_TIME = 0.3
 
 local IGNORED_UNITS = {
   target = true,
@@ -122,6 +119,7 @@ local SettingsShowEnemyBlizzardNameplates, SettingsShowFriendlyBlizzardNameplate
 local SettingsShowOnlyNames
 local TargetStyleForEnemy, TargetStyleForFriend, TargetStyleForInteract
 local ShowCastBars
+local ShowInterruptSource
 
 ---------------------------------------------------------------------------------------------------
 -- Wrapper functions for WoW Classic
@@ -582,7 +580,7 @@ local function OnStartCasting(tp_frame, unitid, cast_guid, event_spell_id, castb
   -- Don't check for or style.castbar.show here as depending on the cast the nameplate style can change (with then
   -- a castbar that should be shown).
   if not tp_frame:IsShown() then
-    castbar:Hide()
+    castbar:UpdateVisibility(tp_frame)
     return
   end
 
@@ -598,8 +596,8 @@ local function OnStartCasting(tp_frame, unitid, cast_guid, event_spell_id, castb
   castbar.CastbarID = castbar_id or uci_castbar_id  
 
   if not name or isTradeSkill then
-    castbar:Hide()
-    return 
+    castbar:UpdateVisibility(tp_frame)
+    return
   end
 
   local unit = tp_frame.unit
@@ -609,13 +607,16 @@ local function OnStartCasting(tp_frame, unitid, cast_guid, event_spell_id, castb
 
   -- Abort here as casts can now switch nameplate styles (e.g,. from headline to healthbar view
   if not tp_frame.style.castbar.show and not unit.CustomStyleCast then
-    castbar:Hide()
+    castbar:UpdateVisibility(tp_frame)
     return
   end
 
   unit.isCasting = true
   unit.IsInterrupted = false
   unit.CastIsNotInterruptible = notInterruptible
+  -- Supersede any pending backfill target from a previous, already-resolved-or-stale stop on
+  -- this castbar (see Addon:UNIT_SPELLCAST_STOP / Addon:COMBAT_LOG_EVENT_UNFILTERED).
+  castbar.InterruptSourceUnknown = nil
 
   if not ExpansionIsAtLeastMidnight then
     if StyleModule.CastTriggerUpdateStyle(unit) then
@@ -689,23 +690,25 @@ local function OnStartCasting(tp_frame, unitid, cast_guid, event_spell_id, castb
     PublishEvent("CastingStarted", tp_frame)
   end
 
-  castbar:Show()
+  castbar:UpdateVisibility(tp_frame)
 end
 
-function Addon:UpdateCastbar(tp_frame)
+-- Single entry point for "does unitid have an active cast right now, and if so make the
+-- castbar reflect it" - always queries UnitCastingInfo/UnitChannelInfo live rather than
+-- trusting a cached flag, so a stale unit.isCasting/castbar.IsChanneling can't dispatch to
+-- the wrong info API or miss a cast the plate is only just now discovering.
+local function RefreshCastbar(tp_frame, unitid)
   if not ShowCastBars then return end
 
-  local castbar = tp_frame.visual.Castbar
-  local unit = tp_frame.unit
-  if unit.isCasting then 
-    -- Check to see if there's a spell being cast
-    OnStartCasting(tp_frame, unit.unitid, nil, nil, castbar.CastbarID, castbar.IsChanneling)
+  if UnitCastingInfo(unitid) then
+    OnStartCasting(tp_frame, unitid, nil, nil, nil, false)
+  elseif UnitChannelInfo(unitid) then
+    OnStartCasting(tp_frame, unitid, nil, nil, nil, true)
   else
-    -- It would be better to check for IsInterrupted here and not hide it if that is true
-    -- Not currently sure though, if that might work with the Hide() calls in OnStartCasting
-    castbar:Hide()
+    tp_frame.visual.Castbar:UpdateVisibility(tp_frame)
   end
 end
+Addon.RefreshCastbar = RefreshCastbar
 
 ---------------------------------------------------------------------------------------------------------------------
 -- Widget Container Handling
@@ -1024,8 +1027,10 @@ function Addon.SetNamePlateClickThrough()
   end
 end
 
-local function HandlePlateUnitAdded(plate, unitid)
-  local tp_frame = plate.TPFrame
+-- Re-reads unit data from WoW APIs: name/class/level/reaction/GUID/cast-state, plate bookkeeping,
+-- threat. Skippable by callers that only need to re-derive presentation from data that hasn't
+-- actually changed (local settings/profile changes, not server-side unit events).
+local function RefreshUnitData(tp_frame, plate, unitid)
   local unit = tp_frame.unit
 
   -- Initialize unit data for which there are no events when players enters world or that
@@ -1036,9 +1041,13 @@ local function HandlePlateUnitAdded(plate, unitid)
   if guid and not IsSecretValueTP(guid) then
     PlatesByGUID[guid] = plate
   end
-  
-  -- Update modules, then elements, then widgets
-  ThreatModule.SetUnitAttribute(tp_frame.unit)
+
+  ThreatModule.SetUnitAttribute(unit)
+end
+
+-- Applies presentation (visibility, style, widgets, castbar) computed from currently-known unit
+-- data. No fresh API reads of its own.
+local function RefreshPlatePresentation(tp_frame, plate, unitid)
   SetNameplateVisibility(plate, unitid)
 
   SetNamePlateSimplified(unitid, false)
@@ -1055,15 +1064,13 @@ local function HandlePlateUnitAdded(plate, unitid)
 
   -- Check to see if there's a spell being cast.
   -- Call this after the plate is shown as OnStartCasting checks if the plate is shown; if not, the castbar is hidden and nothing is updated.
-  if ShowCastBars then
-    if UnitCastingInfo(unitid) then
-      OnStartCasting(tp_frame, unitid, nil, nil, nil, false)
-    elseif UnitChannelInfo(unitid) then
-      OnStartCasting(tp_frame, unitid, nil, nil, nil, true)
-    else
-      tp_frame.visual.Castbar:Hide()
-    end
-  end
+  RefreshCastbar(tp_frame, unitid)
+end
+
+local function HandlePlateUnitAdded(plate, unitid)
+  local tp_frame = plate.TPFrame
+  RefreshUnitData(tp_frame, plate, unitid)
+  RefreshPlatePresentation(tp_frame, plate, unitid)
 end
 
 -- This information was extracted from other nameplate addons:
@@ -1205,7 +1212,8 @@ function Addon:UpdateSettings()
     Addon.UnitIsTarget = function(unitid) return UnitIsUnitTP("target", unitid) end
   end
 
-  if db.settings.castnostop.ShowInterruptSource then
+  ShowInterruptSource = db.settings.castnostop.ShowInterruptSource
+  if ShowInterruptSource then
     RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
   else
     UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
@@ -1224,7 +1232,7 @@ function Addon:UpdatePlatesVisible()
   -- No need to update only active nameplates, as this is only done when settings are changed, so performance is
   -- not really an issue.
   for unitid, tp_frame in pairs(PlatesByUnit) do
-    HandlePlateUnitAdded(tp_frame.Parent, unitid)
+    RefreshPlatePresentation(tp_frame, tp_frame.Parent, unitid)
   end
 end
 
@@ -1247,7 +1255,7 @@ function Addon:ForceUpdate()
 end
 
 function Addon:ForceUpdateOnNameplate(tp_frame)
-  HandlePlateUnitAdded(tp_frame.Parent, tp_frame.unit.unitid)
+  RefreshPlatePresentation(tp_frame, tp_frame.Parent, tp_frame.unit.unitid)
 end
 
 function Addon:ForceUpdateFrameOnShow()
@@ -1749,6 +1757,19 @@ end
 -- threat bar colors current when threat shifts gradually without units entering/leaving the table.
 Addon.UNIT_THREAT_SITUATION_UPDATE = Addon.UNIT_THREAT_LIST_UPDATE
 
+-- Immediate light update for a reaction/attackable change on an already-tracked, active plate -
+-- does not re-read name/health/GUID, so it's not a substitute for ScheduleNameplateRevalidation
+-- where that's warranted (see callers).
+local function ApplyReactionUpdate(tp_frame, unitid)
+  SetNameplateVisibility(tp_frame.Parent, unitid)
+  if tp_frame.Active then
+    SetUnitAttributeReaction(tp_frame.unit, unitid)
+    ApplyPlateHitTest(tp_frame)
+    StyleModule.Update(tp_frame)
+    PublishEvent("FactionUpdate", tp_frame)
+  end
+end
+
 -- Update all elements that depend on the unit's reaction towards the player
 function Addon:UNIT_FACTION(unitid)
   -- Skip special unitids (they are updated via their nameplate unitid) and personal nameplate
@@ -1758,31 +1779,19 @@ function Addon:UNIT_FACTION(unitid)
     -- We first need to check if TP is active or not on a nameplate. After a faction change, other nameplates might be active
     -- (friendly/hostile) than before. So, we need to update Active first (as GetActiveThreatPlates only iterates over active
     for plate_unitid, tp_frame in pairs(PlatesByUnit) do
-      SetNameplateVisibility(tp_frame.Parent, plate_unitid)
-      if tp_frame.Active then
-        SetUnitAttributeReaction(tp_frame.unit, plate_unitid)
-        ApplyPlateHitTest(tp_frame)
-        StyleModule.Update(tp_frame)
-        PublishEvent("FactionUpdate", tp_frame)
-      end
+      ApplyReactionUpdate(tp_frame, plate_unitid)
     end
   else
     -- It seems that (at least) in solo shuffles, the UNIT_FACTION event is fired in between the events
-    -- NAME_PLATE_UNIT_REMOVED and NAME_PLATE_UNIT_ADDED. As SetNameplateVisibility sets the TPFrame Active, this results 
-    -- in Lua errors, so basically we cannot use it here to check if the plate is active.    
+    -- NAME_PLATE_UNIT_REMOVED and NAME_PLATE_UNIT_ADDED. As SetNameplateVisibility sets the TPFrame Active, this results
+    -- in Lua errors, so basically we cannot use it here to check if the plate is active.
     -- local plate = self:GetThreatPlateForUnit(unitid)
     local tp_frame = PlatesByUnit[unitid]
     if tp_frame then
       -- If Blizzard-style nameplates are used, we also need to check if TP plates are disabled/enabled now
       -- This also needs to be done no matter if the plate is Active or not as units with
       -- mindcontrolled
-      SetNameplateVisibility(tp_frame.Parent, unitid)
-      if tp_frame.Active then
-        SetUnitAttributeReaction(tp_frame.unit, unitid)
-        ApplyPlateHitTest(tp_frame)
-        StyleModule.Update(tp_frame)
-        PublishEvent("FactionUpdate", tp_frame)
-      end
+      ApplyReactionUpdate(tp_frame, unitid)
 
       -- A faction change can be signaled before the server's updated name/health/GUID for this
       -- unit token have reached the client - re-read once it has caught up.
@@ -1792,12 +1801,32 @@ function Addon:UNIT_FACTION(unitid)
 end
 
 -- Fires on reaction/attackable changes (e.g., flag pickups in battlegrounds) that can precede the
--- client receiving the server's updated unit data for this nameplate token.
+-- client receiving the server's updated unit data for this nameplate token. This event fires very
+-- frequently though - any combat/PvP-flag toggle on a tracked unit, not just BG flag carriers -
+-- so only actually react when something relevant changed (mirrors Plater's UNIT_FLAGS gate:
+-- reaction crossing a hostile/neutral/friendly boundary, attackability changing, or the plate not
+-- being properly active yet). Reacting unconditionally on every firing would collide with other
+-- in-progress per-plate state (e.g. an interrupt hold, see Source/Docs/CastbarInterrupts.md) far
+-- more often than warranted.
 function Addon:UNIT_FLAGS(unitid)
   local tp_frame = PlatesByUnit[unitid]
-  if tp_frame then
-    ScheduleNameplateRevalidation(tp_frame.Parent, unitid)
-  end
+  if not tp_frame then return end
+
+  local unit = tp_frame.unit
+  local new_reaction = MAP_UNIT_REACTION[Addon.GetUnitReactionToPlayer(unitid)]
+  local new_can_attack = UnitCanAttack("player", unitid)
+
+  local reaction_changed = new_reaction and new_reaction ~= unit.reaction
+  local attackable_changed = unit.CanAttack ~= nil and new_can_attack ~= unit.CanAttack
+  unit.CanAttack = new_can_attack
+
+  if not (reaction_changed or attackable_changed or not tp_frame.Active) then return end
+
+  -- Mirrors Addon:UNIT_FACTION's per-unit branch: immediate light update for fast visual
+  -- feedback, plus the same delayed revalidation as a safety net against stale name/health/GUID,
+  -- in case this UNIT_FLAGS also correlates with a silent nameplate token reassignment.
+  ApplyReactionUpdate(tp_frame, unitid)
+  ScheduleNameplateRevalidation(tp_frame.Parent, unitid)
 end
 
 function Addon:UNIT_LEVEL(unitid)
@@ -1853,16 +1882,23 @@ function Addon:UNIT_SPELLCAST_STOP(unitid, cast_guid, spell_id, castbar_id)
   if IGNORED_UNITS[unitid] or not ShowCastBars then return end
 
   local tp_frame = Addon:GetThreatPlateForUnit(unitid)
-  if not tp_frame then return end
+  if not tp_frame then
+    return
+  end
 
   local castbar = tp_frame.visual.Castbar
-  if castbar_id ~= castbar.CastbarID then return end
+  if castbar_id ~= castbar.CastbarID then
+    return
+  end
 
   castbar.CastbarID = nil
   castbar.IsChanneling = false
   castbar.IsCasting = false
-  -- Remember stop time so a late SPELL_INTERRUPT (COMBAT_LOG_EVENT_UNFILTERED) can still find and re-show this castbar.
-  castbar.LastStopTime = GetTime()
+  -- On Classic, interrupted_by is unreliable (often nil even for genuine interrupts), so a
+  -- stop here might silently be an interrupt in disguise. Mark it as a pending backfill target
+  -- for Addon:COMBAT_LOG_EVENT_UNFILTERED (SPELL_INTERRUPT) - cleared on the next OnStartCasting,
+  -- so this survives arbitrarily long combat-log delivery delays instead of a fixed time window.
+  castbar.InterruptSourceUnknown = true
 
   tp_frame.unit.isCasting = false
 
@@ -1888,7 +1924,8 @@ end
 function Addon:UNIT_SPELLCAST_CHANNEL_STOP(unitid, cast_guid, spell_id, interrupted_by, castbar_id)
   if IGNORED_UNITS[unitid] or not ShowCastBars then return end
 
-  if interrupted_by ~= nil then
+  -- Addon:UNIT_SPELLCAST_INTERRUPTED is Retail/Midnight-only code
+  if interrupted_by ~= nil and ExpansionIsAtLeastMidnight then
     Addon:UNIT_SPELLCAST_INTERRUPTED(unitid, cast_guid, spell_id, interrupted_by, castbar_id)
   else
     Addon:UNIT_SPELLCAST_STOP(unitid, cast_guid, spell_id, castbar_id)  -- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED
@@ -1927,19 +1964,27 @@ function Addon:UNIT_SPELLCAST_INTERRUPTED(unitid, cast_guid, spell_id, interrupt
   -- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED
   if IGNORED_UNITS[unitid] or not ShowCastBars then return end
 
+  -- Still need to stop the castbar here even with the option off: for a non-channeled cast,
+  -- WoW fires only UNIT_SPELLCAST_INTERRUPTED on interrupt, never UNIT_SPELLCAST_STOP, so this
+  -- is the sole signal that the cast ended.
+  if not ShowInterruptSource then
+    Addon:UNIT_SPELLCAST_STOP(unitid, cast_guid, spell_id, castbar_id)
+    return
+  end
+
   local tp_frame = Addon:GetThreatPlateForUnit(unitid)
   if not tp_frame then return end
 
   local castbar = tp_frame.visual.Castbar
   if castbar_id ~= castbar.CastbarID or not castbar:IsShown() or not interrupted_by then return end
 
-  local _, class, _, race, _, name, realm = GetPlayerInfoByGUID(interrupted_by)  
+  local _, class, _, race, _, name, realm = GetPlayerInfoByGUID(interrupted_by)
   name = name or UnitNameFromGUID(interrupted_by)
   local class_color = class and GetClassColor(class) or nil
   if class_color then
     name = class_color:WrapTextInColorCode(name)
   end
-  
+
   tp_frame.visual.SpellText:SetText(INTERRUPTED .. " [" .. TransliterateCyrillicLetters(name) .. "]")
 
   castbar:SetMinMaxValues(0, 1)
@@ -1948,15 +1993,17 @@ function Addon:UNIT_SPELLCAST_INTERRUPTED(unitid, cast_guid, spell_id, interrupt
 
   local color = Addon.db.profile.castbarColorInterrupted
   castbar:SetStatusBarColor(color.r, color.g, color.b, color.a)
-  castbar.FlashTime = CASTBAR_INTERRUPT_HOLD_TIME
+  castbar.PostCastHoldTime = CASTBAR_INTERRUPT_HOLD_TIME
 
   -- I am assuming that OnStopCasting is called always when a cast is interrupted from
   -- _STOP events
   tp_frame.unit.IsInterrupted = true
-  
+
   Addon:UNIT_SPELLCAST_STOP(unitid, cast_guid, spell_id, castbar_id)
-  -- Should not be necessary any longer ... as OnStopCasting is not hiding the castbar anymore
-  castbar:Show()
+  -- The STOP call above can run StyleModule.Update (via CastTriggerReset), but visibility is
+  -- reconciled centrally from current state (IsInterrupted/PostCastHoldTime), so this always
+  -- ends up correct regardless of what that intermediate update did.
+  castbar:UpdateVisibility(tp_frame)
 end
 
 function Addon:COMBAT_LOG_EVENT_UNFILTERED()
@@ -1968,13 +2015,12 @@ function Addon:COMBAT_LOG_EVENT_UNFILTERED()
       local visual = tp_frame.visual
 
       local castbar = visual.Castbar
-      -- castbar.CastbarID is not usable here: on Classic, no event/API ever sets it to a
-      -- non-nil value (it is tied to Midnight's concurrent-cast-bar feature), so it can't
-      -- signal whether a new cast has started since the stop. IsCasting/IsChanneling are set
-      -- unconditionally in OnStartCasting on every expansion, so they are the reliable signal.
-      local pending_stop = not castbar.IsCasting and not castbar.IsChanneling and castbar.LastStopTime and
-        (GetTime() - castbar.LastStopTime) < CASTBAR_INTERRUPT_PENDING_TIME
-      if castbar:IsShown() or pending_stop then
+      -- castbar.CastbarID is already nil by the time this arrives (Addon:UNIT_SPELLCAST_STOP
+      -- already ran, confirmed in-game: it fires reliably before SPELL_INTERRUPT on Classic for
+      -- both normal and channeled casts) - InterruptSourceUnknown, set there and cleared by the
+      -- next OnStartCasting, is what tells us this backfill still belongs to the cast that was
+      -- actually interrupted.
+      if castbar.InterruptSourceUnknown then
         sourceName = gsub(sourceName, "%-[^|]+", "") -- UnitName(sourceName) only works in groups
         local _, class_name = GetPlayerInfoByGUID(sourceGUID)
         visual.SpellText:SetText(INTERRUPTED .. " [" .. Addon.ColorByClass(class_name, TransliterateCyrillicLetters(sourceName)) .. "]")
@@ -1985,18 +2031,15 @@ function Addon:COMBAT_LOG_EVENT_UNFILTERED()
 
         local color = Addon.db.profile.castbarColorInterrupted
         castbar:SetStatusBarColor(color.r, color.g, color.b, color.a)
-        castbar.FlashTime = CASTBAR_INTERRUPT_HOLD_TIME
+        castbar.PostCastHoldTime = CASTBAR_INTERRUPT_HOLD_TIME
 
-        -- I am assuming that OnStopCasting is called always when a cast is interrupted from
-        -- _STOP events
         tp_frame.unit.IsInterrupted = true
+        castbar.InterruptSourceUnknown = nil
 
-        -- Stop the cast right away instead of waiting for the (separately-timed) UNIT_SPELLCAST_STOP
-        -- event, otherwise OnUpdate keeps animating the bar (IsCasting/IsChanneling still true) even
-        -- though it was just set to the interrupted color/text. Mirrors Addon:UNIT_SPELLCAST_INTERRUPTED.
-        Addon:UNIT_SPELLCAST_STOP(tp_frame.unit.unitid, nil, nil, castbar.CastbarID)
-        -- Should not be necessary any longer ... as OnStopCasting is not hiding the castbar anymore
-        castbar:Show()
+        -- Addon:UNIT_SPELLCAST_STOP (already run by now) can trigger a style update while
+        -- IsInterrupted was still false; reconcile visibility from current state now instead of
+        -- assuming what that update did to the castbar/SpellText.
+        castbar:UpdateVisibility(tp_frame)
       end
     end
   end
