@@ -1,4 +1,4 @@
 # @project-version@ (@build-time@)
 
-* Fixed a Lua error in the Auras widget when aura highlighting was enabled [GH-719].
-* Updated integrated libraries (LibCustomGlow to 1.0.4-10-g4f8f5c2-alpha).
+* Fix Lua error when displaying auras on nameplates caused by restrictions on secret values [GH-723].
+* Rebuilt the Auras widget on top of Patch 12.1.0's new AuraContainer API, since the old aura-scanning method no longer works reliably. Currently only rudimentary aura features are available as a result.
