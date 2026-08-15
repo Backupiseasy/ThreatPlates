@@ -12,6 +12,7 @@ local abs, floor, ceil, pairs = abs, floor, ceil, pairs
 
 -- WoW APIs
 local UnitIsPVP, UnitPlayerControlled = UnitIsPVP, UnitPlayerControlled
+local GetClassColor = C_ClassColor.GetClassColor
 
 -- WoW Classic APIs:
 
@@ -19,6 +20,7 @@ local UnitIsPVP, UnitPlayerControlled = UnitIsPVP, UnitPlayerControlled
 local SubscribeEvent, PublishEvent = Addon.EventService.Subscribe, Addon.EventService.Publish
 local StyleModule = Addon.Style
 local RGB_P = Addon.RGB_P
+local IsSecretValueTP = Addon.IsSecretValue
 
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
 -- List them here for Mikk's FindGlobals script
@@ -226,12 +228,23 @@ local GetColorByHealth = ColorModule.GetColorByHealthDeficit
 -- Color by class
 ---------------------------------------------------------------------------------------------------
 
+-- unit.class can be a secret value for enemy players in restricted contexts (e.g., arena/rated PvP on
+-- Midnight), so it cannot be used as a SettingsBase.Colors.Classes table key. C_ClassColor.GetClassColor
+-- accepts a secret class token as a safe C-API sink and returns Blizzard's default class color instead.
+local function GetColorForClass(class)
+  if IsSecretValueTP(class) then
+    return GetClassColor(class)
+  end
+
+  return SettingsBase.Colors.Classes[class]
+end
+
 local function GetColorByClass(unit, plate_style)
   local color
 
   if unit.type == "PLAYER" then
     if unit.reaction == "HOSTILE" then
-      color = SettingsBase.Colors.Classes[unit.class]
+      color = GetColorForClass(unit.class)
     elseif unit.reaction == "FRIENDLY" then
       local db_social = SettingsBase.socialWidget
       if db_social.ShowFriendColor and Addon:IsFriend(unit, plate_style) then
@@ -239,7 +252,7 @@ local function GetColorByClass(unit, plate_style)
       elseif db_social.ShowGuildmateColor and Addon:IsGuildmate(unit, plate_style) then
         color = db_social.GuildmateColor
       else
-        color = SettingsBase.Colors.Classes[unit.class]
+        color = GetColorForClass(unit.class)
       end
     end
   end
