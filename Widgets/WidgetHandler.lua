@@ -335,7 +335,12 @@ function WidgetHandler:OnPlateCreated(tp_frame)
   local plate_widgets = {}
 
   for widget_name, widget in pairs(self.EnabledWidgets) do
-    plate_widgets[widget_name] = widget:Create(tp_frame)
+    local ok, widget_frame = pcall(widget.Create, widget, tp_frame)
+    if ok then
+      plate_widgets[widget_name] = widget_frame
+    else
+      Addon.Logging.Error("Error creating widget '" .. tostring(widget_name) .. "': " .. tostring(widget_frame))
+    end
   end
 
   tp_frame.widgets = plate_widgets
@@ -345,6 +350,9 @@ end
 --       Maybe event seperate style dependedt stuff (PVlateStyleChanged)
 function WidgetHandler:OnUnitAdded(tp_frame, unit)
   local plate_widgets = tp_frame.widgets
+  if not plate_widgets then
+    return
+  end
 
   if unit.IsSoftTarget then
     for _, widget in pairs(self.EnabledTargetWidgets) do
@@ -358,14 +366,15 @@ function WidgetHandler:OnUnitAdded(tp_frame, unit)
 
   for widget_name, widget in pairs(self.EnabledWidgets) do
     local widget_frame = plate_widgets[widget_name]
+    if widget_frame then
+      widget_frame.Active = tp_frame.stylename ~= "empty" and widget:EnabledForStyle(tp_frame.stylename, unit)
+      widget_frame.unit = unit
 
-    widget_frame.Active = tp_frame.stylename ~= "empty" and widget:EnabledForStyle(tp_frame.stylename, unit)
-    widget_frame.unit = unit
-
-    if widget_frame.Active then
-      widget:OnUnitAdded(widget_frame, unit)
-    else
-      widget_frame:Hide()
+      if widget_frame.Active then
+        widget:OnUnitAdded(widget_frame, unit)
+      else
+        widget_frame:Hide()
+      end
     end
   end
 end
@@ -392,13 +401,19 @@ function WidgetHandler:OnUnitRemoved(tp_frame, unit)
   end
 
   local plate_widgets = tp_frame.widgets
+  if not plate_widgets then
+    return
+  end
+
   for widget_name, widget in pairs(self.EnabledWidgets) do
     local widget_frame = plate_widgets[widget_name]
-    widget_frame.Active = false
-    widget_frame:Hide()
+    if widget_frame then
+      widget_frame.Active = false
+      widget_frame:Hide()
 
-    if widget.OnUnitRemoved then
-      widget:OnUnitRemoved(widget_frame, unit)
+      if widget.OnUnitRemoved then
+        widget:OnUnitRemoved(widget_frame, unit)
+      end
     end
   end
 end
