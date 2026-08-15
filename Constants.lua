@@ -880,19 +880,23 @@ Addon.DEFAULT_SETTINGS = {
         -- so toggling one reaction's checkbox doesn't silently flip the other's.
         ShowDispellableEnemy = false,
         ShowBossEnemy = false,
+        -- Dispel Type ("Bannart") defaults to all types checked, since it's now combined with
+        -- Dispellable ("Bannbar") - it only takes effect once Bannbar is on, and "all types checked"
+        -- is what keeps a freshly-enabled Bannbar showing every dispellable debuff (matching its old,
+        -- type-independent behavior) rather than silently showing nothing.
         FilterByTypeEnemy = {
-          [1] = false,
-          [2] = false,
-          [3] = false,
-          [4] = false,
+          [1] = true,
+          [2] = true,
+          [3] = true,
+          [4] = true,
         },
         FilterMode = "Block",
         FilterBySpell = {},
         FilterByType = {
-          [1] = false,  -- Moved to Debuffs and negated meaning in 8.8.0
-          [2] = false,  -- Moved to Debuffs and negated meaning in 8.8.0
-          [3] = false,  -- Moved to Debuffs and negated meaning in 8.8.0
-          [4] = false,  -- Moved to Debuffs and negated meaning in 8.8.0
+          [1] = true,  -- Moved to Debuffs and negated meaning in 8.8.0
+          [2] = true,  -- Moved to Debuffs and negated meaning in 8.8.0
+          [3] = true,  -- Moved to Debuffs and negated meaning in 8.8.0
+          [4] = true,  -- Moved to Debuffs and negated meaning in 8.8.0
         },
         -- Positioning
         AlignmentH = "LEFT",

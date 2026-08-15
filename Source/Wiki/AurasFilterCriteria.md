@@ -98,30 +98,28 @@ freely-combinable OR-conditions.
 Same freely-combinable multi-group pattern as Debuffs — Enemy below (fewer toggles: no Mine/Blizzard/
 Priority/Max Duration equivalent exposed for friendly): **All** short-circuits everything into a single
 unrestricted group; otherwise Dispellable/Boss/dispel-type are each their own `AddAuraGroup`, cross-
-excluding each other so a multi-matching aura isn't shown twice.
+excluding each other so a multi-matching aura isn't shown twice. **Exception**: Dispellable and Dispel
+Type are combined, not independent — see below.
 
 | Options toggle | Shows | DB field | Technical | Note |
 | --- | --- | --- | --- | --- |
 | Show Debuffs | — | `ShowFriendly` | group master switch | |
 | All | Every debuff on friendly units (except crowd control, which has its own grid) | `ShowAllFriendly` | Crowd Control excluded (own grid) | |
-| Dispellable | Debuffs you can dispel/cleanse | `ShowDispellable` | `DISPELLABLE` token, CC excluded | |
+| Dispellable | Debuffs you can dispel/cleanse, restricted to the dispel types checked below | `ShowDispellable` | `DISPELLABLE` token, CC excluded | |
 | Boss | Debuffs applied by a boss (raid/dungeon encounter) | `ShowBoss` | `candidateFilters.isBossAura = true` | separate DB field from Enemy's `ShowBossEnemy` — changing one doesn't affect the other |
-| Curse / Disease / Magic / Poison | Debuffs of the checked dispel type(s) | `FilterByType[1..4]` | `candidateFilters.includeDispelTypes = {...}` | separate DB field from Enemy's `FilterByTypeEnemy[1..4]`; Dispellable/Boss exclude these checked dispel types from themselves (`excludeDispelTypes`), so a matching aura only shows once, via this group |
+| Curse / Disease / Magic / Poison | Dispellable debuffs of the checked dispel type(s) | `FilterByType[1..4]` | `candidateFilters.includeDispelTypes = {...}` | **combined with Dispellable (2026-08-15)**, not independent — grayed out and inert unless Dispellable is also checked; separate DB field from Enemy's `FilterByTypeEnemy[1..4]`; when active, Boss excludes these checked dispel types from itself (`excludeDispelTypes`), so a matching aura only shows once, via this group; defaults to all four checked |
 
-**Combinations** (Dispel Type = at least one of Curse/Disease/Magic/Poison checked; which specific
-type(s) narrows the result further but doesn't change the combination logic):
+**Combinations** (Dispel Type = at least one of Curse/Disease/Magic/Poison checked; a checked Dispel
+Type only has any effect while Dispellable is also on):
 
 | All | Dispellable | Boss | Dispel Type | Shown |
 | --- | --- | --- | --- | --- |
 | ✅ | – | – | – | Everything (CC excluded) |
-| ❌ | ✅ | ❌ | ❌ | Dispellable only |
-| ❌ | ❌ | ✅ | ❌ | Boss only |
-| ❌ | ❌ | ❌ | ✅ | Checked dispel type(s) only |
-| ❌ | ✅ | ✅ | ❌ | Dispellable ∪ Boss |
-| ❌ | ✅ | ❌ | ✅ | Dispellable ∪ Dispel Type |
-| ❌ | ❌ | ✅ | ✅ | Boss ∪ Dispel Type |
-| ❌ | ✅ | ✅ | ✅ | Union of all three |
-| ❌ | ❌ | ❌ | ❌ | Nothing |
+| ❌ | ✅ | ❌ | ✅ | Dispellable debuffs of the checked type(s) only |
+| ❌ | ✅ | ❌ | ❌ | Nothing from Dispellable (no type checked = no match) |
+| ❌ | ❌ | ✅ | – | Boss only (Dispel Type ignored/grayed out) |
+| ❌ | ✅ | ✅ | ✅ | Boss ∪ (dispellable debuffs of the checked type(s)) |
+| ❌ | ❌ | ❌ | – | Nothing (Dispel Type grayed out, has no effect on its own) |
 
 ## Debuffs — Enemy
 
@@ -136,26 +134,32 @@ duplicated).
 | Blizzard | Debuffs Blizzard itself would show on its own default nameplates | `ShowBlizzardForEnemy` | `IMPORTANT` token | shown on Blizzard's own default nameplates |
 | Boss | Debuffs applied by a boss (raid/dungeon encounter) | `ShowBossEnemy` | boss-applied auras | |
 | Priority | Debuffs Blizzard flags as high priority | `ShowPriority` | Blizzard's "high priority" classification | a general UI-sort flag, distinct from Blizzard/IMPORTANT above (which is nameplate-curation-specific) |
-| Dispellable | Debuffs you can dispel/cleanse | `ShowDispellableEnemy` | `DISPELLABLE` token | separate setting from the Friendly Debuffs Dispellable toggle — changing one doesn't affect the other |
-| Curse / Disease / Magic / Poison | Debuffs of the checked dispel type(s) | `FilterByTypeEnemy[1..4]` | `candidateFilters.includeDispelTypes = {...}` | the other toggles above exclude these checked dispel types from themselves (`excludeDispelTypes`), so a matching aura only shows once, via this group (fixed 2026-08-15 — previously duplicated) |
+| Dispellable | Debuffs you can dispel/cleanse, restricted to the dispel types checked below | `ShowDispellableEnemy` | `DISPELLABLE` token | separate setting from the Friendly Debuffs Dispellable toggle — changing one doesn't affect the other |
+| Curse / Disease / Magic / Poison | Dispellable debuffs of the checked dispel type(s) (optionally further restricted to Mine, see below) | `FilterByTypeEnemy[1..4]` | `candidateFilters.includeDispelTypes = {...}` | **combined with Dispellable (2026-08-15)**, not independent — grayed out and inert unless Dispellable is also checked; the other toggles above exclude these checked dispel types from themselves (`excludeDispelTypes`) whenever active, so a matching aura only shows once, via this group; defaults to all four checked |
 | Max Duration | Hides debuffs whose total duration exceeds the set number of seconds (0 = off) | `MaxDuration` (seconds, 0 = off) | duration cap | applies on top of whichever toggle(s) above are active; any non-zero value also hides permanent (duration-less) debuffs |
 
-Dispel Type is **intentionally independent** of the Dispellable toggle (matches the non-Midnight
-widget's behavior) — it is not gated behind Dispellable being enabled.
+Dispel Type was **intentionally independent** of the Dispellable toggle until 2026-08-15 (matched the
+non-Midnight widget's behavior at the time); both were changed together so it's now gated behind
+Dispellable being enabled instead — see the table row above. Mine is also folded into the Dispellable +
+Dispel Type group when both are active, so e.g. Mine + Dispellable + Curse shows only *your own*
+dispellable Curse debuffs, not everyone's.
 
-**Combinations**: 6 independent toggles (Mine/Blizzard/Boss/Priority/Dispellable/Dispel Type) means 64
-possible on/off combinations — too many to usefully enumerate. The rule is always the same though:
-**shown = union of every checked toggle's own set** (each row's "Shows" column above), and an aura
-matching several checked toggles at once still only renders once. Max Duration is not part of this
-union — it's a cap applied afterward, on top of whatever the union above produced. A few examples:
+**Combinations**: 5 independent toggles (Mine/Blizzard/Boss/Priority/Dispellable, with Dispel Type
+folded into Dispellable) means 32 possible on/off combinations — too many to usefully enumerate. The
+rule is always the same though: **shown = union of every checked toggle's own set** (each row's "Shows"
+column above), and an aura matching several checked toggles at once still only renders once. Max
+Duration is not part of this union — it's a cap applied afterward, on top of whatever the union above
+produced. A few examples:
 
 | Active toggles | Shown |
 | --- | --- |
 | All | Everything (Max Duration ignored too — All is a full short-circuit) |
 | (none) | Nothing |
 | Mine | Only debuffs you (or your pet) applied |
-| Boss + Curse | Boss debuffs ∪ Curse debuffs (a Curse debuff from a boss still only shows once) |
-| Blizzard + Priority + Dispellable | Union of all three |
+| Boss | Boss-applied debuffs only |
+| Dispellable + Curse | Dispellable Curse debuffs from anyone |
+| Mine + Dispellable + Curse | Dispellable Curse debuffs from you only |
+| Blizzard + Priority + Dispellable + (all 4 dispel types checked) | Union of Blizzard's set, Priority's set, and every dispellable debuff regardless of type |
 | Mine + Max Duration = 10 | Only your debuffs, further hidden if their total duration exceeds 10s |
 
 ## CrowdControl — Friendly

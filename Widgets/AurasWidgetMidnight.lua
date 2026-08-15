@@ -77,10 +77,9 @@ local EnabledForStyle = {}
 -- - Per-spell FilterBySpell (spell name/ID text list) is not implemented; candidateFilters.
 --   includeSpellIDs/excludeSpellIDs would only be usable for Debuffs+CrowdControl on enemies anyway
 --   (Blizzard restricts spell-ID candidate filters to helpful-on-assistable/harmful-on-non-assistable).
--- - Dispel-type border coloring is not implemented (SetAuraBorder rendered incorrectly in testing -
---   most buffs have no dispel type to begin with).
--- - Visual settings (font/size/tooltip/stack count/duration text visibility) are only applied once,
---   at pool-creation time - changing them in Options during the same session does not re-skin
+-- - Visual settings (font/size/tooltip/stack count/duration text visibility, including whether the
+--   dispel-type border is drawn at all via ShowAuraType) are only applied once, at pool-creation time
+--   - changing them in Options during the same session does not re-skin
 --   already-pooled AuraButtons (Forbidden Aspects mean there is no per-aura Lua hook to reapply
 --   style on demand, unlike the old manual icon-frame system).
 -- - The demo/preview "Configuration Mode" and the aura-trigger custom-plate-style system (both
@@ -109,6 +108,31 @@ local AURA_GROUP_KEYS = {
 }
 local DISPEL_TYPE_NAMES = { "Curse", "Disease", "Magic", "Poison" } -- index matches Debuffs.FilterByType[1..4]
 
+-- Dispel-type border coloring (AuraWidget.ShowAuraType/DefaultBuffColor/DefaultDebuffColor, shared
+-- across Buffs/Debuffs/CrowdControl - see Constants.lua). AddDispelTypeTexture's customDispelColorMap
+-- wants real Color objects (needs :GetRGBA()), not the plain {r=,g=,b=} tables _G.DebuffTypeColor (or
+-- the legacy AurasWidget.lua fallback of the same shape) provides - built once here. customDispelColorCurve
+-- (a C_CurveUtil color curve) is the alternative Blizzard also supports, but customDispelColorMap is a
+-- plain name->color table and needs no curve object to reconstruct, so it's used here instead.
+local function BuildDispelTypeColorMap()
+  local source = _G.DebuffTypeColor or {
+    Magic = { r = 0.20, g = 0.60, b = 1.00 },
+    Disease = { r = 0.60, g = 0.40, b = 0.00 },
+    Poison = { r = 0.00, g = 0.60, b = 0.00 },
+    Curse = { r = 0.60, g = 0.00, b = 1.00 },
+  }
+  local map = {}
+  for _, dispel_name in ipairs(DISPEL_TYPE_NAMES) do
+    local color = source[dispel_name]
+    if color then
+      map[dispel_name] = _G.CreateColor(color.r, color.g, color.b, 1)
+    end
+  end
+  return map
+end
+
+local DISPEL_TYPE_COLOR_MAP = BuildDispelTypeColorMap()
+
 local AuraContainerPool = { Buffs = {}, Debuffs = {}, CrowdControl = {} }
 local NextAuraContainerIndex = { Buffs = 1, Debuffs = 1, CrowdControl = 1 }
 
@@ -119,6 +143,25 @@ local function InitializeAuraButton(auraButton, aura_type)
   auraButton.Icon:SetAllPoints(auraButton)
   auraButton.Icon:SetTexCoord(.10, 1 - .07, .12, 1 - .12) -- Style: Square - remove border from icons
   auraButton:SetIcon(auraButton.Icon)
+
+  if Widget.db.ShowAuraType then
+    -- Border style + showWithoutDispelType=false: only draws when the aura actually has a dispel
+    -- type (most buffs don't), colored via customDispelColorMap instead of Blizzard's own per-type
+    -- atlas color, matching the legacy widget's DebuffTypeColor-based coloring.
+    auraButton.DispelBorder = auraButton:CreateTexture(nil, "OVERLAY")
+    -- PixelUtil (not plain SetPoint) so the outset is a crisp, consistent number of screen pixels
+    -- regardless of UI scale - a plain SetPoint offset could land sub-pixel and look like it's not
+    -- quite reaching the icon's edge.
+    PixelUtil.SetPoint(auraButton.DispelBorder, "TOPLEFT", auraButton, "TOPLEFT", -3, 3)
+    PixelUtil.SetPoint(auraButton.DispelBorder, "BOTTOMRIGHT", auraButton, "BOTTOMRIGHT", 3, -3)
+    auraButton:AddDispelTypeTexture(auraButton.DispelBorder, {
+      style = _G.Enum.CustomAuraButtonDispelTypeTextureStyle.Border,
+      showWhenHarmful = true,
+      showWhenHelpful = true,
+      showWithoutDispelType = false,
+      customDispelColorMap = DISPEL_TYPE_COLOR_MAP,
+    })
+  end
 
   auraButton.Cooldown = Addon.CreateCooldown(auraButton, HideOmniCC)
   auraButton.Cooldown:SetShownSwipe(Widget.db.ShowCooldownSpiral, HideOmniCC)
@@ -327,31 +370,35 @@ local function GetEnemyBuffsGroupConfigs(db, unit)
   return BuildGroupConfigsFromConditions(conditions, { "HELPFUL", NAMEPLATE_ONLY })
 end
 
--- Debuffs (friendly): same multi-group independent-OR-condition pattern as Debuffs (enemy) below
--- (Dispellable/Boss/FilterByType are the legacy friendly-only fields, see the note above their
--- Constants.lua defaults). ShowAllFriendly short-circuits everything into "main" alone.
+-- Debuffs (friendly): same multi-group independent-OR-condition pattern as Debuffs (enemy) below,
+-- except Dispellable+FilterByType are combined rather than independent - see the note in
+-- GetEnemyDebuffsGroupConfigs (Dispellable/Boss/FilterByType are the legacy friendly-only fields, see
+-- the note above their Constants.lua defaults). ShowAllFriendly short-circuits everything into "main"
+-- alone.
 local function GetFriendlyDebuffsGroupConfigs(db)
   if db.ShowAllFriendly then
     return { main = { filterString = "HARMFUL|!CROWD_CONTROL|" .. NAMEPLATE_ONLY, candidateFilters = {} } }
   end
 
   local conditions = {}
-  if db.ShowDispellable then
-    conditions[#conditions + 1] = { key = "dispellable", filterTokens = { "DISPELLABLE" }, candidateFilters = {} }
-  end
   if db.ShowBoss then
     conditions[#conditions + 1] = { key = "boss", filterTokens = {}, candidateFilters = { isBossAura = true } }
   end
 
+  -- Dispellable ("Bannbar") and Dispel Type ("Bannart") are combined, not independent - see the same
+  -- note in GetEnemyDebuffsGroupConfigs. Bannbar no longer has its own standalone group; it only
+  -- gates whether "dispeltype" exists, and that group always requires DISPELLABLE too.
   local dispel_types, has_dispel_type = {}, false
-  for i, dispel_name in ipairs(DISPEL_TYPE_NAMES) do
-    if db.FilterByType[i] then
-      dispel_types[dispel_name] = true
-      has_dispel_type = true
+  if db.ShowDispellable then
+    for i, dispel_name in ipairs(DISPEL_TYPE_NAMES) do
+      if db.FilterByType[i] then
+        dispel_types[dispel_name] = true
+        has_dispel_type = true
+      end
     end
-  end
-  if has_dispel_type then
-    conditions[#conditions + 1] = { key = "dispeltype", filterTokens = {}, candidateFilters = { includeDispelTypes = dispel_types } }
+    if has_dispel_type then
+      conditions[#conditions + 1] = { key = "dispeltype", filterTokens = { "DISPELLABLE" }, candidateFilters = { includeDispelTypes = dispel_types } }
+    end
   end
 
   return BuildGroupConfigsFromConditions(conditions, { "HARMFUL", "!CROWD_CONTROL", NAMEPLATE_ONLY }, dispel_types, has_dispel_type)
@@ -371,18 +418,20 @@ end
 
 -- Builds the full set of AddAuraGroup configs (per AURA_GROUP_KEYS.Debuffs key) for enemy-reaction
 -- Debuffs from today's boolean settings. ShowAllEnemy short-circuits everything into "main" alone.
--- Otherwise each of ShowOnlyMine ("main"), ShowBlizzardForEnemy ("important", IMPORTANT auras),
--- ShowBoss ("boss", candidateFilters.isBossAura), ShowPriority ("priority",
--- candidateFilters.isPriorityAura), and ShowDispellable ("dispellable", DISPELLABLE auras) is an
--- independent, freely-combinable OR-condition: every group's filter string/candidateFilters excludes
--- every *earlier-listed* active condition (see BuildGroupConfigsFromConditions), so an aura matching
--- more than one toggle is always assigned to exactly one group - the earliest one it satisfies -
--- instead of showing twice or (with the naive "exclude every other condition in both directions"
--- approach this used to have) vanishing from both. FilterByType[1-4] ("dispeltype") is
--- built the same way, but since candidateFilters.includeDispelTypes is a table (not a plain boolean/
--- token), it can't be negated into the other groups' filters the same way - instead, every other
--- group explicitly excludes the checked dispel types via candidateFilters.excludeDispelTypes, so an
--- aura matching e.g. both a checked dispel type and Boss only ever shows via "dispeltype".
+-- Otherwise each of ShowOnlyMine ("main"), ShowBlizzardForEnemy ("important", candidateFilters.nameplateShowAll),
+-- ShowBoss ("boss", candidateFilters.isBossAura), and ShowPriority ("priority",
+-- candidateFilters.isPriorityAura) is an independent, freely-combinable OR-condition: every group's
+-- filter string/candidateFilters excludes every *earlier-listed* active condition (see
+-- BuildGroupConfigsFromConditions), so an aura matching more than one toggle is always assigned to
+-- exactly one group - the earliest one it satisfies - instead of showing twice or (with the naive
+-- "exclude every other condition in both directions" approach this used to have) vanishing from both.
+-- ShowDispellableEnemy ("Bannbar") and FilterByTypeEnemy[1-4] ("Bannart") are combined, not
+-- independent: Bannart only ever produces a "dispeltype" group when Bannbar is also on, and that
+-- group always includes the DISPELLABLE token - so it's not "every other group excludes the checked
+-- dispel types", it's "dispeltype only exists, and only matches dispellable auras, while Bannbar is
+-- on". Every *other* group still explicitly excludes the checked dispel types via
+-- candidateFilters.excludeDispelTypes whenever Bannbar+Bannart together produce a "dispeltype" group,
+-- so an aura matching e.g. both a checked dispellable type and Boss only ever shows via "dispeltype".
 --
 -- Returns a table keyed by group name -> { filterString = ..., candidateFilters = ... }; a group
 -- key that's missing from the result means "disable this group" (caller sets maxFrameCount to 0).
@@ -398,10 +447,20 @@ local function GetEnemyDebuffsGroupConfigs(db)
 
   local conditions = {}
   if db.ShowOnlyMine then
-    conditions[#conditions + 1] = { key = "main", filterTokens = {}, candidateFilters = { isFromPlayerOrPlayerPet = true } }
+    -- PLAYER filter-string token, not candidateFilters.isFromPlayerOrPlayerPet - live-tested and
+    -- confirmed candidateFilters.isFromPlayerOrPlayerPet doesn't actually restrict anything on this
+    -- client (debug dump showed it built/applied correctly - candidateFilters={isFromPlayerOrPlayerPet=true}
+    -- - yet all enemy debuffs still showed, not just self-cast ones). Switching to PLAYER fixed it,
+    -- confirmed by isolated retest (only "Mine" active): only self-cast debuffs shown afterwards.
+    conditions[#conditions + 1] = { key = "main", filterTokens = { "PLAYER" }, candidateFilters = {} }
   end
   if db.ShowBlizzardForEnemy then
-    conditions[#conditions + 1] = { key = "important", filterTokens = { "IMPORTANT" }, candidateFilters = {} }
+    -- Not the IMPORTANT token: per AuraFilters' own doc comment, IMPORTANT only ever applies to
+    -- helpful auras ("helpful auras that show on enemy nameplates even if non-stealable"), so
+    -- combined with HARMFUL here it matched nothing at all - confirmed live by user report.
+    -- nameplateShowAll is the real field behind the legacy "Blizzard" toggle's semantics
+    -- (aura.nameplateShowAll in AurasWidget.lua) and has no such helpful-only restriction.
+    conditions[#conditions + 1] = { key = "important", filterTokens = {}, candidateFilters = { nameplateShowAll = true } }
   end
   if db.ShowBossEnemy then
     conditions[#conditions + 1] = { key = "boss", filterTokens = {}, candidateFilters = { isBossAura = true } }
@@ -409,19 +468,31 @@ local function GetEnemyDebuffsGroupConfigs(db)
   if db.ShowPriority then
     conditions[#conditions + 1] = { key = "priority", filterTokens = {}, candidateFilters = { isPriorityAura = true } }
   end
-  if db.ShowDispellableEnemy then
-    conditions[#conditions + 1] = { key = "dispellable", filterTokens = { "DISPELLABLE" }, candidateFilters = {} }
-  end
-
+  -- Dispellable ("Bannbar") and Dispel Type ("Bannart") are combined, not independent: Bannart is
+  -- inert (and grayed out in Options) unless Bannbar is also on, and once it is, only *dispellable*
+  -- debuffs of a checked type show - not every dispellable debuff regardless of type like before.
+  -- So there's no separate standalone "dispellable" condition/group anymore - Bannbar's own toggle
+  -- only gates whether the "dispeltype" group exists at all.
   local dispel_types, has_dispel_type = {}, false
-  for i, dispel_name in ipairs(DISPEL_TYPE_NAMES) do
-    if db.FilterByTypeEnemy[i] then
-      dispel_types[dispel_name] = true
-      has_dispel_type = true
+  if db.ShowDispellableEnemy then
+    for i, dispel_name in ipairs(DISPEL_TYPE_NAMES) do
+      if db.FilterByTypeEnemy[i] then
+        dispel_types[dispel_name] = true
+        has_dispel_type = true
+      end
     end
-  end
-  if has_dispel_type then
-    conditions[#conditions + 1] = { key = "dispeltype", filterTokens = {}, candidateFilters = { includeDispelTypes = dispel_types } }
+    if has_dispel_type then
+      -- "dispeltype" is exempt from BuildGroupConfigsFromConditions' earlier-condition exclusion (see
+      -- its comment - includeDispelTypes is a table, can't be negated like a boolean/token), so Mine's
+      -- PLAYER token never reaches it through that mechanism. Add it directly here instead, so Mine +
+      -- a checked dispel type combine ("only my Curses/Diseases/...") instead of dispeltype always
+      -- showing every player's matching debuffs regardless of Mine.
+      local dispeltype_tokens = { "DISPELLABLE" }
+      if db.ShowOnlyMine then
+        dispeltype_tokens[#dispeltype_tokens + 1] = "PLAYER"
+      end
+      conditions[#conditions + 1] = { key = "dispeltype", filterTokens = dispeltype_tokens, candidateFilters = { includeDispelTypes = dispel_types } }
+    end
   end
 
   local configs = BuildGroupConfigsFromConditions(conditions, { "HARMFUL", "!CROWD_CONTROL", NAMEPLATE_ONLY }, dispel_types, has_dispel_type)
