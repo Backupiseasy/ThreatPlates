@@ -63,8 +63,10 @@ local EnabledForStyle = {}
 --   ShowOn*NPCs always short-circuit into a single unrestricted group first, though - "All on NPCs" is
 --   conceptually "All, but scoped to NPCs", not a peer condition, and can't be freely combined with
 --   the others the normal way (no candidateFilters field for "unit is an NPC" to cross-exclude it
---   with). Debuffs additionally supports MaxDuration (enemy only) as an AND-restriction on top of
---   whichever OR-condition(s) are active. CrowdControl (either reaction) is still single-condition
+--   with). Buffs (both reactions) additionally supports MaxDuration as an AND-restriction on top of
+--   whichever OR-condition(s) are active - filters out permanent/long-duration passive buffs (flasks,
+--   food, Well Fed, ...); not offered on Debuffs, where a duration cap is rarely useful. CrowdControl
+--   (either reaction) is still single-condition
 --   only (All vs. Dispellable, a plain "elseif") - not converted to the multi-group pattern.
 -- - A crowd-control-classified aura is strictly exclusive to the CrowdControl grid (filtered out of
 --   Debuffs via "!CROWD_CONTROL"); the old per-aura fallback (show as a normal debuff if the
@@ -77,11 +79,15 @@ local EnabledForStyle = {}
 -- - Per-spell FilterBySpell (spell name/ID text list) is not implemented; candidateFilters.
 --   includeSpellIDs/excludeSpellIDs would only be usable for Debuffs+CrowdControl on enemies anyway
 --   (Blizzard restricts spell-ID candidate filters to helpful-on-assistable/harmful-on-non-assistable).
--- - Visual settings (font/size/tooltip/stack count/duration text visibility, including whether the
---   dispel-type border is drawn at all via ShowAuraType) are only applied once, at pool-creation time
---   - changing them in Options during the same session does not re-skin
---   already-pooled AuraButtons (Forbidden Aspects mean there is no per-aura Lua hook to reapply
---   style on demand, unlike the old manual icon-frame system).
+-- - Icon size, tooltip-enable, and cooldown-spiral visibility DO propagate live to already-pooled
+--   AuraButtons (see ReapplyLiveAuraButtonSettings, called from Widget:UpdateSettings) - none of
+--   AuraButton's ForbiddenAspects block plain Set* calls, and GetAuraGroupFrame/GetAuraGroupFrameCount
+--   are real addon-facing methods to reach already-created buttons. Stack count/duration text
+--   visibility, their font/size/color, and whether the dispel-type border is drawn at all
+--   (ShowAuraType) are still create-time-only, though - those conditionally *create* child textures/
+--   fontstrings once at InitializeAuraButton time (FontUpdateText is likewise only ever called there),
+--   and there is no retroactive create/destroy/re-font path for that here - changing any of those in
+--   Options during the same session only takes effect on newly-pooled buttons, not already-pooled ones.
 -- - The demo/preview "Configuration Mode" and the aura-trigger custom-plate-style system (both
 --   already non-functional prior to this) have no equivalent hook into AuraContainer and remain
 --   unavailable.
@@ -103,7 +109,7 @@ local AURA_CONTAINER_TYPES = { "Buffs", "Debuffs", "CrowdControl" }
 -- GetFriendlyBuffsGroupConfigs); Buffs (enemy) and CrowdControl (either reaction) only ever use "main".
 local AURA_GROUP_KEYS = {
   Buffs = { "main", "canapply", "bigdefensive", "dispellable", "magic" },
-  Debuffs = { "main", "important", "boss", "priority", "dispellable", "dispeltype" },
+  Debuffs = { "main", "important", "importantpersonal", "boss", "priority", "dispellable", "dispeltype" },
   CrowdControl = { "main" },
 }
 local DISPEL_TYPE_NAMES = { "Curse", "Disease", "Magic", "Poison" } -- index matches Debuffs.FilterByType[1..4]
@@ -191,6 +197,45 @@ local function InitializeAuraButton(auraButton, aura_type)
   auraButton:SetHideTooltipInCombat(true)
 
   PixelUtil.SetSize(auraButton, db_icon.IconWidth, db_icon.IconHeight)
+end
+
+-- Icon size, tooltip-enable, and cooldown-spiral-visibility are the subset of InitializeAuraButton's
+-- settings that CAN be safely reapplied to already-created AuraButtons after the fact - they're plain
+-- Set* calls, and none of the AuraButton's ForbiddenAspects (UntrustedScriptExecution,
+-- ChangeParent, ... - see Blizzard_AuraButton.xml) block them. Unlike StackCount/Duration/dispel
+-- border above, which are conditionally *created* once at InitializeAuraButton time and have no
+-- retroactive create/destroy path here, so still only take effect on newly-pooled buttons.
+-- GetAuraGroupFrame/GetAuraGroupFrameCount are real addon-facing AuraContainer methods (not
+-- Forbidden), so every already-created button - active or currently unused/available in the pool -
+-- can be reached and re-styled. Called from Widget:UpdateSettings so changing IconWidth/IconHeight/
+-- ShowTooltips/ShowCooldownSpiral in Options actually takes effect immediately, not just for auras
+-- created after the change.
+--
+-- AuraButton carries AccessRestrictionFlags = DenyTaintedAccessWhenAurasAreSecret
+-- (Blizzard_AuraContainerShared.lua), and this call happens from plain (tainted) addon code, unlike
+-- InitializeAuraButton's initial Set* calls, which run inside Blizzard's own securecallfunction
+-- wrapper (Blizzard_AuraContainerFrameProviders.lua:79) and are therefore not tainted. Rather than
+-- risk that restriction denying/erroring on individual buttons, deferred via Addon.ExecuteAfterCombatEnds
+-- like every other setting this addon can't safely change mid-combat - warns once and re-runs
+-- automatically after combat ends instead of silently doing nothing until the next settings change.
+local function ReapplyLiveAuraButtonSettings(aura_type)
+  if not HasAuraContainers then return end
+
+  Addon.ExecuteAfterCombatEnds(function()
+    local db_icon = Widget.db[aura_type].ModeIcon
+    for _, container in ipairs(AuraContainerPool[aura_type]) do
+      for _, group_key in ipairs(AURA_GROUP_KEYS[aura_type]) do
+        for i = 1, container:GetAuraGroupFrameCount(group_key) do
+          local auraButton = container:GetAuraGroupFrame(group_key, i)
+          PixelUtil.SetSize(auraButton, db_icon.IconWidth, db_icon.IconHeight)
+          auraButton:SetMouseMotionEnabled(Widget.db.ShowTooltips)
+          if auraButton.Cooldown then
+            auraButton.Cooldown:SetShownSwipe(Widget.db.ShowCooldownSpiral, HideOmniCC)
+          end
+        end
+      end
+    end
+  end, "Unable to update the appearance of auras while in combat.")
 end
 
 -- Maps the widget's SortOrder setting to the closest AuraContainerSortMethod. Duration/Creation have
@@ -332,8 +377,15 @@ end
 -- auras on NPC targets). Otherwise Mine/PlayerCanApply/BigDefensives are independent,
 -- freely-combinable OR-conditions.
 local function GetFriendlyBuffsGroupConfigs(db, unit)
+  -- MaxDuration (Patch 12.1.0): non-nil implicitly hides permanent buffs too, per Blizzard's own
+  -- documentation - applied as an extra AND-restriction on every active group below (not its own
+  -- OR-condition/group), regardless of which other toggle(s) are active. Makes more sense here than
+  -- on Debuffs (where it originally lived) - hiding long-duration/permanent auras is mainly useful for
+  -- filtering out passive self-buffs (flasks, food, Well Fed, ...), not debuffs.
+  local max_duration = (db.MaxDurationFriendly and db.MaxDurationFriendly > 0) and db.MaxDurationFriendly or nil
+
   if db.ShowAllFriendly or (db.ShowOnFriendlyNPCs and unit.type == "NPC") then
-    return { main = { filterString = "HELPFUL|" .. NAMEPLATE_ONLY, candidateFilters = {} } }
+    return { main = { filterString = "HELPFUL|" .. NAMEPLATE_ONLY, candidateFilters = { maxDuration = max_duration } } }
   end
 
   local conditions = {}
@@ -347,14 +399,22 @@ local function GetFriendlyBuffsGroupConfigs(db, unit)
     conditions[#conditions + 1] = { key = "bigdefensive", filterTokens = { "BIG_DEFENSIVE" }, candidateFilters = {} }
   end
 
-  return BuildGroupConfigsFromConditions(conditions, { "HELPFUL", NAMEPLATE_ONLY })
+  local configs = BuildGroupConfigsFromConditions(conditions, { "HELPFUL", NAMEPLATE_ONLY })
+  for _, config in pairs(configs) do
+    config.candidateFilters.maxDuration = max_duration
+  end
+
+  return configs
 end
 
 -- Buffs (enemy): same pattern as Friendly above - ShowAllEnemy/ShowOnEnemyNPCs short-circuit,
--- Dispellable/Magic are independent, freely-combinable OR-conditions.
+-- Dispellable/Magic are independent, freely-combinable OR-conditions. MaxDurationEnemy is the
+-- separate enemy-reaction field - see the comment on MaxDurationFriendly in GetFriendlyBuffsGroupConfigs.
 local function GetEnemyBuffsGroupConfigs(db, unit)
+  local max_duration = (db.MaxDurationEnemy and db.MaxDurationEnemy > 0) and db.MaxDurationEnemy or nil
+
   if db.ShowAllEnemy or (db.ShowOnEnemyNPCs and unit.type == "NPC") then
-    return { main = { filterString = "HELPFUL|" .. NAMEPLATE_ONLY, candidateFilters = {} } }
+    return { main = { filterString = "HELPFUL|" .. NAMEPLATE_ONLY, candidateFilters = { maxDuration = max_duration } } }
   end
 
   local conditions = {}
@@ -367,7 +427,12 @@ local function GetEnemyBuffsGroupConfigs(db, unit)
     conditions[#conditions + 1] = { key = "magic", filterTokens = {}, candidateFilters = { includeDispelTypes = { Magic = true } } }
   end
 
-  return BuildGroupConfigsFromConditions(conditions, { "HELPFUL", NAMEPLATE_ONLY })
+  local configs = BuildGroupConfigsFromConditions(conditions, { "HELPFUL", NAMEPLATE_ONLY })
+  for _, config in pairs(configs) do
+    config.candidateFilters.maxDuration = max_duration
+  end
+
+  return configs
 end
 
 -- Debuffs (friendly): same multi-group independent-OR-condition pattern as Debuffs (enemy) below,
@@ -418,9 +483,11 @@ end
 
 -- Builds the full set of AddAuraGroup configs (per AURA_GROUP_KEYS.Debuffs key) for enemy-reaction
 -- Debuffs from today's boolean settings. ShowAllEnemy short-circuits everything into "main" alone.
--- Otherwise each of ShowOnlyMine ("main"), ShowBlizzardForEnemy ("important", candidateFilters.nameplateShowAll),
--- ShowBoss ("boss", candidateFilters.isBossAura), and ShowPriority ("priority",
--- candidateFilters.isPriorityAura) is an independent, freely-combinable OR-condition: every group's
+-- Otherwise each of ShowOnlyMine ("main"), ShowBlizzardForEnemy ("important", candidateFilters.nameplateShowAll
+-- - always further restricted to PLAYER too, by deliberate design: "Blizzard" means "Blizzard-flagged
+-- debuffs I applied", not "anyone's" - see the comment at its condition below), ShowBoss ("boss",
+-- candidateFilters.isBossAura), and ShowPriority ("priority", candidateFilters.isPriorityAura) is an
+-- independent, freely-combinable OR-condition: every group's
 -- filter string/candidateFilters excludes every *earlier-listed* active condition (see
 -- BuildGroupConfigsFromConditions), so an aura matching more than one toggle is always assigned to
 -- exactly one group - the earliest one it satisfies - instead of showing twice or (with the naive
@@ -436,13 +503,8 @@ end
 -- Returns a table keyed by group name -> { filterString = ..., candidateFilters = ... }; a group
 -- key that's missing from the result means "disable this group" (caller sets maxFrameCount to 0).
 local function GetEnemyDebuffsGroupConfigs(db)
-  -- maxDuration (Patch 12.1.0): non-nil implicitly hides permanent auras too, per Blizzard's own
-  -- documentation - applied as an extra AND-restriction on every active group below (not its own
-  -- OR-condition/group), regardless of which other toggle(s) are active.
-  local max_duration = (db.MaxDuration and db.MaxDuration > 0) and db.MaxDuration or nil
-
   if db.ShowAllEnemy then
-    return { main = { filterString = "HARMFUL|!CROWD_CONTROL|" .. NAMEPLATE_ONLY, candidateFilters = { maxDuration = max_duration } } }
+    return { main = { filterString = "HARMFUL|!CROWD_CONTROL|" .. NAMEPLATE_ONLY, candidateFilters = {} } }
   end
 
   local conditions = {}
@@ -460,7 +522,16 @@ local function GetEnemyDebuffsGroupConfigs(db)
     -- combined with HARMFUL here it matched nothing at all - confirmed live by user report.
     -- nameplateShowAll is the real field behind the legacy "Blizzard" toggle's semantics
     -- (aura.nameplateShowAll in AurasWidget.lua) and has no such helpful-only restriction.
-    conditions[#conditions + 1] = { key = "important", filterTokens = {}, candidateFilters = { nameplateShowAll = true } }
+    --
+    -- PLAYER token is hardcoded (not conditional on ShowOnlyMine, unlike the "dispeltype" group's
+    -- PLAYER addition below) - per explicit user decision, "Blizzard" now always means "Blizzard-
+    -- flagged debuffs I applied", not "anyone's". Checking Mine+Blizzard together no longer narrows
+    -- anything further (Mine's own group already shows every debuff the player applied, a superset),
+    -- but that tradeoff was accepted deliberately: an unconditional PLAYER token here is the only way
+    -- to make "Blizzard" alone (without Mine also checked) mean "my own Blizzard-relevant debuffs"
+    -- instead of "everyone's" - the previous, broader meaning is gone entirely, not just narrowed
+    -- when combined with Mine.
+    conditions[#conditions + 1] = { key = "important", filterTokens = { "PLAYER" }, candidateFilters = { nameplateShowAll = true } }
   end
   if db.ShowBossEnemy then
     conditions[#conditions + 1] = { key = "boss", filterTokens = {}, candidateFilters = { isBossAura = true } }
@@ -496,8 +567,26 @@ local function GetEnemyDebuffsGroupConfigs(db)
   end
 
   local configs = BuildGroupConfigsFromConditions(conditions, { "HARMFUL", "!CROWD_CONTROL", NAMEPLATE_ONLY }, dispel_types, has_dispel_type)
-  for _, config in pairs(configs) do
-    config.candidateFilters.maxDuration = max_duration
+
+  -- "Blizzard" is really two conditions ORed together: nameplateShowAll (curated for everyone) and
+  -- nameplateShowPersonal (curated only when self-applied - the field Blizzard's own default
+  -- nameplates also check, per the legacy widget's `aura.nameplateShowAll or (aura.nameplateShowPersonal
+  -- and aura.CastByPlayer)`). A single AddAuraGroup can't express "field A OR field B" - candidateFilters
+  -- entries are ANDed together - so this needs a second, peer group. It can't be pushed through
+  -- BuildGroupConfigsFromConditions as its own condition though: both would need the identical PLAYER
+  -- token, and ordered exclusion would negate the earlier one's token into the later one's filter
+  -- string ("PLAYER|!PLAYER" - a self-contradiction that matches nothing). Instead, clone "important"'s
+  -- already-fully-excluded result (same exclusions against Mine/Boss/Priority/dispeltype) and swap
+  -- nameplateShowAll for nameplateShowPersonal - explicitly excluding nameplateShowAll from the clone
+  -- so an aura with both flags set doesn't render via both groups.
+  if configs.important then
+    local personal_candidate_filters = {}
+    for field, value in pairs(configs.important.candidateFilters) do
+      personal_candidate_filters[field] = value
+    end
+    personal_candidate_filters.nameplateShowAll = false
+    personal_candidate_filters.nameplateShowPersonal = true
+    configs.importantpersonal = { filterString = configs.important.filterString, candidateFilters = personal_candidate_filters }
   end
 
   return configs
@@ -798,6 +887,10 @@ function Widget:UpdateSettings()
   EnabledForStyle["unique"] = self.db.ON
   EnabledForStyle["etotem"] = false
   EnabledForStyle["empty"] = false
+
+  for _, aura_type in ipairs(AURA_CONTAINER_TYPES) do
+    ReapplyLiveAuraButtonSettings(aura_type)
+  end
 end
 
 ---------------------------------------------------------------------------------------------------

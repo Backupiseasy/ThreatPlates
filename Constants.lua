@@ -873,7 +873,6 @@ Addon.DEFAULT_SETTINGS = {
         ShowOnlyMine = true,
         ShowBlizzardForEnemy = false,
         ShowPriority = false, -- candidateFilters.isPriorityAura (Patch 12.1.0)
-        MaxDuration = 0, -- candidateFilters.maxDuration in seconds (Patch 12.1.0), 0 = disabled
         -- ShowDispellable/ShowBoss/FilterByType above are friendly-only (legacy semantics: the old
         -- Enemy filter function never read them, and Enemy Options never exposed them). The enemy
         -- Midnight panel's own Dispellable/Boss/DispelType toggles use these separate fields instead,
@@ -1029,11 +1028,13 @@ Addon.DEFAULT_SETTINGS = {
         ShowOnlyMine = false,
         ShowPlayerCanApply = false,
         ShowFriendlyBigDefensives = false,
+        MaxDurationFriendly = 0, -- candidateFilters.maxDuration in seconds (Patch 12.1.0), 0 = disabled
         ShowEnemy = true,
         ShowAllEnemy = false,
         ShowOnEnemyNPCs = true,
         ShowDispellable = true,
         ShowMagic = false,
+        MaxDurationEnemy = 0, -- candidateFilters.maxDuration in seconds (Patch 12.1.0), 0 = disabled
         ShowUnlimitedAlways = false,
         ShowUnlimitedInCombat = true,
         ShowUnlimitedInInstances = true,

@@ -4840,6 +4840,19 @@ local function CreateAurasWidgetOptions()
                     arg = { "AuraWidget", "Buffs", "ShowFriendlyBigDefensives" },
                     disabled = function() return not db.AuraWidget.Buffs.ShowFriendly end
                   },
+                  MaxDuration = {
+                    name = L["Max Duration"],
+                    order = 70,
+                    type = "range",
+                    isPercent = false,
+                    min = 0,
+                    softMin = 0,
+                    softMax = 300,
+                    step = 1,
+                    desc = L["Hide buffs with a duration longer than this, in seconds (applies on top of the toggles above). 0 disables this filter. Any non-zero value also hides permanent buffs."],
+                    arg = { "AuraWidget", "Buffs", "MaxDurationFriendly" },
+                    disabled = function() return not db.AuraWidget.Buffs.ShowFriendly end,
+                  },
                 },
               },
               EnemyUnits = {
@@ -5073,6 +5086,19 @@ local function CreateAurasWidgetOptions()
                     disabled = function()
                       return not db.AuraWidget.Buffs.ShowEnemy
                     end
+                  },
+                  MaxDuration = {
+                    name = L["Max Duration"],
+                    order = 70,
+                    type = "range",
+                    isPercent = false,
+                    min = 0,
+                    softMin = 0,
+                    softMax = 300,
+                    step = 1,
+                    desc = L["Hide buffs with a duration longer than this, in seconds (applies on top of the toggles above). 0 disables this filter. Any non-zero value also hides permanent buffs."],
+                    arg = { "AuraWidget", "Buffs", "MaxDurationEnemy" },
+                    disabled = function() return not db.AuraWidget.Buffs.ShowEnemy end,
                   },
                 },
               },
@@ -5498,7 +5524,7 @@ local function CreateAurasWidgetOptions()
                     name = L["Blizzard"],
                     order = 40,
                     type = "toggle",
-                    desc = L["Show debuffs that are shown on Blizzard's default nameplates."],
+                    desc = L["Show debuffs applied by you that are also shown on Blizzard's default nameplates."],
                     set = function(info, val)
                       local db = db.AuraWidget.Debuffs
                       db.ShowAllEnemy = not (db.ShowOnlyMine or val or db.ShowBossEnemy or db.ShowPriority or db.ShowDispellableEnemy)
@@ -5544,19 +5570,6 @@ local function CreateAurasWidgetOptions()
                       SetValue(info, val)
                     end,
                     arg = { "AuraWidget", "Debuffs", "ShowDispellableEnemy" },
-                    disabled = function() return not db.AuraWidget.Debuffs.ShowEnemy end,
-                  },
-                  MaxDuration = {
-                    name = L["Max Duration"],
-                    order = 75,
-                    type = "range",
-                    isPercent = false,
-                    min = 0,
-                    softMin = 0,
-                    softMax = 300,
-                    step = 1,
-                    desc = L["Hide debuffs with a duration longer than this, in seconds (applies on top of the toggles above). 0 disables this filter. Any non-zero value also hides permanent debuffs."],
-                    arg = { "AuraWidget", "Debuffs", "MaxDuration" },
                     disabled = function() return not db.AuraWidget.Debuffs.ShowEnemy end,
                   },
                   DispelTypeHeader = {
