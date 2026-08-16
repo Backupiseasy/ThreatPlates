@@ -4120,6 +4120,7 @@ local function CreateAuraAreaLayoutOptions(pos, widget_info)
             set = function(info, val) SetValue(info, true) end,
             get = function(info) return GetValue(info) end,
             arg = { "AuraWidget", widget_info, "ModeBar", "Enabled" },
+            hidden = Addon.ExpansionIsAtLeastMidnight,
           },
         },
       },
@@ -4311,6 +4312,7 @@ local function CreateAuraAreaBarModeOptions(pos, widget_info)
     order = pos,
     type = "group",
     inline = false,
+    hidden = Addon.ExpansionIsAtLeastMidnight,
     args = {
       --Help = { type = "description", order = 0, width = "full", name = L["Show auras as bars (with optional icons)."], },
       Format = {
@@ -4772,9 +4774,10 @@ local function CreateAurasWidgetOptions()
                     arg = { "AuraWidget", "Buffs", "ShowAllFriendly" },
                     set = function(info, val)
                       local db = db.AuraWidget.Buffs
-                      if db.ShowOnFriendlyNPCs or db.ShowOnlyMine or db.ShowFriendlyBigDefensives then
+                      if db.ShowOnFriendlyNPCs or db.ShowOnlyMine or db.ShowPlayerCanApply or db.ShowFriendlyBigDefensives then
                         db.ShowOnFriendlyNPCs = false
                         db.ShowOnlyMine = false
+                        db.ShowPlayerCanApply = false
                         db.ShowFriendlyBigDefensives = false
                         SetValue(info, val)
                       end
@@ -4785,10 +4788,10 @@ local function CreateAurasWidgetOptions()
                     name = L["All on NPCs"],
                     order = 30,
                     type = "toggle",
-                    desc = L["Show all buffs on NPCs."],
+                    desc = L["Show all buffs on NPCs. Like All, but scoped to friendly NPCs only - not freely combinable with Mine/Player Can Apply/Big Defensives on NPC targets."],
                     set = function(info, val)
                       local db = db.AuraWidget.Buffs
-                      db.ShowAllFriendly = not (val or db.ShowOnlyMine or db.ShowFriendlyBigDefensives)
+                      db.ShowAllFriendly = not (val or db.ShowOnlyMine or db.ShowPlayerCanApply or db.ShowFriendlyBigDefensives)
                       SetValue(info, val)
                     end,
                     arg = { "AuraWidget", "Buffs", "ShowOnFriendlyNPCs" },
@@ -4803,7 +4806,7 @@ local function CreateAurasWidgetOptions()
                     desc = L["Show buffs that were applied by you."],
                     set = function(info, val)
                       local db = db.AuraWidget.Buffs
-                      db.ShowAllFriendly = not (db.ShowOnFriendlyNPCs or val or db.ShowFriendlyBigDefensives)
+                      db.ShowAllFriendly = not (db.ShowOnFriendlyNPCs or val or db.ShowPlayerCanApply or db.ShowFriendlyBigDefensives)
                       SetValue(info, val)
                     end,
                     arg = { "AuraWidget", "Buffs", "ShowOnlyMine" },
@@ -4811,21 +4814,47 @@ local function CreateAurasWidgetOptions()
                       return not db.AuraWidget.Buffs.ShowFriendly
                     end
                   },
-                  -- BigDefensive = {
-                  --   name = L["Big Defensives"],
-                  --   order = 60,
-                  --   type = "toggle",
-                  --   desc = L["Show big defensive buffs."],
-                  --   set = function(info, val)
-                  --     local db = db.AuraWidget.Buffs
-                  --     db.ShowAllFriendly = not (db.ShowOnFriendlyNPCs or db.ShowOnlyMine or val)
-                  --     SetValue(info, val)
-                  --   end,
-                  --   arg = { "AuraWidget", "Buffs", "ShowFriendlyBigDefensives" },
-                  --   disabled = function() return not db.AuraWidget.Buffs.ShowFriendly end
-                  -- },
+                  CanApply = {
+                    name = L["Player Can Apply"],
+                    order = 50,
+                    type = "toggle",
+                    desc = L["Show buffs that you could apply yourself (regardless of who actually cast them)."],
+                    set = function(info, val)
+                      local db = db.AuraWidget.Buffs
+                      db.ShowAllFriendly = not (db.ShowOnFriendlyNPCs or db.ShowOnlyMine or val or db.ShowFriendlyBigDefensives)
+                      SetValue(info, val)
+                    end,
+                    arg = { "AuraWidget", "Buffs", "ShowPlayerCanApply" },
+                    disabled = function() return not db.AuraWidget.Buffs.ShowFriendly end
+                  },
+                  BigDefensive = {
+                    name = L["Big Defensives"],
+                    order = 60,
+                    type = "toggle",
+                    desc = L["Show big defensive buffs."],
+                    set = function(info, val)
+                      local db = db.AuraWidget.Buffs
+                      db.ShowAllFriendly = not (db.ShowOnFriendlyNPCs or db.ShowOnlyMine or db.ShowPlayerCanApply or val)
+                      SetValue(info, val)
+                    end,
+                    arg = { "AuraWidget", "Buffs", "ShowFriendlyBigDefensives" },
+                    disabled = function() return not db.AuraWidget.Buffs.ShowFriendly end
+                  },
+                  MaxDuration = {
+                    name = L["Max Duration"],
+                    order = 70,
+                    type = "range",
+                    isPercent = false,
+                    min = 0,
+                    softMin = 0,
+                    softMax = 300,
+                    step = 1,
+                    desc = L["Hide buffs with a duration longer than this, in seconds (applies on top of the toggles above). 0 disables this filter. Any non-zero value also hides permanent buffs."],
+                    arg = { "AuraWidget", "Buffs", "MaxDurationFriendly" },
+                    disabled = function() return not db.AuraWidget.Buffs.ShowFriendly end,
+                  },
                 },
-              },              
+              },
               EnemyUnits = {
                 name = L["Enemy Units"],
                 type = "group",
@@ -5004,6 +5033,7 @@ local function CreateAurasWidgetOptions()
                       if val and not db.ShowAllEnemy then
                         db.ShowOnEnemyNPCs = false
                         db.ShowDispellable = false
+                        db.ShowMagic = false
                         SetValue(info, val)
                       end
                     end,
@@ -5016,10 +5046,10 @@ local function CreateAurasWidgetOptions()
                     name = L["All on NPCs"],
                     order = 30,
                     type = "toggle",
-                    desc = L["Show all buffs on NPCs."],
+                    desc = L["Show all buffs on NPCs. Like All, but scoped to enemy NPCs only - not freely combinable with Dispellable/Magic on NPC targets."],
                     set = function(info, val)
                       local db = db.AuraWidget.Buffs
-                      db.ShowAllEnemy = not (val or db.ShowDispellable)
+                      db.ShowAllEnemy = not (val or db.ShowDispellable or db.ShowMagic)
                       SetValue(info, val)
                     end,
                     arg = { "AuraWidget", "Buffs", "ShowOnEnemyNPCs" },
@@ -5034,7 +5064,7 @@ local function CreateAurasWidgetOptions()
                     desc = L["Show buffs that you can dispell."],
                     set = function(info, val)
                       local db = db.AuraWidget.Buffs
-                      db.ShowAllEnemy = not (db.ShowOnEnemyNPCs or val)
+                      db.ShowAllEnemy = not (db.ShowOnEnemyNPCs or val or db.ShowMagic)
                       SetValue(info, val)
                     end,
                     arg = { "AuraWidget", "Buffs", "ShowDispellable" },
@@ -5042,8 +5072,36 @@ local function CreateAurasWidgetOptions()
                       return not db.AuraWidget.Buffs.ShowEnemy
                     end
                   },
+                  Magic = {
+                    name = L["Magic"],
+                    order = 60,
+                    type = "toggle",
+                    desc = L["Show buffs of dispel type Magic."],
+                    set = function(info, val)
+                      local db = db.AuraWidget.Buffs
+                      db.ShowAllEnemy = not (db.ShowOnEnemyNPCs or db.ShowDispellable or val)
+                      SetValue(info, val)
+                    end,
+                    arg = { "AuraWidget", "Buffs", "ShowMagic" },
+                    disabled = function()
+                      return not db.AuraWidget.Buffs.ShowEnemy
+                    end
+                  },
+                  MaxDuration = {
+                    name = L["Max Duration"],
+                    order = 70,
+                    type = "range",
+                    isPercent = false,
+                    min = 0,
+                    softMin = 0,
+                    softMax = 300,
+                    step = 1,
+                    desc = L["Hide buffs with a duration longer than this, in seconds (applies on top of the toggles above). 0 disables this filter. Any non-zero value also hides permanent buffs."],
+                    arg = { "AuraWidget", "Buffs", "MaxDurationEnemy" },
+                    disabled = function() return not db.AuraWidget.Buffs.ShowEnemy end,
+                  },
                 },
-              },              
+              },
               SpellFilter = {
                 name = L["Filter by Spell"],
                 order = 50,
@@ -5051,6 +5109,12 @@ local function CreateAurasWidgetOptions()
                 inline = true,
                 hidden = Addon.ExpansionIsAtLeastMidnight,
                 args = {
+                  ScopeNote = {
+                    name = L["This spell filter only takes effect for buffs on friendly units. On enemy units it has no effect, due to a Blizzard API restriction (Patch 12.1.0)."],
+                    type = "description",
+                    order = 0,
+                    fontSize = "medium",
+                  },
                   Mode = {
                     name = L["Mode"],
                     type = "select",
@@ -5111,6 +5175,7 @@ local function CreateAurasWidgetOptions()
                     name = L["Show Debuffs"],
                     order = 10,
                     type = "toggle",
+                    desc = L["Enable or disable showing debuffs on friendly units altogether."],
                     arg = { "AuraWidget", "Debuffs", "ShowFriendly" },
                   },
                   ShowAll = {
@@ -5120,8 +5185,7 @@ local function CreateAurasWidgetOptions()
                     desc = L["Show all debuffs on friendly units."],
                     set = function(info, val)
                       local db = db.AuraWidget.Debuffs
-                      if db.ShowBlizzardForFriendly or db.ShowDispellable or db.ShowBoss or
-                        db.FilterByType[1] or db.FilterByType[2] or db.FilterByType[3] or db.FilterByType[4] then
+                      if db.ShowBlizzardForFriendly or db.ShowDispellable or db.ShowBoss then
                         db.ShowBlizzardForFriendly = false
                         db.ShowDispellable = false
                         db.ShowBoss = false
@@ -5138,8 +5202,7 @@ local function CreateAurasWidgetOptions()
                     desc = L["Show debuffs that are shown on Blizzard's default nameplates."],
                     set = function(info, val)
                       local db = db.AuraWidget.Debuffs
-                        db.ShowAllFriendly = not (val or db.ShowDispellable or db.ShowBoss or
-                        db.FilterByType[1] or db.FilterByType[2] or db.FilterByType[3] or db.FilterByType[4])
+                      db.ShowAllFriendly = not (val or db.ShowDispellable or db.ShowBoss)
                       SetValue(info, val)
                     end,
                     arg = { "AuraWidget", "Debuffs", "ShowBlizzardForFriendly" },
@@ -5150,11 +5213,10 @@ local function CreateAurasWidgetOptions()
                     name = L["Dispellable"],
                     order = 40,
                     type = "toggle",
-                    desc = L["Show debuffs that you can dispell."],
+                    desc = L["Show debuffs that you can dispell, restricted to the dispel types checked below (Curse/Disease/Magic/Poison)."],
                     set = function(info, val)
                       local db = db.AuraWidget.Debuffs
-                        db.ShowAllFriendly = not (val or db.ShowBlizzardForFriendly or db.ShowBoss or
-                        db.FilterByType[1] or db.FilterByType[2] or db.FilterByType[3] or db.FilterByType[4])
+                      db.ShowAllFriendly = not (val or db.ShowBlizzardForFriendly or db.ShowBoss)
                       SetValue(info, val)
                     end,
                     arg = { "AuraWidget", "Debuffs", "ShowDispellable" },
@@ -5167,8 +5229,7 @@ local function CreateAurasWidgetOptions()
                     desc = L["Show debuffs that were applied by bosses."],
                     set = function(info, val)
                       local db = db.AuraWidget.Debuffs
-                        db.ShowAllFriendly = not (val or db.ShowBlizzardForFriendly or db.ShowDispellable or
-                        db.FilterByType[1] or db.FilterByType[2] or db.FilterByType[3] or db.FilterByType[4])
+                      db.ShowAllFriendly = not (val or db.ShowBlizzardForFriendly or db.ShowDispellable)
                       SetValue(info, val)
                     end,
                     arg = { "AuraWidget", "Debuffs", "ShowBoss" },
@@ -5179,62 +5240,60 @@ local function CreateAurasWidgetOptions()
                     type = "header",
                     order = 50,
                   },
+                  DispelTypeNote = {
+                    name = L["Only takes effect while \"Dispellable\" above is also checked."],
+                    type = "description",
+                    order = 55,
+                    fontSize = "medium",
+                  },
                   Curses = {
                     name = L["Curse"],
                     order = 60,
                     type = "toggle",
+                    desc = L["Show dispellable harmful auras of the Curse dispel type."],
                     get = function(info) return db.AuraWidget.Debuffs.FilterByType[1] end,
                     set = function(info, val)
-                      local db = db.AuraWidget.Debuffs
-                      db.ShowAllFriendly = not (val or db.ShowBlizzardForFriendly or db.ShowDispellable or db.ShowBoss or
-                        db.FilterByType[2] or db.FilterByType[3] or db.FilterByType[4])
-                      db.FilterByType[1] = val
+                      db.AuraWidget.Debuffs.FilterByType[1] = val
                       Addon.Widgets:UpdateSettings("Auras")
                     end,
-                    disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly end,
+                    disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly or not db.AuraWidget.Debuffs.ShowDispellable end,
                   },
                   Diseases = {
                     name = L["Disease"],
                     order = 70,
                     type = "toggle",
+                    desc = L["Show dispellable harmful auras of the Disease dispel type."],
                     get = function(info) return db.AuraWidget.Debuffs.FilterByType[2] end,
                     set = function(info, val)
-                      local db = db.AuraWidget.Debuffs
-                        db.ShowAllFriendly = not (val or db.ShowBlizzardForFriendly or db.ShowDispellable or db.ShowBoss or
-                        db.FilterByType[1] or db.FilterByType[3] or db.FilterByType[4])
-                        db.FilterByType[2] = val
+                      db.AuraWidget.Debuffs.FilterByType[2] = val
                       Addon.Widgets:UpdateSettings("Auras")
                     end,
-                    disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly end,
+                    disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly or not db.AuraWidget.Debuffs.ShowDispellable end,
                   },
                   Magics = {
                     name = L["Magic"],
                     order = 80,
                     type = "toggle",
+                    desc = L["Show dispellable harmful auras of the Magic dispel type."],
                     get = function(info) return db.AuraWidget.Debuffs.FilterByType[3] end,
                     set = function(info, val)
-                      local db = db.AuraWidget.Debuffs
-                        db.ShowAllFriendly = not (val or db.ShowBlizzardForFriendly or db.ShowDispellable or db.ShowBoss or
-                        db.FilterByType[1] or db.FilterByType[2] or db.FilterByType[4])
-                        db.FilterByType[3] = val
+                      db.AuraWidget.Debuffs.FilterByType[3] = val
                       Addon.Widgets:UpdateSettings("Auras")
                     end,
-                    disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly end,
+                    disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly or not db.AuraWidget.Debuffs.ShowDispellable end,
                   },
                   Poisons = {
                     name = L["Poison"],
                     order = 90,
                     type = "toggle",
+                    desc = L["Show dispellable harmful auras of the Poison dispel type."],
                     get = function(info) return db.AuraWidget.Debuffs.FilterByType[4] end,
                     set = function(info, val)
-                      local db = db.AuraWidget.Debuffs
-                        db.ShowAllFriendly = not (val or db.ShowBlizzardForFriendly or db.ShowDispellable or db.ShowBoss or
-                        db.FilterByType[1] or db.FilterByType[2] or db.FilterByType[3])
-                        db.FilterByType[4] = val
+                      db.AuraWidget.Debuffs.FilterByType[4] = val
                       Addon.Widgets:UpdateSettings("Auras")
                     end,
-                    disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly end,
-                  },                  
+                    disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly or not db.AuraWidget.Debuffs.ShowDispellable end,
+                  },
                 },
               },
               FriendlyUnitsMidnight = {
@@ -5248,6 +5307,7 @@ local function CreateAurasWidgetOptions()
                     name = L["Show Debuffs"],
                     order = 10,
                     type = "toggle",
+                    desc = L["Enable or disable showing debuffs on friendly units altogether."],
                     arg = { "AuraWidget", "Debuffs", "ShowFriendly" },
                   },
                   ShowAll = {
@@ -5255,12 +5315,14 @@ local function CreateAurasWidgetOptions()
                     order = 20,
                     type = "toggle",
                     desc = L["Show all debuffs on friendly units."],
+                    -- "All" subsumes every other toggle below, so turning it on clears them; turning
+                    -- any of them on (see their own set() below) clears "All" instead. Unlike "All",
+                    -- the other toggles are independent and freely combinable with each other.
                     set = function(info, val)
                       local db = db.AuraWidget.Debuffs
-                      if db.ShowDispellable then
-                        db.ShowDispellable = false
-                        SetValue(info, val)
-                      end
+                      db.ShowDispellable = false
+                      db.ShowBoss = false
+                      SetValue(info, val)
                     end,
                     arg = { "AuraWidget", "Debuffs", "ShowAllFriendly" },
                     disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly end
@@ -5269,14 +5331,86 @@ local function CreateAurasWidgetOptions()
                     name = L["Dispellable"],
                     order = 40,
                     type = "toggle",
-                    desc = L["Show debuffs that you can dispell."],
+                    desc = L["Show debuffs that you can dispell, restricted to the dispel types checked below (Curse/Disease/Magic/Poison)."],
                     set = function(info, val)
                       local db = db.AuraWidget.Debuffs
-                      db.ShowAllFriendly = not (val)
+                      db.ShowAllFriendly = not (val or db.ShowBoss)
                       SetValue(info, val)
                     end,
                     arg = { "AuraWidget", "Debuffs", "ShowDispellable" },
                     disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly end
+                  },
+                  Boss = {
+                    name = L["Boss"],
+                    order = 50,
+                    type = "toggle",
+                    desc = L["Show debuffs that were applied by bosses."],
+                    set = function(info, val)
+                      local db = db.AuraWidget.Debuffs
+                      db.ShowAllFriendly = not (db.ShowDispellable or val)
+                      SetValue(info, val)
+                    end,
+                    arg = { "AuraWidget", "Debuffs", "ShowBoss" },
+                    disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly end
+                  },
+                  DispelTypeHeader = {
+                    name = L["Dispel Type"],
+                    type = "header",
+                    order = 80,
+                  },
+                  DispelTypeNote = {
+                    name = L["Only takes effect while \"Dispellable\" above is also checked."],
+                    type = "description",
+                    order = 85,
+                    fontSize = "medium",
+                  },
+                  Curses = {
+                    name = L["Curse"],
+                    order = 90,
+                    type = "toggle",
+                    desc = L["Show dispellable harmful auras of the Curse dispel type."],
+                    get = function(info) return db.AuraWidget.Debuffs.FilterByType[1] end,
+                    set = function(info, val)
+                      db.AuraWidget.Debuffs.FilterByType[1] = val
+                      Addon.Widgets:UpdateSettings("Auras")
+                    end,
+                    disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly or not db.AuraWidget.Debuffs.ShowDispellable end,
+                  },
+                  Diseases = {
+                    name = L["Disease"],
+                    order = 100,
+                    type = "toggle",
+                    desc = L["Show dispellable harmful auras of the Disease dispel type."],
+                    get = function(info) return db.AuraWidget.Debuffs.FilterByType[2] end,
+                    set = function(info, val)
+                      db.AuraWidget.Debuffs.FilterByType[2] = val
+                      Addon.Widgets:UpdateSettings("Auras")
+                    end,
+                    disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly or not db.AuraWidget.Debuffs.ShowDispellable end,
+                  },
+                  Magics = {
+                    name = L["Magic"],
+                    order = 110,
+                    type = "toggle",
+                    desc = L["Show dispellable harmful auras of the Magic dispel type."],
+                    get = function(info) return db.AuraWidget.Debuffs.FilterByType[3] end,
+                    set = function(info, val)
+                      db.AuraWidget.Debuffs.FilterByType[3] = val
+                      Addon.Widgets:UpdateSettings("Auras")
+                    end,
+                    disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly or not db.AuraWidget.Debuffs.ShowDispellable end,
+                  },
+                  Poisons = {
+                    name = L["Poison"],
+                    order = 120,
+                    type = "toggle",
+                    desc = L["Show dispellable harmful auras of the Poison dispel type."],
+                    get = function(info) return db.AuraWidget.Debuffs.FilterByType[4] end,
+                    set = function(info, val)
+                      db.AuraWidget.Debuffs.FilterByType[4] = val
+                      Addon.Widgets:UpdateSettings("Auras")
+                    end,
+                    disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly or not db.AuraWidget.Debuffs.ShowDispellable end,
                   },
                 },
               },
@@ -5291,6 +5425,7 @@ local function CreateAurasWidgetOptions()
                     name = L["Show Debuffs"],
                     order = 10,
                     type = "toggle",
+                    desc = L["Enable or disable showing debuffs on enemy units altogether."],
                     arg = { "AuraWidget", "Debuffs", "ShowEnemy" }
                   },
                   ShowAll = {
@@ -5349,6 +5484,7 @@ local function CreateAurasWidgetOptions()
                     name = L["Show Debuffs"],
                     order = 10,
                     type = "toggle",
+                    desc = L["Enable or disable showing debuffs on enemy units altogether."],
                     arg = { "AuraWidget", "Debuffs", "ShowEnemy" }
                   },
                   ShowAll = {
@@ -5356,12 +5492,17 @@ local function CreateAurasWidgetOptions()
                     order = 20,
                     type = "toggle",
                     desc = L["Show all debuffs on enemy units."],
+                    -- "All" subsumes every other toggle below, so turning it on clears them; turning
+                    -- any of them on (see their own set() below) clears "All" instead. Unlike "All",
+                    -- the other toggles are independent and freely combinable with each other.
                     set = function(info, val)
                       local db = db.AuraWidget.Debuffs
-                      if db.ShowOnlyMine then
-                        db.ShowOnlyMine = false
-                        SetValue(info, val)
-                      end
+                      db.ShowOnlyMine = false
+                      db.ShowBlizzardForEnemy = false
+                      db.ShowBossEnemy = false
+                      db.ShowPriority = false
+                      db.ShowDispellableEnemy = false
+                      SetValue(info, val)
                     end,
                     arg = { "AuraWidget", "Debuffs", "ShowAllEnemy" },
                     disabled = function() return not db.AuraWidget.Debuffs.ShowEnemy end,
@@ -5370,17 +5511,128 @@ local function CreateAurasWidgetOptions()
                     name = L["Mine"],
                     order = 30,
                     type = "toggle",
-                    desc = L["Show debuffs that were applied by you."],
+                    desc = L["Show debuffs that were applied by you (or your pet)."],
                     set = function(info, val)
                       local db = db.AuraWidget.Debuffs
-                      db.ShowAllEnemy = not (val)
+                      db.ShowAllEnemy = not (val or db.ShowBlizzardForEnemy or db.ShowBossEnemy or db.ShowPriority or db.ShowDispellableEnemy)
                       SetValue(info, val)
                     end,
                     arg = { "AuraWidget", "Debuffs", "ShowOnlyMine" },
                     disabled = function() return not db.AuraWidget.Debuffs.ShowEnemy end,
                   },
+                  Blizzard = {
+                    name = L["Blizzard"],
+                    order = 40,
+                    type = "toggle",
+                    desc = L["Show debuffs applied by you that are also shown on Blizzard's default nameplates."],
+                    set = function(info, val)
+                      local db = db.AuraWidget.Debuffs
+                      db.ShowAllEnemy = not (db.ShowOnlyMine or val or db.ShowBossEnemy or db.ShowPriority or db.ShowDispellableEnemy)
+                      SetValue(info, val)
+                    end,
+                    arg = { "AuraWidget", "Debuffs", "ShowBlizzardForEnemy" },
+                    disabled = function() return not db.AuraWidget.Debuffs.ShowEnemy end,
+                  },
+                  Boss = {
+                    name = L["Boss"],
+                    order = 50,
+                    type = "toggle",
+                    desc = L["Show debuffs that were applied by bosses."],
+                    set = function(info, val)
+                      local db = db.AuraWidget.Debuffs
+                      db.ShowAllEnemy = not (db.ShowOnlyMine or db.ShowBlizzardForEnemy or val or db.ShowPriority or db.ShowDispellableEnemy)
+                      SetValue(info, val)
+                    end,
+                    arg = { "AuraWidget", "Debuffs", "ShowBossEnemy" },
+                    disabled = function() return not db.AuraWidget.Debuffs.ShowEnemy end,
+                  },
+                  Priority = {
+                    name = L["Priority"],
+                    order = 60,
+                    type = "toggle",
+                    desc = L["Show debuffs that Blizzard classifies as high priority."],
+                    set = function(info, val)
+                      local db = db.AuraWidget.Debuffs
+                      db.ShowAllEnemy = not (db.ShowOnlyMine or db.ShowBlizzardForEnemy or db.ShowBossEnemy or val or db.ShowDispellableEnemy)
+                      SetValue(info, val)
+                    end,
+                    arg = { "AuraWidget", "Debuffs", "ShowPriority" },
+                    disabled = function() return not db.AuraWidget.Debuffs.ShowEnemy end,
+                  },
+                  Dispellable = {
+                    name = L["Dispellable"],
+                    order = 70,
+                    type = "toggle",
+                    desc = L["Show debuffs that can be dispelled, restricted to the dispel types checked below (Curse/Disease/Magic/Poison)."],
+                    set = function(info, val)
+                      local db = db.AuraWidget.Debuffs
+                      db.ShowAllEnemy = not (db.ShowOnlyMine or db.ShowBlizzardForEnemy or db.ShowBossEnemy or db.ShowPriority or val)
+                      SetValue(info, val)
+                    end,
+                    arg = { "AuraWidget", "Debuffs", "ShowDispellableEnemy" },
+                    disabled = function() return not db.AuraWidget.Debuffs.ShowEnemy end,
+                  },
+                  DispelTypeHeader = {
+                    name = L["Dispel Type"],
+                    type = "header",
+                    order = 80,
+                  },
+                  DispelTypeNote = {
+                    name = L["Only takes effect while \"Dispellable\" above is also checked."],
+                    type = "description",
+                    order = 85,
+                    fontSize = "medium",
+                  },
+                  Curses = {
+                    name = L["Curse"],
+                    order = 90,
+                    type = "toggle",
+                    desc = L["Show dispellable harmful auras of the Curse dispel type."],
+                    get = function(info) return db.AuraWidget.Debuffs.FilterByTypeEnemy[1] end,
+                    set = function(info, val)
+                      db.AuraWidget.Debuffs.FilterByTypeEnemy[1] = val
+                      Addon.Widgets:UpdateSettings("Auras")
+                    end,
+                    disabled = function() return not db.AuraWidget.Debuffs.ShowEnemy or not db.AuraWidget.Debuffs.ShowDispellableEnemy end,
+                  },
+                  Diseases = {
+                    name = L["Disease"],
+                    order = 100,
+                    type = "toggle",
+                    desc = L["Show dispellable harmful auras of the Disease dispel type."],
+                    get = function(info) return db.AuraWidget.Debuffs.FilterByTypeEnemy[2] end,
+                    set = function(info, val)
+                      db.AuraWidget.Debuffs.FilterByTypeEnemy[2] = val
+                      Addon.Widgets:UpdateSettings("Auras")
+                    end,
+                    disabled = function() return not db.AuraWidget.Debuffs.ShowEnemy or not db.AuraWidget.Debuffs.ShowDispellableEnemy end,
+                  },
+                  Magics = {
+                    name = L["Magic"],
+                    order = 110,
+                    type = "toggle",
+                    desc = L["Show dispellable harmful auras of the Magic dispel type."],
+                    get = function(info) return db.AuraWidget.Debuffs.FilterByTypeEnemy[3] end,
+                    set = function(info, val)
+                      db.AuraWidget.Debuffs.FilterByTypeEnemy[3] = val
+                      Addon.Widgets:UpdateSettings("Auras")
+                    end,
+                    disabled = function() return not db.AuraWidget.Debuffs.ShowEnemy or not db.AuraWidget.Debuffs.ShowDispellableEnemy end,
+                  },
+                  Poisons = {
+                    name = L["Poison"],
+                    order = 120,
+                    type = "toggle",
+                    desc = L["Show dispellable harmful auras of the Poison dispel type."],
+                    get = function(info) return db.AuraWidget.Debuffs.FilterByTypeEnemy[4] end,
+                    set = function(info, val)
+                      db.AuraWidget.Debuffs.FilterByTypeEnemy[4] = val
+                      Addon.Widgets:UpdateSettings("Auras")
+                    end,
+                    disabled = function() return not db.AuraWidget.Debuffs.ShowEnemy or not db.AuraWidget.Debuffs.ShowDispellableEnemy end,
+                  },
                 },
-              },              
+              },
               SpellFilter = {
                 name = L["Filter by Spell"],
                 order = 50,
@@ -5388,6 +5640,12 @@ local function CreateAurasWidgetOptions()
                 inline = true,
                 hidden = Addon.ExpansionIsAtLeastMidnight,
                 args = {
+                  ScopeNote = {
+                    name = L["This spell filter only takes effect for debuffs on enemy units. On friendly units it has no effect, due to a Blizzard API restriction (Patch 12.1.0)."],
+                    type = "description",
+                    order = 0,
+                    fontSize = "medium",
+                  },
                   Mode = {
                     name = L["Mode"],
                     type = "select",
@@ -5446,6 +5704,7 @@ local function CreateAurasWidgetOptions()
                     name = L["Show Crowd Control"],
                     order = 10,
                     type = "toggle",
+                    desc = L["Enable or disable showing crowd control auras on friendly units altogether."],
                     arg = { "AuraWidget", "CrowdControl", "ShowFriendly" },
                   },
                   ShowAll = {
@@ -5518,6 +5777,7 @@ local function CreateAurasWidgetOptions()
                     name = L["Show Crowd Control"],
                     order = 10,
                     type = "toggle",
+                    desc = L["Enable or disable showing crowd control auras on friendly units altogether."],
                     arg = { "AuraWidget", "CrowdControl", "ShowFriendly" },
                   },
                   ShowAll = {
@@ -5561,6 +5821,7 @@ local function CreateAurasWidgetOptions()
                     name = L["Show Crowd Control"],
                     order = 10,
                     type = "toggle",
+                    desc = L["Enable or disable showing crowd control auras on enemy units altogether."],
                     arg = { "AuraWidget", "CrowdControl", "ShowEnemy" }
                   },
                   ShowAll = {
@@ -5606,6 +5867,7 @@ local function CreateAurasWidgetOptions()
                     name = L["Show Crowd Control"],
                     order = 10,
                     type = "toggle",
+                    desc = L["Enable or disable showing crowd control auras on enemy units altogether."],
                     arg = { "AuraWidget", "CrowdControl", "ShowEnemy" }
                   },
                   ShowAll = {
@@ -5628,6 +5890,12 @@ local function CreateAurasWidgetOptions()
                 inline = true,
                 hidden = Addon.ExpansionIsAtLeastMidnight,
                 args = {
+                  ScopeNote = {
+                    name = L["This spell filter only takes effect for crowd control on enemy units. On friendly units it has no effect, due to a Blizzard API restriction (Patch 12.1.0)."],
+                    type = "description",
+                    order = 0,
+                    fontSize = "medium",
+                  },
                   Mode = {
                     name = L["Mode"],
                     type = "select",

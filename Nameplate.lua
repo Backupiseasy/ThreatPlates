@@ -1273,7 +1273,7 @@ end
 
 function Addon.ExecuteOnlyOoC(func)
   if InCombatLockdown() then
-    Addon.Logging.Error(L["Unable to change this setting while in combat"])
+    Addon.Logging.Error(L["Unable to change this setting while in combat."])
   else
     func()
   end
