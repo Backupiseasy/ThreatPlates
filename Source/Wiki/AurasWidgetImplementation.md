@@ -167,6 +167,22 @@ and/or in-game testing. Worth knowing before touching this code.
   state. No safely addon-exposed "currently active aura count" API exists on `AuraContainer`
   (`GetAuraGroupFrame`/`GetAuraGroupFrameCount`/`HasAuraGroup` are the only public
   frame-introspection methods); `AuraButton:IsShown()` per-frame might work but is unverified.
+- **`SetMouseMotionEnabled` alone is not enough for tooltips to appear - `SetTooltipAnchorPoint` must
+  also be called at least once.** `OnEnter_Intrinsic`/`OnLeave_Intrinsic` are wired into the button
+  automatically (`Blizzard_AuraButton.xml`, not addon-scriptable), and `ShowTooltip()` calls
+  `tooltip:SetOwner(self, self:GetTooltipAnchorPoint())` - but `GetTooltipAnchorPoint()` returns
+  `self.tooltipAnchorPoint`, which is `nil` until `SetTooltipAnchorPoint(point, offsetX, offsetY)` is
+  called (`OnLoad_Intrinsic` never initializes it). Without that call, every tooltip attempt calls
+  `SetOwner` with a `nil` anchor and no tooltip ever appeared, confirmed live. Fixed by calling
+  `auraButton:SetTooltipAnchorPoint("ANCHOR_RIGHT")` once in `InitializeAuraButton`.
+- **`SetHideTooltipInCombat(true)` hides tooltips in combat - this widget doesn't want that.** Was set
+  unconditionally `true` (pre-existing, before this session's tooltip work), which per
+  `AuraButtonPrivateMixin:ShouldShowTooltip()` suppresses the tooltip entirely whenever
+  `UnitAffectingCombat("player")` is true - unrelated to the anchor-point bug above, a second,
+  independent reason tooltips didn't work. Blizzard's own default unit-frame auras still show
+  tooltips in combat (verified live by user), so this was an unnecessary restriction this widget
+  introduced on its own, not something inherited from Blizzard's own behavior. Fixed by switching to
+  `SetHideTooltipInCombat(false)`.
 - **`candidateFilters.isFromPlayerOrPlayerPet` does not actually restrict anything** on this
   client/patch — a group configured with it still shows auras from every caster, not just the
   player/pet. The `PLAYER` filter-string token (older, part of the classic `AuraFilters` vocabulary)

@@ -211,10 +211,19 @@ local function InitializeAuraButton(auraButton, aura_type)
     auraButton:SetDurationText(auraButton.TimeLeft)
   end
 
-  -- AuraButton tooltips are managed by Blizzard automatically; no AuraFrameOnEnter/GameTooltip code
-  -- needed on our side, just whether mouse interaction is enabled at all.
+  -- AuraButton tooltips are managed by Blizzard automatically (OnEnter/OnLeave are intrinsic, wired
+  -- in Blizzard_AuraButton.xml, not addon-scriptable) - but ShowTooltip() calls
+  -- tooltip:SetOwner(self, self:GetTooltipAnchorPoint()), and GetTooltipAnchorPoint() returns
+  -- self.tooltipAnchorPoint, which is nil until SetTooltipAnchorPoint() is called at least once
+  -- (OnLoad_Intrinsic never initializes it). Without this, SetOwner got a nil anchor and no tooltip
+  -- ever appeared - confirmed by user report ("mouse over aura shows nothing") even with ShowTooltips
+  -- enabled and SetMouseMotionEnabled/SetHideTooltipInCombat both correctly set.
+  -- false, not true: Blizzard's own default unit-frame auras still show tooltips in combat (verified
+  -- live by user), so hiding ours in combat was an unnecessary restriction, not something matching
+  -- Blizzard's own behavior.
+  auraButton:SetTooltipAnchorPoint("ANCHOR_RIGHT")
   auraButton:SetMouseMotionEnabled(Widget.db.ShowTooltips)
-  auraButton:SetHideTooltipInCombat(true)
+  auraButton:SetHideTooltipInCombat(false)
 
   PixelUtil.SetSize(auraButton, db_icon.IconWidth, db_icon.IconHeight)
 end
