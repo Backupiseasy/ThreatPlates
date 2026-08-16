@@ -114,12 +114,12 @@ local AURA_GROUP_KEYS = {
 }
 local DISPEL_TYPE_NAMES = { "Curse", "Disease", "Magic", "Poison" } -- index matches Debuffs.FilterByType[1..4]
 
--- Dispel-type border coloring (AuraWidget.ShowAuraType/DefaultBuffColor/DefaultDebuffColor, shared
--- across Buffs/Debuffs/CrowdControl - see Constants.lua). AddDispelTypeTexture's customDispelColorMap
--- wants real Color objects (needs :GetRGBA()), not the plain {r=,g=,b=} tables _G.DebuffTypeColor (or
--- the legacy AurasWidget.lua fallback of the same shape) provides - built once here. customDispelColorCurve
--- (a C_CurveUtil color curve) is the alternative Blizzard also supports, but customDispelColorMap is a
--- plain name->color table and needs no curve object to reconstruct, so it's used here instead.
+-- Dispel-type border coloring (AuraWidget.ShowAuraType, shared across Buffs/Debuffs/CrowdControl -
+-- see Constants.lua). AddDispelTypeTexture's customDispelColorMap wants real Color objects (needs
+-- :GetRGBA()), not the plain {r=,g=,b=} tables _G.DebuffTypeColor (or the legacy AurasWidget.lua
+-- fallback of the same shape) provides - built once here. customDispelColorCurve (a C_CurveUtil color
+-- curve) is the alternative Blizzard also supports, but customDispelColorMap is a plain name->color
+-- table and needs no curve object to reconstruct, so it's used here instead.
 local function BuildDispelTypeColorMap()
   local source = _G.DebuffTypeColor or {
     Magic = { r = 0.20, g = 0.60, b = 1.00 },
@@ -139,6 +139,25 @@ end
 
 local DISPEL_TYPE_COLOR_MAP = BuildDispelTypeColorMap()
 
+-- customDispelColorMap's lookup key for an aura with no dispel type is the literal string "None"
+-- (Blizzard_CustomAuraButton.lua's GetDispelTypeMapKey: `auraData.dispelName or "None"`) - adding a
+-- "None" entry here is what lets AuraWidget.DefaultBuffColor/DefaultDebuffColor (Options: Appearance
+-- -> Highlight -> Buff/Debuff Color) actually take effect, matching the legacy widget's
+-- Widget:GetColorForAura (DebuffTypeColor[dispelName] or DefaultDebuffColor for harmful auras,
+-- DefaultBuffColor otherwise). Built per aura_type (not once globally, unlike DISPEL_TYPE_COLOR_MAP
+-- above) since Buffs vs. Debuffs/CrowdControl need a different default color - CrowdControl auras are
+-- always harmful, so they share Debuffs' DefaultDebuffColor, same as the legacy widget's
+-- `aura.effect == "HARMFUL"` check.
+local function GetDispelTypeColorMapForAuraType(aura_type)
+  local map = {}
+  for dispel_name, color in pairs(DISPEL_TYPE_COLOR_MAP) do
+    map[dispel_name] = color
+  end
+  local default_color = (aura_type == "Buffs") and Widget.db.DefaultBuffColor or Widget.db.DefaultDebuffColor
+  map.None = _G.CreateColor(default_color.r, default_color.g, default_color.b, default_color.a or 1)
+  return map
+end
+
 local AuraContainerPool = { Buffs = {}, Debuffs = {}, CrowdControl = {} }
 local NextAuraContainerIndex = { Buffs = 1, Debuffs = 1, CrowdControl = 1 }
 
@@ -151,9 +170,10 @@ local function InitializeAuraButton(auraButton, aura_type)
   auraButton:SetIcon(auraButton.Icon)
 
   if Widget.db.ShowAuraType then
-    -- Border style + showWithoutDispelType=false: only draws when the aura actually has a dispel
-    -- type (most buffs don't), colored via customDispelColorMap instead of Blizzard's own per-type
-    -- atlas color, matching the legacy widget's DebuffTypeColor-based coloring.
+    -- Border style, always drawn (showWithoutDispelType=true) - dispel-typed auras get their
+    -- DISPEL_TYPE_COLOR_MAP color, everything else falls back to DefaultBuffColor/DefaultDebuffColor
+    -- via the "None" map key (see GetDispelTypeColorMapForAuraType), matching the legacy widget's
+    -- Widget:GetColorForAura (every aura gets some border color, not just dispel-typed ones).
     auraButton.DispelBorder = auraButton:CreateTexture(nil, "OVERLAY")
     -- PixelUtil (not plain SetPoint) so the outset is a crisp, consistent number of screen pixels
     -- regardless of UI scale - a plain SetPoint offset could land sub-pixel and look like it's not
@@ -164,8 +184,8 @@ local function InitializeAuraButton(auraButton, aura_type)
       style = _G.Enum.CustomAuraButtonDispelTypeTextureStyle.Border,
       showWhenHarmful = true,
       showWhenHelpful = true,
-      showWithoutDispelType = false,
-      customDispelColorMap = DISPEL_TYPE_COLOR_MAP,
+      showWithoutDispelType = true,
+      customDispelColorMap = GetDispelTypeColorMapForAuraType(aura_type),
     })
   end
 

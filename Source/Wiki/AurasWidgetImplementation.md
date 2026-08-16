@@ -222,6 +222,14 @@ and/or in-game testing. Worth knowing before touching this code.
   `customDispelColorCurve` (a `C_CurveUtil` color curve) is the alternative Blizzard also supports,
   but needs a curve object; `customDispelColorMap` is functionally equivalent for this use case and
   needs no such object.
+- **`customDispelColorMap`'s lookup key for an aura with no dispel type is the literal string
+  `"None"`** (`Blizzard_CustomAuraButton.lua`'s `GetDispelTypeMapKey`: `auraData.dispelName or
+  "None"`) - not documented anywhere obvious, found by reading the source. This is what makes
+  `AuraWidget.DefaultBuffColor`/`DefaultDebuffColor` (Options: Appearance → Highlight → Buff/Debuff
+  Color) work at all: `GetDispelTypeColorMapForAuraType` adds a `"None"` entry to a per-aura_type copy
+  of `DISPEL_TYPE_COLOR_MAP`, and `showWithoutDispelType = true` on `AddDispelTypeTexture` makes the
+  border draw for every aura instead of only dispel-typed ones - matching the legacy widget's
+  `Widget:GetColorForAura`, which likewise colors every aura, not just dispel-typed ones.
 
 ---
 
@@ -241,6 +249,8 @@ capability doesn't exist for addon code on `AuraButton`/`AuraContainer` as of Pa
 | Per-spell whitelist/blacklist | hidden (Options) | `candidateFilters.includeSpellIDs`/`excludeSpellIDs`, reaction-restricted (§6) | **Yes, partially** |
 | "Dispellable (only me)" for Enemy Debuffs | not implemented | no Blizzard token/candidateFilters field for player-personal dispel capability exists — would need a static class/spec→dispel-type lookup table instead | **Yes, via workaround** |
 | Dynamic sibling-height anchoring (no wasted vertical gap above an empty grid) | not implemented (static max-height used instead) | none found — `GetAuraGroupFrameCount` is pool size not live count (§6), no `GetHeight` on Forbidden containers | **No**, not with a currently-known API |
+| `CenterAuras` | inert, not gated | pure Lua-side layout math (center the flow-layout group instead of growing from the alignment corner) — not an API blocker, just not wired into `UpdateAuraContainer`'s layout code | **Yes** — not built yet |
+| `ModeIcon.ShowBorder` (generic icon border, independent of dispel-type coloring) | inert, only reachable via Options when Icon Style = Custom | none found for a plain non-dispel-type border texture beyond what `InitializeAuraButton` already draws | **Yes** — a plain `CreateTexture` border, same mechanism as the dispel-type border, just unconditional |
 
 ---
 
