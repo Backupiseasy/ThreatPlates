@@ -1,4 +1,10 @@
 ﻿------------------------------------------------------
+13.1.0 (2026-08-15)
+------------------------------------------------------
+* Fix Lua error when displaying auras on nameplates caused by restrictions on secret values [GH-723].
+* Rebuilt the Auras widget on top of Patch 12.1.0's new AuraContainer API, since the old aura-scanning method no longer works reliably. Currently only rudimentary aura features are available as a result.
+
+------------------------------------------------------
 13.0.31 (2026-08-15)
 ------------------------------------------------------
 * Fixed a Lua error that broke enemy nameplate coloring in Arenas and Rated Solo Shuffle on Midnight [GH-724].

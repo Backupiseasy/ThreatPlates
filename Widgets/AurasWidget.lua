@@ -1714,11 +1714,12 @@ Widget.FILTER_FUNCTIONS = {
 
 if Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER then
   function Widget:FilterFriendlyDebuffsBySpell(db, aura, AuraFilterFunction)
+    -- Dispellable ("Bannbar") and Dispel Type ("Bannart") are combined, not independent: Bannart only
+    -- takes effect while Bannbar is also on, and then only dispellable debuffs of a checked type show.
     local show_aura = db.ShowAllFriendly or
                       (db.ShowBlizzardForFriendly and (aura.nameplateShowAll or (aura.nameplateShowPersonal and aura.CastByPlayer))) or
-                      (db.ShowDispellable and aura.isStealable) or
                       (db.ShowBoss and aura.isBossAura) or
-                      (aura.dispelName and db.FilterByType[self.AURA_TYPE[aura.dispelName]])
+                      (db.ShowDispellable and aura.isStealable and aura.dispelName and db.FilterByType[self.AURA_TYPE[aura.dispelName]])
 
     local spellfound = self.AuraFilterDebuffs[aura.name] or self.AuraFilterDebuffs[aura.spellId]
 
@@ -1757,11 +1758,12 @@ if Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER then
 else
   -- ShowBlizzard... is not supported in Classic
   function Widget:FilterFriendlyDebuffsBySpell(db, aura, AuraFilterFunction)
+    -- Dispellable ("Bannbar") and Dispel Type ("Bannart") are combined, not independent: Bannart only
+    -- takes effect while Bannbar is also on, and then only dispellable debuffs of a checked type show.
     local show_aura = db.ShowAllFriendly or
       -- (db.ShowBlizzardForFriendly and (aura.nameplateShowAll or (aura.nameplateShowPersonal and aura.CastByPlayer))) or
-      (db.ShowDispellable and aura.isStealable) or
       (db.ShowBoss and aura.isBossAura) or
-      (aura.dispelName and db.FilterByType[self.AURA_TYPE[aura.dispelName]])
+      (db.ShowDispellable and aura.isStealable and aura.dispelName and db.FilterByType[self.AURA_TYPE[aura.dispelName]])
 
     local spellfound = self.AuraFilterDebuffs[aura.name] or self.AuraFilterDebuffs[aura.spellId]
 
