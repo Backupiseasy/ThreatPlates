@@ -24,9 +24,8 @@ local UnitIsUnitTP = Addon.UnitIsUnit
 -- (AuraUtil.ForEachAura/C_UnitAuras.GetUnitAuras) - it's secret-safe by design (Blizzard owns aura
 -- fetching internally once SetUnit() is called), whereas the old addon-side pull model can throw or
 -- come back empty for nameplate unit tokens even outside restricted periods [GH-723]. This is the
--- only aura display path in this widget; there is no addon-side fallback. Feature-detected the same
--- way Plater-Nameplates does it, since there is no dedicated expansion-level flag for this - only a
--- template-existence check.
+-- only aura display path in this widget; there is no addon-side fallback. Feature-detected via a
+-- template-existence check, since there is no dedicated expansion-level flag for this.
 local HasAuraContainers = C_XMLUtil and C_XMLUtil.GetTemplateInfo and C_XMLUtil.GetTemplateInfo("CustomAuraContainerTemplate") and true or false
 local AuraContainerSortMethod = _G.AuraContainerSortMethod
 local AuraContainerSortDirection = _G.AuraContainerSortDirection
@@ -102,7 +101,21 @@ local EnabledForStyle = {}
 -- both their buff and debuff filter strings (Blizzard_NamePlateAuras.lua) - matched here for parity.
 local NAMEPLATE_ONLY = "INCLUDE_NAME_PLATE_ONLY"
 
-local AURA_CONTAINER_POOL_SIZE = 40 -- matches the practical max concurrent nameplate count (same assumption Plater-Nameplates uses)
+-- Square (not Blizzard's rounded-corner atlas) dispel-type border texture, 64x64 with alpha - see
+-- InitializeAuraButton's DispelBorder setup. squareline.tga (the legacy widget's Backdrop border
+-- asset) turned out to be a 128x16 tileable edge *strip* built for SetBackdrop's edgeFile tiling, not
+-- a square 9-slice-able frame - wrong shape for SetTextureSliceMargins, confirmed live to not work.
+local AURA_BORDER_TEXTURE = Addon.ADDON_DIRECTORY .. "Artwork\\NinesliceBorder"
+-- Sliced (not plain stretch): with a flush, 0-outset frame (matching the icon exactly, no gap), plain
+-- stretch couples ring thickness and position - making the frame bigger to get a thicker ring also
+-- pushes the ring's inner edge (and the transparent "hole" around it) away from the icon, leaving a
+-- visible gap - confirmed live. SetTextureSliceMargins keeps the corner/edge band at native
+-- texture-pixel size independent of the frame's overall size, so thickness can be tuned via
+-- AURA_BORDER_THICKNESS below without moving the frame off the icon at all.
+local AURA_BORDER_TEXTURE_BAND = 8
+local AURA_BORDER_THICKNESS = 6
+
+local AURA_CONTAINER_POOL_SIZE = 40 -- matches the practical max concurrent nameplate count
 local AURA_CONTAINER_TYPES = { "Buffs", "Debuffs", "CrowdControl" }
 -- AddAuraGroup keys declared per aura type - Debuffs (either reaction) and Buffs (friendly) get one
 -- group per independent OR-condition (see GetEnemyDebuffsGroupConfigs/GetFriendlyDebuffsGroupConfigs/
@@ -174,13 +187,40 @@ end
 local AuraContainerPool = { Buffs = {}, Debuffs = {}, CrowdControl = {} }
 local NextAuraContainerIndex = { Buffs = 1, Debuffs = 1, CrowdControl = 1 }
 
+-- Icon crop per ModeIcon.Style - removes each icon texture's own baked-in border pixels (not related
+-- to ModeIcon.ShowBorder/the dispel-type border texture, which is a separate overlay). Previously
+-- hardcoded to the "square" crop unconditionally regardless of Style, in both this widget and the
+-- legacy AurasWidget.lua (which even carries the intended "wide" crop as a dead, commented-out line -
+-- AurasWidget.lua:3036, typo'd "Widee" - never wired up). A "wide" icon's aspect ratio needs a bigger
+-- vertical crop than "square" to look right; using the square crop on a wide icon under-crops
+-- vertically, leaving the source texture's border artifacts visible - which reads as the dispel-type
+-- border (drawn at a fixed -3/+3 outset from the icon, unaffected by TexCoord) sitting too far inward
+-- relative to the visibly-uncropped icon content. "custom" (arbitrary width/height, no fixed aspect)
+-- has no clean formula - falls back to the square crop, matching prior behavior.
+local AURA_ICON_TEX_COORD = {
+  square = { .10, 1 - .07, .12, 1 - .12 },
+  wide = { .07, 1 - .07, .23, 1 - .23 },
+}
+
 local function InitializeAuraButton(auraButton, aura_type)
   local db_icon = Widget.db[aura_type].ModeIcon
+  local tex_coord = AURA_ICON_TEX_COORD[db_icon.Style] or AURA_ICON_TEX_COORD.square
 
   auraButton.Icon = auraButton:CreateTexture(nil, "ARTWORK", nil, -5)
   auraButton.Icon:SetAllPoints(auraButton)
-  auraButton.Icon:SetTexCoord(.10, 1 - .07, .12, 1 - .12) -- Style: Square - remove border from icons
+  auraButton.Icon:SetTexCoord(tex_coord[1], tex_coord[2], tex_coord[3], tex_coord[4])
   auraButton:SetIcon(auraButton.Icon)
+
+  -- Rounds the icon's own corners to match the dispel-type border ring's rounded corners - without
+  -- this, the icon (a plain rectangle, same size as the button) pokes its sharp square corners out
+  -- past the border's rounded corner artwork, since the border sits 3px *outside* the icon (see
+  -- below) and never overlaps/covers the icon's corner pixels at all. TexCoord can't fix this (it only
+  -- crops which part of the source texture is sampled, not the icon's on-screen shape). Blizzard's own
+  -- reference (CooldownViewer.xml) applies the identical fix to its icon via the same atlas.
+  local iconMask = auraButton:CreateMaskTexture(nil, "ARTWORK", nil, -4)
+  iconMask:SetAtlas("SquareMask", false)
+  iconMask:SetAllPoints(auraButton.Icon)
+  auraButton.Icon:AddMaskTexture(iconMask)
 
   if db_icon.ShowBorder then
     -- ModeIcon.ShowBorder is the master on/off (legacy: AurasWidget.lua:3039/3053, Border:Show()/
@@ -190,14 +230,24 @@ local function InitializeAuraButton(auraButton, aura_type)
     -- drawn once shown (showWithoutDispelType=true) - dispel-typed auras get their
     -- DISPEL_TYPE_COLOR_MAP color, everything else falls back to DefaultBuffColor/DefaultDebuffColor
     -- via the "None" map key (see GetDispelTypeColorMapForAuraType) when ShowAuraType is on.
+    --
+    -- style = PreserveAsset (not Border) + our own square texture - Blizzard's Border/BorderWithIcon
+    -- styles are locked to Blizzard's own dispel-type atlas (ui-debuff-border-<type>-noicon), which is
+    -- rounded-corner; PreserveAsset keeps whatever texture we already set via SetTexture below and
+    -- only recolors it (AuraUtil.SetAuraBorderColor's own tint, then immediately overridden by our
+    -- customDispelColorMap below - same override order as the Border style before it, confirmed from
+    -- Blizzard_CustomAuraButton.lua's ApplyDispelTypeTextureStyle -> ApplyCustomDispelTypeTextureColor
+    -- call order). Same safe mechanism either way - the color itself is still resolved without this
+    -- widget ever reading auraData.dispelName in Lua.
     auraButton.DispelBorder = auraButton:CreateTexture(nil, "OVERLAY")
-    -- PixelUtil (not plain SetPoint) so the outset is a crisp, consistent number of screen pixels
-    -- regardless of UI scale - a plain SetPoint offset could land sub-pixel and look like it's not
-    -- quite reaching the icon's edge.
-    PixelUtil.SetPoint(auraButton.DispelBorder, "TOPLEFT", auraButton, "TOPLEFT", -3, 3)
-    PixelUtil.SetPoint(auraButton.DispelBorder, "BOTTOMRIGHT", auraButton, "BOTTOMRIGHT", 3, -3)
+    auraButton.DispelBorder:SetTexture(AURA_BORDER_TEXTURE)
+    auraButton.DispelBorder:SetTextureSliceMargins(AURA_BORDER_TEXTURE_BAND, AURA_BORDER_TEXTURE_BAND, AURA_BORDER_TEXTURE_BAND, AURA_BORDER_TEXTURE_BAND)
+    -- Flush, 0 outset - see the AURA_BORDER_TEXTURE_BAND comment above for why thickness is tuned via
+    -- SetScale instead of moving this frame off the icon.
+    auraButton.DispelBorder:SetAllPoints(auraButton.Icon)
+    auraButton.DispelBorder:SetScale(AURA_BORDER_THICKNESS / AURA_BORDER_TEXTURE_BAND)
     auraButton:AddDispelTypeTexture(auraButton.DispelBorder, {
-      style = _G.Enum.CustomAuraButtonDispelTypeTextureStyle.Border,
+      style = _G.Enum.CustomAuraButtonDispelTypeTextureStyle.PreserveAsset,
       showWhenHarmful = true,
       showWhenHelpful = true,
       showWithoutDispelType = true,
@@ -520,9 +570,9 @@ end
 -- Builds the full set of AddAuraGroup configs (per AURA_GROUP_KEYS.Debuffs key) for enemy-reaction
 -- Debuffs from today's boolean settings. ShowAllEnemy short-circuits everything into "main" alone.
 -- Otherwise each of ShowOnlyMine ("main"), ShowBlizzardForEnemy ("important" + "importantpersonal" -
--- two peer groups, IMPORTANT/!IMPORTANT split, both PLAYER-restricted and nameplateShowPersonal-gated,
--- matching Plater-Nameplates' DB_AURA_SHOW_AS_BLIZZARD exactly - see the comment at its condition
--- below), ShowBoss ("boss", candidateFilters.isBossAura), and ShowPriority ("priority",
+-- two peer groups, IMPORTANT/!IMPORTANT split, both PLAYER-restricted and nameplateShowPersonal-gated -
+-- see the comment at its condition below), ShowBoss ("boss", candidateFilters.isBossAura), and
+-- ShowPriority ("priority",
 -- candidateFilters.isPriorityAura) is an
 -- independent, freely-combinable OR-condition: every group's
 -- filter string/candidateFilters excludes every *earlier-listed* active condition (see
@@ -554,22 +604,21 @@ local function GetEnemyDebuffsGroupConfigs(db)
     conditions[#conditions + 1] = { key = "main", filterTokens = { "PLAYER" }, candidateFilters = {} }
   end
   if db.ShowBlizzardForEnemy then
-    -- Matches Plater-Nameplates' DB_AURA_SHOW_AS_BLIZZARD exactly (Plater_Auras.lua ~line 812-824,
-    -- confirmed by reading its source 2026-08-17): two peer groups, split by IMPORTANT/!IMPORTANT,
-    -- both PLAYER-restricted and both gated on candidateFilters.nameplateShowPersonal - not the
-    -- single-group nameplateShowPersonal-only version this addon shipped for one day (2026-08-17,
-    -- reverted here). "important" catches Blizzard-flagged self-cast debuffs (IMPORTANT token);
-    -- "importantpersonal" catches every other self-cast debuff Blizzard's own nameplates show
-    -- (!IMPORTANT, still nameplateShowPersonal-gated) - together, the same nameplateShowAll/Personal
-    -- coverage the very first "Blizzard" fix (2026-08-16) had, but expressed as IMPORTANT/!IMPORTANT
-    -- instead of nameplateShowAll/nameplateShowPersonal (see AurasWidgetImplementation.md §6 for
-    -- why nameplateShowAll can't combine with a single-group PLAYER restriction).
+    -- Two peer groups, split by IMPORTANT/!IMPORTANT, both PLAYER-restricted and both gated on
+    -- candidateFilters.nameplateShowPersonal - not the single-group nameplateShowPersonal-only version
+    -- this addon shipped for one day (2026-08-17, reverted here). "important" catches Blizzard-flagged
+    -- self-cast debuffs (IMPORTANT token); "importantpersonal" catches every other self-cast debuff
+    -- Blizzard's own nameplates show (!IMPORTANT, still nameplateShowPersonal-gated) - together, the
+    -- same nameplateShowAll/Personal coverage the very first "Blizzard" fix (2026-08-16) had, but
+    -- expressed as IMPORTANT/!IMPORTANT instead of nameplateShowAll/nameplateShowPersonal (see
+    -- AurasWidgetImplementation.md §6 for why nameplateShowAll can't combine with a single-group
+    -- PLAYER restriction).
     --
     -- Known tradeoff, reintroduced on purpose: two concurrently-active groups for this one toggle
     -- means SortOrder (e.g. TimeLeft) won't be globally correct across them when "Blizzard" is
     -- active - Blizzard's AuraContainer never merges sort order *across* AddAuraGroups, only within
     -- each one (§6). This is the exact same architectural cost the 2026-08-17 single-group fix was
-    -- built to avoid - reintroduced here per explicit user request to match Plater's own approach.
+    -- built to avoid - reintroduced here per explicit user request.
     conditions[#conditions + 1] = { key = "important", filterTokens = { "IMPORTANT", "PLAYER" }, candidateFilters = { nameplateShowPersonal = true } }
   end
   if db.ShowBossEnemy then
