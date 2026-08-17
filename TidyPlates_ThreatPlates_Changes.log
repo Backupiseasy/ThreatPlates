@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+13.1.1 (2026-08-16)
+------------------------------------------------------
+* Fixed and updated several options of the Auras widget. These were not working correctly after Path 12.1.0.
+
+------------------------------------------------------
 13.1.0 (2026-08-16)
 ------------------------------------------------------
 * Fix Lua error when displaying auras on nameplates caused by restrictions on secret values [GH-723].

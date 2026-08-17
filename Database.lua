@@ -1042,6 +1042,22 @@ local function MigrateAnchorFrameToNameplateSize(profile_name, profile)
   end
 end
 
+-- "Duration"/"Creation" have no AuraContainerSortMethod equivalent on Midnight (Patch 12.1.0's
+-- AuraContainer API only supports Default/Name/Expiration - see GetSortMethod in
+-- AurasWidgetMidnight.lua), and always silently fell back to Default sort behavior there. The Options
+-- toggles for them are now hidden on Midnight instead of left silently inert - migrate any profile
+-- that had one of them explicitly selected to "None", the toggle that actually represents that
+-- fallback behavior, so the stored value matches what's both selectable and already happening.
+-- Version-gated to Midnight only (see Migrate Version = below) - Classic's legacy widget still sorts
+-- by these itself, so leave Classic profiles untouched.
+local function MigrateAurasSortOrder(_, profile)
+  if DatabaseEntryExists(profile, { "AuraWidget", "SortOrder" }) then
+    if profile.AuraWidget.SortOrder == "Duration" or profile.AuraWidget.SortOrder == "Creation" then
+      profile.AuraWidget.SortOrder = "None"
+    end
+  end
+end
+
 local function MigrateAurasWidgetV2(_, profile)
   local default_profile = Addon.DEFAULT_SETTINGS.profile
 
@@ -1549,6 +1565,9 @@ local MIGRATION_FUNCTIONS_BY_VERSION = {
   },
   ["13.0.25"] = {
     { Type = "Migrate", Name = "Anchor Frame to Nameplate Size", Function = MigrateAnchorFrameToNameplateSize },
+  },
+  ["13.1.0"] = {
+    { Type = "Migrate", Name = "Auras Sort Order (Duration/Creation)", Function = MigrateAurasSortOrder, NoDefaultProfile = true, Version = Addon.ExpansionIsAtLeastMidnight },
   },
 }
 

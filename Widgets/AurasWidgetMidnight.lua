@@ -158,6 +158,19 @@ local function GetDispelTypeColorMapForAuraType(aura_type)
   return map
 end
 
+-- ModeIcon.ShowBorder off + AuraWidget.ShowAuraType off (legacy: AurasWidget.lua:3049,
+-- SetBackdropBorderColor(0, 0, 0, 1) at border creation, never overwritten unless ShowAuraType is
+-- also on) - a flat black map for every possible customDispelColorMap key, reusing the same
+-- AddDispelTypeTexture mechanism instead of a second, separate border texture/code path.
+local BLACK_DISPEL_COLOR_MAP = {}
+do
+  local black = _G.CreateColor(0, 0, 0, 1)
+  for _, dispel_name in ipairs(DISPEL_TYPE_NAMES) do
+    BLACK_DISPEL_COLOR_MAP[dispel_name] = black
+  end
+  BLACK_DISPEL_COLOR_MAP.None = black
+end
+
 local AuraContainerPool = { Buffs = {}, Debuffs = {}, CrowdControl = {} }
 local NextAuraContainerIndex = { Buffs = 1, Debuffs = 1, CrowdControl = 1 }
 
@@ -169,11 +182,14 @@ local function InitializeAuraButton(auraButton, aura_type)
   auraButton.Icon:SetTexCoord(.10, 1 - .07, .12, 1 - .12) -- Style: Square - remove border from icons
   auraButton:SetIcon(auraButton.Icon)
 
-  if Widget.db.ShowAuraType then
-    -- Border style, always drawn (showWithoutDispelType=true) - dispel-typed auras get their
+  if db_icon.ShowBorder then
+    -- ModeIcon.ShowBorder is the master on/off (legacy: AurasWidget.lua:3039/3053, Border:Show()/
+    -- Hide()); AuraWidget.ShowAuraType only controls whether it's colored per dispel type or flat
+    -- black - matching the legacy widget exactly (SetBackdropBorderColor(0,0,0,1) at creation, only
+    -- overwritten by GetColorForAura's result when ShowAuraType is also on). Border style, always
+    -- drawn once shown (showWithoutDispelType=true) - dispel-typed auras get their
     -- DISPEL_TYPE_COLOR_MAP color, everything else falls back to DefaultBuffColor/DefaultDebuffColor
-    -- via the "None" map key (see GetDispelTypeColorMapForAuraType), matching the legacy widget's
-    -- Widget:GetColorForAura (every aura gets some border color, not just dispel-typed ones).
+    -- via the "None" map key (see GetDispelTypeColorMapForAuraType) when ShowAuraType is on.
     auraButton.DispelBorder = auraButton:CreateTexture(nil, "OVERLAY")
     -- PixelUtil (not plain SetPoint) so the outset is a crisp, consistent number of screen pixels
     -- regardless of UI scale - a plain SetPoint offset could land sub-pixel and look like it's not
@@ -185,7 +201,7 @@ local function InitializeAuraButton(auraButton, aura_type)
       showWhenHarmful = true,
       showWhenHelpful = true,
       showWithoutDispelType = true,
-      customDispelColorMap = GetDispelTypeColorMapForAuraType(aura_type),
+      customDispelColorMap = Widget.db.ShowAuraType and GetDispelTypeColorMapForAuraType(aura_type) or BLACK_DISPEL_COLOR_MAP,
     })
   end
 
@@ -503,10 +519,11 @@ end
 
 -- Builds the full set of AddAuraGroup configs (per AURA_GROUP_KEYS.Debuffs key) for enemy-reaction
 -- Debuffs from today's boolean settings. ShowAllEnemy short-circuits everything into "main" alone.
--- Otherwise each of ShowOnlyMine ("main"), ShowBlizzardForEnemy ("important", candidateFilters.nameplateShowAll
--- - always further restricted to PLAYER too, by deliberate design: "Blizzard" means "Blizzard-flagged
--- debuffs I applied", not "anyone's" - see the comment at its condition below), ShowBoss ("boss",
--- candidateFilters.isBossAura), and ShowPriority ("priority", candidateFilters.isPriorityAura) is an
+-- Otherwise each of ShowOnlyMine ("main"), ShowBlizzardForEnemy ("important" + "importantpersonal" -
+-- two peer groups, IMPORTANT/!IMPORTANT split, both PLAYER-restricted and nameplateShowPersonal-gated,
+-- matching Plater-Nameplates' DB_AURA_SHOW_AS_BLIZZARD exactly - see the comment at its condition
+-- below), ShowBoss ("boss", candidateFilters.isBossAura), and ShowPriority ("priority",
+-- candidateFilters.isPriorityAura) is an
 -- independent, freely-combinable OR-condition: every group's
 -- filter string/candidateFilters excludes every *earlier-listed* active condition (see
 -- BuildGroupConfigsFromConditions), so an aura matching more than one toggle is always assigned to
@@ -537,21 +554,23 @@ local function GetEnemyDebuffsGroupConfigs(db)
     conditions[#conditions + 1] = { key = "main", filterTokens = { "PLAYER" }, candidateFilters = {} }
   end
   if db.ShowBlizzardForEnemy then
-    -- Not the IMPORTANT token: per AuraFilters' own doc comment, IMPORTANT only ever applies to
-    -- helpful auras ("helpful auras that show on enemy nameplates even if non-stealable"), so
-    -- combined with HARMFUL here it matched nothing at all - confirmed live by user report.
-    -- nameplateShowAll is the real field behind the legacy "Blizzard" toggle's semantics
-    -- (aura.nameplateShowAll in AurasWidget.lua) and has no such helpful-only restriction.
+    -- Matches Plater-Nameplates' DB_AURA_SHOW_AS_BLIZZARD exactly (Plater_Auras.lua ~line 812-824,
+    -- confirmed by reading its source 2026-08-17): two peer groups, split by IMPORTANT/!IMPORTANT,
+    -- both PLAYER-restricted and both gated on candidateFilters.nameplateShowPersonal - not the
+    -- single-group nameplateShowPersonal-only version this addon shipped for one day (2026-08-17,
+    -- reverted here). "important" catches Blizzard-flagged self-cast debuffs (IMPORTANT token);
+    -- "importantpersonal" catches every other self-cast debuff Blizzard's own nameplates show
+    -- (!IMPORTANT, still nameplateShowPersonal-gated) - together, the same nameplateShowAll/Personal
+    -- coverage the very first "Blizzard" fix (2026-08-16) had, but expressed as IMPORTANT/!IMPORTANT
+    -- instead of nameplateShowAll/nameplateShowPersonal (see AurasWidgetImplementation.md §6 for
+    -- why nameplateShowAll can't combine with a single-group PLAYER restriction).
     --
-    -- PLAYER token is hardcoded (not conditional on ShowOnlyMine, unlike the "dispeltype" group's
-    -- PLAYER addition below) - per explicit user decision, "Blizzard" now always means "Blizzard-
-    -- flagged debuffs I applied", not "anyone's". Checking Mine+Blizzard together no longer narrows
-    -- anything further (Mine's own group already shows every debuff the player applied, a superset),
-    -- but that tradeoff was accepted deliberately: an unconditional PLAYER token here is the only way
-    -- to make "Blizzard" alone (without Mine also checked) mean "my own Blizzard-relevant debuffs"
-    -- instead of "everyone's" - the previous, broader meaning is gone entirely, not just narrowed
-    -- when combined with Mine.
-    conditions[#conditions + 1] = { key = "important", filterTokens = { "PLAYER" }, candidateFilters = { nameplateShowAll = true } }
+    -- Known tradeoff, reintroduced on purpose: two concurrently-active groups for this one toggle
+    -- means SortOrder (e.g. TimeLeft) won't be globally correct across them when "Blizzard" is
+    -- active - Blizzard's AuraContainer never merges sort order *across* AddAuraGroups, only within
+    -- each one (§6). This is the exact same architectural cost the 2026-08-17 single-group fix was
+    -- built to avoid - reintroduced here per explicit user request to match Plater's own approach.
+    conditions[#conditions + 1] = { key = "important", filterTokens = { "IMPORTANT", "PLAYER" }, candidateFilters = { nameplateShowPersonal = true } }
   end
   if db.ShowBossEnemy then
     conditions[#conditions + 1] = { key = "boss", filterTokens = {}, candidateFilters = { isBossAura = true } }
@@ -588,25 +607,19 @@ local function GetEnemyDebuffsGroupConfigs(db)
 
   local configs = BuildGroupConfigsFromConditions(conditions, { "HARMFUL", "!CROWD_CONTROL", NAMEPLATE_ONLY }, dispel_types, has_dispel_type)
 
-  -- "Blizzard" is really two conditions ORed together: nameplateShowAll (curated for everyone) and
-  -- nameplateShowPersonal (curated only when self-applied - the field Blizzard's own default
-  -- nameplates also check, per the legacy widget's `aura.nameplateShowAll or (aura.nameplateShowPersonal
-  -- and aura.CastByPlayer)`). A single AddAuraGroup can't express "field A OR field B" - candidateFilters
-  -- entries are ANDed together - so this needs a second, peer group. It can't be pushed through
-  -- BuildGroupConfigsFromConditions as its own condition though: both would need the identical PLAYER
-  -- token, and ordered exclusion would negate the earlier one's token into the later one's filter
-  -- string ("PLAYER|!PLAYER" - a self-contradiction that matches nothing). Instead, clone "important"'s
-  -- already-fully-excluded result (same exclusions against Mine/Boss/Priority/dispeltype) and swap
-  -- nameplateShowAll for nameplateShowPersonal - explicitly excluding nameplateShowAll from the clone
-  -- so an aura with both flags set doesn't render via both groups.
+  -- "importantpersonal" is "important"'s IMPORTANT/!IMPORTANT twin (see the comment on the
+  -- ShowBlizzardForEnemy condition above) - built by cloning "important"'s already-fully-excluded
+  -- result and flipping its IMPORTANT token, same technique the original 2026-08-16
+  -- nameplateShowAll/Personal split used (gsub count=1 is safe: "IMPORTANT" appears nowhere else in
+  -- the filter string at this point - not in HARMFUL/CROWD_CONTROL/NAMEPLATE_ONLY/PLAYER, and no
+  -- "!IMPORTANT" exists yet to double-negate).
   if configs.important then
-    local personal_candidate_filters = {}
+    local filter_string = configs.important.filterString:gsub("IMPORTANT", "!IMPORTANT", 1)
+    local candidate_filters = {}
     for field, value in pairs(configs.important.candidateFilters) do
-      personal_candidate_filters[field] = value
+      candidate_filters[field] = value
     end
-    personal_candidate_filters.nameplateShowAll = false
-    personal_candidate_filters.nameplateShowPersonal = true
-    configs.importantpersonal = { filterString = configs.important.filterString, candidateFilters = personal_candidate_filters }
+    configs.importantpersonal = { filterString = filter_string, candidateFilters = candidate_filters }
   end
 
   return configs

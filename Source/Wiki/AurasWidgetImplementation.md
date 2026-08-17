@@ -125,20 +125,23 @@ result means "disable this group" (`Widget:UpdateAuraContainer` sets its `maxFra
   into one unrestricted `"main"` group. Otherwise, Boss (`"boss"`, `candidateFilters.isBossAura`) is always its
   own condition; Enemy additionally pushes `"main"` (Mine, `PLAYER` token — see the
   `isFromPlayerOrPlayerPet` gotcha in §6) and `"priority"` (`candidateFilters.isPriorityAura`).
-  Blizzard is two peer groups, not one: `"important"` (`PLAYER` token + `candidateFilters.nameplateShowAll`)
-  and `"importantpersonal"` (`PLAYER` token + `candidateFilters.nameplateShowPersonal`, with
-  `nameplateShowAll` explicitly forced `false` to avoid double-rendering an aura that happens to carry
-  both flags) — a single `AddAuraGroup` can't express "field A OR field B" since `candidateFilters`
-  entries are ANDed together, so the two Blizzard curation flags (matches the legacy widget's
-  `aura.nameplateShowAll or (aura.nameplateShowPersonal and aura.CastByPlayer)` — see the `IMPORTANT`
-  gotcha in §6) need two groups. `"importantpersonal"` is built by cloning `"important"`'s
-  already-fully-excluded result (same exclusions against Mine/Boss/Priority/dispeltype) rather than
-  pushed through `BuildGroupConfigsFromConditions` as its own condition — both would carry the
-  identical `PLAYER` token, and ordered exclusion would negate the earlier one's token into the later
-  one's filter string (`PLAYER|!PLAYER`, a self-contradiction matching nothing). Both are hardcoded to
-  always require `PLAYER`, not conditional on Mine, so "Blizzard" always means "my own Blizzard-
-  flagged debuffs" rather than "anyone's" — checking Mine alongside it can't narrow the result
-  further, since Mine's own group is already a superset.
+  Blizzard is two peer groups, `"important"` (`IMPORTANT|PLAYER` +
+  `candidateFilters.nameplateShowPersonal`) and `"importantpersonal"` (`!IMPORTANT|PLAYER` + the same
+  `candidateFilters`) — matches Plater-Nameplates' `DB_AURA_SHOW_AS_BLIZZARD` exactly (2026-08-17,
+  confirmed by reading `Plater_Auras.lua`), hardcoded to always require `PLAYER`, not conditional on
+  Mine, so "Blizzard" always means "my own Blizzard-flagged debuffs" rather than "anyone's" — checking
+  Mine alongside it can't narrow the result further, since Mine's own group is already a superset.
+  **Known tradeoff, reintroduced on purpose**: two concurrently-active groups for this one toggle
+  breaks `SortOrder` (e.g. TimeLeft) across them when "Blizzard" is active alone, since Blizzard's
+  `AuraContainer` never merges sort order across `AddAuraGroup`s, only within each one (see §6). A
+  same-day single-group fix (`nameplateShowPersonal` only, no `IMPORTANT` split) avoided this cost but
+  was reverted in favor of matching Plater's approach. **Suspected dead weight**: per the `IMPORTANT`
+  doc comment (§6 - "helpful auras... even if non-stealable"), `IMPORTANT` combined with `HARMFUL`
+  matches nothing, so `"important"` may always be an empty group for debuffs, with all actual coverage
+  coming from `"importantpersonal"` alone - if so, this reintroduces the sort-order cost for zero
+  practical gain over the single-group version. Not yet confirmed live either way - Plater ships the
+  same combination regardless, so either the doc comment is wrong/incomplete, or Plater carries the
+  same dead group.
   Dispellable + Dispel Type are combined rather than independent conditions: a `"dispeltype"` group is
   only ever pushed while Dispellable is checked, always carries the `DISPELLABLE` token plus
   `candidateFilters.includeDispelTypes` for whichever Curse/Disease/Magic/Poison boxes are checked —
@@ -172,13 +175,20 @@ and/or in-game testing. Worth knowing before touching this code.
   player/pet. The `PLAYER` filter-string token (older, part of the classic `AuraFilters` vocabulary)
   is used instead everywhere "cast by me or my pet" filtering is needed. Root cause is unconfirmed —
   worth rechecking if other boolean `candidateFilters` fields ever show similarly inert behavior.
-- **`IMPORTANT` only ever applies to helpful auras.** Per `AuraFilters`' own doc comment ("helpful
-  auras that show on enemy nameplates even if non-stealable"), combining it with `HARMFUL` matches
-  nothing at all. `candidateFilters.nameplateShowAll` (Blizzard's own default-nameplate curation flag)
-  has no such helpful-only restriction and is used instead wherever "what Blizzard's own nameplates
-  would show" semantics are needed — though for Enemy Debuffs' "Blizzard" toggle this is further
-  scoped to `PLAYER` on top, by deliberate design (see §5), so it no longer literally means "what
-  Blizzard would show for anyone", only for the player.
+- **`IMPORTANT` only ever applies to helpful auras — but Plater combines it with `HARMFUL` anyway.**
+  Per `AuraFilters`' own doc comment ("helpful auras that show on enemy nameplates even if
+  non-stealable"), combining `IMPORTANT` with `HARMFUL` should match nothing at all — confirmed live
+  by an earlier isolated test in this addon (IMPORTANT-only, no PLAYER/nameplateShowPersonal, showed
+  no debuffs). Yet Plater-Nameplates' `DB_AURA_SHOW_AS_BLIZZARD` (`Plater_Auras.lua` ~line 812) ships
+  exactly `HARMFUL|IMPORTANT|PLAYER|!CROWD_CONTROL` as one of its two groups, unconditionally, whenever
+  that toggle is on. Enemy Debuffs' "Blizzard" toggle now mirrors this exactly (see §5) — if the doc
+  comment is accurate, the `"important"` (`IMPORTANT`) group is permanently empty for debuffs and all
+  real coverage comes from `"importantpersonal"` (`!IMPORTANT`) alone, meaning the two-group
+  `SortOrder` cost buys nothing; not yet confirmed live in this addon post-switch.
+  `candidateFilters.nameplateShowAll`/`nameplateShowPersonal` (Blizzard's own default-nameplate
+  curation flags) have no such helpful-only restriction — `nameplateShowPersonal` is the field that
+  actually restricts to self-applied debuffs here, `IMPORTANT`/`!IMPORTANT` only splits the result into
+  two groups without changing what's matched (assuming the dead-group theory above holds).
 - **`includeSpellIDs`/`excludeSpellIDs` are reaction-restricted; other `candidateFilters` boolean
   fields are not.** Per `Blizzard_AuraContainerUtil.lua`'s `DoesAuraPassCandidateFilters`, only the
   two spell-ID checks are gated behind `CanApplyIdentityCandidateFilters` (valid only for Friendly
@@ -216,6 +226,46 @@ and/or in-game testing. Worth knowing before touching this code.
   `Default`/`BigDefensive`/`UnitFrameDebuff`/`ImportantOnly`/`Expiration`/`ExpirationOnly`/`Name`/
   `NameOnly`/`AuraInstanceIDOnly`. `SortOrder` settings of `"Duration"`/`"Creation"` fall back to
   `Default` (`GetSortMethod`).
+- **Sorting never merges across `AddAuraGroup`s - it's per-group, then groups are concatenated.**
+  Confirmed by reading `Blizzard_CustomAuraContainer.lua:557-634`
+  (`GetFlowLayoutGroupDescriptions`/`RebuildLayoutGroups`): each group becomes its own flow-layout
+  block (`elements = function() return auraGroup:GetFramesByIndex() end`), and blocks are laid out
+  fully, one after another, in `AddAuraGroup` registration order (`AURA_GROUP_KEYS` array order) - not
+  interleaved by the shared sort criterion. Each group's *own* auras are correctly ordered by its
+  comparator (`SetAuraGroupSortMethod`), but the visible result for any state with 2+ simultaneously-
+  active groups is "group A's sorted auras, then group B's sorted auras" - never a true cross-toggle
+  sort by time/name/etc. A newly-arrived aura landing in a *different* group than existing ones can
+  therefore appear out of order relative to them regardless of `SortOrder`, even though nothing is
+  actually stale (confirmed live 2026-08-17 - re-triggering `SetAuraGroupSortMethod` on `UNIT_AURA`
+  made no difference, since re-sorting within a group was never the problem). This is an inherent
+  consequence of the multi-group free-combination design (§4) - only single-group states (`All`
+  short-circuit, or exactly one condition producing exactly one group) get a fully correct global
+  sort. This caught out Enemy Debuffs' "Blizzard" toggle specifically at first, even with *nothing
+  else* checked, because it used to be two peer groups internally (see §5) for one conceptual toggle -
+  fixed by dropping to a single group there (2026-08-17). No general fix for the broader
+  multiple-simultaneously-checked-toggles case attempted - would need either a design change (single
+  shared group instead of per-toggle groups, losing the free-combination guarantee) or a Blizzard-side
+  cross-group sort option that doesn't currently exist.
+  **Audited (2026-08-17) for other single-toggle-produces-2+-groups cases** across all four
+  `Get*GroupConfigs` functions (§5) - "Blizzard" was the only one. Every other toggle (Mine, Boss,
+  Priority, Player Can Apply, Big Defensives, Dispellable, Magic) produces exactly one group by
+  itself. Dispellable+Dispel Type combining into a single `"dispeltype"` group needs *two* Options
+  controls together (Dispellable checked, plus at least one Curse/Disease/Magic/Poison box) - the
+  opposite risk shape (fewer groups, not more), not a sort hazard the way "Blizzard" was.
+  **Investigation closed (2026-08-17): not a bug at all.** The original report that kicked off this
+  whole investigation - `SortOrder` (TimeLeft) appearing wrong with only a *single* toggle active
+  ("Mine" alone, one group, cross-group concatenation ruled out by construction) - remained
+  unexplained through two `ReapplyAuraSort`/`UNIT_AURA` attempts, a full architecture read, and a
+  Plater comparison. User then verified live, independently: (1) Plater-Nameplates shows the **exact
+  same** "wrong" order ("Sortierung ist genauso falsch bei Plater"), and (2) **Blizzard's own default
+  nameplates** show the same order too ("Und ebenso falsch mit Blizzard default nameplates"). Since
+  the addon with zero custom sort code (Blizzard's own UI) and a completely independent third-party
+  addon (Plater) both reproduce the identical ordering, this rules out any addon-side bug in either
+  codebase - it's simply how `AuraContainerSortMethod.Expiration` actually behaves on this
+  client/patch (most likely: sorted once when the comparator/group is (re)applied or when an aura is
+  added, not continuously live-re-ordered every frame as remaining duration ticks down - unconfirmed
+  in source, but consistent with all three independent observations). No further fix attempted or
+  planned - matches the platform's own reference implementation, which is the correct bar to clear.
 - **`AddDispelTypeTexture`'s `customDispelColorMap` wants real `Color` objects** (`:GetRGBA()`
   callable), not plain `{r=, g=, b=}` tables — `_G.DebuffTypeColor` (and this widget's own fallback
   table) provide the latter, so `BuildDispelTypeColorMap` wraps each entry in `_G.CreateColor(...)`.
@@ -230,6 +280,12 @@ and/or in-game testing. Worth knowing before touching this code.
   of `DISPEL_TYPE_COLOR_MAP`, and `showWithoutDispelType = true` on `AddDispelTypeTexture` makes the
   border draw for every aura instead of only dispel-typed ones - matching the legacy widget's
   `Widget:GetColorForAura`, which likewise colors every aura, not just dispel-typed ones.
+  `ModeIcon.ShowBorder` (not `AuraWidget.ShowAuraType`) is the master on/off for whether the border
+  exists at all - `ShowAuraType` only switches its coloring between the dispel-type-aware map and a
+  flat black one (`BLACK_DISPEL_COLOR_MAP`, same "None"-key mechanism, all four dispel-type keys and
+  `"None"` mapped to black) - matching the legacy widget's `Border:Show()`/`Hide()` (gated on
+  `ShowBorder`) versus its `SetBackdropBorderColor` call (gated separately on `ShowAuraType`, with the
+  border's creation-time color - solid black - left in place otherwise).
 
 ---
 
@@ -241,16 +297,17 @@ capability doesn't exist for addon code on `AuraButton`/`AuraContainer` as of Pa
 | Feature | Status | 12.1.0 API path | Feasible? |
 | --- | --- | --- | --- |
 | Bar display mode | hidden (Options) | `SetDurationBar(statusBar, options)` exists on `AuraButton` | **Yes** — not built yet |
-| Highlight/glow (stealable-aura outline) | inert, not gated | none — no hook point (§6) | **No** |
+| Highlight/glow (stealable-aura outline) | hidden (Options, Midnight only - still available on Classic) | none — no hook point (§6) | **No** |
 | Flash-on-expiring | inert, not gated | none — same as Highlight | **No** |
-| `SortOrder`: Duration / Creation | inert, falls back to Default | no enum value exists (§6) | **No** |
+| `SortOrder`: Duration / Creation | hidden (Options, Midnight only - still available on Classic) | no enum value exists (§6) | **No** |
 | Config/Demo preview mode | stubbed (`Widget:ToggleConfigurationMode` no-ops) | none — `AuraContainer` only ever shows real data for a real `SetUnit()` token | **No**, not with the current mechanism |
 | `SwitchAuraAreaByReaction` | inert, not gated | pure Lua-side (`unit.reaction` is non-secret) — not an API blocker, just not wired in | **Yes** — trivial |
 | Per-spell whitelist/blacklist | hidden (Options) | `candidateFilters.includeSpellIDs`/`excludeSpellIDs`, reaction-restricted (§6) | **Yes, partially** |
 | "Dispellable (only me)" for Enemy Debuffs | not implemented | no Blizzard token/candidateFilters field for player-personal dispel capability exists — would need a static class/spec→dispel-type lookup table instead | **Yes, via workaround** |
 | Dynamic sibling-height anchoring (no wasted vertical gap above an empty grid) | not implemented (static max-height used instead) | none found — `GetAuraGroupFrameCount` is pool size not live count (§6), no `GetHeight` on Forbidden containers | **No**, not with a currently-known API |
 | `CenterAuras` | inert, not gated | pure Lua-side layout math (center the flow-layout group instead of growing from the alignment corner) — not an API blocker, just not wired into `UpdateAuraContainer`'s layout code | **Yes** — not built yet |
-| `ModeIcon.ShowBorder` (generic icon border, independent of dispel-type coloring) | inert, only reachable via Options when Icon Style = Custom | none found for a plain non-dispel-type border texture beyond what `InitializeAuraButton` already draws | **Yes** — a plain `CreateTexture` border, same mechanism as the dispel-type border, just unconditional |
+| `SortOrder` doesn't merge across multiple active toggles (e.g. Mine + Boss for Enemy Debuffs) | known limitation, not gated - `SortOrder` still applies *within* each toggle's group | none found — Blizzard concatenates `AddAuraGroup`s in registration order rather than merging by sort criterion across groups (§6) | **No**, not without redesigning away from multi-group filters |
+| `SortOrder` (TimeLeft) not always visually ascending, even single-group | **not a bug** - confirmed live 2026-08-17 that Blizzard's own default nameplates and Plater-Nameplates show the identical ordering (§6) | n/a - matches the platform's own reference behavior | n/a |
 
 ---
 

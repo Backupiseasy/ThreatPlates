@@ -4494,12 +4494,19 @@ local function CreateAurasWidgetOptions()
                 hasAlpha = true,
               },
               Spacer1 = GetSpacerEntry(35),
+              -- Glow on stealable/purgeable auras has no equivalent on Midnight - AuraButton exposes
+              -- no script-hook or callback for addon-attached visual effects (confirmed by a full
+              -- read of the mixin - see AurasWidgetImplementation.md §6), so hidden here rather than
+              -- left silently inert, same as SortOrder Duration/Creation (2026-08-16). Still
+              -- functional on Classic (AurasWidget.lua's own icon-based glow), so only hidden on
+              -- Midnight, not removed.
               EnableGlow = {
                 name = L["Steal or Purge Glow"],
                 type = "toggle",
                 order = 40,
                 desc = L["Shows a glow effect on auras that you can steal or purge."],
                 arg = { "AuraWidget", "Highlight", "Enabled" },
+                hidden = Addon.ExpansionIsAtLeastMidnight,
               },
               GlowType = {
                 name = L["Glow Type"],
@@ -4507,12 +4514,14 @@ local function CreateAurasWidgetOptions()
                 values = Addon.GLOW_TYPES,
                 order = 50,
                 arg = { "AuraWidget", "Highlight", "Type" },
+                hidden = Addon.ExpansionIsAtLeastMidnight,
               },
               GlowColorEnable = {
                 name = L["Glow Color"],
                 type = "toggle",
                 order = 60,
                 arg = { "AuraWidget", "Highlight", "CustomColor" },
+                hidden = Addon.ExpansionIsAtLeastMidnight,
               },
               GlowColor = {
                 name = L["Color"],
@@ -4520,6 +4529,7 @@ local function CreateAurasWidgetOptions()
                 order = 70,
                 arg = { "AuraWidget", "Highlight", "Color" },
                 hasAlpha = true,
+                hidden = Addon.ExpansionIsAtLeastMidnight,
               },
             },
           },
@@ -4556,6 +4566,11 @@ local function CreateAurasWidgetOptions()
                 get = function(info) return db.AuraWidget.SortOrder == "Duration" end,
                 set = function(info, value) SetValue(info, "Duration") end,
                 arg = {"AuraWidget","SortOrder"},
+                -- No AuraContainerSortMethod equivalent exists on Midnight (Patch 12.1.0) - falls back
+                -- to Default there regardless of this setting (see GetSortMethod in
+                -- AurasWidgetMidnight.lua) - hidden rather than left silently inert. Still valid on
+                -- Classic (legacy pull-based aura scanning sorts these itself).
+                hidden = Addon.ExpansionIsAtLeastMidnight,
               },
               Creation = {
                 name = L["Creation"], type = "toggle", order = 40, width = "half",
@@ -4563,6 +4578,7 @@ local function CreateAurasWidgetOptions()
                 get = function(info) return db.AuraWidget.SortOrder == "Creation" end,
                 set = function(info, value) SetValue(info, "Creation") end,
                 arg = {"AuraWidget","SortOrder"},
+                hidden = Addon.ExpansionIsAtLeastMidnight,
               },
               ReverseOrder = {
                 name = L["Reverse"], type = "toggle", order = 50,
