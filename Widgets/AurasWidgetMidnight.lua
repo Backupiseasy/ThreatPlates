@@ -202,6 +202,23 @@ local AURA_ICON_TEX_COORD = {
   wide = { .07, 1 - .07, .23, 1 - .23 },
 }
 
+-- Midnight replacement for AuraWidget.FlashWhenExpiring/FlashTime (Classic-only - no equivalent exists
+-- on Midnight, AuraButton has no script-hook for addon-attached icon effects, see the wiki's
+-- AddDispelTypeTexture/glow discussion). Colors the duration text itself via a live Blizzard-driven
+-- binding (SetDurationText's options.textColor) instead of flashing the icon - a Step curve (no
+-- interpolation, hard cutoff at ExpiringColorThreshold) snapping to ExpiringColor below the threshold
+-- and back to the aura_type's normal duration-text color above it. AddPoint needs real Color objects
+-- (colorRGBA/ColorMixin), not the plain {r=,g=,b=,a=} tables this addon's own color fields use - same
+-- CreateColor() wrapping GetDispelTypeColorMapForAuraType already does for the same reason.
+local function BuildExpiringColorCurve(normal_color)
+  local curve = _G.C_CurveUtil.CreateColorCurve()
+  curve:SetType(_G.Enum.LuaCurveType.Step)
+  local expiring_color = Widget.db.ExpiringColor
+  curve:AddPoint(0, _G.CreateColor(expiring_color.r, expiring_color.g, expiring_color.b, expiring_color.a or 1))
+  curve:AddPoint(Widget.db.ExpiringColorThreshold, _G.CreateColor(normal_color.r, normal_color.g, normal_color.b, normal_color.a or 1))
+  return curve
+end
+
 local function InitializeAuraButton(auraButton, aura_type)
   local db_icon = Widget.db[aura_type].ModeIcon
   local tex_coord = AURA_ICON_TEX_COORD[db_icon.Style] or AURA_ICON_TEX_COORD.square
@@ -274,7 +291,16 @@ local function InitializeAuraButton(auraButton, aura_type)
     -- Same font-before-Set* ordering requirement as SetApplicationCount above.
     auraButton.TimeLeft = auraButton:CreateFontString(nil, "OVERLAY")
     FontUpdateText(auraButton, auraButton.TimeLeft, db_icon.Duration)
-    auraButton:SetDurationText(auraButton.TimeLeft)
+    if Widget.db.ShowExpiringColor then
+      auraButton:SetDurationText(auraButton.TimeLeft, {
+        textColor = {
+          curve = BuildExpiringColorCurve(db_icon.Duration.Font.Color),
+          property = _G.Enum.DurationTextBindingProperty.RemainingDuration,
+        },
+      })
+    else
+      auraButton:SetDurationText(auraButton.TimeLeft)
+    end
   end
 
   -- AuraButton tooltips are managed by Blizzard automatically; no AuraFrameOnEnter/GameTooltip code

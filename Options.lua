@@ -4642,6 +4642,10 @@ local function CreateAurasWidgetOptions()
                 order = 10,
                 name = L["Flash When Expiring"],
                 arg = { "AuraWidget", "FlashWhenExpiring" },
+                -- No script-hook/callback exists on AuraButton for addon-attached icon effects on
+                -- Midnight (see AurasWidgetImplementation.md §6) - replaced there by ShowExpiringColor
+                -- below instead of left silently inert.
+                hidden = Addon.ExpansionIsAtLeastMidnight,
               },
               FlashTime = {
                 type = "range",
@@ -4652,8 +4656,42 @@ local function CreateAurasWidgetOptions()
                 softMax = 20,
                 isPercent = false,
                 arg = { "AuraWidget", "FlashTime" },
+                hidden = Addon.ExpansionIsAtLeastMidnight,
                 disabled = function()
                   return not db.AuraWidget.FlashWhenExpiring
+                end
+              },
+              ShowExpiringColor = {
+                type = "toggle",
+                order = 30,
+                name = L["Color when Expiring"],
+                desc = L["Colors the countdown text once the remaining duration drops below the threshold below - the Midnight replacement for Flash When Expiring, which has no equivalent on Midnight."],
+                arg = { "AuraWidget", "ShowExpiringColor" },
+                hidden = not Addon.ExpansionIsAtLeastMidnight,
+              },
+              ExpiringColorThreshold = {
+                type = "range",
+                order = 40,
+                name = L["Expiring Threshold"],
+                step = 1,
+                softMin = 1,
+                softMax = 20,
+                isPercent = false,
+                arg = { "AuraWidget", "ExpiringColorThreshold" },
+                hidden = not Addon.ExpansionIsAtLeastMidnight,
+                disabled = function()
+                  return not db.AuraWidget.ShowExpiringColor
+                end
+              },
+              ExpiringColor = {
+                type = "color",
+                order = 50,
+                name = L["Expiring Color"],
+                arg = { "AuraWidget", "ExpiringColor" },
+                hasAlpha = true,
+                hidden = not Addon.ExpansionIsAtLeastMidnight,
+                disabled = function()
+                  return not db.AuraWidget.ShowExpiringColor
                 end
               },
             },

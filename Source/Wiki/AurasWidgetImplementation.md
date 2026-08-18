@@ -332,6 +332,25 @@ and/or in-game testing. Worth knowing before touching this code.
   exactly, no gap) plus `SetScale(AURA_BORDER_THICKNESS / AURA_BORDER_TEXTURE_BAND)` on the whole
   texture region - this decouples the on-screen ring thickness (tuned live: 2 → 4 → 6, confirmed
   working) from both the frame's position (stays flush) and the texture's own baked-in 8px margin.
+- **`ShowExpiringColor`/`ExpiringColorThreshold`/`ExpiringColor` (Midnight only) replace
+  `FlashWhenExpiring`/`FlashTime`** - `AuraButton` has no script-hook for addon-attached icon effects
+  (see the glow bullet above), so flashing the icon itself isn't buildable, but
+  `AuraButton:SetDurationText(fontString, options)` (already used unconditionally in
+  `InitializeAuraButton`) accepts `options.textColor = { curve, property }`, a *live* Blizzard-driven
+  color binding on the duration text - not a one-time color set. Built via
+  `C_CurveUtil.CreateColorCurve()` (`LuaColorCurveObject`), `:SetType(Enum.LuaCurveType.Step)` (hard
+  cutoff, no interpolation between points) and two points: `(0, ExpiringColor)` and
+  `(ExpiringColorThreshold, normal_color)`, where `normal_color` is that aura_type's own
+  `db_icon.Duration.Font.Color` - the curve *replaces* static color control once attached, so its upper
+  point reproduces the existing default look rather than introducing a second color knob.
+  `property = Enum.DurationTextBindingProperty.RemainingDuration` (raw seconds, matching
+  `FlashTime`'s existing seconds scale directly). `AddPoint` needs real `Color` objects
+  (`colorRGBA`/`ColorMixin`), not this addon's own plain `{r=,g=,b=,a=}` tables - wrapped via
+  `CreateColor()`, same as `GetDispelTypeColorMapForAuraType` already does for the same reason. Global
+  (not per-aura-type) scope, matching `FlashWhenExpiring`/`FlashTime`'s existing scope exactly.
+  **Not yet live-verified**: `Step` curve behavior exactly at/beyond the boundary point, and whether
+  permanent/duration-less auras report `RemainingDuration` as `0` (which would wrongly evaluate to the
+  "expiring" end of the curve forever) - no confirmation found in Blizzard's docs either way.
 
 ---
 
@@ -344,7 +363,7 @@ capability doesn't exist for addon code on `AuraButton`/`AuraContainer` as of Pa
 | --- | --- | --- | --- |
 | Bar display mode | hidden (Options) | `SetDurationBar(statusBar, options)` exists on `AuraButton` | **Yes** — not built yet |
 | Highlight/glow (stealable-aura outline) | hidden (Options, Midnight only - still available on Classic) | none — no hook point (§6) | **No** |
-| Flash-on-expiring | inert, not gated | none — same as Highlight | **No** |
+| Flash-on-expiring | replaced (Midnight only) - `ShowExpiringColor` colors the duration text instead, see §6 | `SetDurationText`'s `options.textColor` + `C_CurveUtil.CreateColorCurve` | **Yes, via a different mechanism** |
 | `SortOrder`: Duration / Creation | hidden (Options, Midnight only - still available on Classic) | no enum value exists (§6) | **No** |
 | Config/Demo preview mode | stubbed (`Widget:ToggleConfigurationMode` no-ops) | none — `AuraContainer` only ever shows real data for a real `SetUnit()` token | **No**, not with the current mechanism |
 | `SwitchAuraAreaByReaction` | inert, not gated | pure Lua-side (`unit.reaction` is non-secret) — not an API blocker, just not wired in | **Yes** — trivial |
