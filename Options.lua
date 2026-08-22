@@ -4195,7 +4195,13 @@ local function CreateAuraAreaIconModeOptions(pos, widget_info)
             name = L["Icon Style"],
             order = 10,
             type = "select",
-            desc = L["This lets you select the layout style of the auras area."],
+            desc = function()
+              local desc = L["This lets you select the layout style of the auras area."]
+              if Addon.ExpansionIsAtLeastMidnight then
+                desc = desc .. " " .. L["The icon crop for Wide/Square requires /reload to take effect on already-displayed auras."]
+              end
+              return desc
+            end,
             descStyle = "inline",
             values = { wide = L["Wide"], square = L["Square"], custom = L["Custom"] },
             set = function(info, val)
@@ -4273,6 +4279,7 @@ local function CreateAuraAreaIconModeOptions(pos, widget_info)
             type = "toggle",
             order = 130,
             name = L["Border"],
+            desc = function() return Addon.ExpansionIsAtLeastMidnight and L["Requires /reload to take effect on already-displayed auras."] or "" end,
             arg = { "AuraWidget", widget_info, "ModeIcon", "ShowBorder" },
             disabled = function() return db.AuraWidget[widget_info].ModeIcon.Style ~= "custom" end,
           },

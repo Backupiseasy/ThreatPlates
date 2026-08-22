@@ -2,3 +2,4 @@
 
 * Fixed and updated several options of the Auras widget. These were not working correctly after Path 12.1.0.
 * Added a Midnight replacement for "Flash When Expiring": colors the aura's duration text once its remaining time drops below a threshold, since flashing the icon itself has no equivalent on Midnight.
+* Toggling the aura Duration/Stack Text or Icon Size options on Midnight now applies immediately (outside of combat) instead of requiring a UI reload.

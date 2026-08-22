@@ -194,13 +194,46 @@ and/or in-game testing. Worth knowing before touching this code.
   `AuraContainerCustomFrameProviderMixin:CreateFrame`, wrapped in `securecallfunction`) — never again
   on reuse/recycling. Any setting only ever applied inside `InitializeAuraButton` is therefore
   create-time-only unless something else re-applies it later. `ReapplyLiveAuraButtonSettings` does
-  this for icon size/tooltip-enable/cooldown-spiral (plain `Set*` calls, safe to repeat) by
-  enumerating already-created buttons via `GetAuraGroupFrame`/`GetAuraGroupFrameCount` and calling the
-  same setters again from `Widget:UpdateSettings`. Stack count/duration text visibility and the
-  dispel-type border toggle (`ShowAuraType`) are **not** covered by this — those conditionally
-  *create* child textures/fontstrings once, rather than just setting a property, and there's no
-  retroactive create/destroy path built for that; changing them in Options only affects newly-pooled
-  buttons.
+  this for icon size/tooltip-enable/cooldown-spiral (plain `Set*` calls, safe to repeat), plus stack
+  count/duration text visibility *and* font/size/color/position styling (`ShowStackCount`/
+  `ShowDuration` — 2026-08-18: lazily creates the FontString the first time a toggle turns on for an
+  already-pooled button, same code as `InitializeAuraButton`, then `Show()`/`Hide()`s it afterward;
+  `FontUpdateText` - `SetFont`/`SetShadowColor`/`SetTextColor`/justification/`AnchorFrameTo` position,
+  all plain `Set*` calls - is then re-run unconditionally every pass, both for freshly-created and
+  already-existing FontStrings, so changed styling reapplies too, not just visibility), by enumerating
+  already-created buttons via `GetAuraGroupFrame`/`GetAuraGroupFrameCount` and calling the same setters
+  again from `Widget:UpdateSettings`. Only the dispel-type border toggle (`ShowAuraType`/`ShowBorder`)
+  is **not** covered by this at all: unlike a FontString, `AddDispelTypeTexture` registers a whole
+  comparator/coloring *binding* on the texture region, not just a property, and there's no known safe
+  way to swap or remove that binding once registered; changing it in Options only affects newly-pooled
+  buttons. (Confirmed this is a shared, not TidyPlates-specific, limitation: Plater-Nameplates'
+  `initAuraFrame` also calls `SetAuraBorder`/`AddDispelTypeTexture` exactly once, never again outside
+  create-time - though their per-plate `reSkinAuraButtons` pass *does* call
+  `auraButton.Border:SetScale(borderThickness / band)` live on the already-registered border texture
+  region every update, proving `SetScale` alone - unlike the `AddDispelTypeTexture` binding itself - is
+  safe to re-call after creation; not applicable to this widget since `AURA_BORDER_THICKNESS` is a
+  fixed code constant here, not a user-configurable DB field, but relevant if one is ever added.)
+- **Filter/layout/sort/alignment/anchor settings do NOT propagate live to already-displayed plates on
+  their own** (2026-08-18) - `Widget:UpdateAuraContainer`/`UpdateAurasGrids` (where
+  `SetAuraGroupFilterString`/`CandidateFilters`/`SortMethod`/`Layout`, `SetFlowLayoutAnchorPoint`/
+  `GrowthDirection`/`MaximumLineSize`, and `IgnoreAuraUpdateForUnit`'s `ShowTargetOnly` check all live)
+  only ever run from `Widget:UpdateAuras`, itself only called from `OnUnitAdded`
+  (new plate/target-change) - a pure Options change (`WIDGET_INFO.AuraWidget = { UpdateSettings = true
+  }`, no `ForceUpdate`, `Options.lua` line ~172) only triggers `Widget:UpdateSettings()`, which never
+  called any of that. Two fixes considered: (1) add `ForceUpdate = true` to `WIDGET_INFO.AuraWidget`,
+  matching `ThreatWidget`/`ExperienceWidget`'s precedent - triggers `Addon:ForceUpdate()`, an
+  addon-wide restyle of every widget/module on every active plate, not scoped to Auras; (2) **chosen
+  approach** - implemented `Widget:UpdateFrame(widget_frame, unit)` (thin wrapper calling
+  `Widget:UpdateAuras`) and call `self:UpdateAllFrames()` (an existing generic per-widget helper,
+  `WidgetHandler.lua`'s `UpdateAllFrames(widget)`, iterating `Addon:GetActiveThreatPlates()` and
+  calling `widget:UpdateFrame(widget_frame, tp_frame.unit)` for each active plate) at the end of
+  `Widget:UpdateSettings()` - reruns exactly the same per-plate code path `OnUnitAdded` already uses,
+  scoped to Auras only, no other widget touched. Called directly, **not** deferred via
+  `Addon.ExecuteAfterCombatEnds` like the `AuraButton`-level settings above - these are the same
+  `AuraContainer` group-config setters already called from plain addon code on every `OnUnitAdded`/
+  target-change, including mid-combat (the widget's entire reason for existing - see §1), so
+  `DenyTaintedAccessWhenAurasAreSecret` was never a risk here, only for per-`AuraButton` `Set*` calls
+  issued outside Blizzard's `securecallfunction` wrapper. Not yet live-verified.
 - **`AuraButton` carries `AccessRestrictionFlags = DenyTaintedAccessWhenAurasAreSecret`**
   (`Blizzard_AuraContainerShared.lua`). `InitializeAuraButton`'s calls run inside Blizzard's own
   `securecallfunction` wrapper and are therefore not tainted; `ReapplyLiveAuraButtonSettings`'s calls
@@ -351,6 +384,41 @@ and/or in-game testing. Worth knowing before touching this code.
   **Not yet live-verified**: `Step` curve behavior exactly at/beyond the boundary point, and whether
   permanent/duration-less auras report `RemainingDuration` as `0` (which would wrongly evaluate to the
   "expiring" end of the curve forever) - no confirmation found in Blizzard's docs either way.
+- **Attempted, then reverted (2026-08-21): making `ShowBorder`/`ShowAuraType`/`DefaultBuffColor`/
+  `DefaultDebuffColor` live via `ReapplyLiveAuraButtonSettings`.** `AddDispelTypeTexture` was made
+  unconditional-existence-safe by moving `DispelBorder`'s texture *creation* into
+  `InitializeAuraButton` unconditionally (regardless of `ShowBorder` at creation time), leaving only
+  the registration call itself (`AddDispelTypeTexture`/`RemoveDispelTypeTexture`) to run live - this
+  avoided the taint risk of creating a *new* texture object from plain code (`ValidateInboundScriptObject`
+  needing the object's provenance/parentage to check out), but not the underlying instability. Two bugs
+  found along the way: (1) `ClearDispelTypeTextures()` doesn't call `self:UpdateAuraDisplay()`
+  internally (confirmed from source - it's a bare `self.dispelTypeTextures = {}`), so clearing alone
+  doesn't visually refresh the button - switched to `RemoveDispelTypeTexture(index)`, which does call
+  `UpdateAuraDisplay()`, targeting index 1 unconditionally since `DispelBorder` is the only entry this
+  widget ever registers; (2) the now-unconditionally-created `DispelBorder` texture is `Shown` by
+  default with no vertex color once `CreateTexture()`'d, and never gets Blizzard's automatic
+  `Shown`/color management (`AddSecretAspect(Enum.SecretAspect.Shown)`) unless
+  `AddDispelTypeTexture` actually registers it - so a fresh button with `ShowBorder` off at creation
+  showed a raw white border instead of none; fixed with an explicit `:Hide()` in the `else` branch of
+  `InitializeAuraButton`. Even after both fixes, `AddDispelTypeTexture`/`RemoveDispelTypeTexture`/
+  `ClearDispelTypeTextures` turned out **not to work reliably on `AuraButton`s that have already
+  displayed an aura** (confirmed by live user testing; the exact failure mode - error vs. silent no-op
+  vs. stale display - wasn't pinned down before reverting). Per explicit user instruction, the whole
+  live-registration attempt was reverted - `ShowBorder`/`ShowAuraType`/`DefaultBuffColor`/
+  `DefaultDebuffColor` are create-time-only again, same as before this thread of experiments; only the
+  unconditional-texture-creation-plus-`Hide()` groundwork in `InitializeAuraButton` was kept (harmless,
+  and already fixes the white-border-on-creation bug on its own).
+- **Color-only re-application is live, confirmed working (2026-08-21).** Narrower than the reverted
+  existence-toggle attempt above: `ReapplyLiveAuraButtonSettings` re-registers
+  (`RemoveDispelTypeTexture(1)` then `AddDispelTypeTexture` with a fresh `customDispelColorMap`) only
+  when `db_icon.ShowBorder` is on **and** the border is already registered
+  (`GetDispelTypeTextureCount() > 0`) - never registers a border for the first time on a button that
+  never had one, so the existence toggle itself stays reload-only per the revert above. Confirmed live
+  by the user: `ShowAuraType`/`DefaultBuffColor`/`DefaultDebuffColor` now update without `/reload` on
+  auras whose border was already showing - unlike the broader existence-toggle case,
+  `Remove`+`AddDispelTypeTexture` is reliable for this narrower "recolor an already-shown border"
+  pattern. `Options.lua`'s "Requires /reload" `desc` notes removed from `AuraTypeColors`/
+  `DefaultBuffColor`/`DefaultDebuffColor` (kept on `ShowBorder` itself, which is still reload-only).
 
 ---
 
