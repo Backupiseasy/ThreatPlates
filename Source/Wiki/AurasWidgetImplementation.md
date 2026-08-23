@@ -152,6 +152,19 @@ result means "disable this group" (`Widget:UpdateAuraContainer` sets its `maxFra
   can never set); otherwise returns `nil` (group disabled). Its plain-string return (not the
   group-keyed table shape the other four produce) is wrapped into the same shape via the
   `SingleGroupConfig` helper before reaching `Widget:UpdateAuraContainer`.
+- **`SwitchAreaByReaction`** (2026-08-23) — for `FRIENDLY` units only, swaps which type's *layout*
+  (icon size, columns/rows/spacing, sort, alignment, anchor - `Widget:UpdateAuraContainer`'s `db`/
+  `db_icon`, computed from a `layout_type` local that flips Buffs↔Debuffs, not from `aura_type`
+  directly) Buffs/Debuffs use, while the real `aura_type`/`container`/`AURA_GROUP_KEYS[aura_type]`/
+  filter data stay unswapped. Matches the legacy widget's own behavior exactly: it fed buff data
+  straight into the already-Debuffs-styled physical `widget_frame.Debuffs` frame
+  (`AurasWidget.lua` ~2156), not just relocating the buff icons to the debuff screen position but
+  rendering them *as if configured as debuffs* - counterintuitive for a "switch position" setting, but
+  faithfully replicated here. `CrowdControl` is never swapped (matches legacy scope). Known,
+  unguarded edge case: if the *swapped* config's `AnchorTo` names the other of Buffs/Debuffs (stacking
+  one grid below the other) while this setting is also on, the two containers' anchor chains can end
+  up referencing each other in a way that wasn't reachable before - not expected to be a common
+  configuration, not specially handled.
 
 ---
 
@@ -434,7 +447,6 @@ capability doesn't exist for addon code on `AuraButton`/`AuraContainer` as of Pa
 | Flash-on-expiring | replaced (Midnight only) - `ShowExpiringColor` colors the duration text instead, see §6 | `SetDurationText`'s `options.textColor` + `C_CurveUtil.CreateColorCurve` | **Yes, via a different mechanism** |
 | `SortOrder`: Duration / Creation | hidden (Options, Midnight only - still available on Classic) | no enum value exists (§6) | **No** |
 | Config/Demo preview mode | stubbed (`Widget:ToggleConfigurationMode` no-ops) | none — `AuraContainer` only ever shows real data for a real `SetUnit()` token | **No**, not with the current mechanism |
-| `SwitchAuraAreaByReaction` | inert, not gated | pure Lua-side (`unit.reaction` is non-secret) — not an API blocker, just not wired in | **Yes** — trivial |
 | Per-spell whitelist/blacklist | hidden (Options) | `candidateFilters.includeSpellIDs`/`excludeSpellIDs`, reaction-restricted (§6) | **Yes, partially** |
 | "Dispellable (only me)" for Enemy Debuffs | not implemented | no Blizzard token/candidateFilters field for player-personal dispel capability exists — would need a static class/spec→dispel-type lookup table instead | **Yes, via workaround** |
 | Dynamic sibling-height anchoring (no wasted vertical gap above an empty grid) | not implemented (static max-height used instead) | none found — `GetAuraGroupFrameCount` is pool size not live count (§6), no `GetHeight` on Forbidden containers | **No**, not with a currently-known API |

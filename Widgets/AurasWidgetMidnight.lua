@@ -839,7 +839,29 @@ function Widget:UpdateAuraContainer(widget_frame, aura_type, group_configs, unit
     return false
   end
 
-  local db = self.db[aura_type]
+  -- SwitchAreaByReaction (friendly units only, Buffs<->Debuffs - matches the legacy widget's own
+  -- scope, CrowdControl was never swapped there either): swaps which type's *layout* (icon size,
+  -- columns/rows/spacing, sort, alignment, anchor - everything below except the actual filter data,
+  -- which stays on the real aura_type/container) Buffs/Debuffs use. Matches the legacy widget's
+  -- behavior of feeding buff data straight into the already-Debuffs-styled physical Debuffs frame
+  -- (AurasWidget.lua ~2156: `local buff_aura_grid = (db.SwitchAreaByReaction and
+  -- widget_frame.Debuffs) or widget_frame.Buffs`) - not just relocating buffs to debuffs' screen
+  -- position, but rendering them as if they were configured as debuffs (that reads oddly for
+  -- "switch position", but is what the legacy widget actually did, so replicated here for parity).
+  -- Known edge case, not specially guarded: if AnchorTo on the *swapped* config names the other of
+  -- Buffs/Debuffs (stacking one below the other) while this setting is also on, the two containers'
+  -- anchor chains can reference each other in a way that wasn't possible before switching was
+  -- implemented - not expected to be a common configuration.
+  local layout_type = aura_type
+  if unit.reaction == "FRIENDLY" and self.db.SwitchAreaByReaction then
+    if aura_type == "Buffs" then
+      layout_type = "Debuffs"
+    elseif aura_type == "Debuffs" then
+      layout_type = "Buffs"
+    end
+  end
+
+  local db = self.db[layout_type]
   local db_icon = db.ModeIcon
   local max_auras = min(db_icon.MaxAuras, db_icon.Rows * db_icon.Columns)
   local anchor_point, horizontal_direction, vertical_direction = GetFlowLayoutForAlignment(db.AlignmentH, db.AlignmentV)
