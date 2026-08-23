@@ -4148,6 +4148,7 @@ local function CreateAuraAreaLayoutOptions(pos, widget_info)
             type = "toggle",
             order = 40,
             name = L["Center Auras"],
+            hidden = Addon.ExpansionIsAtLeastMidnight,
             arg = { "AuraWidget", widget_info, "CenterAuras" },
           },
         },
