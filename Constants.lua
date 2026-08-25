@@ -872,13 +872,30 @@ Addon.DEFAULT_SETTINGS = {
         ShowAllEnemy = false,
         ShowOnlyMine = true,
         ShowBlizzardForEnemy = false,
+        ShowPriority = false, -- candidateFilters.isPriorityAura (Patch 12.1.0)
+        -- ShowDispellable/ShowBoss/FilterByType above are friendly-only (legacy semantics: the old
+        -- Enemy filter function never read them, and Enemy Options never exposed them). The enemy
+        -- Midnight panel's own Dispellable/Boss/DispelType toggles use these separate fields instead,
+        -- so toggling one reaction's checkbox doesn't silently flip the other's.
+        ShowDispellableEnemy = false,
+        ShowBossEnemy = false,
+        -- Dispel Type ("Bannart") defaults to all types checked, since it's now combined with
+        -- Dispellable ("Bannbar") - it only takes effect once Bannbar is on, and "all types checked"
+        -- is what keeps a freshly-enabled Bannbar showing every dispellable debuff (matching its old,
+        -- type-independent behavior) rather than silently showing nothing.
+        FilterByTypeEnemy = {
+          [1] = true,
+          [2] = true,
+          [3] = true,
+          [4] = true,
+        },
         FilterMode = "Block",
         FilterBySpell = {},
         FilterByType = {
-          [1] = false,  -- Moved to Debuffs and negated meaning in 8.8.0
-          [2] = false,  -- Moved to Debuffs and negated meaning in 8.8.0
-          [3] = false,  -- Moved to Debuffs and negated meaning in 8.8.0
-          [4] = false,  -- Moved to Debuffs and negated meaning in 8.8.0
+          [1] = true,  -- Moved to Debuffs and negated meaning in 8.8.0
+          [2] = true,  -- Moved to Debuffs and negated meaning in 8.8.0
+          [3] = true,  -- Moved to Debuffs and negated meaning in 8.8.0
+          [4] = true,  -- Moved to Debuffs and negated meaning in 8.8.0
         },
         -- Positioning
         AlignmentH = "LEFT",
@@ -1010,11 +1027,14 @@ Addon.DEFAULT_SETTINGS = {
         ShowOnFriendlyNPCs = true,
         ShowOnlyMine = false,
         ShowPlayerCanApply = false,
+        ShowFriendlyBigDefensives = false,
+        MaxDurationFriendly = 0, -- candidateFilters.maxDuration in seconds (Patch 12.1.0), 0 = disabled
         ShowEnemy = true,
         ShowAllEnemy = false,
         ShowOnEnemyNPCs = true,
         ShowDispellable = true,
         ShowMagic = false,
+        MaxDurationEnemy = 0, -- candidateFilters.maxDuration in seconds (Patch 12.1.0), 0 = disabled
         ShowUnlimitedAlways = false,
         ShowUnlimitedInCombat = true,
         ShowUnlimitedInInstances = true,

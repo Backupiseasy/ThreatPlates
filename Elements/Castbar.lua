@@ -66,14 +66,17 @@ local function OnUpdate(self, elapsed)
     end
 
     self:SetValue(0)
-  elseif (self.FlashTime > 0) then
+  elseif (self.PostCastHoldTime > 0) then
     self.CastTime:SetText("")
-    self.FlashTime = self.FlashTime - elapsed
+    self.PostCastHoldTime = self.PostCastHoldTime - elapsed
     return
   end
 
-  self:Hide()
+  -- SpellText is a child of castbar.Overlay, so it's already visually hidden along with
+  -- castbar - Element.UpdateVisibility (the single authority for both) resyncs its own
+  -- shown-flag next time it runs, no need to touch it here too.
   self:GetParent().unit.IsInterrupted = false
+  self:Hide()
 end
 
 local function OnUpdateMidnight(self, elapsed)
@@ -81,17 +84,17 @@ local function OnUpdateMidnight(self, elapsed)
     self:SetValue(self.Duration:GetRemainingDuration())
     self.CastTime:SetText(string_format("%.1f", self.Duration:GetRemainingDuration()))
     self.Spark:SetPoint("CENTER", self:GetStatusBarTexture(), "RIGHT")
-  elseif self.FlashTime > 0 then
+  elseif self.PostCastHoldTime > 0 then
     self.CastTime:SetText("")
-    self.FlashTime = self.FlashTime - elapsed
+    self.PostCastHoldTime = self.PostCastHoldTime - elapsed
   else
-    self:Hide()
     self:GetParent().unit.IsInterrupted = false
+    self:Hide()
   end
 end
 
 local function OnHide(self)
-   if self.FlashTime > 0 then
+  if self.PostCastHoldTime > 0 then
     self:Show()
   end
 end
@@ -176,6 +179,33 @@ local function UpdateForCast(self, unit)
   self.Spark:SetShown(db.castbar.ShowSpark)
 end
 
+-- Single authority for castbar/SpellText Show/Hide - the only place in the addon allowed to call
+-- Show/Hide/SetShown on these two frames for cast-state-driven visibility. Everything else
+-- (style updates, cast start/stop, interrupts) sets state (unit.isCasting, unit.IsInterrupted,
+-- self.PostCastHoldTime) and calls this to reconcile, instead of deciding visibility itself.
+local function UpdateVisibility(self, tp_frame)
+  local unit = tp_frame.unit
+  local spell_text = tp_frame.visual.SpellText
+
+  local show_castbar = tp_frame.style.castbar.show and (unit.isCasting or unit.IsInterrupted or self.PostCastHoldTime > 0)
+  self:SetShown(show_castbar)
+
+  -- SpellText is a child of castbar.Overlay; it already inherits castbar's hidden state
+  -- visually, but its own shown-flag must still track show_castbar so a later self:Show()
+  -- doesn't reveal a SpellText left hidden from a previous, unrelated style evaluation.
+  -- No IsInterrupted-specific case here: show_castbar already accounts for that, and
+  -- spelltext.show is a plain style/user setting, unrelated to cast/interrupt state.
+  local show_spell_text = show_castbar and tp_frame.style.spelltext.show
+  spell_text:SetShown(show_spell_text)
+  if not show_spell_text then
+    -- Every caller that turns show_spell_text true also sets fresh text right before doing so
+    -- (OnStartCasting, Addon:UNIT_SPELLCAST_INTERRUPTED, the SPELL_INTERRUPT backfill) - clearing
+    -- here is a structural guarantee against stale text (e.g. a past interrupted cast's name)
+    -- surviving into some future, unrelated show, regardless of what triggers that show.
+    spell_text:SetText("")
+  end
+end
+
 ---------------------------------------------------------------------------------------------------
 -- Core element code
 ---------------------------------------------------------------------------------------------------
@@ -209,6 +239,7 @@ function Element.PlateCreated(tp_frame)
   castbar.InterruptShield:SetPoint("CENTER", castbar, "LEFT")
 
   castbar.UpdateForCast = UpdateForCast
+  castbar.UpdateVisibility = UpdateVisibility
 
   castbar:SetStatusBarColor(1, 0.8, 0)
 
@@ -231,7 +262,7 @@ function Element.PlateCreated(tp_frame)
 
   castbar.IsCasting = false
   castbar.IsChanneling = false
-  castbar.FlashTime = 0
+  castbar.PostCastHoldTime = 0
   castbar.Value = 0
   castbar.MaxValue = 0
 
@@ -248,12 +279,13 @@ end
 
 -- Called in processing event: NAME_PLATE_UNIT_ADDED
 function Element.PlateUnitAdded(tp_frame)
-  tp_frame.visual.Castbar.FlashTime = 0  -- Set FlashTime to 0 so that the castbar is actually hidden (see statusbar OnHide hook function)
+  tp_frame.visual.Castbar.PostCastHoldTime = 0  -- Set to 0 so that the castbar is actually hidden (see statusbar OnHide hook function)
 end
 
 -- Called in processing event: NAME_PLATE_UNIT_REMOVED
 --function Element.PlateUnitRemoved(tp_frame)
 --end
+
 
 -- Called in processing event: UpdateStyle in Nameplate.lua
 function Element.UpdateStyle(tp_frame, style)
@@ -305,30 +337,27 @@ function Element.UpdateStyle(tp_frame, style)
   castbar.InterruptShield:SetSize(14 * scale_factor, 16 * scale_factor)
   castbar.Spark:SetSize(3, castbar_style.height)
 
-  castbar:SetShown(castbar_style.show)
-
   local spell_text, spell_text_style = tp_frame.visual.SpellText, style.spelltext
 
   -- At least font must be set as otherwise it results in a Lua error when UnitAdded with SetText is called
   spell_text:SetFont(spell_text_style.typeface, spell_text_style.size, spell_text_style.flags)
 
-  if spell_text_style.show then
-    FontSetJustify(spell_text, spell_text_style.align, spell_text_style.vertical)
-    if spell_text_style.shadow then
-      spell_text:SetShadowColor(0,0,0, 1)
-      spell_text:SetShadowOffset(1, -1)
-    else
-      spell_text:SetShadowColor(0,0,0,0)
-    end
-
-    spell_text:ClearAllPoints()
-    spell_text:SetSize(spell_text_style.width, spell_text_style.height)
-    spell_text:SetPoint(spell_text_style.anchor, castbar, spell_text_style.anchor, db.SpellNameText.HorizontalOffset, db.SpellNameText.VerticalOffset)
-
-    spell_text:Show()
+  FontSetJustify(spell_text, spell_text_style.align, spell_text_style.vertical)
+  if spell_text_style.shadow then
+    spell_text:SetShadowColor(0,0,0, 1)
+    spell_text:SetShadowOffset(1, -1)
   else
-    spell_text:Hide()
+    spell_text:SetShadowColor(0,0,0,0)
   end
+
+  spell_text:ClearAllPoints()
+  spell_text:SetSize(spell_text_style.width, spell_text_style.height)
+  spell_text:SetPoint(spell_text_style.anchor, castbar, spell_text_style.anchor, db.SpellNameText.HorizontalOffset, db.SpellNameText.VerticalOffset)
+
+  -- Show/Hide for the castbar and SpellText is decided exclusively by castbar:UpdateVisibility -
+  -- don't set shown state here, a style update can happen mid-interrupt-hold from any unrelated
+  -- unit event and must not cut that display short.
+  castbar:UpdateVisibility(tp_frame)
 
   local cast_time = castbar.CastTime
 
