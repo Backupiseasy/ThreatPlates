@@ -4148,6 +4148,7 @@ local function CreateAuraAreaLayoutOptions(pos, widget_info)
             type = "toggle",
             order = 40,
             name = L["Center Auras"],
+            hidden = Addon.ExpansionIsAtLeastMidnight,
             arg = { "AuraWidget", widget_info, "CenterAuras" },
           },
         },
@@ -4195,7 +4196,13 @@ local function CreateAuraAreaIconModeOptions(pos, widget_info)
             name = L["Icon Style"],
             order = 10,
             type = "select",
-            desc = L["This lets you select the layout style of the auras area."],
+            desc = function()
+              local desc = L["This lets you select the layout style of the auras area."]
+              if Addon.ExpansionIsAtLeastMidnight then
+                desc = desc .. " " .. L["The icon crop for Wide/Square requires /reload to take effect on already-displayed auras."]
+              end
+              return desc
+            end,
             descStyle = "inline",
             values = { wide = L["Wide"], square = L["Square"], custom = L["Custom"] },
             set = function(info, val)
@@ -4273,6 +4280,7 @@ local function CreateAuraAreaIconModeOptions(pos, widget_info)
             type = "toggle",
             order = 130,
             name = L["Border"],
+            desc = function() return Addon.ExpansionIsAtLeastMidnight and L["Requires /reload to take effect on already-displayed auras."] or "" end,
             arg = { "AuraWidget", widget_info, "ModeIcon", "ShowBorder" },
             disabled = function() return db.AuraWidget[widget_info].ModeIcon.Style ~= "custom" end,
           },
@@ -4494,12 +4502,19 @@ local function CreateAurasWidgetOptions()
                 hasAlpha = true,
               },
               Spacer1 = GetSpacerEntry(35),
+              -- Glow on stealable/purgeable auras has no equivalent on Midnight - AuraButton exposes
+              -- no script-hook or callback for addon-attached visual effects (confirmed by a full
+              -- read of the mixin - see AurasWidgetImplementation.md §6), so hidden here rather than
+              -- left silently inert, same as SortOrder Duration/Creation (2026-08-16). Still
+              -- functional on Classic (AurasWidget.lua's own icon-based glow), so only hidden on
+              -- Midnight, not removed.
               EnableGlow = {
                 name = L["Steal or Purge Glow"],
                 type = "toggle",
                 order = 40,
                 desc = L["Shows a glow effect on auras that you can steal or purge."],
                 arg = { "AuraWidget", "Highlight", "Enabled" },
+                hidden = Addon.ExpansionIsAtLeastMidnight,
               },
               GlowType = {
                 name = L["Glow Type"],
@@ -4507,12 +4522,14 @@ local function CreateAurasWidgetOptions()
                 values = Addon.GLOW_TYPES,
                 order = 50,
                 arg = { "AuraWidget", "Highlight", "Type" },
+                hidden = Addon.ExpansionIsAtLeastMidnight,
               },
               GlowColorEnable = {
                 name = L["Glow Color"],
                 type = "toggle",
                 order = 60,
                 arg = { "AuraWidget", "Highlight", "CustomColor" },
+                hidden = Addon.ExpansionIsAtLeastMidnight,
               },
               GlowColor = {
                 name = L["Color"],
@@ -4520,6 +4537,7 @@ local function CreateAurasWidgetOptions()
                 order = 70,
                 arg = { "AuraWidget", "Highlight", "Color" },
                 hasAlpha = true,
+                hidden = Addon.ExpansionIsAtLeastMidnight,
               },
             },
           },
@@ -4556,6 +4574,11 @@ local function CreateAurasWidgetOptions()
                 get = function(info) return db.AuraWidget.SortOrder == "Duration" end,
                 set = function(info, value) SetValue(info, "Duration") end,
                 arg = {"AuraWidget","SortOrder"},
+                -- No AuraContainerSortMethod equivalent exists on Midnight (Patch 12.1.0) - falls back
+                -- to Default there regardless of this setting (see GetSortMethod in
+                -- AurasWidgetMidnight.lua) - hidden rather than left silently inert. Still valid on
+                -- Classic (legacy pull-based aura scanning sorts these itself).
+                hidden = Addon.ExpansionIsAtLeastMidnight,
               },
               Creation = {
                 name = L["Creation"], type = "toggle", order = 40, width = "half",
@@ -4563,6 +4586,7 @@ local function CreateAurasWidgetOptions()
                 get = function(info) return db.AuraWidget.SortOrder == "Creation" end,
                 set = function(info, value) SetValue(info, "Creation") end,
                 arg = {"AuraWidget","SortOrder"},
+                hidden = Addon.ExpansionIsAtLeastMidnight,
               },
               ReverseOrder = {
                 name = L["Reverse"], type = "toggle", order = 50,
@@ -4626,6 +4650,10 @@ local function CreateAurasWidgetOptions()
                 order = 10,
                 name = L["Flash When Expiring"],
                 arg = { "AuraWidget", "FlashWhenExpiring" },
+                -- No script-hook/callback exists on AuraButton for addon-attached icon effects on
+                -- Midnight (see AurasWidgetImplementation.md §6) - replaced there by ShowExpiringColor
+                -- below instead of left silently inert.
+                hidden = Addon.ExpansionIsAtLeastMidnight,
               },
               FlashTime = {
                 type = "range",
@@ -4636,8 +4664,42 @@ local function CreateAurasWidgetOptions()
                 softMax = 20,
                 isPercent = false,
                 arg = { "AuraWidget", "FlashTime" },
+                hidden = Addon.ExpansionIsAtLeastMidnight,
                 disabled = function()
                   return not db.AuraWidget.FlashWhenExpiring
+                end
+              },
+              ShowExpiringColor = {
+                type = "toggle",
+                order = 30,
+                name = L["Color when Expiring"],
+                desc = L["Colors the countdown text once the remaining duration drops below the threshold below - the Midnight replacement for Flash When Expiring, which has no equivalent on Midnight."],
+                arg = { "AuraWidget", "ShowExpiringColor" },
+                hidden = not Addon.ExpansionIsAtLeastMidnight,
+              },
+              ExpiringColorThreshold = {
+                type = "range",
+                order = 40,
+                name = L["Expiring Threshold"],
+                step = 1,
+                softMin = 1,
+                softMax = 20,
+                isPercent = false,
+                arg = { "AuraWidget", "ExpiringColorThreshold" },
+                hidden = not Addon.ExpansionIsAtLeastMidnight,
+                disabled = function()
+                  return not db.AuraWidget.ShowExpiringColor
+                end
+              },
+              ExpiringColor = {
+                type = "color",
+                order = 50,
+                name = L["Expiring Color"],
+                arg = { "AuraWidget", "ExpiringColor" },
+                hasAlpha = true,
+                hidden = not Addon.ExpansionIsAtLeastMidnight,
+                disabled = function()
+                  return not db.AuraWidget.ShowExpiringColor
                 end
               },
             },

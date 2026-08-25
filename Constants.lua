@@ -862,6 +862,12 @@ Addon.DEFAULT_SETTINGS = {
       SwitchAreaByReaction = true,
       FlashWhenExpiring = false,
       FlashTime = 5,
+      -- Midnight-only replacement for Flash When Expiring (AuraButton has no script-hook for
+      -- addon-attached icon effects - see AurasWidgetImplementation.md §6). Global, not per-aura-type,
+      -- matching FlashWhenExpiring/FlashTime's existing scope.
+      ShowExpiringColor = false,
+      ExpiringColorThreshold = 5,
+      ExpiringColor = RGB_P(1, 0, 0, 1),
       Debuffs = {
         ShowFriendly = false,
         ShowAllFriendly = false,

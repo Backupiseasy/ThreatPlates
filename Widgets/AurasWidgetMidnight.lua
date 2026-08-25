@@ -24,12 +24,14 @@ local UnitIsUnitTP = Addon.UnitIsUnit
 -- (AuraUtil.ForEachAura/C_UnitAuras.GetUnitAuras) - it's secret-safe by design (Blizzard owns aura
 -- fetching internally once SetUnit() is called), whereas the old addon-side pull model can throw or
 -- come back empty for nameplate unit tokens even outside restricted periods [GH-723]. This is the
--- only aura display path in this widget; there is no addon-side fallback. Feature-detected the same
--- way Plater-Nameplates does it, since there is no dedicated expansion-level flag for this - only a
--- template-existence check.
+-- only aura display path in this widget; there is no addon-side fallback. Feature-detected via a
+-- template-existence check, since there is no dedicated expansion-level flag for this.
 local HasAuraContainers = C_XMLUtil and C_XMLUtil.GetTemplateInfo and C_XMLUtil.GetTemplateInfo("CustomAuraContainerTemplate") and true or false
 local AuraContainerSortMethod = _G.AuraContainerSortMethod
 local AuraContainerSortDirection = _G.AuraContainerSortDirection
+local LuaCurveTypeStep = _G.Enum.LuaCurveType.Step
+local DispelTypeTextureStylePreserveAsset = _G.Enum.CustomAuraButtonDispelTypeTextureStyle.PreserveAsset
+local DurationTextBindingPropertyRemainingDuration = _G.Enum.DurationTextBindingProperty.RemainingDuration
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -79,15 +81,16 @@ local EnabledForStyle = {}
 -- - Per-spell FilterBySpell (spell name/ID text list) is not implemented; candidateFilters.
 --   includeSpellIDs/excludeSpellIDs would only be usable for Debuffs+CrowdControl on enemies anyway
 --   (Blizzard restricts spell-ID candidate filters to helpful-on-assistable/harmful-on-non-assistable).
--- - Icon size, tooltip-enable, and cooldown-spiral visibility DO propagate live to already-pooled
---   AuraButtons (see ReapplyLiveAuraButtonSettings, called from Widget:UpdateSettings) - none of
---   AuraButton's ForbiddenAspects block plain Set* calls, and GetAuraGroupFrame/GetAuraGroupFrameCount
---   are real addon-facing methods to reach already-created buttons. Stack count/duration text
---   visibility, their font/size/color, and whether the dispel-type border is drawn at all
---   (ShowAuraType) are still create-time-only, though - those conditionally *create* child textures/
---   fontstrings once at InitializeAuraButton time (FontUpdateText is likewise only ever called there),
---   and there is no retroactive create/destroy/re-font path for that here - changing any of those in
---   Options during the same session only takes effect on newly-pooled buttons, not already-pooled ones.
+-- - Icon size, tooltip-enable, cooldown-spiral visibility, stack-count/duration-text visibility, and
+--   their font/size/color/position styling all DO propagate live to already-pooled AuraButtons (see
+--   ReapplyLiveAuraButtonSettings, called from Widget:UpdateSettings) - none of AuraButton's
+--   ForbiddenAspects block plain Set* calls, lazily creating a FontString the first time a toggle
+--   turns on, or re-running FontUpdateText, and GetAuraGroupFrame/GetAuraGroupFrameCount are real
+--   addon-facing methods to reach already-created buttons. Only whether the dispel-type border is
+--   drawn at all (ShowAuraType/ShowBorder) is still create-time-only - its underlying
+--   AddDispelTypeTexture call registers a whole binding, not just a property, with no known safe way
+--   to swap it once registered - changing that in Options during the same session only takes effect on
+--   newly-pooled buttons, not already-pooled ones.
 -- - The demo/preview "Configuration Mode" and the aura-trigger custom-plate-style system (both
 --   already non-functional prior to this) have no equivalent hook into AuraContainer and remain
 --   unavailable.
@@ -102,7 +105,21 @@ local EnabledForStyle = {}
 -- both their buff and debuff filter strings (Blizzard_NamePlateAuras.lua) - matched here for parity.
 local NAMEPLATE_ONLY = "INCLUDE_NAME_PLATE_ONLY"
 
-local AURA_CONTAINER_POOL_SIZE = 40 -- matches the practical max concurrent nameplate count (same assumption Plater-Nameplates uses)
+-- Square (not Blizzard's rounded-corner atlas) dispel-type border texture, 64x64 with alpha - see
+-- InitializeAuraButton's DispelBorder setup. squareline.tga (the legacy widget's Backdrop border
+-- asset) turned out to be a 128x16 tileable edge *strip* built for SetBackdrop's edgeFile tiling, not
+-- a square 9-slice-able frame - wrong shape for SetTextureSliceMargins, confirmed live to not work.
+local AURA_BORDER_TEXTURE = Addon.ADDON_DIRECTORY .. "Artwork\\NinesliceBorder"
+-- Sliced (not plain stretch): with a flush, 0-outset frame (matching the icon exactly, no gap), plain
+-- stretch couples ring thickness and position - making the frame bigger to get a thicker ring also
+-- pushes the ring's inner edge (and the transparent "hole" around it) away from the icon, leaving a
+-- visible gap - confirmed live. SetTextureSliceMargins keeps the corner/edge band at native
+-- texture-pixel size independent of the frame's overall size, so thickness can be tuned via
+-- AURA_BORDER_THICKNESS below without moving the frame off the icon at all.
+local AURA_BORDER_TEXTURE_BAND = 8
+local AURA_BORDER_THICKNESS = 6
+
+local AURA_CONTAINER_POOL_SIZE = 40 -- matches the practical max concurrent nameplate count
 local AURA_CONTAINER_TYPES = { "Buffs", "Debuffs", "CrowdControl" }
 -- AddAuraGroup keys declared per aura type - Debuffs (either reaction) and Buffs (friendly) get one
 -- group per independent OR-condition (see GetEnemyDebuffsGroupConfigs/GetFriendlyDebuffsGroupConfigs/
@@ -148,88 +165,236 @@ local DISPEL_TYPE_COLOR_MAP = BuildDispelTypeColorMap()
 -- above) since Buffs vs. Debuffs/CrowdControl need a different default color - CrowdControl auras are
 -- always harmful, so they share Debuffs' DefaultDebuffColor, same as the legacy widget's
 -- `aura.effect == "HARMFUL"` check.
+-- One map per aura_type, not rebuilt on every call (InitializeAuraButton calls this per button - up
+-- to 40x per pool - plus once per button again on every ReapplyLiveAuraButtonSettings recolor pass).
+-- Unlike GetExpiringColorCurve's cache, this one DOES need invalidating - DefaultBuffColor/
+-- DefaultDebuffColor/ShowAuraType can change live and the recolor pass depends on picking that up (see
+-- ReapplyLiveAuraButtonSettings) - InvalidateDispelTypeColorMapCache is called from
+-- Widget:UpdateSettings, before anything reads this, so a changed color always rebuilds fresh before
+-- it's used.
+local DispelTypeColorMapCache = {}
+local function InvalidateDispelTypeColorMapCache()
+  DispelTypeColorMapCache = {}
+end
 local function GetDispelTypeColorMapForAuraType(aura_type)
-  local map = {}
-  for dispel_name, color in pairs(DISPEL_TYPE_COLOR_MAP) do
-    map[dispel_name] = color
+  local map = DispelTypeColorMapCache[aura_type]
+  if not map then
+    map = {}
+    for dispel_name, color in pairs(DISPEL_TYPE_COLOR_MAP) do
+      map[dispel_name] = color
+    end
+    local default_color = (aura_type == "Buffs") and Widget.db.DefaultBuffColor or Widget.db.DefaultDebuffColor
+    map.None = _G.CreateColor(default_color.r, default_color.g, default_color.b, default_color.a or 1)
+    DispelTypeColorMapCache[aura_type] = map
   end
-  local default_color = (aura_type == "Buffs") and Widget.db.DefaultBuffColor or Widget.db.DefaultDebuffColor
-  map.None = _G.CreateColor(default_color.r, default_color.g, default_color.b, default_color.a or 1)
   return map
+end
+
+-- ModeIcon.ShowBorder off + AuraWidget.ShowAuraType off (legacy: AurasWidget.lua:3049,
+-- SetBackdropBorderColor(0, 0, 0, 1) at border creation, never overwritten unless ShowAuraType is
+-- also on) - a flat black map for every possible customDispelColorMap key, reusing the same
+-- AddDispelTypeTexture mechanism instead of a second, separate border texture/code path.
+local BLACK_DISPEL_COLOR_MAP = {}
+do
+  local black = _G.CreateColor(0, 0, 0, 1)
+  for _, dispel_name in ipairs(DISPEL_TYPE_NAMES) do
+    BLACK_DISPEL_COLOR_MAP[dispel_name] = black
+  end
+  BLACK_DISPEL_COLOR_MAP.None = black
 end
 
 local AuraContainerPool = { Buffs = {}, Debuffs = {}, CrowdControl = {} }
 local NextAuraContainerIndex = { Buffs = 1, Debuffs = 1, CrowdControl = 1 }
 
+-- Icon crop per ModeIcon.Style - removes each icon texture's own baked-in border pixels (not related
+-- to ModeIcon.ShowBorder/the dispel-type border texture, which is a separate overlay). Previously
+-- hardcoded to the "square" crop unconditionally regardless of Style, in both this widget and the
+-- legacy AurasWidget.lua (which even carries the intended "wide" crop as a dead, commented-out line -
+-- AurasWidget.lua:3036, typo'd "Widee" - never wired up). A "wide" icon's aspect ratio needs a bigger
+-- vertical crop than "square" to look right; using the square crop on a wide icon under-crops
+-- vertically, leaving the source texture's border artifacts visible - which reads as the dispel-type
+-- border (drawn at a fixed -3/+3 outset from the icon, unaffected by TexCoord) sitting too far inward
+-- relative to the visibly-uncropped icon content. "custom" (arbitrary width/height, no fixed aspect)
+-- has no clean formula - falls back to the square crop, matching prior behavior.
+local AURA_ICON_TEX_COORD = {
+  square = { .10, 1 - .07, .12, 1 - .12 },
+  wide = { .07, 1 - .07, .23, 1 - .23 },
+}
+
+-- Midnight replacement for AuraWidget.FlashWhenExpiring/FlashTime (Classic-only - no equivalent exists
+-- on Midnight, AuraButton has no script-hook for addon-attached icon effects, see the wiki's
+-- AddDispelTypeTexture/glow discussion). Colors the duration text itself via a live Blizzard-driven
+-- binding (SetDurationText's options.textColor) instead of flashing the icon - a Step curve (no
+-- interpolation, hard cutoff at ExpiringColorThreshold) snapping to ExpiringColor below the threshold
+-- and back to the aura_type's normal duration-text color above it. AddPoint needs real Color objects
+-- (colorRGBA/ColorMixin), not the plain {r=,g=,b=,a=} tables this addon's own color fields use - same
+-- CreateColor() wrapping GetDispelTypeColorMapForAuraType already does for the same reason.
+local function BuildExpiringColorCurve(normal_color)
+  local curve = _G.C_CurveUtil.CreateColorCurve()
+  curve:SetType(LuaCurveTypeStep)
+  local expiring_color = Widget.db.ExpiringColor
+  curve:AddPoint(0, _G.CreateColor(expiring_color.r, expiring_color.g, expiring_color.b, expiring_color.a or 1))
+  curve:AddPoint(Widget.db.ExpiringColorThreshold, _G.CreateColor(normal_color.r, normal_color.g, normal_color.b, normal_color.a or 1))
+  return curve
+end
+
+-- One curve per aura_type (Buffs/Debuffs/CrowdControl), not per AuraButton - ExpiringColor/
+-- ExpiringColorThreshold are global and the "normal" endpoint color only varies by aura_type, so every
+-- button of the same type would otherwise build (and leak) an identical curve object. Never
+-- invalidated - ExpiringColor/ExpiringColorThreshold/Duration.Font.Color are create-time-only anyway
+-- (SetDurationText's binding is never re-registered live - see ReapplyLiveAuraButtonSettings), and the
+-- pool is only ever built once per session (PreallocateAuraContainers guards on #pool == 0), so a
+-- stale cache entry can't outlive a /reload.
+local ExpiringColorCurveCache = {}
+local function GetExpiringColorCurve(aura_type, normal_color)
+  local curve = ExpiringColorCurveCache[aura_type]
+  if not curve then
+    curve = BuildExpiringColorCurve(normal_color)
+    ExpiringColorCurveCache[aura_type] = curve
+  end
+  return curve
+end
+
 local function InitializeAuraButton(auraButton, aura_type)
   local db_icon = Widget.db[aura_type].ModeIcon
+  local tex_coord = AURA_ICON_TEX_COORD[db_icon.Style] or AURA_ICON_TEX_COORD.square
 
   auraButton.Icon = auraButton:CreateTexture(nil, "ARTWORK", nil, -5)
   auraButton.Icon:SetAllPoints(auraButton)
-  auraButton.Icon:SetTexCoord(.10, 1 - .07, .12, 1 - .12) -- Style: Square - remove border from icons
+  auraButton.Icon:SetTexCoord(tex_coord[1], tex_coord[2], tex_coord[3], tex_coord[4])
   auraButton:SetIcon(auraButton.Icon)
 
-  if Widget.db.ShowAuraType then
-    -- Border style, always drawn (showWithoutDispelType=true) - dispel-typed auras get their
-    -- DISPEL_TYPE_COLOR_MAP color, everything else falls back to DefaultBuffColor/DefaultDebuffColor
-    -- via the "None" map key (see GetDispelTypeColorMapForAuraType), matching the legacy widget's
-    -- Widget:GetColorForAura (every aura gets some border color, not just dispel-typed ones).
-    auraButton.DispelBorder = auraButton:CreateTexture(nil, "OVERLAY")
-    -- PixelUtil (not plain SetPoint) so the outset is a crisp, consistent number of screen pixels
-    -- regardless of UI scale - a plain SetPoint offset could land sub-pixel and look like it's not
-    -- quite reaching the icon's edge.
-    PixelUtil.SetPoint(auraButton.DispelBorder, "TOPLEFT", auraButton, "TOPLEFT", -3, 3)
-    PixelUtil.SetPoint(auraButton.DispelBorder, "BOTTOMRIGHT", auraButton, "BOTTOMRIGHT", 3, -3)
+  -- Rounds the icon's own corners to match the dispel-type border ring's rounded corners - without
+  -- this, the icon (a plain rectangle, same size as the button) pokes its sharp square corners out
+  -- past the border's rounded corner artwork, since the border sits 3px *outside* the icon (see
+  -- below) and never overlaps/covers the icon's corner pixels at all. TexCoord can't fix this (it only
+  -- crops which part of the source texture is sampled, not the icon's on-screen shape). Blizzard's own
+  -- reference (CooldownViewer.xml) applies the identical fix to its icon via the same atlas.
+  local iconMask = auraButton:CreateMaskTexture(nil, "ARTWORK", nil, -4)
+  iconMask:SetAtlas("SquareMask", false)
+  iconMask:SetAllPoints(auraButton.Icon)
+  auraButton.Icon:AddMaskTexture(iconMask)
+
+  -- ModeIcon.ShowBorder is the master on/off (legacy: AurasWidget.lua:3039/3053, Border:Show()/
+  -- Hide()); AuraWidget.ShowAuraType only controls whether it's colored per dispel type or flat
+  -- black - matching the legacy widget exactly (SetBackdropBorderColor(0,0,0,1) at creation, only
+  -- overwritten by GetColorForAura's result when ShowAuraType is also on). Border style, always
+  -- drawn once shown (showWithoutDispelType=true) - dispel-typed auras get their
+  -- DISPEL_TYPE_COLOR_MAP color, everything else falls back to DefaultBuffColor/DefaultDebuffColor
+  -- via the "None" map key (see GetDispelTypeColorMapForAuraType) when ShowAuraType is on.
+  --
+  -- style = PreserveAsset (not Border) + our own square texture - Blizzard's Border/BorderWithIcon
+  -- styles are locked to Blizzard's own dispel-type atlas (ui-debuff-border-<type>-noicon), which is
+  -- rounded-corner; PreserveAsset keeps whatever texture we already set via SetTexture below and
+  -- only recolors it (AuraUtil.SetAuraBorderColor's own tint, then immediately overridden by our
+  -- customDispelColorMap below - same override order as the Border style before it, confirmed from
+  -- Blizzard_CustomAuraButton.lua's ApplyDispelTypeTextureStyle -> ApplyCustomDispelTypeTextureColor
+  -- call order). Same safe mechanism either way - the color itself is still resolved without this
+  -- widget ever reading auraData.dispelName in Lua.
+  --
+  -- The texture region itself is created unconditionally (not gated on ShowBorder) so it always
+  -- originates from InitializeAuraButton's securecallfunction-wrapped context (same as everything
+  -- else here), even if ShowBorder starts off - ReapplyLiveAuraButtonSettings only ever registers/
+  -- clears AddDispelTypeTexture on this already-existing, already-validated texture object, never
+  -- creates it from plain/tainted code itself.
+  auraButton.DispelBorder = auraButton:CreateTexture(nil, "OVERLAY")
+  auraButton.DispelBorder:SetTexture(AURA_BORDER_TEXTURE)
+  auraButton.DispelBorder:SetTextureSliceMargins(AURA_BORDER_TEXTURE_BAND, AURA_BORDER_TEXTURE_BAND, AURA_BORDER_TEXTURE_BAND, AURA_BORDER_TEXTURE_BAND)
+  -- Flush, 0 outset - see the AURA_BORDER_TEXTURE_BAND comment above for why thickness is tuned via
+  -- SetScale instead of moving this frame off the icon.
+  auraButton.DispelBorder:SetAllPoints(auraButton.Icon)
+  auraButton.DispelBorder:SetScale(AURA_BORDER_THICKNESS / AURA_BORDER_TEXTURE_BAND)
+  if db_icon.ShowBorder then
     auraButton:AddDispelTypeTexture(auraButton.DispelBorder, {
-      style = _G.Enum.CustomAuraButtonDispelTypeTextureStyle.Border,
+      style = DispelTypeTextureStylePreserveAsset,
       showWhenHarmful = true,
       showWhenHelpful = true,
       showWithoutDispelType = true,
-      customDispelColorMap = GetDispelTypeColorMapForAuraType(aura_type),
+      customDispelColorMap = Widget.db.ShowAuraType and GetDispelTypeColorMapForAuraType(aura_type) or BLACK_DISPEL_COLOR_MAP,
     })
+  else
+    -- A freshly CreateTexture()'d region is Shown by default with no vertex color applied - without
+    -- ever calling AddDispelTypeTexture (which is what makes Blizzard's engine take over managing the
+    -- texture's Shown/color state - see AddSecretAspect(Enum.SecretAspect.Shown) in
+    -- Blizzard_CustomAuraButton.lua), it just stays visible as-is: the raw, untinted NinesliceBorder
+    -- texture (looks white). Hide it explicitly for this case.
+    auraButton.DispelBorder:Hide()
   end
 
   auraButton.Cooldown = Addon.CreateCooldown(auraButton, HideOmniCC)
   auraButton.Cooldown:SetShownSwipe(Widget.db.ShowCooldownSpiral, HideOmniCC)
   auraButton:SetDurationCooldown(auraButton.Cooldown)
 
-  if Widget.db.ShowStackCount then
-    -- Font must be set before SetApplicationCount below: it triggers an immediate
-    -- UpdateAuraDisplay() -> FontString:SetText(), which errors ("Font not set") on a FontString
-    -- that was just created with CreateFontString(nil, ...) and has no font applied yet.
-    auraButton.Stacks = auraButton:CreateFontString(nil, "OVERLAY")
-    auraButton.Stacks:SetJustifyH("right")
-    auraButton.Stacks:SetPoint("BOTTOMRIGHT", 3, -2)
-    FontUpdateText(auraButton, auraButton.Stacks, db_icon.StackCount)
-    auraButton:SetApplicationCount(auraButton.Stacks)
+  -- Always created (like DispelBorder above) so ReapplyLiveAuraButtonSettings never needs to create
+  -- anything itself, only Show()/Hide() and restyle - matches how the FontString-creation-outside-
+  -- Create taint risk was already avoided for DispelBorder.
+  --
+  -- Font must be set before SetApplicationCount below: it triggers an immediate
+  -- UpdateAuraDisplay() -> FontString:SetText(), which errors ("Font not set") on a FontString
+  -- that was just created with CreateFontString(nil, ...) and has no font applied yet.
+  auraButton.Stacks = auraButton:CreateFontString(nil, "OVERLAY")
+  auraButton.Stacks:SetJustifyH("right")
+  auraButton.Stacks:SetPoint("BOTTOMRIGHT", 3, -2)
+  FontUpdateText(auraButton, auraButton.Stacks, db_icon.StackCount)
+  auraButton:SetApplicationCount(auraButton.Stacks)
+  if not Widget.db.ShowStackCount then
+    auraButton.Stacks:Hide()
   end
 
-  if ShowDuration then
-    -- Same font-before-Set* ordering requirement as SetApplicationCount above.
-    auraButton.TimeLeft = auraButton:CreateFontString(nil, "OVERLAY")
-    FontUpdateText(auraButton, auraButton.TimeLeft, db_icon.Duration)
+  -- Same font-before-Set* ordering requirement as SetApplicationCount above.
+  auraButton.TimeLeft = auraButton:CreateFontString(nil, "OVERLAY")
+  FontUpdateText(auraButton, auraButton.TimeLeft, db_icon.Duration)
+  if Widget.db.ShowExpiringColor then
+    auraButton:SetDurationText(auraButton.TimeLeft, {
+      textColor = {
+        curve = GetExpiringColorCurve(aura_type, db_icon.Duration.Font.Color),
+        property = DurationTextBindingPropertyRemainingDuration,
+      },
+    })
+  else
     auraButton:SetDurationText(auraButton.TimeLeft)
   end
+  if not ShowDuration then
+    auraButton.TimeLeft:Hide()
+  end
 
-  -- AuraButton tooltips are managed by Blizzard automatically; no AuraFrameOnEnter/GameTooltip code
-  -- needed on our side, just whether mouse interaction is enabled at all.
+  -- AuraButton tooltips are managed by Blizzard automatically (OnEnter/OnLeave are intrinsic, wired
+  -- in Blizzard_AuraButton.xml, not addon-scriptable) - but ShowTooltip() calls
+  -- tooltip:SetOwner(self, self:GetTooltipAnchorPoint()), and GetTooltipAnchorPoint() returns
+  -- self.tooltipAnchorPoint, which is nil until SetTooltipAnchorPoint() is called at least once
+  -- (OnLoad_Intrinsic never initializes it). Without this, SetOwner got a nil anchor and no tooltip
+  -- ever appeared - confirmed by user report ("mouse over aura shows nothing") even with ShowTooltips
+  -- enabled and SetMouseMotionEnabled/SetHideTooltipInCombat both correctly set.
+  -- false, not true: Blizzard's own default unit-frame auras still show tooltips in combat (verified
+  -- live by user), so hiding ours in combat was an unnecessary restriction, not something matching
+  -- Blizzard's own behavior.
+  auraButton:SetTooltipAnchorPoint("ANCHOR_RIGHT")
   auraButton:SetMouseMotionEnabled(Widget.db.ShowTooltips)
-  auraButton:SetHideTooltipInCombat(true)
+  auraButton:SetHideTooltipInCombat(false)
 
   PixelUtil.SetSize(auraButton, db_icon.IconWidth, db_icon.IconHeight)
 end
 
--- Icon size, tooltip-enable, and cooldown-spiral-visibility are the subset of InitializeAuraButton's
--- settings that CAN be safely reapplied to already-created AuraButtons after the fact - they're plain
--- Set* calls, and none of the AuraButton's ForbiddenAspects (UntrustedScriptExecution,
--- ChangeParent, ... - see Blizzard_AuraButton.xml) block them. Unlike StackCount/Duration/dispel
--- border above, which are conditionally *created* once at InitializeAuraButton time and have no
--- retroactive create/destroy path here, so still only take effect on newly-pooled buttons.
+-- Icon size, tooltip-enable, cooldown-spiral-visibility, stack-count/duration-text visibility, and
+-- their font/size/color/position styling are the subset of InitializeAuraButton's settings that CAN be
+-- safely reapplied to already-created AuraButtons after the fact - none of the AuraButton's
+-- ForbiddenAspects (UntrustedScriptExecution, ChangeParent, ... - see Blizzard_AuraButton.xml) block
+-- them. This function never *creates* anything itself (2026-08-21) - Stacks/TimeLeft/DispelBorder are
+-- all created unconditionally in InitializeAuraButton now (same reasoning as DispelBorder's own
+-- comment: keeps every CreateTexture/CreateFontString call inside InitializeAuraButton's
+-- securecallfunction-wrapped context, never from this plain/tainted one), so this only ever restyles
+-- (FontUpdateText - plain Set* calls) and toggles Show()/Hide() for ShowStackCount/ShowDuration.
+-- Border re-coloring (not existence) is the one exception that still touches a binding
+-- (AddDispelTypeTexture) live - see its own comment below for why that's confirmed safe while the
+-- existence toggle isn't. The dispel-type border's *existence* (ShowBorder) is **not** covered here -
+-- unlike a FontString's Show()/Hide(), toggling whether the border is registered at all turned out
+-- unreliable on already-displayed buttons, so it still only takes effect on newly-pooled
+-- buttons.
 -- GetAuraGroupFrame/GetAuraGroupFrameCount are real addon-facing AuraContainer methods (not
 -- Forbidden), so every already-created button - active or currently unused/available in the pool -
 -- can be reached and re-styled. Called from Widget:UpdateSettings so changing IconWidth/IconHeight/
--- ShowTooltips/ShowCooldownSpiral in Options actually takes effect immediately, not just for auras
--- created after the change.
+-- ShowTooltips/ShowCooldownSpiral/ShowStackCount/ShowDuration in Options actually takes effect
+-- immediately, not just for auras created after the change.
 --
 -- AuraButton carries AccessRestrictionFlags = DenyTaintedAccessWhenAurasAreSecret
 -- (Blizzard_AuraContainerShared.lua), and this call happens from plain (tainted) addon code, unlike
@@ -238,6 +403,18 @@ end
 -- risk that restriction denying/erroring on individual buttons, deferred via Addon.ExecuteAfterCombatEnds
 -- like every other setting this addon can't safely change mid-combat - warns once and re-runs
 -- automatically after combat ends instead of silently doing nothing until the next settings change.
+--
+-- 2026-08-21, under active live testing: two conflicting data points so far - (1) with the
+-- ExecuteAfterCombatEnds wrapper temporarily disabled for testing and the player actually in combat,
+-- plain auraButton:SetSize() threw "Attempt to access forbidden object from code tainted by an AddOn"
+-- (not just PixelUtil.SetSize's internal GetEffectiveScale - the object itself, any method); (2) with
+-- PixelUtil.SetSize and the wrapper enabled, it reportedly worked fine out of combat. Consistent with
+-- the restriction being genuinely combat/secret-aura-gated after all (as the flag name suggests), not
+-- an unconditional Forbidden-object block as briefly concluded mid-session - that conclusion was drawn
+-- from an in-combat test that had the deferral wrapper manually disabled, which explains the crash
+-- without implicating PixelUtil specifically. Restored to the original PixelUtil.SetSize +
+-- ExecuteAfterCombatEnds combination for further, more careful testing rather than left on the
+-- untested plain-SetSize variant.
 local function ReapplyLiveAuraButtonSettings(aura_type)
   if not HasAuraContainers then return end
 
@@ -251,6 +428,41 @@ local function ReapplyLiveAuraButtonSettings(aura_type)
           auraButton:SetMouseMotionEnabled(Widget.db.ShowTooltips)
           if auraButton.Cooldown then
             auraButton.Cooldown:SetShownSwipe(Widget.db.ShowCooldownSpiral, HideOmniCC)
+          end
+
+          -- Stacks/TimeLeft always exist (created unconditionally in InitializeAuraButton, like
+          -- DispelBorder - see its comment) - this never creates or (re)binds SetApplicationCount/
+          -- SetDurationText itself, only restyles (FontUpdateText - plain Set* calls, nothing
+          -- restricted) and toggles Show()/Hide() for ShowStackCount/ShowDuration.
+          FontUpdateText(auraButton, auraButton.Stacks, db_icon.StackCount)
+          auraButton.Stacks:SetShown(Widget.db.ShowStackCount)
+
+          FontUpdateText(auraButton, auraButton.TimeLeft, db_icon.Duration)
+          auraButton.TimeLeft:SetShown(ShowDuration)
+
+          -- Dispel-type border EXISTENCE (ShowBorder true<->false) reverted to create-time-only
+          -- (2026-08-21) - AddDispelTypeTexture/RemoveDispelTypeTexture/ClearDispelTypeTextures turned
+          -- out not to work reliably on AuraButtons that have already displayed an aura (confirmed by
+          -- live testing, exact failure mode not fully diagnosed). Changing ShowBorder in Options only
+          -- affects newly-pooled buttons again, same as before this session's live-update experiments -
+          -- see InitializeAuraButton's own DispelBorder setup.
+          --
+          -- Re-coloring (ShowAuraType/DefaultBuffColor/DefaultDebuffColor) on a border that's *already
+          -- registered*, without touching existence - narrower than the reverted existence-toggle
+          -- attempt above. Gated on GetDispelTypeTextureCount() > 0 so this never registers a border
+          -- for the first time on a button that never had one (that stays reload-only, per the revert
+          -- above) - only re-applies fresh color to one that was already shown. Confirmed live
+          -- 2026-08-21: unlike the broader existence-toggle case, Remove+AddDispelTypeTexture works
+          -- reliably here for recoloring an already-shown border.
+          if db_icon.ShowBorder and auraButton:GetDispelTypeTextureCount() > 0 then
+            auraButton:RemoveDispelTypeTexture(1)
+            auraButton:AddDispelTypeTexture(auraButton.DispelBorder, {
+              style = DispelTypeTextureStylePreserveAsset,
+              showWhenHarmful = true,
+              showWhenHelpful = true,
+              showWithoutDispelType = true,
+              customDispelColorMap = Widget.db.ShowAuraType and GetDispelTypeColorMapForAuraType(aura_type) or BLACK_DISPEL_COLOR_MAP,
+            })
           end
         end
       end
@@ -503,10 +715,11 @@ end
 
 -- Builds the full set of AddAuraGroup configs (per AURA_GROUP_KEYS.Debuffs key) for enemy-reaction
 -- Debuffs from today's boolean settings. ShowAllEnemy short-circuits everything into "main" alone.
--- Otherwise each of ShowOnlyMine ("main"), ShowBlizzardForEnemy ("important", candidateFilters.nameplateShowAll
--- - always further restricted to PLAYER too, by deliberate design: "Blizzard" means "Blizzard-flagged
--- debuffs I applied", not "anyone's" - see the comment at its condition below), ShowBoss ("boss",
--- candidateFilters.isBossAura), and ShowPriority ("priority", candidateFilters.isPriorityAura) is an
+-- Otherwise each of ShowOnlyMine ("main"), ShowBlizzardForEnemy ("important" + "importantpersonal" -
+-- two peer groups, IMPORTANT/!IMPORTANT split, both PLAYER-restricted and nameplateShowPersonal-gated -
+-- see the comment at its condition below), ShowBoss ("boss", candidateFilters.isBossAura), and
+-- ShowPriority ("priority",
+-- candidateFilters.isPriorityAura) is an
 -- independent, freely-combinable OR-condition: every group's
 -- filter string/candidateFilters excludes every *earlier-listed* active condition (see
 -- BuildGroupConfigsFromConditions), so an aura matching more than one toggle is always assigned to
@@ -537,21 +750,22 @@ local function GetEnemyDebuffsGroupConfigs(db)
     conditions[#conditions + 1] = { key = "main", filterTokens = { "PLAYER" }, candidateFilters = {} }
   end
   if db.ShowBlizzardForEnemy then
-    -- Not the IMPORTANT token: per AuraFilters' own doc comment, IMPORTANT only ever applies to
-    -- helpful auras ("helpful auras that show on enemy nameplates even if non-stealable"), so
-    -- combined with HARMFUL here it matched nothing at all - confirmed live by user report.
-    -- nameplateShowAll is the real field behind the legacy "Blizzard" toggle's semantics
-    -- (aura.nameplateShowAll in AurasWidget.lua) and has no such helpful-only restriction.
+    -- Two peer groups, split by IMPORTANT/!IMPORTANT, both PLAYER-restricted and both gated on
+    -- candidateFilters.nameplateShowPersonal - not the single-group nameplateShowPersonal-only version
+    -- this addon shipped for one day (2026-08-17, reverted here). "important" catches Blizzard-flagged
+    -- self-cast debuffs (IMPORTANT token); "importantpersonal" catches every other self-cast debuff
+    -- Blizzard's own nameplates show (!IMPORTANT, still nameplateShowPersonal-gated) - together, the
+    -- same nameplateShowAll/Personal coverage the very first "Blizzard" fix (2026-08-16) had, but
+    -- expressed as IMPORTANT/!IMPORTANT instead of nameplateShowAll/nameplateShowPersonal (see
+    -- AurasWidgetImplementation.md §6 for why nameplateShowAll can't combine with a single-group
+    -- PLAYER restriction).
     --
-    -- PLAYER token is hardcoded (not conditional on ShowOnlyMine, unlike the "dispeltype" group's
-    -- PLAYER addition below) - per explicit user decision, "Blizzard" now always means "Blizzard-
-    -- flagged debuffs I applied", not "anyone's". Checking Mine+Blizzard together no longer narrows
-    -- anything further (Mine's own group already shows every debuff the player applied, a superset),
-    -- but that tradeoff was accepted deliberately: an unconditional PLAYER token here is the only way
-    -- to make "Blizzard" alone (without Mine also checked) mean "my own Blizzard-relevant debuffs"
-    -- instead of "everyone's" - the previous, broader meaning is gone entirely, not just narrowed
-    -- when combined with Mine.
-    conditions[#conditions + 1] = { key = "important", filterTokens = { "PLAYER" }, candidateFilters = { nameplateShowAll = true } }
+    -- Known tradeoff, reintroduced on purpose: two concurrently-active groups for this one toggle
+    -- means SortOrder (e.g. TimeLeft) won't be globally correct across them when "Blizzard" is
+    -- active - Blizzard's AuraContainer never merges sort order *across* AddAuraGroups, only within
+    -- each one (§6). This is the exact same architectural cost the 2026-08-17 single-group fix was
+    -- built to avoid - reintroduced here per explicit user request.
+    conditions[#conditions + 1] = { key = "important", filterTokens = { "IMPORTANT", "PLAYER" }, candidateFilters = { nameplateShowPersonal = true } }
   end
   if db.ShowBossEnemy then
     conditions[#conditions + 1] = { key = "boss", filterTokens = {}, candidateFilters = { isBossAura = true } }
@@ -588,25 +802,19 @@ local function GetEnemyDebuffsGroupConfigs(db)
 
   local configs = BuildGroupConfigsFromConditions(conditions, { "HARMFUL", "!CROWD_CONTROL", NAMEPLATE_ONLY }, dispel_types, has_dispel_type)
 
-  -- "Blizzard" is really two conditions ORed together: nameplateShowAll (curated for everyone) and
-  -- nameplateShowPersonal (curated only when self-applied - the field Blizzard's own default
-  -- nameplates also check, per the legacy widget's `aura.nameplateShowAll or (aura.nameplateShowPersonal
-  -- and aura.CastByPlayer)`). A single AddAuraGroup can't express "field A OR field B" - candidateFilters
-  -- entries are ANDed together - so this needs a second, peer group. It can't be pushed through
-  -- BuildGroupConfigsFromConditions as its own condition though: both would need the identical PLAYER
-  -- token, and ordered exclusion would negate the earlier one's token into the later one's filter
-  -- string ("PLAYER|!PLAYER" - a self-contradiction that matches nothing). Instead, clone "important"'s
-  -- already-fully-excluded result (same exclusions against Mine/Boss/Priority/dispeltype) and swap
-  -- nameplateShowAll for nameplateShowPersonal - explicitly excluding nameplateShowAll from the clone
-  -- so an aura with both flags set doesn't render via both groups.
+  -- "importantpersonal" is "important"'s IMPORTANT/!IMPORTANT twin (see the comment on the
+  -- ShowBlizzardForEnemy condition above) - built by cloning "important"'s already-fully-excluded
+  -- result and flipping its IMPORTANT token, same technique the original 2026-08-16
+  -- nameplateShowAll/Personal split used (gsub count=1 is safe: "IMPORTANT" appears nowhere else in
+  -- the filter string at this point - not in HARMFUL/CROWD_CONTROL/NAMEPLATE_ONLY/PLAYER, and no
+  -- "!IMPORTANT" exists yet to double-negate).
   if configs.important then
-    local personal_candidate_filters = {}
+    local filter_string = configs.important.filterString:gsub("IMPORTANT", "!IMPORTANT", 1)
+    local candidate_filters = {}
     for field, value in pairs(configs.important.candidateFilters) do
-      personal_candidate_filters[field] = value
+      candidate_filters[field] = value
     end
-    personal_candidate_filters.nameplateShowAll = false
-    personal_candidate_filters.nameplateShowPersonal = true
-    configs.importantpersonal = { filterString = configs.important.filterString, candidateFilters = personal_candidate_filters }
+    configs.importantpersonal = { filterString = filter_string, candidateFilters = candidate_filters }
   end
 
   return configs
@@ -640,7 +848,29 @@ function Widget:UpdateAuraContainer(widget_frame, aura_type, group_configs, unit
     return false
   end
 
-  local db = self.db[aura_type]
+  -- SwitchAreaByReaction (friendly units only, Buffs<->Debuffs - matches the legacy widget's own
+  -- scope, CrowdControl was never swapped there either): swaps which type's *layout* (icon size,
+  -- columns/rows/spacing, sort, alignment, anchor - everything below except the actual filter data,
+  -- which stays on the real aura_type/container) Buffs/Debuffs use. Matches the legacy widget's
+  -- behavior of feeding buff data straight into the already-Debuffs-styled physical Debuffs frame
+  -- (AurasWidget.lua ~2156: `local buff_aura_grid = (db.SwitchAreaByReaction and
+  -- widget_frame.Debuffs) or widget_frame.Buffs`) - not just relocating buffs to debuffs' screen
+  -- position, but rendering them as if they were configured as debuffs (that reads oddly for
+  -- "switch position", but is what the legacy widget actually did, so replicated here for parity).
+  -- Known edge case, not specially guarded: if AnchorTo on the *swapped* config names the other of
+  -- Buffs/Debuffs (stacking one below the other) while this setting is also on, the two containers'
+  -- anchor chains can reference each other in a way that wasn't possible before switching was
+  -- implemented - not expected to be a common configuration.
+  local layout_type = aura_type
+  if unit.reaction == "FRIENDLY" and self.db.SwitchAreaByReaction then
+    if aura_type == "Buffs" then
+      layout_type = "Debuffs"
+    elseif aura_type == "Debuffs" then
+      layout_type = "Buffs"
+    end
+  end
+
+  local db = self.db[layout_type]
   local db_icon = db.ModeIcon
   local max_auras = min(db_icon.MaxAuras, db_icon.Rows * db_icon.Columns)
   local anchor_point, horizontal_direction, vertical_direction = GetFlowLayoutForAlignment(db.AlignmentH, db.AlignmentV)
@@ -776,11 +1006,7 @@ function Widget:UpdateAurasGrids(widget_frame, unit)
     return
   end
 
-  if buffs_active or debuffs_active or cc_active then
-    widget_frame:Show()
-  else
-    widget_frame:Hide()
-  end
+  widget_frame:SetShown(buffs_active or debuffs_active or cc_active)
 end
 
 function Widget:UpdateAuras(widget_frame, unit)
@@ -908,9 +1134,30 @@ function Widget:UpdateSettings()
   EnabledForStyle["etotem"] = false
   EnabledForStyle["empty"] = false
 
+  -- Must happen before ReapplyLiveAuraButtonSettings below (its recolor pass reads
+  -- GetDispelTypeColorMapForAuraType) - otherwise a changed DefaultBuffColor/DefaultDebuffColor/
+  -- ShowAuraType would keep serving the stale cached map.
+  InvalidateDispelTypeColorMapCache()
+
   for _, aura_type in ipairs(AURA_CONTAINER_TYPES) do
     ReapplyLiveAuraButtonSettings(aura_type)
   end
+
+  -- Filter/layout/sort/alignment/anchor settings (Mine/Blizzard/Boss/.../SortOrder/Columns/Rows/...)
+  -- are otherwise only recomputed at Widget:UpdateAuras time (OnUnitAdded/target-change) - a pure
+  -- Options change doesn't retrigger that for already-displayed plates on its own. UpdateAllFrames
+  -- (WidgetHandler.lua, calls Widget:UpdateFrame per active plate) reruns exactly that same per-plate
+  -- code path immediately instead. Safe to call directly, unlike ReapplyLiveAuraButtonSettings above -
+  -- these are the same AuraContainer group-config setters (SetAuraGroupFilterString/
+  -- CandidateFilters/etc.) already called from plain addon code on every OnUnitAdded/target-change,
+  -- including mid-combat (that's the widget's whole reason for existing - see §1) - so no
+  -- DenyTaintedAccessWhenAurasAreSecret risk here, unlike per-AuraButton Set* calls issued outside
+  -- Blizzard's securecallfunction wrapper.
+  self:UpdateAllFrames()
+end
+
+function Widget:UpdateFrame(widget_frame, unit)
+  self:UpdateAuras(widget_frame, unit)
 end
 
 ---------------------------------------------------------------------------------------------------
