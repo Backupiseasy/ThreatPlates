@@ -337,7 +337,7 @@ local function AlphaNormal(unit, non_combat_transparency)
 
 
   -- dps/tank, only if
-  --  InCombatLockdown() and unit.type == "NPC" and unit.reaction ~= "FRIENDLY" and db.ON and ShowThreatFeedback()
+  --  InCombatLockdown() and unit.type == "NPC" and unit.reaction ~= "FRIENDLY" and db.ON and ShowFeedback()
   local style = ThreatPlates.GetThreatStyle(unit)
   if style == "normal" then -- no: totem, etotem, emptya
     return non_combat_transparency or TransparencyGeneral(unit)
@@ -351,8 +351,8 @@ local function AlphaNormal(unit, non_combat_transparency)
   --		if unit.isMarked and db.marked.alpha then
   --			return override_alpha or TransparencyGeneral(unit), non_target_alpha
   --		else
-  --			-- style == "tank" or style == "dps" means, that ShowThreatFeedback(unit) is true anyway
-  --			--			if ShowThreatFeedback(unit) then
+  --			-- style == "tank" or style == "dps" means, that ShowFeedback(unit) is true anyway
+  --			--			if ShowFeedback(unit) then
   --			--				return GetThreatAlpha(unit), non_target_alpha
   --			--			end
   --		end

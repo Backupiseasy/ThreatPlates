@@ -2,7 +2,6 @@
 -- Social Widget
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
-local ThreatPlates = Addon.ThreatPlates
 
 local Widget = Addon.Widgets:NewWidget("Social")
 
@@ -27,7 +26,6 @@ local Widget = Addon.Widgets:NewWidget("Social")
 local GetNumGuildMembers, GetGuildRosterInfo = GetNumGuildMembers, GetGuildRosterInfo
 local BNET_CLIENT_WOW = BNET_CLIENT_WOW
 local UnitName, GetRealmName, UnitFactionGroup = UnitName, GetRealmName, UnitFactionGroup
-local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local C_FriendList_ShowFriends, C_FriendList_GetNumOnlineFriends = C_FriendList.ShowFriends, C_FriendList.GetNumOnlineFriends
 local C_FriendList_GetFriendInfo = C_FriendList.GetFriendInfo
 
@@ -41,7 +39,7 @@ local ListGuildMembersSize, ListFriendsSize, ListBnetFriendsSize = 0, 0, 0
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
 -- List them here for Mikk's FindGlobals script
--- GLOBALS: BNGetNumFriends, BNGetGameAccountInfo
+-- GLOBALS: BNGetNumFriends
 
 local BNGetFriendInfo, BNGetFriendInfoByID = BNGetFriendInfo, BNGetFriendInfoByID -- For Classic
 local GetFriendAccountInfo, GetGameAccountInfoByID -- For Retail
@@ -90,6 +88,12 @@ else
 end
 
 ---------------------------------------------------------------------------------------------------
+-- Cached configuration settings
+---------------------------------------------------------------------------------------------------
+local Settings, SettingsFaction
+local PlateColorEnabled = {}
+
+---------------------------------------------------------------------------------------------------
 -- Social Widget Functions
 ---------------------------------------------------------------------------------------------------
 
@@ -121,7 +125,7 @@ function Widget:FRIENDLIST_UPDATE()
 
     ListFriendsSize = no_friends -- as name might be nil, friendsOnline might not be correct here
 
-    self:UpdateAllFramesAndNameplateColor()
+    self:UpdateAllFramesWithPublish("ClassColorUpdate")
   end
 end
 
@@ -144,7 +148,7 @@ function Widget:GUILD_ROSTER_UPDATE()
 
     ListGuildMembersSize = no_guild_members_with_info
 
-    self:UpdateAllFramesAndNameplateColor()
+    self:UpdateAllFramesWithPublish("ClassColorUpdate")
   end
 end
 
@@ -168,7 +172,7 @@ function Widget:BN_CONNECTED()
 
     ListBnetFriendsSize = BnetOnline
 
-    self:UpdateAllFramesAndNameplateColor()
+    self:UpdateAllFramesWithPublish("ClassColorUpdate")
   end
 end
 
@@ -177,7 +181,7 @@ function Widget:BN_FRIEND_ACCOUNT_ONLINE(friend_id, _)
 
   if game_account_info and game_account_info.isOnline and game_account_info.clientProgram == BNET_CLIENT_WOW and game_account_info.characterName and game_account_info.realmName ~= "" then
     ListBnetFriends[GetFullName(game_account_info.characterName, game_account_info.realmName)] = "Social.BattleNetFriend"
-    self:UpdateAllFramesAndNameplateColor()
+    self:UpdateAllFramesWithPublish("ClassColorUpdate")
   end
 end
 
@@ -186,17 +190,16 @@ function Widget:BN_FRIEND_ACCOUNT_OFFLINE(friend_id, _)
 
   if game_account_info and game_account_info.clientProgram == BNET_CLIENT_WOW and game_account_info.characterName and game_account_info.realmName ~= "" then
     ListBnetFriends[GetFullName(game_account_info.characterName, game_account_info.realmName)] = nil
-    self:UpdateAllFramesAndNameplateColor()
+    self:UpdateAllFramesWithPublish("ClassColorUpdate")
   end
 end
 
 function Widget:UNIT_NAME_UPDATE(unitid)
-  local plate = GetNamePlateForUnit(unitid)
-
-  if plate and plate.TPFrame.Active then
-    local widget_frame = plate.TPFrame.widgets.Social
+  local tp_frame = Addon:GetThreatPlateForUnit(unitid)
+  if tp_frame then
+    local widget_frame = tp_frame.widgets.Social
     if widget_frame.Active then
-      local unit = plate.TPFrame.unit
+      local unit = tp_frame.unit
 
       -- * Creating full unit name here (not using GetUnitName(unitid, true) as I don't know if 
       -- * game_account_info.characterName .. "-" .. game_account_info.realmName would always be equal to
@@ -209,18 +212,13 @@ function Widget:UNIT_NAME_UPDATE(unitid)
   end
 end
 
-local function IsFriend(unit)
-  -- no need to check for ShowInHeadlineView as this is for coloring the healthbar
-  return Addon.db.profile.socialWidget.ON and (ListFriends[unit.fullname] or ListBnetFriends[unit.fullname])
+function Addon:IsFriend(unit, plate_style)
+  return PlateColorEnabled[plate_style] and (ListFriends[unit.fullname] or ListBnetFriends[unit.fullname])
 end
 
-local function IsGuildmate(unit)
-  -- no need to check for ShowInHeadlineView as this is for coloring the healthbar
-  return Addon.db.profile.socialWidget.ON and ListGuildMembers[unit.fullname]
+function Addon:IsGuildmate(unit, plate_style)
+  return PlateColorEnabled[plate_style] and ListGuildMembers[unit.fullname]
 end
-
-ThreatPlates.IsFriend = IsFriend
-ThreatPlates.IsGuildmate = IsGuildmate
 
 ---------------------------------------------------------------------------------------------------
 -- Widget functions for creation and update
@@ -245,27 +243,33 @@ end
 
 function Widget:IsEnabled()
   local db = Addon.db.profile.socialWidget
-  return db.ON or db.ShowInHeadlineView
+  return (db.ON or db.ShowInHeadlineView) and
+         (db.ShowFriendIcon or db.ShowFriendColor or db.ShowGuildmateColor or db.ShowFactionIcon)
 end
 
 function Widget:OnEnable()
-  if Addon.db.profile.socialWidget.ShowFriendIcon then
-    self:RegisterEvent("FRIENDLIST_UPDATE")
-    self:RegisterEvent("GUILD_ROSTER_UPDATE")
-    self:RegisterEvent("BN_CONNECTED")
-    self:RegisterEvent("BN_FRIEND_ACCOUNT_ONLINE")
-    self:RegisterEvent("BN_FRIEND_ACCOUNT_OFFLINE")
-    self:RegisterEvent("UNIT_NAME_UPDATE")
-    --Widget:RegisterEvent("BN_FRIEND_LIST_SIZE_CHANGED", EventHandler)
+  local db = Addon.db.profile.socialWidget
+  if db.ShowFriendIcon or db.ShowFriendColor or db.ShowGuildmateColor then
+    self:SubscribeEvent("FRIENDLIST_UPDATE")
+    self:SubscribeEvent("GUILD_ROSTER_UPDATE")
+    self:SubscribeEvent("BN_CONNECTED")
+    self:SubscribeEvent("BN_FRIEND_ACCOUNT_ONLINE")
+    self:SubscribeEvent("BN_FRIEND_ACCOUNT_OFFLINE")
+    self:SubscribeEvent("UNIT_NAME_UPDATE")
+    --Widget:SubscribeEvent("BN_FRIEND_LIST_SIZE_CHANGED", EventHandler)
 
     --self:FRIENDLIST_UPDATE()
     C_FriendList_ShowFriends() -- Will fire FRIENDLIST_UPDATE
     self:BN_CONNECTED()
     --self:GUILD_ROSTER_UPDATE() -- called automatically by game
   else
-    self:UnregisterAllEvents()
+    self:UnsubscribeAllEvents()
   end
 end
+
+-- function Widget:OnDisable()
+--   self:UnsubscribeAllEvents()
+-- end
 
 function Widget:EnabledForStyle(style, unit)
   if unit.type ~= "PLAYER" then return false end
@@ -278,11 +282,9 @@ function Widget:EnabledForStyle(style, unit)
 end
 
 function Widget:OnUnitAdded(widget_frame, unit)
-  local db = Addon.db.profile.socialWidget
-  widget_frame.Icon:SetSize(db.scale, db.scale)
+  widget_frame.Icon:SetSize(Settings.scale, Settings.scale)
 
-  db = Addon.db.profile.FactionWidget
-  widget_frame.FactionIcon:SetSize(db.scale, db.scale)
+  widget_frame.FactionIcon:SetSize(SettingsFaction.scale, SettingsFaction.scale)
 
   local name, realm = UnitName(unit.unitid)
   unit.fullname = GetFullName(name, realm)
@@ -293,13 +295,16 @@ end
 function Widget:UpdateFrame(widget_frame, unit)
   -- I will probably expand this to a table with 'friend = true','guild = true', and 'bnet = true' and have 3 textuers show.
   local db = Addon.db.profile.socialWidget
-  local friend_texture = db.ShowFriendIcon and (ListFriends[unit.name] or ListBnetFriends[unit.fullname] or ListGuildMembers[unit.fullname])
+
   local faction_texture
   if db.ShowFactionIcon then
     -- faction can be nil, e.g., for Pandarians that not yet have chosen a faction
     local faction = UnitFactionGroup(unit.unitid)
     faction_texture = faction and ("Social.".. faction) or nil
   end
+
+  -- I will probably expand this to a table with 'friend = true','guild = true', and 'bnet = true' and have 3 textuers show.
+  local friend_texture = Settings.ShowFriendIcon and (ListFriends[unit.name] or ListBnetFriends[unit.fullname] or ListGuildMembers[unit.fullname])
 
   -- Need to hide the frame here as it may have been shown before
   if not (friend_texture or faction_texture) then
@@ -308,13 +313,14 @@ function Widget:UpdateFrame(widget_frame, unit)
   end
 
   local name_style = unit.style == "NameOnly" or unit.style == "NameOnly-Unique"
+
   local icon = widget_frame.Icon
   if friend_texture then
     -- db = Addon.db.profile.socialWidget
     if name_style then
-      icon:SetPoint("CENTER", widget_frame:GetParent(), db.x_hv, db.y_hv)
+      icon:SetPoint("CENTER", widget_frame:GetParent(), Settings.x_hv, Settings.y_hv)
     else
-      icon:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
+      icon:SetPoint("CENTER", widget_frame:GetParent(), Settings.x, Settings.y)
     end
     Addon:SetIconTexture(icon, friend_texture, unit.unitid)
 
@@ -326,11 +332,10 @@ function Widget:UpdateFrame(widget_frame, unit)
   icon = widget_frame.FactionIcon
   if faction_texture then
     -- apply settings to faction icon
-    db = Addon.db.profile.FactionWidget
     if name_style then
-      icon:SetPoint("CENTER", widget_frame:GetParent(), db.x_hv, db.y_hv)
+      icon:SetPoint("CENTER", widget_frame:GetParent(), SettingsFaction.x_hv, SettingsFaction.y_hv)
     else
-      icon:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
+      icon:SetPoint("CENTER", widget_frame:GetParent(), SettingsFaction.x, SettingsFaction.y)
     end
     Addon:SetIconTexture(icon, faction_texture, unit.unitid)
 
@@ -342,27 +347,13 @@ function Widget:UpdateFrame(widget_frame, unit)
   widget_frame:Show()
 end
 
---function Widget:OnUpdateStyle(widget_frame, unit)
---  local name_style = unit.style == "NameOnly" or unit.style == "NameOnly-Unique"
---  if widget_frame.Icon:IsShown() then
---    local db = Addon.db.profile.socialWidget
---    if name_style then
---      widget_frame.Icon:SetPoint("CENTER", widget_frame:GetParent(), db.x_hv, db.y_hv)
---    else
---      widget_frame.Icon:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
---    end
---  end
---
---  if widget_frame.FactionIcon:IsShown() then
---    -- apply settings to faction icon
---    local db = Addon.db.profile.FactionWidget
---    if name_style then
---      widget_frame.FactionIcon:SetPoint("CENTER", widget_frame:GetParent(), db.x_hv, db.y_hv)
---    else
---      widget_frame.FactionIcon:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
---    end
---  end
---end
+function Widget:UpdateSettings()
+  Settings = Addon.db.profile.socialWidget
+  SettingsFaction = Addon.db.profile.FactionWidget
+
+  PlateColorEnabled["HealthbarMode"] = Settings.ON
+  PlateColorEnabled["NameMode"] = Settings.ShowInHeadlineView
+end
 
 function Widget:PrintDebug()
   Addon.Logging.Debug("BNet Friends:")

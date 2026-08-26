@@ -1,0 +1,13 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+<Script file="Font.lua"/>
+<Script file="Icon.lua"/>
+<Script file="Animation.lua"/>
+<Script file="Threat.lua"/>
+<Script file="Color.lua"/>
+<Script file="Transparency.lua"/>
+<Script file="Scaling.lua"/>
+<!-- <Script file="Localization.lua"/> -->
+<!--Order is relevant for creation -->
+</Ui>

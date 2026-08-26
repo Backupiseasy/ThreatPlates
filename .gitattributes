@@ -1,0 +1,10 @@
+# Normalize all text files to LF on commit and checkout
+* text=auto eol=lf
+
+# Binary assets
+*.blp binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary

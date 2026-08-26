@@ -32,8 +32,11 @@ externals:
   Libs/LibDualSpec-1.0: https://repos.wowace.com/wow/libdualspec-1-0
 
 embedded-libraries:
+  # ForAllIndentsAndPurposes was removed from CurseForge (slug no longer exists → Error 1018).
+  # The library is still embedded in Libs/ForAllIndentsAndPurposes/indent.lua and loaded via Libs/Libs.xml.
+  # Re-enable this line once/if the project reappears on CurseForge under the correct slug.
   # - ForAllIndentsAndPurposes
-  # - UTF8
+  - UTF8
 
 enable-nolib-creation: no
 
@@ -44,16 +47,11 @@ manual-changelog:
 wowi-convert-changelog: yes
 
 ignore:
-  - .git
-  - .github
-  - .idea
-  - .release
-  - .env
-  - .gitignore
-  - .pkgmeta
+  # The packager auto-excludes anything starting with a dot, so they don't need to be listed here explicitly.
   - Source
   - Test
   - README.md
+  - CLAUDE.md
   - TidyPlates_ThreatPlates.iml
   - TidyPlates_ThreatPlates-Mainline.toc
   - TidyPlates_ThreatPlates-Vanilla.toc
@@ -62,4 +60,4 @@ ignore:
   - TidyPlates_ThreatPlates-Cata.toc
   - TidyPlates_ThreatPlates-Mists.toc
 
-move-folders:
+# move-folders:  # not needed - single top-level addon folder, kept as placeholder

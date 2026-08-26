@@ -50,31 +50,31 @@ Feel free to email me at |cff00ff00threatplates@gmail.com|r
 
 Blacksalsify
 
-(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=] ] = [=[
-|cff00ff00threatplates@gmail.com|r으로 자유롭게 이메일을 보내주세요
-
---
-
-Blacksalsify
-
+(Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=] ] = [=[
+|cff00ff00threatplates@gmail.com|r으로 자유롭게 이메일을 보내주세요
+
+--
+
+Blacksalsify
+
 (원 제작자: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=]
 --[[Translation missing --]]
-L[ [=[
-
---
-
-Backupiseasy
-
+L[ [=[
+
+--
+
+Backupiseasy
+
 (Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=] ] = ""
 --[[Translation missing --]]
-L[ [=[
-
-Feel free to email me at |cff00ff00threatplates@gmail.com|r
-
---
-
-Blacksalsify
-
+L[ [=[
+
+Feel free to email me at |cff00ff00threatplates@gmail.com|r
+
+--
+
+Blacksalsify
+
 (Original author: Suicidal Katt - |cff00ff00Shamtasticle@gmail.com|r)]=] ] = ""
 --[[Translation missing --]]
 L["%s already anchored to %s"] = "%s already anchored to %s"
@@ -105,8 +105,8 @@ This is your first time using Threat Plates and you are a(n):
 This is your first time using Threat Plates and you are a(n):
 |r|cff]=]
 --[[Translation missing --]]
-L[ [=[|cff89f559Welcome to |r|cff89f559Threat Plates!
-This is your first time using Threat Plates and you are a(n):
+L[ [=[|cff89f559Welcome to |r|cff89f559Threat Plates!
+This is your first time using Threat Plates and you are a(n):
 |r|cff]=] ] = ""
 L["|cff89f559You are currently in your "] = "|cff89f559당신은 현재 "
 --[[Translation missing --]]
@@ -114,7 +114,7 @@ L[ [=[|cffFF0000DELETE CUSTOM NAMEPLATE|r
 Are you sure you want to delete the selected custom nameplate?]=] ] = [=[|cffFF0000DELETE CUSTOM NAMEPLATE|r
 Are you sure you want to delete the selected custom nameplate?]=]
 --[[Translation missing --]]
-L[ [=[|cffFF0000DELETE CUSTOM NAMEPLATE|r
+L[ [=[|cffFF0000DELETE CUSTOM NAMEPLATE|r
 Are you sure you want to delete the selected custom nameplate?]=] ] = ""
 L["|cffff0000DPS/Healing|r"] = "|cffff0000공격 전담/치유 전담|r"
 L["|cffff0000dpsing / healing|r"] = "|cffff0000공격 전담 / 치유 전담|r"
@@ -339,8 +339,8 @@ Current version: ]=] ] = [=[Clear and easy to use threat-reactive nameplates.
 
 Current version: ]=]
 --[[Translation missing --]]
-L[ [=[Clear and easy to use threat-reactive nameplates.
-
+L[ [=[Clear and easy to use threat-reactive nameplates.
+
 Current version: ]=] ] = ""
 L["Clickable Area"] = "선택 영역"
 L["Color"] = "색상"
@@ -411,10 +411,10 @@ Type /dogtag for tag info.
 
 Remember to press ENTER after filling out this box or it will not save.]=]
 --[[Translation missing --]]
-L[ [=[Define a custom status text using LibDogTag markup language.
-
-Type /dogtag for tag info.
-
+L[ [=[Define a custom status text using LibDogTag markup language.
+
+Type /dogtag for tag info.
+
 Remember to press ENTER after filling out this box or it will not save.]=] ] = ""
 L["Define a custom transparency for this nameplate and overwrite any other transparency settings."] = "이 이름표에 사용자 설정 투명도를 정의하고 다른 모든 투명도 설정을 덮어씁니다."
 L["Define base alpha settings for various unit types. Only one of these settings is applied to a unit at the same time, i.e., they are mutually exclusive."] = "여러 유닛 유형들의 기본 투명도 설정을 정의합니다. 이 설정들 중 동시에 하나만 유닛에 적용됩니다, 즉, 상호 배타적입니다."

@@ -85,7 +85,7 @@ Only enable this script for class Warrior.
 **Function: Create**
 
     function(widget_frame)
-      local healthbar = widget_frame:GetParent().visual.healthbar
+      local healthbar = widget_frame:GetParent().visual.Healthbar
       hooksecurefunc(healthbar, "SetAllColors", function()
         local unitid = healthbar:GetParent().unit.unitid
         local health = _G.UnitHealth(unitid) or 0

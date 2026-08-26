@@ -2,9 +2,9 @@
 -- ThreatPlates default configuration for testing
 ---------------------------------------------------------------------------------------------------
 
-local RGB = ThreatPlates.RGB
-local RGB_P = ThreatPlates.RGB_P
-local L = ThreatPlates.L
+local RGB = Addon.RGB
+local RGB_P = Addon.RGB_P
+local L = Addon.L
 
 local function GetTotemSettings()
 end

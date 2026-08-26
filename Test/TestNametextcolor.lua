@@ -7,84 +7,84 @@ local TEST_UNIT = {
   {
     isTapped = false, isMarked = true, raidIcon = "STAR", reaction = "FRIENDLY", type = "PLAYER", class = "DRUID",
     Test_style = "NameOnly-Unique",
-    Test_unique_style =  { useColor = true, allowMarked = true, color = ThreatPlates.RGB(255, 255, 255) },
+    Test_unique_style =  { useColor = true, allowMarked = true, color = Addon.RGB(255, 255, 255) },
     Test_IsFriend = false, Test_IsGuildmate = false,
   },
   -- 2: Marked, NameOnly
   {
     isTapped = false, isMarked = true, raidIcon = "STAR", reaction = "FRIENDLY", type = "PLAYER", class = "DRUID",
     Test_style = "NameOnly",
-    Test_unique_style =  { useColor = true, allowMarked = true, color = ThreatPlates.RGB(255, 255, 255) },
+    Test_unique_style =  { useColor = true, allowMarked = true, color = Addon.RGB(255, 255, 255) },
     Test_IsFriend = false, Test_IsGuildmate = false,
   },
   -- 3: NameOnly-Unique
   {
     isTapped = false, isMarked = false, raidIcon = "STAR", reaction = "FRIENDLY", type = "PLAYER", class = "DRUID",
     Test_style = "NameOnly-Unique",
-    Test_unique_style =  { useColor = true, allowMarked = true, color = ThreatPlates.RGB(255, 255, 255) },
+    Test_unique_style =  { useColor = true, allowMarked = true, color = Addon.RGB(255, 255, 255) },
     Test_IsFriend = false, Test_IsGuildmate = false,
   },
   -- 4: Custom, Friendly
   {
     isTapped = false, isMarked = false, raidIcon = "STAR", reaction = "FRIENDLY", type = "PLAYER", class = "DRUID",
     Test_style = "dps",
-    Test_unique_style =  { useColor = true, allowMarked = true, color = ThreatPlates.RGB(255, 255, 255) },
+    Test_unique_style =  { useColor = true, allowMarked = true, color = Addon.RGB(255, 255, 255) },
     Test_IsFriend = false, Test_IsGuildmate = false,
   },
   -- 5: HEALTH
   {
     isTapped = false, isMarked = false, raidIcon = "STAR", reaction = "FRIENDLY", type = "PLAYER", class = "DRUID",
     Test_style = "dps",
-    Test_unique_style =  { useColor = true, allowMarked = true, color = ThreatPlates.RGB(255, 255, 255) },
+    Test_unique_style =  { useColor = true, allowMarked = true, color = Addon.RGB(255, 255, 255) },
     Test_IsFriend = false, Test_IsGuildmate = false,
   },
   -- 6: CLASS, Tapped
   {
     isTapped = true, isMarked = false, raidIcon = "STAR", reaction = "FRIENDLY", type = "NPC", class = "DRUID",
     Test_style = "dps",
-    Test_unique_style =  { useColor = true, allowMarked = true, color = ThreatPlates.RGB(255, 255, 255) },
+    Test_unique_style =  { useColor = true, allowMarked = true, color = Addon.RGB(255, 255, 255) },
     Test_IsFriend = false, Test_IsGuildmate = false,
   },
   -- 7: CLASS, PLAYER, Friend
   {
     isTapped = false, isMarked = false, raidIcon = "STAR", reaction = "FRIENDLY", type = "PLAYER", class = "DRUID",
     Test_style = "dps",
-    Test_unique_style =  { useColor = true, allowMarked = true, color = ThreatPlates.RGB(255, 255, 255) },
+    Test_unique_style =  { useColor = true, allowMarked = true, color = Addon.RGB(255, 255, 255) },
     Test_IsFriend = true, Test_IsGuildmate = false,
   },
   -- 8: CLASS, PLAYER, No Friend
   {
     isTapped = false, isMarked = false, raidIcon = "STAR", reaction = "FRIENDLY", type = "PLAYER", class = "DRUID",
     Test_style = "dps",
-    Test_unique_style =  { useColor = true, allowMarked = true, color = ThreatPlates.RGB(255, 255, 255) },
+    Test_unique_style =  { useColor = true, allowMarked = true, color = Addon.RGB(255, 255, 255) },
     Test_IsFriend = false, Test_IsGuildmate = false,
   },
   -- 9: CLASS, NPC
   {
     isTapped = false, isMarked = false, raidIcon = "STAR", reaction = "FRIENDLY", type = "NPC", class = "DRUID",
     Test_style = "dps",
-    Test_unique_style =  { useColor = true, allowMarked = true, color = ThreatPlates.RGB(255, 255, 255) },
+    Test_unique_style =  { useColor = true, allowMarked = true, color = Addon.RGB(255, 255, 255) },
     Test_IsFriend = false, Test_IsGuildmate = false,
   },
   -- 10: REACTION, Tapped
   {
     isTapped = true, isMarked = false, raidIcon = "STAR", reaction = "FRIENDLY", type = "PLAYER", class = "DRUID",
     Test_style = "dps",
-    Test_unique_style =  { useColor = true, allowMarked = true, color = ThreatPlates.RGB(255, 255, 255) },
+    Test_unique_style =  { useColor = true, allowMarked = true, color = Addon.RGB(255, 255, 255) },
     Test_IsFriend = false, Test_IsGuildmate = false,
   },
   -- 11: REACTION, Player, Is Guild Member
   {
     isTapped = false, isMarked = false, raidIcon = "STAR", reaction = "FRIENDLY", type = "PLAYER", class = "DRUID",
     Test_style = "dps",
-    Test_unique_style =  { useColor = true, allowMarked = true, color = ThreatPlates.RGB(255, 255, 255) },
+    Test_unique_style =  { useColor = true, allowMarked = true, color = Addon.RGB(255, 255, 255) },
     Test_IsFriend = false, Test_IsGuildmate = true,
   },
   -- 12: REACTION, Player, No Guild Member
   {
     isTapped = false, isMarked = false, raidIcon = "STAR", reaction = "FRIENDLY", type = "PLAYER", class = "DRUID",
     Test_style = "dps",
-    Test_unique_style =  { useColor = true, allowMarked = true, color = ThreatPlates.RGB(255, 255, 255) },
+    Test_unique_style =  { useColor = true, allowMarked = true, color = Addon.RGB(255, 255, 255) },
     Test_IsFriend = false, Test_IsGuildmate = false,
   },
 }

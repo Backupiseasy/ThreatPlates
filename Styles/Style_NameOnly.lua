@@ -1,8 +1,6 @@
 local ADDON_NAME, Addon = ...
-local ThreatPlates = Addon.ThreatPlates
 
-local ART_PATH = ThreatPlates.Art
-local EMPTY_TEXTURE = ART_PATH.."Empty"
+local EMPTY_TEXTURE = Addon.PATH_ARTWORK.."Empty"
 
 -------------------------------------------------------------------------------------
 -- Style: Text-Only for Headline-View
@@ -22,20 +20,22 @@ local function Create(name)
     healthbar = {
       texture = EMPTY_TEXTURE,
       backdrop = EMPTY_TEXTURE,
-      height = 10,
-      width = 120,
       x = 0,
       y = 0,
       anchor = "CENTER",
       show = false,
-    },
-
-    healthbarFriendly = {
-      height = 10,
-      width = 120,
-      x = 0,
-      y = 0,
-      anchor = "CENTER",
+      HOSTILE = {
+        height = 10,
+        width = 120,
+      },
+      NEUTRAL = {
+        height = 10,
+        width = 120,
+      },
+      FRIENDLY = {
+        height = 10,
+        width = 120, 
+      },     
     },
 
     healthborder = {
@@ -61,16 +61,11 @@ local function Create(name)
       x = 0,
       y = 0,
       anchor = "CENTER",
-      -- Texture Coordinates
-      left = 0,
-      right = 1,
-      top = 0,
-      bottom = 1,
     },
 
     highlight = {
-      texture = (dbprofile.HeadlineView.ShowMouseoverHighlight and ART_PATH.."Highlight") or EMPTY_TEXTURE,
-      show = true,
+      texture = (dbprofile.HeadlineView.ShowMouseoverHighlight and Addon.PATH_ARTWORK .."Highlight") or EMPTY_TEXTURE,
+      show = dbprofile.HeadlineView.ShowMouseoverHighlight,
     },
 
     castbar = {
@@ -85,7 +80,7 @@ local function Create(name)
     },
 
     castborder = {
-      texture = (db.castbar.ShowInHeadlineView and db.castborder.show and ThreatPlates.Art .. db.castborder.texture) or EMPTY_TEXTURE,
+      texture = (db.castbar.ShowInHeadlineView and db.castborder.show and Addon.PATH_ARTWORK .. db.castborder.texture) or EMPTY_TEXTURE,
       edgesize = db.castborder.EdgeSize,
       offset = db.castborder.Offset,
       show = true,
@@ -93,21 +88,6 @@ local function Create(name)
 
     castnostop = {
       show = db.castbar.ShowInHeadlineView and db.castborder.show and db.castnostop.ShowOverlay,
-    },
-
-    name = {
-      typeface = Addon.LibSharedMedia:Fetch('font', db.name.typeface),
-      size = dbprofile.HeadlineView.name.size,
-      width = db.name.width, -- use same as for healthbar view
-      height = db.name.height, -- use same as for healthbar view
-      x = dbprofile.HeadlineView.name.x,
-      y = dbprofile.HeadlineView.name.y,
-      align = dbprofile.HeadlineView.name.align,
-      anchor = "CENTER",
-      vertical = dbprofile.HeadlineView.name.vertical,
-      shadow = db.name.shadow, -- or: true,
-      flags = db.name.flags, -- or: true
-      show = true,
     },
 
     level = {
@@ -122,21 +102,6 @@ local function Create(name)
       vertical = db.level.vertical,
       shadow = false,
       show = false,
-    },
-
-    customtext = {
-      typeface = Addon.LibSharedMedia:Fetch('font', db.name.typeface),
-      size = dbprofile.HeadlineView.customtext.size,
-      width = db.customtext.width, -- use same as for healthbar view
-      height = db.customtext.height, -- use same as for healthbar view
-      x = dbprofile.HeadlineView.customtext.x,
-      y = dbprofile.HeadlineView.customtext.y,
-      align = dbprofile.HeadlineView.customtext.align,
-      anchor = "CENTER",
-      vertical = dbprofile.HeadlineView.customtext.vertical,
-      shadow = db.name.shadow,
-      flags = db.name.flags,
-      show = true,
     },
 
     spelltext = {
@@ -172,11 +137,6 @@ local function Create(name)
       x = 0,
       y = 0,
       anchor = "CENTER",
-      -- Texture Coordinates
-      left = 0,
-      right = 1,
-      top = 0,
-      bottom = 1,
     },
 
     spellicon = {
@@ -189,7 +149,6 @@ local function Create(name)
     },
 
     raidicon = {
-      texture = "Interface\\TargetingFrame\\UI-RaidTargetingIcons",
       width = db.raidicon.scale,
       height = db.raidicon.scale,
       x = db.raidicon.x_hv,
@@ -197,12 +156,6 @@ local function Create(name)
       anchor = "CENTER", --db.raidicon.anchor,
       show = db.raidicon.ShowInHeadlineView,
     },
-
-    threatcolor = {
-      LOW = { r = 0, g = 0, b = 0, a = 0 },
-      MEDIUM = { r = 0, g = 0, b = 0, a = 0 },
-      HIGH = { r = 0, g = 0, b = 0, a = 0 },
-    }
   }
   return theme
 end

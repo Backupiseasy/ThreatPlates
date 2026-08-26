@@ -1,7 +1,8 @@
 local ADDON_NAME, Addon = ...
-local ThreatPlates = Addon.ThreatPlates
 
-local Widget = (Addon.ExpansionIsAtLeastBfA and Addon.Widgets:NewWidget("Experience")) or {}
+if not Addon.ExpansionIsAtLeastBfA then return end
+
+local Widget = Addon.Widgets:NewWidget("Experience")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants
@@ -17,10 +18,7 @@ local GetStatusBarWidgetVisualizationInfo = C_UIWidgetManager.GetStatusBarWidget
 local UnitPlayerControlled, UnitIsOwnerOrControllerOfUnit = UnitPlayerControlled, UnitIsOwnerOrControllerOfUnit
 
 -- ThreatPlates APIs
-local ANCHOR_POINT_TEXT = Addon.ANCHOR_POINT_TEXT
-local IGNORED_STYLES = Addon.IGNORED_STYLES
 
-local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
 -- List them here for Mikk's FindGlobals script
 -- GLOBALS:
@@ -107,13 +105,12 @@ function Widget:IsEnabled()
 end
 
 function Widget:OnEnable()
-  self:RegisterEvent("UPDATE_UI_WIDGET")
+  self:SubscribeEvent("UPDATE_UI_WIDGET")
 end
 
-function Widget:OnDisable()
-  self:UnregisterEvent("UPDATE_UI_WIDGET")
-  self:UpdateAllFrames()
-end
+-- function Widget:OnDisable()
+--   self:UnsubscribeAllEvents()
+-- end
 
 function Widget:UpdateFrame(widget_frame,  unit)
   -- Show nameplate widget for this unit, if Experience widget was shown before it was disabled

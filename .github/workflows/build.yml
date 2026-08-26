@@ -1,96 +1,34 @@
-# description of this workflow, can be anything you want
-name: Package and release version 
+# Packages and publishes a stable release to CurseForge, WoWInterface, Wago, and GitHub.
+# Triggers on a version tag (e.g. "13.0.24") - explicitly excluding "-alpha"/"-beta" tags,
+# which are handled by build_alpha.yml/build_beta.yml instead. Builds separate packages
+# per game flavor (retail/classic/bcc/mists) from the same multi-version .toc.
+#
+# Actual packaging logic lives in the reusable workflow _package_release.yml - this file
+# only owns the release-channel-specific trigger, naming, and which secrets are forwarded.
+name: Package and release version
 
 on:
-  # push:
-  #   branches:
-  #     - master
-  #     - main
   push:
     tags:
       - "[0-9]+.[0-9]+.[0-9]+"
       - "!**-beta**"
       - "!**-alpha**"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to package and release (e.g. 13.0.24)"
+        required: true
+
+concurrency:
+  group: release-${{ github.workflow }}-${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      # we first have to clone the AddOn project, this is a required step
-      - name: Clone project
-        uses: actions/checkout@v1
-        # note: checkout@v2 breaks git history, so generating a changelog and
-        # file naming for non-tagged builds will not work properly
-
-      - name: Update Build Date in release changelog
-        run: sed -i "s/@build-time@/`date +%Y-%m-%d`/" CHANGELOG.md
-
-      - name: Update Build Date in release changelog
-        run: sed -i "s/@build-time@/`date +%Y-%m-%d`/" TidyPlates_ThreatPlates_Changes.log
-
-      - name: Create Mainline Package
-        uses: BigWigsMods/packager@v2
-        with:
-          args: -e -l -n "ThreatPlates-{project-version}{classic}" -g retail
-        env:
-          CF_API_KEY: ${{ secrets.CF_API_KEY }}
-          GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
-          WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
-          WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
-
-      - name: Create Vanilla Package
-        uses: BigWigsMods/packager@v2
-        with:
-          args: -e -l -n "ThreatPlates-{project-version}{classic}" -g classic
-        env:
-          CF_API_KEY: ${{ secrets.CF_API_KEY }}
-          GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
-          WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
-          WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
-
-      # - name: Create TBC Classic Package
-      #   uses: BigWigsMods/packager@v2
-      #   with:
-      #     args: -e -l -n "ThreatPlates-{project-version}{classic}" -g bcc
-      #   env:
-      #     CF_API_KEY: ${{ secrets.CF_API_KEY }}
-      #     GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
-      #     WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
-      #     WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
-
-      # - name: Create Wrath Classic Package
-      #   uses: BigWigsMods/packager@v2
-      #   with:
-      #     args: -e -l -n "ThreatPlates-{project-version}{classic}" -g wrath
-      #   env:
-      #     CF_API_KEY: ${{ secrets.CF_API_KEY }}
-      #     GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
-      #     WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
-      #     WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
-
-      # - name: Create Cata Classic Package
-      #   uses: BigWigsMods/packager@v2
-      #   with:
-      #     args: -e -l -n "ThreatPlates-{project-version}{classic}" -g cata
-      #   env:
-      #     CF_API_KEY: ${{ secrets.CF_API_KEY }}
-      #     GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
-      #     WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
-      #     WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}          
-
-      - name: Create Mists Classic Package
-        uses: BigWigsMods/packager@v2
-        with:
-          args: -e -l -n "ThreatPlates-{project-version}{classic}" -g mists
-        env:
-          CF_API_KEY: ${{ secrets.CF_API_KEY }}
-          GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
-          WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
-
-#      - name: Send Status to Discord
-#        uses: nebularg/actions-discord-webhook@v1
-#        with:
-#          webhook_url: ${{ secrets.WEBHOOK_URL }}
-#          status: ${{ job.status }}
-#        if: failure()
+  release:
+    uses: ./.github/workflows/_package_release.yml
+    with:
+      ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
+    secrets:
+      CF_API_KEY: ${{ secrets.CF_API_KEY }}
+      WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
+      WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}

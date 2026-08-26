@@ -20,26 +20,23 @@
     <Include file="LibCustomGlow-1.0\LibCustomGlow-1.0.xml"/>
     <Script file="LibDeflate\LibDeflate.lua"/>
     <Include file="UTF8\UTF8.xml"/>
+    <Script file="LibDualSpec-1.0\LibDualSpec-1.0.lua"/>
 
     <Script file="ForAllIndentsAndPurposes\indent.lua"/>
-
+    
     <!--@version-retail@-->
-    <Script file="LibDualSpec-1.0\LibDualSpec-1.0.lua"/>
     <!--@end-version-retail@-->
 
     <!--@version-bcc@-->
     <!--@end-version-bcc@-->
 
     <!--@version-wrath@-->
-    <Script file="LibDualSpec-1.0\LibDualSpec-1.0.lua"/>
     <!--@end-version-wrath@-->
 
     <!--@version-cata@-->
-    <Script file="LibDualSpec-1.0\LibDualSpec-1.0.lua"/>
     <!--@end-version-cata@-->
 
     <!--@version-mists@-->
-    <Script file="LibDualSpec-1.0\LibDualSpec-1.0.lua"/>
     <!--@end-version-mists@-->
 
     <!--@version-classic@-->

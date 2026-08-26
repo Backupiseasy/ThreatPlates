@@ -1,4 +1,4 @@
-## Interface: 20504
+## Interface: 20506
 
 ## Title: Threat Plates
 ## Version: @project-version@
@@ -21,8 +21,8 @@
 ## X-Wago-ID: RqGZkkNd
 
 ## RequiredDeps:
-## OptionalDeps: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate
-## X-Embeds: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate
+## OptionalDeps: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate, LibDualSpec-1.0
+## X-Embeds: Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibCustomGlow-1.0, LibDeflate, LibDualSpec-1.0
 
 ## X-License: GNU General Public License
 ## X-Credits: danltiger (for Tidy Plates), Tosaido (for quest handling code from QuestMobs)
@@ -30,24 +30,26 @@
 Libs\Libs.xml
 Locales\Locales.xml
 
+ThreatPlates.xml
+
 Init.lua
+Debug.lua
 Compatibility.lua
-Localization.lua
+Modules\Localization.lua
+EventService.lua
 CVarsManager.lua
 Media.lua
 Constants.lua
+Modules\Modules.xml
 Elements\Elements.xml
-
 Widgets\WidgetHandler.lua
 
-# Integration of TidyPlates for standalone version
-TidyPlatesInternal\TidyPlates.xml
-
+Nameplate.lua
 Database.lua
-Core.lua
+Addon.lua
 Commands.lua
+AceGUIPreviewImage.lua
 Options.lua
 
 Styles\Styles.xml
-Functions\Functions.xml
 Widgets\Widgets.xml
