@@ -2996,8 +2996,8 @@ local function CreateAuraFrameIconMode(self, parent)
   local text_frame = _G.CreateFrame("Frame", nil, frame)
   text_frame:SetFrameLevel(parent:GetFrameLevel())
   text_frame:SetAllPoints(frame.Icon)
-  frame.Stacks = text_frame:CreateFontString(nil, "OVERLAY")
-  frame.TimeLeft = text_frame:CreateFontString(nil, "OVERLAY")
+  frame.Stacks = text_frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  frame.TimeLeft = text_frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 
   frame:Hide()
 
@@ -3142,13 +3142,13 @@ local function CreateAuraFrameBarMode(self, parent)
 
   frame.Icon = frame:CreateTexture(nil, "ARTWORK", nil, -5)
 
-  frame.Stacks = frame.Statusbar:CreateFontString(nil, "OVERLAY")
+  frame.Stacks = frame.Statusbar:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   frame.Stacks:SetAllPoints(frame.Icon)
   --frame.Stacks:SetFont("Fonts\\FRIZQT__.TTF", 11)
 
-  frame.LabelText = frame.Statusbar:CreateFontString(nil, "OVERLAY")
+  frame.LabelText = frame.Statusbar:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   frame.LabelText:SetAllPoints(frame.Statusbar)
-  frame.TimeText = frame.Statusbar:CreateFontString(nil, "OVERLAY")
+  frame.TimeText = frame.Statusbar:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   frame.TimeText:SetAllPoints(frame.Statusbar)
 
   frame.Cooldown = Addon.CreateCooldown(frame, HideOmniCC)

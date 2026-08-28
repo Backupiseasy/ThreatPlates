@@ -88,7 +88,7 @@ function Widget:Create(tp_frame)
   widget_frame.RightTexture:SetPoint("LEFT", tp_frame.visual.Healthbar, "RIGHT", 4, 0)
   widget_frame.RightTexture:SetSize(64, 64)
 
-  widget_frame.Percentage = widget_frame:CreateFontString(nil, "OVERLAY")
+  widget_frame.Percentage = widget_frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   widget_frame.Percentage:SetFont("Fonts\\FRIZQT__.TTF", 11)
 
   self:UpdateLayout(widget_frame)

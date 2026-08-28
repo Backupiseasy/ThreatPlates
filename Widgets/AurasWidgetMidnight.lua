@@ -332,7 +332,7 @@ local function InitializeAuraButton(auraButton, aura_type)
   -- Font must be set before SetApplicationCount below: it triggers an immediate
   -- UpdateAuraDisplay() -> FontString:SetText(), which errors ("Font not set") on a FontString
   -- that was just created with CreateFontString(nil, ...) and has no font applied yet.
-  auraButton.Stacks = auraButton:CreateFontString(nil, "OVERLAY")
+  auraButton.Stacks = auraButton:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   auraButton.Stacks:SetJustifyH("right")
   auraButton.Stacks:SetPoint("BOTTOMRIGHT", 3, -2)
   FontUpdateText(auraButton, auraButton.Stacks, db_icon.StackCount)
@@ -342,7 +342,7 @@ local function InitializeAuraButton(auraButton, aura_type)
   end
 
   -- Same font-before-Set* ordering requirement as SetApplicationCount above.
-  auraButton.TimeLeft = auraButton:CreateFontString(nil, "OVERLAY")
+  auraButton.TimeLeft = auraButton:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   FontUpdateText(auraButton, auraButton.TimeLeft, db_icon.Duration)
   if Widget.db.ShowExpiringColor then
     auraButton:SetDurationText(auraButton.TimeLeft, {

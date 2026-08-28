@@ -380,7 +380,7 @@ function Element.PlateCreated(tp_frame)
     healthbar.HealAbsorbGlow = healabsorb_glow
   end
 
-  healthbar.TargetUnit = healthbar:CreateFontString(nil, "OVERLAY")
+  healthbar.TargetUnit = healthbar:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   healthbar.TargetUnit:SetFont("Fonts\\FRIZQT__.TTF", 11)
 
   --frame:SetScript("OnSizeChanged", OnSizeChanged)

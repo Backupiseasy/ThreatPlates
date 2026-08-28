@@ -190,7 +190,7 @@ function Widget:Create()
 
     WidgetFrame = widget_frame
 
-    widget_frame.Text = widget_frame:CreateFontString(nil, "OVERLAY")
+    widget_frame.Text = widget_frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 
     local bar = _G.CreateFrame("StatusBar", nil, widget_frame)
     bar:SetFrameLevel(widget_frame:GetFrameLevel())
