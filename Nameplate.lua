@@ -788,6 +788,10 @@ end
 --     :Show(), even when the frame's shown-flag never actually toggled. Needed specifically for
 --     the reparented/protected case, where the shown-flag stays true the whole time it's "hidden"
 --     (only its parent/anchor changed), so OnShow above would never fire there on its own.
+--     Since this hooks :Show() itself, SetShownBlizzardPlate's own show=true branch guards its
+--     Show() call on IsShown() first - otherwise that call would re-trigger this same hook and
+--     recurse forever, the same reentrancy hazard the old SetAlpha-based version guarded with a
+--     "locked" flag.
 ---------------------------------------------------------------------------------------------------------------------
 
 local function IgnoreUnitForThreatPlates(unitid)
@@ -808,7 +812,12 @@ if ExpansionIsAtLeastMidnight then
         unit_frame:SetAllPoints(orig_parent)
         BlizzardPlateOrigParent[unit_frame] = nil
       end
-      unit_frame:Show()
+      -- hooksecurefunc(unit_frame, "Show", ...) below re-triggers on this call too - guard on
+      -- IsShown() (already true by the time that hook runs a real Show()) to stop the recursion
+      -- after one harmless extra pass instead of looping forever.
+      if not unit_frame:IsShown() then
+        unit_frame:Show()
+      end
       unit_frame:SetAlpha(1)
     elseif unit_frame:IsProtected() then
       if not BlizzardPlateOrigParent[unit_frame] then
