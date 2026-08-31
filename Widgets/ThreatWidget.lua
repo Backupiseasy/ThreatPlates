@@ -104,6 +104,7 @@ function Widget:IsEnabled()
 end
 
 function Widget:OnEnable()
+  PlayerIsInGroup = IsInGroup()
   self:SubscribeEvent("UNIT_THREAT_LIST_UPDATE")
   self:SubscribeEvent("TargetMarkerUpdate")
   self:SubscribeEvent("GROUP_ROSTER_UPDATE")
