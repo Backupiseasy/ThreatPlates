@@ -745,6 +745,54 @@ end
 ---------------------------------------------------------------------------------------------------------------------
 -- * Control default nameplate visibility and behaviour
 ---------------------------------------------------------------------------------------------------------------------
+-- How TP and Blizzard's own nameplate (plate.UnitFrame) relate to each other, end to end:
+--
+-- Anchoring: TP never removes or replaces plate.UnitFrame. plate.TPFrame is anchored to it
+-- ("CENTER" to "CENTER", see NamePlateDriverFrame_AcquireUnitFrame below) and the two are shown
+-- as mutual opposites - exactly one of them is visible for a given plate at a time, controlled
+-- by ShowBlizzardNameplate/SetNameplateVisibility based on the friendly/enemy "Show Blizzard
+-- Nameplates" settings.
+--
+-- Acquire: NamePlateDriverFrame_AcquireUnitFrame is hooksecurefunc'd onto Blizzard's own
+-- NamePlateDriverFrame:AcquireUnitFrame (registered further below), which Blizzard calls whenever
+-- it assigns/reuses a UnitFrame instance for a plate. First time for a given unit_frame, this is
+-- where we: do the anchoring above, hook OnShow (see Hide/Show below), and - on Midnight only -
+-- add the extra Show-method watchdog. It's also called a second time, manually, from
+-- Addon:NAME_PLATE_UNIT_ADDED / ScheduleNameplateRevalidation, to cover the case where
+-- plate.UnitFrame was still nil on the first call (Blizzard's own ADDED handler, which sets it,
+-- hadn't necessarily run yet) - without that retry, this plate would never get the OnShow/Show
+-- hooks attached and its Blizzard nameplate could stay visible for its entire lifetime.
+--
+-- Hide/Show (SetShownBlizzardPlate, Midnight only - Classic just uses SetShown()): three cases,
+-- driven by whether Blizzard's UnitFrame IsProtected() at the moment we need to hide it -
+--   * show=true            - undo whichever of the two hide paths below was used: restore the
+--                             saved parent/anchor if we reparented it away, Show()+SetAlpha(1).
+--   * show=false, protected - reparent away (ClearAllPoints + SetParent(nil)) instead of
+--                             Hide()/SetAlpha(0), because Blizzard's own secure code (aggro flash,
+--                             fade animations - Arenas/Battlegrounds are in combat almost
+--                             continuously) can silently revert either of those on a protected
+--                             frame. The original parent is stashed in the weak-keyed
+--                             BlizzardPlateOrigParent table so it isn't lost across repeat hides.
+--   * show=false, otherwise - plain Hide() (confirmed safe against Plater's own, TWW-era,
+--                             unchanged-through-current-Midnight OnRetailNamePlateShow - the taint
+--                             restriction has only ever been about IsProtected() frames, not Hide()
+--                             itself).
+--
+-- Watchdogs: Blizzard's own code can re-show its plate after we hid it (aggro flash, pooling,
+-- fade animations, ...) without going through any of our code, so two hooks re-assert our
+-- decision whenever that happens - both ultimately call SetVisibilityOfBlizzardNameplate, which
+-- re-derives the correct show/hide state and calls SetShownBlizzardPlate again:
+--   * HookScript(unit_frame, "OnShow", FrameOnShow) - fires on a genuine hidden->shown transition
+--     of the frame's own shown-flag. Covers the plain Hide() case above on its own.
+--   * hooksecurefunc(unit_frame, "Show", ...) (Midnight only) - fires on every raw call to
+--     :Show(), even when the frame's shown-flag never actually toggled. Needed specifically for
+--     the reparented/protected case, where the shown-flag stays true the whole time it's "hidden"
+--     (only its parent/anchor changed), so OnShow above would never fire there on its own.
+--     Since this hooks :Show() itself, SetShownBlizzardPlate's own show=true branch guards its
+--     Show() call on IsShown() first - otherwise that call would re-trigger this same hook and
+--     recurse forever, the same reentrancy hazard the old SetAlpha-based version guarded with a
+--     "locked" flag.
+---------------------------------------------------------------------------------------------------------------------
 
 local function IgnoreUnitForThreatPlates(unitid)
   return UnitIsUnitTP("player", unitid) or UnitNameplateShowsWidgetsOnly(unitid)
@@ -752,14 +800,39 @@ end
 
 local SetShownBlizzardPlate
 
+-- Weak-keyed: the entry disappears on its own once Blizzard releases/GCs the frame.
+local BlizzardPlateOrigParent = setmetatable({}, { __mode = "k" })
+
 if ExpansionIsAtLeastMidnight then
   SetShownBlizzardPlate = function(unit_frame, show)
-    unit_frame:SetAlpha(show and 1 or 0)
+    if show then
+      local orig_parent = BlizzardPlateOrigParent[unit_frame]
+      if orig_parent then
+        unit_frame:SetParent(orig_parent)
+        unit_frame:SetAllPoints(orig_parent)
+        BlizzardPlateOrigParent[unit_frame] = nil
+      end
+      -- hooksecurefunc(unit_frame, "Show", ...) below re-triggers on this call too - guard on
+      -- IsShown() (already true by the time that hook runs a real Show()) to stop the recursion
+      -- after one harmless extra pass instead of looping forever.
+      if not unit_frame:IsShown() then
+        unit_frame:Show()
+      end
+      unit_frame:SetAlpha(1)
+    elseif unit_frame:IsProtected() then
+      if not BlizzardPlateOrigParent[unit_frame] then
+        BlizzardPlateOrigParent[unit_frame] = unit_frame:GetParent()
+      end
+      unit_frame:ClearAllPoints()
+      unit_frame:SetParent(nil)
+    else
+      unit_frame:Hide()
+    end
   end
 else
   SetShownBlizzardPlate = function(unit_frame, show)
     unit_frame:SetShown(show)
-  end  
+  end
 end
 
 local function ShowBlizzardNameplate(plate, show_blizzard_plate)
@@ -884,24 +957,25 @@ end
 
 local function NamePlateDriverFrame_AcquireUnitFrame(_, plate)
   local unit_frame = plate.UnitFrame
+  if unit_frame then
+    -- Blizzard's own AcquireUnitFrame just re-parented/re-anchored this (possibly pooled and
+    -- reused-by-a-different-plate) instance to plate, so any parent we saved for it before is
+    -- stale and must not be restored to later - see SetShownBlizzardPlate above.
+    BlizzardPlateOrigParent[unit_frame] = nil
+  end
+
   if unit_frame and not unit_frame:IsForbidden() and not unit_frame.ThreatPlates then
     unit_frame.ThreatPlates = true
     unit_frame:HookScript("OnShow", FrameOnShow)
-    
-    -- Shameless copy from Plater - prevent Blizzard plates from showing when their alpha is changed
-    -- as they are currently hidden using with SetAlpha(0)
-    if ExpansionIsAtLeastMidnight then
-      local locked = false
-      hooksecurefunc(unit_frame, "SetAlpha", function(self)
-        if locked or self:IsForbidden() then return end
 
-        locked = true
+    if ExpansionIsAtLeastMidnight then
+      hooksecurefunc(unit_frame, "Show", function(self)
+        if self:IsForbidden() then return end
+
         SetVisibilityOfBlizzardNameplate(self, self.unit)
-        --self:SetAlpha(0)
-        locked = false
       end)
     end
-    
+
    -- # Nameplate Hierarchy, Anchoring, and Scaling
     plate.TPFrame:SetPoint("CENTER", plate.UnitFrame, "CENTER")
     --plate.Background:SetAllPoints(plate.TPFrame)
@@ -1085,6 +1159,7 @@ local function ScheduleNameplateRevalidation(plate, unitid, delay)
     local tp_frame = plate.TPFrame
     if PlatesByUnit[unitid] == tp_frame and tp_frame.unit.unitid == unitid then
       HandlePlateUnitAdded(plate, unitid)
+      NamePlateDriverFrame_AcquireUnitFrame(nil, plate)
     end
   end)
 end
@@ -1541,6 +1616,8 @@ function Addon:NAME_PLATE_UNIT_ADDED(unitid)
 
     if was_already_added then
       ScheduleNameplateRevalidation(plate, unitid, 0.5)
+    elseif not plate.UnitFrame then
+      ScheduleNameplateRevalidation(plate, unitid, 0)
     end
   end
 end

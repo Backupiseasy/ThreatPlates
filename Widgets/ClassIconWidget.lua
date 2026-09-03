@@ -13,6 +13,7 @@ local Widget = Addon.Widgets:NewWidget("ClassIcon")
 
 -- ThreatPlates APIs
 local RegisterMasqueGroup, IconCreateIcon = Addon.Icon.RegisterMasqueGroup, Addon.Icon.CreateIcon
+local IsSecretValueTP = Addon.IsSecretValue
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -66,16 +67,13 @@ function Widget:EnabledForStyle(style, unit)
 end
 
 function Widget:OnUnitAdded(widget_frame, unit)
-  -- Caching maybe for unknown player (no name update yet?)
-  -- if db.cacheClass and unit.guid then
-  -- 	-- local _, Class = GetPlayerInfoByGUID(unit.guid)
-  -- 	if not db.cache[unit.name] then
-  -- 		db.cache[unit.name] = unit.class
-  -- 		class = unit.class
-  -- 	else
-  -- 		class = db.cache[unit.name]
-  -- 	end
-  -- else
+  -- Blizzard returns class as a secret value for hostile players in Arenas/Battlegrounds (Patch
+  -- 12.1) - concatenating it below would produce a secret icon_id, which then throws when used as
+  -- a table key in Addon:GetIconTexture. Nothing to display in that case, so just hide.
+  if IsSecretValueTP(unit.class) then
+    widget_frame:Hide()
+    return
+  end
 
   local db = Addon.db.profile
 
@@ -97,20 +95,3 @@ function Widget:OnUnitAdded(widget_frame, unit)
     widget_frame:Hide()
   end
 end
-
---function Widget:OnUpdatePlateMode(widget_frame, unit)
---  local db = Addon.db.profile
---  if (unit.reaction == "HOSTILE" and db.HostileClassIcon) or (unit.reaction == "FRIENDLY" and db.friendlyClassIcon) then
---    db = db.classWidget
---
---    if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then
---      widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x_hv, db.y_hv)
---    else
---      widget_frame:SetPoint("CENTER", widget_frame:GetParent(), db.x, db.y)
---    end
---
---    widget_frame:Show()
---  else
---    widget_frame:Hide()
---  end
---end
