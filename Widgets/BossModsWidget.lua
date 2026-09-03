@@ -139,13 +139,13 @@ local function CreateIconFrame(widget_frame, index)
   -- Requires widget_frame.Icon to be defined
   icon_frame.Cooldown = Addon.CreateCooldown(icon_frame, true)
 
-  local time = icon_frame:CreateFontString(nil, "OVERLAY") -- Duration Text
+  local time = icon_frame:CreateFontString(nil, "OVERLAY", "GameFontNormal") -- Duration Text
   time:SetJustifyH("CENTER")
   time:SetJustifyV("MIDDLE")
   time:SetShadowOffset(1, -1)
   icon_frame.Time = time
 
-  icon_frame.Label = icon_frame:CreateFontString(nil, "OVERLAY")
+  icon_frame.Label = icon_frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   icon_frame.Label:SetFont("Fonts\\FRIZQT__.TTF", 11)
 
   icon_frame.Highlight = _G.CreateFrame("Frame", nil, icon_frame)

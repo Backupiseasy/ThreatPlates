@@ -373,7 +373,7 @@ local Element = Addon.Elements.NewElement("StatusText")
 
 -- Called in processing event: NAME_PLATE_CREATED
 function Element.PlateCreated(tp_frame)
-  local status_text = tp_frame.visual.textframe:CreateFontString(nil, "ARTWORK")
+  local status_text = tp_frame.visual.textframe:CreateFontString(nil, "ARTWORK", "GameFontNormal")
   -- At least font must be set as otherwise it results in a Lua error when UnitAdded with SetText is called
   status_text:SetFont("Fonts\\FRIZQT__.TTF", 11)
   status_text:SetWordWrap(false) -- otherwise text is wrapped when plate is scaled down

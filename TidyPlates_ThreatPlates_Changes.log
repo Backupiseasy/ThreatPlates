@@ -1,4 +1,9 @@
 ﻿------------------------------------------------------
+13.1.2 (2026-08-28)
+------------------------------------------------------
+* Fixed missing text shadows on nameplate text (name, level, status text, auras, and other widgets) on TBC Classic [GH-734].
+
+------------------------------------------------------
 13.1.1 (2026-08-25)
 ------------------------------------------------------
 * Fixed and updated several options of the Auras widget. These were not working correctly after Path 12.1.0.

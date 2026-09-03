@@ -1154,7 +1154,7 @@ local function CreateResourceTextureStandard(widget_frame, resource_index)
 
     resource_texture = widget_frame:CreateTexture(nil, "ARTWORK", nil, 0)
     resource_off_texture = widget_frame:CreateTexture(nil, "ARTWORK", nil, 1)
-    resource_off_texture.Time = widget_frame:CreateFontString(nil, "ARTWORK")
+    resource_off_texture.Time = widget_frame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
 
     -- Copy current cooldown values from previous layout
     if widget_frame.ComboPointsOff[resource_index] then
@@ -1182,7 +1182,7 @@ local function CreateResourceTextureEssence(widget_frame, resource_index)
     end
   
     essence_frame = _G.CreateFrame("Button", "EvokerResource" .. tostring(resource_index), widget_frame, "EssencePointButtonTemplate")
-    essence_frame.Time = essence_frame.EssenceFilling:CreateFontString(nil, "OVERLAY")
+    essence_frame.Time = essence_frame.EssenceFilling:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     
     -- Copy current cooldown values from previous layout
     if essence_frame_off then
