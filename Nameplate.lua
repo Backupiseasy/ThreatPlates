@@ -1614,7 +1614,16 @@ function Addon:NAME_PLATE_UNIT_ADDED(unitid)
 
     NamePlateDriverFrame_AcquireUnitFrame(nil, plate)
 
-    if was_already_added then
+    if was_already_added or Addon.IsInPvPInstance then
+      -- Unlike was_already_added, this also covers the very first ADDED for a unit - needed in
+      -- arenas/battlegrounds because Addon:UNIT_FLAGS only revalidates on a detected change
+      -- (reaction_changed/attackable_changed), and neither can be true on a freshly-added hostile
+      -- enemy player's first UNIT_FLAGS firing (unit.reaction is already "HOSTILE" from
+      -- SetUnitAttributeReaction moments earlier, and unit.CanAttack starts nil, not a prior
+      -- value to differ from) - so that path can't catch this unit's client/server data lag on
+      -- its own. The lag itself is the same one Plater's Plater.ScheduleUpdateForNameplate
+      -- documents for faction/flag changes generally (client received the server update but
+      -- hasn't applied it to this token yet) - see the guard-pattern catalogue.
       ScheduleNameplateRevalidation(plate, unitid, 0.5)
     elseif not plate.UnitFrame then
       ScheduleNameplateRevalidation(plate, unitid, 0)

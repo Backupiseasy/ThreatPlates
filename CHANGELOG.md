@@ -5,3 +5,4 @@
 * Fixed a Lua error when re-applying Aura widget appearance settings in an Arena or Battleground as aura information is secret there.
 * Fixed a Lua error in Social widget in Arenas and Battlegrounds, caused by Blizzard now returning name/realm information as a secret value for hostile players there.
 * Fixed missing text shadows on nameplate text (name, level, status text, auras, and other widgets) on TBC Classic [GH-734].
+* Fixed enemy nameplates in Arenas and Battlegrounds sometimes showing a previous unit's name, health, or missing debuffs right after entering, caused by client-side data for freshly assigned nameplates not being fully available yet [Comment #8285, Comment #8310, Comment #8648].
