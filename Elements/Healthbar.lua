@@ -22,7 +22,7 @@ local UnitIsUnitTP = Addon.UnitIsUnit
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
 -- List them here for Mikk's FindGlobals script
--- GLOBALS: CreateFrame, UnitHealth, UnitHealthMax, UnitGetTotalAbsorbs
+-- GLOBALS: CreateFrame, UnitHealth, UnitHealthMax, UnitGetTotalAbsorbs, CreateUnitHealPredictionCalculator, UnitGetDetailedHealPrediction
 
 local IGNORED_STYLES = Addon.IGNORED_STYLES_WITH_NAMEMODE
 
@@ -45,13 +45,63 @@ local UpdateAbsorbs
 
 -- UnitGetTotalAbsorbs: Mists - Patch 5.2.0 (2013-03-05): Added.
 -- UnitGetTotalHealAbsorbs: Mists - Patch 5.4.0 (2013-09-10): Added.
-if Addon.IS_MAINLINE then
+if Addon.ExpansionIsAtLeastMidnight then
+  -- Midnight: absorb/health values can be secret, so the shield is a StatusBar
+  -- filled via C-API (SetMinMaxValues / SetValue / SetAlphaFromBoolean) with no Lua math.
+  UpdateAbsorbs = function(tp_frame)
+    local healthbar = tp_frame.visual.Healthbar
+    local absorbbar = healthbar.AbsorbBar
+    local overshieldbar = healthbar.OvershieldBar
+    local spark = healthbar.AbsorbSpark
+
+    if not Settings.ShowAbsorbs or IGNORED_STYLES[tp_frame.style] then
+      absorbbar:SetAlpha(0)
+      overshieldbar:SetAlpha(0)
+      spark:SetAlpha(0)
+      return
+    end
+
+    local unitid = tp_frame.unit.unitid
+    local calc = healthbar.HealPredictionCalc
+    UnitGetDetailedHealPrediction(unitid, nil, calc)
+
+    local _, max_health = healthbar:GetMinMaxValues()
+    local amount, clamped = calc:GetDamageAbsorbs()
+
+    local health_tex = healthbar:GetStatusBarTexture()
+    absorbbar:ClearAllPoints()
+    absorbbar:SetPoint("TOPLEFT", health_tex, "TOPRIGHT")
+    absorbbar:SetPoint("BOTTOMLEFT", health_tex, "BOTTOMRIGHT")
+    absorbbar:SetPoint("RIGHT", healthbar, "RIGHT")
+    absorbbar:SetMinMaxValues(0, calc:GetMissingHealth())
+    absorbbar:SetValue(amount)
+
+    overshieldbar:SetMinMaxValues(0, max_health)
+    overshieldbar:SetValue(_G.UnitGetTotalAbsorbs(unitid))
+
+    spark:ClearAllPoints()
+    if Settings.AlwaysFullAbsorb then
+      -- Attached bar when the shield fits; reverse-fill overshield when it does not.
+      absorbbar:SetAlphaFromBoolean(clamped, 0, 1)
+      overshieldbar:SetAlphaFromBoolean(clamped, 1, 0)
+      local overshield_tex = overshieldbar:GetStatusBarTexture()
+      spark:SetPoint("TOPLEFT", overshield_tex, "TOPLEFT", -4, 1)
+      spark:SetPoint("BOTTOMLEFT", overshield_tex, "BOTTOMLEFT", -4, -1)
+    else
+      absorbbar:SetAlpha(1)
+      overshieldbar:SetAlpha(0)
+      spark:SetPoint("BOTTOMLEFT", healthbar, "BOTTOMRIGHT", -4, -1)
+      spark:SetPoint("TOPLEFT", healthbar, "TOPRIGHT", -4, 1)
+    end
+    spark:SetAlphaFromBoolean(clamped, 1, 0)
+  end
+elseif Addon.IS_MAINLINE then
   UpdateAbsorbs = function(tp_frame)
     local visual = tp_frame.visual
     local absorbbar = visual.Healthbar.Absorbs
     local healthbar = visual.Healthbar
 
-    if IGNORED_STYLES[tp_frame.style] or Addon.ExpansionIsAtLeastMidnight then
+    if IGNORED_STYLES[tp_frame.style] then
       healthbar.HealAbsorbGlow:Hide()
       healthbar.HealAbsorb:Hide()
       healthbar.HealAbsorbLeftShadow:Hide()
@@ -204,7 +254,7 @@ if Addon.IS_MAINLINE then
     end
   end
 else
-  UpdateAbsorbs = function() end  
+  UpdateAbsorbs = function() end
 end
 
 local function HideTargetUnit(healthbar)
@@ -337,7 +387,37 @@ function Element.PlateCreated(tp_frame)
 
   healthbar.Background = healthbar:CreateTexture(nil, "ARTWORK")
 
-  if Addon.IS_MAINLINE then
+  if Addon.ExpansionIsAtLeastMidnight then
+    local function CreateShieldBar()
+      local bar = _G.CreateFrame("StatusBar", nil, healthbar)
+      bar:SetFrameLevel(healthbar:GetFrameLevel() + 1)
+      bar:SetStatusBarTexture("Interface\\RaidFrame\\Shield-Overlay", "REPEAT", "REPEAT")
+      bar:GetStatusBarTexture():SetHorizTile(true)
+      bar:SetAlpha(0)
+      return bar
+    end
+
+    healthbar.AbsorbBar = CreateShieldBar()
+    healthbar.OvershieldBar = CreateShieldBar()
+    healthbar.OvershieldBar:SetAllPoints(healthbar)
+    healthbar.OvershieldBar:SetReverseFill(true)
+
+    local spark_holder = _G.CreateFrame("Frame", nil, healthbar)
+    spark_holder:SetAllPoints(healthbar)
+    spark_holder:SetFrameLevel(healthbar:GetFrameLevel() + 2)
+    healthbar.AbsorbSparkHolder = spark_holder
+
+    local spark = spark_holder:CreateTexture(nil, "OVERLAY")
+    spark:SetTexture("Interface\\RaidFrame\\Shield-Overshield")
+    spark:SetBlendMode("ADD")
+    spark:SetWidth(8)
+    spark:SetAlpha(0)
+    healthbar.AbsorbSpark = spark
+
+    local calc = CreateUnitHealPredictionCalculator()
+    calc:SetDamageAbsorbClampMode(Enum.UnitDamageAbsorbClampMode.MissingHealth)
+    healthbar.HealPredictionCalc = calc
+  elseif Addon.IS_MAINLINE then
     local absorbs = healthbar:CreateTexture(nil, "ARTWORK", nil, 2)
     absorbs.Overlay = healthbar:CreateTexture(nil, "ARTWORK", nil, 3)
     absorbs.Overlay:SetTexture("Interface\\Addons\\TidyPlates_ThreatPlates\\Artwork\\Striped_Texture.tga", true, true)
@@ -442,7 +522,36 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
   -- SetBackdrop resets the border color to white, so restore it right after
   ColorUpdate(tp_frame, tp_frame.HealthbarColor)
 
-  if Addon.IS_MAINLINE then
+  if Addon.ExpansionIsAtLeastMidnight then
+    local absorbbar = healthbar.AbsorbBar
+    local overshieldbar = healthbar.OvershieldBar
+    local use_overlay = Settings.OverlayTexture or Settings.AlwaysFullAbsorb
+    local texture, color
+    if use_overlay then
+      texture = "Interface\\RaidFrame\\Shield-Overlay"
+      color = Settings.OverlayColor
+    else
+      texture = Addon.LibSharedMedia:Fetch('statusbar', Settings.texture)
+      color = Settings.AbsorbColor
+    end
+
+    if use_overlay then
+      absorbbar:SetStatusBarTexture(texture, "REPEAT", "REPEAT")
+      absorbbar:GetStatusBarTexture():SetHorizTile(true)
+      overshieldbar:SetStatusBarTexture(texture, "REPEAT", "REPEAT")
+      overshieldbar:GetStatusBarTexture():SetHorizTile(true)
+    else
+      absorbbar:SetStatusBarTexture(texture)
+      overshieldbar:SetStatusBarTexture(texture)
+    end
+    absorbbar:SetStatusBarColor(color.r, color.g, color.b, color.a)
+    absorbbar:SetFrameLevel(healthbar:GetFrameLevel() + 1)
+    overshieldbar:SetStatusBarColor(color.r, color.g, color.b, color.a)
+    overshieldbar:SetFrameLevel(healthbar:GetFrameLevel() + 1)
+    healthbar.AbsorbSparkHolder:SetFrameLevel(healthbar:GetFrameLevel() + 2)
+
+    UpdateAbsorbs(tp_frame)
+  elseif Addon.IS_MAINLINE then
     -- Absorbs
     healthbar.HealAbsorb:SetTexture(healthbar_style.texture, true, false)
 
