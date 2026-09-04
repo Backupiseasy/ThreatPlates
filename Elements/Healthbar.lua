@@ -61,16 +61,44 @@ local function HideAllAbsorbElements(healthbar)
   healthbar.AbsorbStatusBar:Hide()
   healthbar.AbsorbStatusBar.Overlay:Hide()
   healthbar.AbsorbStatusBar.Spark:SetAlpha(0)
+  if healthbar.OvershieldBar then healthbar.OvershieldBar:SetAlpha(0) end
+  if healthbar.MidnightAbsorbSpark then healthbar.MidnightAbsorbSpark:SetAlpha(0) end
 end
 
-local function RenderMidnightAbsorbs(healthbar, absorb_max, absorb_val, absorb_clamped)
-  healthbar.AbsorbStatusBar:SetMinMaxValues(0, absorb_max)
-  healthbar.AbsorbStatusBar:SetValue(absorb_val)
-  ShowAbsorbStatusBar(healthbar)
-  -- Spark: SetAlphaFromBoolean passes clamped directly to C-side alpha (SecretArguments =
-  -- "AllowedWhenTainted"), safe for both secret (real gameplay) and plain (Config Mode) bools.
-  healthbar.AbsorbStatusBar.Spark:Show()
-  healthbar.AbsorbStatusBar.Spark:SetAlphaFromBoolean(absorb_clamped, 1, 0)
+-- total_absorb: unclamped raw absorb from UnitGetTotalAbsorbs; nil in Config Mode (OvershieldBar skipped).
+local function RenderMidnightAbsorbs(healthbar, absorb_max, absorb_val, absorb_clamped, total_absorb)
+  local absorb_sb = healthbar.AbsorbStatusBar
+  -- MidnightAbsorbSpark is parented to a separate holder frame, not to absorb_sb, so its
+  -- alpha is independent when absorb_sb is hidden via SetAlphaFromBoolean.
+  local spark = healthbar.MidnightAbsorbSpark or absorb_sb.Spark
+  local overshield = healthbar.OvershieldBar
+
+  absorb_sb:SetMinMaxValues(0, absorb_max)
+  absorb_sb:SetValue(absorb_val)
+  absorb_sb:Show()
+  absorb_sb.Overlay:SetShown(Settings.OverlayTexture)
+
+  spark:ClearAllPoints()
+
+  if overshield and Settings.AlwaysFullAbsorb and total_absorb ~= nil then
+    -- OvershieldBar (reverse-fill) shows full shield magnitude when over-absorbing.
+    -- SetAlphaFromBoolean is safe for secret absorb_clamped (SecretArguments = "AllowedWhenTainted").
+    overshield:SetMinMaxValues(0, absorb_max)
+    overshield:SetValue(total_absorb)
+    overshield:SetAlphaFromBoolean(absorb_clamped, 1, 0)
+    absorb_sb:SetAlphaFromBoolean(absorb_clamped, 0, 1)
+    -- Spark at left edge of reverse-fill texture (tracks actual absorb left boundary).
+    local overshield_tex = overshield:GetStatusBarTexture()
+    spark:SetPoint("TOPLEFT", overshield_tex, "TOPLEFT", -4, 1)
+    spark:SetPoint("BOTTOMLEFT", overshield_tex, "BOTTOMLEFT", -4, -1)
+  else
+    if overshield then overshield:SetAlpha(0) end
+    absorb_sb:SetAlpha(1)
+    spark:SetPoint("BOTTOMLEFT", healthbar, "BOTTOMRIGHT", -4, -1)
+    spark:SetPoint("TOPLEFT", healthbar, "TOPRIGHT", -4, 1)
+  end
+  -- Spark visible only when over-absorbing; safe with secret bool.
+  spark:SetAlphaFromBoolean(absorb_clamped, 1, 0)
 end
 
 local function RenderNonMidnightAbsorbs(healthbar, health, health_max, heal_absorb, absorb)
@@ -169,11 +197,15 @@ if Addon.WOW_FEATURE_ABSORBS then
         calc:SetMaximumHealthMode(Enum.UnitMaximumHealthMode.Default)
         local absorb_max = calc:GetMaximumHealth()
         local absorb_val, absorb_clamped = calc:GetDamageAbsorbs()
-        RenderMidnightAbsorbs(healthbar, absorb_max, absorb_val, absorb_clamped)
+        -- UnitGetTotalAbsorbs returns the unclamped raw absorb; passed only to C-API sinks, safe with secrets.
+        local total_absorb = _G.UnitGetTotalAbsorbs(unitid)
+        RenderMidnightAbsorbs(healthbar, absorb_max, absorb_val, absorb_clamped, total_absorb)
       else
         healthbar.AbsorbStatusBar:Hide()
         healthbar.AbsorbStatusBar.Overlay:Hide()
         healthbar.AbsorbStatusBar.Spark:SetAlpha(0)
+        if healthbar.OvershieldBar then healthbar.OvershieldBar:SetAlpha(0) end
+        if healthbar.MidnightAbsorbSpark then healthbar.MidnightAbsorbSpark:SetAlpha(0) end
       end
     end
   else
@@ -387,6 +419,29 @@ function Element.PlateCreated(tp_frame)
     healthbar.AbsorbStatusBar = absorb_statusbar
 
     if Addon.ExpansionIsAtLeastMidnight then
+      -- OvershieldBar: covers full healthbar with reverse-fill to visualize total (unclamped) absorb
+      -- magnitude when AlwaysFullAbsorb is enabled and the shield exceeds missing health.
+      local overshield_bar = _G.CreateFrame("StatusBar", nil, healthbar)
+      overshield_bar:SetFrameLevel(healthbar:GetFrameLevel() + 1)
+      overshield_bar:SetStatusBarTexture("Interface\\RaidFrame\\Shield-Fill")
+      overshield_bar:SetAllPoints(healthbar)
+      overshield_bar:SetReverseFill(true)
+      overshield_bar:SetAlpha(0)
+      healthbar.OvershieldBar = overshield_bar
+
+      -- Midnight spark: parented to a separate holder frame so its alpha is independent of
+      -- AbsorbStatusBar's alpha (AbsorbStatusBar is hidden via SetAlphaFromBoolean when
+      -- OvershieldBar takes over, which would otherwise hide the spark as a child texture).
+      local spark_holder = _G.CreateFrame("Frame", nil, healthbar)
+      spark_holder:SetAllPoints(healthbar)
+      spark_holder:SetFrameLevel(healthbar:GetFrameLevel() + 2)
+      local midnight_spark = spark_holder:CreateTexture(nil, "ARTWORK", nil, 4)
+      midnight_spark:SetTexture("Interface\\RaidFrame\\Shield-Overshield")
+      midnight_spark:SetBlendMode("ADD")
+      midnight_spark:SetWidth(8)
+      midnight_spark:SetAlpha(0)
+      healthbar.MidnightAbsorbSpark = midnight_spark
+
       -- Midnight heal prediction calculator (one per nameplate frame, reused across updates).
       local calc = _G.CreateUnitHealPredictionCalculator()
       calc:SetDamageAbsorbClampMode(Enum.UnitDamageAbsorbClampMode.MissingHealthWithoutIncomingHeals)
@@ -461,22 +516,33 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
   ColorUpdate(tp_frame, tp_frame.HealthbarColor)
 
   if Addon.WOW_FEATURE_ABSORBS then
-    -- Absorbs
-    healthbar.HealAbsorb:SetTexture(healthbar_style.texture, true, false)
-
     local absorb_sb = healthbar.AbsorbStatusBar
     local bar_width = healthbar_style[tp_frame.unit.reaction].width
     healthbar.TP_BarWidth = bar_width
     absorb_sb:SetWidth(bar_width)
-    absorb_sb:SetStatusBarTexture(Addon.LibSharedMedia:Fetch('statusbar', Settings.texture), true, false)
+
+    local absorb_texture = Addon.LibSharedMedia:Fetch('statusbar', Settings.texture)
+    absorb_sb:SetStatusBarTexture(absorb_texture, true, false)
     local color = Settings.AbsorbColor
     absorb_sb:SetStatusBarColor(color.r, color.g, color.b, color.a)
     color = Settings.OverlayColor
     absorb_sb.Overlay:SetVertexColor(color.r, color.g, color.b, color.a)
-    if not Settings.ShowAbsorbs then
-      absorb_sb:Hide()
-      absorb_sb.Overlay:Hide()
-      absorb_sb.Spark:Hide()
+
+    if Addon.ExpansionIsAtLeastMidnight then
+      -- OvershieldBar uses the same texture and color as AbsorbStatusBar.
+      local overshield = healthbar.OvershieldBar
+      if overshield then
+        overshield:SetStatusBarTexture(absorb_texture, true, false)
+        color = Settings.AbsorbColor
+        overshield:SetStatusBarColor(color.r, color.g, color.b, color.a)
+      end
+    else
+      healthbar.HealAbsorb:SetTexture(healthbar_style.texture, true, false)
+      if not Settings.ShowAbsorbs then
+        absorb_sb:Hide()
+        absorb_sb.Overlay:Hide()
+        absorb_sb.Spark:Hide()
+      end
     end
   end
 
@@ -494,12 +560,19 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
   healthbar:SetFrameLevel(frame_level)
   if Addon.WOW_FEATURE_ABSORBS then
     healthbar.AbsorbStatusBar:SetFrameLevel(frame_level + 1)
+    if Addon.ExpansionIsAtLeastMidnight and healthbar.OvershieldBar then
+      healthbar.OvershieldBar:SetFrameLevel(frame_level + 1)
+    end
   end
   border:SetFrameLevel(frame_level - 1)
   tp_frame.visual.EliteBorder:SetFrameLevel(frame_level)
   tp_frame.visual.ThreatGlow:SetFrameLevel(frame_level - 1)
 
   tp_frame.visual.textframe:SetFrameLevel(frame_level)
+
+  if Addon.WOW_FEATURE_ABSORBS and Addon.ExpansionIsAtLeastMidnight then
+    UpdateAbsorbs(tp_frame)
+  end
 
   healthbar:Show()
 end
@@ -574,12 +647,12 @@ local HEALTHBAR_CONFIG_SCENARIOS = {
   {  30000, 100000, 40000,     0 },  -- 30% HP, heal absorb > health → glow
   {  70000, 100000, 20000, 15000 },  -- 70% HP, heal absorb + dmg absorb
 }
--- Midnight: { health, health_max, absorb_max, absorb_val, over_absorb }
--- s[3] = health_max (GetMaximumHealth with Default mode); s[4] = clamped absorb (≤ missing_health); s[5] = over-absorb
+-- Midnight: { health, health_max, absorb_max, absorb_val, over_absorb, total_absorb }
+-- s[3] = GetMaximumHealth; s[4] = clamped absorb (≤ missing); s[5] = over-absorb bool; s[6] = unclamped total
 local HEALTHBAR_CONFIG_SCENARIOS_MIDNIGHT = {
-  {  70000, 100000, 100000, 30000, true  },  -- 70% HP, absorb=30000=missing → over-absorb spark
-  {  70000, 100000, 100000, 20000, false },  -- 70% HP, absorb=20000 < missing → partial fill
-  {  30000, 100000, 100000, 70000, true  },  -- 30% HP, absorb=70000=missing → over-absorb spark
+  {  70000, 100000, 100000, 30000, true,  50000 },  -- 70% HP, clamped=30000, total=50000 → over-absorb
+  {  70000, 100000, 100000, 20000, false, 20000 },  -- 70% HP, absorb fits within missing health
+  {  30000, 100000, 100000, 70000, true,  90000 },  -- 30% HP, clamped=70000, total=90000 → over-absorb
 }
 -- Classic (no absorbs): { health, health_max }
 local HEALTHBAR_CONFIG_HP_SCENARIOS = {
@@ -611,11 +684,13 @@ local function UpdateHealthbarConfigMode(tp_frame)
       healthbar.HealAbsorbRightShadow:Hide()
 
       if Settings.ShowAbsorbs then
-        RenderMidnightAbsorbs(healthbar, s[3], s[4], s[5])
+        RenderMidnightAbsorbs(healthbar, s[3], s[4], s[5], s[6])
       else
         healthbar.AbsorbStatusBar:Hide()
         healthbar.AbsorbStatusBar.Overlay:Hide()
         healthbar.AbsorbStatusBar.Spark:SetAlpha(0)
+        if healthbar.OvershieldBar then healthbar.OvershieldBar:SetAlpha(0) end
+        if healthbar.MidnightAbsorbSpark then healthbar.MidnightAbsorbSpark:SetAlpha(0) end
       end
     else
       local s = HEALTHBAR_CONFIG_SCENARIOS[((healthbar._config_scenario - 1) % #HEALTHBAR_CONFIG_SCENARIOS) + 1]

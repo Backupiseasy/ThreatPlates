@@ -7407,8 +7407,13 @@ local function CreateHealthbarOptions()
                     name = L["Full Absorbs"],
                     order = 120,
                     type = "toggle",
-                    hidden = function() return Addon.ExpansionIsAtLeastMidnight end,
-                    desc = L["In over-absorb situations (shield larger than missing health), moves the over-absorb spark to indicate the actual shield magnitude, instead of pinning it to the bar's right edge."],
+                    desc = function()
+                      if Addon.ExpansionIsAtLeastMidnight then
+                        return L["In over-absorb situations (shield larger than missing health), shows a reverse-fill shield overlay across the health bar and positions the spark at its left boundary to indicate the actual shield magnitude."]
+                      else
+                        return L["In over-absorb situations (shield larger than missing health), moves the over-absorb spark to indicate the actual shield magnitude, instead of pinning it to the bar's right edge."]
+                      end
+                    end,
                     arg = { "settings", "healthbar", "AlwaysFullAbsorb" },
                   },
                   OverlayTexture = {
