@@ -90,6 +90,8 @@ L["Allow"] = "允许"
 L["Allow action target selection while player has a locked target."] = "允许在玩家已经锁定目标的情况下选择其他目标进行操作。"
 L["Always"] = "总是"
 L["Always do action targeting"] = "始终进行目标操作选择"
+--[[Translation missing --]]
+L["Always enabled if full absorbs are shown."] = "Always enabled if full absorbs are shown."
 L["Always Show Nameplates"] = "总是显示血条"
 --[[Translation missing --]]
 L["Always show nameplates for soft enemy target."] = "Always show nameplates for soft enemy target."
@@ -97,8 +99,6 @@ L["Always show nameplates for soft enemy target."] = "Always show nameplates for
 L["Always show nameplates for soft friend target."] = "Always show nameplates for soft friend target."
 --[[Translation missing --]]
 L["Always show nameplates for soft interact target."] = "Always show nameplates for soft interact target."
---[[Translation missing --]]
-L["Always shows the full amount of absorbs on a unit. In overabsorb situations, the absorbs bar is shifted to the left."] = "Always shows the full amount of absorbs on a unit. In overabsorb situations, the absorbs bar is shifted to the left."
 L["Amount"] = "数值"
 L["Anchor"] = "对齐"
 L["Anchor Point"] = "锚点"
@@ -148,6 +148,8 @@ L["Bar Width"] = "条的宽度"
 L["Bars"] = "条列"
 --[[Translation missing --]]
 L["Big"] = "Big"
+--[[Translation missing --]]
+L["Big Defensives"] = "Big Defensives"
 --[[Translation missing --]]
 L["Big matches the previous default size; normal keeps nameplates more compact, scaled down by the UI scale."] = "Big matches the previous default size; normal keeps nameplates more compact, scaled down by the UI scale."
 L["Blizzard"] = "暴雪"
@@ -212,8 +214,12 @@ L["Color"] = "颜色"
 L["Color by Target Mark"] = "标记图示颜色"
 L["Color Healthbar by Target Marks in Healthbar View"] = "血条检视时，血条显示标记图示颜色。"
 L["Color Name by Target Marks in Headline View"] = "名字检视时，名字显示标记图示颜色。"
+--[[Translation missing --]]
+L["Color when Expiring"] = "Color when Expiring"
 L["Coloring"] = "颜色"
 L["Colors"] = "颜色"
+--[[Translation missing --]]
+L["Colors the countdown text once the remaining duration drops below the threshold below - the Midnight replacement for Flash When Expiring, which has no equivalent on Midnight."] = "Colors the countdown text once the remaining duration drops below the threshold below - the Midnight replacement for Flash When Expiring, which has no equivalent on Midnight."
 L["Column Limit"] = "列限制"
 L["Combat"] = "战斗"
 L["Combo Points"] = "连击点"
@@ -318,6 +324,14 @@ L["Enable Guild Members"] = "启用公会成员"
 L["Enable Healer Tracker Widget"] = "启用治疗追踪套件"
 L["Enable nameplate clickthrough for enemy units."] = "启用敌方血条的鼠标点击穿透。"
 L["Enable nameplate clickthrough for friendly units."] = "启用友方血条的鼠标点击穿透。"
+--[[Translation missing --]]
+L["Enable or disable showing crowd control auras on enemy units altogether."] = "Enable or disable showing crowd control auras on enemy units altogether."
+--[[Translation missing --]]
+L["Enable or disable showing crowd control auras on friendly units altogether."] = "Enable or disable showing crowd control auras on friendly units altogether."
+--[[Translation missing --]]
+L["Enable or disable showing debuffs on enemy units altogether."] = "Enable or disable showing debuffs on enemy units altogether."
+--[[Translation missing --]]
+L["Enable or disable showing debuffs on friendly units altogether."] = "Enable or disable showing debuffs on friendly units altogether."
 L["Enable Quest Widget"] = "启用任务部件"
 L["Enable Resource Widget"] = "启用资源套件"
 L["Enable Social Widget"] = "启用社交套件"
@@ -378,6 +392,10 @@ L["Evoker Essence Cooldown"] = "唤魔师精华冷却"
 L["Exchange"] = "交换"
 L["Experience"] = "经验值"
 L["Experience Text"] = "经验值文字"
+--[[Translation missing --]]
+L["Expiring Color"] = "Expiring Color"
+--[[Translation missing --]]
+L["Expiring Threshold"] = "Expiring Threshold"
 L["Export"] = "导出"
 L["Export all custom nameplate settings as string."] = "将所有自定义血条导出为字符串。"
 L["Export Custom Nameplates"] = "导出自定义血条"
@@ -468,6 +486,8 @@ L["Healthbar, Castbar"] = "血量条, 施法条"
 L["Heuristic"] = "启发式"
 L["Heuristic In Instances"] = "副本中使用启发式"
 L["Hide Buffs"] = "隐藏增益"
+--[[Translation missing --]]
+L["Hide buffs with a duration longer than this, in seconds (applies on top of the toggles above). 0 disables this filter. Any non-zero value also hides permanent buffs."] = "Hide buffs with a duration longer than this, in seconds (applies on top of the toggles above). 0 disables this filter. Any non-zero value also hides permanent buffs."
 L["Hide Friendly Nameplates"] = "隐藏友方姓名版"
 L["Hide Healthbars"] = "隐藏血条"
 --[[Translation missing --]]
@@ -533,6 +553,10 @@ L["In combat, use coloring, transparency, and scaling based on threat level as c
 L["In delta mode, show the name of the player who is second in the enemy unit's threat table."] = "在增量模式下，显示在敌方单位仇恨表中排名第二的玩家名字。"
 L["In Groups"] = "在队伍中时"
 L["In Instances"] = "副本内"
+--[[Translation missing --]]
+L["In over-absorb situations (shield larger than missing health), moves the over-absorb spark to indicate the actual shield magnitude, instead of pinning it to the bar's right edge."] = "In over-absorb situations (shield larger than missing health), moves the over-absorb spark to indicate the actual shield magnitude, instead of pinning it to the bar's right edge."
+--[[Translation missing --]]
+L["In over-absorb situations (shield larger than missing health), shows a reverse-fill shield overlay across the health bar and positions the spark at its left boundary to indicate the actual shield magnitude."] = "In over-absorb situations (shield larger than missing health), shows a reverse-fill shield overlay across the health bar and positions the spark at its left boundary to indicate the actual shield magnitude."
 L["Initials"] = "缩写"
 L["Insert a new custom nameplate slot after the currently selected slot."] = "在当前选取的自定义血条下方插入新的。"
 L["Inset"] = "内缩"
@@ -579,6 +603,8 @@ L["Match appropriate action target to locked target."] = "Match appropriate acti
 L["Max Auras"] = "最多光环数量"
 L["Max Distance"] = "最远距离"
 L["Max Distance Behind Camera"] = "镜头后方的最远距离"
+--[[Translation missing --]]
+L["Max Duration"] = "Max Duration"
 L["Max Health"] = "最大血量"
 L["Medium Threat"] = "一般仇恨"
 L["Member 1"] = "成员1"
@@ -661,6 +687,8 @@ L["Only Mine"] = "只有我的"
 L["Only Names"] = "只有名字"
 --[[Translation missing --]]
 L["Only Names for Friendly Players"] = "Only Names for Friendly Players"
+--[[Translation missing --]]
+L["Only takes effect while \"Dispellable\" above is also checked."] = "Only takes effect while \"Dispellable\" above is also checked."
 L["Onyxian Whelp"] = "奥妮克希亚雏龙"
 L["Open Blizzard Settings"] = "打开Blizzard设置"
 L["Open Options"] = "开启设定选项"
@@ -684,6 +712,8 @@ L["Pets"] = "宠物"
 L["Pixel"] = "像素"
 L["Pixel-Perfect UI"] = "完全符合屏幕像素"
 L["Placement"] = "位置"
+--[[Translation missing --]]
+L["Player Can Apply"] = "Player Can Apply"
 L["Players"] = "玩家"
 L["Players in Instances"] = "副本内的玩家"
 --[[Translation missing --]]
@@ -713,6 +743,8 @@ L["Realm"] = "服务器"
 L["Reanimated Adherent"] = "被复活的追随者"
 L["Reanimated Fanatic"] = "被复活的狂热者"
 L["Render font without antialiasing."] = "文字不要消除锯齿。"
+--[[Translation missing --]]
+L["Requires /reload to take effect on already-displayed auras."] = "Requires /reload to take effect on already-displayed auras."
 L["Reset to Defaults"] = "还原默认值"
 L["Resource"] = "资源"
 L["Resource Bar"] = "资源条"
@@ -765,6 +797,10 @@ L["Show a tooltip when hovering above an aura."] = "鼠标指向光环时显示�
 L["Show all buffs on enemy units."] = "显示敌方单位身上全部的增益效果。"
 L["Show all buffs on friendly units."] = "显示友方单位身上全部的增益效果。"
 L["Show all buffs on NPCs."] = "显示NPC身上全部的增益效果。"
+--[[Translation missing --]]
+L["Show all buffs on NPCs. Like All, but scoped to enemy NPCs only - not freely combinable with Dispellable/Magic on NPC targets."] = "Show all buffs on NPCs. Like All, but scoped to enemy NPCs only - not freely combinable with Dispellable/Magic on NPC targets."
+--[[Translation missing --]]
+L["Show all buffs on NPCs. Like All, but scoped to friendly NPCs only - not freely combinable with Mine/Player Can Apply/Big Defensives on NPC targets."] = "Show all buffs on NPCs. Like All, but scoped to friendly NPCs only - not freely combinable with Mine/Player Can Apply/Big Defensives on NPC targets."
 L["Show all crowd control auras on enemy units."] = "显示敌方单位身上全部的控场效果光环。"
 L["Show all crowd control auras on friendly units."] = "显示友方单位身上全部的控场效果光环。"
 L["Show all debuffs on enemy units."] = "显示敌方单位身上全部的减益效果。"
@@ -776,13 +812,19 @@ L["Show an quest icon at the nameplate for quest mobs."] = "任务怪的血条�
 L["Show auras as bars (with optional icons)."] = "显示条上光环(可选图标)。"
 L["Show auras as icons in a grid configuration."] = "显示光环图标在团队配置。"
 L["Show auras in order created with oldest aura first."] = "以旧光环为第一的顺序显示光环"
+--[[Translation missing --]]
+L["Show big defensive buffs."] = "Show big defensive buffs."
 L["Show Blizzard Nameplates for Friendly Units"] = "友方单位显示游戏内置的血条"
 L["Show Blizzard Nameplates for Neutral and Enemy Units"] = "中立和敌对单位显示游戏默认的姓名版"
 L["Show Buffs"] = "显示增益效果"
+--[[Translation missing --]]
+L["Show buffs of dispel type Magic."] = "Show buffs of dispel type Magic."
 L["Show buffs of dispell type Magic."] = "显示驱散类型为魔法的增益效果。"
 L["Show buffs that were applied by you."] = "显示由你施放的增益效果."
 L["Show buffs that you can apply."] = "显示你可以施放的增益效果。"
 L["Show buffs that you can dispell."] = "显示你可以驱散的增益效果。"
+--[[Translation missing --]]
+L["Show buffs that you could apply yourself (regardless of who actually cast them)."] = "Show buffs that you could apply yourself (regardless of who actually cast them)."
 L["Show buffs with unlimited duration in all situations (e.g., in and out of combat)."] = "在各种情况下 (战斗中和非战斗中) 都要显示没有时间限制的增益效果。"
 L["Show By Unit Type"] = "依据单位类型显示"
 L["Show Crowd Control"] = "显示控场"
@@ -791,11 +833,28 @@ L["Show crowd control auras that are shown on Blizzard's default nameplates."] =
 L["Show crowd control auras that were applied by bosses."] = "Show crowd control auras that were applied by bosses."
 L["Show crowd control auras that you can dispell."] = "显示你可以驱散的控场效果光环。"
 L["Show Debuffs"] = "显示减益效果"
+--[[Translation missing --]]
+L["Show debuffs applied by you that are also shown on Blizzard's default nameplates."] = "Show debuffs applied by you that are also shown on Blizzard's default nameplates."
 L["Show debuffs that are shown on Blizzard's default nameplates."] = "显示游戏内置血条会显示出的减益效果。"
 --[[Translation missing --]]
+L["Show debuffs that Blizzard classifies as high priority."] = "Show debuffs that Blizzard classifies as high priority."
+--[[Translation missing --]]
+L["Show debuffs that can be dispelled, restricted to the dispel types checked below (Curse/Disease/Magic/Poison)."] = "Show debuffs that can be dispelled, restricted to the dispel types checked below (Curse/Disease/Magic/Poison)."
+--[[Translation missing --]]
 L["Show debuffs that were applied by bosses."] = "Show debuffs that were applied by bosses."
+--[[Translation missing --]]
+L["Show debuffs that were applied by you (or your pet)."] = "Show debuffs that were applied by you (or your pet)."
 L["Show debuffs that were applied by you."] = "显示你施放的减益效果。"
-L["Show debuffs that you can dispell."] = "显示你可以驱散的减益效果。"
+--[[Translation missing --]]
+L["Show debuffs that you can dispell, restricted to the dispel types checked below (Curse/Disease/Magic/Poison)."] = "Show debuffs that you can dispell, restricted to the dispel types checked below (Curse/Disease/Magic/Poison)."
+--[[Translation missing --]]
+L["Show dispellable harmful auras of the Curse dispel type."] = "Show dispellable harmful auras of the Curse dispel type."
+--[[Translation missing --]]
+L["Show dispellable harmful auras of the Disease dispel type."] = "Show dispellable harmful auras of the Disease dispel type."
+--[[Translation missing --]]
+L["Show dispellable harmful auras of the Magic dispel type."] = "Show dispellable harmful auras of the Magic dispel type."
+--[[Translation missing --]]
+L["Show dispellable harmful auras of the Poison dispel type."] = "Show dispellable harmful auras of the Poison dispel type."
 --[[Translation missing --]]
 L["Show Enemy Nameplates"] = "Show Enemy Nameplates"
 L["Show Enemy Units"] = "显示敌方单位"
@@ -917,6 +976,8 @@ L["Texture"] = "材质"
 L["Textures"] = "材质"
 L["The (friendly or hostile) player is not flagged for PvP or the player is in a sanctuary."] = "(友方或敌方) 玩家未标记为 PvP，或玩家在安全区中。"
 L["The font for unit names can only be changed if nameplates and names are be enabled for these units. Names can be enabled in \"Game Menu - Interface - Names\"."] = "只有已经启用血条和名字的单位，才能更改单位名字的字体。可以在 \"Esc > 介面 > 名称\" 启用名字。"
+--[[Translation missing --]]
+L["The icon crop for Wide/Square requires /reload to take effect on already-displayed auras."] = "The icon crop for Wide/Square requires /reload to take effect on already-displayed auras."
 L["The import string contains a profile from an different Threat Plates version. The profile will still be imported (and migrated as far as possible), but some settings from the imported profile might be lost."] = "导入的字符串包含来自不同版本的威力血条的配置文件。配置文件仍然会被导入 (并且尽可能的转换)，但是可能会遗失某些在导入的配置文件中的设定。"
 L["The import string contains custom nameplate settings from a different Threat Plates version. The custom nameplates will still be imported (and migrated as far as possible), but some settings from the imported custom nameplates might be lost."] = "导入的字符串包含来自不同版本的威力血条的自定义血条设定。自定义血条仍然会被导入 (并且尽可能的转换)，但是可能会遗失某些在导入的自定义血条中的设定。"
 L["The import string has an invalid format and cannot be imported. Verify that the import string was generated from the same Threat Plates version that you are using currently."] = "导入的字符串包含无效的格式，无法导入。请确认导入的字符串是由相同版本的威力血条所产生的。"
@@ -959,6 +1020,12 @@ L["This setting will disable threat scale for target marked, mouseover or castin
 L["This setting will disable threat transparency for target marked, mouseover or casting units and instead use the general transparency settings."] = "这个设定会停用被标记目标、鼠标指向或正在施法单位的仇恨值透明度变化，改为使用一般的透明度设定。"
 --[[Translation missing --]]
 L["This settings changes CVars related to action targeting and are not stored in the profile, but by WoW itself (character-specific settings)."] = "This settings changes CVars related to action targeting and are not stored in the profile, but by WoW itself (character-specific settings)."
+--[[Translation missing --]]
+L["This spell filter only takes effect for buffs on friendly units. On enemy units it has no effect, due to a Blizzard API restriction (Patch 12.1.0)."] = "This spell filter only takes effect for buffs on friendly units. On enemy units it has no effect, due to a Blizzard API restriction (Patch 12.1.0)."
+--[[Translation missing --]]
+L["This spell filter only takes effect for crowd control on enemy units. On friendly units it has no effect, due to a Blizzard API restriction (Patch 12.1.0)."] = "This spell filter only takes effect for crowd control on enemy units. On friendly units it has no effect, due to a Blizzard API restriction (Patch 12.1.0)."
+--[[Translation missing --]]
+L["This spell filter only takes effect for debuffs on enemy units. On friendly units it has no effect, due to a Blizzard API restriction (Patch 12.1.0)."] = "This spell filter only takes effect for debuffs on enemy units. On friendly units it has no effect, due to a Blizzard API restriction (Patch 12.1.0)."
 --[[Translation missing --]]
 L["This widget highlights the nameplate of your current focus target by showing a border around the healthbar and by coloring the nameplate's healthbar and/or name with a custom color."] = "This widget highlights the nameplate of your current focus target by showing a border around the healthbar and by coloring the nameplate's healthbar and/or name with a custom color."
 --[[Translation missing --]]
@@ -1027,7 +1094,7 @@ L["UI Scale"] = "界面缩放"
 L["Unable to change a setting while in combat."] = "战斗中无法变更设定。"
 L["Unable to change the following console variable while in combat: "] = "战斗中无法修改如下的设置:"
 --[[Translation missing --]]
-L["Unable to change this setting while in combat"] = "Unable to change this setting while in combat"
+L["Unable to change this setting while in combat."] = "Unable to change this setting while in combat."
 L["Unfriendly"] = "不友好"
 L["Uniform Color"] = "单一颜色"
 L["Unit"] = "单位"
@@ -1055,7 +1122,8 @@ L["Use a custom color for the healthbar's border."] = "Use a custom color for th
 L["Use a custom color for the name of your current focus target (in healthbar view and in headline view)."] = "焦点目标的名字使用自订颜色 (在血条检视和名字检视时)。"
 L["Use a custom color for the name of your current target (in healthbar view and in headline view)."] = "当前目标的名字使用自定义颜色（在血条检视和名字检视时）。"
 L["Use a heuristic to detect if a mob is in combat with you, but only in instances (like dungeons or raids)."] = "使用启发式仇恨检测来判断与你战斗的怪物，但是只有在副本中时 (例如 5 人地城或团队)。"
-L["Use a striped texture for the absorbs overlay. Always enabled if full absorbs are shown."] = "使用条纹材质来显示吸收盾，吸收盾完整时一定会显示。"
+--[[Translation missing --]]
+L["Use a striped texture for the absorbs overlay."] = "Use a striped texture for the absorbs overlay."
 L["Use Blizzard default nameplates for friendly nameplates and disable ThreatPlates for these units."] = "友方玩家使用游戏内置的血条，不要使用ThreatPlates。"
 L["Use Blizzard default nameplates for neutral and enemy nameplates and disable ThreatPlates for these units."] = "中立和敌对单位使用游戏默认的姓名版，而不使用TPTP。"
 --[[Translation missing --]]
