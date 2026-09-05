@@ -10,6 +10,7 @@ import os
 import pytest
 
 from localization_tool import (
+    MT_MARKER_COMMENT,
     cmd_check,
     cmd_extract,
     enabled_locales,
@@ -17,7 +18,9 @@ from localization_tool import (
     locale_translation_stats,
     lua_quote,
     parse_locale_keys,
+    parse_mt_marked_keys,
     scan_repository,
+    select_mt_keys_for_push,
 )
 
 
@@ -252,7 +255,7 @@ def test_locale_translation_stats_counts_missing_and_percentage(tmp_path):
     enus_keys = parse_locale_keys(str(tmp_path / "Locales" / "enUS.lua"))
     stats = locale_translation_stats(str(tmp_path), enus_keys)
 
-    assert stats == [("deDE", 2, 4, 2, 50.0)]
+    assert stats == [("deDE", 2, 0, 4, 2, 50.0, 50.0)]
 
 
 def test_locale_translation_stats_ignores_stale_keys_no_longer_in_enus(tmp_path):
@@ -266,7 +269,7 @@ def test_locale_translation_stats_ignores_stale_keys_no_longer_in_enus(tmp_path)
     enus_keys = parse_locale_keys(str(tmp_path / "Locales" / "enUS.lua"))
     stats = locale_translation_stats(str(tmp_path), enus_keys)
 
-    assert stats == [("deDE", 1, 1, 0, 100.0)]
+    assert stats == [("deDE", 1, 0, 1, 0, 100.0, 100.0)]
 
 
 def test_locale_translation_stats_skips_commented_out_locales(tmp_path):
@@ -299,3 +302,68 @@ def test_cmd_check_output_includes_translation_status(tmp_path, capsys):
     assert "Translation status (of 2 enUS keys):" in out
     assert "deDE" in out
     assert "1 missing" in out
+
+
+# ---------------------------------------------------------------------------
+# parse_mt_marked_keys / push-translation: telling MT-origin entries apart from
+# community translations pulled from CurseForge
+# ---------------------------------------------------------------------------
+
+def test_parse_mt_marked_keys_finds_marker_tagged_entry(tmp_path):
+    p = write(str(tmp_path / "Locales" / "deDE.lua"),
+              f'{MT_MARKER_COMMENT}\nL["Foo"] = "Foo-de"\nL["Bar"] = "Bar-de"\n')
+    assert parse_mt_marked_keys(p) == {"Foo"}
+
+
+def test_parse_mt_marked_keys_ignores_unrelated_comment(tmp_path):
+    p = write(str(tmp_path / "Locales" / "deDE.lua"),
+              '--[[Translation missing --]]\nL["Foo"] = "Foo"\n')
+    assert parse_mt_marked_keys(p) == set()
+
+
+def test_parse_mt_marked_keys_returns_empty_set_when_file_missing(tmp_path):
+    assert parse_mt_marked_keys(str(tmp_path / "Locales" / "deDE.lua")) == set()
+
+
+def test_locale_translation_stats_splits_human_vs_mt_pending(tmp_path):
+    make_enus(tmp_path, "Foo", "Bar", "Baz")
+    make_locales_xml(tmp_path, "enUS", "deDE")
+    write(str(tmp_path / "Locales" / "deDE.lua"),
+          f'L["Foo"] = "Foo-de"\n{MT_MARKER_COMMENT}\nL["Bar"] = "Bar-de"\n')
+
+    enus_keys = parse_locale_keys(str(tmp_path / "Locales" / "enUS.lua"))
+    stats = locale_translation_stats(str(tmp_path), enus_keys)
+
+    # Foo human-reviewed, Bar MT-pending, Baz missing entirely.
+    assert stats == [("deDE", 1, 1, 3, 1, pytest.approx(33.333, abs=0.01), pytest.approx(66.667, abs=0.01))]
+
+
+def test_cmd_check_output_splits_human_vs_mt_pending(tmp_path, capsys):
+    write(str(tmp_path / "Options.lua"), 'x = L["Foo"]\ny = L["Bar"]\n')
+    make_enus(tmp_path, "Foo", "Bar")
+    make_locales_xml(tmp_path, "enUS", "deDE")
+    write(str(tmp_path / "Locales" / "deDE.lua"),
+          f'L["Foo"] = "Foo-de"\n{MT_MARKER_COMMENT}\nL["Bar"] = "Bar-de"\n')
+
+    class Args:
+        root = str(tmp_path)
+
+    assert cmd_check(Args()) == 0
+    out = capsys.readouterr().out
+    assert "human-reviewed" in out
+    assert "+1 machine-translated pending review" in out
+
+
+def test_select_mt_keys_for_push_returns_only_marked_and_translated_keys(tmp_path):
+    p = write(str(tmp_path / "Locales" / "deDE.lua"),
+              # Bar: MT-marked and translated -> selected.
+              f'{MT_MARKER_COMMENT}\nL["Bar"] = "Bar-de"\n'
+              # Foo: translated but not MT-marked (human/community translation) -> skipped.
+              'L["Foo"] = "Foo-de"\n'
+              # Baz: MT-marked but still a placeholder (value == key) -> skipped.
+              f'{MT_MARKER_COMMENT}\nL["Baz"] = "Baz"\n')
+
+    keys, entries = select_mt_keys_for_push(p)
+
+    assert keys == ["Bar"]
+    assert entries["Bar"] == "Bar-de"
