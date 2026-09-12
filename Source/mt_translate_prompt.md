@@ -1,7 +1,8 @@
 # MT translate deDE prompt
 
-Run this locally via Claude Code (not in CI - no `ANTHROPIC_API_KEY` is wired into any
-workflow for this). It fills genuine deDE translation gaps in the sync PR opened by
+Run this locally via an AI coding assistant with git/shell access (e.g. Claude Code, or an
+equivalent agentic tool) - not in CI, no AI-provider API key is wired into any workflow for
+this. It fills genuine deDE translation gaps in the sync PR opened by
 `.github/workflows/sync_localization_translations.yml`, without ever touching an existing
 community translation.
 
