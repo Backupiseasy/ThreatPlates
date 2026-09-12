@@ -82,12 +82,12 @@ L["Allow"] = "Permitir"
 L["Allow action target selection while player has a locked target."] = "Permitir selección de objetivos por combate de acción mientras el jugador tiene un objetivo fijado."
 L["Always"] = "Siempre"
 L["Always do action targeting"] = "Siempre hacer combate de acción"
---[[Translation missing --]]
-L["Always enabled if full absorbs are shown."] = "Always enabled if full absorbs are shown."
 L["Always Show Nameplates"] = "Siempre mostrar placas identificativas"
 L["Always show nameplates for soft enemy target."] = "Siempre mostrar placas de nombre para objetivo dinámico enemigo."
 L["Always show nameplates for soft friend target."] = "Siempre mostrar placas de nombre para objetivo dinámico amistoso."
 L["Always show nameplates for soft interact target."] = "Siempre mostrar placas de nombre para objetivo dinámico de interacción."
+--[[Translation missing --]]
+L["Always shows the full amount of absorbs on a unit. In overabsorb situations, the absorbs bar is shifted to the left."] = "Always shows the full amount of absorbs on a unit. In overabsorb situations, the absorbs bar is shifted to the left."
 L["Amount"] = "Cantidad"
 L["Anchor"] = "Ancla"
 L["Anchor Point"] = "Punto de Anclar"
@@ -516,10 +516,6 @@ L["In combat, use coloring, transparency, and scaling based on threat level as c
 L["In delta mode, show the name of the player who is second in the enemy unit's threat table."] = "En modo Delta, muestra el nombre del jugador que está de segundo en la tabla de amenaza del enemigo"
 L["In Groups"] = "En grupos"
 L["In Instances"] = "En Instancias"
---[[Translation missing --]]
-L["In over-absorb situations (shield larger than missing health), moves the over-absorb spark to indicate the actual shield magnitude, instead of pinning it to the bar's right edge."] = "In over-absorb situations (shield larger than missing health), moves the over-absorb spark to indicate the actual shield magnitude, instead of pinning it to the bar's right edge."
---[[Translation missing --]]
-L["In over-absorb situations (shield larger than missing health), shows a reverse-fill shield overlay across the health bar and positions the spark at its left boundary to indicate the actual shield magnitude."] = "In over-absorb situations (shield larger than missing health), shows a reverse-fill shield overlay across the health bar and positions the spark at its left boundary to indicate the actual shield magnitude."
 L["Initials"] = "Iniciales"
 L["Insert a new custom nameplate slot after the currently selected slot."] = "Inserta una nueva ranura de placa identificativa personalizada después de la ranura actualmente seleccionada."
 L["Inset"] = "Recuadro"
@@ -1073,7 +1069,7 @@ L["Use a custom color for the name of your current focus target (in healthbar vi
 L["Use a custom color for the name of your current target (in healthbar view and in headline view)."] = "Usa un color personalizado para el nombre de su objetivo actual (en la vista de la barra de salud y en la Vista de Título)."
 L["Use a heuristic to detect if a mob is in combat with you, but only in instances (like dungeons or raids)."] = "Usa una heurística para detectar si un mob está en combate contigo, pero solo en instancias (como mazmorras o bandas)."
 --[[Translation missing --]]
-L["Use a striped texture for the absorbs overlay."] = "Use a striped texture for the absorbs overlay."
+L["Use a striped texture for the absorbs overlay. Always enabled if full absorbs are shown."] = "Use a striped texture for the absorbs overlay. Always enabled if full absorbs are shown."
 L["Use Blizzard default nameplates for friendly nameplates and disable ThreatPlates for these units."] = "Utiliza las placas identificativas predeterminadas de Blizzard para placas identificativas de aliados y deshabilite las placas de amenaza para estas unidades."
 L["Use Blizzard default nameplates for neutral and enemy nameplates and disable ThreatPlates for these units."] = "Utiliza las placas identificativas predeterminadas de Blizzard para placas identificativas neutrales y enemigas y deshabilite las placas de amenaza para estas unidades."
 L["Use FrameSort"] = "Usar ordenar marcos"

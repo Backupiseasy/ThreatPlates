@@ -79,12 +79,12 @@ L["Allow"] = "Zulassen"
 L["Allow action target selection while player has a locked target."] = "Erlaube Zielerfassung für Aktionen, während der Spieler Ziel erfasst hat."
 L["Always"] = "Immer"
 L["Always do action targeting"] = "Zielerfassung für Aktionen immer verwenden"
---[[Machine translation --]]
-L["Always enabled if full absorbs are shown."] = "Immer aktiviert, wenn vollständige Absorptionen angezeigt werden."
 L["Always Show Nameplates"] = "Namensplaketten immer anzeigen"
 L["Always show nameplates for soft enemy target."] = "Namensplaketten für Gegner bei Zielerfassung für Aktionen immer anzeigen."
 L["Always show nameplates for soft friend target."] = "Namensplaketten für Freunde bei Zielerfassung für Aktionen immer anzeigen."
 L["Always show nameplates for soft interact target."] = "Namensplaketten für Interaktionsziele bei Zielerfassung für Aktionen immer anzeigen."
+--[[Translation missing --]]
+L["Always shows the full amount of absorbs on a unit. In overabsorb situations, the absorbs bar is shifted to the left."] = "Always shows the full amount of absorbs on a unit. In overabsorb situations, the absorbs bar is shifted to the left."
 L["Amount"] = "Menge"
 L["Anchor"] = "Verankerung"
 L["Anchor Point"] = "Ankerpunkt"
@@ -489,10 +489,6 @@ L["In combat, use coloring, transparency, and scaling based on threat level as c
 L["In delta mode, show the name of the player who is second in the enemy unit's threat table."] = "Zeige den Namen des Spielers, der zweiter in der Bedrohungstabelle der gegnerischen Einheit ist (bei eingeschaltetem Delta-Modus)."
 L["In Groups"] = "In Gruppen"
 L["In Instances"] = "In Instanzen"
---[[Machine translation --]]
-L["In over-absorb situations (shield larger than missing health), moves the over-absorb spark to indicate the actual shield magnitude, instead of pinning it to the bar's right edge."] = "Verschiebt bei Über-Absorption (Schild größer als fehlende Gesundheit) den Über-Absorptions-Funken, um die tatsächliche Schildstärke anzuzeigen, anstatt ihn am rechten Leistenrand zu fixieren."
---[[Machine translation --]]
-L["In over-absorb situations (shield larger than missing health), shows a reverse-fill shield overlay across the health bar and positions the spark at its left boundary to indicate the actual shield magnitude."] = "Zeigt bei Über-Absorption (Schild größer als fehlende Gesundheit) eine umgekehrt gefüllte Schildüberlagerung über der Gesundheitsleiste an und positioniert den Funken an ihrem linken Rand, um die tatsächliche Schildstärke anzuzeigen."
 L["Initials"] = "Initialen"
 L["Insert a new custom nameplate slot after the currently selected slot."] = "Füge einen neuen Platz für eine benutzerdefinierte Namensplakette nach dem aktuell ausgewählten Platz ein."
 L["Inset"] = "Einrückung"
@@ -1015,8 +1011,8 @@ L["Use a custom color for the healthbar's border."] = "Verwende eine benutzerdef
 L["Use a custom color for the name of your current focus target (in healthbar view and in headline view)."] = "Verwende eine benutzerdefinierte Farbe für den Namen deines aktuellen Fokus-Ziels (in Healthbar-View und Headline-View)."
 L["Use a custom color for the name of your current target (in healthbar view and in headline view)."] = "Verwende eine benutzerdefinierte Farbe für den Namen deines aktuellen Ziels (in Healthbar-View und Headline-View)."
 L["Use a heuristic to detect if a mob is in combat with you, but only in instances (like dungeons or raids)."] = "Verwende die Heuristik um festzustellen, ob du im Kampf mit einem Mob bist, nur in Instanzen (wie Dungeons oder Raids) "
---[[Machine translation --]]
-L["Use a striped texture for the absorbs overlay."] = "Verwendet eine gestreifte Textur für die Absorptionsanzeige."
+--[[Translation missing --]]
+L["Use a striped texture for the absorbs overlay. Always enabled if full absorbs are shown."] = "Use a striped texture for the absorbs overlay. Always enabled if full absorbs are shown."
 L["Use Blizzard default nameplates for friendly nameplates and disable ThreatPlates for these units."] = "Verwende Blizzard-Namensplaketten für freundliche Einheiten und deaktiviere ThreatPlates für diese Einheiten."
 L["Use Blizzard default nameplates for neutral and enemy nameplates and disable ThreatPlates for these units."] = "Verwende Blizzard-Namensplaketten für neutrale und gegnerische Einheiten und deaktiviere ThreatPlates für diese Einheiten."
 L["Use FrameSort"] = "FrameSort verwenden"
@@ -1074,3 +1070,11 @@ L["You can access the "] = "Die Einstellungen können für "
 L["You cannot delete General Settings, only custom nameplates entries."] = "Du kannst die allgemeinen Einstellungen nicht löschen, nur Einträge für benutzerdefinierte Namensplaketten."
 L["You currently have two nameplate addons enabled: |cff89F559Threat Plates|r and |cff89F559%s|r. Please disable one of these, otherwise two overlapping nameplates will be shown for units."] = "Du hast aktuell zwei Nameplate-Addons aktiviert: |cff89F559Threat Plates|r und |cff89F559%s|r. Bitte deaktiviere eines dieser beiden Addons, da ansonsten zwei überlappende Namensplaketten bei Einheiten angezeigt werden."
 L["Your version of LibDogTag-Unit-3.0 does not support nameplates. You need to install at least v90000.3 of LibDogTag-Unit-3.0."] = "Die installierte Version von LibDogTag-Unit-3.0 unterstützt keine Namensplaketten. Du musst zumindest v90000.3 von LibDogTag-Unit-3.0 installieren."
+--[[Machine translation --]]
+L["Always enabled if full absorbs are shown."] = "Immer aktiviert, wenn vollständige Absorptionen angezeigt werden."
+--[[Machine translation --]]
+L["In over-absorb situations (shield larger than missing health), moves the over-absorb spark to indicate the actual shield magnitude, instead of pinning it to the bar's right edge."] = "Verschiebt bei Über-Absorption (Schild größer als fehlende Gesundheit) den Über-Absorptions-Funken, um die tatsächliche Schildstärke anzuzeigen, anstatt ihn am rechten Leistenrand zu fixieren."
+--[[Machine translation --]]
+L["In over-absorb situations (shield larger than missing health), shows a reverse-fill shield overlay across the health bar and positions the spark at its left boundary to indicate the actual shield magnitude."] = "Zeigt bei Über-Absorption (Schild größer als fehlende Gesundheit) eine umgekehrt gefüllte Schildüberlagerung über der Gesundheitsleiste an und positioniert den Funken an ihrem linken Rand, um die tatsächliche Schildstärke anzuzeigen."
+--[[Machine translation --]]
+L["Use a striped texture for the absorbs overlay."] = "Verwendet eine gestreifte Textur für die Absorptionsanzeige."
