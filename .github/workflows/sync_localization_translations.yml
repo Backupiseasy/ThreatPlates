@@ -42,6 +42,12 @@ name: Sync localization strings with CurseForge
 # The push trigger is scoped to these branches (not "all branches"): the PR step below pushes its
 # own commits to a localization-sync-* branch, and a trigger that also matched that branch would
 # re-run this workflow on its own output.
+#
+# Checkout and PR creation use PAT_TOKEN (a personal access token), not the default GITHUB_TOKEN:
+# a PR opened under GITHUB_TOKEN is attributed to github-actions[bot], and GitHub then requires a
+# maintainer to manually click "Approve and run workflows" before pull_request-triggered workflows
+# (e.g. check_localization.yml) will run on it - same gate as a first-time contributor's fork PR.
+# Using a real user's PAT avoids that gate entirely, so the check workflow runs immediately.
 
 on:
   workflow_dispatch:
@@ -78,6 +84,8 @@ jobs:
     steps:
       - name: Clone project
         uses: actions/checkout@v7
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
 
       - name: Install Python
         uses: actions/setup-python@v6
@@ -99,6 +107,7 @@ jobs:
       - name: Open pull request with updated translations
         uses: peter-evans/create-pull-request@v8
         with:
+          token: ${{ secrets.PAT_TOKEN }}
           commit-message: "Update localization files from CurseForge"
           title: "Update localization files from CurseForge"
           body: |
