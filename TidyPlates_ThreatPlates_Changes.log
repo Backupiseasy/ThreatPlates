@@ -10,6 +10,7 @@
 * Fixed missing text shadows on nameplate text (name, level, status text, auras, and other widgets) on TBC Classic [GH-734].
 * Fixed absorb and heal absorb display not working on Mists Classic despite the options being available.
 * Fixed a Lua error when coloring nameplates of player-controlled units, caused by PvP status being a secret value for them [GH-744].
+* Fixed the threat percentage not showing after /reload when "Show in Groups" is enabled, until the next group roster update [GH-737].
 
 ------------------------------------------------------
 13.1.1 (2026-08-25)
