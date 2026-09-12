@@ -9,6 +9,7 @@
 * Fixed a Lua error in Social widget in Arenas and Battlegrounds, caused by Blizzard now returning name/realm information as a secret value for hostile players there.
 * Fixed missing text shadows on nameplate text (name, level, status text, auras, and other widgets) on TBC Classic [GH-734].
 * Fixed absorb and heal absorb display not working on Mists Classic despite the options being available.
+* Fixed a Lua error when coloring nameplates of player-controlled units, caused by PvP status being a secret value for them [GH-744].
 
 ------------------------------------------------------
 13.1.1 (2026-08-25)
