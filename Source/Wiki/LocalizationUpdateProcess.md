@@ -53,9 +53,22 @@ edits with no accompanying code change) and via manual `workflow_dispatch`.
    any enUS key the scan no longer finds — safe because every dynamic `L[expr]` site the AST scan
    can't resolve is expected to already have its possible keys documented in that registry file; see
    `cmd_generate_enus`'s docstring in `Source/localization_tool.py` for the full reasoning.
-3. `pull` — downloads current CF translations for every `Locales.xml`-enabled locale.
+3. `pull` — downloads current CF translations for every `Locales.xml`-enabled locale. Never
+   regresses or drops a locally existing translation: if CF reports a key as
+   `--[[Translation missing --]]`, the existing local translation (and its
+   `--[[Machine translation --]]` marker, if any) is kept instead of the placeholder; if CF
+   doesn't know the key at all yet (its enUS phrase hasn't reached CF via Step 5's `upload` -
+   see the note below on that), the existing local translation is carried over unchanged
+   rather than silently dropped. See `preserve_existing_translations()` in
+   `Source/localization_tool.py`.
 4. Opens (or updates, if one is already open) a PR titled **"Update localization files from
    CurseForge"** on branch `localization-sync-<ref>`.
+
+Checkout and PR creation use a personal access token (the `PAT_TOKEN` repo secret), not the
+default `GITHUB_TOKEN`. A PR opened under `GITHUB_TOKEN` is attributed to
+`github-actions[bot]`, and GitHub then requires a maintainer to manually click "Approve and
+run workflows" before `pull_request`-triggered workflows (Step 2) run on it - same gate as a
+first-time contributor's fork PR. `PAT_TOKEN` avoids that entirely.
 
 Nothing to do here unless something looks wrong in the resulting PR (see Step 2).
 
@@ -146,3 +159,13 @@ no manual bookkeeping needed anywhere in this pipeline.
 - **Branch cleanup after merge.** `delete_branch_on_merge` is enabled repo-wide, so GitHub
   auto-deletes a `localization-sync-*` branch once its PR is merged (does *not* apply to PRs closed
   without merging, or to branches that already existed before this setting was turned on).
+- **Not every branch runs the same version of this tooling.** CF phrase state is shared
+  globally across the whole project, but each branch's `Locales/*.lua` and
+  `Source/localization_tool.py` are independent until merged. A branch still running an
+  older, unmigrated `sync_localization_translations.yml` (e.g. one with its own unconditional
+  `upload` step, pre-dating Step 5's merge-gated split) can upload an enUS phrase to CF that
+  another branch also happens to contain in its code - CF then starts reporting it (as a
+  placeholder, or later a real translation) to that other branch's own `pull`, even though
+  that branch never uploaded it itself. `pull`'s preserve logic (Step 1) handles this
+  correctly, but only once every branch has that logic - if in doubt, verify an unexpected
+  `pull` diff on a locale file rather than trusting it at face value.
