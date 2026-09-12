@@ -510,14 +510,25 @@ _LOCALE_ENTRY_RE = re.compile(r'^L\[("(?:[^"\\]|\\.)*")\]\s*=\s*("(?:[^"\\]|\\.)
 
 
 def _index_translated_entries(lines):
-    """Map literal `L["key"]` source text -> full source line, for every
-    single-line `L["key"] = "value"` entry whose value differs from its key
-    (i.e. an actual translation, not a missing-translation placeholder)."""
+    """Map literal `L["key"]` source text -> (full source line, mt_marked), for
+    every single-line `L["key"] = "value"` entry whose value differs from its
+    key (i.e. an actual translation, not a missing-translation placeholder).
+
+    mt_marked is True when the immediately preceding non-blank line is exactly
+    MT_MARKER_COMMENT (same convention as parse_mt_marked_keys) - carried along
+    so a pull that preserves the entry can also preserve its pending-review
+    status, instead of it silently starting to count as human-reviewed just
+    because CurseForge happens to have since heard of the phrase."""
     index = {}
-    for line in lines:
+    for i, line in enumerate(lines):
         m = _LOCALE_ENTRY_RE.match(line.strip())
-        if m and m.group(1) != m.group(2):
-            index.setdefault(m.group(1), line)
+        if not (m and m.group(1) != m.group(2)):
+            continue
+        j = i - 1
+        while j >= 0 and lines[j].strip() == "":
+            j -= 1
+        mt_marked = j >= 0 and lines[j].strip() == MT_MARKER_COMMENT
+        index.setdefault(m.group(1), (line, mt_marked))
     return index
 
 
@@ -528,32 +539,59 @@ def preserve_existing_translations(existing_lines, incoming_lines):
     correct translation if one exists locally - e.g. because it was edited
     directly and never re-uploaded to CurseForge, or because the English key
     text changed and CurseForge's translation pool hasn't caught up yet. Where
-    that's the case, keep the existing translation and drop the now-inaccurate
-    comment instead of pulling in the placeholder.
+    that's the case, keep the existing translation (and its MT_MARKER_COMMENT,
+    if any) instead of pulling in the placeholder.
+
+    A key can also be missing from CurseForge's export entirely - not even as a
+    placeholder - e.g. a phrase this project's own sync workflow hasn't
+    `upload`ed yet (upload is merge-gated, separate from this pull; see
+    publish_localization_to_curseforge.yml). CurseForge's export is otherwise
+    treated as authoritative and fully replaces the locale file, so such a key
+    would silently vanish, not just regress to untranslated. Any locally
+    existing translation whose key never appears anywhere in incoming_lines is
+    therefore carried over unchanged (with its marker) at the end.
 
     Only handles single-line `L["..."] = "..."` entries (the vast majority) -
     multi-line long-bracket string values are left as CurseForge sent them,
     same as before this safeguard existed.
 
-    Returns (merged_lines, preserved_count)."""
+    Returns (merged_lines, preserved_count, carried_over_count)."""
     existing_by_key = _index_translated_entries(existing_lines)
     result = []
     preserved = 0
+    seen_keys = set()
     i, n = 0, len(incoming_lines)
     while i < n:
         line = incoming_lines[i]
         if line.strip() == "--[[Translation missing --]]" and i + 1 < n:
             m = _LOCALE_ENTRY_RE.match(incoming_lines[i + 1].strip())
             if m and m.group(1) == m.group(2):
-                existing_line = existing_by_key.get(m.group(1))
-                if existing_line is not None:
+                existing = existing_by_key.get(m.group(1))
+                if existing is not None:
+                    existing_line, mt_marked = existing
+                    if mt_marked:
+                        result.append(MT_MARKER_COMMENT)
                     result.append(existing_line)
+                    seen_keys.add(m.group(1))
                     preserved += 1
                     i += 2
                     continue
+        m2 = _LOCALE_ENTRY_RE.match(line.strip())
+        if m2:
+            seen_keys.add(m2.group(1))
         result.append(line)
         i += 1
-    return result, preserved
+
+    carried_over = 0
+    for key, (existing_line, mt_marked) in existing_by_key.items():
+        if key in seen_keys:
+            continue
+        if mt_marked:
+            result.append(MT_MARKER_COMMENT)
+        result.append(existing_line)
+        carried_over += 1
+
+    return result, preserved, carried_over
 
 
 def cmd_pull(args):
@@ -601,9 +639,11 @@ def cmd_pull(args):
         if os.path.exists(locale_path):
             with open(locale_path, encoding="utf-8-sig") as f:
                 existing_lines = f.read().splitlines()
-        body_lines, preserved = preserve_existing_translations(existing_lines, body_lines)
+        body_lines, preserved, carried_over = preserve_existing_translations(existing_lines, body_lines)
         if preserved:
             print(f"  Kept {preserved} existing translation(s) CurseForge reported as missing.")
+        if carried_over:
+            print(f"  Kept {carried_over} existing translation(s) CurseForge doesn't know about yet.")
 
         with open(locale_path, "w", encoding="utf-8", newline="\n") as f:
             f.write(header)

@@ -19,6 +19,7 @@ from localization_tool import (
     lua_quote,
     parse_locale_keys,
     parse_mt_marked_keys,
+    preserve_existing_translations,
     scan_repository,
     select_mt_keys_for_push,
 )
@@ -367,3 +368,63 @@ def test_select_mt_keys_for_push_returns_only_marked_and_translated_keys(tmp_pat
 
     assert keys == ["Bar"]
     assert entries["Bar"] == "Bar-de"
+
+
+# ---------------------------------------------------------------------------
+# preserve_existing_translations: a pull must not regress or silently drop a
+# translation CurseForge doesn't (yet) know about - see cmd_pull's docstring
+# and the bug this was written against (an MT translation for a phrase never
+# `upload`ed lost its pending-review marker, or vanished outright, on the very
+# next pull).
+# ---------------------------------------------------------------------------
+
+def test_preserve_existing_translations_keeps_translation_for_reported_placeholder():
+    existing = ['L["Foo"] = "Foo-de"']
+    incoming = ['--[[Translation missing --]]', 'L["Foo"] = "Foo"']
+
+    merged, preserved, carried_over = preserve_existing_translations(existing, incoming)
+
+    assert merged == ['L["Foo"] = "Foo-de"']
+    assert preserved == 1
+    assert carried_over == 0
+
+
+def test_preserve_existing_translations_keeps_mt_marker_across_placeholder_substitution():
+    # CurseForge has since heard of the phrase (sends its own "missing" placeholder for
+    # it) but the actual translation is still ours, unreviewed - the marker must survive,
+    # not silently start counting as human-reviewed.
+    existing = [MT_MARKER_COMMENT, 'L["Foo"] = "Foo-de"']
+    incoming = ['--[[Translation missing --]]', 'L["Foo"] = "Foo"']
+
+    merged, preserved, carried_over = preserve_existing_translations(existing, incoming)
+
+    assert merged == [MT_MARKER_COMMENT, 'L["Foo"] = "Foo-de"']
+    assert preserved == 1
+    assert carried_over == 0
+
+
+def test_preserve_existing_translations_carries_over_key_curseforge_has_never_heard_of():
+    # "Bar" isn't in CurseForge's export at all - not even as a placeholder (e.g. its
+    # enUS phrase was never `upload`ed yet). It must not vanish from the locale file.
+    existing = [MT_MARKER_COMMENT, 'L["Bar"] = "Bar-de"']
+    incoming = ['L["Foo"] = "Foo-de"']
+
+    merged, preserved, carried_over = preserve_existing_translations(existing, incoming)
+
+    assert merged == ['L["Foo"] = "Foo-de"', MT_MARKER_COMMENT, 'L["Bar"] = "Bar-de"']
+    assert preserved == 0
+    assert carried_over == 1
+
+
+def test_preserve_existing_translations_does_not_duplicate_a_key_curseforge_already_sends():
+    # "Foo" has a real (non-placeholder) translation on both sides - CurseForge's own
+    # version passes through untouched, and it must not also get appended again from
+    # the carry-over pass.
+    existing = ['L["Foo"] = "Alte Uebersetzung"']
+    incoming = ['L["Foo"] = "Neue Community-Uebersetzung"']
+
+    merged, preserved, carried_over = preserve_existing_translations(existing, incoming)
+
+    assert merged == ['L["Foo"] = "Neue Community-Uebersetzung"']
+    assert preserved == 0
+    assert carried_over == 0
