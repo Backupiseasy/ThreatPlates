@@ -83,7 +83,8 @@ L["Always Show Nameplates"] = "Namensplaketten immer anzeigen"
 L["Always show nameplates for soft enemy target."] = "Namensplaketten für Gegner bei Zielerfassung für Aktionen immer anzeigen."
 L["Always show nameplates for soft friend target."] = "Namensplaketten für Freunde bei Zielerfassung für Aktionen immer anzeigen."
 L["Always show nameplates for soft interact target."] = "Namensplaketten für Interaktionsziele bei Zielerfassung für Aktionen immer anzeigen."
-L["Always shows the full amount of absorbs on a unit. In overabsorb situations, the absorbs bar is shifted to the left."] = "Zeit immer die gesamte Menge an Absorptionen einer Einheit an. In Situationen mit Überabsorption wird die Absorptionenleiste nach links verschoben. "
+--[[Translation missing --]]
+L["Always shows the full amount of absorbs on a unit. In overabsorb situations, the absorbs bar is shifted to the left."] = "Always shows the full amount of absorbs on a unit. In overabsorb situations, the absorbs bar is shifted to the left."
 L["Amount"] = "Menge"
 L["Anchor"] = "Verankerung"
 L["Anchor Point"] = "Ankerpunkt"
@@ -129,6 +130,8 @@ L["Bar Style"] = "Leistenstil"
 L["Bar Width"] = "Leistenbreite"
 L["Bars"] = "Leisten"
 L["Big"] = "Groß"
+--[[Machine translation --]]
+L["Big Defensives"] = "Große Verteidigungs-Buffs"
 L["Big matches the previous default size; normal keeps nameplates more compact, scaled down by the UI scale."] = "Groß entspricht der bisherigen Standardgröße; Normal hält Namensplaketten kompakter, skaliert durch den UI-Maßstab."
 L["Blizzard"] = "Blizzard"
 L["Blizzard Settings"] = "Blizzard-Einstellungen"
@@ -190,8 +193,12 @@ L["Color"] = "Farbe"
 L["Color by Target Mark"] = "Einfärben nach Zielmarkierung"
 L["Color Healthbar by Target Marks in Healthbar View"] = "Gesundheitsleiste nach Zielmarkierung in Healthbar-View einfärben"
 L["Color Name by Target Marks in Headline View"] = "Name nach Zielmarkierung im Headline-View einfärben"
+--[[Machine translation --]]
+L["Color when Expiring"] = "Einfärben beim Ablaufen"
 L["Coloring"] = "Farben"
 L["Colors"] = "Farben"
+--[[Machine translation --]]
+L["Colors the countdown text once the remaining duration drops below the threshold below - the Midnight replacement for Flash When Expiring, which has no equivalent on Midnight."] = "Färbt den Countdown-Text ein, sobald die verbleibende Dauer unter den Schwellenwert unten fällt - der Midnight-Ersatz für \"Aufblinken beim Ablaufen\", das auf Midnight keine Entsprechung hat."
 L["Column Limit"] = "Spaltenobergrenze"
 L["Combat"] = "Kampf"
 L["Combo Points"] = "Combopunkte"
@@ -286,6 +293,14 @@ L["Enable Guild Members"] = "Gildenmitglieder einschalten"
 L["Enable Healer Tracker Widget"] = "Heiler-Tracker-Widget einschalten"
 L["Enable nameplate clickthrough for enemy units."] = "Hindurchklicken bei Namensplaketten bei gegnerischen Einheiten einschalten."
 L["Enable nameplate clickthrough for friendly units."] = "Hindurchklicken bei Namensplaketten bei freundlichen Einheiten einschalten."
+--[[Machine translation --]]
+L["Enable or disable showing crowd control auras on enemy units altogether."] = "Schaltet die Anzeige von Crowd-Control-Auren auf gegnerischen Einheiten insgesamt ein oder aus."
+--[[Machine translation --]]
+L["Enable or disable showing crowd control auras on friendly units altogether."] = "Schaltet die Anzeige von Crowd-Control-Auren auf freundlichen Einheiten insgesamt ein oder aus."
+--[[Machine translation --]]
+L["Enable or disable showing debuffs on enemy units altogether."] = "Schaltet die Anzeige von Debuffs auf gegnerischen Einheiten insgesamt ein oder aus."
+--[[Machine translation --]]
+L["Enable or disable showing debuffs on friendly units altogether."] = "Schaltet die Anzeige von Debuffs auf freundlichen Einheiten insgesamt ein oder aus."
 L["Enable Quest Widget"] = "Quest-Widget einschalten"
 L["Enable Resource Widget"] = "Ressourcen-Widget einschalten"
 L["Enable Social Widget"] = "Gemeinschaft-Widget einschalten"
@@ -327,6 +342,10 @@ L["Evoker Essence Cooldown"] = "Essenz-Cooldown von Rufern"
 L["Exchange"] = "Austausch"
 L["Experience"] = "Erfahrung"
 L["Experience Text"] = "Erfahrungstext"
+--[[Machine translation --]]
+L["Expiring Color"] = "Farbe beim Ablaufen"
+--[[Machine translation --]]
+L["Expiring Threshold"] = "Schwellenwert für Ablaufen"
 L["Export"] = "Export"
 L["Export all custom nameplate settings as string."] = "Alle benutzerdefinierten Namensplaketten als Zeichenkette exportieren."
 L["Export Custom Nameplates"] = "Benutzerdefinierte Namensplaketten exportieren"
@@ -409,6 +428,8 @@ L["Healthbar, Castbar"] = "Gesundheitsleiste, Zauberleiste"
 L["Heuristic"] = "Heuristik"
 L["Heuristic In Instances"] = "Heuristik in Instanzen"
 L["Hide Buffs"] = "Verstecke Buffs"
+--[[Machine translation --]]
+L["Hide buffs with a duration longer than this, in seconds (applies on top of the toggles above). 0 disables this filter. Any non-zero value also hides permanent buffs."] = "Versteckt Buffs mit einer längeren Dauer als hier angegeben (in Sekunden), zusätzlich zu den obigen Schaltern. 0 deaktiviert diesen Filter. Jeder Wert ungleich 0 versteckt auch permanente Buffs."
 L["Hide Friendly Nameplates"] = "Freundliche Namensplaketten verstecken"
 L["Hide Healthbars"] = "Gesundheitsleisten verstecken"
 L["Hide healthbars of friendly units"] = "Gesundheitsleisten von freundlichen Einheiten verstecken"
@@ -508,6 +529,8 @@ L["Match appropriate action target to locked target."] = "Zielerfassung für Akt
 L["Max Auras"] = "Max. Auren"
 L["Max Distance"] = "Maximale Entfernung"
 L["Max Distance Behind Camera"] = "Maximale Entfernung hinter der Kamera"
+--[[Machine translation --]]
+L["Max Duration"] = "Maximale Dauer"
 L["Max Health"] = "Maximale Gesundheit"
 L["Medium Threat"] = "Mittlere Bedrohung"
 L["Member 1"] = "Mitglied 1"
@@ -582,6 +605,8 @@ L["Only in Instances"] = "Nur in Instanzen"
 L["Only Mine"] = "Nur eigene"
 L["Only Names"] = "Nur Namen"
 L["Only Names for Friendly Players"] = "Nur Namen für freundliche Spieler"
+--[[Machine translation --]]
+L["Only takes effect while \"Dispellable\" above is also checked."] = "Wirkt sich nur aus, wenn \"Bannbar\" oben ebenfalls aktiviert ist."
 L["Onyxian Whelp"] = "Welpe von Onyxia"
 L["Open Blizzard Settings"] = "Blizzard-Einstellungen öffnen"
 L["Open Options"] = "Optionen öffnen"
@@ -604,6 +629,8 @@ L["Pets"] = "Begleiter"
 L["Pixel"] = "Pixel"
 L["Pixel-Perfect UI"] = "Pixelperfektes UI"
 L["Placement"] = "Platzierung"
+--[[Machine translation --]]
+L["Player Can Apply"] = "Von dir wirkbar"
 L["Players"] = "Spieler"
 L["Players in Instances"] = "Spieler in Instanzen"
 L["Please select a target unit to enable configuration mode."] = "Bitte visiere eine Einheit an, um den Konfigurationsmodus zu aktivieren."
@@ -629,6 +656,8 @@ L["Realm"] = "Realm"
 L["Reanimated Adherent"] = "Wiederbelebter Kultist"
 L["Reanimated Fanatic"] = "Wiederbelebter Fanatiker"
 L["Render font without antialiasing."] = "Schriftart ohne Antialiasing berechnen."
+--[[Machine translation --]]
+L["Requires /reload to take effect on already-displayed auras."] = "Erfordert /reload, um sich auf bereits angezeigte Auren auszuwirken."
 L["Reset to Defaults"] = "Zurücksetzen auf Standardwerte"
 L["Resource"] = "Ressourcen"
 L["Resource Bar"] = "Ressourcenleiste"
@@ -676,6 +705,10 @@ L["Show a tooltip when hovering above an aura."] = "Zeige einen Tooltip an, wenn
 L["Show all buffs on enemy units."] = "Zeige alle Buffs auf gegnerischen Einheiten an."
 L["Show all buffs on friendly units."] = "Zeige alle Buffs auf freundlichen Einheiten an."
 L["Show all buffs on NPCs."] = "Zeige alle Buffs auf NPCs an."
+--[[Machine translation --]]
+L["Show all buffs on NPCs. Like All, but scoped to enemy NPCs only - not freely combinable with Dispellable/Magic on NPC targets."] = "Zeige alle Buffs auf NPCs an. Wie Alle, aber beschränkt auf gegnerische NPCs - nicht frei mit Bannbar/Magie auf NPC-Zielen kombinierbar."
+--[[Machine translation --]]
+L["Show all buffs on NPCs. Like All, but scoped to friendly NPCs only - not freely combinable with Mine/Player Can Apply/Big Defensives on NPC targets."] = "Zeige alle Buffs auf NPCs an. Wie Alle, aber beschränkt auf freundliche NPCs - nicht frei mit Eigene/Von dir wirkbar/Große Verteidigungs-Buffs auf NPC-Zielen kombinierbar."
 L["Show all crowd control auras on enemy units."] = "Zeige alle Crowd-Control-Auren auf gegnerischen Einheiten an."
 L["Show all crowd control auras on friendly units."] = "Zeige alle Crowd-Control-Auren auf freundlichen Einheiten an."
 L["Show all debuffs on enemy units."] = "Zeige alle Debuffs auf gegnerischen Einheiten an."
@@ -686,13 +719,19 @@ L["Show an quest icon at the nameplate for quest mobs."] = "Zeige ein Questsymbo
 L["Show auras as bars (with optional icons)."] = "Auren als Leisten anzeigen (optional mit Symbolen)."
 L["Show auras as icons in a grid configuration."] = "Auren als Symbole in einem Raster anzeigen."
 L["Show auras in order created with oldest aura first."] = "Sortiert die Auren in der Reihenfolge, in der sie erzeugt wurden (älteste zuerst)."
+--[[Machine translation --]]
+L["Show big defensive buffs."] = "Zeige große Verteidigungs-Buffs an."
 L["Show Blizzard Nameplates for Friendly Units"] = "Blizzard-Namensplaketten für freundliche Einheiten anzeigen"
 L["Show Blizzard Nameplates for Neutral and Enemy Units"] = "Blizzard-Namensplaketten für neutrale und gegnerische Einheiten anzeigen"
 L["Show Buffs"] = "Buffs anzeigen"
+--[[Machine translation --]]
+L["Show buffs of dispel type Magic."] = "Zeige Buffs der Bannart Magie an."
 L["Show buffs of dispell type Magic."] = "Buffs der Bannart Magie anzeigen."
 L["Show buffs that were applied by you."] = "Zeigt Buffs an, die von dir angewendet wurden."
 L["Show buffs that you can apply."] = "Zeige Buffs an, die du anwenden kannst."
 L["Show buffs that you can dispell."] = "Zeige Stärkungszauber an, die du bannen kannst."
+--[[Machine translation --]]
+L["Show buffs that you could apply yourself (regardless of who actually cast them)."] = "Zeige Buffs an, die du selbst wirken könntest (unabhängig davon, wer sie tatsächlich gewirkt hat)."
 L["Show buffs with unlimited duration in all situations (e.g., in and out of combat)."] = "Buffs mit unbegrenzter Laufzeit in allen Situationen anzeigen (z. B. in und außerhalb des Kampfes)."
 L["Show By Unit Type"] = "Basierend auf Einheitentyp anzeigen"
 L["Show Crowd Control"] = "Crowd-Control anzeigen"
@@ -700,10 +739,27 @@ L["Show crowd control auras that are shown on Blizzard's default nameplates."] =
 L["Show crowd control auras that were applied by bosses."] = "Zeige Crowd-Control-Auren an, die von Bossen angewendet wurden."
 L["Show crowd control auras that you can dispell."] = "Zeige Crowd-Control-Auren an, die du bannen kannst."
 L["Show Debuffs"] = "Debuffs anzeigen"
+--[[Machine translation --]]
+L["Show debuffs applied by you that are also shown on Blizzard's default nameplates."] = "Zeige von dir angewendete Debuffs an, die auch bei den Standard-Namensplaketten von Blizzard angezeigt werden."
 L["Show debuffs that are shown on Blizzard's default nameplates."] = "Zeige Debuffs an, die bei den Standard-Namensplaketten von Blizzard angezeigt werden."
+--[[Machine translation --]]
+L["Show debuffs that Blizzard classifies as high priority."] = "Zeige Debuffs an, die von Blizzard als hohe Priorität eingestuft werden."
+--[[Machine translation --]]
+L["Show debuffs that can be dispelled, restricted to the dispel types checked below (Curse/Disease/Magic/Poison)."] = "Zeige bannbare Debuffs an, beschränkt auf die unten ausgewählten Bannarten (Fluch/Krankheit/Magie/Gift)."
 L["Show debuffs that were applied by bosses."] = "Zeige Debuffs an, die von Bossen angewendet wurden."
+--[[Machine translation --]]
+L["Show debuffs that were applied by you (or your pet)."] = "Zeige Debuffs an, die von dir (oder deinem Begleiter) angewendet wurden."
 L["Show debuffs that were applied by you."] = "Zeige Debuffs an, die von dir angewendet wurden."
-L["Show debuffs that you can dispell."] = "Zeige Schwächungszauber an, die du bannen kannst"
+--[[Machine translation --]]
+L["Show debuffs that you can dispell, restricted to the dispel types checked below (Curse/Disease/Magic/Poison)."] = "Zeige Debuffs an, die du bannen kannst, beschränkt auf die unten ausgewählten Bannarten (Fluch/Krankheit/Magie/Gift)."
+--[[Machine translation --]]
+L["Show dispellable harmful auras of the Curse dispel type."] = "Zeige bannbare schädliche Auren der Bannart Fluch an."
+--[[Machine translation --]]
+L["Show dispellable harmful auras of the Disease dispel type."] = "Zeige bannbare schädliche Auren der Bannart Krankheit an."
+--[[Machine translation --]]
+L["Show dispellable harmful auras of the Magic dispel type."] = "Zeige bannbare schädliche Auren der Bannart Magie an."
+--[[Machine translation --]]
+L["Show dispellable harmful auras of the Poison dispel type."] = "Zeige bannbare schädliche Auren der Bannart Gift an."
 L["Show Enemy Nameplates"] = "Namensplaketten von gegnerischen Einheiten anzeigen"
 L["Show Enemy Units"] = "Gegnerische Einheiten anzeigen"
 L["Show Focus"] = "Fokus anzeigen"
@@ -820,6 +876,8 @@ L["Texture"] = "Textur"
 L["Textures"] = "Texturen"
 L["The (friendly or hostile) player is not flagged for PvP or the player is in a sanctuary."] = "Der (freundliche oder feindliche) Spieler ist nicht für PvP markiert oder der Spieler befindet sich in einem Refugium."
 L["The font for unit names can only be changed if nameplates and names are be enabled for these units. Names can be enabled in \"Game Menu - Interface - Names\"."] = "Die Schriftart für Einheitennamen kann nur geändert werden, wenn Namensplaketten und Namen für diese Einheiten eingeschaltet sind. Namen können hier eingeschaltet werden: Spielmenü - Interface - Namen."
+--[[Machine translation --]]
+L["The icon crop for Wide/Square requires /reload to take effect on already-displayed auras."] = "Der Symbolzuschnitt für Breit/Square erfordert /reload, um sich auf bereits angezeigte Auren auszuwirken."
 L["The import string contains a profile from an different Threat Plates version. The profile will still be imported (and migrated as far as possible), but some settings from the imported profile might be lost."] = "Die Import-Zeichenkette enthält ein Profil von einer anderen Threat-Plates-Version. Das Profil wird trotzdem importiert (und soweit möglich migriert), aber einige Einstellungen aus dem importierten Profil können verloren gehen. "
 L["The import string contains custom nameplate settings from a different Threat Plates version. The custom nameplates will still be imported (and migrated as far as possible), but some settings from the imported custom nameplates might be lost."] = "Die Import-Zeichenkette enthält Einstellungen für benutzerdefinierte Namensplaketten von einer anderen Threat-Plates-Version. Das Profil wird trotzdem importiert (und soweit möglich migriert), aber einige Einstellungen der importierten benutzerdefinierten Namensplaketten können verloren gehen. "
 L["The import string has an invalid format and cannot be imported. Verify that the import string was generated from the same Threat Plates version that you are using currently."] = "Die Import-Zeichenkette hat ein ungültiges Format und kann nicht importiert werden. Überprüfe, ob die Import-Zeichenkette von der gleichen Threat-Plates-Version erzeugt wurde, die auch du aktuell benutzt."
@@ -861,6 +919,12 @@ L["This option allows you to control whether threat affects the transparency of 
 L["This setting will disable threat scale for target marked, mouseover or casting units and instead use the general scale settings."] = "Die Einstellung schaltet die Skalierung auf Basis der Bedrohung für Einheiten für markierte, zaubernde oder Mouseover-Einheiten aus."
 L["This setting will disable threat transparency for target marked, mouseover or casting units and instead use the general transparency settings."] = "Die Einstellung schaltet die Transparenz auf Basis der Bedrohung für Einheiten für markierte, zaubernde oder Mouseover-Einheiten aus."
 L["This settings changes CVars related to action targeting and are not stored in the profile, but by WoW itself (character-specific settings)."] = "Diese Einstellungen ändern CVars für das Zielerfassungssystem für Aktionen. Sie werden nicht im Profil gespeichert, sondern durch WoW selbst (charakterspezifische Einstellungen)."
+--[[Machine translation --]]
+L["This spell filter only takes effect for buffs on friendly units. On enemy units it has no effect, due to a Blizzard API restriction (Patch 12.1.0)."] = "Dieser Zauberfilter wirkt sich nur auf Buffs bei freundlichen Einheiten aus. Bei gegnerischen Einheiten hat er keine Wirkung, aufgrund einer Blizzard-API-Einschränkung (Patch 12.1.0)."
+--[[Machine translation --]]
+L["This spell filter only takes effect for crowd control on enemy units. On friendly units it has no effect, due to a Blizzard API restriction (Patch 12.1.0)."] = "Dieser Zauberfilter wirkt sich nur auf Crowd-Control bei gegnerischen Einheiten aus. Bei freundlichen Einheiten hat er keine Wirkung, aufgrund einer Blizzard-API-Einschränkung (Patch 12.1.0)."
+--[[Machine translation --]]
+L["This spell filter only takes effect for debuffs on enemy units. On friendly units it has no effect, due to a Blizzard API restriction (Patch 12.1.0)."] = "Dieser Zauberfilter wirkt sich nur auf Debuffs bei gegnerischen Einheiten aus. Bei freundlichen Einheiten hat er keine Wirkung, aufgrund einer Blizzard-API-Einschränkung (Patch 12.1.0)."
 L["This widget highlights the nameplate of your current focus target by showing a border around the healthbar and by coloring the nameplate's healthbar and/or name with a custom color."] = "Dieses Widget hebt die Namensplakette deines aktuellen Fokus-Ziels hervor, indem ein Rand um die Gesundheitsleiste herum angezeigt wird oder indem die Gesundheitsleiste und/oder der Name mit einer benutzerdefinierten Farbe eingefärbt werden."
 L["This widget highlights the nameplate of your current target by showing a border around the healthbar and by coloring the nameplate's healthbar and/or name with a custom color."] = "Dieses Widget hebt die Namensplakette deines aktuellen Ziels hervor, indem ein Rand um die Gesundheitsleiste herum angezeigt wird oder indem die Gesundheitsleiste und/oder der Name mit einer benutzerdefinierten Farbe eingefärbt werden."
 L["This widget shows a class icon on the nameplates of players."] = "Dieses Widget zeigt ein Klassensymbol an den Namensplaketten von Spielern an."
@@ -921,7 +985,8 @@ L["Typeface"] = "Schriftart"
 L["UI Scale"] = "UI-Skalierung"
 L["Unable to change a setting while in combat."] = "Eine Einstellung kann nicht angepasst werden, während du dich im Kampf befindest."
 L["Unable to change the following console variable while in combat: "] = "Die folgende Konsolenvariable kann nicht angepasst werden, während du dich im Kampf befindest: "
-L["Unable to change this setting while in combat"] = "Diese Einstellung kann nicht angepasst werden, während du dich im Kampf befindest"
+--[[Machine translation --]]
+L["Unable to change this setting while in combat."] = "Diese Einstellung kann nicht angepasst werden, während du dich im Kampf befindest."
 L["Unfriendly"] = "Unfreundlich"
 L["Uniform Color"] = "Einheitliche Farbe"
 L["Unit"] = "Einheit"
@@ -946,7 +1011,8 @@ L["Use a custom color for the healthbar's border."] = "Verwende eine benutzerdef
 L["Use a custom color for the name of your current focus target (in healthbar view and in headline view)."] = "Verwende eine benutzerdefinierte Farbe für den Namen deines aktuellen Fokus-Ziels (in Healthbar-View und Headline-View)."
 L["Use a custom color for the name of your current target (in healthbar view and in headline view)."] = "Verwende eine benutzerdefinierte Farbe für den Namen deines aktuellen Ziels (in Healthbar-View und Headline-View)."
 L["Use a heuristic to detect if a mob is in combat with you, but only in instances (like dungeons or raids)."] = "Verwende die Heuristik um festzustellen, ob du im Kampf mit einem Mob bist, nur in Instanzen (wie Dungeons oder Raids) "
-L["Use a striped texture for the absorbs overlay. Always enabled if full absorbs are shown."] = "Verwende eine gestreifte Textur für das Absorptionen-Overlay. Diese Textur ist immer aktiviert, falls die gesamten Absorptionen angezeigt werden."
+--[[Translation missing --]]
+L["Use a striped texture for the absorbs overlay. Always enabled if full absorbs are shown."] = "Use a striped texture for the absorbs overlay. Always enabled if full absorbs are shown."
 L["Use Blizzard default nameplates for friendly nameplates and disable ThreatPlates for these units."] = "Verwende Blizzard-Namensplaketten für freundliche Einheiten und deaktiviere ThreatPlates für diese Einheiten."
 L["Use Blizzard default nameplates for neutral and enemy nameplates and disable ThreatPlates for these units."] = "Verwende Blizzard-Namensplaketten für neutrale und gegnerische Einheiten und deaktiviere ThreatPlates für diese Einheiten."
 L["Use FrameSort"] = "FrameSort verwenden"
@@ -1004,3 +1070,11 @@ L["You can access the "] = "Die Einstellungen können für "
 L["You cannot delete General Settings, only custom nameplates entries."] = "Du kannst die allgemeinen Einstellungen nicht löschen, nur Einträge für benutzerdefinierte Namensplaketten."
 L["You currently have two nameplate addons enabled: |cff89F559Threat Plates|r and |cff89F559%s|r. Please disable one of these, otherwise two overlapping nameplates will be shown for units."] = "Du hast aktuell zwei Nameplate-Addons aktiviert: |cff89F559Threat Plates|r und |cff89F559%s|r. Bitte deaktiviere eines dieser beiden Addons, da ansonsten zwei überlappende Namensplaketten bei Einheiten angezeigt werden."
 L["Your version of LibDogTag-Unit-3.0 does not support nameplates. You need to install at least v90000.3 of LibDogTag-Unit-3.0."] = "Die installierte Version von LibDogTag-Unit-3.0 unterstützt keine Namensplaketten. Du musst zumindest v90000.3 von LibDogTag-Unit-3.0 installieren."
+--[[Machine translation --]]
+L["Always enabled if full absorbs are shown."] = "Immer aktiviert, wenn vollständige Absorptionen angezeigt werden."
+--[[Machine translation --]]
+L["In over-absorb situations (shield larger than missing health), moves the over-absorb spark to indicate the actual shield magnitude, instead of pinning it to the bar's right edge."] = "Verschiebt bei Über-Absorption (Schild größer als fehlende Gesundheit) den Über-Absorptions-Funken, um die tatsächliche Schildstärke anzuzeigen, anstatt ihn am rechten Leistenrand zu fixieren."
+--[[Machine translation --]]
+L["In over-absorb situations (shield larger than missing health), shows a reverse-fill shield overlay across the health bar and positions the spark at its left boundary to indicate the actual shield magnitude."] = "Zeigt bei Über-Absorption (Schild größer als fehlende Gesundheit) eine umgekehrt gefüllte Schildüberlagerung über der Gesundheitsleiste an und positioniert den Funken an ihrem linken Rand, um die tatsächliche Schildstärke anzuzeigen."
+--[[Machine translation --]]
+L["Use a striped texture for the absorbs overlay."] = "Verwendet eine gestreifte Textur für die Absorptionsanzeige."

@@ -186,9 +186,23 @@ Two files must stay in sync for every user-facing change:
 - `CHANGELOG.md` — mirrors **only** the entries of the current unreleased (top) version block in
   `TidyPlates_ThreatPlates_Changes.log`; consumed by the packager via `# @project-version@ (@build-time@)`.
 
-Entry format: one `* `-bullet per logical change, capitalized, no trailing period. Reference CurseForge comments
-as `[Comment #NNNN]` and GitHub issues/PRs as `[GH-NNN]` or `[PR GH-NNN by author]` (combinable as
-`[GH-NNN, Comment #MMMM]`) — never invent reference numbers.
+Entry format: one `* `-bullet per logical change, starting with a capitalized past-tense verb (`Fixed`, `Added`,
+`Changed`, `Removed`, `Updated`, `Rebuilt`; use `Hopefully fixed` when the fix is unverified), ending with a
+period. Reference CurseForge comments as `[Comment #NNNN]` and GitHub issues/PRs as `[GH-NNN]` or
+`[PR GH-NNN by author]` (combinable as `[GH-NNN, Comment #MMMM]`), placed right before the final period — never
+invent reference numbers.
+
+Wording, derived from the existing log:
+
+- Lead with the user-visible symptom in plain, player-facing language (e.g. "a Lua error", "a bug where
+  nameplates showed the wrong name", "missing text shadows"), never with the internal fix or code change.
+- Optionally add root cause with a `, caused by ...` clause, phrased in terms of WoW/Blizzard behavior (a
+  client-side API change, a secret-value restriction, a specific patch) — never in terms of TPTP's internal
+  functions, files, or variables.
+- Two recurring shapes: `Fixed a Lua error when <doing X>, caused by <Y>.` and `Fixed a bug where <symptom>,
+  caused by <Y> [ref].`
+- One bullet per independent change, even closely related ones (e.g. two separate library updates each get
+  their own bullet).
 
 If the last released tag matches the current top version block, start a **new** version block (incremented
 patch version, today's date) before adding the entry; otherwise append to the existing top (unreleased) block.

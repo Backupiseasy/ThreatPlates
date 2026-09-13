@@ -14,12 +14,16 @@ long-bracket multi-line strings) and never sees commented-out code (comments
 are not part of the AST at all).
 
 Subcommands:
-  extract  Scan Lua source for L["..."] keys, write phrase_keys_export_file.txt
-  check    Diff extracted keys against Locales/enUS.lua, fail on missing keys;
-           also reports per-locale translation completeness (informational)
-  upload   POST phrase_keys_export_file.txt to CurseForge as new enUS phrases
-  pull     Download current translations for each Locales.xml-enabled locale
-           and rewrite Locales/<locale>.lua
+  extract          Scan Lua source for L["..."] keys, write phrase_keys_export_file.txt
+  check            Diff extracted keys against Locales/enUS.lua, fail on missing keys;
+                   also reports per-locale translation completeness (informational),
+                   split into human-reviewed vs. machine-translated pending review
+  upload           POST phrase_keys_export_file.txt to CurseForge as new enUS phrases
+  pull             Download current translations for each Locales.xml-enabled locale
+                   and rewrite Locales/<locale>.lua
+  push-translation Upload machine-translated entries for one locale (only keys tagged
+                   with the MT_MARKER_COMMENT, e.g. deDE) to CurseForge - see
+                   Source/mt_translate_prompt.md for how those entries get created
 """
 import argparse
 import os
@@ -35,6 +39,11 @@ CURSEFORGE_PROJECT_ID = 21217
 CURSEFORGE_BASE = "https://legacy.curseforge.com/api/projects"
 BLOCKED_DIRS = {"Libs", "Locales", "Source", "Test", ".git", ".github", ".idea", ".release"}
 DEFAULT_EXPORT_FILE = "phrase_keys_export_file.txt"
+
+# Written by the local MT prompt (Source/mt_translate_prompt.md) immediately above every
+# L["key"] = "value" entry it adds to a locale file, so those entries can be told apart
+# from community translations pulled from CurseForge - see parse_mt_marked_keys().
+MT_MARKER_COMMENT = "--[[Machine translation --]]"
 
 
 # ---------------------------------------------------------------------------
@@ -185,9 +194,50 @@ def parse_locale_keys(locale_path):
     return set(parse_locale_entries(locale_path))
 
 
+def parse_mt_marked_keys(locale_path):
+    """Keys in a Locales/<locale>.lua file whose L["key"] = "value" assignment is
+    immediately preceded (skipping blank lines) by MT_MARKER_COMMENT - i.e. entries
+    added by the local MT prompt (Source/mt_translate_prompt.md) that a human
+    translator hasn't reviewed on CurseForge yet.
+
+    This is self-cleaning: once a community translator supplies a real translation
+    on CurseForge, the next `pull` overwrites that line with CF's export (which never
+    carries this marker), so the key silently stops being MT-marked with no extra
+    bookkeeping required anywhere."""
+    if not os.path.exists(locale_path):
+        return set()
+
+    tree = parse_lua_file(locale_path)
+    key_lines = {}
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Assign):
+            continue
+        for target, value in zip(node.targets, node.values):
+            if not (isinstance(target, ast.Index) and getattr(target.value, "id", None) == "L"):
+                continue
+            if not isinstance(target.idx, ast.String):
+                continue
+            line = _line_of(target)
+            if line is not None:
+                key_lines[_decode(target.idx.s)] = line
+
+    with open(locale_path, encoding="utf-8-sig") as f:
+        lines = f.readlines()
+
+    marked = set()
+    for key, line in key_lines.items():
+        i = line - 2  # 0-indexed line immediately above the (1-indexed) assignment line
+        while i >= 0 and lines[i].strip() == "":
+            i -= 1
+        if i >= 0 and lines[i].strip() == MT_MARKER_COMMENT:
+            marked.add(key)
+    return marked
+
+
 def locale_translation_stats(root, enus_keys):
     """Per active (non-enUS, non-commented-out in Locales.xml) locale: how many of the
-    current enUS keys have an actual translated entry. Denominator is always
+    current enUS keys have an actual translated entry, split into human-reviewed vs.
+    machine-translated pending review (see parse_mt_marked_keys). Denominator is always
     len(enus_keys) - a locale file can contain stale entries for keys no longer in
     enUS, which must not inflate its completion percentage.
 
@@ -195,7 +245,10 @@ def locale_translation_stats(root, enus_keys):
     `--[[Translation missing --]]` placeholder (English fallback, comment stripped
     by the AST parser) rather than a real translation, and must not count as
     translated - otherwise every locale always reports ~100%, since CurseForge
-    fills in every key regardless of whether it's actually translated."""
+    fills in every key regardless of whether it's actually translated.
+
+    Returns a list of (locale, human_translated, mt_pending, total, missing,
+    human_pct, total_pct) tuples."""
     locales_xml = os.path.join(root, "Locales", "Locales.xml")
     if not os.path.exists(locales_xml):
         return []
@@ -205,11 +258,17 @@ def locale_translation_stats(root, enus_keys):
         locale_path = os.path.join(root, "Locales", f"{locale}.lua")
         entries = parse_locale_entries(locale_path)
         translated_keys = {k for k, v in entries.items() if v is not None and v != k}
-        translated = len(enus_keys & translated_keys)
+        mt_marked = parse_mt_marked_keys(locale_path)
+        human_keys = translated_keys - mt_marked
+        pending_keys = translated_keys & mt_marked
+
         total = len(enus_keys)
-        missing = total - translated
-        pct = (translated / total * 100) if total else 100.0
-        stats.append((locale, translated, total, missing, pct))
+        human = len(enus_keys & human_keys)
+        pending = len(enus_keys & pending_keys)
+        missing = total - human - pending
+        human_pct = (human / total * 100) if total else 100.0
+        total_pct = ((human + pending) / total * 100) if total else 100.0
+        stats.append((locale, human, pending, total, missing, human_pct, total_pct))
     return stats
 
 
@@ -248,8 +307,12 @@ def cmd_check(args):
         print()
         print(f"Translation status (of {len(enus_keys)} enUS keys):")
         width = max(len(s[0]) for s in stats)
-        for locale, translated, total, miss, pct in stats:
-            print(f"  {locale.ljust(width)} : {translated:4d}/{total} ({pct:5.1f}%)  {miss} missing")
+        for locale, human, pending, total, miss, human_pct, total_pct in stats:
+            line = f"  {locale.ljust(width)} : {human:4d}/{total} ({human_pct:5.1f}%) human-reviewed"
+            if pending:
+                line += f", +{pending} machine-translated pending review ({total_pct:5.1f}% total)"
+            line += f"  {miss} missing"
+            print(line)
 
     return rc
 
@@ -325,17 +388,12 @@ def cmd_generate_enus(args):
 # upload
 # ---------------------------------------------------------------------------
 
-def cmd_upload(args):
-    with open(args.file, "rb") as f:
-        body = f.read()
-
+def _post_localization_import(body, language, missing_phrase_handling, token):
+    """Shared multipart POST to CurseForge's /localization/import, used both to upload
+    new enUS source phrases (cmd_upload) and to push machine-translated deDE entries
+    (cmd_push_translation) - only `language` and `missing-phrase-handling` differ."""
     boundary = "----localizationtoolboundary"
-    # DeletePhrase (not DoNothing) so phrases no longer in the current upload - e.g. a
-    # typo fix or rewording that changes the English key text - get purged from
-    # CurseForge instead of lingering forever as stale, never-matched duplicates that
-    # resurface in every future pull. Matches the upstream WeakAuras script this
-    # project's old import_localization_phrase_keys.sh was derived from.
-    metadata = '{ language: "enUS", "missing-phrase-handling": "DeletePhrase" }'
+    metadata = f'{{ language: "{language}", "missing-phrase-handling": "{missing_phrase_handling}" }}'
 
     parts = [
         f"--{boundary}\r\n"
@@ -354,7 +412,7 @@ def cmd_upload(args):
 
     url = f"{CURSEFORGE_BASE}/{CURSEFORGE_PROJECT_ID}/localization/import"
     req = urllib.request.Request(url, data=data, method="POST")
-    req.add_header("X-Api-Token", args.token)
+    req.add_header("X-Api-Token", token)
     req.add_header("Content-Type", f"multipart/form-data; boundary={boundary}")
 
     try:
@@ -364,6 +422,53 @@ def cmd_upload(args):
     except urllib.error.HTTPError as e:
         print(f"Upload FAILED: HTTP {e.code}: {e.read().decode(errors='replace')}", file=sys.stderr)
         return 1
+
+
+def cmd_upload(args):
+    with open(args.file, "rb") as f:
+        body = f.read()
+
+    # DeletePhrase (not DoNothing) so phrases no longer in the current upload - e.g. a
+    # typo fix or rewording that changes the English key text - get purged from
+    # CurseForge instead of lingering forever as stale, never-matched duplicates that
+    # resurface in every future pull. Matches the upstream WeakAuras script this
+    # project's old import_localization_phrase_keys.sh was derived from.
+    return _post_localization_import(body, "enUS", "DeletePhrase", args.token)
+
+
+# ---------------------------------------------------------------------------
+# push-translation
+# ---------------------------------------------------------------------------
+
+def select_mt_keys_for_push(locale_path):
+    """Keys in a locale file that are both actually translated (not a missing-
+    translation placeholder) and still MT-marked (see parse_mt_marked_keys) - the
+    exact subset cmd_push_translation uploads. Kept separate from cmd_push_translation
+    so it's testable without a network call."""
+    entries = parse_locale_entries(locale_path)
+    translated_keys = {k for k, v in entries.items() if v is not None and v != k}
+    mt_marked = parse_mt_marked_keys(locale_path)
+    return sorted(mt_marked & translated_keys), entries
+
+
+def cmd_push_translation(args):
+    locale_path = os.path.join(args.root, "Locales", f"{args.locale}.lua")
+    keys, entries = select_mt_keys_for_push(locale_path)
+
+    if not keys:
+        print(f"No machine-translated {args.locale} keys pending upload.")
+        return 0
+
+    lines = [f'L["{lua_quote(k)}"] = "{lua_quote(entries[k])}"' for k in keys]
+    body = ("\n".join(lines) + "\n").encode("utf-8")
+
+    print(f"Uploading {len(keys)} machine-translated {args.locale} key(s) to CurseForge: "
+          f"{', '.join(keys[:10])}{', ...' if len(keys) > 10 else ''}")
+    # DoNothing (not DeletePhrase): this upload is deliberately a narrow subset (only
+    # MT-marked keys), never the full locale file - DeletePhrase would purge every
+    # translation for a key merely absent from that subset, including real community
+    # translations. See Conflicts §2 in the localization-update-process plan.
+    return _post_localization_import(body, args.locale, "DoNothing", args.token)
 
 
 # ---------------------------------------------------------------------------
@@ -405,14 +510,25 @@ _LOCALE_ENTRY_RE = re.compile(r'^L\[("(?:[^"\\]|\\.)*")\]\s*=\s*("(?:[^"\\]|\\.)
 
 
 def _index_translated_entries(lines):
-    """Map literal `L["key"]` source text -> full source line, for every
-    single-line `L["key"] = "value"` entry whose value differs from its key
-    (i.e. an actual translation, not a missing-translation placeholder)."""
+    """Map literal `L["key"]` source text -> (full source line, mt_marked), for
+    every single-line `L["key"] = "value"` entry whose value differs from its
+    key (i.e. an actual translation, not a missing-translation placeholder).
+
+    mt_marked is True when the immediately preceding non-blank line is exactly
+    MT_MARKER_COMMENT (same convention as parse_mt_marked_keys) - carried along
+    so a pull that preserves the entry can also preserve its pending-review
+    status, instead of it silently starting to count as human-reviewed just
+    because CurseForge happens to have since heard of the phrase."""
     index = {}
-    for line in lines:
+    for i, line in enumerate(lines):
         m = _LOCALE_ENTRY_RE.match(line.strip())
-        if m and m.group(1) != m.group(2):
-            index.setdefault(m.group(1), line)
+        if not (m and m.group(1) != m.group(2)):
+            continue
+        j = i - 1
+        while j >= 0 and lines[j].strip() == "":
+            j -= 1
+        mt_marked = j >= 0 and lines[j].strip() == MT_MARKER_COMMENT
+        index.setdefault(m.group(1), (line, mt_marked))
     return index
 
 
@@ -423,32 +539,59 @@ def preserve_existing_translations(existing_lines, incoming_lines):
     correct translation if one exists locally - e.g. because it was edited
     directly and never re-uploaded to CurseForge, or because the English key
     text changed and CurseForge's translation pool hasn't caught up yet. Where
-    that's the case, keep the existing translation and drop the now-inaccurate
-    comment instead of pulling in the placeholder.
+    that's the case, keep the existing translation (and its MT_MARKER_COMMENT,
+    if any) instead of pulling in the placeholder.
+
+    A key can also be missing from CurseForge's export entirely - not even as a
+    placeholder - e.g. a phrase this project's own sync workflow hasn't
+    `upload`ed yet (upload is merge-gated, separate from this pull; see
+    publish_localization_to_curseforge.yml). CurseForge's export is otherwise
+    treated as authoritative and fully replaces the locale file, so such a key
+    would silently vanish, not just regress to untranslated. Any locally
+    existing translation whose key never appears anywhere in incoming_lines is
+    therefore carried over unchanged (with its marker) at the end.
 
     Only handles single-line `L["..."] = "..."` entries (the vast majority) -
     multi-line long-bracket string values are left as CurseForge sent them,
     same as before this safeguard existed.
 
-    Returns (merged_lines, preserved_count)."""
+    Returns (merged_lines, preserved_count, carried_over_count)."""
     existing_by_key = _index_translated_entries(existing_lines)
     result = []
     preserved = 0
+    seen_keys = set()
     i, n = 0, len(incoming_lines)
     while i < n:
         line = incoming_lines[i]
         if line.strip() == "--[[Translation missing --]]" and i + 1 < n:
             m = _LOCALE_ENTRY_RE.match(incoming_lines[i + 1].strip())
             if m and m.group(1) == m.group(2):
-                existing_line = existing_by_key.get(m.group(1))
-                if existing_line is not None:
+                existing = existing_by_key.get(m.group(1))
+                if existing is not None:
+                    existing_line, mt_marked = existing
+                    if mt_marked:
+                        result.append(MT_MARKER_COMMENT)
                     result.append(existing_line)
+                    seen_keys.add(m.group(1))
                     preserved += 1
                     i += 2
                     continue
+        m2 = _LOCALE_ENTRY_RE.match(line.strip())
+        if m2:
+            seen_keys.add(m2.group(1))
         result.append(line)
         i += 1
-    return result, preserved
+
+    carried_over = 0
+    for key, (existing_line, mt_marked) in existing_by_key.items():
+        if key in seen_keys:
+            continue
+        if mt_marked:
+            result.append(MT_MARKER_COMMENT)
+        result.append(existing_line)
+        carried_over += 1
+
+    return result, preserved, carried_over
 
 
 def cmd_pull(args):
@@ -496,9 +639,11 @@ def cmd_pull(args):
         if os.path.exists(locale_path):
             with open(locale_path, encoding="utf-8-sig") as f:
                 existing_lines = f.read().splitlines()
-        body_lines, preserved = preserve_existing_translations(existing_lines, body_lines)
+        body_lines, preserved, carried_over = preserve_existing_translations(existing_lines, body_lines)
         if preserved:
             print(f"  Kept {preserved} existing translation(s) CurseForge reported as missing.")
+        if carried_over:
+            print(f"  Kept {carried_over} existing translation(s) CurseForge doesn't know about yet.")
 
         with open(locale_path, "w", encoding="utf-8", newline="\n") as f:
             f.write(header)
@@ -554,6 +699,14 @@ def build_parser():
     p_pull.add_argument("--token", required=True)
     p_pull.add_argument("--locale", action="append", help="Limit to specific locale(s); repeatable")
     p_pull.set_defaults(func=cmd_pull)
+
+    p_push = sub.add_parser("push-translation",
+                             help="Upload machine-translated entries for one locale to CurseForge "
+                                  "(only MT_MARKER_COMMENT-tagged keys, never the whole file)")
+    p_push.add_argument("--root", default=".")
+    p_push.add_argument("--locale", required=True, help="Locale to push, e.g. deDE")
+    p_push.add_argument("--token", required=True)
+    p_push.set_defaults(func=cmd_push_translation)
 
     return parser
 

@@ -2,10 +2,16 @@ name: Sync localization strings with CurseForge
 
 # Full localization sync loop:
 #   1. Extract every L["..."] string used in the addon's Lua files.
-#   2. Upload new/unknown strings to CurseForge so translators have something to translate.
-#   3. Regenerate Locales/enUS.lua from the same code scan (mechanical - see
+#   2. Regenerate Locales/enUS.lua from the same code scan (mechanical - see
 #      Source/localization_tool.py's cmd_generate_enus docstring), pull the current
 #      translations for the other locales back down, and propose both via a PR.
+#
+# Uploading new enUS phrases to CurseForge happens separately, merge-gated, in
+# .github/workflows/publish_localization_to_curseforge.yml (push to main only) - this
+# workflow never calls the CurseForge upload API, so a PR that never merges never
+# pollutes CurseForge with unreviewed source strings. Filling deDE translation gaps for
+# new strings is also separate: see Source/mt_translate_prompt.md, run locally against
+# this workflow's PR branch before merging.
 #
 # Only locales that are actually <Script>-loaded in Locales/Locales.xml are touched. Several
 # locale files exist in the repo but are commented out there on purpose (translation quality too
@@ -15,8 +21,14 @@ name: Sync localization strings with CurseForge
 # L["Minuss"] = "Minors") - but still goes through the same PR review as every other locale rather
 # than being committed directly, so an unexpected regeneration (e.g. a key that should have been
 # added to LocalizationSpecialPhraseKeys.lua as a documented override, but wasn't) can be caught
-# before merge. Note: generate-enus runs without --prune here, so keys the scan no longer finds
-# are kept, not deleted - see cmd_generate_enus's docstring for why.
+# before merge. generate-enus runs with --prune, so keys the scan no longer finds get dropped -
+# safe because every dynamic L[expr] site the AST scan can't resolve is required to already have
+# its possible resulting keys documented in LocalizationSpecialPhraseKeys.lua (extract fails loudly
+# on stderr - though it does not exit non-zero, since it can't verify registry completeness for a
+# truly dynamic expression - if it finds an undocumented one), so used_keys in cmd_generate_enus
+# already covers everything reachable; any unexpected deletion still shows up as a removed line in
+# this PR's diff before it can reach main/release. See cmd_generate_enus's docstring for the pruning
+# logic itself.
 #
 # All steps are implemented by Source/localization_tool.py (AST-based - see that file's
 # docstring for why this replaced the old regex-based Source/ExtractPhraseKeysForLocalization.lua
@@ -30,6 +42,12 @@ name: Sync localization strings with CurseForge
 # The push trigger is scoped to these branches (not "all branches"): the PR step below pushes its
 # own commits to a localization-sync-* branch, and a trigger that also matched that branch would
 # re-run this workflow on its own output.
+#
+# Checkout and PR creation use PAT_TOKEN (a personal access token), not the default GITHUB_TOKEN:
+# a PR opened under GITHUB_TOKEN is attributed to github-actions[bot], and GitHub then requires a
+# maintainer to manually click "Approve and run workflows" before pull_request-triggered workflows
+# (e.g. check_localization.yml) will run on it - same gate as a first-time contributor's fork PR.
+# Using a real user's PAT avoids that gate entirely, so the check workflow runs immediately.
 
 on:
   workflow_dispatch:
@@ -66,6 +84,8 @@ jobs:
     steps:
       - name: Clone project
         uses: actions/checkout@v7
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
 
       - name: Install Python
         uses: actions/setup-python@v6
@@ -78,11 +98,8 @@ jobs:
       - name: Extract phrase keys (strings that have to be translated) from lua files
         run: python Source/localization_tool.py extract
 
-      - name: Upload new phrase keys to CurseForge
-        run: python Source/localization_tool.py upload --token "$CF_API_KEY"
-
       - name: Regenerate Locales/enUS.lua from the code scan
-        run: python Source/localization_tool.py generate-enus
+        run: python Source/localization_tool.py generate-enus --prune
 
       - name: Pull current CurseForge translations into Locales/*.lua
         run: python Source/localization_tool.py pull --token "$CF_API_KEY"
@@ -90,6 +107,7 @@ jobs:
       - name: Open pull request with updated translations
         uses: peter-evans/create-pull-request@v8
         with:
+          token: ${{ secrets.PAT_TOKEN }}
           commit-message: "Update localization files from CurseForge"
           title: "Update localization files from CurseForge"
           body: |
@@ -103,6 +121,10 @@ jobs:
               `Locales/Locales.xml`.
             - Disabled locales (commented out in `Locales.xml`, e.g. for translation-quality
               reasons) are intentionally skipped.
+            - deDE gaps are filled separately - see `Source/mt_translate_prompt.md`; run it
+              against this branch before merging if new untranslated strings are listed
+              above (check the "machine-translated pending review" / missing counts posted
+              by the localization-check comment on this PR).
 
             Please review the diff for translation quality before merging.
           branch: localization-sync-${{ github.ref_name }}

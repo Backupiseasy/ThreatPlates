@@ -14,6 +14,9 @@ local abs, floor, ceil, pairs = abs, floor, ceil, pairs
 local UnitIsPVP, UnitPlayerControlled = UnitIsPVP, UnitPlayerControlled
 local GetClassColor = C_ClassColor.GetClassColor
 
+-- ThreatPlates APIs
+local UnitIsPVPTP = Addon.UnitIsPVP
+
 -- WoW Classic APIs:
 
 -- ThreatPlates APIs
@@ -184,7 +187,8 @@ local function GetColorByReaction(unit)
     if ColorByReaction.IgnorePvPStatus or Addon.IsInPvPInstance then
       color = (unit.reaction == "HOSTILE" and ColorByReaction.HostilePlayer) or ColorByReaction.FriendlyPlayer
     else
-      local unit_is_pvp = UnitIsPVP(unit.unitid) or false
+      -- unit.unitid may be identity-restricted (e.g. mind-controlled unit); "player" never is
+      local unit_is_pvp = UnitIsPVPTP(unit.unitid) or false
       local player_is_pvp = UnitIsPVP("player") or false
       color = ColorByReaction[UNIT_COLOR_MAP[unit.reaction][unit_type][unit_is_pvp][player_is_pvp]]
     end
