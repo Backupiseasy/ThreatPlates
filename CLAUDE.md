@@ -27,14 +27,14 @@ There is no compile step — the addon is loaded directly by the WoW client from
 - No automated test runner; `Test/` contains standalone scripts/mocks (performance tests, API mocks), not wired
   into CI.
 
-## Multi-TOC Layout
+## Unified TOC
 
-- `TidyPlates_ThreatPlates.toc` — the packager-facing manifest with `#@version-x@` / `#@end-version-x@`
-  conditional blocks (retail/classic/tbc/wrath/cata/mists). This is the canonical load-order list and what
-  CurseForge/Wago packaging processes.
-- `TidyPlates_ThreatPlates-{Mainline,Vanilla,TBC,Wrath,Cata,Mists}.toc` — single-`Interface:` TOCs for local
-  testing against one specific client (e.g. `-Mainline.toc` = 120005, `-Mists.toc` = 50504). `.pkgmeta` excludes
-  these from packaged releases.
+`TidyPlates_ThreatPlates.toc` is the single manifest for every supported client. Its `## Interface:` line is
+comma-delimited (e.g. `120007, 11508, 20506, 50504`), which WoW clients (Mainline 10.2.7+, Classic Progression
+4.4.0+, Classic Era 1.14.0+) read natively to pick the right ruleset — no per-flavor `.toc` files or packager
+`-g`/`-S` build variants are needed. This is also the canonical load-order list and what CurseForge/Wago
+packaging processes. Wrath (30405) and Cata (40402) are not yet supported and therefore not in the Interface
+line (see the comment above it in the TOC).
 
 ## Architecture
 

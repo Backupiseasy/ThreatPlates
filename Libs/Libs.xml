@@ -23,22 +23,4 @@
     <Script file="LibDualSpec-1.0\LibDualSpec-1.0.lua"/>
 
     <Script file="ForAllIndentsAndPurposes\indent.lua"/>
-    
-    <!--@version-retail@-->
-    <!--@end-version-retail@-->
-
-    <!--@version-bcc@-->
-    <!--@end-version-bcc@-->
-
-    <!--@version-wrath@-->
-    <!--@end-version-wrath@-->
-
-    <!--@version-cata@-->
-    <!--@end-version-cata@-->
-
-    <!--@version-mists@-->
-    <!--@end-version-mists@-->
-
-    <!--@version-classic@-->
-    <!--@end-version-classic@-->
 </Ui>
