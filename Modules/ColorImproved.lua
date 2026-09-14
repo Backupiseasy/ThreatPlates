@@ -17,6 +17,7 @@ local UnitCanAttack, UnitIsPVP, UnitPlayerControlled = UnitCanAttack, UnitIsPVP,
 
 -- ThreatPlates APIs
 local SubscribeEvent, PublishEvent,  UnsubscribeEvent = Addon.EventService.Subscribe, Addon.EventService.Publish, Addon.EventService.Unsubscribe
+local UnitIsPVPTP = Addon.UnitIsPVP
 local StyleModule = Addon.Style
 local RGB_P = Addon.RGB_P
 
@@ -285,7 +286,8 @@ local function GetColorByReaction(unit)
     if ColorByReaction.IgnorePvPStatus or Addon.IsInPvPInstance then
       unit.ReactionColor = (unit.reaction == "HOSTILE" and ColorByReaction.HostilePlayer) or ColorByReaction.FriendlyPlayer
     else
-      local unit_is_pvp = UnitIsPVP(unit.unitid) or false
+      -- unit.unitid may be identity-restricted (e.g. mind-controlled unit); "player" never is
+      local unit_is_pvp = UnitIsPVPTP(unit.unitid) or false
       local player_is_pvp = UnitIsPVP("player") or false
       unit.ReactionColor = ColorByReaction[UNIT_COLOR_MAP[unit.reaction][unit_type][unit_is_pvp][player_is_pvp]]
     end

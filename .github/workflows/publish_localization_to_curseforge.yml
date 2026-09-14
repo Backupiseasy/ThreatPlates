@@ -1,0 +1,68 @@
+name: Publish localization to CurseForge
+
+# Merge-gated counterpart to sync_localization_translations.yml, which only ever pulls
+# translations down. This workflow pushes:
+#   1. New/changed enUS source phrases -> CurseForge (so community translators have
+#      something to translate), via the same `upload` (DeletePhrase) already used before
+#      this workflow existed.
+#   2. Machine-translated deDE entries still pending human review -> CurseForge, via the
+#      new `push-translation` subcommand (DoNothing, only MT_MARKER_COMMENT-tagged keys -
+#      see Source/localization_tool.py and Source/mt_translate_prompt.md). Never uploads
+#      the whole deDE file, so a community translation for a key outside that subset is
+#      never touched.
+#
+# Trigger: push to main touching Locales/enUS.lua only. No commit-message gating needed -
+# this workflow makes no commits itself, so re-running it is always idempotent, and a
+# plain path filter also correctly covers a human editing enUS.lua/deDE.lua directly on
+# main without going through the bot PR.
+#
+# Race mitigation: `pull` (step below) runs before `push-translation` and is never
+# committed - it only refreshes the runner's local Locales/deDE.lua so `push-translation`
+# recomputes which keys are still MT-marked against the latest CurseForge state. This
+# narrows (does not eliminate) the window where a community translation landing between
+# the local MT step and this run could get overwritten - see Conflicts §6 in the
+# localization-update-process plan.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "Locales/enUS.lua"
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CF_API_KEY: ${{ secrets.CF_API_KEY }}
+
+    steps:
+      - name: Clone project
+        uses: actions/checkout@v7
+
+      - name: Install Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.x"
+
+      - name: Install luaparser
+        run: pip install luaparser
+
+      - name: Extract phrase keys (strings that have to be translated) from lua files
+        run: python Source/localization_tool.py extract
+
+      - name: Upload new phrase keys to CurseForge
+        run: python Source/localization_tool.py upload --token "$CF_API_KEY"
+
+      - name: Refresh local deDE.lua from CurseForge (not committed - narrows the MT/community race window)
+        run: python Source/localization_tool.py pull --token "$CF_API_KEY" --locale deDE
+
+      - name: Push machine-translated deDE entries still pending review to CurseForge
+        run: python Source/localization_tool.py push-translation --locale deDE --token "$CF_API_KEY"

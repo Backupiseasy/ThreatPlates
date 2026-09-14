@@ -30,6 +30,7 @@ local C_FriendList_ShowFriends, C_FriendList_GetNumOnlineFriends = C_FriendList.
 local C_FriendList_GetFriendInfo = C_FriendList.GetFriendInfo
 
 -- ThreatPlates APIs
+local IsSecretValueTP = Addon.IsSecretValue
 
 local ListGuildMembers = {}
 local ListFriends = {}
@@ -98,6 +99,13 @@ local PlateColorEnabled = {}
 ---------------------------------------------------------------------------------------------------
 
 local function GetFullName(character_name, realm)
+  -- UnitName() returns a secret name/realm for hostile players in Arenas/Battlegrounds (Patch
+  -- 12.1) - can't compare/concat those, and nothing meaningful to build here without the real
+  -- name, so just report "no full name available" instead.
+  if IsSecretValueTP(character_name) or IsSecretValueTP(realm) then
+    return nil
+  end
+
   if realm == nil or realm == "" then
     realm = GetRealmName()
   end
@@ -304,7 +312,10 @@ function Widget:UpdateFrame(widget_frame, unit)
   end
 
   -- I will probably expand this to a table with 'friend = true','guild = true', and 'bnet = true' and have 3 textuers show.
-  local friend_texture = Settings.ShowFriendIcon and (ListFriends[unit.name] or ListBnetFriends[unit.fullname] or ListGuildMembers[unit.fullname])
+  -- unit.name can be a secret value for hostile players in Arenas/Battlegrounds (Patch 12.1) - never
+  -- use it as a table key in that case (unit.fullname is already nil then too, see GetFullName).
+  local friend_texture = Settings.ShowFriendIcon and not IsSecretValueTP(unit.name)
+    and (ListFriends[unit.name] or ListBnetFriends[unit.fullname] or ListGuildMembers[unit.fullname])
 
   -- Need to hide the frame here as it may have been shown before
   if not (friend_texture or faction_texture) then

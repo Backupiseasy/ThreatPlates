@@ -88,7 +88,7 @@ function Widget:Create(tp_frame)
   widget_frame.RightTexture:SetPoint("LEFT", tp_frame.visual.Healthbar, "RIGHT", 4, 0)
   widget_frame.RightTexture:SetSize(64, 64)
 
-  widget_frame.Percentage = widget_frame:CreateFontString(nil, "OVERLAY")
+  widget_frame.Percentage = widget_frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   widget_frame.Percentage:SetFont("Fonts\\FRIZQT__.TTF", 11)
 
   self:UpdateLayout(widget_frame)
@@ -104,6 +104,11 @@ function Widget:IsEnabled()
 end
 
 function Widget:OnEnable()
+  -- Prime the group state immediately, otherwise ShowInGroups stays hidden after /reload
+  -- until the next GROUP_ROSTER_UPDATE event fires (which may take a while if the group
+  -- roster doesn't change).
+  PlayerIsInGroup = IsInGroup()
+
   self:SubscribeEvent("UNIT_THREAT_LIST_UPDATE")
   self:SubscribeEvent("TargetMarkerUpdate")
   self:SubscribeEvent("GROUP_ROSTER_UPDATE")

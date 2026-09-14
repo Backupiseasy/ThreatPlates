@@ -332,7 +332,7 @@ local function InitializeAuraButton(auraButton, aura_type)
   -- Font must be set before SetApplicationCount below: it triggers an immediate
   -- UpdateAuraDisplay() -> FontString:SetText(), which errors ("Font not set") on a FontString
   -- that was just created with CreateFontString(nil, ...) and has no font applied yet.
-  auraButton.Stacks = auraButton:CreateFontString(nil, "OVERLAY")
+  auraButton.Stacks = auraButton:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   auraButton.Stacks:SetJustifyH("right")
   auraButton.Stacks:SetPoint("BOTTOMRIGHT", 3, -2)
   FontUpdateText(auraButton, auraButton.Stacks, db_icon.StackCount)
@@ -342,7 +342,7 @@ local function InitializeAuraButton(auraButton, aura_type)
   end
 
   -- Same font-before-Set* ordering requirement as SetApplicationCount above.
-  auraButton.TimeLeft = auraButton:CreateFontString(nil, "OVERLAY")
+  auraButton.TimeLeft = auraButton:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   FontUpdateText(auraButton, auraButton.TimeLeft, db_icon.Duration)
   if Widget.db.ShowExpiringColor then
     auraButton:SetDurationText(auraButton.TimeLeft, {
@@ -404,6 +404,16 @@ end
 -- like every other setting this addon can't safely change mid-combat - warns once and re-runs
 -- automatically after combat ends instead of silently doing nothing until the next settings change.
 --
+-- 2026-08-27, live in an Arena, out of combat (ExecuteAfterCombatEnds ran func() immediately):
+-- PixelUtil.SetSize still threw "Attempt to access forbidden object from code tainted by an AddOn".
+-- This contradicts the combat-gated conclusion below - matches the flag's actual documented meaning
+-- instead (Blizzard_APIDocumentationGenerated/SimpleFrameScriptObjectConstantsDocumentation.lua):
+-- "Denies access to this script object from tainted execution while aura information is secret" -
+-- i.e. gated on whether a unit's aura is currently secret (any hostile unit's aura in an Arena/
+-- Battleground, regardless of combat state), not on the local player's combat state. Since that
+-- applies to the whole call (any button in any container could be one of these), not just one
+-- button, skip the whole thing up front instead of trying and partially failing per button.
+--
 -- 2026-08-21, under active live testing: two conflicting data points so far - (1) with the
 -- ExecuteAfterCombatEnds wrapper temporarily disabled for testing and the player actually in combat,
 -- plain auraButton:SetSize() threw "Attempt to access forbidden object from code tainted by an AddOn"
@@ -417,6 +427,16 @@ end
 -- untested plain-SetSize variant.
 local function ReapplyLiveAuraButtonSettings(aura_type)
   if not HasAuraContainers then return end
+
+  -- Aura buttons are forbidden objects while their unit's aura info is secret (any hostile unit in
+  -- an Arena/Battleground) - not just combat-gated, see comment above. Warn and skip entirely
+  -- rather than attempt it and partially fail; the change is picked up next time this is called
+  -- with the addon in a state where it is actually allowed (e.g. after a settings change outside
+  -- an instance).
+  if Addon.IsInPvPInstance then
+    Addon.Logging.Warning("Unable to update the appearance of auras while in an arena or battleground.")
+    return
+  end
 
   Addon.ExecuteAfterCombatEnds(function()
     local db_icon = Widget.db[aura_type].ModeIcon

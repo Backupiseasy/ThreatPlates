@@ -26,7 +26,7 @@ local _G =_G
 local function AddTextArea(self, text_area)
   self.TextAreas[#self.TextAreas + 1] = text_area
 
-  self[text_area] = self:CreateFontString(nil, "OVERLAY")
+  self[text_area] = self:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   self[text_area]:SetFont("Fonts\\FRIZQT__.TTF", 11)
 end
 

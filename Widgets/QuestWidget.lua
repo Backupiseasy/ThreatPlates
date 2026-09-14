@@ -605,7 +605,7 @@ function Widget:Create(tp_frame)
   widget_frame.Icon = widget_frame:CreateTexture(nil, "OVERLAY")
   widget_frame.Text = false
 
-  local text_frame = widget_frame:CreateFontString(nil, "OVERLAY")
+  local text_frame = widget_frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   local type_frame = widget_frame:CreateTexture(nil, "OVERLAY")
 
   text_frame:SetFont(Font, db.FontSize + (db.scale * FONT_SCALING))

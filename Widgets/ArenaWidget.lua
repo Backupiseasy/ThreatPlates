@@ -219,7 +219,7 @@ function Widget:Create(tp_frame)
   widget_frame.Icon = widget_frame:CreateTexture(nil, "ARTWORK")
   widget_frame.Icon:SetAllPoints(widget_frame)
 
-  widget_frame.NumText = widget_frame:CreateFontString(nil, "ARTWORK")
+  widget_frame.NumText = widget_frame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
 
   self:UpdateLayout(widget_frame)
   --------------------------------------

@@ -225,6 +225,17 @@ else
   Addon.UnitIsUnit = UnitIsUnit
 end
 
+-- Safe wrapper for UnitIsPVP: returns false instead of a secret value when the result is restricted.
+-- Use this instead of the raw UnitIsPVP() call wherever the result is used in a boolean context.
+if Addon.ExpansionIsAtLeastMidnight then
+  function Addon.UnitIsPVP(unitid)
+    local result = UnitIsPVP(unitid)
+    return not Addon.IsSecretValue(result) and result
+  end
+else
+  Addon.UnitIsPVP = UnitIsPVP
+end
+
 function Addon.EvaluateColorValueFromBoolean(boolean, color_if_true, color_if_false)
   local r = EvaluateColorValueFromBoolean(boolean, color_if_true.r, color_if_false.r)
   local g = EvaluateColorValueFromBoolean(boolean, color_if_true.g, color_if_false.g)

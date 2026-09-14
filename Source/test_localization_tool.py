@@ -10,6 +10,7 @@ import os
 import pytest
 
 from localization_tool import (
+    MT_MARKER_COMMENT,
     cmd_check,
     cmd_extract,
     enabled_locales,
@@ -17,7 +18,10 @@ from localization_tool import (
     locale_translation_stats,
     lua_quote,
     parse_locale_keys,
+    parse_mt_marked_keys,
+    preserve_existing_translations,
     scan_repository,
+    select_mt_keys_for_push,
 )
 
 
@@ -252,7 +256,7 @@ def test_locale_translation_stats_counts_missing_and_percentage(tmp_path):
     enus_keys = parse_locale_keys(str(tmp_path / "Locales" / "enUS.lua"))
     stats = locale_translation_stats(str(tmp_path), enus_keys)
 
-    assert stats == [("deDE", 2, 4, 2, 50.0)]
+    assert stats == [("deDE", 2, 0, 4, 2, 50.0, 50.0)]
 
 
 def test_locale_translation_stats_ignores_stale_keys_no_longer_in_enus(tmp_path):
@@ -266,7 +270,7 @@ def test_locale_translation_stats_ignores_stale_keys_no_longer_in_enus(tmp_path)
     enus_keys = parse_locale_keys(str(tmp_path / "Locales" / "enUS.lua"))
     stats = locale_translation_stats(str(tmp_path), enus_keys)
 
-    assert stats == [("deDE", 1, 1, 0, 100.0)]
+    assert stats == [("deDE", 1, 0, 1, 0, 100.0, 100.0)]
 
 
 def test_locale_translation_stats_skips_commented_out_locales(tmp_path):
@@ -299,3 +303,128 @@ def test_cmd_check_output_includes_translation_status(tmp_path, capsys):
     assert "Translation status (of 2 enUS keys):" in out
     assert "deDE" in out
     assert "1 missing" in out
+
+
+# ---------------------------------------------------------------------------
+# parse_mt_marked_keys / push-translation: telling MT-origin entries apart from
+# community translations pulled from CurseForge
+# ---------------------------------------------------------------------------
+
+def test_parse_mt_marked_keys_finds_marker_tagged_entry(tmp_path):
+    p = write(str(tmp_path / "Locales" / "deDE.lua"),
+              f'{MT_MARKER_COMMENT}\nL["Foo"] = "Foo-de"\nL["Bar"] = "Bar-de"\n')
+    assert parse_mt_marked_keys(p) == {"Foo"}
+
+
+def test_parse_mt_marked_keys_ignores_unrelated_comment(tmp_path):
+    p = write(str(tmp_path / "Locales" / "deDE.lua"),
+              '--[[Translation missing --]]\nL["Foo"] = "Foo"\n')
+    assert parse_mt_marked_keys(p) == set()
+
+
+def test_parse_mt_marked_keys_returns_empty_set_when_file_missing(tmp_path):
+    assert parse_mt_marked_keys(str(tmp_path / "Locales" / "deDE.lua")) == set()
+
+
+def test_locale_translation_stats_splits_human_vs_mt_pending(tmp_path):
+    make_enus(tmp_path, "Foo", "Bar", "Baz")
+    make_locales_xml(tmp_path, "enUS", "deDE")
+    write(str(tmp_path / "Locales" / "deDE.lua"),
+          f'L["Foo"] = "Foo-de"\n{MT_MARKER_COMMENT}\nL["Bar"] = "Bar-de"\n')
+
+    enus_keys = parse_locale_keys(str(tmp_path / "Locales" / "enUS.lua"))
+    stats = locale_translation_stats(str(tmp_path), enus_keys)
+
+    # Foo human-reviewed, Bar MT-pending, Baz missing entirely.
+    assert stats == [("deDE", 1, 1, 3, 1, pytest.approx(33.333, abs=0.01), pytest.approx(66.667, abs=0.01))]
+
+
+def test_cmd_check_output_splits_human_vs_mt_pending(tmp_path, capsys):
+    write(str(tmp_path / "Options.lua"), 'x = L["Foo"]\ny = L["Bar"]\n')
+    make_enus(tmp_path, "Foo", "Bar")
+    make_locales_xml(tmp_path, "enUS", "deDE")
+    write(str(tmp_path / "Locales" / "deDE.lua"),
+          f'L["Foo"] = "Foo-de"\n{MT_MARKER_COMMENT}\nL["Bar"] = "Bar-de"\n')
+
+    class Args:
+        root = str(tmp_path)
+
+    assert cmd_check(Args()) == 0
+    out = capsys.readouterr().out
+    assert "human-reviewed" in out
+    assert "+1 machine-translated pending review" in out
+
+
+def test_select_mt_keys_for_push_returns_only_marked_and_translated_keys(tmp_path):
+    p = write(str(tmp_path / "Locales" / "deDE.lua"),
+              # Bar: MT-marked and translated -> selected.
+              f'{MT_MARKER_COMMENT}\nL["Bar"] = "Bar-de"\n'
+              # Foo: translated but not MT-marked (human/community translation) -> skipped.
+              'L["Foo"] = "Foo-de"\n'
+              # Baz: MT-marked but still a placeholder (value == key) -> skipped.
+              f'{MT_MARKER_COMMENT}\nL["Baz"] = "Baz"\n')
+
+    keys, entries = select_mt_keys_for_push(p)
+
+    assert keys == ["Bar"]
+    assert entries["Bar"] == "Bar-de"
+
+
+# ---------------------------------------------------------------------------
+# preserve_existing_translations: a pull must not regress or silently drop a
+# translation CurseForge doesn't (yet) know about - see cmd_pull's docstring
+# and the bug this was written against (an MT translation for a phrase never
+# `upload`ed lost its pending-review marker, or vanished outright, on the very
+# next pull).
+# ---------------------------------------------------------------------------
+
+def test_preserve_existing_translations_keeps_translation_for_reported_placeholder():
+    existing = ['L["Foo"] = "Foo-de"']
+    incoming = ['--[[Translation missing --]]', 'L["Foo"] = "Foo"']
+
+    merged, preserved, carried_over = preserve_existing_translations(existing, incoming)
+
+    assert merged == ['L["Foo"] = "Foo-de"']
+    assert preserved == 1
+    assert carried_over == 0
+
+
+def test_preserve_existing_translations_keeps_mt_marker_across_placeholder_substitution():
+    # CurseForge has since heard of the phrase (sends its own "missing" placeholder for
+    # it) but the actual translation is still ours, unreviewed - the marker must survive,
+    # not silently start counting as human-reviewed.
+    existing = [MT_MARKER_COMMENT, 'L["Foo"] = "Foo-de"']
+    incoming = ['--[[Translation missing --]]', 'L["Foo"] = "Foo"']
+
+    merged, preserved, carried_over = preserve_existing_translations(existing, incoming)
+
+    assert merged == [MT_MARKER_COMMENT, 'L["Foo"] = "Foo-de"']
+    assert preserved == 1
+    assert carried_over == 0
+
+
+def test_preserve_existing_translations_carries_over_key_curseforge_has_never_heard_of():
+    # "Bar" isn't in CurseForge's export at all - not even as a placeholder (e.g. its
+    # enUS phrase was never `upload`ed yet). It must not vanish from the locale file.
+    existing = [MT_MARKER_COMMENT, 'L["Bar"] = "Bar-de"']
+    incoming = ['L["Foo"] = "Foo-de"']
+
+    merged, preserved, carried_over = preserve_existing_translations(existing, incoming)
+
+    assert merged == ['L["Foo"] = "Foo-de"', MT_MARKER_COMMENT, 'L["Bar"] = "Bar-de"']
+    assert preserved == 0
+    assert carried_over == 1
+
+
+def test_preserve_existing_translations_does_not_duplicate_a_key_curseforge_already_sends():
+    # "Foo" has a real (non-placeholder) translation on both sides - CurseForge's own
+    # version passes through untouched, and it must not also get appended again from
+    # the carry-over pass.
+    existing = ['L["Foo"] = "Alte Uebersetzung"']
+    incoming = ['L["Foo"] = "Neue Community-Uebersetzung"']
+
+    merged, preserved, carried_over = preserve_existing_translations(existing, incoming)
+
+    assert merged == ['L["Foo"] = "Neue Community-Uebersetzung"']
+    assert preserved == 0
+    assert carried_over == 0
