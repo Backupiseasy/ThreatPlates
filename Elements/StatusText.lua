@@ -39,7 +39,7 @@ local COLOR_GUILD = RGB(178, 178, 229, .7)
 
 local HideAtFullHealthCurve
 --local HideAtZeroAbsorbsCurve
-if Addon.ExpansionIsAtLeastMidnight then
+if Addon.HAS_MIDNIGHT_API then
   HideAtFullHealthCurve = C_CurveUtil.CreateCurve()
   HideAtFullHealthCurve:SetType(Enum.LuaCurveType.Step)
   HideAtFullHealthCurve:AddPoint(0, 1)
@@ -156,7 +156,9 @@ end
 
 local TextHealthPercentColored
 
-if Addon.ExpansionIsAtLeastMidnight then
+-- Every client that can return secret health/absorb values takes the Addon.HAS_MIDNIGHT_API branch below
+-- instead, so the else branch's plain arithmetic needs no secret-value guard.
+if Addon.HAS_MIDNIGHT_API then
   TextHealthPercentColored = function(unit)
     local text_health, text_absorbs
     local color = GetRoleColor
@@ -337,7 +339,7 @@ end
 
 -- Guild, Role, Level, Health
 local function TextAll(unit)
-  if Addon.ExpansionIsAtLeastMidnight or unit.health == unit.healthmax then
+  if Addon.HAS_MIDNIGHT_API or unit.health == unit.healthmax then
     return TextRoleGuildLevel(unit)
   else
     return TextHealthPercentColored(unit)
@@ -404,7 +406,7 @@ local function SetStatusText(tp_frame)
   local status_text_frame = tp_frame.visual.StatusText
   status_text_frame:SetText(status_text)
   if status_text then
-    if Addon.ExpansionIsAtLeastMidnight and status_text_func == TextHealthPercentColored and not Settings.full then
+    if Addon.HAS_MIDNIGHT_API and status_text_func == TextHealthPercentColored and not Settings.full then
       local alpha  = UnitHealthPercent(unit.unitid, true, HideAtFullHealthCurve)
       color = CreateColor(color.r, color.g, color.b, alpha)
     end
@@ -527,7 +529,10 @@ function Element.UpdateSettings()
     SettingsStatusText.NameMode.FriendlySubtext == "HEALTH" or SettingsStatusText.NameMode.FriendlySubtext == "ALL" or
     SettingsStatusText.NameMode.EnemySubtext == "HEALTH" or SettingsStatusText.NameMode.EnemySubtext == "ALL" then
 
-    if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
+    -- UNIT_HEALTH_FREQUENT is an old-classic-engine event; a client that reports a Classic-level
+    -- expansion but has Midnight's API surface (see Addon.HAS_MIDNIGHT_API in Init.lua) runs on the
+    -- modern engine, which uses the events in the else branch instead.
+    if (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) and not Addon.HAS_MIDNIGHT_API then
       SubscribeEvent(Element, "UNIT_HEALTH_FREQUENT", HealthUpdate)
     else
       SubscribeEvent(Element, "UNIT_HEALTH", HealthUpdate)
@@ -536,7 +541,7 @@ function Element.UpdateSettings()
 
     SubscribeEvent(Element, "UNIT_MAXHEALTH", HealthUpdate)
   else
-    if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
+    if (Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC) and not Addon.HAS_MIDNIGHT_API then
       UnsubscribeEvent(Element, "UNIT_HEALTH_FREQUENT", HealthUpdate)
     else
       UnsubscribeEvent(Element, "UNIT_HEALTH", HealthUpdate)

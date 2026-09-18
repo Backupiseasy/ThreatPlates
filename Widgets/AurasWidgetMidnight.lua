@@ -3,7 +3,10 @@
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
 
-if not Addon.ExpansionIsAtLeastMidnight then return end
+-- Active on Midnight, and on any client whose engine has Midnight's API/secret-value surface (not just
+-- Midnight itself - see Addon.HAS_MIDNIGHT_API in Init.lua). See AurasWidget.lua for the sibling widget
+-- used on genuinely older clients.
+if not Addon.HAS_MIDNIGHT_API then return end
 
 local Widget = Addon.Widgets:NewWidget("Auras")
 
@@ -305,7 +308,15 @@ local function InitializeAuraButton(auraButton, aura_type)
   auraButton.DispelBorder:SetAllPoints(auraButton.Icon)
   auraButton.DispelBorder:SetScale(AURA_BORDER_THICKNESS / AURA_BORDER_TEXTURE_BAND)
   if db_icon.ShowBorder then
-    auraButton:AddDispelTypeTexture(auraButton.DispelBorder, {
+    -- Capture the return value: on the API contract live on retail as of this writing (12.1.0),
+    -- AddDispelTypeTexture returns an index that RemoveDispelTypeTexture(index) later needs. Warcraft
+    -- Wiki documents an upcoming Patch 12.1.5 change where AddDispelTypeTexture returns nothing instead
+    -- and RemoveDispelTypeTexture takes the region object itself (and AddDispelTypeTexture errors if the
+    -- same region is registered twice, which it didn't before) - see ReapplyLiveAuraButtonSettings below,
+    -- where that error was actually observed live on a client already running the newer contract. Store
+    -- whatever came back (an index, or nil post-change) so the removal call there can self-adapt to
+    -- either API generation without hardcoding a version check.
+    auraButton.DispelBorderRegistration = auraButton:AddDispelTypeTexture(auraButton.DispelBorder, {
       style = DispelTypeTextureStylePreserveAsset,
       showWhenHarmful = true,
       showWhenHelpful = true,
@@ -474,9 +485,31 @@ local function ReapplyLiveAuraButtonSettings(aura_type)
           -- above) - only re-applies fresh color to one that was already shown. Confirmed live
           -- 2026-08-21: unlike the broader existence-toggle case, Remove+AddDispelTypeTexture works
           -- reliably here for recoloring an already-shown border.
+          --
+          -- Root cause of the "Display element '...DispelBorder...' has already been added" error seen
+          -- live (100% reproducible on every already-shown button, not intermittent - ruling out combat/
+          -- taint/timing theories floated earlier): Warcraft Wiki documents an upcoming Patch 12.1.5 API
+          -- change to AddDispelTypeTexture/RemoveDispelTypeTexture's contract - not live on retail as of
+          -- this writing (retail is on 12.1.0), but the client this was reproduced on already has it,
+          -- i.e. that client tracks a newer/PTR-ish build than live retail (matches its
+          -- wow_classic_beta product/build-track elsewhere in this addon's compatibility notes). Pre-
+          -- change, AddDispelTypeTexture returns an index and RemoveDispelTypeTexture(index) takes that
+          -- index; post-change, AddDispelTypeTexture returns nothing, RemoveDispelTypeTexture(region)
+          -- takes the region object itself, and AddDispelTypeTexture now errors if the same region is
+          -- already registered (it silently didn't before) - see
+          -- https://warcraft.wiki.gg/wiki/Patch_12.1.5/API_changes. The old RemoveDispelTypeTexture(1)
+          -- call below never matched InitializeAuraButton's stored registration on a client with the new
+          -- contract (a literal 1 isn't a valid region reference there), so the border was never actually
+          -- removed before the very next AddDispelTypeTexture call re-added it. Fixed by passing back
+          -- whatever InitializeAuraButton's AddDispelTypeTexture call returned
+          -- (auraButton.DispelBorderRegistration - an index pre-change, nil post-change, in which case
+          -- the region itself is used instead) so removal targets the same API generation as the original
+          -- registration, self-adapting to either client without hardcoding a version check. No pcall
+          -- here (deliberately) - a failure at this point means the API-generation detection above is
+          -- wrong for the running client, which should surface as a visible error, not be swallowed.
           if db_icon.ShowBorder and auraButton:GetDispelTypeTextureCount() > 0 then
-            auraButton:RemoveDispelTypeTexture(1)
-            auraButton:AddDispelTypeTexture(auraButton.DispelBorder, {
+            auraButton:RemoveDispelTypeTexture(auraButton.DispelBorderRegistration or auraButton.DispelBorder)
+            auraButton.DispelBorderRegistration = auraButton:AddDispelTypeTexture(auraButton.DispelBorder, {
               style = DispelTypeTextureStylePreserveAsset,
               showWhenHarmful = true,
               showWhenHelpful = true,

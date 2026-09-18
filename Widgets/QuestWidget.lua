@@ -3,7 +3,9 @@
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
 
-if not Addon.ExpansionIsAtLeastMists then return end
+-- Official Blizzard clients with Midnight's API surface (e.g. "WoW Forever" - see Addon.IS_FOREVER in
+-- Init.lua) have working quest tooltip data despite the Classic-level ruleset, so they're not excluded.
+if not Addon.ExpansionIsAtLeastMists and not Addon.IS_FOREVER then return end
 
 local Widget = Addon.Widgets:NewWidget("Quest")
 
@@ -140,8 +142,10 @@ local OBJECTIVE_GOAL_ALIGNMENT = {
   ruRU = "RIGHT",
 }
 
--- Set correct regexps for current expansion and locale
-local RegexpForExpansion = OBJECTIVE_PARSER_REGEXP_BY_EXPANSION[Addon.GetExpansionLevel()]
+-- Set correct regexps for current expansion and locale. Official Blizzard clients with Midnight's API
+-- surface (e.g. "WoW Forever") render quest tooltips like the modern engine despite a Classic-level
+-- Addon.GetExpansionLevel(), so they use the "MAINLINE" entry instead of looking up their own level.
+local RegexpForExpansion = OBJECTIVE_PARSER_REGEXP_BY_EXPANSION[Addon.IS_FOREVER and "MAINLINE" or Addon.GetExpansionLevel()]
 
 local QUEST_OBJECTIVE_PARSER_LEFT = function(text)
   local current, goal, objective_name = string_match(text, RegexpForExpansion.LEFT)
@@ -229,7 +233,10 @@ local function IsQuestUnit(unit)
 
     local text = line.leftText
 
-    if Addon.ExpansionIsAtLeastMidnight then
+    -- Addon.C_TooltipInfo_GetUnit_Quest returns real C_TooltipInfo.GetUnit() line data (with .type) on
+    -- Midnight and on clients with Midnight's API surface (Addon.HAS_MIDNIGHT_API) - the .leftColor-based
+    -- heuristic below is only for the legacy TooltipScanner emulation on genuinely older clients.
+    if Addon.HAS_MIDNIGHT_API then
       if line.type == Enum.TooltipDataLineType.QuestPlayer then
         quest_progress_player = true
       elseif line.type == Enum.TooltipDataLineType.QuestTitle then
@@ -850,7 +857,7 @@ function Widget:PrintDebug(command)
       local text = line.leftText
 
       Addon.Logging.Debug("=== Line:", text)
-      if Addon.ExpansionIsAtLeastMidnight then
+      if Addon.HAS_MIDNIGHT_API then
         if line.type == Enum.TooltipDataLineType.QuestPlayer then
           quest_progress_player = true
           Addon.Logging.Debug("  Player:", text)

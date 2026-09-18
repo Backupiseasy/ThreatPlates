@@ -112,7 +112,15 @@ local function GetCastbarColor(unit)
 
   -- Because of this ordering, IsInterrupted must be set to false when a new cast is cast. Otherwise
   -- the interrupt color may be shown for a cast
-  if Addon.ExpansionIsAtLeastMidnight then
+  --
+  -- unit.CastIsNotInterruptible can be secret on any client with Midnight's API surface (not just
+  -- Midnight itself - Addon.HAS_MIDNIGHT_API). The else branch's bare `elseif unit.CastIsNotInterruptible
+  -- then` was assumed safe (a plain truthy check, no comparison/arithmetic) per CLAUDE.md's guard-pattern
+  -- catalogue, but confirmed live to still throw "attempt to perform boolean test on field ... (a secret
+  -- boolean value, while execution tainted by 'TidyPlates_ThreatPlates')" - so a bare truthy check on a
+  -- secret value is NOT always safe once the calling code itself is tainted; see the correction in
+  -- CLAUDE.md's Midnight guard patterns.
+  if Addon.HAS_MIDNIGHT_API then
     if unit.IsInterrupted then
       c = db.castbarColorInterrupted
     else
@@ -150,8 +158,12 @@ local function UpdateForCast(self, unit)
   local show = unit.CastIsNotInterruptible
   local db = Addon.db.profile.settings
 
+  -- show (unit.CastIsNotInterruptible) can be secret on any client with Midnight's API surface (not just
+  -- Midnight itself - Addon.HAS_MIDNIGHT_API), and SetShown()/Show()/Hide() are not documented as
+  -- SecretArguments = "AllowedWhenTainted" the way SetAlphaFromBoolean is (see CLAUDE.md's Midnight guard
+  -- patterns) - assumed to behave the same as real Midnight there, same as everywhere else this session.
   if db.castnostop.ShowInterruptShield then
-    if Addon.ExpansionIsAtLeastMidnight then
+    if Addon.HAS_MIDNIGHT_API then
       self.InterruptShield:SetAlphaFromBoolean(show, 1, 0)
       self.InterruptShield:Show()
     else
@@ -162,7 +174,7 @@ local function UpdateForCast(self, unit)
   end
 
   if db.castborder.show and db.castnostop.ShowOverlay then
-    if Addon.ExpansionIsAtLeastMidnight then
+    if Addon.HAS_MIDNIGHT_API then
       self.InterruptBorder:SetAlphaFromBoolean(show, 1, 0)
       self.InterruptOverlay:SetAlphaFromBoolean(show, 1, 0)
       self.InterruptBorder:Show()
