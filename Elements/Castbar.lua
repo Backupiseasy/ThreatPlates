@@ -93,6 +93,14 @@ local function OnUpdateMidnight(self, elapsed)
   end
 end
 
+-- Must match the branch in Nameplate.lua's OnStartCasting (Addon.HAS_MIDNIGHT_API): it sets castbar.Duration via
+-- SetTimerDuration there, and the legacy OnUpdate (Value/MaxValue based) would hide the castbar immediately.
+local CastbarOnUpdate = Addon.HAS_MIDNIGHT_API and OnUpdateMidnight or OnUpdate
+
+-- Config mode state (see "Show config mode" below); declared here as UpdateVisibility needs it
+local EnabledConfigMode = false
+local ConfigModePlate
+
 local function OnHide(self)
   if self.PostCastHoldTime > 0 then
     self:Show()
@@ -196,6 +204,13 @@ end
 -- (style updates, cast start/stop, interrupts) sets state (unit.isCasting, unit.IsInterrupted,
 -- self.PostCastHoldTime) and calls this to reconcile, instead of deciding visibility itself.
 local function UpdateVisibility(self, tp_frame)
+  -- In config mode the castbar is driven by Addon:ConfigCastbar's OnUpdate, which only runs while the castbar
+  -- is shown - hiding it here would stop it for good.
+  if EnabledConfigMode and ConfigModePlate == tp_frame then
+    self:Show()
+    return
+  end
+
   local unit = tp_frame.unit
   local spell_text = tp_frame.visual.SpellText
 
@@ -278,11 +293,7 @@ function Element.PlateCreated(tp_frame)
   castbar.Value = 0
   castbar.MaxValue = 0
 
-  if Addon.ExpansionIsAtLeastMidnight then
-    castbar:SetScript("OnUpdate", OnUpdateMidnight)
-  else
-    castbar:SetScript("OnUpdate", OnUpdate)
-  end
+  castbar:SetScript("OnUpdate", CastbarOnUpdate)
   castbar:HookScript("OnHide", OnHide)
 
   tp_frame.visual.Castbar = castbar
@@ -432,9 +443,6 @@ SubscribeEvent(Element, "TargetLost", TargetUpdate)
 -- Show config mode
 ---------------------------------------------------------------------------------------------------
 
-local EnabledConfigMode = false
-local ConfigModePlate
-
 local function ShowOnUnit(unit)
   local db = Addon.db.profile.settings.castbar
 
@@ -516,10 +524,10 @@ function Addon:ConfigCastbar()
     end
   else
     local castbar = ConfigModePlate.visual.Castbar
-    castbar:SetScript("OnUpdate", OnUpdate)
+    castbar:SetScript("OnUpdate", CastbarOnUpdate)
     castbar.Hide = castbar._Hide
-    castbar:Hide()
     EnabledConfigMode = false
+    castbar:Hide()
 
     if ConfigModePlate and ConfigModePlate.Active then
       Addon:ForceUpdateOnNameplate(ConfigModePlate)

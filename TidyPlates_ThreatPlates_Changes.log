@@ -20,6 +20,8 @@
 * Fixed a Lua error showing the castbar color for a non-interruptible cast on Classic-rules clients that run on a modern client engine (e.g. "WoW Forever"), caused by a plain truthy check on a secret interruptible-state value there.
 * Identified (but could not fully resolve) a bug where settings reset on login on some clients, caused by the client not loading saved settings at all in some sessions - most likely needs a fix on the client's own side, not something this addon can work around.
 * Updated integrated libraries (Ace3 r1414-alpha).
+* Fixed castbars not being shown on nameplates on Classic-rules clients that run on a modern client engine (e.g. "WoW Forever"), caused by the castbar update code for old Classic clients running there and hiding the castbar immediately after a cast started.
+* Fixed the castbar configuration mode (Castbar options) not showing the castbar on nameplates, caused by the castbar being hidden again as soon as the nameplate was updated while no real cast was active.
 
 ------------------------------------------------------
 13.2.0 (2026-09-13)
