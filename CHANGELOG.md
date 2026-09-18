@@ -21,3 +21,4 @@
 * Updated integrated libraries (Ace3 r1414-alpha).
 * Fixed castbars not being shown on nameplates on Classic-rules clients that run on a modern client engine (e.g. "WoW Forever"), caused by the castbar update code for old Classic clients running there and hiding the castbar immediately after a cast started.
 * Fixed the castbar configuration mode (Castbar options) not showing the castbar on nameplates, caused by the castbar being hidden again as soon as the nameplate was updated while no real cast was active.
+* Fixed a Lua error when updating the threat status of nameplates while tanking on Classic-rules clients that run on a modern client engine (e.g. "WoW Forever"), caused by the threat value used for off-tank detection being a secret value there; off-tank detection is now disabled on such clients, like on Midnight.
