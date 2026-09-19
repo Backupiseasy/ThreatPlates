@@ -170,7 +170,7 @@ end
 -- UnitGetTotalAbsorbs: Mists - Patch 5.2.0 (2013-03-05): Added.
 -- UnitGetTotalHealAbsorbs: Mists - Patch 5.4.0 (2013-09-10): Added.
 if Addon.WOW_FEATURE_ABSORBS then
-  if Addon.ExpansionIsAtLeastMidnight then
+  if Addon.HAS_MIDNIGHT_API then
     UpdateAbsorbs = function(tp_frame)
       local healthbar = tp_frame.visual.Healthbar
 
@@ -282,7 +282,7 @@ local function ShowTargetUnit(healthbar, unitid)
 end
 
 local function UpdateTargetUnit(healthbar, unitid)
-  if Addon.ExpansionIsAtLeastMidnight then return end
+  if Addon.HAS_MIDNIGHT_API then return end
 
   if SettingsTargetUnitHide or (SettingsShowOnlyForTarget and not UnitIsUnit("target", unitid)) or (SettingsTargetUnit.ShowOnlyInCombat and not InCombatLockdown()) then
     HideTargetUnit(healthbar)
@@ -322,7 +322,7 @@ local function ColorUpdate(tp_frame, color)
   if tp_frame.PlateStyle ~= "HealthbarMode" then return end
 
   local healthbar = tp_frame.visual.Healthbar
-  if Addon.ExpansionIsAtLeastMidnight then
+  if Addon.HAS_MIDNIGHT_API then
     healthbar:GetStatusBarTexture():SetVertexColor(color.r, color.g, color.b)
   else
     healthbar:SetStatusBarColor(color.r, color.g, color.b, 1)
@@ -418,7 +418,7 @@ function Element.PlateCreated(tp_frame)
 
     healthbar.AbsorbStatusBar = absorb_statusbar
 
-    if Addon.ExpansionIsAtLeastMidnight then
+    if Addon.HAS_MIDNIGHT_API then
       -- OvershieldBar: covers full healthbar with reverse-fill to visualize total (unclamped) absorb
       -- magnitude when AlwaysFullAbsorb is enabled and the shield exceeds missing health.
       local overshield_bar = _G.CreateFrame("StatusBar", nil, healthbar)
@@ -528,7 +528,7 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
     color = Settings.OverlayColor
     absorb_sb.Overlay:SetVertexColor(color.r, color.g, color.b, color.a)
 
-    if Addon.ExpansionIsAtLeastMidnight then
+    if Addon.HAS_MIDNIGHT_API then
       -- OvershieldBar uses the same texture and color as AbsorbStatusBar.
       local overshield = healthbar.OvershieldBar
       if overshield then
@@ -560,7 +560,7 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
   healthbar:SetFrameLevel(frame_level)
   if Addon.WOW_FEATURE_ABSORBS then
     healthbar.AbsorbStatusBar:SetFrameLevel(frame_level + 1)
-    if Addon.ExpansionIsAtLeastMidnight and healthbar.OvershieldBar then
+    if Addon.HAS_MIDNIGHT_API and healthbar.OvershieldBar then
       healthbar.OvershieldBar:SetFrameLevel(frame_level + 1)
     end
   end
@@ -570,7 +570,7 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
 
   tp_frame.visual.textframe:SetFrameLevel(frame_level)
 
-  if Addon.WOW_FEATURE_ABSORBS and Addon.ExpansionIsAtLeastMidnight then
+  if Addon.WOW_FEATURE_ABSORBS and Addon.HAS_MIDNIGHT_API then
     UpdateAbsorbs(tp_frame)
   end
 
@@ -617,7 +617,7 @@ function Element.UpdateSettings()
 
   SubscribeEvent(Element, "HealthbarColorUpdate", ColorUpdate)
 
-  if not Addon.ExpansionIsAtLeastMidnight and SettingsTargetUnit.Show then
+  if not Addon.HAS_MIDNIGHT_API and SettingsTargetUnit.Show then
     SubscribeEvent(Element, "UNIT_TARGET", UNIT_TARGET)
     SubscribeEvent(Element, "ThreatUpdate", UnitThreatUpdate)
     SubscribeEvent(Element, "TargetLost", PlayerTargetLost)
@@ -672,7 +672,7 @@ local function UpdateHealthbarConfigMode(tp_frame)
   end
 
   if Addon.WOW_FEATURE_ABSORBS then
-    if Addon.ExpansionIsAtLeastMidnight then
+    if Addon.HAS_MIDNIGHT_API then
       local s = HEALTHBAR_CONFIG_SCENARIOS_MIDNIGHT[((healthbar._config_scenario - 1) % #HEALTHBAR_CONFIG_SCENARIOS_MIDNIGHT) + 1]
 
       healthbar:SetMinMaxValues(0, s[2])
@@ -706,7 +706,7 @@ local function UpdateHealthbarConfigMode(tp_frame)
     healthbar:SetValue(s[1])
   end
 
-  if not Addon.ExpansionIsAtLeastMidnight and not SettingsTargetUnitHide then
+  if not Addon.HAS_MIDNIGHT_API and not SettingsTargetUnitHide then
     local target_unit = healthbar.TargetUnit
     target_unit:SetText("Thrall")
     local color = SettingsTargetUnit.UseClassColor and Addon.db.profile.Colors.Classes["SHAMAN"] or SettingsTargetUnit.CustomColor

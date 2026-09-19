@@ -18,19 +18,28 @@ local UnitDetailedThreatSituation = UnitDetailedThreatSituation
 ---------------------------------------------------------------------------------------------------
 -- WoW Version Check
 ---------------------------------------------------------------------------------------------------
-Addon.IS_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
+-- WOW_PROJECT_ID alone is not reliable: some official Blizzard clients (e.g. "WoW Forever", a client/
+-- product running parallel to Retail and WoW Classic) report WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
+-- while running Classic-rules content on a modern,
+-- secret-value-capable engine (no legacy globals like _G.GetSpellInfo). Addon.IS_CLASSIC/IS_TBC_CLASSIC/
+-- etc. below therefore cross-check GetClassicExpansionLevel() instead of trusting WOW_PROJECT_ID alone.
+-- Addon.IS_FOREVER flags this specific combination (Classic ruleset + modern engine) so code that
+-- depends on the client's API surface rather than its ruleset (e.g. which events/globals exist) can
+-- pick the right branch instead of assuming ruleset and engine always match.
+Addon.IS_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC) or (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_CLASSIC) or false
 Addon.IS_CLASSIC_SOM = (Addon.IS_CLASSIC and C_Seasons and C_Seasons.GetActiveSeason() == 1)
 Addon.IS_CLASSIC_SOD = (Addon.IS_CLASSIC and C_Seasons and C_Seasons.GetActiveSeason() == 2)
-Addon.IS_TBC_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_BURNING_CRUSADE)
+Addon.IS_TBC_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_BURNING_CRUSADE) or false
 Addon.IS_TBC_CLASSIC_ANNIVERSARY = (Addon.IS_TBC_CLASSIC and C_Seasons and C_Seasons.GetActiveSeason() == 125)
-Addon.IS_WRATH_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_WRATH_OF_THE_LICH_KING)
-Addon.IS_CATA_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_CATACLYSM)
-Addon.IS_MISTS_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_MISTS_OF_PANDARIA)
+Addon.IS_WRATH_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_WRATH_OF_THE_LICH_KING) or false
+Addon.IS_CATA_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_CATACLYSM) or false
+Addon.IS_MISTS_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_MISTS_OF_PANDARIA) or false
 --Addon.IS_MIDNIGHT = GetServerExpansionLevel() == LE_EXPANSION_MIDNIGHT
 Addon.IS_MIDNIGHT = (select(4, GetBuildInfo()) >= 120000)
-Addon.IS_MAINLINE = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
--- Addon.IS_TBC_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC and LE_EXPANSION_LEVEL_CURRENT == LE_EXPANSION_BURNING_CRUSADE)
--- Addon.IS_WRATH_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC and LE_EXPANSION_LEVEL_CURRENT == LE_EXPANSION_WRATH_OF_THE_LICH_KING)
+Addon.IS_FOREVER = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
+  and (GetClassicExpansionLevel and GetClassicExpansionLevel() ~= nil and GetClassicExpansionLevel() ~= false)
+  or false
+Addon.IS_MAINLINE = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE) and not Addon.IS_FOREVER
 
 -- For Mainline, this always returns true. 
 Addon.ExpansionIsAtLeast = function(expansion_id)
@@ -77,11 +86,22 @@ Addon.ExpansionIsAtLeastDF = Addon.ExpansionIsAtLeast(LE_EXPANSION_DRAGONFLIGHT)
 Addon.ExpansionIsAtLeastTWW = Addon.ExpansionIsAtLeast(LE_EXPANSION_WAR_WITHIN)
 Addon.ExpansionIsAtLeastMidnight = Addon.IS_MIDNIGHT
 
+-- True on Midnight, and on any client whose engine has Midnight's full API surface (secret values,
+-- C_Spell/C_UnitAuras/C_CurveUtil, the heal-prediction calculator, ...) even though its content/ruleset
+-- isn't Midnight (e.g. "WoW Forever" - see Addon.IS_FOREVER above; /tptp debug MidnightAPI reports every
+-- API this addon's Midnight-only code depends on). Use this - not Addon.ExpansionIsAtLeastMidnight -
+-- wherever a branch exists purely to pick the API-safe/modern code path; keep
+-- Addon.ExpansionIsAtLeastMidnight itself for genuine ruleset/feature decisions (e.g. features
+-- intentionally disabled on Midnight, see CLAUDE.md).
+Addon.HAS_MIDNIGHT_API = Addon.ExpansionIsAtLeastMidnight or Addon.IS_FOREVER
+
 -- aura.nameplateShowAll/nameplateShowPersonal are a Legion+ feature - confirmed to
 -- always be false on both TBC Classic Anniversary and Mists Classic.
 Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER = Addon.ExpansionIsAtLeast(LE_EXPANSION_LEGION)
 -- Absorbs bug in Mists: https://github.com/Stanzilla/WoWUIBugs/issues/736
-Addon.WOW_FEATURE_ABSORBS = Addon.ExpansionIsAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA)
+-- Detect by API availability (UnitGetTotalAbsorbs, Mists 5.2.0+) instead of expansion, as the
+-- core function is what every absorb-dependent code path actually needs.
+Addon.WOW_FEATURE_ABSORBS = type(_G.UnitGetTotalAbsorbs) == "function"
 
 ---------------------------------------------------------------------------------------------------
 -- Constants with different values in different expansions
@@ -203,14 +223,16 @@ Addon.Cache = {
 
 -- UnitDetailedThreatSituation: WotLK - Patch 3.0.2 (2008-10-14): Added
 -- C_PvP.IsSoloShuffle: Shadowlands - Patch 9.2.0 (2022-02-22): Added.
+-- Mists Classic and "WoW Forever" (see Addon.IS_FOREVER above) both run on the modern client engine
+-- despite non-Mainline content, so both get the modern (unscaled, C_Spell-based) branch here.
 if Addon.IS_MAINLINE then
 	Addon.UnitDetailedThreatSituationWrapper = UnitDetailedThreatSituation
 	Addon.IsSoloShuffle = C_PvP.IsSoloShuffle
 	Addon.GetSpellInfo = C_Spell.GetSpellInfo
-elseif Addon.IS_MISTS_CLASSIC then
+elseif Addon.IS_MISTS_CLASSIC or Addon.IS_FOREVER then
 	Addon.UnitDetailedThreatSituationWrapper = UnitDetailedThreatSituation
-	
-	-- Not available in Mists Classic
+
+	-- Not available in Mists Classic (and not meaningful on "WoW Forever")
 	Addon.IsSoloShuffle = function() return false end
 
 	Addon.GetSpellInfo = C_Spell.GetSpellInfo

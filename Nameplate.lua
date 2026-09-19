@@ -45,7 +45,6 @@ local IsSecretValueTP = Addon.IsSecretValue
 local UnitIsUnitTP = Addon.UnitIsUnit
 local CombatLogGetCurrentEventInfoTP = Addon.CombatLogGetCurrentEventInfo
 local IsSpellKnownTP = Addon.IsSpellKnown
-local ExpansionIsAtLeastMidnight = Addon.ExpansionIsAtLeastMidnight
 
 local TransliterateCyrillicLetters = Addon.Localization.TransliterateCyrillicLetters
 local SetNamesFonts = Addon.Font.SetNamesFonts
@@ -125,7 +124,11 @@ local ShowInterruptSource
 -- Wrapper functions for WoW Classic
 ---------------------------------------------------------------------------------------------------
 
-if Addon.IS_CLASSIC then
+-- Old-classic-engine-only quirks (frame naming, UnitChannelInfo/_G.GetSpellInfo). A client that reports
+-- Addon.IS_CLASSIC (Vanilla-level content) but has Midnight's API surface (see Addon.HAS_MIDNIGHT_API in
+-- Init.lua) runs on a modern engine without these quirks, so it falls through to the modern branch at
+-- the bottom of this chain instead.
+if Addon.IS_CLASSIC and not Addon.HAS_MIDNIGHT_API then
   GetNameForNameplate = function(plate) return plate:GetName():gsub("NamePlate", "Plate") end
 
     -- Fix for UnitChannelInfo not working on WoW Classic
@@ -486,7 +489,10 @@ end
 
 local function SetUnitAttributeTargetMarker(unit, unitid)
   local raid_icon_index = GetRaidTargetIndex(unitid)
-  if ExpansionIsAtLeastMidnight then 
+  -- raid_icon_index can be secret in restricted contexts on any client with Midnight's API surface (not
+  -- just Midnight itself - Addon.HAS_MIDNIGHT_API), and the else branch below uses it as a table key,
+  -- which is unsafe if secret.
+  if Addon.HAS_MIDNIGHT_API then
     unit.TargetMarkerIcon = raid_icon_index
     unit.MentorIcon = raid_icon_index
   else
@@ -526,7 +532,7 @@ local function SetUnitAttributes(unit, unitid)
     unit.class = ""
     unit.type = "NPC"
 
-    if not ExpansionIsAtLeastMidnight then
+    if not Addon.HAS_MIDNIGHT_API then
       local _, _, _, _, _, npc_id = strsplit("-", unit.guid or "")
       unit.NPCID = npc_id
     end
@@ -601,7 +607,9 @@ local function OnStartCasting(tp_frame, unitid, cast_guid, event_spell_id, castb
   end
 
   local unit = tp_frame.unit
-  if not ExpansionIsAtLeastMidnight then
+  -- CastTriggerCheckIfActive keys a table by spell_id/name, which can be secret on any client with
+  -- Midnight's API surface (not just Midnight itself) - skipped there just like on Midnight.
+  if not Addon.HAS_MIDNIGHT_API then
     StyleModule.CastTriggerCheckIfActive(unit, spell_id, name)
   end
 
@@ -618,7 +626,9 @@ local function OnStartCasting(tp_frame, unitid, cast_guid, event_spell_id, castb
   -- this castbar (see Addon:UNIT_SPELLCAST_STOP / Addon:COMBAT_LOG_EVENT_UNFILTERED).
   castbar.InterruptSourceUnknown = nil
 
-  if not ExpansionIsAtLeastMidnight then
+  -- Companion to the CastTriggerCheckIfActive skip above - kept in sync so this doesn't run against
+  -- unit.CustomStyleCast/.PreviousCustomStyleCast state that was never set on this client.
+  if not Addon.HAS_MIDNIGHT_API then
     if StyleModule.CastTriggerUpdateStyle(unit) then
       StyleModule:Update(tp_frame)
     end
@@ -627,7 +637,9 @@ local function OnStartCasting(tp_frame, unitid, cast_guid, event_spell_id, castb
   visual.SpellText:SetText(text)
   visual.SpellIcon:SetTexture(texture)
 
-  if ExpansionIsAtLeastMidnight then
+  -- The else branch below does Lua arithmetic on startTime/endTime, which are secret on any client with
+  -- Midnight's API surface (not just Midnight itself) - use the Midnight-safe timer API there too.
+  if Addon.HAS_MIDNIGHT_API then
     local target_unit_name = UnitSpellTargetName(unitid)
     if target_unit_name then
       local class_name = UnitSpellTargetClass(unitid)
@@ -803,7 +815,10 @@ local SetShownBlizzardPlate
 -- Weak-keyed: the entry disappears on its own once Blizzard releases/GCs the frame.
 local BlizzardPlateOrigParent = setmetatable({}, { __mode = "k" })
 
-if ExpansionIsAtLeastMidnight then
+-- The protected-frame branch below (unit_frame:IsProtected()) exists because plain Show()/Hide()/
+-- SetShown() can be blocked by frame protection on the modern engine, not just on Midnight - see
+-- Addon.HAS_MIDNIGHT_API in Init.lua and the "Use SetAlpha(0/1)..." rule in CLAUDE.md.
+if Addon.HAS_MIDNIGHT_API then
   SetShownBlizzardPlate = function(unit_frame, show)
     if show then
       local orig_parent = BlizzardPlateOrigParent[unit_frame]
@@ -847,7 +862,7 @@ local function ShowBlizzardNameplate(plate, show_blizzard_plate)
     -- Restore frames used from Blizzard namemplates
     WidgetContainerReset(plate)
     -- Clear the TP-managed hit-test so Blizzard's UnitFrame handles mouse events naturally.
-    if ExpansionIsAtLeastMidnight and plate:CanChangeHitTestPoints() then
+    if Addon.HAS_MIDNIGHT_API and plate:CanChangeHitTestPoints() then
       plate:ClearAllHitTestPoints()
     end
   else
@@ -968,7 +983,8 @@ local function NamePlateDriverFrame_AcquireUnitFrame(_, plate)
     unit_frame.ThreatPlates = true
     unit_frame:HookScript("OnShow", FrameOnShow)
 
-    if ExpansionIsAtLeastMidnight then
+    -- Companion to SetShownBlizzardPlate above - kept on the same condition.
+    if Addon.HAS_MIDNIGHT_API then
       hooksecurefunc(unit_frame, "Show", function(self)
         if self:IsForbidden() then return end
 
@@ -1661,7 +1677,7 @@ function Addon:NAME_PLATE_UNIT_REMOVED(unitid)
   tp_frame.Active = false
 
   PlatesByUnit[unitid] = nil
-  if not ExpansionIsAtLeastMidnight then
+  if not Addon.HAS_MIDNIGHT_API then
     if tp_frame.unit.guid then -- maybe hide directly after create with unit added?
       PlatesByGUID[tp_frame.unit.guid] = nil
     end
@@ -1799,7 +1815,9 @@ function Addon:RAID_TARGET_UPDATE()
     local previous_target_marker_icon = unit.TargetMarkerIcon
     local previous_mentor_icon = unit.MentorIcon
     SetUnitAttributeTargetMarker(unit, unitid)
-    if ExpansionIsAtLeastMidnight or previous_target_marker_icon ~= unit.TargetMarkerIcon or previous_mentor_icon ~= unit.MentorIcon then
+    -- unit.TargetMarkerIcon/.MentorIcon can be secret (see SetUnitAttributeTargetMarker), so the ~=
+    -- comparisons below must be skipped - not just on Midnight, but on any client with its API surface.
+    if Addon.HAS_MIDNIGHT_API or previous_target_marker_icon ~= unit.TargetMarkerIcon or previous_mentor_icon ~= unit.MentorIcon then
       PublishEvent("TargetMarkerUpdate", tp_frame)
     end
   end
@@ -2010,8 +2028,9 @@ end
 function Addon:UNIT_SPELLCAST_CHANNEL_STOP(unitid, cast_guid, spell_id, interrupted_by, castbar_id)
   if IGNORED_UNITS[unitid] or not ShowCastBars then return end
 
-  -- Addon:UNIT_SPELLCAST_INTERRUPTED is Retail/Midnight-only code
-  if interrupted_by ~= nil and ExpansionIsAtLeastMidnight then
+  -- Addon:UNIT_SPELLCAST_INTERRUPTED is Retail/Midnight-only code (see Addon.HAS_MIDNIGHT_API in Init.lua
+  -- for clients that share this API surface without being Midnight itself)
+  if interrupted_by ~= nil and Addon.HAS_MIDNIGHT_API then
     Addon:UNIT_SPELLCAST_INTERRUPTED(unitid, cast_guid, spell_id, interrupted_by, castbar_id)
   else
     Addon:UNIT_SPELLCAST_STOP(unitid, cast_guid, spell_id, castbar_id)  -- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED

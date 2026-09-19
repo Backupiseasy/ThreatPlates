@@ -146,7 +146,7 @@ local TRANSLITERATE_CHARS = {
 }
 
 function LocalizationModule.TransliterateCyrillicLetters(text)
-  if Addon.ExpansionIsAtLeastMidnight then return text end
+  if Addon.HAS_MIDNIGHT_API then return text end
   
   if Addon.db.profile.Localization.TransliterateCyrillicLetters and text and text:len() > 1 then
     local cache_entry = TextCache[text]
@@ -173,7 +173,7 @@ end
 ---------------------------------------------------------------------------------------------------
 
 function LocalizationModule.UpdateSettings()
-  if not Addon.ExpansionIsAtLeastMidnight then
+  if not Addon.HAS_MIDNIGHT_API then
     Addon.Truncate = (Addon.db.profile.text.LocalizedUnitSymbol and TruncateEastAsian) or TruncateWestern
   end
 

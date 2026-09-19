@@ -27,7 +27,7 @@ local WOW_EVENTS = {
   BN_CONNECTED = true,
   BN_FRIEND_ACCOUNT_OFFLINE = true,
   BN_FRIEND_ACCOUNT_ONLINE = true,
-  COMBAT_LOG_EVENT_UNFILTERED = not Addon.ExpansionIsAtLeastMidnight, -- Removed in Midnight
+  COMBAT_LOG_EVENT_UNFILTERED = not Addon.HAS_MIDNIGHT_API, -- Removed in Midnight; also ADDON_ACTION_FORBIDDEN on other clients with Midnight's API surface
   FRIENDLIST_UPDATE = true,
   GUILD_ROSTER_UPDATE = true,
   GROUP_LEFT = true,
@@ -66,8 +66,11 @@ local WOW_EVENTS = {
   UNIT_FACTION = true,
   UNIT_FLAGS = true,
   UNIT_HEAL_ABSORB_AMOUNT_CHANGED = Addon.WOW_FEATURE_ABSORBS, -- Absorbs (or at least absorbs functions) were added in Mists
-  UNIT_HEALTH = Addon.ExpansionIsAtLeastMists, -- Shadowlands Patch 9.0.1 (2020-10-13): Fully replaces UNIT_HEALTH_FREQUENT
-  UNIT_HEALTH_FREQUENT = not Addon.ExpansionIsAtLeastMists,
+  -- UNIT_HEALTH_FREQUENT is an old-classic-engine event, replaced by UNIT_HEALTH on the modern engine
+  -- (Mainline, Mists Classic, and "WoW Forever" - see Addon.IS_FOREVER in Init.lua - all run the modern
+  -- engine regardless of content/ruleset).
+  UNIT_HEALTH = Addon.ExpansionIsAtLeastMists or Addon.IS_FOREVER, -- Shadowlands Patch 9.0.1 (2020-10-13): Fully replaces UNIT_HEALTH_FREQUENT
+  UNIT_HEALTH_FREQUENT = not Addon.ExpansionIsAtLeastMists and not Addon.IS_FOREVER,
   UNIT_LEVEL = true,
   UNIT_MAXHEALTH = true,
   UNIT_MAXPOWER = true,
@@ -81,9 +84,9 @@ local WOW_EVENTS = {
   UNIT_SPELLCAST_CHANNEL_STOP = true,
   UNIT_SPELLCAST_CHANNEL_UPDATE = true,
   UNIT_SPELLCAST_DELAYED = true,
-  UNIT_SPELLCAST_INTERRUPTED = Addon.ExpansionIsAtLeastMidnight, 
-  --UNIT_SPELLCAST_FAILED = Addon.ExpansionIsAtLeastMidnight, 
-  --UNIT_SPELLCAST_FAILED_QUIET = Addon.ExpansionIsAtLeastMidnight, 
+  UNIT_SPELLCAST_INTERRUPTED = Addon.HAS_MIDNIGHT_API,
+  --UNIT_SPELLCAST_FAILED = Addon.HAS_MIDNIGHT_API,
+  --UNIT_SPELLCAST_FAILED_QUIET = Addon.HAS_MIDNIGHT_API,
   UNIT_SPELLCAST_EMPOWER_START = Addon.ExpansionIsAtLeastDF,
   UNIT_SPELLCAST_EMPOWER_STOP = Addon.ExpansionIsAtLeastDF,
   UNIT_SPELLCAST_EMPOWER_UPDATE = Addon.ExpansionIsAtLeastDF,
@@ -91,7 +94,7 @@ local WOW_EVENTS = {
   UNIT_SPELLCAST_NOT_INTERRUPTIBLE = true,
   UNIT_SPELLCAST_START = true,
   UNIT_SPELLCAST_STOP = true,
-  UNIT_SPELLCAST_SENT = Addon.ExpansionIsAtLeastMidnight,
+  UNIT_SPELLCAST_SENT = Addon.HAS_MIDNIGHT_API,
   UNIT_TARGET = true,
   UNIT_THREAT_LIST_UPDATE = true,
   UNIT_THREAT_SITUATION_UPDATE = true,
@@ -101,15 +104,12 @@ local WOW_EVENTS = {
   UPDATE_UI_WIDGET = true, -- Added in 8.0.1 / 1.13.2
 }
 
---local DebugUnknowEvents = {}
-
 function Addon:ExpansionSupportsEvent(event, register_for_current_expansion)
-  -- if WOW_EVENTS[event] == nil then DebugUnknowEvents[event] = true end
   return register_for_current_expansion ~= false and WOW_EVENTS[event]
 end
 
 function Addon:RegisterEvent(event_handler_frame, event, register_for_current_expansion)
-  if Addon:ExpansionSupportsEvent(event, register_for_current_expansion) then 
+  if Addon:ExpansionSupportsEvent(event, register_for_current_expansion) then
     event_handler_frame:RegisterEvent(event)
   end
 end
@@ -127,23 +127,49 @@ function Addon:UnregisterEvent(event_handler_frame, event)
   end
 end
 
+-- Diagnostic pass over every event this addon knows about (Compatibility.lua's WOW_EVENTS table): tries
+-- to register each one on a throwaway frame via pcall, so a client that rejects/removed an event (hard
+-- Lua error, not just "event never fires") can never bring down the whole addon here. Reports every event
+-- that failed, together with whether WOW_EVENTS already expected that (its flag says "not supported" for
+-- the current expansion) or not (flag says "supported", i.e. WOW_EVENTS is now wrong and needs updating).
+-- Blind spot: an ADDON_ACTION_FORBIDDEN taint error (as opposed to a plain Lua error) is tied to the
+-- calling context, not just the event name, so it will not necessarily reproduce here even for an event
+-- that does fail this way when registered from the addon's normal (non-diagnostic) code paths.
+-- Invoke with /tptp debug Compatibility.
 function Addon:DebugCompatibility()
   local frame = CreateFrame("Frame")
-  
-  for event, is_supported in pairs(WOW_EVENTS) do
-    local success, result = pcall(frame.RegisterEvent, frame, event)
-    if not success then
-      Addon.Logging.Debug("    ", event .. ": FAILED =>", (not WOW_EVENTS[event] and "CORRECT") or "ERROR")
-    elseif not WOW_EVENTS[event] then
-      Addon.Logging.Debug("    ", event .. ": OK => DISABLED")      
+  local mismatched_events, failed_count, mismatch_count, total_count = {}, 0, 0, 0
+
+  -- Sort event names first so output order is stable and deterministic across runs.
+  local event_names = {}
+  for event in pairs(WOW_EVENTS) do
+    event_names[#event_names + 1] = event
+  end
+  table.sort(event_names)
+
+  for _, event in ipairs(event_names) do
+    total_count = total_count + 1
+    local success = pcall(frame.RegisterEvent, frame, event)
+    if success then
+      frame:UnregisterEvent(event)
+    else
+      failed_count = failed_count + 1
+      if WOW_EVENTS[event] then
+        mismatch_count = mismatch_count + 1
+        mismatched_events[mismatch_count] = event
+        Addon.Logging.Print("  FAILED:", event, "(WOW_EVENTS says supported - MISMATCH)")
+      else
+        Addon.Logging.Print("  FAILED:", event, "(WOW_EVENTS already says unsupported - OK)")
+      end
     end
   end
 
-  if DebugUnknowEvents then
-    Addon.Logging.Debug("    Failed Events")      
-    for event, _ in pairs(DebugUnknowEvents) do
-      Addon.Logging.Debug("      =>", event)      
-    end
+  Addon.Logging.Print(("Compatibility check done: %d/%d events failed to register, %d mismatch(es) with WOW_EVENTS."):format(failed_count, total_count, mismatch_count))
+  if mismatch_count > 0 then
+    Addon.Logging.Print("Mismatched events - WOW_EVENTS needs updating (copy this line):")
+    Addon.Logging.Print(table.concat(mismatched_events, ", "))
+  else
+    Addon.Logging.Print("No mismatches - WOW_EVENTS is up to date for this client.")
   end
 end
 
@@ -151,8 +177,10 @@ end
 -- Tooltip handling
 ---------------------------------------------------------------------------------------------------
 
--- C_TooltipInfo.GetUnit was added in 10.0.2
-if Addon.ExpansionIsAtLeastDF then
+-- C_TooltipInfo.GetUnit was added in 10.0.2. Confirmed present on official Blizzard clients with Midnight's
+-- API surface too (e.g. "WoW Forever" - see Addon.IS_FOREVER in Init.lua), despite being below Dragonflight
+-- ruleset-wise, so those get the modern branch here as well instead of the legacy tooltip-scanner below.
+if Addon.ExpansionIsAtLeastDF or Addon.IS_FOREVER then
   Addon.C_TooltipInfo_GetUnit_NPCRole = C_TooltipInfo.GetUnit
   Addon.C_TooltipInfo_GetUnit_Quest = C_TooltipInfo.GetUnit
 else
@@ -203,8 +231,10 @@ else
   end
 end
 
--- Quest widget is not available in Classic (Vanilla, TBC, Wrath)
-if not Addon.ExpansionIsAtLeastMists then
+-- Quest widget is not available in Classic (Vanilla, TBC, Wrath). Official Blizzard clients with
+-- Midnight's API surface (e.g. "WoW Forever" - see Addon.IS_FOREVER in Init.lua) do have working quest tooltip data
+-- despite the Classic-level ruleset, so they're excluded from this stub.
+if not Addon.ExpansionIsAtLeastMists and not Addon.IS_FOREVER then
   Addon.ShowQuestUnit = function(...) return false end
 end
 
@@ -216,7 +246,10 @@ Addon.IsSecretValue = _G.issecretvalue or function() return false end
 
 -- Safe wrapper for UnitIsUnit: returns false instead of a secret value when the result is restricted.
 -- Use this instead of the raw UnitIsUnit() call wherever the result is used in a boolean context.
-if Addon.ExpansionIsAtLeastMidnight then
+-- Guarded on Addon.HAS_MIDNIGHT_API (not Addon.ExpansionIsAtLeastMidnight): secret values also occur on
+-- any client with Midnight's API surface, not just Midnight itself (e.g. "WoW Forever" - see
+-- Addon.IS_FOREVER in Init.lua).
+if Addon.HAS_MIDNIGHT_API then
   function Addon.UnitIsUnit(unit1, unit2)
     local result = UnitIsUnit(unit1, unit2)
     return not Addon.IsSecretValue(result) and result
@@ -227,7 +260,7 @@ end
 
 -- Safe wrapper for UnitIsPVP: returns false instead of a secret value when the result is restricted.
 -- Use this instead of the raw UnitIsPVP() call wherever the result is used in a boolean context.
-if Addon.ExpansionIsAtLeastMidnight then
+if Addon.HAS_MIDNIGHT_API then
   function Addon.UnitIsPVP(unitid)
     local result = UnitIsPVP(unitid)
     return not Addon.IsSecretValue(result) and result

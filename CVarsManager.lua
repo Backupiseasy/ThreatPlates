@@ -239,6 +239,12 @@ end
 -- 
 ---------------------------------------------------------------------------------------------------
 
+-- GetCVar returns nil for CVars that the running client does not know (e.g., nameplateResourceOnTarget on
+-- Classic-rules clients)
+function CVars:IsAvailable(cvar)
+  return GetCVar(cvar) ~= nil
+end
+
 -- From addon: AdvancedInterfaceOptions
 function CVars:CVarExists(cvar)
 	return not not select(2, pcall(function() return addon.GetCVarInfo(cvar) end))

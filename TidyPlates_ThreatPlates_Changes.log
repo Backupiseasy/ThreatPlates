@@ -1,4 +1,11 @@
 ﻿------------------------------------------------------
+13.3.0 (2026-09-18)
+------------------------------------------------------
+* Added support for WoW Forever.
+* Fixed a Lua error re-applying aura appearance settings (e.g. re-opening the options window), caused by an upcoming Blizzard API change (not yet live on retail, but on Forever).
+* Updated integrated libraries (Ace3 r1414-alpha).
+
+------------------------------------------------------
 13.2.0 (2026-09-13)
 ------------------------------------------------------
 * Rebuilt the absorb display on the nameplate's healthbar on WoW Midnight, which had stopped working due to secret value restrictions.

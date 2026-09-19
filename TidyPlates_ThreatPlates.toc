@@ -1,4 +1,4 @@
-## Interface: 120100, 11509, 20506, 50504
+## Interface: 120100, 11509, 20506, 50504, 16001
 # Wrath (30405) and Cata (40402) are not yet supported - add their interface values to the
 # line above once ready.
 

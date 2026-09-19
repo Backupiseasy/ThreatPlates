@@ -3,7 +3,10 @@
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
 
-if Addon.ExpansionIsAtLeastMidnight then return end
+-- Superseded by AurasWidgetMidnight.lua on any client with Midnight's API/secret-value surface (not just
+-- Midnight itself - see Addon.HAS_MIDNIGHT_API in Init.lua): this widget's aura-scanning approach hits
+-- secret-value taint restrictions (e.g. C_UnitAuras.GetAuraSlots()) on such clients.
+if Addon.HAS_MIDNIGHT_API then return end
 
 local Widget = Addon.Widgets:NewWidget("Auras")
 

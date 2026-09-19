@@ -77,6 +77,161 @@ local function PrintHelp()
 	Addon.Logging.Print(L["  /tptptank      Toggles Tank threat plates"])
 end
 
+-- Prints the exact WoW client version (GetBuildInfo) plus how Threat Plates' expansion-detection
+-- systematic (Addon.IS_*/Addon.ExpansionIsAtLeast*, see Init.lua) classifies it. Meant to be pasted
+-- into bug reports, so its own output always prints (not gated behind Addon.DEBUG or the verbose
+-- setting) - but note the "version" command itself is only reachable via ChatCommandDebug below, which
+-- IS gated behind Addon.DEBUG (only true in unpackaged/source builds, see its definition near the top of
+-- this file) - so end users running a packaged release currently can't invoke it via /tptp version.
+local function PrintVersion()
+	local client_version, build, build_date, toc_version = GetBuildInfo()
+
+	Addon.Logging.Print(L["|cff89F559Threat Plates|r: Version "] .. Addon.Meta("version"))
+	Addon.Logging.Print("  " .. L["WoW client:"], client_version, "(" .. L["build"], build .. ", " .. L["Interface"], toc_version .. ", " .. build_date .. ")")
+	Addon.Logging.Print("  " .. L["Expansion Level:"], Addon.GetExpansionLevel())
+
+	if Addon.IS_CLASSIC then
+		if Addon.IS_CLASSIC_SOD then
+			Addon.Logging.Print("  " .. L["Detected as:"], "Classic Era - Season of Discovery")
+		elseif Addon.IS_CLASSIC_SOM then
+			Addon.Logging.Print("  " .. L["Detected as:"], "Classic Era - Season of Mastery")
+		elseif C_Seasons and (C_Seasons.GetActiveSeason() == 11 or C_Seasons.GetActiveSeason() == 12) then
+			Addon.Logging.Print("  " .. L["Detected as:"], "Classic Era - Anniversary Realm")
+		else
+			Addon.Logging.Print("  " .. L["Detected as:"], "Classic Era")
+		end
+	end
+	if Addon.IS_TBC_CLASSIC then
+		if Addon.IS_TBC_CLASSIC_ANNIVERSARY then
+			Addon.Logging.Print("  " .. L["Detected as:"], "TBC Classic - Anniversary Edition")
+		else
+			Addon.Logging.Print("  " .. L["Detected as:"], "TBC Classic")
+		end
+	end
+	if Addon.IS_WRATH_CLASSIC then
+		Addon.Logging.Print("  " .. L["Detected as:"], "Wrath Classic")
+	end
+	if Addon.IS_CATA_CLASSIC then
+		Addon.Logging.Print("  " .. L["Detected as:"], "Cata Classic")
+	end
+	if Addon.IS_MISTS_CLASSIC then
+		Addon.Logging.Print("  " .. L["Detected as:"], "Mists Classic")
+	end
+	if Addon.IS_MIDNIGHT then
+		Addon.Logging.Print("  " .. L["Detected as:"], "Midnight")
+	end
+	if Addon.IS_MAINLINE then
+		Addon.Logging.Print("  " .. L["Detected as:"], "Mainline")
+	end
+	if Addon.IS_FOREVER then
+		Addon.Logging.Print("  " .. L["Detected as:"], "WoW Forever (Classic-rules content on a modern client engine)")
+	end
+
+	-- Secret values (a distinct Lua type WoW returns for restricted unit data) are not tied to a single
+	-- expansion flag - e.g. they also occur on Classic clients sharing Midnight's client build. Report
+	-- API availability directly instead of inferring it from Addon.IS_MIDNIGHT.
+	Addon.Logging.Print("  " .. L["Secret values supported:"], tostring(_G.issecretvalue ~= nil))
+
+	-- Raw signals behind the flags above, for clients where they disagree (e.g. a custom/private-server
+	-- client reporting WOW_PROJECT_ID == WOW_PROJECT_MAINLINE despite running Classic-rules content) -
+	-- GetClassicExpansionLevel is only defined on some clients, hence the existence check first.
+	Addon.Logging.Print("  -- " .. L["Raw signals"] .. " --")
+	Addon.Logging.Print("    WOW_PROJECT_ID:", tostring(WOW_PROJECT_ID))
+	Addon.Logging.Print("    WOW_PROJECT_MAINLINE:", tostring(WOW_PROJECT_MAINLINE))
+	Addon.Logging.Print("    WOW_PROJECT_CLASSIC:", tostring(WOW_PROJECT_CLASSIC))
+	Addon.Logging.Print("    GetClassicExpansionLevel exists:", tostring(GetClassicExpansionLevel ~= nil))
+	if GetClassicExpansionLevel then
+		Addon.Logging.Print("    GetClassicExpansionLevel():", tostring(GetClassicExpansionLevel()))
+	end
+	if GetServerExpansionLevel then
+		Addon.Logging.Print("    GetServerExpansionLevel():", tostring(GetServerExpansionLevel()))
+	end
+end
+
+-- Read-only existence checks only - never calls anything - so this is safe to run without side effects
+-- (a game-state-changing call, e.g. CreateUnitHealPredictionCalculator(), would need a real unit context
+-- to be meaningful anyway). "path" is a dot-separated lookup starting from _G, e.g. "C_Spell.GetSpellInfo".
+local function ResolvePath(path)
+	local value = _G
+	for key in path:gmatch("[^.]+") do
+		if type(value) ~= "table" then return nil end
+		value = value[key]
+	end
+	return value
+end
+
+-- The set of Midnight-exclusive (or Midnight-introduced) APIs this addon's Midnight-only code paths
+-- depend on. Grouped by the subsystem that uses them, so a missing entry points straight at the
+-- Addon.ExpansionIsAtLeastMidnight branch in that file that needs a feature-detection guard instead.
+local MIDNIGHT_API_CHECKS = {
+	{ "Secret values", "issecretvalue" },
+	{ "Healthbar - heal prediction", "CreateUnitHealPredictionCalculator" },
+	{ "Healthbar - heal prediction", "UnitGetDetailedHealPrediction" },
+	{ "Healthbar - heal prediction", "Enum.UnitMaximumHealthMode" },
+	{ "Healthbar - heal prediction", "Enum.UnitDamageAbsorbClampMode" },
+	{ "Healthbar - heal prediction", "Enum.UnitHealAbsorbClampMode" },
+	{ "Healthbar - heal prediction", "Enum.UnitHealAbsorbMode" },
+	{ "Healthbar - heal prediction", "Enum.UnitIncomingHealClampMode" },
+	{ "StatusText - health percent/curves", "UnitHealthPercent" },
+	{ "StatusText/Color - curves", "C_CurveUtil.CreateCurve" },
+	{ "StatusText/Color - curves", "C_CurveUtil.CreateColorCurve" },
+	{ "StatusText/Color - curves", "C_CurveUtil.EvaluateColorValueFromBoolean" },
+	{ "StatusText/Color - curves", "Enum.LuaCurveType" },
+	{ "Color - class color", "C_ClassColor.GetClassColor" },
+	{ "Init - spell info", "C_Spell.GetSpellInfo" },
+	{ "Init - solo shuffle", "C_PvP.IsSoloShuffle" },
+	{ "Elements/QuestWidget - tooltip scanning", "C_TooltipInfo.GetUnit" },
+	{ "QuestWidget - tooltip line types", "Enum.TooltipDataLineType" },
+	{ "AurasWidget - aura API", "C_UnitAuras.GetAuraSlots" },
+	{ "AurasWidget - aura API", "C_UnitAuras.GetAuraDataBySlot" },
+	{ "AurasWidget - aura API", "C_UnitAuras.GetAuraDataByAuraInstanceID" },
+	{ "AurasWidget - aura API", "C_UnitAuras.GetUnitAuras" },
+	{ "AurasWidget - aura API", "C_UnitAuras.GetBuffDataByIndex" },
+	{ "AurasWidget - aura API", "C_UnitAuras.IsAuraFilteredOutByInstanceID" },
+	{ "Compatibility - server expansion", "GetServerExpansionLevel" },
+	{ "Castbar - cast target/timer", "UnitSpellTargetName" },
+	{ "Castbar - cast target/timer", "UnitSpellTargetClass" },
+	{ "Castbar - cast target/timer", "UnitChannelDuration" },
+	{ "Castbar - cast target/timer", "UnitCastingDuration" },
+	{ "Castbar - cast target/timer", "WrapTextInColor" },
+	{ "Castbar - cast target/timer", "GetClassColor" },
+}
+
+-- StatusBar/Frame mixin methods can't be looked up on _G - they only exist on frame instances - so they
+-- need a throwaway frame to test against, same approach as PrintCompatibilityCheck below.
+local MIDNIGHT_FRAME_METHOD_CHECKS = {
+	{ "Healthbar/Color - alpha from secret bool", "SetAlphaFromBoolean" },
+	{ "Castbar - timer duration", "SetTimerDuration" },
+}
+
+-- Checks whether this client's API surface actually has what Threat Plates' Midnight-only code paths
+-- (everything gated behind Addon.ExpansionIsAtLeastMidnight) call. A client that reports itself as not
+-- Midnight but still returns secret values for unit data (e.g. "WoW Forever" - see Addon.IS_FOREVER in
+-- Init.lua) may or may not also have the rest of Midnight's new APIs; this settles that empirically
+-- instead of guessing. Invoke with /tptp debug MidnightAPI.
+local function PrintMidnightAPICheck()
+	local available_count, total_count = 0, 0
+
+	for _, check in ipairs(MIDNIGHT_API_CHECKS) do
+		local subsystem, path = check[1], check[2]
+		total_count = total_count + 1
+		local exists = ResolvePath(path) ~= nil
+		if exists then available_count = available_count + 1 end
+		Addon.Logging.Print(("  %s: %s (%s)"):format(exists and "OK  " or "MISSING", path, subsystem))
+	end
+
+	local frame = CreateFrame("StatusBar")
+	for _, check in ipairs(MIDNIGHT_FRAME_METHOD_CHECKS) do
+		local subsystem, method = check[1], check[2]
+		total_count = total_count + 1
+		local exists = type(frame[method]) == "function"
+		if exists then available_count = available_count + 1 end
+		Addon.Logging.Print(("  %s: %s (%s)"):format(exists and "OK  " or "MISSING", method, subsystem))
+	end
+
+	Addon.Logging.Print(("Midnight API check done: %d/%d available."):format(available_count, total_count))
+end
+
 local function SearchDBForString(db, prefix, keyword)
   for key, value in pairs(db) do
     local search_text = prefix .. "." .. key
@@ -93,7 +248,9 @@ end
 local function ChatCommandDebug(cmd_list)
 	local command = cmd_list[1]
 	
-	if command == "searchdb" then
+	if command == "version" then
+		PrintVersion()
+	elseif command == "searchdb" then
 		Addon.Logging.Print("|cff89F559Threat Plates|r: Searching settings:")
 		SearchDBForString(Addon.db.profile, "<Profile>", string.lower(cmd_list[2]))
 		SearchDBForString(Addon.db.global, "<Profile>", string.lower(cmd_list[2]))
@@ -117,6 +274,8 @@ local function ChatCommandDebug(cmd_list)
 			Addon:DebugWidgetHandler()
 		elseif component_name == "Compatibility" then
 			Addon:DebugCompatibility()
+		elseif component_name == "MidnightAPI" then
+			PrintMidnightAPICheck()
 		elseif component_name == "EventService" then
 			Addon:PrintEventService()
 		elseif component_name == "Color" then 
@@ -147,42 +306,9 @@ local function ChatCommandDebug(cmd_list)
 				Addon.Logging.Debug("Removing", i)
 			end
 		end			
-	elseif command == "version" then
-		Addon.Logging.Debug("Expansion Level:", Addon.GetExpansionLevel())
-		if Addon.IS_CLASSIC then
-			if Addon.IS_CLASSIC_SOD then
-				Addon.Logging.Debug("Version: Classic Era - Season of Discovery")
-			elseif C_Seasons and (C_Seasons.GetActiveSeason() == 11 or C_Seasons.GetActiveSeason() == 12) then
-				Addon.Logging.Debug("Version: Classic Era - Anniversary Realm")
-			else
-				Addon.Logging.Debug("Version: Classic Era")
-			end
-		end
-		if Addon.IS_TBC_CLASSIC then
-			if C_Seasons and (C_Seasons.GetActiveSeason() == 125) then
-				Addon.Logging.Debug("Version: TBC Classic - Anniversary Edition")
-			else
-				Addon.Logging.Debug("Version: TBC Classic")
-			end
-		end
-		if Addon.IS_MISTS_CLASSIC then
-			Addon.Logging.Debug("Version: Mists Classic")
-		end
-		if Addon.IS_MIDNIGHT then
-			Addon.Logging.Debug("Version: Midnight")
-		end
-		if Addon.IS_MAINLINE then
-			Addon.Logging.Debug("Version: Mainline")
-		end
-
-		Addon.Logging.Debug("-- Enabled Features --")
-		Addon.Logging.Debug("  WOW_FEATURE_ABSORBS:", Addon.WOW_FEATURE_ABSORBS)
-		Addon.Logging.Debug("  WOW_FEATURE_BLIZZARD_AURA_FILTER:", Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER)
-		Addon.Logging.Debug("  NAMEPLATE_MAX_DISTANCE_MAX_VALUE:", Addon.NAMEPLATE_MAX_DISTANCE_MAX_VALUE[Addon.GetExpansionLevel()])
-	elseif command == "version" then
-		--		local unique_unit = Addon.CopyTable(Addon.db.profile.uniqueSettings[1])
-		--		unique_unit.UseAutomaticIcon = nil
-		--		print (Addon.CheckTableStructure(TP.DEFAULT_SETTINGS.profile.uniqueSettings["**"], unique_unit))
+	elseif command == "version-history" then
+		-- Ad-hoc checks for Addon.CurrentVersionIsOlderThan, kept as a manual test since there is no
+		-- automated test runner for this addon (see CLAUDE.md).
 		Addon.Logging.Debug("10.2.11 < 10.3.0:", Addon.CurrentVersionIsOlderThan("10.2.11", "10.3.0"))
 		Addon.Logging.Debug("10.2.11 < 10.3.0-beta2:", Addon.CurrentVersionIsOlderThan("10.2.11", "10.3.0-beta2"))
 		Addon.Logging.Debug("10.3.0-beta2 < 9.3.0:", Addon.CurrentVersionIsOlderThan("10.3.0-beta2", "10.3.0"))

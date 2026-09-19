@@ -297,7 +297,9 @@ function TidyPlatesThreat:OnInitialize()
   -- Registering events here as otherwise PLAYER_LOGIN is not received
   Addon:EnableEvents()
 
-  CVars:OverwriteBool("nameplateResourceOnTarget", Addon.db.profile.PersonalNameplate.ShowResourceOnTarget)
+  if CVars:IsAvailable("nameplateResourceOnTarget") then
+    CVars:OverwriteBool("nameplateResourceOnTarget", Addon.db.profile.PersonalNameplate.ShowResourceOnTarget)
+  end
 
   -- Get updates for CVar changes (e.g, for large nameplates, nameplage scale and alpha)
   CVars.RegisterCVarHook()

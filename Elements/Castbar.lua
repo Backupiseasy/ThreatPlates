@@ -93,6 +93,14 @@ local function OnUpdateMidnight(self, elapsed)
   end
 end
 
+-- Must match the branch in Nameplate.lua's OnStartCasting (Addon.HAS_MIDNIGHT_API): it sets castbar.Duration via
+-- SetTimerDuration there, and the legacy OnUpdate (Value/MaxValue based) would hide the castbar immediately.
+local CastbarOnUpdate = Addon.HAS_MIDNIGHT_API and OnUpdateMidnight or OnUpdate
+
+-- Config mode state (see "Show config mode" below); declared here as UpdateVisibility needs it
+local EnabledConfigMode = false
+local ConfigModePlate
+
 local function OnHide(self)
   if self.PostCastHoldTime > 0 then
     self:Show()
@@ -112,7 +120,15 @@ local function GetCastbarColor(unit)
 
   -- Because of this ordering, IsInterrupted must be set to false when a new cast is cast. Otherwise
   -- the interrupt color may be shown for a cast
-  if Addon.ExpansionIsAtLeastMidnight then
+  --
+  -- unit.CastIsNotInterruptible can be secret on any client with Midnight's API surface (not just
+  -- Midnight itself - Addon.HAS_MIDNIGHT_API). The else branch's bare `elseif unit.CastIsNotInterruptible
+  -- then` was assumed safe (a plain truthy check, no comparison/arithmetic) per CLAUDE.md's guard-pattern
+  -- catalogue, but confirmed live to still throw "attempt to perform boolean test on field ... (a secret
+  -- boolean value, while execution tainted by 'TidyPlates_ThreatPlates')" - so a bare truthy check on a
+  -- secret value is NOT always safe once the calling code itself is tainted; see the correction in
+  -- CLAUDE.md's Midnight guard patterns.
+  if Addon.HAS_MIDNIGHT_API then
     if unit.IsInterrupted then
       c = db.castbarColorInterrupted
     else
@@ -150,8 +166,12 @@ local function UpdateForCast(self, unit)
   local show = unit.CastIsNotInterruptible
   local db = Addon.db.profile.settings
 
+  -- show (unit.CastIsNotInterruptible) can be secret on any client with Midnight's API surface (not just
+  -- Midnight itself - Addon.HAS_MIDNIGHT_API), and SetShown()/Show()/Hide() are not documented as
+  -- SecretArguments = "AllowedWhenTainted" the way SetAlphaFromBoolean is (see CLAUDE.md's Midnight guard
+  -- patterns) - assumed to behave the same as real Midnight there, same as everywhere else this session.
   if db.castnostop.ShowInterruptShield then
-    if Addon.ExpansionIsAtLeastMidnight then
+    if Addon.HAS_MIDNIGHT_API then
       self.InterruptShield:SetAlphaFromBoolean(show, 1, 0)
       self.InterruptShield:Show()
     else
@@ -162,7 +182,7 @@ local function UpdateForCast(self, unit)
   end
 
   if db.castborder.show and db.castnostop.ShowOverlay then
-    if Addon.ExpansionIsAtLeastMidnight then
+    if Addon.HAS_MIDNIGHT_API then
       self.InterruptBorder:SetAlphaFromBoolean(show, 1, 0)
       self.InterruptOverlay:SetAlphaFromBoolean(show, 1, 0)
       self.InterruptBorder:Show()
@@ -184,6 +204,13 @@ end
 -- (style updates, cast start/stop, interrupts) sets state (unit.isCasting, unit.IsInterrupted,
 -- self.PostCastHoldTime) and calls this to reconcile, instead of deciding visibility itself.
 local function UpdateVisibility(self, tp_frame)
+  -- In config mode the castbar is driven by Addon:ConfigCastbar's OnUpdate, which only runs while the castbar
+  -- is shown - hiding it here would stop it for good.
+  if EnabledConfigMode and ConfigModePlate == tp_frame then
+    self:Show()
+    return
+  end
+
   local unit = tp_frame.unit
   local spell_text = tp_frame.visual.SpellText
 
@@ -266,11 +293,7 @@ function Element.PlateCreated(tp_frame)
   castbar.Value = 0
   castbar.MaxValue = 0
 
-  if Addon.ExpansionIsAtLeastMidnight then
-    castbar:SetScript("OnUpdate", OnUpdateMidnight)
-  else
-    castbar:SetScript("OnUpdate", OnUpdate)
-  end
+  castbar:SetScript("OnUpdate", CastbarOnUpdate)
   castbar:HookScript("OnHide", OnHide)
 
   tp_frame.visual.Castbar = castbar
@@ -420,9 +443,6 @@ SubscribeEvent(Element, "TargetLost", TargetUpdate)
 -- Show config mode
 ---------------------------------------------------------------------------------------------------
 
-local EnabledConfigMode = false
-local ConfigModePlate
-
 local function ShowOnUnit(unit)
   local db = Addon.db.profile.settings.castbar
 
@@ -504,10 +524,10 @@ function Addon:ConfigCastbar()
     end
   else
     local castbar = ConfigModePlate.visual.Castbar
-    castbar:SetScript("OnUpdate", OnUpdate)
+    castbar:SetScript("OnUpdate", CastbarOnUpdate)
     castbar.Hide = castbar._Hide
-    castbar:Hide()
     EnabledConfigMode = false
+    castbar:Hide()
 
     if ConfigModePlate and ConfigModePlate.Active then
       Addon:ForceUpdateOnNameplate(ConfigModePlate)
