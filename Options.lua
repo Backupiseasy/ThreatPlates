@@ -10215,8 +10215,8 @@ local function CreateOptionsTable()
                           name = L["Show Focus"],
                           order = 15,
                           type = "toggle",
-                          arg = { "HeadlineView", "ShowFocusHighlight" },
-                          hidden = function() return Addon.IS_CLASSIC end,
+                          arg = { "FocusWidget", "ShowInHeadlineView" },
+                          hidden = function() return not Addon.WOW_FEATURE_FOCUS end,
                         },
                         TargetMouseoverHighlight = {
                           name = L["Show Mouseover"],
