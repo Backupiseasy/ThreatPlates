@@ -979,21 +979,27 @@ local function NamePlateDriverFrame_AcquireUnitFrame(_, plate)
     BlizzardPlateOrigParent[unit_frame] = nil
   end
 
-  if unit_frame and not unit_frame:IsForbidden() and not unit_frame.ThreatPlates then
-    unit_frame.ThreatPlates = true
-    unit_frame:HookScript("OnShow", FrameOnShow)
+  if unit_frame and not unit_frame:IsForbidden() then
+    if not unit_frame.ThreatPlates then
+      unit_frame.ThreatPlates = true
+      unit_frame:HookScript("OnShow", FrameOnShow)
 
-    -- Companion to SetShownBlizzardPlate above - kept on the same condition.
-    if Addon.HAS_MIDNIGHT_API then
-      hooksecurefunc(unit_frame, "Show", function(self)
-        if self:IsForbidden() then return end
+      -- Companion to SetShownBlizzardPlate above - kept on the same condition.
+      if Addon.HAS_MIDNIGHT_API then
+        hooksecurefunc(unit_frame, "Show", function(self)
+          if self:IsForbidden() then return end
 
-        SetVisibilityOfBlizzardNameplate(self, self.unit)
-      end)
+          SetVisibilityOfBlizzardNameplate(self, self.unit)
+        end)
+      end
     end
 
-   -- # Nameplate Hierarchy, Anchoring, and Scaling
-    plate.TPFrame:SetPoint("CENTER", plate.UnitFrame, "CENTER")
+    -- # Nameplate Hierarchy, Anchoring, and Scaling
+    -- Must run for every acquire, not only the first time a unit_frame is seen: Blizzard pools its
+    -- UnitFrames and can hand plate a different (already hooked) instance on each NAME_PLATE_UNIT_ADDED.
+    -- Otherwise TPFrame stays anchored to the instance plate used before, which is by now either
+    -- released (no anchor, so the plate is invisible) or in use by another plate (so it shows up there).
+    plate.TPFrame:SetPoint("CENTER", unit_frame, "CENTER")
     --plate.Background:SetAllPoints(plate.TPFrame)
   end
 end
