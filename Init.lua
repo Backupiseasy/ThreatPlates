@@ -97,6 +97,10 @@ Addon.ExpansionIsAtLeastMidnight = Addon.IS_MIDNIGHT
 -- intentionally disabled on Midnight, see CLAUDE.md).
 Addon.HAS_MIDNIGHT_API = Addon.ExpansionIsAtLeastMidnight or Addon.IS_FOREVER
 
+-- Focus target (PLAYER_FOCUS_CHANGED, "focus" unit token) exists since TBC. "WoW Forever" reports Vanilla
+-- as its expansion level, but its modern engine supports focus (see Addon.IS_FOREVER above).
+Addon.WOW_FEATURE_FOCUS = Addon.ExpansionIsAtLeastTBC or Addon.IS_FOREVER
+
 -- aura.nameplateShowAll/nameplateShowPersonal are a Legion+ feature - confirmed to
 -- always be false on both TBC Classic Anniversary and Mists Classic.
 Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER = Addon.ExpansionIsAtLeast(LE_EXPANSION_LEGION)

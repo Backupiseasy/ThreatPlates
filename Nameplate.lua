@@ -979,21 +979,27 @@ local function NamePlateDriverFrame_AcquireUnitFrame(_, plate)
     BlizzardPlateOrigParent[unit_frame] = nil
   end
 
-  if unit_frame and not unit_frame:IsForbidden() and not unit_frame.ThreatPlates then
-    unit_frame.ThreatPlates = true
-    unit_frame:HookScript("OnShow", FrameOnShow)
+  if unit_frame and not unit_frame:IsForbidden() then
+    if not unit_frame.ThreatPlates then
+      unit_frame.ThreatPlates = true
+      unit_frame:HookScript("OnShow", FrameOnShow)
 
-    -- Companion to SetShownBlizzardPlate above - kept on the same condition.
-    if Addon.HAS_MIDNIGHT_API then
-      hooksecurefunc(unit_frame, "Show", function(self)
-        if self:IsForbidden() then return end
+      -- Companion to SetShownBlizzardPlate above - kept on the same condition.
+      if Addon.HAS_MIDNIGHT_API then
+        hooksecurefunc(unit_frame, "Show", function(self)
+          if self:IsForbidden() then return end
 
-        SetVisibilityOfBlizzardNameplate(self, self.unit)
-      end)
+          SetVisibilityOfBlizzardNameplate(self, self.unit)
+        end)
+      end
     end
 
-   -- # Nameplate Hierarchy, Anchoring, and Scaling
-    plate.TPFrame:SetPoint("CENTER", plate.UnitFrame, "CENTER")
+    -- # Nameplate Hierarchy, Anchoring, and Scaling
+    -- Must run for every acquire, not only the first time a unit_frame is seen: Blizzard pools its
+    -- UnitFrames and can hand plate a different (already hooked) instance on each NAME_PLATE_UNIT_ADDED.
+    -- Otherwise TPFrame stays anchored to the instance plate used before, which is by now either
+    -- released (no anchor, so the plate is invisible) or in use by another plate (so it shows up there).
+    plate.TPFrame:SetPoint("CENTER", unit_frame, "CENTER")
     --plate.Background:SetAllPoints(plate.TPFrame)
   end
 end
@@ -1075,24 +1081,23 @@ local	function HandlePlateCreated(plate)
 end
 
 -- Applies the C++ hit-test link for a nameplate plate.
--- Guards:
---   • Active: skips when Blizzard plates are shown for this unit.
---   • CanChangeHitTestPoints: skips in restricted C++ contexts.
+-- Click-through (NamePlateFriendlyClickThrough/NamePlateEnemyClickThrough) is decided by the
+-- unit's reaction alone, so it applies the same whether TP or Blizzard's own plate is currently
+-- shown for this unit (Active toggles only which frame's bounds the non-click-through case uses).
+-- Guard: CanChangeHitTestPoints skips in restricted C++ contexts.
 local function ApplyPlateHitTest(tp_frame)
   local plate = tp_frame.Parent
 
   if not plate:CanChangeHitTestPoints() then return end
-  
-  if not tp_frame.Active then 
-    plate:SetAllHitTestPoints(plate.UnitFrame)  
-    return 
-  end
 
   local db = Addon.db.profile
-  local is_friendly = (tp_frame.unit.reaction == "FRIENDLY")
+  local is_friendly = Addon.GetUnitReactionToPlayer(tp_frame.unit.unitid) > 4
   local is_click_through = (is_friendly and db.NamePlateFriendlyClickThrough) or (not is_friendly and db.NamePlateEnemyClickThrough)
+
   if is_click_through then
     plate:ClearAllHitTestPoints()
+  elseif not tp_frame.Active then
+    plate:SetAllHitTestPoints(plate.UnitFrame)
   else
     local db_frame = db.settings.frame
     local width  = (is_friendly and db_frame.widthFriend)  or db_frame.width
@@ -1419,12 +1424,12 @@ local PVP_INSTANCE_TYPES = {
 
 local function SetFriendlyNameplatesShown(value)
   CVars:Set("nameplateShowFriendlyPlayers", value)
-  CVars:Set("nameplateShowFriendlyNPCs", value)
+  CVars:Set("nameplateShowFriendlyNpcs", value)
 end
 
 local function RestoreFriendlyNameplatesShown()
   CVars:RestoreFromProfile("nameplateShowFriendlyPlayers")
-  CVars:RestoreFromProfile("nameplateShowFriendlyNPCs")
+  CVars:RestoreFromProfile("nameplateShowFriendlyNpcs")
 end
 
 -- Same as SetFriendlyNameplatesShown, but sets the CVar(s) directly, bypassing the combat-protection queue in
@@ -1432,7 +1437,7 @@ end
 -- apply immediately.
 local function RawSetFriendlyNameplatesShown(value)
   _G.SetCVar("nameplateShowFriendlyPlayers", value)
-  _G.SetCVar("nameplateShowFriendlyNPCs", value)
+  _G.SetCVar("nameplateShowFriendlyNpcs", value)
 end
 
 -- Fired when the player enters the world, reloads the UI, enters/leaves an instance or battleground, or respawns at a graveyard.
@@ -1871,6 +1876,11 @@ local function ApplyReactionUpdate(tp_frame, unitid)
     ApplyPlateHitTest(tp_frame)
     StyleModule.Update(tp_frame)
     PublishEvent("FactionUpdate", tp_frame)
+  else
+    -- ApplyPlateHitTest falls back to Blizzard's own UnitFrame bounds when Active is false, so this
+    -- keeps the hit-test region correct even when SetNameplateVisibility left Blizzard's own plate
+    -- shown for this unit instead of TP's.
+    ApplyPlateHitTest(tp_frame)
   end
 end
 
