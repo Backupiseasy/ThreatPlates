@@ -36,8 +36,10 @@ Addon.IS_CATA_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel()
 Addon.IS_MISTS_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_MISTS_OF_PANDARIA) or false
 --Addon.IS_MIDNIGHT = GetServerExpansionLevel() == LE_EXPANSION_MIDNIGHT
 Addon.IS_MIDNIGHT = (select(4, GetBuildInfo()) >= 120000)
+-- GetClassicExpansionLevel also exists on Retail/Midnight, where it returns the current (modern) expansion
+-- level, so its existence alone does not identify Forever: it must report a Classic-era level (<= Mists).
 Addon.IS_FOREVER = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
-  and (GetClassicExpansionLevel and GetClassicExpansionLevel() ~= nil and GetClassicExpansionLevel() ~= false)
+  and (GetClassicExpansionLevel and type(GetClassicExpansionLevel()) == "number" and GetClassicExpansionLevel() <= LE_EXPANSION_MISTS_OF_PANDARIA)
   or false
 Addon.IS_MAINLINE = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE) and not Addon.IS_FOREVER
 
