@@ -45,7 +45,6 @@ local IsSecretValueTP = Addon.IsSecretValue
 local UnitIsUnitTP = Addon.UnitIsUnit
 local CombatLogGetCurrentEventInfoTP = Addon.CombatLogGetCurrentEventInfo
 local IsSpellKnownTP = Addon.IsSpellKnown
-local ExpansionIsAtLeastMidnight = Addon.ExpansionIsAtLeastMidnight
 
 local TransliterateCyrillicLetters = Addon.Localization.TransliterateCyrillicLetters
 local SetNamesFonts = Addon.Font.SetNamesFonts
@@ -533,7 +532,7 @@ local function SetUnitAttributes(unit, unitid)
     unit.class = ""
     unit.type = "NPC"
 
-    if not ExpansionIsAtLeastMidnight then
+    if not Addon.HAS_MIDNIGHT_API then
       local _, _, _, _, _, npc_id = strsplit("-", unit.guid or "")
       unit.NPCID = npc_id
     end
@@ -1678,7 +1677,7 @@ function Addon:NAME_PLATE_UNIT_REMOVED(unitid)
   tp_frame.Active = false
 
   PlatesByUnit[unitid] = nil
-  if not ExpansionIsAtLeastMidnight then
+  if not Addon.HAS_MIDNIGHT_API then
     if tp_frame.unit.guid then -- maybe hide directly after create with unit added?
       PlatesByGUID[tp_frame.unit.guid] = nil
     end

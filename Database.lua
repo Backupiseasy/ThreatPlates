@@ -1048,8 +1048,9 @@ end
 -- toggles for them are now hidden on Midnight instead of left silently inert - migrate any profile
 -- that had one of them explicitly selected to "None", the toggle that actually represents that
 -- fallback behavior, so the stored value matches what's both selectable and already happening.
--- Version-gated to Midnight only (see Migrate Version = below) - Classic's legacy widget still sorts
--- by these itself, so leave Classic profiles untouched.
+-- Version-gated to clients using the Midnight Auras widget (Addon.HAS_MIDNIGHT_API, so also "WoW Forever";
+-- see Migrate Version = below) - Classic's legacy widget still sorts by these itself, so leave Classic
+-- profiles untouched.
 local function MigrateAurasSortOrder(_, profile)
   if DatabaseEntryExists(profile, { "AuraWidget", "SortOrder" }) then
     if profile.AuraWidget.SortOrder == "Duration" or profile.AuraWidget.SortOrder == "Creation" then
@@ -1567,7 +1568,7 @@ local MIGRATION_FUNCTIONS_BY_VERSION = {
     { Type = "Migrate", Name = "Anchor Frame to Nameplate Size", Function = MigrateAnchorFrameToNameplateSize },
   },
   ["13.1.0"] = {
-    { Type = "Migrate", Name = "Auras Sort Order (Duration/Creation)", Function = MigrateAurasSortOrder, NoDefaultProfile = true, Version = Addon.ExpansionIsAtLeastMidnight },
+    { Type = "Migrate", Name = "Auras Sort Order (Duration/Creation)", Function = MigrateAurasSortOrder, NoDefaultProfile = true, Version = Addon.HAS_MIDNIGHT_API },
   },
 }
 

@@ -282,7 +282,7 @@ local function ShowTargetUnit(healthbar, unitid)
 end
 
 local function UpdateTargetUnit(healthbar, unitid)
-  if Addon.ExpansionIsAtLeastMidnight then return end
+  if Addon.HAS_MIDNIGHT_API then return end
 
   if SettingsTargetUnitHide or (SettingsShowOnlyForTarget and not UnitIsUnit("target", unitid)) or (SettingsTargetUnit.ShowOnlyInCombat and not InCombatLockdown()) then
     HideTargetUnit(healthbar)
@@ -322,7 +322,7 @@ local function ColorUpdate(tp_frame, color)
   if tp_frame.PlateStyle ~= "HealthbarMode" then return end
 
   local healthbar = tp_frame.visual.Healthbar
-  if Addon.ExpansionIsAtLeastMidnight then
+  if Addon.HAS_MIDNIGHT_API then
     healthbar:GetStatusBarTexture():SetVertexColor(color.r, color.g, color.b)
   else
     healthbar:SetStatusBarColor(color.r, color.g, color.b, 1)
@@ -617,7 +617,7 @@ function Element.UpdateSettings()
 
   SubscribeEvent(Element, "HealthbarColorUpdate", ColorUpdate)
 
-  if not Addon.ExpansionIsAtLeastMidnight and SettingsTargetUnit.Show then
+  if not Addon.HAS_MIDNIGHT_API and SettingsTargetUnit.Show then
     SubscribeEvent(Element, "UNIT_TARGET", UNIT_TARGET)
     SubscribeEvent(Element, "ThreatUpdate", UnitThreatUpdate)
     SubscribeEvent(Element, "TargetLost", PlayerTargetLost)
@@ -706,7 +706,7 @@ local function UpdateHealthbarConfigMode(tp_frame)
     healthbar:SetValue(s[1])
   end
 
-  if not Addon.ExpansionIsAtLeastMidnight and not SettingsTargetUnitHide then
+  if not Addon.HAS_MIDNIGHT_API and not SettingsTargetUnitHide then
     local target_unit = healthbar.TargetUnit
     target_unit:SetText("Thrall")
     local color = SettingsTargetUnit.UseClassColor and Addon.db.profile.Colors.Classes["SHAMAN"] or SettingsTargetUnit.CustomColor

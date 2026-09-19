@@ -664,7 +664,7 @@ function Widget:OnEnable()
   -- Also use ThreatUpdate Threatas new mobs may enter the combat mid-fight (PLAYER_REGEN_DISABLED already triggered)
   self:SubscribeEvent("ThreatUpdate")
 
-  if not Addon.ExpansionIsAtLeastMidnight then
+  if not Addon.HAS_MIDNIGHT_API then
     -- To handle objectives correctly when quest objectives of group memebers are shown in the tooltip, we need to keep a
     -- list of all players in the group
     self:SubscribeEvent("GROUP_ROSTER_UPDATE")
@@ -674,7 +674,7 @@ function Widget:OnEnable()
   Addon.CVars:Overwrite("showQuestTrackingTooltips", 1)
 
   InCombat = InCombatLockdown()
-  if not Addon.ExpansionIsAtLeastMidnight then
+  if not Addon.HAS_MIDNIGHT_API then
     self:GROUP_ROSTER_UPDATE()
   end
 end

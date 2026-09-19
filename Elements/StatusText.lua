@@ -107,7 +107,7 @@ local function GetUnitSubtitle(unit)
         
         -- Strip color escape sequences: "|c"
         -- Name of unit: type = Enum.TooltipDataLineType.UnitName
-        if not Addon.ExpansionIsAtLeastMidnight then
+        if not Addon.HAS_MIDNIGHT_API then
           tooltip_name = gsub( gsub( (tooltip_name), "|c........", "" ), "|r", "" ) 
           if tooltip_name ~= UnitName(unit.unitid) then return end	-- Avoid caching information for the wrong unit
         end

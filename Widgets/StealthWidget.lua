@@ -3,9 +3,9 @@
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
 
-if Addon.ExpansionIsAtLeastMidnight then return end
+if Addon.HAS_MIDNIGHT_API or Addon.IS_CLASSIC then return end
 
-local Widget = (Addon.IS_CLASSIC and {}) or Addon.Widgets:NewWidget("Stealth")
+local Widget = Addon.Widgets:NewWidget("Stealth")
 
 ---------------------------------------------------------------------------------------------------
 -- Imported functions and constants

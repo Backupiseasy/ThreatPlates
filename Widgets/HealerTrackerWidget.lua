@@ -18,7 +18,7 @@
 -----------------------
 local ADDON_NAME, Addon = ...
 
-if Addon.ExpansionIsAtLeastMidnight then return end
+if Addon.HAS_MIDNIGHT_API then return end
 
 local Widget = Addon.Widgets:NewWidget("HealerTracker")
 

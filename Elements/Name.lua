@@ -53,7 +53,7 @@ end
 function Element.PlateUnitAdded(tp_frame)
   local unit = tp_frame.unit
   
-  if Addon.ExpansionIsAtLeastMidnight then
+  if Addon.HAS_MIDNIGHT_API then
     tp_frame.visual.NameText:SetText(unit.name)
   else
     local unit_name = TransliterateCyrillicLetters(unit.name)

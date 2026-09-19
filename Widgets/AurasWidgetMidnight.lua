@@ -1174,7 +1174,7 @@ Widget.PLAYER_REGEN_DISABLED = Widget.PLAYER_REGEN_ENABLED
 function Widget:UpdateSettings()
   self.db = Addon.db.profile.AuraWidget
 
-  HideOmniCC = not self.db.ShowOmniCC or Addon.ExpansionIsAtLeastMidnight
+  HideOmniCC = not self.db.ShowOmniCC or Addon.HAS_MIDNIGHT_API
   ShowDuration = self.db.ShowDuration and HideOmniCC
 
   EnabledForStyle["NameOnly"] = self.db.ShowInHeadlineView

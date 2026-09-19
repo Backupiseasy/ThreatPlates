@@ -4120,7 +4120,7 @@ local function CreateAuraAreaLayoutOptions(pos, widget_info)
             set = function(info, val) SetValue(info, true) end,
             get = function(info) return GetValue(info) end,
             arg = { "AuraWidget", widget_info, "ModeBar", "Enabled" },
-            hidden = Addon.ExpansionIsAtLeastMidnight,
+            hidden = Addon.HAS_MIDNIGHT_API,
           },
         },
       },
@@ -4148,7 +4148,7 @@ local function CreateAuraAreaLayoutOptions(pos, widget_info)
             type = "toggle",
             order = 40,
             name = L["Center Auras"],
-            hidden = Addon.ExpansionIsAtLeastMidnight,
+            hidden = Addon.HAS_MIDNIGHT_API,
             arg = { "AuraWidget", widget_info, "CenterAuras" },
           },
         },
@@ -4198,7 +4198,7 @@ local function CreateAuraAreaIconModeOptions(pos, widget_info)
             type = "select",
             desc = function()
               local desc = L["This lets you select the layout style of the auras area."]
-              if Addon.ExpansionIsAtLeastMidnight then
+              if Addon.HAS_MIDNIGHT_API then
                 desc = desc .. " " .. L["The icon crop for Wide/Square requires /reload to take effect on already-displayed auras."]
               end
               return desc
@@ -4280,7 +4280,7 @@ local function CreateAuraAreaIconModeOptions(pos, widget_info)
             type = "toggle",
             order = 130,
             name = L["Border"],
-            desc = function() return Addon.ExpansionIsAtLeastMidnight and L["Requires /reload to take effect on already-displayed auras."] or "" end,
+            desc = function() return Addon.HAS_MIDNIGHT_API and L["Requires /reload to take effect on already-displayed auras."] or "" end,
             arg = { "AuraWidget", widget_info, "ModeIcon", "ShowBorder" },
             disabled = function() return db.AuraWidget[widget_info].ModeIcon.Style ~= "custom" end,
           },
@@ -4320,7 +4320,7 @@ local function CreateAuraAreaBarModeOptions(pos, widget_info)
     order = pos,
     type = "group",
     inline = false,
-    hidden = Addon.ExpansionIsAtLeastMidnight,
+    hidden = Addon.HAS_MIDNIGHT_API,
     args = {
       --Help = { type = "description", order = 0, width = "full", name = L["Show auras as bars (with optional icons)."], },
       Format = {
@@ -4447,7 +4447,7 @@ local function CreateAurasWidgetOptions()
                 desc = L["Show time left on auras that have a duration."],
                 arg = { "AuraWidget", "ShowDuration" },
                 disabled = function()
-                  return db.AuraWidget.ShowOmniCC and not Addon.ExpansionIsAtLeastMidnight
+                  return db.AuraWidget.ShowOmniCC and not Addon.HAS_MIDNIGHT_API
                 end
               },
               OmniCC = {
@@ -4456,7 +4456,7 @@ local function CreateAurasWidgetOptions()
                 order = 35,
                 desc = L["Show the OmniCC cooldown count instead of the built-in duration text on auras."],
                 arg = { "AuraWidget", "ShowOmniCC" },
-                hidden = Addon.ExpansionIsAtLeastMidnight,
+                hidden = Addon.HAS_MIDNIGHT_API,
               },
               Stacks = {
                 name = L["Stack Count"],
@@ -4514,7 +4514,7 @@ local function CreateAurasWidgetOptions()
                 order = 40,
                 desc = L["Shows a glow effect on auras that you can steal or purge."],
                 arg = { "AuraWidget", "Highlight", "Enabled" },
-                hidden = Addon.ExpansionIsAtLeastMidnight,
+                hidden = Addon.HAS_MIDNIGHT_API,
               },
               GlowType = {
                 name = L["Glow Type"],
@@ -4522,14 +4522,14 @@ local function CreateAurasWidgetOptions()
                 values = Addon.GLOW_TYPES,
                 order = 50,
                 arg = { "AuraWidget", "Highlight", "Type" },
-                hidden = Addon.ExpansionIsAtLeastMidnight,
+                hidden = Addon.HAS_MIDNIGHT_API,
               },
               GlowColorEnable = {
                 name = L["Glow Color"],
                 type = "toggle",
                 order = 60,
                 arg = { "AuraWidget", "Highlight", "CustomColor" },
-                hidden = Addon.ExpansionIsAtLeastMidnight,
+                hidden = Addon.HAS_MIDNIGHT_API,
               },
               GlowColor = {
                 name = L["Color"],
@@ -4537,7 +4537,7 @@ local function CreateAurasWidgetOptions()
                 order = 70,
                 arg = { "AuraWidget", "Highlight", "Color" },
                 hasAlpha = true,
-                hidden = Addon.ExpansionIsAtLeastMidnight,
+                hidden = Addon.HAS_MIDNIGHT_API,
               },
             },
           },
@@ -4578,7 +4578,7 @@ local function CreateAurasWidgetOptions()
                 -- to Default there regardless of this setting (see GetSortMethod in
                 -- AurasWidgetMidnight.lua) - hidden rather than left silently inert. Still valid on
                 -- Classic (legacy pull-based aura scanning sorts these itself).
-                hidden = Addon.ExpansionIsAtLeastMidnight,
+                hidden = Addon.HAS_MIDNIGHT_API,
               },
               Creation = {
                 name = L["Creation"], type = "toggle", order = 40, width = "half",
@@ -4586,7 +4586,7 @@ local function CreateAurasWidgetOptions()
                 get = function(info) return db.AuraWidget.SortOrder == "Creation" end,
                 set = function(info, value) SetValue(info, "Creation") end,
                 arg = {"AuraWidget","SortOrder"},
-                hidden = Addon.ExpansionIsAtLeastMidnight,
+                hidden = Addon.HAS_MIDNIGHT_API,
               },
               ReverseOrder = {
                 name = L["Reverse"], type = "toggle", order = 50,
@@ -4653,7 +4653,7 @@ local function CreateAurasWidgetOptions()
                 -- No script-hook/callback exists on AuraButton for addon-attached icon effects on
                 -- Midnight (see AurasWidgetImplementation.md §6) - replaced there by ShowExpiringColor
                 -- below instead of left silently inert.
-                hidden = Addon.ExpansionIsAtLeastMidnight,
+                hidden = Addon.HAS_MIDNIGHT_API,
               },
               FlashTime = {
                 type = "range",
@@ -4664,7 +4664,7 @@ local function CreateAurasWidgetOptions()
                 softMax = 20,
                 isPercent = false,
                 arg = { "AuraWidget", "FlashTime" },
-                hidden = Addon.ExpansionIsAtLeastMidnight,
+                hidden = Addon.HAS_MIDNIGHT_API,
                 disabled = function()
                   return not db.AuraWidget.FlashWhenExpiring
                 end
@@ -4675,7 +4675,7 @@ local function CreateAurasWidgetOptions()
                 name = L["Color when Expiring"],
                 desc = L["Colors the countdown text once the remaining duration drops below the threshold below - the Midnight replacement for Flash When Expiring, which has no equivalent on Midnight."],
                 arg = { "AuraWidget", "ShowExpiringColor" },
-                hidden = not Addon.ExpansionIsAtLeastMidnight,
+                hidden = not Addon.HAS_MIDNIGHT_API,
               },
               ExpiringColorThreshold = {
                 type = "range",
@@ -4686,7 +4686,7 @@ local function CreateAurasWidgetOptions()
                 softMax = 20,
                 isPercent = false,
                 arg = { "AuraWidget", "ExpiringColorThreshold" },
-                hidden = not Addon.ExpansionIsAtLeastMidnight,
+                hidden = not Addon.HAS_MIDNIGHT_API,
                 disabled = function()
                   return not db.AuraWidget.ShowExpiringColor
                 end
@@ -4697,7 +4697,7 @@ local function CreateAurasWidgetOptions()
                 name = L["Expiring Color"],
                 arg = { "AuraWidget", "ExpiringColor" },
                 hasAlpha = true,
-                hidden = not Addon.ExpansionIsAtLeastMidnight,
+                hidden = not Addon.HAS_MIDNIGHT_API,
                 disabled = function()
                   return not db.AuraWidget.ShowExpiringColor
                 end
@@ -4741,7 +4741,7 @@ local function CreateAurasWidgetOptions()
                 type = "group",
                 order = 10,
                 inline = true,
-                hidden = Addon.ExpansionIsAtLeastMidnight,
+                hidden = Addon.HAS_MIDNIGHT_API,
                 args = {
                   Show = {
                     name = L["Show Buffs"],
@@ -4820,7 +4820,7 @@ local function CreateAurasWidgetOptions()
                 type = "group",
                 order = 11,
                 inline = true,
-                hidden = not Addon.ExpansionIsAtLeastMidnight,
+                hidden = not Addon.HAS_MIDNIGHT_API,
                 args = {
                   Show = {
                     name = L["Show Buffs"],
@@ -4922,7 +4922,7 @@ local function CreateAurasWidgetOptions()
                 type = "group",
                 order = 20,
                 inline = true,
-                hidden = Addon.ExpansionIsAtLeastMidnight,                    
+                hidden = Addon.HAS_MIDNIGHT_API,                    
                 args = {
                   ShowEnemy = {
                     name = L["Show Buffs"],
@@ -5077,7 +5077,7 @@ local function CreateAurasWidgetOptions()
                 type = "group",
                 order = 21,
                 inline = true,
-                hidden = not Addon.ExpansionIsAtLeastMidnight,                    
+                hidden = not Addon.HAS_MIDNIGHT_API,                    
                 args = {
                   ShowEnemy = {
                     name = L["Show Buffs"],
@@ -5169,7 +5169,7 @@ local function CreateAurasWidgetOptions()
                 order = 50,
                 type = "group",
                 inline = true,
-                hidden = Addon.ExpansionIsAtLeastMidnight,
+                hidden = Addon.HAS_MIDNIGHT_API,
                 args = {
                   ScopeNote = {
                     name = L["This spell filter only takes effect for buffs on friendly units. On enemy units it has no effect, due to a Blizzard API restriction (Patch 12.1.0)."],
@@ -5231,7 +5231,7 @@ local function CreateAurasWidgetOptions()
                 type = "group",
                 order = 10,
                 inline = true,
-                hidden = Addon.ExpansionIsAtLeastMidnight,
+                hidden = Addon.HAS_MIDNIGHT_API,
                 args = {
                   Show = {
                     name = L["Show Debuffs"],
@@ -5363,7 +5363,7 @@ local function CreateAurasWidgetOptions()
                 type = "group",
                 order = 11,
                 inline = true,                
-                hidden = not Addon.ExpansionIsAtLeastMidnight,
+                hidden = not Addon.HAS_MIDNIGHT_API,
                 args = {
                   Show = {
                     name = L["Show Debuffs"],
@@ -5481,7 +5481,7 @@ local function CreateAurasWidgetOptions()
                 type = "group",
                 order = 20,
                 inline = true,
-                hidden = Addon.ExpansionIsAtLeastMidnight,
+                hidden = Addon.HAS_MIDNIGHT_API,
                 args = {
                   ShowEnemy = {
                     name = L["Show Debuffs"],
@@ -5540,7 +5540,7 @@ local function CreateAurasWidgetOptions()
                 type = "group",
                 order = 21,
                 inline = true,
-                hidden = not Addon.ExpansionIsAtLeastMidnight,
+                hidden = not Addon.HAS_MIDNIGHT_API,
                 args = {
                   ShowEnemy = {
                     name = L["Show Debuffs"],
@@ -5700,7 +5700,7 @@ local function CreateAurasWidgetOptions()
                 order = 50,
                 type = "group",
                 inline = true,
-                hidden = Addon.ExpansionIsAtLeastMidnight,
+                hidden = Addon.HAS_MIDNIGHT_API,
                 args = {
                   ScopeNote = {
                     name = L["This spell filter only takes effect for debuffs on enemy units. On friendly units it has no effect, due to a Blizzard API restriction (Patch 12.1.0)."],
@@ -5760,7 +5760,7 @@ local function CreateAurasWidgetOptions()
                 type = "group",
                 order = 10,
                 inline = true,
-                hidden = Addon.ExpansionIsAtLeastMidnight,
+                hidden = Addon.HAS_MIDNIGHT_API,
                 args = {
                   Show = {
                     name = L["Show Crowd Control"],
@@ -5833,7 +5833,7 @@ local function CreateAurasWidgetOptions()
                 type = "group",
                 order = 11,
                 inline = true,
-                hidden = not Addon.ExpansionIsAtLeastMidnight,
+                hidden = not Addon.HAS_MIDNIGHT_API,
                 args = {
                   Show = {
                     name = L["Show Crowd Control"],
@@ -5877,7 +5877,7 @@ local function CreateAurasWidgetOptions()
                 type = "group",
                 order = 20,
                 inline = true,
-                hidden = Addon.ExpansionIsAtLeastMidnight,                
+                hidden = Addon.HAS_MIDNIGHT_API,                
                 args = {
                   ShowEnemy = {
                     name = L["Show Crowd Control"],
@@ -5923,7 +5923,7 @@ local function CreateAurasWidgetOptions()
                 type = "group",
                 order = 21,
                 inline = true,
-                hidden = not Addon.ExpansionIsAtLeastMidnight,
+                hidden = not Addon.HAS_MIDNIGHT_API,
                 args = {
                   ShowEnemy = {
                     name = L["Show Crowd Control"],
@@ -5950,7 +5950,7 @@ local function CreateAurasWidgetOptions()
                 order = 50,
                 type = "group",
                 inline = true,
-                hidden = Addon.ExpansionIsAtLeastMidnight,
+                hidden = Addon.HAS_MIDNIGHT_API,
                 args = {
                   ScopeNote = {
                     name = L["This spell filter only takes effect for crowd control on enemy units. On friendly units it has no effect, due to a Blizzard API restriction (Patch 12.1.0)."],
@@ -6274,7 +6274,7 @@ local function CreateLocalizationSettings()
     order = 135,
     type = "group",
     inline = false,
-    hidden = Addon.ExpansionIsAtLeastMidnight,
+    hidden = Addon.HAS_MIDNIGHT_API,
     args = {
       Texts = {
         name = L["Texts"],
@@ -6467,7 +6467,7 @@ local function CreateBlizzardSettings()
                 get = GetValueCVarBool,
                 desc = L["Show only unit names and hide healthbars (requires /reload). Note that the clickable area of friendly nameplates will also be set to zero so that they don't interfere with enemy nameplates stacking (not in Classic or TBC Classic)."],
                 arg = "nameplateShowOnlyNames",
-                hidden = Addon.ExpansionIsAtLeastMidnight,
+                hidden = Addon.HAS_MIDNIGHT_API,
               },
               ShowOnlyNameForFriendlyPlayerUnits = {
                 name = L["Only Names for Friendly Players"],
@@ -6478,7 +6478,7 @@ local function CreateBlizzardSettings()
                 get = GetValueCVarBool,
                 desc = L["Hide healthbars of friendly units"],
                 arg = "nameplateShowOnlyNameForFriendlyPlayerUnits",    
-                hidden = not Addon.ExpansionIsAtLeastMidnight,        
+                hidden = not Addon.HAS_MIDNIGHT_API,        
               },                    
               DebuffsOnFriendly = {
                 name = L["Debuffs on Friendly"],
@@ -6648,7 +6648,9 @@ local function CreateBlizzardSettings()
                 order = 10,
                 type = "range",
                 min = 0,
-                max = Addon.NAMEPLATE_MAX_DISTANCE_MAX_VALUE[Addon.GetExpansionLevel()],
+                -- Clients with Midnight's API surface (e.g. "WoW Forever") use the Mainline limit, although their
+                -- expansion level is a Classic one (default nameplateMaxDistance there is 45, above the Classic limits).
+                max = Addon.NAMEPLATE_MAX_DISTANCE_MAX_VALUE[Addon.HAS_MIDNIGHT_API and "MAINLINE" or Addon.GetExpansionLevel()],
                 step = 1,
                 width = "double",
                 desc = L["The max distance to show nameplates."],
@@ -6758,6 +6760,7 @@ local function CreateBlizzardSettings()
               CVars:OverwriteBool("nameplateResourceOnTarget", val)
             end,
             get = GetValue,
+            hidden = function() return not CVars:IsAvailable("nameplateResourceOnTarget") end,
             arg = { "PersonalNameplate", "ShowResourceOnTarget"},
           },
         },
@@ -7229,7 +7232,7 @@ local function CreateHealthbarOptions()
                 order = 29,
                 type = "toggle",
                 arg = { "settings", "healthbar", "ShowHealAbsorbs" },
-                hidden = function() return not Addon.WOW_FEATURE_ABSORBS or Addon.ExpansionIsAtLeastMidnight end, -- Absorbs were added with Mists; heal absorbs not available on Midnight
+                hidden = function() return not Addon.WOW_FEATURE_ABSORBS or Addon.HAS_MIDNIGHT_API end, -- Absorbs were added with Mists; heal absorbs not available on Midnight
               },
               ShowAbsorbs = {
                 name = L["Absorbs"],
@@ -7408,7 +7411,7 @@ local function CreateHealthbarOptions()
                     order = 120,
                     type = "toggle",
                     desc = function()
-                      if Addon.ExpansionIsAtLeastMidnight then
+                      if Addon.HAS_MIDNIGHT_API then
                         return L["In over-absorb situations (shield larger than missing health), shows a reverse-fill shield overlay across the health bar and positions the spark at its left boundary to indicate the actual shield magnitude."]
                       else
                         return L["In over-absorb situations (shield larger than missing health), moves the over-absorb spark to indicate the actual shield magnitude, instead of pinning it to the bar's right edge."]
@@ -7420,8 +7423,8 @@ local function CreateHealthbarOptions()
                     name = L["Striped Texture"],
                     order = 130,
                     type = "toggle",
-                    desc = L["Use a striped texture for the absorbs overlay."] .. (Addon.ExpansionIsAtLeastMidnight and "" or L["Always enabled if full absorbs are shown."]),
-                    disabled = function() return not Addon.ExpansionIsAtLeastMidnight and db.settings.healthbar.AlwaysFullAbsorb end,
+                    desc = L["Use a striped texture for the absorbs overlay."] .. (Addon.HAS_MIDNIGHT_API and "" or L["Always enabled if full absorbs are shown."]),
+                    disabled = function() return not Addon.HAS_MIDNIGHT_API and db.settings.healthbar.AlwaysFullAbsorb end,
                     arg = { "settings", "healthbar", "OverlayTexture" },
                   },
                   OverlayColor = {
@@ -7581,7 +7584,7 @@ local function CreateHealthbarOptions()
     },
   }
 
-  entry.args.TargetUnitText.hidden = Addon.ExpansionIsAtLeastMidnight
+  entry.args.TargetUnitText.hidden = Addon.HAS_MIDNIGHT_API
 
   entry.args.TargetUnitText.args.Showing = {
     name = L["Show"],
@@ -8296,7 +8299,7 @@ local function CreateNameOptions()
             order = 60,
             type = "group",
             inline = true,
-            hidden = Addon.ExpansionIsAtLeastMidnight,
+            hidden = Addon.HAS_MIDNIGHT_API,
             args = {
               NameAbbreviationForEnemyUnits = {
                 name = L["Enemy Units"],
@@ -10860,7 +10863,7 @@ local function CreateOptionsTable()
                           order = 30,
                           desc = L["Display absorbs percentage text."],
                           arg = { "text", "AbsorbsPercentage" },
-                          hidden = Addon.ExpansionIsAtLeastMidnight,
+                          hidden = Addon.HAS_MIDNIGHT_API,
                         },
                       },
                     },
@@ -11130,7 +11133,7 @@ local function CreateOptionsTable()
                   type = "group",
                   order = 10,
                   inline = true,
-                  hidden = Addon.ExpansionIsAtLeastMidnight,
+                  hidden = Addon.HAS_MIDNIGHT_API,
                   args = {
                     OffTank = {
                       type = "toggle",
@@ -11148,7 +11151,7 @@ local function CreateOptionsTable()
                   type = "group",
                   order = 20,
                   inline = true,
-                  hidden = Addon.ExpansionIsAtLeastMidnight,
+                  hidden = Addon.HAS_MIDNIGHT_API,
                   args = {
                     Note = {
                       name = L["By default, the threat system works based on a mob's threat table. Some mobs do not have such a threat table even if you are in combat with them. The threat detection heuristic uses other factors to determine if you are in combat with a mob. This works well in instances. In the open world, this can show units in combat with you that are actually just in combat with another player (and not you)."],
