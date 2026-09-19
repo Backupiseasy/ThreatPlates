@@ -45,11 +45,7 @@ local COMBAT_PROTECTED = {
   nameplateShowEnemyPets = true,
   nameplateShowEnemyTotems = true,
   nameplateShowFriendlyPlayers = true,
-  nameplateShowFriendlyNPCs = true,
-  nameplateShowFriendlyGuardians = true,
-  nameplateShowFriendlyMinions = true,
-  nameplateShowFriendlyPets = true,
-  nameplateShowFriendlyTotems = true,
+  nameplateShowFriendlyNpcs = true,
   nameplateShowFriendlyPlayerGuardians = true,
   nameplateShowFriendlyPlayerMinions = true,
   nameplateShowFriendlyPlayerPets = true,
@@ -112,8 +108,10 @@ end
 
 -- Blizzard's NamePlateDriverMixin recomputes and re-applies the native plate size via
 -- C_NamePlate.SetNamePlateSize whenever any of these CVars change (see UpdateNamePlateOptions /
--- UpdateNamePlateSize in Blizzard_NamePlates.lua), which can leave already-active plates with a
--- stale hit-test region until TidyPlates re-asserts its own size (see SetCVarHook below)
+-- UpdateNamePlateSize in Blizzard_NamePlates.lua). TP's own hit-test region (ApplyPlateHitTest,
+-- Nameplate.lua) is independent of that native size, but its HitTestFrame is still anchored to
+-- plate.UnitFrame, which Blizzard's resize can reposition/resize - so already-active plates can be
+-- left with a stale clickable area until TidyPlates re-asserts it (see SetCVarHook below).
 local RESYNC_NATIVE_SIZE_CVARS = {
   nameplateSize = true,
   nameplateStyle = true,

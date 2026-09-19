@@ -8,17 +8,14 @@ local _, Addon = ...
 ---------------------------------------------------------------------------------------------------
 
 -- Lua APIs
-local max = math.max
 local select = select
 
 -- WoW APIs
 local IsAddOnLoaded = C_AddOns.IsAddOnLoaded
-local C_NamePlate = C_NamePlate
 local C_Timer_NewTimer = C_Timer.NewTimer
 local UnitClass = UnitClass
 local GetSpecializationInfo = C_SpecializationInfo and C_SpecializationInfo.GetSpecializationInfo or _G.GetSpecializationInfo
 local LoadAddOn = C_AddOns and C_AddOns.LoadAddOn or _G.LoadAddOn
-local SetNamePlateSize = C_NamePlate and C_NamePlate.SetNamePlateSize
 
 -- ThreatPlates APIs
 local TidyPlatesThreat = TidyPlatesThreat
@@ -49,6 +46,11 @@ Addon.PlayerIsInCombat = false
 -- Functions different depending on WoW version
 ---------------------------------------------------------------------------------------------------
 
+-- C_NamePlate.SetNamePlateSize sets a single, global size shared by every native plate - including
+-- ones Threat Plates cannot replace (e.g. a protected friendly unit's plate inside an instance).
+-- ApplyPlateHitTest's SetAllHitTestPoints (Nameplate.lua) works independently of that native size,
+-- so TP does not need to set it at all.
+
 -- # Nameplate Hierarchy, Anchoring, and Scaling
 Addon.SetBaseNamePlateSize = function(self)
   local db = self.db.profile.settings
@@ -67,11 +69,8 @@ Addon.SetBaseNamePlateSize = function(self)
     db_frame.heightFriend = (db_healthbar.heightFriend * 2) / plate_scale
   end
 
-  local width  = max(db_frame.widthFriend,  db_frame.width)
-  local height = max(db_frame.heightFriend, db_frame.height)
-  -- Nameplate size also needs to be adjusted for the HitTestFrame to work. Otherwise the
-  -- bigger HitTestFrame size will be ignored.
-  SetNamePlateSize(width, height)
+  -- db_frame.width/height/widthFriend/heightFriend are used as-is by ApplyPlateHitTest for the
+  -- actual per-reaction click area.
   self.SetNamePlateClickThrough()
 end
 

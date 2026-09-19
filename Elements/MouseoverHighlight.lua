@@ -109,7 +109,7 @@ end
 function Element.UpdateSettings()
   local db = Addon.db.profile
 
-  local name_mode_enabled = db.HeadlineView.ShowTargetHighlight
+  local name_mode_enabled = db.HeadlineView.ShowMouseoverHighlight
   local healthbar_mode_enabled = db.settings.highlight.show
 
   TargetHighlightEnabledForStyle["NameOnly"] = name_mode_enabled

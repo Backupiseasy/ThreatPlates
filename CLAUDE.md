@@ -134,7 +134,24 @@ Central pub/sub for both real WoW events and internal TP events (`INTERNAL_EVENT
   and raids [Comment #8228, #8363, #8408, #8433]. Mitigated by `ScheduleNameplateRevalidation(plate, unitid,
   delay)` in `Nameplate.lua`, which re-runs `HandlePlateUnitAdded` after a short delay (0 frames for
   `UNIT_FACTION`/`UNIT_FLAGS`, 0.5s for a detected double `NAME_PLATE_UNIT_ADDED` without an intervening
-  `REMOVED`), guarded against the plate having legitimately moved on in the meantime.
+  `REMOVED`), guarded against the plate having legitimately moved on in the meantime. This is a *data* problem
+  (TP's own `unit` table is wrong); see the next bullet for a look-alike that is a *placement* problem.
+- **`plate.UnitFrame` is pooled — re-anchor `TPFrame` on every acquire**: on Mists Classic and the modern engine
+  (Midnight, "WoW Forever"), Blizzard's `NamePlateBaseMixin:AcquireUnitFrame` takes an arbitrary frame from a pool on
+  every `NAME_PLATE_UNIT_ADDED` and `ReleaseUnitFrame` sets `plate.UnitFrame = nil` on `REMOVED`, so a plate can get
+  a *different* (already `unit_frame.ThreatPlates`-flagged) instance each time. `tp_frame` is a child of `plate` but
+  is anchored (`CENTER`) to `plate.UnitFrame`, so `NamePlateDriverFrame_AcquireUnitFrame` (`Nameplate.lua`) must
+  call `SetPoint` on **every** acquire, outside the "first time this `unit_frame` is seen" block that installs the
+  hooks. Symptom when it doesn't (regression from 2026-01-27, fixed 13.3.0): all TP data is correct
+  (`Active == true`, `TPFrame:IsShown()`, right name/reaction/style, alpha 1) but the plate is briefly drawn over
+  another unit (wrong name/reaction) and then vanishes — the stale anchor points at a frame that is now either
+  released (no points) or used by another plate. Diagnose in-game with `/run local p =
+  C_NamePlate.GetNamePlateForUnit("target"); local _, rel = p.TPFrame:GetPoint(); print(rel == p.UnitFrame,
+  p.TPFrame:IsVisible(), p.TPFrame:GetAlpha(), p.TPFrame:GetLeft())` — `false` (and no `GetLeft`) confirms it.
+  Related: Blizzard's `AcquireUnitFrame` post-hook runs before `plate.UnitFrame` is assigned, hence the manual
+  re-call from `Addon:NAME_PLATE_UNIT_ADDED`/`ScheduleNameplateRevalidation`. Also note that
+  `SetShownBlizzardPlate`'s protected branch does `ClearAllPoints()`+`SetParent(nil)` on `UnitFrame` — anything
+  anchored to it loses its rect while it is reparented, so prefer anchoring to the (stable) `plate` for new frames.
 - **Event-ordering rule**: WoW script handlers (`OnShow`, `OnHide`, `OnEvent`) fire **synchronously** when the
   corresponding C-side API is called (confirmed by WoW Wiki's `ScriptRegion:Show()` docs) — `Show()` fires
   `OnShow` immediately within the same call, and `HookScript("OnShow", ...)` hooks run synchronously too. Game

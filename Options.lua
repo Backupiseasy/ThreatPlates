@@ -6149,11 +6149,11 @@ local function CreateVisibilityTab()
             width = "full",
             set = function(info, value)
               CVars:OverwriteBool("nameplateShowFriendlyPlayers", value)
-              CVars:OverwriteBool("nameplateShowFriendlyNPCs", value)
+              CVars:OverwriteBool("nameplateShowFriendlyNpcs", value)
               CVars:OverwriteBool("nameplateShowEnemies", value)
             end,
             get = function(info)
-              return GetCVarBool("nameplateShowFriendlyPlayers") and GetCVarBool("nameplateShowFriendlyNPCs") and GetCVarBool("nameplateShowEnemies")
+              return GetCVarBool("nameplateShowFriendlyPlayers") and GetCVarBool("nameplateShowFriendlyNpcs") and GetCVarBool("nameplateShowEnemies")
             end,
           },
           AllHostile = {
@@ -10215,8 +10215,8 @@ local function CreateOptionsTable()
                           name = L["Show Focus"],
                           order = 15,
                           type = "toggle",
-                          arg = { "HeadlineView", "ShowFocusHighlight" },
-                          hidden = function() return Addon.IS_CLASSIC end,
+                          arg = { "FocusWidget", "ShowInHeadlineView" },
+                          hidden = function() return not Addon.WOW_FEATURE_FOCUS end,
                         },
                         TargetMouseoverHighlight = {
                           name = L["Show Mouseover"],
