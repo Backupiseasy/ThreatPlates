@@ -1424,12 +1424,12 @@ local PVP_INSTANCE_TYPES = {
 
 local function SetFriendlyNameplatesShown(value)
   CVars:Set("nameplateShowFriendlyPlayers", value)
-  CVars:Set("nameplateShowFriendlyNPCs", value)
+  CVars:Set("nameplateShowFriendlyNpcs", value)
 end
 
 local function RestoreFriendlyNameplatesShown()
   CVars:RestoreFromProfile("nameplateShowFriendlyPlayers")
-  CVars:RestoreFromProfile("nameplateShowFriendlyNPCs")
+  CVars:RestoreFromProfile("nameplateShowFriendlyNpcs")
 end
 
 -- Same as SetFriendlyNameplatesShown, but sets the CVar(s) directly, bypassing the combat-protection queue in
@@ -1437,7 +1437,7 @@ end
 -- apply immediately.
 local function RawSetFriendlyNameplatesShown(value)
   _G.SetCVar("nameplateShowFriendlyPlayers", value)
-  _G.SetCVar("nameplateShowFriendlyNPCs", value)
+  _G.SetCVar("nameplateShowFriendlyNpcs", value)
 end
 
 -- Fired when the player enters the world, reloads the UI, enters/leaves an instance or battleground, or respawns at a graveyard.

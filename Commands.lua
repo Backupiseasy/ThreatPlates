@@ -204,6 +204,38 @@ local MIDNIGHT_FRAME_METHOD_CHECKS = {
 	{ "Castbar - timer duration", "SetTimerDuration" },
 }
 
+-- Unit types whose visibility Threat Plates controls via a CVar (Constants.lua, Visibility[...].Show).
+local CVAR_UNIT_TYPE_CHECKS = { "FriendlyNPC", "FriendlyMinion", "FriendlyPet", "FriendlyGuardian", "FriendlyTotem" }
+
+-- CVars that only exist on some clients; Threat Plates has to skip them if missing.
+local CVAR_OPTIONAL_CHECKS = { "nameplateResourceOnTarget", "nameplateLargerScale", "nameplateGlobalScale" }
+
+-- Reports for the CVars Threat Plates uses to show friendly units whether the client knows them (GetCVar returns nil
+-- for unknown CVars). Called by PrintMidnightAPICheck.
+local function PrintNameplateCVarCheck()
+	local function Value(cvar)
+		local ok, value = pcall(C_CVar.GetCVar, cvar)
+		if not ok then return "ERROR" end
+		return value == nil and "MISSING" or tostring(value)
+	end
+
+	Addon.Logging.Print("CVar check (Addon.HAS_MIDNIGHT_API = " .. tostring(Addon.HAS_MIDNIGHT_API) .. "):")
+	local problem_count = 0
+	for _, unit_type in ipairs(CVAR_UNIT_TYPE_CHECKS) do
+		local cvar = Addon.db.profile.Visibility[unit_type].Show
+		local value = type(cvar) == "string" and Value(cvar) or "MISSING"
+		local exists = value ~= "MISSING" and value ~= "ERROR"
+		if not exists then problem_count = problem_count + 1 end
+		Addon.Logging.Print(("  %s: %s uses %s = %s"):format(exists and "OK  " or "WRONG", unit_type, tostring(cvar), value))
+	end
+
+	for _, cvar in ipairs(CVAR_OPTIONAL_CHECKS) do
+		Addon.Logging.Print(("  %s = %s"):format(cvar, Value(cvar)))
+	end
+
+	Addon.Logging.Print(("CVar check done: %d unknown CVar(s)."):format(problem_count))
+end
+
 -- Checks whether this client's API surface actually has what Threat Plates' Midnight-only code paths
 -- (everything gated behind Addon.ExpansionIsAtLeastMidnight) call. A client that reports itself as not
 -- Midnight but still returns secret values for unit data (e.g. "WoW Forever" - see Addon.IS_FOREVER in
@@ -230,6 +262,8 @@ local function PrintMidnightAPICheck()
 	end
 
 	Addon.Logging.Print(("Midnight API check done: %d/%d available."):format(available_count, total_count))
+
+	PrintNameplateCVarCheck()
 end
 
 local function SearchDBForString(db, prefix, keyword)

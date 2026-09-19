@@ -6149,11 +6149,11 @@ local function CreateVisibilityTab()
             width = "full",
             set = function(info, value)
               CVars:OverwriteBool("nameplateShowFriendlyPlayers", value)
-              CVars:OverwriteBool("nameplateShowFriendlyNPCs", value)
+              CVars:OverwriteBool("nameplateShowFriendlyNpcs", value)
               CVars:OverwriteBool("nameplateShowEnemies", value)
             end,
             get = function(info)
-              return GetCVarBool("nameplateShowFriendlyPlayers") and GetCVarBool("nameplateShowFriendlyNPCs") and GetCVarBool("nameplateShowEnemies")
+              return GetCVarBool("nameplateShowFriendlyPlayers") and GetCVarBool("nameplateShowFriendlyNpcs") and GetCVarBool("nameplateShowEnemies")
             end,
           },
           AllHostile = {
