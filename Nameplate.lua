@@ -1081,24 +1081,23 @@ local	function HandlePlateCreated(plate)
 end
 
 -- Applies the C++ hit-test link for a nameplate plate.
--- Guards:
---   • Active: skips when Blizzard plates are shown for this unit.
---   • CanChangeHitTestPoints: skips in restricted C++ contexts.
+-- Click-through (NamePlateFriendlyClickThrough/NamePlateEnemyClickThrough) is decided by the
+-- unit's reaction alone, so it applies the same whether TP or Blizzard's own plate is currently
+-- shown for this unit (Active toggles only which frame's bounds the non-click-through case uses).
+-- Guard: CanChangeHitTestPoints skips in restricted C++ contexts.
 local function ApplyPlateHitTest(tp_frame)
   local plate = tp_frame.Parent
 
   if not plate:CanChangeHitTestPoints() then return end
-  
-  if not tp_frame.Active then 
-    plate:SetAllHitTestPoints(plate.UnitFrame)  
-    return 
-  end
 
   local db = Addon.db.profile
-  local is_friendly = (tp_frame.unit.reaction == "FRIENDLY")
+  local is_friendly = Addon.GetUnitReactionToPlayer(tp_frame.unit.unitid) > 4
   local is_click_through = (is_friendly and db.NamePlateFriendlyClickThrough) or (not is_friendly and db.NamePlateEnemyClickThrough)
+
   if is_click_through then
     plate:ClearAllHitTestPoints()
+  elseif not tp_frame.Active then
+    plate:SetAllHitTestPoints(plate.UnitFrame)
   else
     local db_frame = db.settings.frame
     local width  = (is_friendly and db_frame.widthFriend)  or db_frame.width
@@ -1877,6 +1876,11 @@ local function ApplyReactionUpdate(tp_frame, unitid)
     ApplyPlateHitTest(tp_frame)
     StyleModule.Update(tp_frame)
     PublishEvent("FactionUpdate", tp_frame)
+  else
+    -- ApplyPlateHitTest falls back to Blizzard's own UnitFrame bounds when Active is false, so this
+    -- keeps the hit-test region correct even when SetNameplateVisibility left Blizzard's own plate
+    -- shown for this unit instead of TP's.
+    ApplyPlateHitTest(tp_frame)
   end
 end
 
