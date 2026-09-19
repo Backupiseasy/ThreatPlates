@@ -14,7 +14,7 @@ local select = select
 -- WoW APIs
 local IsAddOnLoaded = C_AddOns.IsAddOnLoaded
 local C_NamePlate = C_NamePlate
-local C_Timer_After = C_Timer.After
+local C_Timer_NewTimer = C_Timer.NewTimer
 local UnitClass = UnitClass
 local GetSpecializationInfo = C_SpecializationInfo and C_SpecializationInfo.GetSpecializationInfo or _G.GetSpecializationInfo
 local LoadAddOn = C_AddOns and C_AddOns.LoadAddOn or _G.LoadAddOn
@@ -184,20 +184,28 @@ end
 
 -- Register callbacks at LSM, so that we can refresh everything if additional media is added after TP is loaded
 function Addon.MediaUpdate(addon_name, name, mediatype, key)
-  if mediatype ~= Addon.LibSharedMedia.MediaType.SOUND and not LSMUpdateTimer then
-    LSMUpdateTimer = true
+  if mediatype == Addon.LibSharedMedia.MediaType.SOUND then return end
 
-    -- Delay the update for one second to avoid firering this several times when multiple media are registered by another addon
-    C_Timer_After(1, function()
-      LSMUpdateTimer = nil
-      -- Basically, ReloadTheme but without CVar and some other stuff
-      Addon:SetThemes()
-      -- no media used: Addon:UpdateConfigurationStatusText()
-      -- no media used: Addon:InitializeCustomNameplates()
-      Addon.Widgets:InitializeAllWidgets()
-      Addon:ForceUpdate()
-    end)
+  -- LibSharedMedia:Register fires its callback once per key, synchronously, with no batching of its
+  -- own - addons commonly register several media entries back-to-back, or across multiple
+  -- ADDON_LOADED events during login, so bursts of many calls in a short span are normal. Cancel and
+  -- reschedule on every call (trailing-edge debounce) instead of only scheduling once and ignoring
+  -- the rest (leading-edge), so this refreshes exactly once, 1s after the LAST registration in a
+  -- burst - a fixed 1s-from-the-first window could otherwise still fire multiple times if
+  -- registrations keep trickling in past it.
+  if LSMUpdateTimer then
+    LSMUpdateTimer:Cancel()
   end
+
+  LSMUpdateTimer = C_Timer_NewTimer(1, function()
+    LSMUpdateTimer = nil
+    -- Basically, ReloadTheme but without CVar and some other stuff
+    Addon:SetThemes()
+    -- no media used: Addon:UpdateConfigurationStatusText()
+    -- no media used: Addon:InitializeCustomNameplates()
+    Addon.Widgets:InitializeAllWidgets()
+    Addon:ForceUpdate()
+  end)
 end
 
 function Addon.LoadLibraryDogTag()
