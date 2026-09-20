@@ -9,5 +9,6 @@
 * Fixed the "Show Focus" option for the Headline View not working.
 * Fixed the Focus and mouseover highlights not being shown in Headline View.
 * Fixed a Lua error when selecting the "Crescent" texture for the Target or Focus highlight.
-* Updated integrated libraries (Ace3 r1414-alpha).
 * Fixed the options for showing friendly minions, pets, guardians, totems, and NPCs having no effect (checkboxes could not be checked) [Comment #8597].
+* Disabled the option for showing friendly pets if showing friendly players is disabled, as Blizzard does not show these nameplates then.
+* Updated integrated libraries (Ace3 r1414-alpha).

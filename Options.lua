@@ -6061,6 +6061,12 @@ local function CreateHeadlineViewShowEntry()
   return args
 end
 
+-- Confirmed in-game: friendly pets get no nameplates while friendly player nameplates are disabled
+-- (guardians and totems are not verified yet)
+local function IsFriendlyPlayerVisibilityDisabled()
+  return not GetUnitVisibilitySetting({ arg = "FriendlyPlayer" })
+end
+
 local function CreateUnitGroupsVisibility(args, pos)
   for _, value in ipairs(UNIT_TYPES) do
     local faction = value.Faction
@@ -6080,6 +6086,7 @@ local function CreateUnitGroupsVisibility(args, pos)
         arg = faction..unit_type,
         get = GetUnitVisibilitySetting,
         set = SetUnitVisibilitySetting,
+        disabled = (faction == "Friendly" and unit_type == "Pet" and IsFriendlyPlayerVisibilityDisabled) or nil,
       }
     end
 
