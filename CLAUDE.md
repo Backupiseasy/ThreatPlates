@@ -284,6 +284,20 @@ with `issecretvalue` / `Addon.IsSecretValue` before boolean tests, math, string 
 - For status bars, pass raw values to C-side frame APIs (`SetMinMaxValues`, `SetValue`) and avoid Lua-side
   fraction math. If a value is secret in a restricted context, degrade gracefully (skip/hide/fallback) instead
   of forcing computation.
+- **Absorb bar (`Elements/Healthbar.lua`, `RenderMidnightAbsorbs`) is shown one frame late on new plates**: the
+  absorb amount from `UnitHealPredictionCalculator` is secret, so Lua cannot tell whether a shield exists
+  (no boolean "absorb > 0" API was found; `clamped` from `GetDamageAbsorbs()` only means "over the clamp
+  boundary"). The `AbsorbStatusBar` is therefore visible on every plate, just with a fill width of 0 when there
+  is no shield. Symptom fixed in 13.3.0: on a newly added plate the bar (with its striped overlay) briefly
+  rendered at full width beyond the healthbar edge, then corrected itself. Working assumption (not proven; the
+  bar's texture width is itself secret, so it can't be measured): the client resolves the fill of a StatusBar set
+  with secret values only after the first drawn frame. Mitigation: `RenderMidnightAbsorbs` defers `Show()` by
+  `C_Timer.After(0)` when the bar is hidden (guarded by `healthbar.AbsorbWanted`/`AbsorbShowPending`, cleared in
+  `HideAllAbsorbElements`). An already shown bar (e.g. on a reused plate) is updated immediately, without the
+  delay; there is intentionally no reset on `NAME_PLATE_UNIT_REMOVED` (untested whether reused plates need one).
+  Don't print/log values from this bar
+  for debugging: `GetAlpha()` after `SetAlphaFromBoolean` and the texture width are secret and turn a whole chat
+  line into `???`.
 - `UNIT_SPELLCAST_INTERRUPTIBLE` / `UNIT_SPELLCAST_NOT_INTERRUPTIBLE` carry only `{ unitTarget }` on Midnight
   (no `castGUID`/`spellID`/`castBarID`); `Nameplate.lua`'s `UnitSpellcastInterruptible` guards on
   `castbar.CastbarID ~= nil` (set in `OnStartCasting`, cleared in `UNIT_SPELLCAST_STOP`) instead of the missing

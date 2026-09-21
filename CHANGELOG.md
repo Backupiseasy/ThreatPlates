@@ -12,3 +12,4 @@
 * Fixed the options for showing friendly minions, pets, guardians, totems, and NPCs having no effect (checkboxes could not be checked) [Comment #8597].
 * Disabled the option for showing friendly pets if showing friendly players is disabled, as Blizzard does not show these nameplates then.
 * Updated integrated libraries (Ace3 r1414-alpha).
+* Fixed a bug where the absorb bar briefly showed at full width when a new nameplate was displayed.

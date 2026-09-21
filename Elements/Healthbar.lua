@@ -54,6 +54,7 @@ local function ShowAbsorbStatusBar(healthbar)
 end
 
 local function HideAllAbsorbElements(healthbar)
+  healthbar.AbsorbWanted = false
   healthbar.HealAbsorbGlow:Hide()
   healthbar.HealAbsorb:Hide()
   healthbar.HealAbsorbLeftShadow:Hide()
@@ -75,8 +76,22 @@ local function RenderMidnightAbsorbs(healthbar, absorb_max, absorb_val, absorb_c
 
   absorb_sb:SetMinMaxValues(0, absorb_max)
   absorb_sb:SetValue(absorb_val)
-  absorb_sb:Show()
-  absorb_sb.Overlay:SetShown(Settings.OverlayTexture)
+  -- The fill of a StatusBar set with secret values seems to be resolved by the client only after the first
+  -- frame it is drawn in, so a freshly shown bar (new nameplate) briefly rendered at full width, including the
+  -- striped overlay. Delay showing it by one frame; an already shown bar is updated immediately.
+  healthbar.AbsorbWanted = true
+  if absorb_sb:IsShown() then
+    absorb_sb.Overlay:SetShown(Settings.OverlayTexture)
+  elseif not healthbar.AbsorbShowPending then
+    healthbar.AbsorbShowPending = true
+    C_Timer.After(0, function()
+      healthbar.AbsorbShowPending = false
+      if healthbar.AbsorbWanted then
+        absorb_sb:Show()
+        absorb_sb.Overlay:SetShown(Settings.OverlayTexture)
+      end
+    end)
+  end
 
   spark:ClearAllPoints()
 
@@ -395,6 +410,8 @@ function Element.PlateCreated(tp_frame)
     absorb_statusbar:SetStatusBarTexture("Interface\\RaidFrame\\Shield-Fill")
     absorb_statusbar:SetPoint("TOPLEFT", healthbar:GetStatusBarTexture(), "TOPRIGHT")
     absorb_statusbar:SetPoint("BOTTOMLEFT", healthbar:GetStatusBarTexture(), "BOTTOMRIGHT")
+    absorb_statusbar:SetMinMaxValues(0, 1)
+    absorb_statusbar:SetValue(0)
     absorb_statusbar:Hide()
 
     local absorb_overlay = absorb_statusbar:CreateTexture(nil, "ARTWORK", nil, 1)
