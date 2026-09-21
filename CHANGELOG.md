@@ -11,5 +11,5 @@
 * Fixed a Lua error when selecting the "Crescent" texture for the Target or Focus highlight.
 * Fixed the options for showing friendly minions, pets, guardians, totems, and NPCs having no effect (checkboxes could not be checked) [Comment #8597].
 * Disabled the option for showing friendly pets if showing friendly players is disabled, as Blizzard does not show these nameplates then.
-* Updated integrated libraries (Ace3 r1414-alpha).
+* Updated integrated libraries (Ace3 r1414-alpha, LibDualSpec-1.0 v1.35.0, LibSharedMedia-3.0 v12.1.0).
 * Fixed a bug where the absorb bar briefly showed at full width when a new nameplate was displayed.
