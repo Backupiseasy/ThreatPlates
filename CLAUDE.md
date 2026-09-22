@@ -294,10 +294,9 @@ with `issecretvalue` / `Addon.IsSecretValue` before boolean tests, math, string 
   with secret values only after the first drawn frame. Mitigation: `RenderMidnightAbsorbs` defers `Show()` by
   `C_Timer.After(0)` when the bar is hidden (guarded by `healthbar.AbsorbWanted`/`AbsorbShowPending`, cleared in
   `HideAllAbsorbElements`). An already shown bar (e.g. on a reused plate) is updated immediately, without the
-  delay; there is intentionally no reset on `NAME_PLATE_UNIT_REMOVED` (untested whether reused plates need one).
-  Don't print/log values from this bar
-  for debugging: `GetAlpha()` after `SetAlphaFromBoolean` and the texture width are secret and turn a whole chat
-  line into `???`.
+  delay; confirmed no reset is needed on `NAME_PLATE_UNIT_REMOVED` for this. Don't print/log values from this
+  bar for debugging: `GetAlpha()` after `SetAlphaFromBoolean` and the texture width are secret and turn a whole
+  chat line into `???`.
 - `UNIT_SPELLCAST_INTERRUPTIBLE` / `UNIT_SPELLCAST_NOT_INTERRUPTIBLE` carry only `{ unitTarget }` on Midnight
   (no `castGUID`/`spellID`/`castBarID`); `Nameplate.lua`'s `UnitSpellcastInterruptible` guards on
   `castbar.CastbarID ~= nil` (set in `OnStartCasting`, cleared in `UNIT_SPELLCAST_STOP`) instead of the missing
