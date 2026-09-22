@@ -13,3 +13,4 @@
 * Disabled the options for showing friendly pets, guardians, and totems if showing friendly players is disabled, as Blizzard does not show these nameplates then.
 * Updated integrated libraries (Ace3 r1414-alpha, LibDualSpec-1.0 v1.35.0, LibSharedMedia-3.0 v12.1.0).
 * Fixed a bug where the absorb bar briefly showed at full width when a new nameplate was displayed.
+* Fixed automatic role detection not recognizing Druids in Bear Form as tanks on WoW Forever.

@@ -2277,7 +2277,12 @@ if Addon.ExpansionIsAtLeastMists then
 else
   -- GetShapeshiftFormID: not sure when removed
   local GetShapeshiftFormID = GetShapeshiftFormID
-  local BEAR_FORM, DIRE_BEAR_FORM = BEAR_FORM, 8
+  -- Global BEAR_FORM (=5) is only defined by Blizzard_FrameXMLBase's Classic/Constants.lua, which is not
+  -- loaded on "WoW Forever" (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE, see Addon.IS_FOREVER) - there, BEAR_FORM
+  -- is nil and form_index == BEAR_FORM never matches, so Bear Form druids are never detected as tank.
+  -- DRUID_BEAR_FORM (=5) is defined on every flavor (Classic, Mists, Cata, Mainline Constants.lua), so
+  -- prefer it and fall back to BEAR_FORM/the literal for older clients that may only define the latter.
+  local BEAR_FORM, DIRE_BEAR_FORM = DRUID_BEAR_FORM or BEAR_FORM or 5, 8
 
   -- Tanks are only Warriors in Defensive Stance or Druids in Bear form
   local PLAYER_IS_TANK_BY_CLASS = {
