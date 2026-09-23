@@ -209,10 +209,13 @@ function Widget:UNIT_NAME_UPDATE(unitid)
     if widget_frame.Active then
       local unit = tp_frame.unit
 
-      -- * Creating full unit name here (not using GetUnitName(unitid, true) as I don't know if 
+      -- * Creating full unit name here (not using GetUnitName(unitid, true) as I don't know if
       -- * game_account_info.characterName .. "-" .. game_account_info.realmName would always be equal to
       -- * GetUnitName for the same unitid
-      local name, realm = UnitName(unitid)
+      -- On WoW Forever, UnitName's 2nd return is a surname, not a realm - GetFullName's "-realm" format
+      -- makes no sense there, so let it fall back to GetRealmName() instead (same as the nil/"" case).
+      local name, second_value = UnitName(unitid)
+      local realm = (not Addon.WOW_FEATURE_REGIONAL_SURNAMES) and second_value
       unit.fullname = GetFullName(name, realm)
 
       self:OnUnitAdded(widget_frame, unit)
@@ -294,7 +297,9 @@ function Widget:OnUnitAdded(widget_frame, unit)
 
   widget_frame.FactionIcon:SetSize(SettingsFaction.scale, SettingsFaction.scale)
 
-  local name, realm = UnitName(unit.unitid)
+  -- On WoW Forever, UnitName's 2nd return is a surname, not a realm - see UNIT_NAME_UPDATE above.
+  local name, second_value = UnitName(unit.unitid)
+  local realm = (not Addon.WOW_FEATURE_REGIONAL_SURNAMES) and second_value
   unit.fullname = GetFullName(name, realm)
 
   self:UpdateFrame(widget_frame, unit)
