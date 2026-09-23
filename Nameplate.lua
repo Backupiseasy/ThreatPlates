@@ -2352,26 +2352,30 @@ else
   end
 
   -- Only registered for player unit
-  local TANK_AURA_SPELL_IDs = {
-    [20468] = true, [20469] = true, [20470] = true, [25780] = true, -- Paladin Righteous Fury
-    [48263] = true,   -- Deathknight Blood Presence
-    [407627] = true,  -- Paladin Righteous Fury (Season of Discovery)
-    [408680] = true,  -- Shaman Way of Earth (Season of Discovery)
-    [403789] = true,  -- Warlock Metamorphosis (Season of Discovery)
+  local TANK_AURA_SPELL_IDs_BY_CLASS = {
+    PALADIN = { 20468, 20469, 20470, 25780, 407627 }, -- Righteous Fury (407627: Season of Discovery)
+    DEATHKNIGHT = { 48263 }, -- Blood Presence
+    SHAMAN = { 408680 }, -- Way of Earth (Season of Discovery)
+    WARLOCK = { 403789 }, -- Metamorphosis (Season of Discovery)
     -- Rogue tanks are detected using IsSpellKnown (as there is no buff for Just a Flesh Wound)
-  }  
+  }
+  local TANK_AURA_SPELL_IDs = TANK_AURA_SPELL_IDs_BY_CLASS[Addon.PlayerClass] or {}
+  -- UnitBuff does not exist on clients with Midnight's API surface (e.g. "WoW Forever"), and the index-based
+  -- C_UnitAuras.GetBuffDataByIndex throws in combat there (auras are secret). GetPlayerAuraBySpellID never throws,
+  -- it only returns nil for a secret aura - so a nil result in combat is inconclusive and keeps the previous value.
+  local GetPlayerAuraBySpellID = C_UnitAuras.GetPlayerAuraBySpellID
+
   function Addon:UNIT_AURA(event, unitid)
-    for i = 1, 40 do
-      local name , _, _, _, _, _, _, _, _, spellId = _G.UnitBuff("player", i, "PLAYER")
-      if not name then
-        break
-      elseif TANK_AURA_SPELL_IDs[spellId] then
+    for i = 1, #TANK_AURA_SPELL_IDs do
+      if GetPlayerAuraBySpellID(TANK_AURA_SPELL_IDs[i]) then
         Addon.PlayerIsTank = true
         return
       end
     end
-  
-    Addon.PlayerIsTank = false
+
+    if not InCombatLockdown() then
+      Addon.PlayerIsTank = false
+    end
   end
 
   function Addon:RUNE_UPDATED()
@@ -2395,7 +2399,7 @@ else
     -- For Season of Discovery
     SHAMAN = Addon.IS_CLASSIC_SOD,
     WARLOCK = Addon.IS_CLASSIC_SOD,
-    ROGUE = Addon.IS_CLASSIC_SOD,
+    -- Rogues have no tank aura (see RUNE_UPDATED above), UNIT_AURA would only reset their PlayerIsTank
   }
   if ENABLE_UNIT_AURA_FOR_CLASS[Addon.PlayerClass] then
     Addon.EventService.SubscribeUnitEvent(Addon, "UNIT_AURA", "player")
