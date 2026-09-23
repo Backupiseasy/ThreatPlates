@@ -18,6 +18,7 @@ local SubscribeEvent, UnsubscribeEvent = Addon.EventService.Subscribe, Addon.Eve
 local BackdropTemplate = Addon.BackdropTemplate
 local TransliterateCyrillicLetters = Addon.Localization.TransliterateCyrillicLetters
 local UnitIsUnitTP = Addon.UnitIsUnit
+local GetUnitNameWithSurname = Addon.GetUnitNameWithSurname
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -30,6 +31,7 @@ local IGNORED_STYLES = Addon.IGNORED_STYLES_WITH_NAMEMODE
 -- Local variables
 ---------------------------------------------------------------------------------------------------
 local Settings, SettingsHealthbar, SettingsTargetUnit, SettingsTargetUnitHide, SettingsShowOnlyForTarget
+local SettingsShowSurname
 
 local COLOR_BLACK = Addon.RGB(0, 0, 0)
 
@@ -263,10 +265,9 @@ local function ShowTargetUnit(healthbar, unitid)
   if unitid then
     local target_of_target_unit = unitid .. "target"
     if not SettingsTargetUnit.ShowNotMyself or not UnitIsUnitTP("player", target_of_target_unit) then
-      local target_of_target_name = UnitName(target_of_target_unit)
+      local target_of_target_name = GetUnitNameWithSurname(target_of_target_unit, SettingsShowSurname)
       if target_of_target_name then
-        target_of_target_name = 
-        TransliterateCyrillicLetters(target_of_target_name)
+        target_of_target_name = TransliterateCyrillicLetters(target_of_target_name)
         if SettingsTargetUnit.ShowBrackets then
           target_of_target_name = "|cffffffff[|r " .. target_of_target_name .. " |cffffffff]|r" 
         end
@@ -631,6 +632,7 @@ function Element.UpdateSettings()
   SettingsTargetUnit = Settings.TargetUnit
   SettingsTargetUnitHide = not SettingsTargetUnit.Show
   SettingsShowOnlyForTarget = SettingsTargetUnit.ShowOnlyForTarget
+  SettingsShowSurname = Addon.WOW_FEATURE_REGIONAL_SURNAMES and Addon.db.profile.Name.HealthbarMode.ShowSurname
 
   SubscribeEvent(Element, "HealthbarColorUpdate", ColorUpdate)
 

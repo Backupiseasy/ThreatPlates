@@ -33,6 +33,11 @@ local CastbarChannelDirection = Enum.StatusBarTimerDirection and Enum.StatusBarT
 local WrapTextInColor = C_ColorUtil and C_ColorUtil.WrapTextInColor
 local GetClassColor = C_ClassColor and C_ClassColor.GetClassColor
 local UnitChannelDuration, UnitCastingDuration = UnitChannelDuration, UnitCastingDuration
+-- Constants.CharacterNameSeparatorConsts only exists on WoW Forever (confirmed: not present on live
+-- Retail/Midnight or any Classic flavor as of 2026-09-23) - fall back to the literal separators every
+-- other client hardcodes for realm names.
+local NAME_REALM_SEPARATOR = Constants.CharacterNameSeparatorConsts and Constants.CharacterNameSeparatorConsts.CHARACTERNAME_REALMNAME_SEPARATOR or "-"
+local GetUnitNameWithSurname = Addon.GetUnitNameWithSurname
 
 -- ThreatPlates APIs
 local L = Addon.L
@@ -119,6 +124,7 @@ local SettingsShowOnlyNames
 local TargetStyleForEnemy, TargetStyleForFriend, TargetStyleForInteract
 local ShowCastBars
 local ShowInterruptSource
+local SettingsShowSurname
 
 ---------------------------------------------------------------------------------------------------
 -- Wrapper functions for WoW Classic
@@ -431,26 +437,37 @@ end
 
 local function SetUnitAttributeName(unit, unitid)
   -- Can be UNKNOWNOBJECT => UNIT_NAME_UPDATE
-  local unit_name, realm = UnitName(unitid)
-  -- Let's preserve the unaltered name for the custom styles check…
-  unit.basename = unit_name
+  -- Surname is shown by default (like Blizzard's own nameplate name text), independent of ShowRealm,
+  -- only toggled by ShowSurname (SettingsShowSurname, cached in Addon:UpdateSettings()).
+  local name, second_value = GetUnitNameWithSurname(unitid, SettingsShowSurname)
 
+  -- UnitName's 2nd return means different things depending on the client:
+  --   - WoW Forever (surname system active): a surname, e.g. "Smith" (already appended to name above)
+  --   - Every other client: a realm name (only set when cross-realm)
+  local realm = (not Addon.WOW_FEATURE_REGIONAL_SURNAMES) and second_value
+
+  -- Preserve the unaltered (but surname-complete) name for the custom styles check…
+  unit.basename = name
+
+  -- NPCs/other non-player units: no title, no realm - done.
   if unit.type ~= "PLAYER" then
-    unit.name = unit_name
+    unit.name = name
     return
   end
 
   local db = Addon.db.profile.Name.HealthbarMode
 
+  -- Players only: optional PvP title overrides the name (on Forever, UnitPVPName already includes the
+  -- surname - confirmed live: untitled unit "Gavanda Hughes" -> UnitPVPName returns "Gavanda Hughes").
   if db.ShowTitle then
-    unit_name = UnitPVPName(unitid) or unit_name
+    name = UnitPVPName(unitid) or name
   end
 
-  if db.ShowRealm and realm then
-    unit_name = unit_name .. " - " .. (realm or "")
+  if db.ShowRealm and realm and realm ~= "" then
+    name = name .. " " .. NAME_REALM_SEPARATOR .. " " .. realm
   end
 
-  unit.name = unit_name
+  unit.name = name
 end
 
 Addon.GetUnitReactionToPlayer = function(unitid)
@@ -664,9 +681,9 @@ local function OnStartCasting(tp_frame, unitid, cast_guid, event_spell_id, castb
     end
   else
     local target_unitid = unit.unitid .. "target"
-    local target_unit_name = UnitName(target_unitid)
+    -- There are situations when UnitName returns nil (OnHealthUpdate, hypothesis: health update when the unit died tiggers this, but then there is no target any more)
+    local target_unit_name = GetUnitNameWithSurname(target_unitid, SettingsShowSurname)
     if target_unit_name then
-      -- There are situations when UnitName returns nil (OnHealthUpdate, hypothesis: health update when the unit died tiggers this, but then there is no target any more)
       local _, class_name = UnitClass(target_unitid)
       castbar.CastTarget:SetText(Addon.ColorByClass(class_name, TransliterateCyrillicLetters(target_unit_name)))
     else
@@ -1293,6 +1310,7 @@ function Addon:UpdateSettings()
   SettingsShowEnemyBlizzardNameplates = db.ShowEnemyBlizzardNameplates
   SettingsHideBuffsOnPersonalNameplate = db.PersonalNameplate.HideBuffs
   SettingsShowOnlyNames = CVars:GetAsBool("nameplateShowOnlyNames") and Addon.db.profile.BlizzardSettings.Names.Enabled
+  SettingsShowSurname = Addon.WOW_FEATURE_REGIONAL_SURNAMES and db.Name.HealthbarMode.ShowSurname
 
   TargetStyleForEnemy = db.targetWidget.SoftTarget.TargetStyleForEnemy
   TargetStyleForFriend = db.targetWidget.SoftTarget.TargetStyleForFriend
@@ -1328,6 +1346,10 @@ function Addon:UpdatePlatesVisible()
   -- No need to update only active nameplates, as this is only done when settings are changed, so performance is
   -- not really an issue.
   for unitid, tp_frame in pairs(PlatesByUnit) do
+    -- Name text depends on both unit data (UnitName) and settings (ShowTitle/ShowRealm/ShowSurname), unlike
+    -- most other presentation state, so it must be re-derived here too, not just re-rendered from the
+    -- unchanged unit.name RefreshPlatePresentation would otherwise redraw.
+    SetUnitAttributeName(tp_frame.unit, unitid)
     RefreshPlatePresentation(tp_frame, tp_frame.Parent, unitid)
   end
 end

@@ -101,6 +101,25 @@ Addon.HAS_MIDNIGHT_API = Addon.ExpansionIsAtLeastMidnight or Addon.IS_FOREVER
 -- as its expansion level, but its modern engine supports focus (see Addon.IS_FOREVER above).
 Addon.WOW_FEATURE_FOCUS = Addon.ExpansionIsAtLeastTBC or Addon.IS_FOREVER
 
+-- "WoW Forever" (see Addon.IS_FOREVER above) has a native surname/last-name system: when active,
+-- UnitName's 2nd return is a surname, not a realm name. RegionalUniqueNamesEnabled only exists on
+-- clients with that system, hence the existence check.
+Addon.WOW_FEATURE_REGIONAL_SURNAMES = Addon.IS_FOREVER and _G.RegionalUniqueNamesEnabled and RegionalUniqueNamesEnabled() or false
+-- Only exists on WoW Forever - fall back to the literal every other client hardcodes.
+local NAME_SURNAME_SEPARATOR = Constants.CharacterNameSeparatorConsts and Constants.CharacterNameSeparatorConsts.CHARACTERNAME_SURNAME_SEPARATOR or " "
+
+-- Calls UnitName(unitid) and appends the surname (UnitName's 2nd return on WoW Forever) if show_surname
+-- is true - the combined Addon.WOW_FEATURE_REGIONAL_SURNAMES + ShowSurname setting, cached per-file in
+-- UpdateSettings() so callers don't re-read the profile table on every call. Also returns the raw 2nd
+-- return (a realm name on every other client) for callers that still need it (e.g. ShowRealm).
+function Addon.GetUnitNameWithSurname(unitid, show_surname)
+  local name, second_value = UnitName(unitid)
+  if show_surname and second_value and second_value ~= "" then
+    name = name .. NAME_SURNAME_SEPARATOR .. second_value
+  end
+  return name, second_value
+end
+
 -- aura.nameplateShowAll/nameplateShowPersonal are a Legion+ feature - confirmed to
 -- always be false on both TBC Classic Anniversary and Mists Classic.
 Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER = Addon.ExpansionIsAtLeast(LE_EXPANSION_LEGION)
@@ -157,7 +176,7 @@ Addon.BackdropTemplate = BackdropTemplateMixin and "BackdropTemplate"
 
 -- Returns if the currently active spec is tank (true) or dps/heal (false)
 Addon.PlayerClass = select(2, UnitClass("player"))
-Addon.PlayerName = select(1, UnitName("player"))
+-- Addon.PlayerName is (re-)defined in Addon.lua, which loads later and needs Addon.WOW_FEATURE_REGIONAL_SURNAMES above
 
 ---------------------------------------------------------------------------------------------------
 -- Define table that contains all addon-global variables and functions

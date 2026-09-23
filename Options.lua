@@ -8221,9 +8221,16 @@ local function CreateNameOptions()
                 type = "toggle",
                 arg = { "Name", "HealthbarMode", "ShowTitle" },
               },
+              Surname = {
+                name = L["Surname"],
+                order = 20,
+                type = "toggle",
+                arg = { "Name", "HealthbarMode", "ShowSurname" },
+                hidden = function() return not Addon.WOW_FEATURE_REGIONAL_SURNAMES end,
+              },
               Realm = {
                 name = L["Realm"],
-                order = 20,
+                order = 30,
                 type = "toggle",
                 arg = { "Name", "HealthbarMode", "ShowRealm" },
               },
@@ -8982,7 +8989,10 @@ CreateCustomNameplateEntry = function(index)
             order = 30,
             func = function()
               if UnitExists("target") then
-                local target_unit = UnitName("target")
+                -- Match unit.basename exactly (incl. Forever surname, if shown) - a raw UnitName here
+                -- would silently never match if the target's basename includes a surname.
+                local tp_frame = Addon:GetThreatPlateForUnit("target")
+                local target_unit = (tp_frame and tp_frame.unit.basename) or UnitName("target")
                 local triggers = { target_unit }
                 local check_ok = CustomPlateCheckIfTriggerIsUniqueWithErrorMessage("Name", triggers, db.uniqueSettings[index])
                 if check_ok then

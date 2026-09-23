@@ -14,3 +14,4 @@
 * Updated integrated libraries (Ace3 r1414-alpha, LibDualSpec-1.0 v1.35.0, LibSharedMedia-3.0 v12.1.0).
 * Fixed a bug where the absorb bar briefly showed at full width when a new nameplate was displayed.
 * Fixed automatic role detection not recognizing Druids in Bear Form as tanks on WoW Forever.
+* Added support for WoW Forever's character surnames - full names (first and last) are now shown on nameplates, with a new option to show first names only.

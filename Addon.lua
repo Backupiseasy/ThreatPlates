@@ -38,7 +38,10 @@ local LSMUpdateTimer
 ---------------------------------------------------------------------------------------------------
 
 Addon.PlayerClass = select(2, UnitClass("player"))
-Addon.PlayerName = select(1, UnitName("player"))
+-- On WoW Forever, UnitName's 2nd return is a surname, not a realm - include it here (matching
+-- unit.basename in Nameplate.lua) so identity comparisons against other units' full/base names
+-- (e.g. Widgets/QuestWidget.lua's group-quest-tooltip parsing) still recognize the player's own name.
+Addon.PlayerName = Addon.GetUnitNameWithSurname("player", Addon.WOW_FEATURE_REGIONAL_SURNAMES)
 Addon.PlayerIsInCombat = false
 -- Addon.PlayerRole -- accessed via function Addon.GetPlayerRole()
 
