@@ -8,9 +8,10 @@ local ADDON_NAME, Addon = ...
 ---------------------------------------------------------------------------------------------------
 
 -- WoW APIs
-local UnitIsUnit, UnitName, UnitClass = UnitIsUnit, UnitName, UnitClass
+local UnitClass = UnitClass
 local UnitGetTotalHealAbsorbs = UnitGetTotalHealAbsorbs
 local InCombatLockdown = InCombatLockdown
+local GetClassColor = C_ClassColor.GetClassColor
 
 -- ThreatPlates APIs
 local FontUpdateText, FontUpdateTextSize = Addon.Font.UpdateText, Addon.Font.UpdateTextSize
@@ -18,6 +19,7 @@ local SubscribeEvent, UnsubscribeEvent = Addon.EventService.Subscribe, Addon.Eve
 local BackdropTemplate = Addon.BackdropTemplate
 local TransliterateCyrillicLetters = Addon.Localization.TransliterateCyrillicLetters
 local UnitIsUnitTP = Addon.UnitIsUnit
+local IsSecretValueTP = Addon.IsSecretValue
 local GetUnitNameWithSurname = Addon.GetUnitNameWithSurname
 
 local _G =_G
@@ -267,15 +269,19 @@ local function ShowTargetUnit(healthbar, unitid)
     if not SettingsTargetUnit.ShowNotMyself or not UnitIsUnitTP("player", target_of_target_unit) then
       local target_of_target_name = GetUnitNameWithSurname(target_of_target_unit, SettingsShowSurname)
       if target_of_target_name then
+        -- TransliterateCyrillicLetters no-ops on HAS_MIDNIGHT_API clients (never touches the string),
+        -- and plain ".." concatenation of a secret value just taints the result rather than erroring
+        -- (confirmed via Nameplate.lua's UNIT_SPELLCAST_INTERRUPTED handler) - safe to pass straight
+        -- into the SetText sink below without a secret-value guard here.
         target_of_target_name = TransliterateCyrillicLetters(target_of_target_name)
         if SettingsTargetUnit.ShowBrackets then
-          target_of_target_name = "|cffffffff[|r " .. target_of_target_name .. " |cffffffff]|r" 
+          target_of_target_name = "|cffffffff[|r " .. target_of_target_name .. " |cffffffff]|r"
         end
         target_of_target:SetText(target_of_target_name)
 
-        local _, class_name = UnitClass(target_of_target_unit)   
+        local _, class_name = UnitClass(target_of_target_unit)
         target_of_target.ClassName = class_name
-        
+
         target_of_target:Show()
       else
         HideTargetUnit(healthbar)
@@ -289,7 +295,11 @@ local function ShowTargetUnit(healthbar, unitid)
   if target_of_target:IsShown() then
     local color
     if SettingsTargetUnit.UseClassColor and target_of_target.ClassName then
-      color = Addon.db.profile.Colors.Classes[target_of_target.ClassName]
+      if IsSecretValueTP(target_of_target.ClassName) then
+        color = GetClassColor(target_of_target.ClassName)
+      else
+        color = Addon.db.profile.Colors.Classes[target_of_target.ClassName]
+      end
     else
       color = SettingsTargetUnit.CustomColor
     end
@@ -298,9 +308,7 @@ local function ShowTargetUnit(healthbar, unitid)
 end
 
 local function UpdateTargetUnit(healthbar, unitid)
-  if Addon.HAS_MIDNIGHT_API then return end
-
-  if SettingsTargetUnitHide or (SettingsShowOnlyForTarget and not UnitIsUnit("target", unitid)) or (SettingsTargetUnit.ShowOnlyInCombat and not InCombatLockdown()) then
+  if SettingsTargetUnitHide or (SettingsShowOnlyForTarget and not UnitIsUnitTP("target", unitid)) or (SettingsTargetUnit.ShowOnlyInCombat and not InCombatLockdown()) then
     HideTargetUnit(healthbar)
   else
     ShowTargetUnit(healthbar, unitid)
@@ -636,7 +644,7 @@ function Element.UpdateSettings()
 
   SubscribeEvent(Element, "HealthbarColorUpdate", ColorUpdate)
 
-  if not Addon.HAS_MIDNIGHT_API and SettingsTargetUnit.Show then
+  if SettingsTargetUnit.Show then
     SubscribeEvent(Element, "UNIT_TARGET", UNIT_TARGET)
     SubscribeEvent(Element, "ThreatUpdate", UnitThreatUpdate)
     SubscribeEvent(Element, "TargetLost", PlayerTargetLost)
@@ -725,7 +733,7 @@ local function UpdateHealthbarConfigMode(tp_frame)
     healthbar:SetValue(s[1])
   end
 
-  if not Addon.HAS_MIDNIGHT_API and not SettingsTargetUnitHide then
+  if not SettingsTargetUnitHide then
     local target_unit = healthbar.TargetUnit
     target_unit:SetText("Thrall")
     local color = SettingsTargetUnit.UseClassColor and Addon.db.profile.Colors.Classes["SHAMAN"] or SettingsTargetUnit.CustomColor

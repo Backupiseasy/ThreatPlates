@@ -7593,8 +7593,6 @@ local function CreateHealthbarOptions()
     },
   }
 
-  entry.args.TargetUnitText.hidden = Addon.HAS_MIDNIGHT_API
-
   entry.args.TargetUnitText.args.Showing = {
     name = L["Show"],
     order = 5,

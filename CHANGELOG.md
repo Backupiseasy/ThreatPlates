@@ -15,3 +15,4 @@
 * Fixed a bug where the absorb bar briefly showed at full width when a new nameplate was displayed.
 * Fixed automatic role detection not recognizing Druids in Bear Form as tanks on WoW Forever.
 * Added support for WoW Forever's character surnames - full names (first and last) are now shown on nameplates, with a new option to show first names only.
+* Enabled target of target names again on WoW Midnight and WoW Forever [Comment #8697].

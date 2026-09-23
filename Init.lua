@@ -114,7 +114,10 @@ local NAME_SURNAME_SEPARATOR = Constants.CharacterNameSeparatorConsts and Consta
 -- return (a realm name on every other client) for callers that still need it (e.g. ShowRealm).
 function Addon.GetUnitNameWithSurname(unitid, show_surname)
   local name, second_value = UnitName(unitid)
-  if show_surname and second_value and second_value ~= "" then
+  -- second_value can be a secret value in restricted contexts; the "~=" comparison below would
+  -- error on one (unlike the "..' concatenation two lines down, which is a safe no-throw taint -
+  -- see CLAUDE.md's "Correction (was previously stated as needing a guard)"), so check first.
+  if show_surname and second_value and not Addon.IsSecretValue(second_value) and second_value ~= "" then
     name = name .. NAME_SURNAME_SEPARATOR .. second_value
   end
   return name, second_value
