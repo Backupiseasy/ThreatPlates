@@ -255,8 +255,8 @@ with `issecretvalue` / `Addon.IsSecretValue` before boolean tests, math, string 
 
 - Never call raw `UnitIsUnit` in a boolean context — use `Addon.UnitIsUnit` (`Compatibility.lua`), which returns
   `false` for secret results. Local upvalue convention: `local UnitIsUnitTP = Addon.UnitIsUnit`.
-- Guard before any Lua-side operation (arithmetic, comparison, string format/match/concat, table key):
-  `if issecretvalue(value) then ... end`.
+- Guard before any Lua-side operation (arithmetic, comparison, string format/match/gsub, table key):
+  `if issecretvalue(value) then ... end`. (Plain `..` concatenation is an exception — see below.)
 - Never use `UnitName(...)` / `unit.name` as a table key — use `UnitGUID(unit)` / `unit.guid` instead, and
   still guard the GUID itself (`if not guid or issecretvalue(guid) then return end` before using it as a key).
 - **Correction (was previously stated as unconditionally safe)**: a Lua truthiness check
@@ -274,16 +274,42 @@ with `issecretvalue` / `Addon.IsSecretValue` before boolean tests, math, string 
   accepts it as a parameter (`FontString:SetText`, `C_ColorUtil.WrapTextInColor`, `C_ClassColor.GetClassColor`,
   `Texture:SetTexture`, `StatusBar:SetValue`, `SetMinMaxValues`) — no `IsSecretValueTP` guard needed for a pure
   pass-through path, e.g. `castbar.CastTarget:SetText(WrapTextInColor(UnitSpellTargetName(unitid), color))` is
-  safe as long as no Lua string op touches the value first. Blizzard's `AbbreviateNumbers`,
-  `AbbreviateLargeNumbers`, and `BreakUpLargeNumbers` are documented `SecretArguments = "AllowedWhenTainted"`
-  and are safe display sinks for secret numeric values. There is no equivalent verified API metadata for Lua
-  `string.format`; do not assume raw `format` on a secret value is safe without explicit documentation or
-  runtime proof.
+  safe. Blizzard's `AbbreviateNumbers`, `AbbreviateLargeNumbers`, and `BreakUpLargeNumbers` are documented
+  `SecretArguments = "AllowedWhenTainted"` and are safe display sinks for secret numeric values. There is no
+  equivalent verified API metadata for Lua `string.format`, `string.match`, or `string.gsub`; do not assume
+  a raw pattern-based string op on a secret value is safe without explicit documentation or runtime proof.
+- **Correction (was previously stated as needing a guard)**: plain `..` concatenation with a secret operand
+  does **not** itself throw — it produces a secret *result* (taints it), the same as arithmetic would, but
+  unlike arithmetic/comparison it does not error at the concatenation step itself. Confirmed live on a client
+  with Midnight's API surface: `Nameplate.lua`'s `UNIT_SPELLCAST_INTERRUPTED` handler concatenates a
+  potentially-secret resolved name directly (`INTERRUPTED .. " [" .. TransliterateCyrillicLetters(name) .. "]"`,
+  see `Source/Docs/CastbarInterrupts.md`) and passes the result straight into `SetText` without any
+  `issecretvalue` guard — this is the documented, confirmed-working Retail/Midnight code path, not an
+  oversight. `Widgets/ClassIconWidget.lua`'s comment on `icon_id` independently confirms the same shape: the
+  concatenation itself succeeds, and the error occurs only where the (now-secret) *result* is later used
+  unsafely — e.g. as a table key or in a comparison. Do not add an `issecretvalue` guard purely to skip a `..`
+  concatenation; guard the actual unsafe consumer (table index, comparison, pattern-based string op) instead.
+  A once-added guard of this kind in `Elements/Healthbar.lua`'s `ShowTargetUnit` (skipping bracket-wrap
+  concatenation for a secret target-of-target name) was identified as unnecessary by this reasoning and should
+  not be treated as the required pattern for new code.
 - Never do Lua arithmetic (`+ - * /`) or comparisons (`< > == ~=`) on secret values, and never index a table
   that may itself be secret.
 - For status bars, pass raw values to C-side frame APIs (`SetMinMaxValues`, `SetValue`) and avoid Lua-side
   fraction math. If a value is secret in a restricted context, degrade gracefully (skip/hide/fallback) instead
   of forcing computation.
+- **Absorb bar (`Elements/Healthbar.lua`, `RenderMidnightAbsorbs`) is shown one frame late on new plates**: the
+  absorb amount from `UnitHealPredictionCalculator` is secret, so Lua cannot tell whether a shield exists
+  (no boolean "absorb > 0" API was found; `clamped` from `GetDamageAbsorbs()` only means "over the clamp
+  boundary"). The `AbsorbStatusBar` is therefore visible on every plate, just with a fill width of 0 when there
+  is no shield. Symptom fixed in 13.3.0: on a newly added plate the bar (with its striped overlay) briefly
+  rendered at full width beyond the healthbar edge, then corrected itself. Working assumption (not proven; the
+  bar's texture width is itself secret, so it can't be measured): the client resolves the fill of a StatusBar set
+  with secret values only after the first drawn frame. Mitigation: `RenderMidnightAbsorbs` defers `Show()` by
+  `C_Timer.After(0)` when the bar is hidden (guarded by `healthbar.AbsorbWanted`/`AbsorbShowPending`, cleared in
+  `HideAllAbsorbElements`). An already shown bar (e.g. on a reused plate) is updated immediately, without the
+  delay; confirmed no reset is needed on `NAME_PLATE_UNIT_REMOVED` for this. Don't print/log values from this
+  bar for debugging: `GetAlpha()` after `SetAlphaFromBoolean` and the texture width are secret and turn a whole
+  chat line into `???`.
 - `UNIT_SPELLCAST_INTERRUPTIBLE` / `UNIT_SPELLCAST_NOT_INTERRUPTIBLE` carry only `{ unitTarget }` on Midnight
   (no `castGUID`/`spellID`/`castBarID`); `Nameplate.lua`'s `UnitSpellcastInterruptible` guards on
   `castbar.CastbarID ~= nil` (set in `OnStartCasting`, cleared in `UNIT_SPELLCAST_STOP`) instead of the missing

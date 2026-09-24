@@ -594,6 +594,7 @@ Addon.DEFAULT_SETTINGS = {
         AbbreviationForFriendlyUnits = "FULL",
         ShowTitle = false,
         ShowRealm = false,
+        ShowSurname = true,
         -- Font anchoring and format
         -- Anchor = "CENTER",
         -- InsideAnchor = true,

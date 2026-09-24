@@ -6061,6 +6061,14 @@ local function CreateHeadlineViewShowEntry()
   return args
 end
 
+-- Confirmed in-game: friendly pets and totems get no nameplates while friendly player nameplates are disabled.
+-- Guardians are assumed to behave the same way (not individually verified), based on that pattern.
+local FRIENDLY_UNIT_TYPES_DEPENDING_ON_PLAYERS = { Pet = true, Guardian = true, Totem = true }
+
+local function IsFriendlyPlayerVisibilityDisabled()
+  return not GetUnitVisibilitySetting({ arg = "FriendlyPlayer" })
+end
+
 local function CreateUnitGroupsVisibility(args, pos)
   for _, value in ipairs(UNIT_TYPES) do
     local faction = value.Faction
@@ -6080,6 +6088,7 @@ local function CreateUnitGroupsVisibility(args, pos)
         arg = faction..unit_type,
         get = GetUnitVisibilitySetting,
         set = SetUnitVisibilitySetting,
+        disabled = (faction == "Friendly" and FRIENDLY_UNIT_TYPES_DEPENDING_ON_PLAYERS[unit_type] and IsFriendlyPlayerVisibilityDisabled) or nil,
       }
     end
 
@@ -7584,8 +7593,6 @@ local function CreateHealthbarOptions()
     },
   }
 
-  entry.args.TargetUnitText.hidden = Addon.HAS_MIDNIGHT_API
-
   entry.args.TargetUnitText.args.Showing = {
     name = L["Show"],
     order = 5,
@@ -8212,9 +8219,16 @@ local function CreateNameOptions()
                 type = "toggle",
                 arg = { "Name", "HealthbarMode", "ShowTitle" },
               },
+              Surname = {
+                name = L["Surname"],
+                order = 20,
+                type = "toggle",
+                arg = { "Name", "HealthbarMode", "ShowSurname" },
+                hidden = function() return not Addon.WOW_FEATURE_REGIONAL_SURNAMES end,
+              },
               Realm = {
                 name = L["Realm"],
-                order = 20,
+                order = 30,
                 type = "toggle",
                 arg = { "Name", "HealthbarMode", "ShowRealm" },
               },
@@ -8973,7 +8987,10 @@ CreateCustomNameplateEntry = function(index)
             order = 30,
             func = function()
               if UnitExists("target") then
-                local target_unit = UnitName("target")
+                -- Match unit.basename exactly (incl. Forever surname, if shown) - a raw UnitName here
+                -- would silently never match if the target's basename includes a surname.
+                local tp_frame = Addon:GetThreatPlateForUnit("target")
+                local target_unit = (tp_frame and tp_frame.unit.basename) or UnitName("target")
                 local triggers = { target_unit }
                 local check_ok = CustomPlateCheckIfTriggerIsUniqueWithErrorMessage("Name", triggers, db.uniqueSettings[index])
                 if check_ok then
