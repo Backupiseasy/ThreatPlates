@@ -2338,12 +2338,22 @@ else
 
   local PlayerIsTankByClassFunction = PLAYER_IS_TANK_BY_CLASS[Addon.PlayerClass] or PLAYER_IS_TANK_BY_CLASS["DEFAULT"]
 
+  -- UnitHasEffectivelyTankAura (WoW Forever 1.60.1+) is what Blizzard's PlayerUtil.IsPlayerEffectivelyTank uses.
+  -- It also works in combat, where GetPlayerAuraBySpellID (see UNIT_AURA below) returns nil for secret auras.
+  -- As it is not documented which auras count, it only adds to the class-based detection instead of replacing it.
+  -- The result can be secret (SecretWhenUnitIdentityRestricted), then fall back to the class-based detection.
+  local UnitHasEffectivelyTankAura = _G.UnitHasEffectivelyTankAura
+  local PlayerHasTankAura = UnitHasEffectivelyTankAura and function()
+    local has_tank_aura = UnitHasEffectivelyTankAura("player")
+    return not IsSecretValueTP(has_tank_aura) and has_tank_aura == true
+  end or PLAYER_IS_TANK_BY_CLASS["DEFAULT"]
+
   function Addon.GetPlayerRole()
     local db = Addon.db
 
     local role
     if db.profile.optionRoleDetectionAutomatic then
-      role = PlayerIsTankByClassFunction()
+      role = PlayerHasTankAura() or PlayerIsTankByClassFunction()
     else
       role = db.char.spec[1]
     end
