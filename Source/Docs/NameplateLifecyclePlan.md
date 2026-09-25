@@ -1,6 +1,6 @@
 # Nameplate lifecycle: implementation plan
 
-Branch: `feature/nameplate-lifecycle` (created from `release/13.3` @ `cc69d850`).
+Branch: `feature/nameplate-lifecycle` (created from `release/13.3` @ `cc69d850`). Target version: 13.4.0.
 
 Background: comparison of how Plater and Platynator handle `NAME_PLATE_CREATED` / `NAME_PLATE_UNIT_ADDED` /
 `NAME_PLATE_UNIT_REMOVED`, anchor their own frames and hide Blizzard's `plate.UnitFrame`, versus TP's
@@ -23,7 +23,26 @@ Verified against `wow-ui-source` (live, classic, classic_era, classic_anniversar
   `OnUnitCleared` removes them. Unregistering events for one plate lifetime is therefore self-healing.
 - The **old** Classic driver (`wow-ui-source-classic_beta/.../TBC|Vanilla/Blizzard_NamePlates.lua`) anchors
   `UnitFrame` with `SetPoint("TOPLEFT", plate, "TOPLEFT")` only (no `SetAllPoints`). There, `UnitFrame`'s
-  center matches `plate`'s center only if both sizes match. P1 must be verified on every supported flavor.
+  center matches `plate`'s center only if both sizes match. **Not live anywhere** (see "Verification results").
+
+### Verification results (2026-09-25)
+
+- UI source: `Blizzard_NamePlateBase.lua` and `Blizzard_NamePlates.lua` are identical (ignoring CR/whitespace)
+  between classic_era, classic_anniversary, classic (Mists) and live. `Blizzard_NamePlateUnitFrame.lua` is
+  identical between all Classic flavors and differs from live by 74 lines (Retail-only features). The old
+  TOPLEFT driver only exists in the outdated `classic_beta` snapshot.
+- In-game, driver check `p.AcquireUnitFrame ~= nil`: `true` on all plates on Retail and Classic Era.
+- In-game, `IsAnchoringRestricted()`: `plate`, `UnitFrame` and `TPFrame` are all `true` on Retail and Classic Era
+  (open world, out of combat). Position queries (`GetPoint`, `GetCenter`, `GetLeft`) throw `Can't measure
+  restricted regions`, size queries (`GetWidth`) work. Positions can therefore not be measured; the P1 tests
+  below use a visual A/B re-anchor instead.
+- In-game, Classic Era: re-anchoring `TPFrame` of 30+ live plates from `UnitFrame` to `plate` (`ClearAllPoints` +
+  `SetPoint("CENTER", p)`) caused no visible layout change.
+- Consequence: P1 needs no flavor gate; the `ANCHOR_TPFRAME_TO_UNITFRAME` flag was dropped in favor of a comment
+  (runtime detection would be `plate.AcquireUnitFrame == nil`, should the old driver ever come back).
+- Side finding: `Addon:NAME_PLATE_CREATED`'s `not Addon.ExpansionIsAtLeastMists and plate.UnitFrame` branch is based
+  on an outdated assumption (Classic Era uses the pooled driver too). Harmless, since `plate.UnitFrame` is `nil`
+  at `CREATED` there. Cleanup scheduled with L1.
 
 Reference implementations:
 
@@ -45,6 +64,7 @@ P1 ─┼─> L1 (hidden parent, drop Show watchdog)
     └─> P8 (stacking bounds; reuses the plate-anchored helper-frame pattern)
 P2 ─> P3 ─> P4
 P5 (independent)
+P10 ─> P9 (hit-test area: clamp first, then scale with TPFrame)
 P6 (optional, after L1)
 L2, L3 (measure first, may be dropped)
 ```
@@ -54,7 +74,7 @@ on Retail/Midnight.
 
 ## 2. Items
 
-### P7: Keep hook marker out of Blizzard's frame (trivial, do first)
+### P7: Keep hook marker out of Blizzard's frame (trivial, do first) — DONE (`47d61a38`)
 
 - **Problem**: `unit_frame.ThreatPlates = true` (`Nameplate.lua`, `NamePlateDriverFrame_AcquireUnitFrame`)
   writes an addon key onto a (possibly secure) Blizzard frame.
@@ -66,7 +86,7 @@ on Retail/Midnight.
   once per pooled instance (temporary debug counter).
 - **Changelog**: none (internal).
 
-### P1: Anchor `TPFrame` and `HitTestFrame` to `plate`, not `plate.UnitFrame`
+### P1: Anchor `TPFrame` and `HitTestFrame` to `plate`, not `plate.UnitFrame` — DONE
 
 - **Problem**: `TPFrame` is anchored to the pooled `plate.UnitFrame`. This caused the 13.3.0 regression
   (stale anchor after pool reassignment). `SetShownBlizzardPlate`'s protected branch (`ClearAllPoints` +
@@ -79,15 +99,18 @@ on Retail/Midnight.
      `BlizzardPlateOrigParent` reset and hook installation.
   3. `ApplyPlateHitTest`: `tp_frame.HitTestFrame:SetPoint("CENTER", plate, "CENTER")`. Guard the Blizzard
      branch: `elseif not tp_frame.Active then if plate.UnitFrame then plate:SetAllHitTestPoints(plate.UnitFrame) end`.
-  4. Flavor gate: if in-game verification shows that the old Classic driver (TOPLEFT-only anchor) is live on a
-     supported client and the centers differ, keep the `UnitFrame` anchor behind a single local flag
-     (e.g. `ANCHOR_TPFRAME_TO_UNITFRAME = <old driver detected>`) instead of branching in several places.
-- **Docs**: rewrite the "Anchoring" part of the comment block above `IgnoreUnitForThreatPlates`
-  (`Nameplate.lua`, "How TP and Blizzard's own nameplate relate...") and the CLAUDE.md bullet
-  "`plate.UnitFrame` is pooled - re-anchor `TPFrame` on every acquire" (new invariant: `TPFrame` and all TP
-  helper frames anchor to `plate`; update the `/run` diagnostic to `rel == p`).
-- **Test**:
-  - `/run local p=C_NamePlate.GetNamePlateForUnit("target"); local _,rel=p.TPFrame:GetPoint(); print(rel==p, p.TPFrame:GetLeft())`
+  4. ~~Flavor gate~~: not needed, see "Verification results". No flag; the old-driver caveat is documented in
+     the code comment and CLAUDE.md.
+  5. `CVarsManager.lua`: comment at `RESYNC_NATIVE_SIZE_CVARS` updated (`HitTestFrame` is anchored to `plate`).
+- **Docs** (done): rewrote the "Anchoring" part of the comment block above `IgnoreUnitForThreatPlates`
+  (`Nameplate.lua`). Replaced the CLAUDE.md bullet "`plate.UnitFrame` is pooled - re-anchor `TPFrame` on every
+  acquire" with "never anchor TP frames to it", and added the bullet "Nameplate frames are restricted regions - no
+  position queries", which includes a diagnostic that does not measure.
+- **Test** (positions cannot be measured, see "Verification results"):
+  - Visual A/B, already done on Classic Era before the change: re-anchor live plates via `/run` and compare
+    screenshots.
+  - After the change: `/run for _,p in ipairs(C_NamePlate.GetNamePlates())do print(p:GetName(),p.AcquireUnitFrame~=nil,p.TPFrame and p.TPFrame:IsVisible())end`
+    shows `true true` for TP-handled plates.
   - Position identical to before (screenshot comparison) with Nameplate Size Normal/Big, Headline View,
     mouseover/target scaling, custom styles with offsets.
   - Mixed mode (Blizzard plates for friendly units) plus reaction change (mind control, duels).
@@ -252,6 +275,8 @@ on Retail/Midnight.
 - **Follow-up**: `BlizzardPlateOrigParent` is no longer needed (restore target is always the plate). The
   `hooksecurefunc(unit_frame, "Show")` watchdog and possibly the `OnShow` hook become obsolete. Remove them only
   after tests show that nothing else re-parents the frame (grep `SetParent` in `Blizzard_NamePlates*`).
+- **Also**: remove the outdated `not Addon.ExpansionIsAtLeastMists and plate.UnitFrame` branch in
+  `Addon:NAME_PLATE_CREATED` (all clients use the pooled driver, see "Verification results").
 - **Depends on**: P1 (TPFrame must not depend on `UnitFrame`'s rect).
 - **Test**: aggro flash, fade animations, BG/arena in continuous combat, mixed mode, `/reload` in combat.
 - **Changelog**: `Fixed a bug where Blizzard's default nameplates sometimes showed up behind Threat Plates.`
@@ -278,6 +303,64 @@ on Retail/Midnight.
 - **Test**: visual layering screenshots for all widget combinations, plus FPS/CPU comparison in large pulls.
 - **Changelog**: `Improved rendering performance of nameplates.` (only if measurable)
 
+### Hit-test findings (in-game, Retail, 2026-09-25)
+
+Basis for P9/P10 (also recorded in CLAUDE.md, "Hit-test (clickable) area"):
+
+| Test | Result |
+| --- | --- |
+| `HitTestFrame:SetSize(300,100)` in and out of combat, no re-bind | no effect, which was misleading at first; see the clamp below |
+| `SetSize(300,100)` + `plate:SetAllHitTestPoints(HitTestFrame)` (`CanChangeHitTestPoints() == true`) | no effect beyond the old area (plate: 172.5 x 60.3) |
+| `SetSize(30,6)` + re-bind | only the tiny area was clickable |
+| `SetSize(plate - 4)` + re-bind | the whole area was clickable |
+| `SetSize(30,6)` **in combat, no re-bind** | only the tiny area was clickable, so the area follows the frame live |
+| `SetSize(30,6)` with the frame **hidden** (TP default), no re-bind | only the tiny area was clickable, so a hidden frame works |
+
+Conclusions: the bound `HitTestFrame` can be resized at any time (also in combat). Re-binding is blocked in
+combat except on the `ADDED` tick. The clickable area is clamped to `plate`'s bounds, and `C_NamePlate.SetNamePlateSize` is
+no option (global, distorts Blizzard's plates, which also exist in pure TP mode).
+
+### P10: Clamp the clickable area to the plate size and make the limit visible
+
+- **Problem**: with a wide healthbar (or large manual click area), `HitTestFrame` exceeds `plate` and the clickable
+  area is silently cut off. `ConfigClickableArea` shows an area that is partly not clickable.
+- **Change**:
+  1. `ApplyPlateHitTest` (and P9's resize helper): `width = min(width, plate:GetWidth())`,
+     `height = min(height, plate:GetHeight())`. Size reads are allowed on restricted regions. Account for the scale
+     difference once P9 gives `HitTestFrame` its own scale (compare in the same coordinate space: divide by the
+     `HitTestFrame` scale).
+  2. Options: extend the description of the clickable-area settings (`Options.lua`, `SyncWithHealthbar` and the
+     width/height sliders) with a note that the area cannot exceed Blizzard's nameplate size, which is adjustable via
+     Blizzard's "Nameplate Size" setting. Add the new string to `Locales/*.lua`.
+  3. Re-apply when the native plate size changes. `CVarsManager`'s `RESYNC_NATIVE_SIZE_CVARS` path already calls
+     `SetBaseNamePlateSize` (out of combat).
+- **Test**: healthbar width 250 → click area = plate width, and `ConfigClickableArea` shows the clamped area. Change
+  Blizzard's nameplate size and check that the clamp follows.
+
+### P9: Let the clickable area scale with `TPFrame` (target/mouseover/threat scale, custom styles)
+
+- **Problem**: `ScalingModule` scales only `TPFrame`. `HitTestFrame` keeps the base size from `db.settings.frame`,
+  so enlarged target plates and custom styles with other healthbar sizes keep the default click area. Blizzard's
+  own plate scaling currently *does* affect `HitTestFrame` (a child of `plate` without `SetIgnoreParentScale`),
+  unlike `TPFrame`.
+- **Feasible in combat**: yes, the area follows the bound frame live (see "Hit-test findings").
+- **Change**:
+  1. `HitTestFrame:SetIgnoreParentScale(true)`, so it uses the same scale basis as `TPFrame` and Blizzard's plate
+     scaling no longer affects it (consistent with `TPFrame`).
+  2. Wherever `TPFrame:SetScale(...)` is applied (`Modules/Scaling.lua`: `ScalePlate`, scale animations), apply the
+     same scale to `HitTestFrame`. Prefer `SetScale` over anchoring `HitTestFrame` to `TPFrame` (the existing comment
+     in `ApplyPlateHitTest` warns about cross-hierarchy anchoring to a scaled frame).
+  3. Size from the active style's healthbar (`UpdateNameplateStyle` in `Styles/Styles.lua`) when `SyncWithHealthbar`
+     is on, instead of the reaction-based `db.settings.frame`. Keep the manual values when it is off. Headline View
+     keeps the current behavior (decided 2026-09-25).
+  4. Revisit `SetBaseNamePlateSize`'s "Big" division by `plate_scale`. With a shared scale basis it should become
+     unnecessary.
+  5. Clamp with P10.
+- **Risk**: extra `UPDATE_MOUSEOVER_UNIT` / flicker at the plate edges during mouseover scale animations. Test
+  explicitly (hover at the edge while the scale-up animation runs).
+- **Test**: target scale > 1, so the click area grows with the plate (up to the clamp). Mouseover scale animation
+  without flicker. Custom style with a different healthbar size. All of this in combat.
+
 ## 3. Test matrix (per item, as applicable)
 
 | Scenario | Retail/Midnight | WoW Forever | Mists Classic | Classic Era / Anniversary / SoD |
@@ -297,5 +380,8 @@ Error console: BugSack/!BugGrabber, with no `ADDON_ACTION_BLOCKED`/`FORBIDDEN` e
 - CLAUDE.md: update the "Nameplate lifecycle" section (anchoring invariant after P1, revalidation timer slots after
   P2, missed-REMOVED recovery after P4, stacking bounds after P8, hidden parent after L1).
 - `Nameplate.lua` comment block "How TP and Blizzard's own nameplate relate": rewrite after P1/L1.
-- Changelog: add entries per the CLAUDE.md "Changelog Workflow" at implementation time (check whether the top
-  version block of `TidyPlates_ThreatPlates_Changes.log` is already released).
+- Changelog: **one shared entry for the whole plan** (decided 2026-09-25) in the 13.4.0 block:
+  `* Reworked how nameplates are added, removed, and anchored to make them more reliable, especially when
+  Blizzard re-uses its internal nameplate frames for different units.` The per-item "Changelog" lines above are
+  only wording suggestions and are not added separately. Adjust the shared entry if an item adds a clearly
+  user-visible change of its own (e.g. P8 stacking, P6 performance) that deserves its own bullet.

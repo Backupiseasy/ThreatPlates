@@ -183,22 +183,47 @@ Central pub/sub for both real WoW events and internal TP events (`INTERNAL_EVENT
   `UNIT_FACTION`/`UNIT_FLAGS`, 0.5s for a detected double `NAME_PLATE_UNIT_ADDED` without an intervening
   `REMOVED`), guarded against the plate having legitimately moved on in the meantime. This is a *data* problem
   (TP's own `unit` table is wrong); see the next bullet for a look-alike that is a *placement* problem.
-- **`plate.UnitFrame` is pooled — re-anchor `TPFrame` on every acquire**: on Mists Classic and the modern engine
-  (Midnight, "WoW Forever"), Blizzard's `NamePlateBaseMixin:AcquireUnitFrame` takes an arbitrary frame from a pool on
-  every `NAME_PLATE_UNIT_ADDED` and `ReleaseUnitFrame` sets `plate.UnitFrame = nil` on `REMOVED`, so a plate can get
-  a *different* (already hooked, tracked in the weak-keyed `HookedUnitFrames` table) instance each time. `tp_frame` is a child of `plate` but
-  is anchored (`CENTER`) to `plate.UnitFrame`, so `NamePlateDriverFrame_AcquireUnitFrame` (`Nameplate.lua`) must
-  call `SetPoint` on **every** acquire, outside the "first time this `unit_frame` is seen" block that installs the
-  hooks. Symptom when it doesn't (regression from 2026-01-27, fixed 13.3.0): all TP data is correct
-  (`Active == true`, `TPFrame:IsShown()`, right name/reaction/style, alpha 1) but the plate is briefly drawn over
-  another unit (wrong name/reaction) and then vanishes — the stale anchor points at a frame that is now either
-  released (no points) or used by another plate. Diagnose in-game with `/run local p =
-  C_NamePlate.GetNamePlateForUnit("target"); local _, rel = p.TPFrame:GetPoint(); print(rel == p.UnitFrame,
-  p.TPFrame:IsVisible(), p.TPFrame:GetAlpha(), p.TPFrame:GetLeft())` — `false` (and no `GetLeft`) confirms it.
-  Related: Blizzard's `AcquireUnitFrame` post-hook runs before `plate.UnitFrame` is assigned, hence the manual
-  re-call from `Addon:NAME_PLATE_UNIT_ADDED`/`ScheduleNameplateRevalidation`. Also note that
-  `SetShownBlizzardPlate`'s protected branch does `ClearAllPoints()`+`SetParent(nil)` on `UnitFrame` — anything
-  anchored to it loses its rect while it is reparented, so prefer anchoring to the (stable) `plate` for new frames.
+- **`plate.UnitFrame` is pooled — never anchor TP frames to it**: on all current clients (Retail/Midnight, "WoW
+  Forever", and all Classic clients — Era/SoD, Anniversary and Mists share byte-identical `Blizzard_NamePlateBase.lua`
+  and `Blizzard_NamePlates.lua` with Retail), Blizzard's `NamePlateBaseMixin:AcquireUnitFrame` takes an arbitrary
+  frame from a pool on every `NAME_PLATE_UNIT_ADDED` and does `UnitFrame:SetAllPoints(plate)`; `ReleaseUnitFrame`
+  sets `plate.UnitFrame = nil` on `REMOVED`. A plate therefore gets a *different* (already hooked, tracked in the
+  weak-keyed `HookedUnitFrames` table) instance each time. `TPFrame` and TP's helper frames (`HitTestFrame`) are
+  anchored `CENTER` to `plate` itself, once in `HandlePlateCreated` — identical position, since `UnitFrame` always
+  fills `plate` (verified in-game on Retail and Classic Era by re-anchoring 30+ live plates between `plate` and
+  `UnitFrame` with no visible change). History: until 13.3.x `TPFrame` was anchored to `plate.UnitFrame` and had to
+  be re-anchored on every acquire; missing that (regression from 2026-01-27, fixed 13.3.0) made plates briefly draw
+  over another unit and then vanish, because the stale anchor pointed at a released or foreign `UnitFrame`. Also,
+  `SetShownBlizzardPlate`'s protected branch does `ClearAllPoints()`+`SetParent(nil)` on `UnitFrame`, which would
+  strip the rect from anything anchored to it. Only the *old* Classic driver (TOPLEFT-only anchor, template size;
+  seen only in an outdated `classic_beta` UI-source snapshot, not on any live client) would break this assumption —
+  detectable at runtime via `plate.AcquireUnitFrame == nil`. Related: Blizzard's `AcquireUnitFrame` post-hook runs
+  before `plate.UnitFrame` is assigned, hence the manual re-call from
+  `Addon:NAME_PLATE_UNIT_ADDED`/`ScheduleNameplateRevalidation` (still needed to install the per-instance hooks).
+- **Nameplate frames are restricted regions — no position queries**: on Retail/Midnight and Classic Era (verified
+  in-game, 2026-09-25), `plate`, `plate.UnitFrame` and `TPFrame` all report `IsAnchoringRestricted() == true`.
+  Position queries on them or anything anchored within that tree (`GetPoint`, `GetCenter`,
+  `GetLeft`/`GetRight`/`GetTop`/`GetBottom`, `GetRect`, `GetScaledRect`) throw `Action[FrameMeasurement] failed
+  because[Can't measure restricted regions]`. Size queries (`GetWidth`/`GetHeight`/`GetSize`) still work, and
+  `SetPoint`/`ClearAllPoints`/`SetSize` are allowed. Rule: TP code must never read positions from nameplate frames;
+  size reads are fine. For in-game diagnostics use checks that don't measure, e.g. `/run for _,p in
+  ipairs(C_NamePlate.GetNamePlates())do print(p:GetName(),p.AcquireUnitFrame~=nil,p.TPFrame and
+  p.TPFrame:IsVisible())end` (modern driver: `true`), or wrap measurements in `pcall`.
+- **Hit-test (clickable) area** (`ApplyPlateHitTest`, verified in-game on Retail, 2026-09-25):
+  - `plate:SetAllHitTestPoints(frame)` *binds* the clickable area to `frame`. Afterwards it follows `frame`'s size
+    live, **including in combat**, without calling `SetAllHitTestPoints` again (shrinking `HitTestFrame` via
+    `SetSize` in combat immediately shrank the clickable area). A hidden `HitTestFrame` works too (TP keeps it
+    hidden on purpose, since it has no textures).
+  - `SetAllHitTestPoints`/`SetHitTestPoints`/`ClearAllHitTestPoints` require `plate:CanChangeHitTestPoints()`,
+    which is false for tainted code in combat except on the tick the unit is first assigned
+    (`NAME_PLATE_UNIT_ADDED`) - so *re-binding* (e.g. switching between TP's `HitTestFrame` and Blizzard's
+    `UnitFrame`, or toggling click-through) is not possible mid-combat, but *resizing* the bound frame is.
+  - The clickable area is **clamped to the bounds of `plate`** (Blizzard's native nameplate size, e.g. 172.5 x 60.3
+    with default settings; documented at `C_NamePlateManager.SetNamePlateHitTestInsets`: "all hit testing is
+    clamped to the bounds of the nameplate"). A `HitTestFrame` larger than `plate` is silently cut off.
+    `C_NamePlate.SetNamePlateSize` is deliberately not used to enlarge `plate`: it is a single global size and
+    would also distort Blizzard's own plates (which TP shows in mixed mode and which exist even in pure TP mode,
+    e.g. protected friendly plates in instances).
 - **Plate frames (`NamePlate1`, `NamePlate2`, ...) are pooled too — keep `PlatesByMetaUnit` in sync**: a unit can
   get a different plate (and with it a different `TPFrame`) while it stays the (soft) target. Observed in-game
   (2026-10): with a friendly NPC targeted, toggling only `nameplateShowFriendlyNpcs` off and on moved the

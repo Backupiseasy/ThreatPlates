@@ -100,7 +100,7 @@ end
 -- C_NamePlate.SetNamePlateSize whenever any of these CVars change (see UpdateNamePlateOptions /
 -- UpdateNamePlateSize in Blizzard_NamePlates.lua). TP's own hit-test region (ApplyPlateHitTest,
 -- Nameplate.lua) is independent of that native size, but its HitTestFrame is still anchored to
--- plate.UnitFrame, which Blizzard's resize can reposition/resize - so already-active plates can be
+-- plate, which Blizzard's resize can reposition/resize - so already-active plates can be
 -- left with a stale clickable area until TidyPlates re-asserts it (see SetCVarHook below).
 local RESYNC_NATIVE_SIZE_CVARS = {
   nameplateSize = true,
