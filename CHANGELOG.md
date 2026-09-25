@@ -20,3 +20,4 @@
 
 * Fixed automatic role detection not recognizing Druids in Bear Form as tanks on WoW Forever.
 * Fixed a Lua error on WoW Forever for Paladins (and some other classes), caused by changes to the Blizzard API used for role detection [Comment #8694].
+* Changed automatic role detection on WoW Forever to also use Blizzard's own tank detection, so that tank auras gained in combat (e.g. Righteous Fury) are recognized.
