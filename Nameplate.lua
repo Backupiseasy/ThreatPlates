@@ -865,6 +865,11 @@ local SetShownBlizzardPlate
 -- Weak-keyed: the entry disappears on its own once Blizzard releases/GCs the frame.
 local BlizzardPlateOrigParent = setmetatable({}, { __mode = "k" })
 
+-- Blizzard UnitFrames (pooled) that already have TP's OnShow/Show hooks installed. Kept outside the
+-- frame itself so that no addon-owned key is written onto a (possibly secure) Blizzard frame.
+-- Weak-keyed like BlizzardPlateOrigParent.
+local HookedUnitFrames = setmetatable({}, { __mode = "k" })
+
 -- The protected-frame branch below (unit_frame:IsProtected()) exists because plain Show()/Hide()/
 -- SetShown() can be blocked by frame protection on the modern engine, not just on Midnight - see
 -- Addon.HAS_MIDNIGHT_API in Init.lua and the "Use SetAlpha(0/1)..." rule in CLAUDE.md.
@@ -1014,8 +1019,8 @@ local function NamePlateDriverFrame_AcquireUnitFrame(_, plate)
   end
 
   if unit_frame and not unit_frame:IsForbidden() then
-    if not unit_frame.ThreatPlates then
-      unit_frame.ThreatPlates = true
+    if not HookedUnitFrames[unit_frame] then
+      HookedUnitFrames[unit_frame] = true
       unit_frame:HookScript("OnShow", FrameOnShow)
 
       -- Companion to SetShownBlizzardPlate above - kept on the same condition.

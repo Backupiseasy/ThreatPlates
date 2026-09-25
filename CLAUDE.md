@@ -186,7 +186,7 @@ Central pub/sub for both real WoW events and internal TP events (`INTERNAL_EVENT
 - **`plate.UnitFrame` is pooled — re-anchor `TPFrame` on every acquire**: on Mists Classic and the modern engine
   (Midnight, "WoW Forever"), Blizzard's `NamePlateBaseMixin:AcquireUnitFrame` takes an arbitrary frame from a pool on
   every `NAME_PLATE_UNIT_ADDED` and `ReleaseUnitFrame` sets `plate.UnitFrame = nil` on `REMOVED`, so a plate can get
-  a *different* (already `unit_frame.ThreatPlates`-flagged) instance each time. `tp_frame` is a child of `plate` but
+  a *different* (already hooked, tracked in the weak-keyed `HookedUnitFrames` table) instance each time. `tp_frame` is a child of `plate` but
   is anchored (`CENTER`) to `plate.UnitFrame`, so `NamePlateDriverFrame_AcquireUnitFrame` (`Nameplate.lua`) must
   call `SetPoint` on **every** acquire, outside the "first time this `unit_frame` is seen" block that installs the
   hooks. Symptom when it doesn't (regression from 2026-01-27, fixed 13.3.0): all TP data is correct
