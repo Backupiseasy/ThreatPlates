@@ -16,7 +16,7 @@ local GetSpellTexture = C_Spell and C_Spell.GetSpellTexture or _G.GetSpellTextur
 local UnitIsUnitTP = Addon.UnitIsUnit
 
 -- ThreatPlates APIs
-local FontSetJustify, FontUpdateText, FontUpdateTextSize = Addon.Font.SetJustify, Addon.Font.UpdateText, Addon.Font.UpdateTextSize
+local FontSetFont, FontSetJustify, FontUpdateText, FontUpdateTextSize = Addon.Font.SetFont, Addon.Font.SetJustify, Addon.Font.UpdateText, Addon.Font.UpdateTextSize
 local SubscribeEvent = Addon.EventService.Subscribe
 local BackdropTemplate = Addon.BackdropTemplate
 local L = Addon.L
@@ -363,7 +363,7 @@ function Element.UpdateStyle(tp_frame, style)
   local spell_text, spell_text_style = tp_frame.visual.SpellText, style.spelltext
 
   -- At least font must be set as otherwise it results in a Lua error when UnitAdded with SetText is called
-  spell_text:SetFont(spell_text_style.typeface, spell_text_style.size, spell_text_style.flags)
+  FontSetFont(spell_text, spell_text_style.typeface, spell_text_style.size, spell_text_style.flags)
 
   FontSetJustify(spell_text, spell_text_style.align, spell_text_style.vertical)
   if spell_text_style.shadow then

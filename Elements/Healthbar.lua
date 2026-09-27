@@ -14,7 +14,7 @@ local InCombatLockdown = InCombatLockdown
 local GetClassColor = C_ClassColor.GetClassColor
 
 -- ThreatPlates APIs
-local FontUpdateText, FontUpdateTextSize = Addon.Font.UpdateText, Addon.Font.UpdateTextSize
+local FontSetInitialFont, FontUpdateText, FontUpdateTextSize = Addon.Font.SetInitialFont, Addon.Font.UpdateText, Addon.Font.UpdateTextSize
 local SubscribeEvent, UnsubscribeEvent = Addon.EventService.Subscribe, Addon.EventService.Unsubscribe
 local BackdropTemplate = Addon.BackdropTemplate
 local TransliterateCyrillicLetters = Addon.Localization.TransliterateCyrillicLetters
@@ -480,7 +480,7 @@ function Element.PlateCreated(tp_frame)
   end
 
   healthbar.TargetUnit = healthbar:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-  healthbar.TargetUnit:SetFont("Fonts\\FRIZQT__.TTF", 11)
+  FontSetInitialFont(healthbar.TargetUnit)
 
   --frame:SetScript("OnSizeChanged", OnSizeChanged)
   tp_frame.visual.Healthbar = healthbar
