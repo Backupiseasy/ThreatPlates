@@ -88,11 +88,10 @@ end
 -- Font families: fallback fonts for Cyrillic and CJK characters
 ---------------------------------------------------------------------------------------------------
 
--- A font file only contains glyphs for some alphabets, so text in other alphabets (e.g., Cyrillic or Chinese names
--- on WoW Forever) is shown as squares. A font family lets the client pick the font file per alphabet, like
--- Blizzard's own nameplate fonts do.
--- For now, only enabled on WoW Forever, where this was reported [GH-751].
-local USE_FONT_FAMILIES = Addon.IS_FOREVER and CreateFontFamily ~= nil
+-- A font file only contains glyphs for some alphabets, so text in other alphabets (e.g., Cyrillic or Chinese names)
+-- is shown as squares. A font family lets the client pick the font file per alphabet, like Blizzard's own nameplate
+-- fonts do [GH-751].
+local USE_FONT_FAMILIES = CreateFontFamily ~= nil
 
 local FONT_FAMILY_FALLBACK_FILES = {
   russian = "Fonts\\FRIZQT___CYR.TTF",
@@ -100,6 +99,16 @@ local FONT_FAMILY_FALLBACK_FILES = {
   simplifiedchinese = "Fonts\\ARKai_T.ttf",
   traditionalchinese = "Fonts\\blei00d.TTF",
 }
+
+-- On these clients, the selected font is (by default) a font for the client's alphabet, so it's used for that
+-- alphabet instead of the fallback font
+local LOCALE_ALPHABET = {
+  ruRU = "russian",
+  koKR = "korean",
+  zhCN = "simplifiedchinese",
+  zhTW = "traditionalchinese",
+}
+local CLIENT_ALPHABET = LOCALE_ALPHABET[GetLocale()]
 
 local FontFamilies = {}
 local FontFamilyCount = 0
@@ -114,7 +123,8 @@ local function GetFontFamily(file, size, flags)
       { alphabet = "roman", file = file, height = size, flags = flags },
     }
     for alphabet, fallback_file in pairs(FONT_FAMILY_FALLBACK_FILES) do
-      members[#members + 1] = { alphabet = alphabet, file = fallback_file, height = size, flags = flags }
+      local member_file = (alphabet == CLIENT_ALPHABET) and file or fallback_file
+      members[#members + 1] = { alphabet = alphabet, file = member_file, height = size, flags = flags }
     end
 
     FontFamilyCount = FontFamilyCount + 1
