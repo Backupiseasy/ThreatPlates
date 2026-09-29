@@ -128,6 +128,23 @@ local MONITORED_CVARS = {
   nameplateSelectedAlpha = true,
 }
 
+-- Reactions to CVar changes via the CVAR_UPDATE event (CVarUpdateHook below). Verified in-game: CVAR_UPDATE
+-- fires synchronously inside C_CVar.SetCVar, only if the value actually changed, and after Blizzard's own
+-- CVAR_UPDATE handling (CVarCallbackRegistry) has updated its frames. Unlike MONITORED_CVARS (SetCVarHook,
+-- which only sees changes made via C_CVar.SetCVar/ConsoleExec), it covers every change of the CVar.
+local function UpdateStackingBoundsOfAllPlates()
+  Addon.UpdateStackingBoundsOfAllPlates()
+end
+
+local CVAR_UPDATE_HANDLERS = {
+  -- Stacking bounds depend on Blizzard's plate layout (Nameplate.lua, AnchorToBlizzardHitTestArea):
+  -- "only name" mode switches live (no reload), nameplateStyle decides whether the name is inside or
+  -- above the healthbar, nameplateSize changes the healthbar size used for TP plates.
+  nameplateShowOnlyNameForFriendlyPlayerUnits = UpdateStackingBoundsOfAllPlates,
+  nameplateStyle = UpdateStackingBoundsOfAllPlates,
+  nameplateSize = UpdateStackingBoundsOfAllPlates,
+}
+
 local function SetConsoleVariable(cvar, value)
   -- Store in settings to be able to restore it later, but don't overwrite an existing value unless the current value
   -- is different from the backup value and the new value TP wants to set. In that case, the CVars was changed since
@@ -300,7 +317,14 @@ local function SetCVarHook(name, value, c)
   end
 end
 
+local function CVarUpdateHook(cvar_name, value)
+  local handler = CVAR_UPDATE_HANDLERS[cvar_name]
+  if handler then handler(value) end
+end
+
 function CVars.RegisterCVarHook()
+  Addon.EventService.Subscribe(CVars, "CVAR_UPDATE", CVarUpdateHook)
+
   -- Tracking of CVars based on code from AdvancedInterfaceOptions
   --hooksecurefunc("SetCVar", SetCVarHook) -- /script SetCVar(cvar, value)
   if C_CVar and C_CVar.SetCVar then

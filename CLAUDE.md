@@ -204,9 +204,14 @@ Central pub/sub for both real WoW events and internal TP events (`INTERNAL_EVENT
   in-game, 2026-09-25), `plate`, `plate.UnitFrame` and `TPFrame` all report `IsAnchoringRestricted() == true`.
   Position queries on them or anything anchored within that tree (`GetPoint`, `GetCenter`,
   `GetLeft`/`GetRight`/`GetTop`/`GetBottom`, `GetRect`, `GetScaledRect`) throw `Action[FrameMeasurement] failed
-  because[Can't measure restricted regions]`. Size queries (`GetWidth`/`GetHeight`/`GetSize`) still work, and
-  `SetPoint`/`ClearAllPoints`/`SetSize` are allowed. Rule: TP code must never read positions from nameplate frames;
-  size reads are fine. For in-game diagnostics use checks that don't measure, e.g. `/run for _,p in
+  because[Can't measure restricted regions]`. Size queries (`GetWidth`/`GetHeight`/`GetSize`) do not throw, and
+  `SetPoint`/`ClearAllPoints`/`SetSize` are allowed. **But sizes can be secret values**: in restricted contexts (seen
+  in an instance, right after combat ended) `GetSize` on a frame anchored to Blizzard's `UnitFrame` elements returned
+  secret numbers, and comparing them threw `attempt to compare ... (a secret number value, ...)` (P8,
+  `ApplyPlateStackingBounds`, 2026-09-26). TP's own frames with sizes set explicitly by TP have shown no such error
+  so far. Rule: TP code must never read positions from nameplate frames, and must guard size reads of frames whose
+  layout depends on Blizzard's frames with `IsSecretValueTP` before any arithmetic or comparison. For in-game
+  diagnostics use checks that don't measure, e.g. `/run for _,p in
   ipairs(C_NamePlate.GetNamePlates())do print(p:GetName(),p.AcquireUnitFrame~=nil,p.TPFrame and
   p.TPFrame:IsVisible())end` (modern driver: `true`), or wrap measurements in `pcall`.
 - **Hit-test (clickable) area** (`ApplyPlateHitTest`, verified in-game on Retail, 2026-09-25):
@@ -224,6 +229,33 @@ Central pub/sub for both real WoW events and internal TP events (`INTERNAL_EVENT
     `C_NamePlate.SetNamePlateSize` is deliberately not used to enlarge `plate`: it is a single global size and
     would also distort Blizzard's own plates (which TP shows in mixed mode and which exist even in pure TP mode,
     e.g. protected friendly plates in instances).
+- **Stacking bounds** (`ApplyPlateStackingBounds`, all clients that implement `plate:SetStackingBoundsFrame`, which
+  is a real method on Retail, "WoW Forever" and Classic Era; verified in-game on Retail, 2026-09-25/26):
+  - `plate:SetStackingBoundsFrame(frame)` replaces Blizzard's default stacking (overlap-avoidance) bounds with
+    `frame`'s. It is not gated by `CanChangeHitTestPoints`, and `frame` is not nilable (no "reset to default"), so
+    TP must set correct bounds for *every* plate it has touched, including plates shown by Blizzard and plates TP
+    ignores (widget-only, personal), because plates are pooled.
+  - Without it, Blizzard stacks by the plate's **hit-test area** as set by `NamePlateUnitFrameMixin:UpdateHitTestArea`
+    (name top to healthbar bottom, ±10 horizontally, half the healthbar height below), not the whole plate
+    (172.5 x 60.3 includes aura space and stacks visibly wider). In "only name" mode
+    (`nameplateShowOnlyNameForFriendlyPlayerUnits`, `UnitFrame:IsShowOnlyName()`), Blizzard clears the hit-test
+    area but still stacks those plates, only tighter.
+  - The `nameplateOverlapH/V` CVars scale the stacking spacing on top of the bounds, on Retail and Classic Era, with
+    TP enabled and disabled, for Blizzard-shown and TP plates alike. They have no effect when stacking is off.
+    TP's "Horizontal/Vertical Overlap" options set them. (An earlier note here claimed they had no effect on
+    Midnight. That was wrong: the tested values, 1.66 vs. 2, were just too close.)
+  - TP: plates shown by Blizzard are anchored to Blizzard's hit-test area (`AnchorToBlizzardHitTestArea`; name only
+    in "only name" mode). TP plates use that area's *size*, centered on `plate`, so they stack exactly like
+    Blizzard's plates. The size is measured on the hidden `UnitFrame` and cached, since the `UnitFrame` cannot be
+    measured while it is reparented away, and it is never taken from an "only name" `UnitFrame`. Same camera, same
+    CVars, TP disabled vs. enabled gave identical spacing.
+  - Re-applied on `NAME_PLATE_UNIT_ADDED` (also for ignored units), reaction changes, and on `CVAR_UPDATE` for
+    `nameplateShowOnlyNameForFriendlyPlayerUnits` / `nameplateStyle` / `nameplateSize` (`CVAR_UPDATE_HANDLERS` in
+    `CVarsManager.lua`, next to `MONITORED_CVARS`/`SetCVarHook`; "only name" switches live, without a reload).
+  - **`frame` must be shown and have visible content**: an empty frame (shown or hidden) makes Blizzard stop stacking
+    that plate entirely. TP, Plater and Platynator all give it a fully transparent texture
+    (`SetColorTexture(0, 0, 0, 0)` + `SetAllPoints`). This is unlike the hit-test frame, where a hidden, empty
+    frame works.
 - **Plate frames (`NamePlate1`, `NamePlate2`, ...) are pooled too — keep `PlatesByMetaUnit` in sync**: a unit can
   get a different plate (and with it a different `TPFrame`) while it stays the (soft) target. Observed in-game
   (2026-10): with a friendly NPC targeted, toggling only `nameplateShowFriendlyNpcs` off and on moved the
@@ -243,7 +275,11 @@ Central pub/sub for both real WoW events and internal TP events (`INTERNAL_EVENT
   `OnShow` immediately within the same call, and `HookScript("OnShow", ...)` hooks run synchronously too. Game
   events like `UPDATE_MOUSEOVER_UNIT` and `UNIT_FACTION` are **not** documented to fire inside a running Lua
   call; they fire between Lua event handler calls (empirically observed: `UNIT_FACTION` fires between
-  `NAME_PLATE_UNIT_REMOVED` and `NAME_PLATE_UNIT_ADDED` in solo-shuffle). Rule: always clear derived state
+  `NAME_PLATE_UNIT_REMOVED` and `NAME_PLATE_UNIT_ADDED` in solo-shuffle). **Exception, verified in-game
+  (2026-09-26)**: `CVAR_UPDATE` fires synchronously *inside* `C_CVar.SetCVar` (a debug trace printed before the
+  statement following `SetCVar` in the same `/run`), and only if the value actually changed. Blizzard's own
+  `CVAR_UPDATE` handling (`CVarCallbackRegistry`) has run by then, so a `hooksecurefunc(C_CVar, "SetCVar")` post-hook
+  (`SetCVarHook`) also sees Blizzard's updated state. Rule: always clear derived state
   (mouseover, focus, target references) **before** calling `wipe(unit)` in `NAME_PLATE_UNIT_REMOVED`, so any
   subsequent event handler still finds valid unit data. (This is also why `NAME_PLATE_UNIT_REMOVED` clears the
   `PlatesByUnit["mouseover"]` stale reference before `wipe(unit)` — it used to nil-crash

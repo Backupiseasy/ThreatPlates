@@ -1094,6 +1094,22 @@ local	function HandlePlateCreated(plate)
   -- recalculations when tp_frame:SetScale() is called (e.g. during mouseover scale animation).
   tp_frame.HitTestFrame = _G.CreateFrame("Frame", nil, plate)
   tp_frame.HitTestFrame:Hide()
+
+  -- # Nameplate Hierarchy, Anchoring, and Scaling
+  -- Frame whose bounds Blizzard uses for stacking (overlap avoidance) of this plate, see
+  -- ApplyPlateStackingBounds. Same parent/anchor reasoning as HitTestFrame. plate:SetStackingBoundsFrame
+  -- is a real method on all current clients (Retail, "WoW Forever", Classic); the check is a safeguard.
+  -- Unlike HitTestFrame, this frame must be shown and have a (fully transparent) texture: without
+  -- one, Blizzard stops stacking the plate at all (Plater and Platynator use the same transparent
+  -- texture for their stacking frames).
+  if plate.SetStackingBoundsFrame then
+    local stacking_frame = _G.CreateFrame("Frame", nil, plate)
+    local texture = stacking_frame:CreateTexture()
+    texture:SetColorTexture(0, 0, 0, 0)
+    texture:SetAllPoints(stacking_frame)
+    tp_frame.StackingBoundsFrame = stacking_frame
+  end
+
   SetNameplateFrameProperties(tp_frame)
   -- Size is set in Styles.lua
 
@@ -1125,13 +1141,99 @@ local	function HandlePlateCreated(plate)
   Widgets:OnPlateCreated(tp_frame)
 end
 
--- Applies the C++ hit-test link for a nameplate plate.
+-- Without a stacking bounds frame, Blizzard stacks a plate by its hit-test (clickable) area, as set
+-- by NamePlateUnitFrameMixin:UpdateHitTestArea (verified in-game: anchoring the stacking frame like
+-- this restores Blizzard's native spacing; the nameplateOverlapH/V CVars scale it on top).
+-- Anchors frame to that area of Blizzard's UnitFrame. Returns false if not possible, and as second
+-- value whether the plate is in "only name" mode (nameplateShowOnlyNameForFriendlyPlayerUnits): there
+-- Blizzard clears its hit-test area, but still stacks the plates, only tighter (verified in-game) -
+-- approximated by the name's bounds.
+local function AnchorToBlizzardHitTestArea(frame, unit_frame)
+  local healthbar = unit_frame and unit_frame.HealthBarsContainer and unit_frame.HealthBarsContainer.healthBar
+  if not healthbar then return false end
+
+  frame:ClearAllPoints()
+  -- Only where Blizzard actually clears the hit-test area in "only name" mode (UpdateHitTestArea, Retail).
+  -- Classic sets the same hit-test area in ApplyFrameOptions and keeps it in "only name" mode.
+  if unit_frame.name and unit_frame.UpdateHitTestArea and unit_frame:IsShowOnlyName() then
+    frame:SetAllPoints(unit_frame.name)
+    return true, true
+  end
+
+  local setup_options = _G.NamePlateSetupOptions
+  local offset_y = ((setup_options and setup_options.healthBarHeight) or 0) / 2
+
+  frame:SetPoint("BOTTOMRIGHT", healthbar, "BOTTOMRIGHT", 10, -offset_y)
+  if (setup_options and setup_options.unitNameInsideHealthBar) or not unit_frame.name then
+    frame:SetPoint("TOPLEFT", healthbar, "TOPLEFT", -10, offset_y)
+  else
+    frame:SetPoint("TOPLEFT", unit_frame.name, "TOPLEFT", -14, 0)
+  end
+  return true, false
+end
+
+-- Size of Blizzard's hit-test area, measured on the (hidden) UnitFrame of a TP plate. Cached, as it
+-- cannot be measured while the UnitFrame is reparented away (see SetShownBlizzardPlate).
+local BlizzardHitTestAreaWidth, BlizzardHitTestAreaHeight
+
+-- Sets the frame Blizzard uses as this plate's bounds for stacking (overlap avoidance), so that the
+-- spacing matches Blizzard's own plates: plates shown by Blizzard use Blizzard's hit-test area
+-- directly; TP plates use the size of that area, centered on plate (measured, not anchored, as the
+-- hidden UnitFrame of a TP plate may be reparented away). The nameplateOverlapH/V CVars still scale
+-- the spacing on top, for both. Size reads are allowed although nameplate frames are restricted
+-- regions (see CLAUDE.md). Unlike the hit-test API, SetStackingBoundsFrame is not gated by
+-- CanChangeHitTestPoints.
+local function ApplyPlateStackingBounds(tp_frame)
+  local frame = tp_frame.StackingBoundsFrame
+  if not frame then return end
+
+  local plate = tp_frame.Parent
+  local anchored, only_name = AnchorToBlizzardHitTestArea(frame, plate.UnitFrame)
+
+  if tp_frame.Active then
+    -- TP plates always show a healthbar, so never take the size from an "only name" UnitFrame.
+    -- In restricted contexts (e.g. in instances), sizes of nameplate frames are secret values.
+    if anchored and not only_name then
+      local ok, width, height = pcall(frame.GetSize, frame)
+      if ok and not IsSecretValueTP(width) and not IsSecretValueTP(height) and width > 0 and height > 0 then
+        BlizzardHitTestAreaWidth, BlizzardHitTestAreaHeight = width, height
+      end
+    end
+
+    frame:ClearAllPoints()
+    if BlizzardHitTestAreaWidth then
+      frame:SetSize(BlizzardHitTestAreaWidth, BlizzardHitTestAreaHeight)
+      frame:SetPoint("CENTER", plate, "CENTER")
+    else
+      -- Not measured yet (only until the first measurable TP plate)
+      frame:SetAllPoints(plate)
+    end
+  elseif not anchored then
+    frame:ClearAllPoints()
+    frame:SetAllPoints(plate)
+  end
+
+  plate:SetStackingBoundsFrame(frame)
+end
+
+-- Re-applies the stacking bounds of all plates with a unit, incl. plates shown by Blizzard
+-- (PlatesByUnit, unlike GetActiveThreatPlates).
+function Addon.UpdateStackingBoundsOfAllPlates()
+  for _, tp_frame in pairs(PlatesByUnit) do
+    ApplyPlateStackingBounds(tp_frame)
+  end
+end
+
+-- Applies the C++ hit-test link for a nameplate plate (and, sharing the same call sites, the
+-- stacking bounds - see ApplyPlateStackingBounds).
 -- Click-through (NamePlateFriendlyClickThrough/NamePlateEnemyClickThrough) is decided by the
 -- unit's reaction alone, so it applies the same whether TP or Blizzard's own plate is currently
 -- shown for this unit (Active toggles only which frame's bounds the non-click-through case uses).
 -- Guard: CanChangeHitTestPoints skips in restricted C++ contexts.
 local function ApplyPlateHitTest(tp_frame)
   local plate = tp_frame.Parent
+
+  ApplyPlateStackingBounds(tp_frame)
 
   if not plate:CanChangeHitTestPoints() then return end
 
@@ -1707,6 +1809,13 @@ function Addon:NAME_PLATE_UNIT_ADDED(unitid)
       ScheduleNameplateRevalidation(plate, unitid, 0.5)
     elseif not plate.UnitFrame then
       ScheduleNameplateRevalidation(plate, unitid, 0)
+    end
+  else
+    -- Not handled by TP, but the (pooled) plate may still have TP's stacking bounds from a previous
+    -- unit - reset them to Blizzard's (tp_frame.Active is false here, see NAME_PLATE_UNIT_REMOVED).
+    local plate = GetNamePlateForUnit(unitid)
+    if plate and plate.TPFrame then
+      ApplyPlateStackingBounds(plate.TPFrame)
     end
   end
 end

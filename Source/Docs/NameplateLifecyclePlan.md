@@ -61,7 +61,7 @@ Reference implementations:
 ```
 P7 ─┐
 P1 ─┼─> L1 (hidden parent, drop Show watchdog)
-    └─> P8 (stacking bounds; reuses the plate-anchored helper-frame pattern)
+    └─> P8 (stacking bounds; reuses the plate-anchored helper-frame pattern) ─> P8b (later, TP-size-based stacking)
 P2 ─> P3 ─> P4
 P5 (independent)
 P10 ─> P9 (hit-test area: clamp first, then scale with TPFrame)
@@ -222,25 +222,135 @@ on Retail/Midnight.
 - **Changelog**: `Fixed a bug where nameplates did not update their style when a unit's classification (e.g.
   elite or rare) changed.`
 
-### P8: Use `SetStackingBoundsFrame` (Midnight API)
+### P8: Use `SetStackingBoundsFrame` — IMPLEMENTED, verified on Retail
+
+**Decision (2026-09-26)**: TP plates stack with the size of Blizzard's hit-test area (= same spacing as Blizzard's
+plates), and Blizzard-shown plates exactly like Blizzard. The spacing is scaled for all plates by the existing
+`nameplateOverlapH/V` CVars (TP's "Horizontal/Vertical Overlap" options). The interim "Stacking Width/Height"
+options (a factor on the size) were **removed again**: they duplicated Overlap, which works on Retail and Classic Era
+with stacking on, with TP enabled and disabled, for Blizzard-shown and TP plates (verified in-game 2026-09-26). P8
+is active on all clients that implement `plate:SetStackingBoundsFrame` (a real method on Retail, "WoW Forever" and
+Classic Era; all clients share the same nameplate API).
+
+**In-game results (Retail, 2026-09-25)**, step by step:
+1. Hidden, empty frame: **no stacking at all** with TP enabled, for TP *and* Blizzard-shown plates. Showing the
+   frame alone did not help. Stashing P8 + `/reload` restored stacking, so P8 was the cause. Fix: frame shown,
+   with a fully transparent texture (same as Plater and Platynator). After that, stacking works and toggling
+   stacking on/off is applied correctly.
+2. TP's click-area size (140 x 20) → TP plates stacked tighter than Blizzard's plates.
+3. Whole plate (`SetAllPoints(plate)`, 172.5 x 60.3) → *all* plates, including Blizzard-shown ones, stacked wider
+   than with TP disabled, so Blizzard's default is not the plate.
+4. Temporary `/tptp stacking-test hittest` (stacking frame anchored like `UpdateHitTestArea`) → Blizzard-shown
+   plates got the native spacing. Blizzard's default stacking bounds = its hit-test area.
+5. Final implementation, same camera and same CVars (`nameplateOverlapH/V` 1.12/1.66), TP disabled vs. enabled:
+   identical spacing (the lower rows match to the pixel, the upper ones differ by a few px from perspective).
+   (`nameplateOverlapV` 2 vs. 1.66 made no visible difference at first, which led to the wrong conclusion that
+   Overlap had no effect on Midnight. A later test with 0.5 vs. 2.0 showed it does, see the decision above.)
 
 - **Problem**: Blizzard stacks TP plates using its default bounds, not TP's actual plate size. Plater and
   Platynator both provide a stacking frame.
-- **Change**:
-  1. `HandlePlateCreated`: `tp_frame.StackingBoundsFrame = CreateFrame("Frame", nil, plate)`, anchored
-     `CENTER` to `plate` (same pattern and same scale reasoning as `HitTestFrame`).
-  2. New `ApplyPlateStackingBounds(tp_frame)`, called from `RefreshPlatePresentation` and wherever
-     `ApplyPlateHitTest` is called for size changes (`SetNamePlateClickThrough` / `SetBaseNamePlateSize`):
-     guard `if not plate.SetStackingBoundsFrame then return end`. If `tp_frame.Active`, size it from the
-     per-reaction healthbar size (or `db.settings.frame` as a first iteration) and call
-     `plate:SetStackingBoundsFrame(frame)`. Otherwise restore Blizzard's bounds (check the API docs for
-     `nil`/`UnitFrame` as argument).
-  3. Check the combat-restriction behavior (like `CanChangeHitTestPoints` for hit tests) in
-     `FrameAPINamePlateDocumentation.lua`.
-  4. Optional follow-up: a separate stacking size setting, since stacking area ≠ click area.
-- **Test**: stacking on/off (`nameplateStackingTypes`), dense packs, different healthbar sizes friendly/enemy,
-  Headline View, mixed Blizzard plates.
-- **Changelog**: `Changed stacking of nameplates to use the actual size of Threat Plates' nameplates.`
+- **API facts**: `SetStackingBoundsFrame(frame)` has no `RequiresCanChangeHitTestPoints` precondition (unlike the
+  hit-test API), and `frame` is not nilable, so there is no "reset to Blizzard default". A no-op Lua stub exists in
+  `NamePlateScriptBaseMixin`, but real nameplates have the real method (checked in-game on Forever and Classic Era).
+  Blizzard's own UI never calls it.
+  Reference: Plater always sets its own frame (size = click space × overlap scale, anchored to its unit frame, or
+  to the plate when Blizzard's plate is shown), and Platynator uses its design's "stack" region.
+- **Implemented** (`Nameplate.lua`):
+  1. `HandlePlateCreated`: `tp_frame.StackingBoundsFrame` (parent `plate`, shown, no mouse, fully transparent
+     texture). Only created if `plate.SetStackingBoundsFrame` exists.
+  2. `AnchorToBlizzardHitTestArea(frame, unit_frame)`: anchors to Blizzard's healthbar/name like
+     `UpdateHitTestArea` (with or without the name, depending on `NamePlateSetupOptions.unitNameInsideHealthBar`).
+  3. `ApplyPlateStackingBounds(tp_frame)`: Blizzard-shown plate → anchored to Blizzard's hit-test area (live).
+     TP plate → size of that area (measured on the hidden `UnitFrame`, cached, fallback plate size), `CENTER` on
+     `plate`. Then `plate:SetStackingBoundsFrame(frame)`.
+  4. (Removed: "Stacking Width/Height" options.)
+  5. Called at the start of `ApplyPlateHitTest`, *before* its `CanChangeHitTestPoints` early return, so it also
+     runs in combat and at all of its call sites (`RefreshPlatePresentation`, `ApplyReactionUpdate`,
+     `SetNamePlateClickThrough` → `SetBaseNamePlateSize`).
+- **"Only names" (Retail, `nameplateShowOnlyNameForFriendlyPlayerUnits`, outside instances with Blizzard plates for
+  friendly units)**: without TP, Blizzard still stacks those plates, only tighter than normal plates. With TP, the
+  spacing stayed the same regardless of the CVar. A first fix (per-UnitFrame hook on `UpdateShowOnlyName`) was
+  reverted as too complicated. Implemented instead:
+  - `AnchorToBlizzardHitTestArea` anchors to the name only in "only name" mode (second return value `only_name`).
+    TP plates never take their cached size from such a UnitFrame.
+  - Live CVar toggle: `CVarsManager.lua` subscribes to `CVAR_UPDATE` (`CVAR_UPDATE_HANDLERS`, defined next to
+    `MONITORED_CVARS`, + `CVarUpdateHook`) and calls
+    `Addon.UpdateStackingBoundsOfAllPlates()` (all plates in `PlatesByUnit`, incl. Blizzard-shown ones). No double
+    processing: the CVar is not in `MONITORED_CVARS`. Verified with a (since removed) debug trace: `CVAR_UPDATE` fires
+    synchronously inside `C_CVar.SetCVar`, only on an actual value change, and after Blizzard's own handling.
+  - Analysis: inside instances, friendly plates are *forbidden* plates (own pool and events
+    `FORBIDDEN_NAME_PLATE_*`, not registered by TP), so TP never touches them. Outside instances, TP handles
+    Blizzard-shown friendly plates via `NAME_PLATE_UNIT_ADDED` (stacking bounds and hit-test, see P10).
+  - Verified in-game (Retail, 2026-09-26): "only names" stacks as tight as without TP, the live CVar toggle takes
+    effect immediately (so Blizzard's `CVAR_UPDATE` handling does run first), and enemy TP plates are unaffected.
+- **Code check "Blizzard-shown plates = Blizzard's spacing"** (2026-09-26) closed two gaps:
+  - Plates ignored by TP (`IgnoreUnitForThreatPlates`: widget-only, personal) kept TP's stacking bounds from a
+    previous unit on the pooled plate. `NAME_PLATE_UNIT_ADDED` now resets them via `ApplyPlateStackingBounds`
+    (`Active` is false there).
+  - `nameplateStyle` (name inside/above the healthbar) and `nameplateSize` changes only re-applied active TP plates.
+    Both are now in `CVAR_UPDATE_HANDLERS` → `UpdateStackingBoundsOfAllPlates`.
+  - Covered paths: ADDED/revalidation, `ApplyReactionUpdate`, `UNIT_FACTION("player")`, Blizzard/TP option toggle
+    (`ForceUpdate` → `UpdatePlatesVisible`), live healthbar resizes (anchored), "only name" CVar (`CVAR_UPDATE`),
+    forbidden plates in instances (never touched).
+- **Review (2026-09-26)**:
+  - Fixed: in an instance, right after combat, `GetSize` on the stacking frame (anchored to Blizzard's `UnitFrame`)
+    returned secret numbers, so the `width > 0` comparison threw. The measurement is now guarded with
+    `IsSecretValueTP` (the cache keeps the last valid size). Without a cached size, TP plates use
+    `SetAllPoints(plate)` instead of reading `plate:GetWidth()`.
+  - Fixed: the "only name" branch only applies where Blizzard clears the hit-test area (`unit_frame.UpdateHitTestArea`
+    exists, Retail). Classic sets the same hit-test area in `ApplyFrameOptions` and keeps it in "only name" mode.
+  - Removed the redundant `EnableMouse(false)` and the outdated "modern engine only" comment.
+- **Verified in-game (Retail, 2026-09-26)**: TP plates and Blizzard-shown plates stack like with TP disabled,
+  Overlap H/V works with TP on (both plate kinds), the "only names" load and live toggle work, `nameplateStyle`
+  changes apply immediately, and instance incl. end of combat shows no errors (after the secret-size fix).
+- **Still to test**: Classic Era with the current code (spacing TP on vs. off, Overlap still working, "only names"
+  like without TP after the `UpdateHitTestArea` check), widget-only plates.
+- **Related, for P10**: `ApplyPlateHitTest` makes Blizzard-shown "only name" plates clickable (Blizzard clears their
+  hit-test area) and replaces Blizzard's exact hit-test area of normal Blizzard-shown plates with the whole plate.
+- The temporary `/tptp stacking-test` command used for the tests above has been removed again.
+- **Changelog**: covered by the shared 13.4.0 entry (the options bullet was removed together with the options).
+
+### P8b (later): Stacking spacing that follows TP's own plate size
+
+- **Idea**: with P8, TP plates always stack with Blizzard's hit-test area size, even if TP's healthbar is much larger
+  or smaller. Instead, apply Blizzard's formula to TP's *own* elements: anchor the stacking frame to TP's name and
+  healthbar (name top to healthbar bottom, ±10, half the healthbar height). Same TP size as Blizzard → same
+  spacing, other sizes adapt automatically and live. Overlap keeps scaling on top.
+- **Cases to cover** (collected 2026-09-25/26):
+  - Healthbar size settings (friendly/enemy) and custom styles with their own healthbar size.
+  - Headline View (name only): name bounds, analogous to Blizzard's "only name" mode.
+  - Individual plate scaling (target/mouseover/threat scale, scale animations): should the stacking area of a
+    scaled-up target plate grow with it? Anchoring into `TPFrame` does this automatically, but may make plates
+    re-stack/jitter during scale animations (compare the cross-hierarchy anchoring issue noted in
+    `ApplyPlateHitTest`). Alternative: size-based (like P8 now), updated from `ScalingModule` on scale changes.
+  - Plate-level elements outside name/healthbar (castbar below, auras/widgets above): included or not?
+- **Why not Overlap**: the Overlap CVars are global (they also change Blizzard-shown plates) and belong to the user.
+- **Why not own "Stacking Width/Height" options**: tried in P8 and removed, since they duplicated Overlap.
+- **Risks**: style-dependent layouts (name/healthbar hidden, Headline View, custom styles), jitter while scaling.
+  Sizes read from frames anchored to Blizzard's frames can be secret, so prefer TP's own configured sizes over
+  measuring where possible.
+
+### Follow-ups collected during P1/P8 (not yet assigned)
+
+- **Overlap option descriptions** (`Options.lua`, "Horizontal/Vertical Overlap"): mention that they scale the spacing
+  of *stacked* nameplates and have no effect when stacking is off. New locale strings (new keys, keep the old
+  translations until the next CurseForge sync).
+- **Double processing of `nameplateSize`/`nameplateStyle`** (harmless): `CVAR_UPDATE` (inside `SetCVar`) and then
+  `SetCVarHook` → `SetBaseNamePlateSize` both re-apply stacking for active TP plates, both after Blizzard's update.
+  `SetCVarHook` is still needed for the hit-test. Could be simplified if P9/P10 move the hit-test update to
+  `CVAR_UPDATE` as well.
+- **Ignored plates on CVar changes**: `UpdateStackingBoundsOfAllPlates` iterates `PlatesByUnit`, which does not
+  contain plates TP ignores (widget-only). They are anchored to Blizzard's elements and follow size changes live.
+  Only a switch of the anchor variant (`nameplateStyle`: name inside/above the healthbar) stays stale until the
+  plate is re-added.
+- **Secret sizes audit**: TP reads sizes of its own frames in 9 places (`Elements/Healthbar.lua` absorbs,
+  `Elements/Castbar.lua` spark, `Widgets/AurasWidget.lua` highlight, `Widgets/ComboPointsWidget.lua`,
+  `Widgets/ThreatWidget.lua`, `Modules/Font.lua`). No errors so far (sizes set explicitly by TP), but check whether any
+  of these frames can inherit a secret size from Blizzard frames. If so, guard with `IsSecretValueTP`.
+- **"WoW Forever"**: P8 not tested with the current code (the method exists there and is real, checked in-game).
+  Considered unnecessary for now.
+- **Hit-test of Blizzard-shown plates** (whole plate instead of Blizzard's area, "only name" plates clickable) and
+  re-binding blocked in combat: see P10.
 
 ### P6 (optional): Unregister Blizzard unit-frame events while TP handles the plate
 
@@ -336,6 +446,10 @@ no option (global, distorts Blizzard's plates, which also exist in pure TP mode)
      `SetBaseNamePlateSize` (out of combat).
 - **Test**: healthbar width 250 → click area = plate width, and `ConfigClickableArea` shows the clamped area. Change
   Blizzard's nameplate size and check that the clamp follows.
+- **Also (found with P8, pre-existing since 13.3.0)**: for plates shown by Blizzard (not click-through),
+  `ApplyPlateHitTest` binds the hit-test to `plate.UnitFrame`, i.e. the whole plate instead of Blizzard's exact area.
+  In "only name" mode, it also overrides Blizzard's cleared hit-test, so friendly names become clickable. Option:
+  bind to a frame anchored via `AnchorToBlizzardHitTestArea`, and in "only name" mode leave the hit-test alone.
 
 ### P9: Let the clickable area scale with `TPFrame` (target/mouseover/threat scale, custom styles)
 
@@ -385,3 +499,44 @@ Error console: BugSack/!BugGrabber, with no `ADDON_ACTION_BLOCKED`/`FORBIDDEN` e
   Blizzard re-uses its internal nameplate frames for different units.` The per-item "Changelog" lines above are
   only wording suggestions and are not added separately. Adjust the shared entry if an item adds a clearly
   user-visible change of its own (e.g. P8 stacking, P6 performance) that deserves its own bullet.
+
+## 5. Final verification before merge (open checks, kept up to date)
+
+Checks that are still open for items already committed. Everything here must pass (or be consciously waived) before
+the branch is merged. Add new entries as items are committed, and tick or remove them when done.
+
+**P7 — hook marker table** (`47d61a38`)
+- [ ] OnShow/Show hooks attach exactly once per pooled `UnitFrame` instance (no duplicate hooks after long sessions;
+      temporary debug counter or `/tptp debug`), Retail and Classic.
+
+**P1 — anchoring to `plate`** (`4b13beda`)
+- [ ] Retail and Classic (Era, Anniversary, Mists): plates at the same position as before. Nameplate size
+      Normal/Big, Headline View, mouseover/target scaling, custom styles with offsets.
+- [ ] Clickable area and click-through (friendly/enemy), mixed mode (Blizzard plates for friendly units), reaction
+      change (duel, mind control).
+- [ ] BG/arena/raid: no vanishing or misplaced plates.
+- [ ] `ConfigClickableArea` and `/tptp clickable-area` show the expected areas.
+- [ ] "WoW Forever" (optional, waived for now).
+
+**P8 — stacking bounds** (`0ad99326`)
+- [x] Retail: TP and Blizzard-shown plates stack like with TP disabled, Overlap H/V works with TP on, "only names"
+      on load and live toggle, `nameplateStyle` change, instance incl. end of combat (no secret-size error).
+- [ ] Classic Era with the current code: spacing TP on vs. off (same camera/CVars), Overlap H/V still works with
+      stacking on, "only names" like without TP (no name-only branch there, since `UpdateHitTestArea` is missing).
+- [ ] Classic Anniversary / Mists: smoke test (stacking on/off, no errors).
+- [ ] Widget-only plates (quest objects, vehicles) stack like with TP disabled, also after the plate showed a TP
+      unit before (pooled plate reset).
+- [ ] `CVAR_UPDATE` handlers on Classic: toggling `nameplateSize`/`nameplateStyle` causes no errors (CVars may not
+      exist there; events for unknown CVars simply never fire).
+- [ ] BG/arena: no errors from secret sizes (`ApplyPlateStackingBounds`), stacking stays correct.
+- [ ] "WoW Forever" (optional, waived for now; the method exists there and is real).
+
+**General**
+- [ ] `luacheck . --config .luacheckrc.ci` clean, and no new warnings in `luacheck . --config .luacheckrc` for touched files.
+- [ ] BugSack/!BugGrabber: no errors, no `ADDON_ACTION_BLOCKED`/`ADDON_ACTION_FORBIDDEN` entries over a longer
+      session (open world, instance, BG) on Retail and Classic.
+- [ ] No temporary test/debug code left (`/tptp stacking-test`, CVAR_UPDATE trace, `/run` helpers in code).
+- [ ] Changelog: 13.4.0 block and `CHANGELOG.md` in sync, entries still accurate for all committed items.
+- [ ] CLAUDE.md and this plan consistent with the final code (item statuses, verification results).
+- [ ] Follow-ups (section "Follow-ups collected during P1/P8") reviewed: either assigned to an item or consciously
+      deferred.
