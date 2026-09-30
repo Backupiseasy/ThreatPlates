@@ -46,7 +46,9 @@ local BNGetFriendInfo, BNGetFriendInfoByID = BNGetFriendInfo, BNGetFriendInfoByI
 local GetFriendAccountInfo, GetGameAccountInfoByID -- For Retail
 
 -- GetFriendAccountInfo and GetAccountInfoByID: BfA - Patch 8.2.5 (2019-09-24): Changed to C_BattleNet.GetFriendAccountInfo() and C_BattleNet.GetAccountInfoByID().
-if Addon.ExpansionIsAtLeastMists then
+-- Check for the API itself, not the expansion: clients with a modern engine, but an older ruleset (e.g. WoW Forever)
+-- no longer have BNGetFriendInfo.
+if C_BattleNet and C_BattleNet.GetFriendAccountInfo then
   GetFriendAccountInfo, GetGameAccountInfoByID = C_BattleNet.GetFriendAccountInfo, C_BattleNet.GetGameAccountInfoByID
 else
   local AccountInfo = {
@@ -106,7 +108,8 @@ local function GetFullName(character_name, realm)
     return nil
   end
 
-  if realm == nil or realm == "" then
+  -- realm is false (not nil) on WoW Forever, where callers discard UnitName's 2nd return (a surname there)
+  if not realm or realm == "" then
     realm = GetRealmName()
   end
   return character_name .. "-" .. realm
@@ -170,10 +173,10 @@ function Widget:BN_CONNECTED()
 
     for i = 1, BnetOnline do
       local account_info = GetFriendAccountInfo(i)
-      local game_account_info = account_info.gameAccountInfo
+      local game_account_info = account_info and account_info.gameAccountInfo
 
       -- Realm seems to be "" for realms from a different WoW version (Retail/Classic/...)
-      if game_account_info.isOnline and game_account_info.clientProgram == BNET_CLIENT_WOW and game_account_info.characterName and game_account_info.realmName ~= "" then
+      if game_account_info and game_account_info.isOnline and game_account_info.clientProgram == BNET_CLIENT_WOW and game_account_info.characterName and game_account_info.realmName ~= "" then
         ListBnetFriends[GetFullName(game_account_info.characterName, game_account_info.realmName)] = "Social.BattleNetFriend"
       end
     end
