@@ -123,3 +123,6 @@ deDE entries under any circumstances - only fill genuine gaps.
   CurseForge before the next `pull`, that `pull` overwrites the marker-tagged line with
   CurseForge's export (which never carries the marker) - the key silently becomes
   human-reviewed with no extra bookkeeping needed.
+- As long as CurseForge's text for a marker-tagged key is still exactly the machine
+  translation, `pull` keeps the marker (see `preserve_existing_translations()`). To accept
+  such a translation unchanged, delete its `--[[Machine translation --]]` line by hand.

@@ -35,7 +35,10 @@ name: Sync localization strings with CurseForge
 # + Source/import_localization_phrase_keys.sh + inline bash pull-back).
 #
 # Triggers:
-#   - push to main, release/* or hotfix/*: pick up new strings as soon as they land.
+#   - push to main or release/*: pick up new strings as soon as they land. hotfix/* is
+#     deliberately not a trigger: every hotfix branch got its own localization-sync-hotfix/*
+#     PR with a diff identical to the release/main one, which nobody merged. A hotfix's new
+#     strings are picked up once it is merged into main or a release branch.
 #   - weekly schedule: catches translation updates made directly on CurseForge, which can happen
 #     without any code commit here.
 #   - workflow_dispatch: manual run.
@@ -54,7 +57,7 @@ on:
   schedule:
     - cron: "0 6 * * 1"
   push:
-    branches: [main, "release/*", "hotfix/*"]
+    branches: [main, "release/*"]
     paths:
       - "**.lua"
       - "Locales/**"

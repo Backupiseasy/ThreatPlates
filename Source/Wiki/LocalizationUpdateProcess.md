@@ -18,7 +18,7 @@ into.
 new L["..."] in code
         │
         ▼
-[Automatic] sync_localization_translations.yml   (push to main/release/*/hotfix/*, weekly, or manual)
+[Automatic] sync_localization_translations.yml   (push to main/release/*, weekly, or manual)
         │  extract → generate-enus --prune → pull → open/update PR
         ▼
 "Update localization files from CurseForge" PR
@@ -31,7 +31,7 @@ new L["..."] in code
         └─ [Manual] review diff, merge PR (squash-merge — see "Merge method" below)
                 │
                 ▼
-        target branch (main/release/*/hotfix/*) updated
+        target branch (main/release/*) updated
                 │
                 ▼ (only if the branch merges into `main`)
 [Automatic] publish_localization_to_curseforge.yml   (push to main, path: Locales/enUS.lua)
@@ -44,8 +44,10 @@ CurseForge project updated (new enUS phrases + MT deDE translations)
 
 ## Step 1 — [Automatic] `sync_localization_translations.yml`
 
-Runs on push to `main`, `release/*`, `hotfix/*`; also weekly (catches CF-side community translation
-edits with no accompanying code change) and via manual `workflow_dispatch`.
+Runs on push to `main` and `release/*`; also weekly (catches CF-side community translation
+edits with no accompanying code change) and via manual `workflow_dispatch`. `hotfix/*` is
+deliberately not a trigger - each hotfix branch used to get its own sync PR with a diff identical
+to the release/main one; a hotfix's new strings are picked up once it is merged forward.
 
 1. `extract` — scans all `.lua` files for `L["..."]` calls.
 2. `generate-enus --prune` — regenerates `Locales/enUS.lua` mechanically from that scan (plus
@@ -59,8 +61,10 @@ edits with no accompanying code change) and via manual `workflow_dispatch`.
    `--[[Machine translation --]]` marker, if any) is kept instead of the placeholder; if CF
    doesn't know the key at all yet (its enUS phrase hasn't reached CF via Step 5's `upload` -
    see the note below on that), the existing local translation is carried over unchanged
-   rather than silently dropped. See `preserve_existing_translations()` in
-   `Source/localization_tool.py`.
+   rather than silently dropped. If CF sends back a real translation whose text is still
+   exactly a local `--[[Machine translation --]]`-marked entry (i.e. Step 5's
+   `push-translation` uploaded it and nobody changed it since), the marker is kept too.
+   See `preserve_existing_translations()` in `Source/localization_tool.py`.
 4. Opens (or updates, if one is already open) a PR titled **"Update localization files from
    CurseForge"** on branch `localization-sync-<ref>`.
 
@@ -144,6 +148,11 @@ and it's fully automatic once code reaches `main`.
 Once a community translator edits a marker-tagged key on CF, the next Step 1 `pull` overwrites that
 line with CF's export (which never carries the marker) — the key silently becomes human-reviewed,
 no manual bookkeeping needed anywhere in this pipeline.
+
+A marker-tagged key whose text on CF is still exactly the machine translation keeps its marker
+across pulls (CF merely echoing back what Step 5 uploaded is not a review). To sign off such a
+translation as-is, delete its `--[[Machine translation --]]` line in `Locales/deDE.lua` by hand —
+`pull` never adds a marker to an unmarked entry.
 
 ---
 
