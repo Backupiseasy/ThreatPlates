@@ -86,56 +86,56 @@ end
 local function PrintVersion()
 	local client_version, build, build_date, toc_version = GetBuildInfo()
 
-	Addon.Logging.Print(L["|cff89F559Threat Plates|r: Version "] .. Addon.Meta("version"))
-	Addon.Logging.Print("  " .. L["WoW client:"], client_version, "(" .. L["build"], build .. ", " .. L["Interface"], toc_version .. ", " .. build_date .. ")")
-	Addon.Logging.Print("  " .. L["Expansion Level:"], Addon.GetExpansionLevel())
+	Addon.Logging.Print("|cff89F559Threat Plates|r: Version " .. Addon.Meta("version"))
+	Addon.Logging.Print("  " .. "WoW client:", client_version, "(" .. "build", build .. ", " .. "Interface", toc_version .. ", " .. build_date .. ")")
+	Addon.Logging.Print("  " .. "Expansion Level:", Addon.GetExpansionLevel())
 
 	if Addon.IS_CLASSIC then
 		if Addon.IS_CLASSIC_SOD then
-			Addon.Logging.Print("  " .. L["Detected as:"], "Classic Era - Season of Discovery")
+			Addon.Logging.Print("  " .. "Detected as:", "Classic Era - Season of Discovery")
 		elseif Addon.IS_CLASSIC_SOM then
-			Addon.Logging.Print("  " .. L["Detected as:"], "Classic Era - Season of Mastery")
+			Addon.Logging.Print("  " .. "Detected as:", "Classic Era - Season of Mastery")
 		elseif C_Seasons and (C_Seasons.GetActiveSeason() == 11 or C_Seasons.GetActiveSeason() == 12) then
-			Addon.Logging.Print("  " .. L["Detected as:"], "Classic Era - Anniversary Realm")
+			Addon.Logging.Print("  " .. "Detected as:", "Classic Era - Anniversary Realm")
 		else
-			Addon.Logging.Print("  " .. L["Detected as:"], "Classic Era")
+			Addon.Logging.Print("  " .. "Detected as:", "Classic Era")
 		end
 	end
 	if Addon.IS_TBC_CLASSIC then
 		if Addon.IS_TBC_CLASSIC_ANNIVERSARY then
-			Addon.Logging.Print("  " .. L["Detected as:"], "TBC Classic - Anniversary Edition")
+			Addon.Logging.Print("  " .. "Detected as:", "TBC Classic - Anniversary Edition")
 		else
-			Addon.Logging.Print("  " .. L["Detected as:"], "TBC Classic")
+			Addon.Logging.Print("  " .. "Detected as:", "TBC Classic")
 		end
 	end
 	if Addon.IS_WRATH_CLASSIC then
-		Addon.Logging.Print("  " .. L["Detected as:"], "Wrath Classic")
+		Addon.Logging.Print("  " .. "Detected as:", "Wrath Classic")
 	end
 	if Addon.IS_CATA_CLASSIC then
-		Addon.Logging.Print("  " .. L["Detected as:"], "Cata Classic")
+		Addon.Logging.Print("  " .. "Detected as:", "Cata Classic")
 	end
 	if Addon.IS_MISTS_CLASSIC then
-		Addon.Logging.Print("  " .. L["Detected as:"], "Mists Classic")
+		Addon.Logging.Print("  " .. "Detected as:", "Mists Classic")
 	end
 	if Addon.IS_MIDNIGHT then
-		Addon.Logging.Print("  " .. L["Detected as:"], "Midnight")
+		Addon.Logging.Print("  " .. "Detected as:", "Midnight")
 	end
 	if Addon.IS_MAINLINE then
-		Addon.Logging.Print("  " .. L["Detected as:"], "Mainline")
+		Addon.Logging.Print("  " .. "Detected as:", "Mainline")
 	end
 	if Addon.IS_FOREVER then
-		Addon.Logging.Print("  " .. L["Detected as:"], "WoW Forever (Classic-rules content on a modern client engine)")
+		Addon.Logging.Print("  " .. "Detected as:", "WoW Forever (Classic-rules content on a modern client engine)")
 	end
 
 	-- Secret values (a distinct Lua type WoW returns for restricted unit data) are not tied to a single
 	-- expansion flag - e.g. they also occur on Classic clients sharing Midnight's client build. Report
 	-- API availability directly instead of inferring it from Addon.IS_MIDNIGHT.
-	Addon.Logging.Print("  " .. L["Secret values supported:"], tostring(_G.issecretvalue ~= nil))
+	Addon.Logging.Print("  " .. "Secret values supported:", tostring(_G.issecretvalue ~= nil))
 
 	-- Raw signals behind the flags above, for clients where they disagree (e.g. "WoW Forever", which
 	-- reports its own project id, WOW_PROJECT_CAMELOT, while running Classic-rules content) -
 	-- GetClassicExpansionLevel is only defined on some clients, hence the existence check first.
-	Addon.Logging.Print("  -- " .. L["Raw signals"] .. " --")
+	Addon.Logging.Print("  -- " .. "Raw signals" .. " --")
 	Addon.Logging.Print("    WOW_PROJECT_ID:", tostring(WOW_PROJECT_ID))
 	Addon.Logging.Print("    WOW_PROJECT_CAMELOT:", tostring(WOW_PROJECT_CAMELOT))
 	Addon.Logging.Print("    WOW_PROJECT_MAINLINE:", tostring(WOW_PROJECT_MAINLINE))
@@ -460,7 +460,7 @@ local function ChatCommandDebug(cmd_list)
 
 		-- If we're in combat, bail out once before making any changes
 		if InCombatLockdown() then
-			Addon.Logging.Warning(L["We're unable to change this while in combat"])
+			Addon.Logging.Warning("We're unable to change this while in combat")
 			return
 		end
 
@@ -469,7 +469,7 @@ local function ChatCommandDebug(cmd_list)
 			for _, name in ipairs(all) do
 				SetCVar(name, 0)
 			end
-			Addon.Logging.Info(L["All restriction CVars are now |cffff0000OFF!|r"]) 
+			Addon.Logging.Info("All restriction CVars are now |cffff0000OFF!|r") 
 			return
 		end
 
@@ -482,8 +482,8 @@ local function ChatCommandDebug(cmd_list)
 		}
 		local target_cvar = map_type[string.lower(cvar_type)]
 		if not target_cvar then
-			Addon.Logging.Error(L["Unknown restrictions type: "] .. (cvar_type or ""))
-			Addon.Logging.Print(L["Valid types: combat, encounter, challenge, pvp, map"]) 
+			Addon.Logging.Error("Unknown restrictions type: " .. (cvar_type or ""))
+			Addon.Logging.Print("Valid types: combat, encounter, challenge, pvp, map") 
 			return
 		end
 
@@ -494,9 +494,9 @@ local function ChatCommandDebug(cmd_list)
 		end
 
 		if selected_on then
-			Addon.Logging.Info(L["All restriction CVars are now |cffff0000OFF!|r"]) 
+			Addon.Logging.Info("All restriction CVars are now |cffff0000OFF!|r") 
 		else
-			Addon.Logging.Info(L["Set restriction: "] .. cvar_type)
+			Addon.Logging.Info("Set restriction: " .. cvar_type)
 		end
 	elseif command == "test" then
     local plate = C_NamePlate.GetNamePlateForUnit("target", true)
@@ -505,7 +505,7 @@ local function ChatCommandDebug(cmd_list)
 		Addon.Logging.Debug("Addon.UnitIsTarget:", Addon.UnitIsTarget)
 		Addon.Logging.Debug("Addon.UnitIsUnit:", Addon.UnitIsUnit)
 	else
-		Addon.Logging.Error(L["Unknown option: "] .. command)
+		Addon.Logging.Error("Unknown option: " .. command)
 		PrintHelp()
 	end
 end
