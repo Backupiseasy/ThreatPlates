@@ -40,7 +40,7 @@ Translate new/untranslated deDE strings for the TidyPlates_ThreatPlates WoW addo
    `Locales/enUS.lua` (and pass step 1's placeholder check) while nothing in the addon
    references it anymore, e.g. leftover options from a removed feature that
    `generate-enus` never pruned by default. Reuse the tool's own scan instead of
-   re-implementing it: a short script (see step 5 for the throwaway-script pattern)
+   re-implementing it: a short script (see step 6 for the throwaway-script pattern)
    importing `scan_repository` and `registry_path_for`/`extract_registry_keys` from
    `Source/localization_tool.py` gives the same `used_keys` set `cmd_generate_enus`
    itself uses (static `L["..."]` calls plus `Source/LocalizationSpecialPhraseKeys.lua`
@@ -85,28 +85,62 @@ Translate new/untranslated deDE strings for the TidyPlates_ThreatPlates WoW addo
    (same technique parse_mt_marked_keys uses), and replaces/appends lines programmatically;
    delete the script afterward. This keeps every write AST-quoted and verifiable by
    construction instead of by hand.
-7. Run `python Source/localization_tool.py check` again to confirm no regressions, and
+7. Check terminology consistency of every `--[[Machine translation --]]`-marked entry
+   in Locales/deDE.lua - the ones written in this run and the ones still pending review
+   from earlier runs - against the human-reviewed entries (no marker, value different
+   from key). Step 4 asks for consistent vocabulary while translating; this step
+   verifies the result, because one run against PR #747 found five deviations in
+   entries that had already been written and uploaded.
+   - Collect the recurring UI terms from the English keys of the marked entries: verbs
+     and nouns of the options panel (e.g. apply, checked, enabled, show, hide, overlay,
+     dispel, duration, icon, pet) and recurring phrases (e.g. "on enemy units").
+   - For each term, group how the human-reviewed entries render it and how the marked
+     entries render it. A throwaway script that matches an English pattern against the
+     keys and counts the German variants in the values, separately for marked and
+     unmarked entries, is enough (same throwaway-script pattern as step 6).
+   - The majority rendering among the human-reviewed entries is the standard. Every
+     marked entry that uses a different word for the same term is an inconsistency.
+     Deviations found in that run: apply rendered as "wirken" instead of "anwenden",
+     checked as "aktiviert" instead of "ausgewählt", enabled as "aktiviert" instead of
+     "eingeschaltet", overlay as "Überlagerung"/"Anzeige" instead of "Overlay", and
+     "on ... units" as "bei ... Einheiten" instead of "auf ... Einheiten".
+   - Check option names quoted inside a description against the translation of that
+     option's own key: if `L["Player Can Apply"]` is "Spieler kann anwenden", a
+     description that lists it must use exactly that wording.
+   - A value identical to its key without a `--[[Translation missing --]]` line above it
+     is an intentional loanword (step 1), e.g. "Square" - not an inconsistency.
+   - Where the human-reviewed entries disagree among themselves (e.g. duration as
+     "Dauer" and "Laufzeit"), follow the majority and leave the human-reviewed entries
+     untouched; mention the split in the summary of step 9.
+   - Fix entries written in this run directly. Do not change a marked entry from an
+     earlier run on your own: list the proposed correction in step 9 and apply it only
+     after confirmation, because that text is already on CurseForge (see "Correcting a
+     machine translation that is already on CurseForge" below).
+8. Run `python Source/localization_tool.py check` again to confirm no regressions, and
    that the new keys show up under "machine-translated pending review" rather than lumped
    into the human-translated count.
-8. Show the user the full diff (git diff Locales/deDE.lua) and, alongside it, an
+9. Show the user the full diff (git diff Locales/deDE.lua) and, alongside it, an
    English -> German overview table of every string translated in this run (one row per
    key), plus a short note of what was deliberately skipped and why (step 1's false
-   positives, step 2's dead/unused-in-code keys, step 3's name-match keys). Wait for
+   positives, step 2's dead/unused-in-code keys, step 3's name-match keys). Add the
+   result of step 7 as a second table (term, established rendering, deviating entry,
+   proposed correction), or state that no inconsistency was found. Wait for
    explicit confirmation before doing anything else in this step. Do not commit or push
    without that confirmation.
-9. Once confirmed: git add Locales/deDE.lua, then
+10. Once confirmed: git add Locales/deDE.lua, then
    git commit -m "Add machine-translated deDE strings for review", then git push origin
    <branch> (the exact branch checked out in step 0 - do not rely on "current branch"
    being right by this point). This adds a commit to the existing sync PR rather than
    creating a new one.
-10. Clean up the local checkout: `git checkout <branch you noted in step 0>`, then
+11. Clean up the local checkout: `git checkout <branch you noted in step 0>`, then
     `git branch -D <branch>` to delete the local copy of the PR branch. The remote PR
     branch (and the PR itself) is untouched by this - only the throwaway local tracking
     branch created in step 0 is removed, so a stale local branch doesn't linger or
     conflict with a future run.
 
-Do not touch any other locale file. Do not modify already-translated (non-placeholder)
-deDE entries under any circumstances - only fill genuine gaps.
+Do not touch any other locale file. Do not modify human-reviewed (unmarked,
+non-placeholder) deDE entries under any circumstances - only fill genuine gaps, and
+correct marker-tagged entries as described in step 7.
 ```
 
 ## What happens to these entries afterward
@@ -126,3 +160,23 @@ deDE entries under any circumstances - only fill genuine gaps.
 - As long as CurseForge's text for a marker-tagged key is still exactly the machine
   translation, `pull` keeps the marker (see `preserve_existing_translations()`). To accept
   such a translation unchanged, delete its `--[[Machine translation --]]` line by hand.
+
+## Correcting a machine translation that is already on CurseForge
+
+`pull` cannot tell a local correction from a community correction: whenever CurseForge's
+text for a key differs from the local one, CurseForge wins and the marker is dropped. A
+marker-tagged entry that was already uploaded and is then reworded locally (e.g. by the
+consistency check in step 7) is therefore reverted to the old text by the next `pull` -
+both the one in the sync workflow and the one the publish workflow runs before
+`push-translation`.
+
+Upload the corrected text before the change reaches a branch that triggers the sync
+workflow:
+
+```
+python Source/localization_tool.py push-translation --locale deDE --token <CF_API_KEY>
+```
+
+This uploads exactly the marker-tagged deDE entries with their local text. Afterwards
+CurseForge and the repository agree again, so `pull` keeps both the text and the marker.
+An entry whose key is new (CurseForge has never seen it) is not affected.
