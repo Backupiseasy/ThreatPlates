@@ -15,6 +15,7 @@
 * Fixed a bug where the absorb bar briefly showed at full width when a new nameplate was displayed.
 * Enabled target of target names again on WoW Midnight and WoW Forever [Comment #8697].
 * Updated integrated libraries (Ace3 r1414-alpha, LibDualSpec-1.0 v1.35.0, LibSharedMedia-3.0 v12.1.0).
+* Fixed several bugs where the Social widget did not recognize friends and guild members (e.g., friends from the in-game friend list, Battle.net friends coming online, or characters with surnames on WoW Forever).
 
 ## WoW Forever Beta
 
@@ -23,3 +24,4 @@
 * Changed automatic role detection on WoW Forever to also use Blizzard's own tank detection, so that tank auras gained in combat (e.g. Righteous Fury) are recognized.
 * Fixed Lua errors on login and nameplates not working on WoW Forever, caused by a change in the latest beta patch to how the client identifies itself [GH-753].
 * Fixed a bug where the Quest widget on WoW Forever also highlighted units for quest objectives of other group members.
+* Fixed a Lua error on WoW Forever when a Battle.net friend is online, caused by Blizzard API changes [Comment #8723].

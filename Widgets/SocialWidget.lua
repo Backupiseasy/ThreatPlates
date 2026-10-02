@@ -25,68 +25,27 @@ local Widget = Addon.Widgets:NewWidget("Social")
 -- WoW APIs
 local GetNumGuildMembers, GetGuildRosterInfo = GetNumGuildMembers, GetGuildRosterInfo
 local BNET_CLIENT_WOW = BNET_CLIENT_WOW
-local UnitName, GetRealmName, UnitFactionGroup = UnitName, GetRealmName, UnitFactionGroup
+local UnitFactionGroup = UnitFactionGroup
 local C_FriendList_ShowFriends, C_FriendList_GetNumOnlineFriends = C_FriendList.ShowFriends, C_FriendList.GetNumOnlineFriends
-local C_FriendList_GetFriendInfo = C_FriendList.GetFriendInfo
+local C_FriendList_GetFriendInfoByIndex = C_FriendList.GetFriendInfoByIndex
+-- C_BattleNet is available on all supported clients (it replaced BNGetFriendInfo, which no longer exists on
+-- clients with a modern engine like WoW Forever, with BfA - Patch 8.2.5).
+local C_BattleNet_GetFriendAccountInfo = C_BattleNet.GetFriendAccountInfo
 
 -- ThreatPlates APIs
 local IsSecretValueTP = Addon.IsSecretValue
 
+-- All lists are indexed by the GUID of the player, not by its name: the format of names differs between
+-- clients and APIs (realm suffix, surnames on WoW Forever, ...).
 local ListGuildMembers = {}
 local ListFriends = {}
 local ListBnetFriends = {}
-local ListGuildMembersSize, ListFriendsSize, ListBnetFriendsSize = 0, 0, 0
+local ListGuildMembersSize, ListFriendsSize = 0, 0
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
 -- List them here for Mikk's FindGlobals script
 -- GLOBALS: BNGetNumFriends
-
-local BNGetFriendInfo, BNGetFriendInfoByID = BNGetFriendInfo, BNGetFriendInfoByID -- For Classic
-local GetFriendAccountInfo, GetGameAccountInfoByID -- For Retail
-
--- GetFriendAccountInfo and GetAccountInfoByID: BfA - Patch 8.2.5 (2019-09-24): Changed to C_BattleNet.GetFriendAccountInfo() and C_BattleNet.GetAccountInfoByID().
-if Addon.ExpansionIsAtLeastMists then
-  GetFriendAccountInfo, GetGameAccountInfoByID = C_BattleNet.GetFriendAccountInfo, C_BattleNet.GetGameAccountInfoByID
-else
-  local AccountInfo = {
-    gameAccountInfo = {}
-  }
-
-  GetFriendAccountInfo = function(friend_index)
-    local _, _, battle_tag, _, character_name, bnet_id_game_account, client, is_online = BNGetFriendInfo(friend_index)
-
-    local realm
-    if bnet_id_game_account then
-      _, _, _, realm = _G.BNGetGameAccountInfo(bnet_id_game_account)
-    end
-
-    local game_account_info = AccountInfo.gameAccountInfo
-    game_account_info.isOnline = is_online
-    game_account_info.clientProgram = client
-    game_account_info.characterName = character_name
-    game_account_info.realmName = realm
-
-    return AccountInfo
-  end
-
-  GetGameAccountInfoByID = function(friend_index)
-    local bnetIDAccount, accountName, battle_tag, isBattleTag, character_name, bnet_id_game_account, client, is_online = BNGetFriendInfoByID(friend_index)
-
-    local _, realm
-    if bnet_id_game_account then
-      _, _, _, realm = _G.BNGetGameAccountInfo(bnet_id_game_account)
-    end
-
-    local game_account_info = AccountInfo.gameAccountInfo
-    game_account_info.isOnline = is_online
-    game_account_info.clientProgram = client
-    game_account_info.characterName = character_name
-    game_account_info.realmName = realm
-
-    return AccountInfo.gameAccountInfo
-  end
-end
 
 ---------------------------------------------------------------------------------------------------
 -- Cached configuration settings
@@ -98,18 +57,14 @@ local PlateColorEnabled = {}
 -- Social Widget Functions
 ---------------------------------------------------------------------------------------------------
 
-local function GetFullName(character_name, realm)
-  -- UnitName() returns a secret name/realm for hostile players in Arenas/Battlegrounds (Patch
-  -- 12.1) - can't compare/concat those, and nothing meaningful to build here without the real
-  -- name, so just report "no full name available" instead.
-  if IsSecretValueTP(character_name) or IsSecretValueTP(realm) then
+-- Returns the GUID, if it can be used as key for the lists above. unit.guid can be a secret value in restricted
+-- contexts (e.g., for hostile players in Arenas/Battlegrounds).
+local function GetListKey(guid)
+  if not guid or IsSecretValueTP(guid) then
     return nil
   end
 
-  if realm == nil or realm == "" then
-    realm = GetRealmName()
-  end
-  return character_name .. "-" .. realm
+  return guid
 end
 
 function Widget:FRIENDLIST_UPDATE()
@@ -124,14 +79,15 @@ function Widget:FRIENDLIST_UPDATE()
 
     local no_friends = 0
     for i = 1, friendsOnline do
-      local name, _ = C_FriendList_GetFriendInfo(i)
-      if name then
-        ListFriends[name] = "Social.Friend"
+      local friend_info = C_FriendList_GetFriendInfoByIndex(i)
+      local guid = friend_info and GetListKey(friend_info.guid)
+      if guid then
+        ListFriends[guid] = "Social.Friend"
         no_friends = no_friends + 1
       end
     end
 
-    ListFriendsSize = no_friends -- as name might be nil, friendsOnline might not be correct here
+    ListFriendsSize = no_friends -- as guid might be nil, friendsOnline might not be correct here
 
     self:UpdateAllFramesWithPublish("ClassColorUpdate")
   end
@@ -144,12 +100,13 @@ function Widget:GUILD_ROSTER_UPDATE()
     if numTotalGuildMembers < ListGuildMembersSize then
       ListGuildMembers = {}
     end
-    
+
     local no_guild_members_with_info = 0
     for i = 1, numTotalGuildMembers do
-      local name, rank, rankIndex, level, classDisplayName, zone, note, officernote, isOnline, _ = GetGuildRosterInfo(i)
-      if name then
-        ListGuildMembers[name] = "Social.GuildMember"
+      -- name, rank, rankIndex, level, classDisplayName, zone, note, officernote, isOnline, ..., guid
+      local guid = GetListKey(select(17, GetGuildRosterInfo(i)))
+      if guid then
+        ListGuildMembers[guid] = "Social.GuildMember"
         no_guild_members_with_info = no_guild_members_with_info + 1
       end
     end
@@ -160,75 +117,41 @@ function Widget:GUILD_ROSTER_UPDATE()
   end
 end
 
-function Widget:BN_CONNECTED()
-  local _, BnetOnline = _G.BNGetNumFriends()
-  if ListBnetFriendsSize ~= BnetOnline then
-    -- Only wipe the Bnet friend list if a member went offline
-    if BnetOnline < ListBnetFriendsSize then
-      ListBnetFriends = {}
-    end
+-- The list is always rebuilt completely as information about the character of a friend is no longer available
+-- after he went offline.
+local function UpdateBnetFriends()
+  ListBnetFriends = {}
 
-    for i = 1, BnetOnline do
-      local account_info = GetFriendAccountInfo(i)
-      local game_account_info = account_info.gameAccountInfo
+  local _, no_friends_online = _G.BNGetNumFriends()
+  for i = 1, no_friends_online do
+    local account_info = C_BattleNet_GetFriendAccountInfo(i)
+    local game_account_info = account_info and account_info.gameAccountInfo
 
-      -- Realm seems to be "" for realms from a different WoW version (Retail/Classic/...)
-      if game_account_info.isOnline and game_account_info.clientProgram == BNET_CLIENT_WOW and game_account_info.characterName and game_account_info.realmName ~= "" then
-        ListBnetFriends[GetFullName(game_account_info.characterName, game_account_info.realmName)] = "Social.BattleNetFriend"
+    if game_account_info and game_account_info.isOnline and game_account_info.clientProgram == BNET_CLIENT_WOW then
+      local guid = GetListKey(game_account_info.playerGuid)
+      if guid then
+        ListBnetFriends[guid] = "Social.BattleNetFriend"
       end
     end
-
-    ListBnetFriendsSize = BnetOnline
-
-    self:UpdateAllFramesWithPublish("ClassColorUpdate")
   end
 end
 
-function Widget:BN_FRIEND_ACCOUNT_ONLINE(friend_id, _)
-  local game_account_info = GetGameAccountInfoByID(friend_id)
-
-  if game_account_info and game_account_info.isOnline and game_account_info.clientProgram == BNET_CLIENT_WOW and game_account_info.characterName and game_account_info.realmName ~= "" then
-    ListBnetFriends[GetFullName(game_account_info.characterName, game_account_info.realmName)] = "Social.BattleNetFriend"
-    self:UpdateAllFramesWithPublish("ClassColorUpdate")
-  end
+function Widget:BN_CONNECTED()
+  UpdateBnetFriends()
+  self:UpdateAllFramesWithPublish("ClassColorUpdate")
 end
 
-function Widget:BN_FRIEND_ACCOUNT_OFFLINE(friend_id, _)
-  local game_account_info = GetGameAccountInfoByID(friend_id)
-
-  if game_account_info and game_account_info.clientProgram == BNET_CLIENT_WOW and game_account_info.characterName and game_account_info.realmName ~= "" then
-    ListBnetFriends[GetFullName(game_account_info.characterName, game_account_info.realmName)] = nil
-    self:UpdateAllFramesWithPublish("ClassColorUpdate")
-  end
-end
-
-function Widget:UNIT_NAME_UPDATE(unitid)
-  local tp_frame = Addon:GetThreatPlateForUnit(unitid)
-  if tp_frame then
-    local widget_frame = tp_frame.widgets.Social
-    if widget_frame.Active then
-      local unit = tp_frame.unit
-
-      -- * Creating full unit name here (not using GetUnitName(unitid, true) as I don't know if
-      -- * game_account_info.characterName .. "-" .. game_account_info.realmName would always be equal to
-      -- * GetUnitName for the same unitid
-      -- On WoW Forever, UnitName's 2nd return is a surname, not a realm - GetFullName's "-realm" format
-      -- makes no sense there, so let it fall back to GetRealmName() instead (same as the nil/"" case).
-      local name, second_value = UnitName(unitid)
-      local realm = (not Addon.WOW_FEATURE_REGIONAL_SURNAMES) and second_value
-      unit.fullname = GetFullName(name, realm)
-
-      self:OnUnitAdded(widget_frame, unit)
-    end
-  end
-end
+Widget.BN_FRIEND_ACCOUNT_ONLINE = Widget.BN_CONNECTED
+Widget.BN_FRIEND_ACCOUNT_OFFLINE = Widget.BN_CONNECTED
 
 function Addon:IsFriend(unit, plate_style)
-  return PlateColorEnabled[plate_style] and (ListFriends[unit.fullname] or ListBnetFriends[unit.fullname])
+  local guid = GetListKey(unit.guid)
+  return guid and PlateColorEnabled[plate_style] and (ListFriends[guid] or ListBnetFriends[guid])
 end
 
 function Addon:IsGuildmate(unit, plate_style)
-  return PlateColorEnabled[plate_style] and ListGuildMembers[unit.fullname]
+  local guid = GetListKey(unit.guid)
+  return guid and PlateColorEnabled[plate_style] and ListGuildMembers[guid]
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -266,7 +189,6 @@ function Widget:OnEnable()
     self:SubscribeEvent("BN_CONNECTED")
     self:SubscribeEvent("BN_FRIEND_ACCOUNT_ONLINE")
     self:SubscribeEvent("BN_FRIEND_ACCOUNT_OFFLINE")
-    self:SubscribeEvent("UNIT_NAME_UPDATE")
     --Widget:SubscribeEvent("BN_FRIEND_LIST_SIZE_CHANGED", EventHandler)
 
     --self:FRIENDLIST_UPDATE()
@@ -297,11 +219,6 @@ function Widget:OnUnitAdded(widget_frame, unit)
 
   widget_frame.FactionIcon:SetSize(SettingsFaction.scale, SettingsFaction.scale)
 
-  -- On WoW Forever, UnitName's 2nd return is a surname, not a realm - see UNIT_NAME_UPDATE above.
-  local name, second_value = UnitName(unit.unitid)
-  local realm = (not Addon.WOW_FEATURE_REGIONAL_SURNAMES) and second_value
-  unit.fullname = GetFullName(name, realm)
-
   self:UpdateFrame(widget_frame, unit)
 end
 
@@ -317,10 +234,9 @@ function Widget:UpdateFrame(widget_frame, unit)
   end
 
   -- I will probably expand this to a table with 'friend = true','guild = true', and 'bnet = true' and have 3 textuers show.
-  -- unit.name can be a secret value for hostile players in Arenas/Battlegrounds (Patch 12.1) - never
-  -- use it as a table key in that case (unit.fullname is already nil then too, see GetFullName).
-  local friend_texture = Settings.ShowFriendIcon and not IsSecretValueTP(unit.name)
-    and (ListFriends[unit.name] or ListBnetFriends[unit.fullname] or ListGuildMembers[unit.fullname])
+  local guid = GetListKey(unit.guid)
+  local friend_texture = Settings.ShowFriendIcon and guid
+    and (ListFriends[guid] or ListBnetFriends[guid] or ListGuildMembers[guid])
 
   -- Need to hide the frame here as it may have been shown before
   if not (friend_texture or faction_texture) then
@@ -373,15 +289,18 @@ end
 
 function Widget:PrintDebug()
   Addon.Logging.Debug("BNet Friends:")
-  local _, BnetOnline = _G.BNGetNumFriends()
-  for i = 1, BnetOnline do
-    local account_info = GetFriendAccountInfo(i)
-    local game_account_info = account_info.gameAccountInfo
-
-    Addon.Logging.Debug("  " .. tostring(i) .. ":", game_account_info.clientProgram, game_account_info.characterName, game_account_info.realmName, game_account_info.isOnline)
-    if game_account_info.isOnline and game_account_info.clientProgram == BNET_CLIENT_WOW and game_account_info.characterName then
-      Addon.Logging.Debug("    => Add:", GetFullName(game_account_info.characterName, game_account_info.realmName))
-      ListBnetFriends[GetFullName(game_account_info.characterName, game_account_info.realmName)] = "Social.BattleNetFriend"
+  local _, no_friends_online = _G.BNGetNumFriends()
+  for i = 1, no_friends_online do
+    local account_info = C_BattleNet_GetFriendAccountInfo(i)
+    local game_account_info = account_info and account_info.gameAccountInfo
+    if game_account_info then
+      Addon.Logging.Debug("  " .. tostring(i) .. ":", game_account_info.clientProgram, game_account_info.characterName, game_account_info.realmName, game_account_info.isOnline, game_account_info.playerGuid)
     end
+  end
+
+  for list_name, list in pairs({ ["BNet Friends"] = ListBnetFriends, Friends = ListFriends, ["Guild Members"] = ListGuildMembers }) do
+    local size = 0
+    for _ in pairs(list) do size = size + 1 end
+    Addon.Logging.Debug("List " .. list_name .. ":", size)
   end
 end
