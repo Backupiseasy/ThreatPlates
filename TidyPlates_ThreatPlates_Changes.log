@@ -16,6 +16,7 @@
 * Fixed a bug where the absorb bar briefly showed at full width when a new nameplate was displayed.
 * Enabled target of target names again on WoW Midnight and WoW Forever [Comment #8697].
 * Updated integrated libraries (Ace3 r1414-alpha, LibDualSpec-1.0 v1.35.0, LibSharedMedia-3.0 v12.1.0).
+* Fixed several bugs where the Social widget did not recognize friends and guild members (e.g., friends from the in-game friend list, Battle.net friends coming online, or characters with surnames on WoW Forever).
 
 WoW Forever Beta:
 * Fixed automatic role detection not recognizing Druids in Bear Form as tanks on WoW Forever.
