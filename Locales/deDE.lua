@@ -847,6 +847,8 @@ L["Striped Texture Color"] = "Farbe der gestreiften Textur"
 L["Stripes"] = "Streifen"
 L["Style"] = "Stil"
 L["Supports multiple entries, separated by commas."] = "Unterstützt mehrere Einträge, die durch Kommata getrennt sind."
+--[[Machine translation --]]
+L["Surname"] = "Nachname"
 L["Swap Area By Reaction"] = "Bereich vertauschen nach Reaktion"
 L["Switch aura areas for buffs and debuffs for friendly units."] = "Aurenbereiche für Buffs und Debuffs für freundliche Einheiten vertauschen"
 L["Symbol"] = "Symbol"
