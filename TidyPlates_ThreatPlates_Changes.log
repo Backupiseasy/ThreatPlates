@@ -22,6 +22,7 @@ WoW Forever Beta:
 * Fixed a Lua error on WoW Forever for Paladins (and some other classes), caused by changes to the Blizzard API used for role detection [Comment #8694].
 * Changed automatic role detection on WoW Forever to also use Blizzard's own tank detection, so that tank auras gained in combat (e.g. Righteous Fury) are recognized.
 * Fixed Lua errors on login and nameplates not working on WoW Forever, caused by a change in the latest beta patch to how the client identifies itself [GH-753].
+* Fixed a bug where the Quest widget on WoW Forever also highlighted units for quest objectives of other group members.
 
 ------------------------------------------------------
 13.2.0 (2026-09-13)
