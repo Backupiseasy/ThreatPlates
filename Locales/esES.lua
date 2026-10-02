@@ -224,7 +224,9 @@ L["Color when Expiring"] = "Color when Expiring"
 L["Coloring"] = "Coloración"
 L["Colors"] = "Colores"
 --[[Translation missing --]]
-L["Colors the countdown text once the remaining duration drops below the threshold below."] = "Colors the countdown text once the remaining duration drops below the threshold below."
+L["Colors the countdown text once the remaining duration drops below the threshold below - the Midnight replacement for Flash When Expiring, which has no equivalent on Midnight."] = "Colors the countdown text once the remaining duration drops below the threshold below - the Midnight replacement for Flash When Expiring, which has no equivalent on Midnight."
+--[[Translation missing --]]
+L["Colors the countdown text once the remaining duration drops below the threshold below."] = ""
 L["Column Limit"] = "Límite de columna"
 L["Combat"] = "Combate"
 L["Combo Points"] = "Puntos de combo"
@@ -960,6 +962,8 @@ L["Striped Texture Color"] = "Color de textura a rayas"
 L["Stripes"] = "Rayas"
 L["Style"] = "Estilo"
 L["Supports multiple entries, separated by commas."] = "Admite múltiples entradas, separadas por comas."
+--[[Translation missing --]]
+L["Surname"] = ""
 --[[Translation missing --]]
 L["Swap Area By Reaction"] = "Swap Area By Reaction"
 L["Switch aura areas for buffs and debuffs for friendly units."] = "Cambia las áreas de aura para los beneficios y perjuicios de las unidades amistosas."
