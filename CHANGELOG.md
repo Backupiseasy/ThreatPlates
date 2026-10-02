@@ -16,6 +16,7 @@
 * Enabled target of target names again on WoW Midnight and WoW Forever [Comment #8697].
 * Updated integrated libraries (Ace3 r1414-alpha, LibDualSpec-1.0 v1.35.0, LibSharedMedia-3.0 v12.1.0).
 * Fixed several bugs where the Social widget did not recognize friends and guild members (e.g., friends from the in-game friend list, Battle.net friends coming online, or characters with surnames on WoW Forever).
+* Fixed Cyrillic, Chinese, and Korean characters in nameplate texts being shown as squares, caused by the selected font not containing these characters [GH-751].
 
 ## WoW Forever Beta
 

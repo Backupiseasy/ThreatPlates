@@ -10,7 +10,7 @@ local ipairs = ipairs
 -- WoW APIs
 
 -- ThreatPlates APIs
-local FontUpdateText = Addon.Font.UpdateText
+local FontSetInitialFont, FontUpdateText = Addon.Font.SetInitialFont, Addon.Font.UpdateText
 local BackdropTemplate = Addon.BackdropTemplate
 local MODE_FOR_STYLE, AnchorFrameTo = Addon.MODE_FOR_STYLE, Addon.AnchorFrameTo
 
@@ -27,7 +27,7 @@ local function AddTextArea(self, text_area)
   self.TextAreas[#self.TextAreas + 1] = text_area
 
   self[text_area] = self:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-  self[text_area]:SetFont("Fonts\\FRIZQT__.TTF", 11)
+  FontSetInitialFont(self[text_area])
 end
 
 local function UpdateSettings(self, db)
