@@ -15,7 +15,7 @@ local string_sub  = Addon.LibUTF8.utf8sub
 
 -- ThreatPlates APIs
 local SubscribeEvent = Addon.EventService.Subscribe
-local FontUpdateText = Addon.Font.UpdateText
+local FontSetInitialFont, FontUpdateText = Addon.Font.SetInitialFont, Addon.Font.UpdateText
 local TransliterateCyrillicLetters = Addon.Localization.TransliterateCyrillicLetters
 local SplitByWhitespace = Addon.SplitByWhitespace
 local TextCache = Addon.Cache.Texts
@@ -43,7 +43,7 @@ local Element = Addon.Elements.NewElement("Name")
 function Element.PlateCreated(tp_frame)
   local name_text = tp_frame.visual.textframe:CreateFontString(nil, "ARTWORK", "GameFontNormal")
   -- At least font must be set as otherwise it results in a Lua error when UnitAdded with SetText is called
-  name_text:SetFont("Fonts\\FRIZQT__.TTF", 11)
+  FontSetInitialFont(name_text)
   name_text:SetWordWrap(false) -- otherwise text is wrapped when plate is scaled down
 
   tp_frame.visual.NameText = name_text

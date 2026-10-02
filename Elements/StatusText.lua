@@ -20,7 +20,7 @@ local CreateColor = CreateColor
 -- ThreatPlates APIs
 local SubscribeEvent, UnsubscribeEvent = Addon.EventService.Subscribe, Addon.EventService.Unsubscribe
 local RGB = Addon.RGB
-local FontUpdateText = Addon.Font.UpdateText
+local FontSetInitialFont, FontUpdateText = Addon.Font.SetInitialFont, Addon.Font.UpdateText
 local TransliterateCyrillicLetters = Addon.Localization.TransliterateCyrillicLetters
 local L = Addon.L
 local GetColorByHealthDeficit = Addon.Color.GetColorByHealthDeficit
@@ -377,7 +377,7 @@ local Element = Addon.Elements.NewElement("StatusText")
 function Element.PlateCreated(tp_frame)
   local status_text = tp_frame.visual.textframe:CreateFontString(nil, "ARTWORK", "GameFontNormal")
   -- At least font must be set as otherwise it results in a Lua error when UnitAdded with SetText is called
-  status_text:SetFont("Fonts\\FRIZQT__.TTF", 11)
+  FontSetInitialFont(status_text)
   status_text:SetWordWrap(false) -- otherwise text is wrapped when plate is scaled down
 
   tp_frame.visual.StatusText = status_text

@@ -22,7 +22,7 @@ local strbyte, strsub = strbyte, strsub
 local L = Addon.L
 local BackdropTemplate = Addon.BackdropTemplate
 local RGB, RGB_P = Addon.RGB, Addon.RGB_P
-local FontUpdateText = Addon.Font.UpdateText
+local FontSetInitialFont, FontUpdateText = Addon.Font.SetInitialFont, Addon.Font.UpdateText
 local MODE_FOR_STYLE, AnchorFrameTo = Addon.MODE_FOR_STYLE, Addon.AnchorFrameTo
 local CUSTOM_GLOW_FUNCTIONS, CUSTOM_GLOW_WRAPPER_FUNCTIONS = Addon.CUSTOM_GLOW_FUNCTIONS, Addon.CUSTOM_GLOW_WRAPPER_FUNCTIONS
 
@@ -146,7 +146,7 @@ local function CreateIconFrame(widget_frame, index)
   icon_frame.Time = time
 
   icon_frame.Label = icon_frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-  icon_frame.Label:SetFont("Fonts\\FRIZQT__.TTF", 11)
+  FontSetInitialFont(icon_frame.Label)
 
   icon_frame.Highlight = _G.CreateFrame("Frame", nil, icon_frame)
   icon_frame.Highlight:SetAllPoints(icon_frame)
