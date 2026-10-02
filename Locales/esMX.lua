@@ -208,7 +208,7 @@ L["Color when Expiring"] = "Color when Expiring"
 L["Coloring"] = "Coloración"
 L["Colors"] = "Colores"
 --[[Translation missing --]]
-L["Colors the countdown text once the remaining duration drops below the threshold below - the Midnight replacement for Flash When Expiring, which has no equivalent on Midnight."] = "Colors the countdown text once the remaining duration drops below the threshold below - the Midnight replacement for Flash When Expiring, which has no equivalent on Midnight."
+L["Colors the countdown text once the remaining duration drops below the threshold below."] = "Colors the countdown text once the remaining duration drops below the threshold below."
 L["Column Limit"] = "Límite de Columna"
 L["Combat"] = "Combate"
 L["Combo Points"] = "Puntos de Combate"

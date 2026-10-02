@@ -102,6 +102,11 @@ It:
   matches (never guess those — a wrong Blizzard-official name silently breaks the match).
 - Translates the remainder, reusing this project's established German terminology, and marks each
   new entry with `--[[Machine translation --]]`.
+- Checks the terminology of all `--[[Machine translation --]]`-marked entries against the
+  human-reviewed ones and reports deviations (e.g. "apply" rendered as "wirken" where the rest of
+  the file uses "anwenden"). A correction to an entry that is already on CF has to be uploaded with
+  `push-translation` before the next `pull`, otherwise CF's old text overwrites it - see
+  "Correcting a machine translation that is already on CurseForge" in the prompt file.
 - Shows the full diff and an English → German overview table, and waits for explicit confirmation
   before committing/pushing anything.
 - Commits and pushes onto the *same* PR branch (adds a commit to the existing sync PR, never opens

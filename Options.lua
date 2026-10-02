@@ -4673,7 +4673,7 @@ local function CreateAurasWidgetOptions()
                 type = "toggle",
                 order = 30,
                 name = L["Color when Expiring"],
-                desc = L["Colors the countdown text once the remaining duration drops below the threshold below - the Midnight replacement for Flash When Expiring, which has no equivalent on Midnight."],
+                desc = L["Colors the countdown text once the remaining duration drops below the threshold below."],
                 arg = { "AuraWidget", "ShowExpiringColor" },
                 hidden = not Addon.HAS_MIDNIGHT_API,
               },
