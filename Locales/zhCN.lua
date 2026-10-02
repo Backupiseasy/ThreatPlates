@@ -90,6 +90,8 @@ L["Allow"] = "允许"
 L["Allow action target selection while player has a locked target."] = "允许在玩家已经锁定目标的情况下选择其他目标进行操作。"
 L["Always"] = "总是"
 L["Always do action targeting"] = "始终进行目标操作选择"
+--[[Translation missing --]]
+L["Always enabled if full absorbs are shown."] = "Always enabled if full absorbs are shown."
 L["Always Show Nameplates"] = "总是显示血条"
 --[[Translation missing --]]
 L["Always show nameplates for soft enemy target."] = "Always show nameplates for soft enemy target."
@@ -97,8 +99,6 @@ L["Always show nameplates for soft enemy target."] = "Always show nameplates for
 L["Always show nameplates for soft friend target."] = "Always show nameplates for soft friend target."
 --[[Translation missing --]]
 L["Always show nameplates for soft interact target."] = "Always show nameplates for soft interact target."
---[[Translation missing --]]
-L["Always shows the full amount of absorbs on a unit. In overabsorb situations, the absorbs bar is shifted to the left."] = "Always shows the full amount of absorbs on a unit. In overabsorb situations, the absorbs bar is shifted to the left."
 L["Amount"] = "数值"
 L["Anchor"] = "对齐"
 L["Anchor Point"] = "锚点"
@@ -553,6 +553,10 @@ L["In combat, use coloring, transparency, and scaling based on threat level as c
 L["In delta mode, show the name of the player who is second in the enemy unit's threat table."] = "在增量模式下，显示在敌方单位仇恨表中排名第二的玩家名字。"
 L["In Groups"] = "在队伍中时"
 L["In Instances"] = "副本内"
+--[[Translation missing --]]
+L["In over-absorb situations (shield larger than missing health), moves the over-absorb spark to indicate the actual shield magnitude, instead of pinning it to the bar's right edge."] = "In over-absorb situations (shield larger than missing health), moves the over-absorb spark to indicate the actual shield magnitude, instead of pinning it to the bar's right edge."
+--[[Translation missing --]]
+L["In over-absorb situations (shield larger than missing health), shows a reverse-fill shield overlay across the health bar and positions the spark at its left boundary to indicate the actual shield magnitude."] = "In over-absorb situations (shield larger than missing health), shows a reverse-fill shield overlay across the health bar and positions the spark at its left boundary to indicate the actual shield magnitude."
 L["Initials"] = "缩写"
 L["Insert a new custom nameplate slot after the currently selected slot."] = "在当前选取的自定义血条下方插入新的。"
 L["Inset"] = "内缩"
@@ -1119,7 +1123,7 @@ L["Use a custom color for the name of your current focus target (in healthbar vi
 L["Use a custom color for the name of your current target (in healthbar view and in headline view)."] = "当前目标的名字使用自定义颜色（在血条检视和名字检视时）。"
 L["Use a heuristic to detect if a mob is in combat with you, but only in instances (like dungeons or raids)."] = "使用启发式仇恨检测来判断与你战斗的怪物，但是只有在副本中时 (例如 5 人地城或团队)。"
 --[[Translation missing --]]
-L["Use a striped texture for the absorbs overlay. Always enabled if full absorbs are shown."] = "Use a striped texture for the absorbs overlay. Always enabled if full absorbs are shown."
+L["Use a striped texture for the absorbs overlay."] = "Use a striped texture for the absorbs overlay."
 L["Use Blizzard default nameplates for friendly nameplates and disable ThreatPlates for these units."] = "友方玩家使用游戏内置的血条，不要使用ThreatPlates。"
 L["Use Blizzard default nameplates for neutral and enemy nameplates and disable ThreatPlates for these units."] = "中立和敌对单位使用游戏默认的姓名版，而不使用TPTP。"
 --[[Translation missing --]]
