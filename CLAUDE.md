@@ -449,6 +449,17 @@ Point-in-time notes from past analysis passes — re-verify before relying on th
 - A local read-only mirror of that source is available as an additional working directory
   (`wow-ui-source-live`).
 
+## Localization
+
+- User-facing text is wrapped as `L["..."]` (`local L = Addon.L`); `Locales/enUS.lua` is generated from a code
+  scan, not hand-edited. Full pipeline (CurseForge sync, deDE machine translation):
+  `Source/Wiki/LocalizationUpdateProcess.md` and `Source/mt_translate_prompt.md`.
+- **Debug commands are not localized**: everything executed by `ChatCommandDebug` in `Commands.lua`
+  (`/tptp debug ...`, `/tptp version`, including helpers called only from there such as `PrintVersion`,
+  `PrintNameplateCVarCheck`, `PrintMidnightAPICheck`) prints plain English string literals — no `L[...]`. This
+  output is for developers and bug reports, is only reachable with `Addon.DEBUG`, and would otherwise create
+  phrases on CurseForge that translators have no reason to translate. Do not add `L[...]` to new debug output.
+
 ## Changelog Workflow
 
 Two files must stay in sync for every user-facing change:

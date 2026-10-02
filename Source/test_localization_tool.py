@@ -382,7 +382,7 @@ def test_preserve_existing_translations_keeps_translation_for_reported_placehold
     existing = ['L["Foo"] = "Foo-de"']
     incoming = ['--[[Translation missing --]]', 'L["Foo"] = "Foo"']
 
-    merged, preserved, carried_over = preserve_existing_translations(existing, incoming)
+    merged, preserved, carried_over, kept_markers = preserve_existing_translations(existing, incoming)
 
     assert merged == ['L["Foo"] = "Foo-de"']
     assert preserved == 1
@@ -396,7 +396,7 @@ def test_preserve_existing_translations_keeps_mt_marker_across_placeholder_subst
     existing = [MT_MARKER_COMMENT, 'L["Foo"] = "Foo-de"']
     incoming = ['--[[Translation missing --]]', 'L["Foo"] = "Foo"']
 
-    merged, preserved, carried_over = preserve_existing_translations(existing, incoming)
+    merged, preserved, carried_over, kept_markers = preserve_existing_translations(existing, incoming)
 
     assert merged == [MT_MARKER_COMMENT, 'L["Foo"] = "Foo-de"']
     assert preserved == 1
@@ -409,7 +409,7 @@ def test_preserve_existing_translations_carries_over_key_curseforge_has_never_he
     existing = [MT_MARKER_COMMENT, 'L["Bar"] = "Bar-de"']
     incoming = ['L["Foo"] = "Foo-de"']
 
-    merged, preserved, carried_over = preserve_existing_translations(existing, incoming)
+    merged, preserved, carried_over, kept_markers = preserve_existing_translations(existing, incoming)
 
     assert merged == ['L["Foo"] = "Foo-de"', MT_MARKER_COMMENT, 'L["Bar"] = "Bar-de"']
     assert preserved == 0
@@ -423,8 +423,47 @@ def test_preserve_existing_translations_does_not_duplicate_a_key_curseforge_alre
     existing = ['L["Foo"] = "Alte Uebersetzung"']
     incoming = ['L["Foo"] = "Neue Community-Uebersetzung"']
 
-    merged, preserved, carried_over = preserve_existing_translations(existing, incoming)
+    merged, preserved, carried_over, kept_markers = preserve_existing_translations(existing, incoming)
 
     assert merged == ['L["Foo"] = "Neue Community-Uebersetzung"']
     assert preserved == 0
     assert carried_over == 0
+
+
+def test_preserve_existing_translations_keeps_mt_marker_when_curseforge_echoes_our_translation():
+    # push-translation uploaded our machine translation, so CurseForge now exports it
+    # as a regular entry (its export never carries the marker). The value is still
+    # exactly ours - nobody reviewed or changed it - so it must stay pending review.
+    existing = [MT_MARKER_COMMENT, 'L["Foo"] = "Foo-de"']
+    incoming = ['L["Foo"] = "Foo-de"']
+
+    merged, preserved, carried_over, kept_markers = preserve_existing_translations(existing, incoming)
+
+    assert merged == [MT_MARKER_COMMENT, 'L["Foo"] = "Foo-de"']
+    assert preserved == 0
+    assert carried_over == 0
+    assert kept_markers == 1
+
+
+def test_preserve_existing_translations_drops_mt_marker_when_curseforge_translation_differs():
+    # A community translator changed the text on CurseForge - that is the review, so
+    # the entry becomes human-reviewed and the marker goes away.
+    existing = [MT_MARKER_COMMENT, 'L["Foo"] = "Foo-de"']
+    incoming = ['L["Foo"] = "Foo-de, verbessert"']
+
+    merged, preserved, carried_over, kept_markers = preserve_existing_translations(existing, incoming)
+
+    assert merged == ['L["Foo"] = "Foo-de, verbessert"']
+    assert kept_markers == 0
+
+
+def test_preserve_existing_translations_does_not_add_mt_marker_to_unmarked_entry():
+    # Removing the marker locally is how a maintainer signs off an unchanged machine
+    # translation - a later pull echoing the same value must not bring it back.
+    existing = ['L["Foo"] = "Foo-de"']
+    incoming = ['L["Foo"] = "Foo-de"']
+
+    merged, preserved, carried_over, kept_markers = preserve_existing_translations(existing, incoming)
+
+    assert merged == ['L["Foo"] = "Foo-de"']
+    assert kept_markers == 0
