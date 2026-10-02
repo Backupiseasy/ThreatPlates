@@ -9,19 +9,22 @@ assumes.
 
 | Signal | Value |
 | --- | --- |
-| `WOW_PROJECT_ID` | `1` (`== WOW_PROJECT_MAINLINE`) |
+| `WOW_PROJECT_ID` | `18` (`== WOW_PROJECT_CAMELOT`) since build `70170`; `1` (`== WOW_PROJECT_MAINLINE`) in earlier beta builds (e.g. `69913`) |
+| `WOW_PROJECT_CAMELOT` | `18` - Blizzard's internal name for Forever; defined in `Blizzard_ProjectConstants/Camelot/ProjectConstants.lua` (wow-ui-source branch `forever`) |
+| `WOW_PROJECT_MAINLINE` | `1` |
 | `WOW_PROJECT_CLASSIC` | `2` |
 | `GetClassicExpansionLevel()` | `0` (`LE_EXPANSION_CLASSIC`, Vanilla) |
 | `GetServerExpansionLevel()` | `0` |
-| `GetBuildInfo()` | version `1.60.1`, build `69913`, Interface `16001` |
+| `GetBuildInfo()` | version `1.60.1`, build `70170` (earlier: `69913`), Interface `16001` |
 | `.build.info` product | `wow_classic_beta` |
 | `issecretvalue` | present - unit data (health, etc.) comes back as secret values |
 
 ## Root cause
 
-The client reports `WOW_PROJECT_ID == WOW_PROJECT_MAINLINE` - a combination Blizzard's other Classic
-Era/TBC/Wrath/Cata/Mists clients don't produce (those all report `WOW_PROJECT_ID == WOW_PROJECT_CLASSIC`) -
-while `GetClassicExpansionLevel()` correctly reports Vanilla-level content. This is expected for this
+The client reports its own project id (`WOW_PROJECT_ID == WOW_PROJECT_CAMELOT`, 18) - neither
+`WOW_PROJECT_MAINLINE` nor `WOW_PROJECT_CLASSIC` - while `GetClassicExpansionLevel()` reports Vanilla-level
+content. Its first beta builds reported `WOW_PROJECT_ID == WOW_PROJECT_MAINLINE` instead; that changed with
+build `70170` and broke the original detection (GH-753, see fix #35). This is expected for this
 client/product specifically: "WoW Forever" is Blizzard's own new version running parallel to Retail and WoW
 Classic, not a spoofed or third-party report. The
 client runs Blizzard's modern (Midnight-era) engine end to end: full secret-value restrictions, and (per
@@ -37,8 +40,8 @@ restrictions"), which is what caused every crash below.
 | Flag | Meaning | Formula |
 | --- | --- | --- |
 | `Addon.IS_CLASSIC` | Vanilla-level content | `WOW_PROJECT_ID == WOW_PROJECT_CLASSIC` **or** `GetClassicExpansionLevel() == LE_EXPANSION_CLASSIC` |
-| `Addon.IS_MAINLINE` | Retail ruleset (not the Forever product) | `WOW_PROJECT_ID == WOW_PROJECT_MAINLINE` **and not** `Addon.IS_FOREVER` |
-| `Addon.IS_FOREVER` | The WOW_PROJECT_ID-vs-GetClassicExpansionLevel mismatch itself, i.e. the "WoW Forever" product specifically | `WOW_PROJECT_ID == WOW_PROJECT_MAINLINE` **and** `GetClassicExpansionLevel()` resolves to a real level |
+| `Addon.IS_MAINLINE` | Retail ruleset (not the Forever product) | `WOW_PROJECT_ID == WOW_PROJECT_MAINLINE` |
+| `Addon.IS_FOREVER` | The "WoW Forever" product specifically | `WOW_PROJECT_CAMELOT ~= nil` **and** `WOW_PROJECT_ID == WOW_PROJECT_CAMELOT` |
 | `Addon.HAS_MIDNIGHT_API` | Engine has Midnight's API/secret-value surface, regardless of ruleset | `Addon.ExpansionIsAtLeastMidnight` **or** `Addon.IS_FOREVER` |
 
 **Rule of thumb:** use `Addon.HAS_MIDNIGHT_API` for "which code path handles this API/secret-value
@@ -101,6 +104,7 @@ lacks. This confirms fix #11 (castbar) is fully safe, not just crash-free.
 | 32 | `Options.lua` (`MaxDistance` slider) | The maximum of the nameplate max distance slider was 20 on Forever: `Addon.GetExpansionLevel()` returns `LE_EXPANSION_CLASSIC` there, but the client's default `nameplateMaxDistance` is 45 (above every Classic limit) and it does not clamp the CVar (setting `1000` reads back `1000`), so the real limit can't be measured | Slider maximum uses the `MAINLINE` entry (100) when `Addon.HAS_MIDNIGHT_API`. **Confirmed in-game:** 100 can be set and survives `/reload`. |
 | 33 | `Nameplate.lua` (`NamePlateDriverFrame_AcquireUnitFrame`) | Nameplates briefly showed the wrong name/reaction (a neutral unit as an enemy) and then disappeared, reproduced twice on the same plate (`nameplate2`) with a neutral and a hostile NPC (not Forever-specific; the pooling exists on Mists Classic and the modern engine, Forever just triggered it). The `/tptp debug` dump was fully correct (`Active`, `TPFrame:IsShown()`, name, reaction, style), so it was not a data problem. Root cause: Blizzard pools its nameplate `UnitFrame`s and hands a plate a different, already flagged instance on `NAME_PLATE_UNIT_ADDED`; `plate.TPFrame:SetPoint("CENTER", plate.UnitFrame, ...)` only ran the first time a `unit_frame` was seen (regression from commit `8f3ccf29`, 2026-01-27), so TPFrame stayed anchored to a previously used instance - drawn over another plate, then without any anchor once that instance was released. In-game check: `TPFrame:GetPoint()`'s relative frame was not `plate.UnitFrame`, `IsVisible()` true, alpha 1, `GetLeft()` returned nothing | `SetPoint` moved out of the once-per-frame block, runs on every acquire (the hooks stay once-per-frame). **Confirmed in-game:** no recurrence. Does **not** make `ScheduleNameplateRevalidation` or the Blizzard-plate `OnShow`/`Show` hooks obsolete (different mechanisms: stale unit data, resp. Blizzard's own plate staying visible); some older "wrong name in BG/Arena" reports may have been this bug, which cannot be told apart retroactively. |
 | 34 | `Options.lua` (`CreateUnitGroupsVisibility`, Visibility tab) | The "Pets"/"Guardians"/"Totems" options under "Show Friendly Units" could be enabled while "Players" was disabled, but friendly pets and totems get no nameplates then (`nameplateShowFriendlyPlayers` off hides them; Blizzard's own dialog makes "Minions" a child of "Friendly Players" via `SetParentInitializer`, but has no checkboxes for pets/guardians/totems) | "Pets", "Guardians" and "Totems" (Friendly) are `disabled` while `nameplateShowFriendlyPlayers` is off (`IsFriendlyPlayerVisibilityDisabled`, `FRIENDLY_UNIT_TYPES_DEPENDING_ON_PLAYERS`). "All Minions" stays enabled on purpose (it is a convenience setter for all minion types). **Confirmed in-game** for pets and totems; guardians are assumed to behave the same way (not individually verified). |
+| 35 | `Init.lua` (`Addon.IS_FOREVER`) | Lua errors on login (`Init.lua` `_G.GetSpellInfo` nil, unknown event `UNIT_HEALTH_FREQUENT`, `Nameplate.lua` `_G.GetSpellInfo` nil) and no nameplates after beta build `70170` (GH-753): `WOW_PROJECT_ID` changed from `1` to `18`, so `IS_FOREVER` was `false` and the client was treated as Classic Era on the old engine | `IS_FOREVER` now checks `WOW_PROJECT_ID == WOW_PROJECT_CAMELOT`; the old "Mainline project id + Classic expansion level" check was removed, so Forever builds before `70170` are no longer detected. Not yet verified in-game. |
 
 The "suboptimal but safe" state from the previous revision of this document (fixes #1/#2 using inline
 guards instead of reusing Midnight's curve-based implementation) has been resolved - see the updated

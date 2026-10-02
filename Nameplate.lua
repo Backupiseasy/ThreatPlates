@@ -2300,7 +2300,7 @@ else
   -- GetShapeshiftFormID: not sure when removed
   local GetShapeshiftFormID = GetShapeshiftFormID
   -- Global BEAR_FORM (=5) is only defined by Blizzard_FrameXMLBase's Classic/Constants.lua, which is not
-  -- loaded on "WoW Forever" (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE, see Addon.IS_FOREVER) - there, BEAR_FORM
+  -- loaded on "WoW Forever" (see Addon.IS_FOREVER) - there, BEAR_FORM
   -- is nil and form_index == BEAR_FORM never matches, so Bear Form druids are never detected as tank.
   -- DRUID_BEAR_FORM (=5) is defined on every flavor (Classic, Mists, Cata, Mainline Constants.lua), so
   -- prefer it and fall back to BEAR_FORM/the literal for older clients that may only define the latter.
