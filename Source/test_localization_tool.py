@@ -467,3 +467,25 @@ def test_preserve_existing_translations_does_not_add_mt_marker_to_unmarked_entry
 
     assert merged == ['L["Foo"] = "Foo-de"']
     assert kept_markers == 0
+
+
+def test_preserve_existing_translations_replaces_empty_placeholder_with_key():
+    # CurseForge knows the phrase only from a translation import and has no enUS
+    # source text for it yet, so it exports "" - which would blank the text in-game.
+    existing = []
+    incoming = ['--[[Translation missing --]]', 'L["Foo"] = ""']
+
+    merged, preserved, carried_over, kept_markers = preserve_existing_translations(existing, incoming)
+
+    assert merged == ['--[[Translation missing --]]', 'L["Foo"] = "Foo"']
+    assert preserved == 0
+
+
+def test_preserve_existing_translations_keeps_translation_for_empty_placeholder():
+    existing = [MT_MARKER_COMMENT, 'L["Foo"] = "Foo-de"']
+    incoming = ['--[[Translation missing --]]', 'L["Foo"] = ""']
+
+    merged, preserved, carried_over, kept_markers = preserve_existing_translations(existing, incoming)
+
+    assert merged == [MT_MARKER_COMMENT, 'L["Foo"] = "Foo-de"']
+    assert preserved == 1

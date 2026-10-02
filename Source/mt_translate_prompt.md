@@ -180,3 +180,9 @@ python Source/localization_tool.py push-translation --locale deDE --token <CF_AP
 This uploads exactly the marker-tagged deDE entries with their local text. Afterwards
 CurseForge and the repository agree again, so `pull` keeps both the text and the marker.
 An entry whose key is new (CurseForge has never seen it) is not affected.
+
+Side effect to expect: `push-translation` also creates the phrase on CurseForge for any
+marker-tagged key it has never seen. Until the publish workflow uploads the enUS source
+text from `main`, CurseForge exports such a phrase for the other locales as a
+`--[[Translation missing --]]` placeholder with an empty value. `pull` replaces that
+empty value with the key, so no blank text reaches a locale file.

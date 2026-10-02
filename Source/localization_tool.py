@@ -522,7 +522,7 @@ def _index_translated_entries(lines):
     index = {}
     for i, line in enumerate(lines):
         m = _LOCALE_ENTRY_RE.match(line.strip())
-        if not (m and m.group(1) != m.group(2)):
+        if not (m and m.group(1) != m.group(2) and m.group(2) != '""'):
             continue
         j = i - 1
         while j >= 0 and lines[j].strip() == "":
@@ -566,6 +566,14 @@ def preserve_existing_translations(existing_lines, incoming_lines):
         line = incoming_lines[i]
         if line.strip() == "--[[Translation missing --]]" and i + 1 < n:
             m = _LOCALE_ENTRY_RE.match(incoming_lines[i + 1].strip())
+            # CurseForge exports an empty value instead of the key for a phrase
+            # it only knows from a translation import (push-translation) and has
+            # no enUS source text for yet - upload is merge-gated, so that state
+            # lasts until the phrase reaches main. Shipping "" would blank the
+            # text in-game, so treat it as the same placeholder.
+            if m and m.group(2) == '""':
+                incoming_lines[i + 1] = f"L[{m.group(1)}] = {m.group(1)}"
+                m = _LOCALE_ENTRY_RE.match(incoming_lines[i + 1])
             if m and m.group(1) == m.group(2):
                 existing = existing_by_key.get(m.group(1))
                 if existing is not None:
