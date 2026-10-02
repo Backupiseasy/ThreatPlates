@@ -659,11 +659,13 @@ local function OnStartCasting(tp_frame, unitid, cast_guid, event_spell_id, castb
   if Addon.HAS_MIDNIGHT_API then
     local target_unit_name = UnitSpellTargetName(unitid)
     if target_unit_name then
+      -- Transliterate the plain name, not the name with the color escape sequence wrapped around it
+      target_unit_name = TransliterateCyrillicLetters(target_unit_name)
       local class_name = UnitSpellTargetClass(unitid)
       if class_name then
         target_unit_name = WrapTextInColor(target_unit_name, GetClassColor(class_name))
       end
-      castbar.CastTarget:SetText(TransliterateCyrillicLetters(target_unit_name))
+      castbar.CastTarget:SetText(target_unit_name)
     else
       castbar.CastTarget:SetText(nil)
     end
@@ -2116,13 +2118,14 @@ function Addon:UNIT_SPELLCAST_INTERRUPTED(unitid, cast_guid, spell_id, interrupt
   if castbar_id ~= castbar.CastbarID or not castbar:IsShown() or not interrupted_by then return end
 
   local _, class, _, race, _, name, realm = GetPlayerInfoByGUID(interrupted_by)
-  name = name or UnitNameFromGUID(interrupted_by)
+  -- Transliterate the plain name, not the name with the color escape sequence wrapped around it
+  name = TransliterateCyrillicLetters(name or UnitNameFromGUID(interrupted_by))
   local class_color = class and GetClassColor(class) or nil
   if class_color then
     name = class_color:WrapTextInColorCode(name)
   end
 
-  tp_frame.visual.SpellText:SetText(INTERRUPTED .. " [" .. TransliterateCyrillicLetters(name) .. "]")
+  tp_frame.visual.SpellText:SetText(INTERRUPTED .. " [" .. name .. "]")
 
   castbar:SetMinMaxValues(0, 1)
   castbar:SetValue(1)

@@ -269,10 +269,11 @@ local function ShowTargetUnit(healthbar, unitid)
     if not SettingsTargetUnit.ShowNotMyself or not UnitIsUnitTP("player", target_of_target_unit) then
       local target_of_target_name = GetUnitNameWithSurname(target_of_target_unit, SettingsShowSurname)
       if target_of_target_name then
-        -- TransliterateCyrillicLetters no-ops on HAS_MIDNIGHT_API clients (never touches the string),
-        -- and plain ".." concatenation of a secret value just taints the result rather than erroring
-        -- (confirmed via Nameplate.lua's UNIT_SPELLCAST_INTERRUPTED handler) - safe to pass straight
-        -- into the SetText sink below without a secret-value guard here.
+        -- On HAS_MIDNIGHT_API clients, TransliterateCyrillicLetters only hands the string to
+        -- C_Intl.Transliterate (if available and enabled) and never inspects it in Lua; its result must be
+        -- treated as secret like the name itself. Plain ".." concatenation of a secret value just taints
+        -- the result rather than erroring (confirmed via Nameplate.lua's UNIT_SPELLCAST_INTERRUPTED
+        -- handler) - safe to pass straight into the SetText sink below without a secret-value guard here.
         target_of_target_name = TransliterateCyrillicLetters(target_of_target_name)
         if SettingsTargetUnit.ShowBrackets then
           target_of_target_name = "|cffffffff[|r " .. target_of_target_name .. " |cffffffff]|r"

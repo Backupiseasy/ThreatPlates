@@ -6283,7 +6283,8 @@ local function CreateLocalizationSettings()
     order = 135,
     type = "group",
     inline = false,
-    hidden = Addon.HAS_MIDNIGHT_API,
+    -- On clients with Midnight's API surface, only transliteration is available (if the client has the API for it)
+    hidden = not Addon.Localization.TransliterationIsSupported,
     args = {
       Texts = {
         name = L["Texts"],
@@ -6305,6 +6306,7 @@ local function CreateLocalizationSettings()
         order = 20,
         type = "group",
         inline = true,
+        hidden = Addon.HAS_MIDNIGHT_API,
         args = {
           MetricUnitSymbols = {
             name = L["Metric Unit Symbols"],

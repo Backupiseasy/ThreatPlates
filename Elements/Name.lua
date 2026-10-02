@@ -54,7 +54,8 @@ function Element.PlateUnitAdded(tp_frame)
   local unit = tp_frame.unit
   
   if Addon.HAS_MIDNIGHT_API then
-    tp_frame.visual.NameText:SetText(unit.name)
+    -- unit.name can be a secret value, so the (possibly secret as well) result goes straight into SetText
+    tp_frame.visual.NameText:SetText(TransliterateCyrillicLetters(unit.name))
   else
     local unit_name = TransliterateCyrillicLetters(unit.name)
     

@@ -12,6 +12,7 @@ local format = format
 
 -- WoW APIs
 local AbbreviateNumbers = AbbreviateNumbers
+local C_Intl = _G.C_Intl
 
 -- ThreatPlates APIs
 local TextCache = Addon.Cache.Texts
@@ -145,9 +146,39 @@ local TRANSLITERATE_CHARS = {
   ["я"] = "ya", -- ["  "] = " ", -- Does not work, see comment below
 }
 
+-- ID of the transliterator used with C_Intl.Transliterate on clients with Midnight's API surface. Blizzard's API
+-- documentation does not list the registered IDs and there is no call of this function in wow-ui-source, but
+-- ICU's transliterator IDs work (confirmed in-game on WoW Forever 1.60.1 with non-secret text).
+-- Do not put an unverified ID here. The parts of this compound ID:
+--   * [:Cyrillic:]         - global filter: only runs of cyrillic letters are processed, so that names in other
+--                            scripts (including latin names with diacritics) stay as they are
+--   * Russian-Latin/BGN    - readable transliteration (Zh, Shch, Yu, Ts, Kh, ...), other than "Cyrillic-Latin",
+--                            which uses diacritics instead (Ž, Ŝ, Û, ...)
+--   * Ukrainian-Latin/BGN  - the same for letters not used in russian
+--   * Cyrillic-Latin       - fallback for any cyrillic letter still left
+--   * Latin-ASCII          - replaces characters that fonts might not contain, like the ones created for the
+--                            soft and hard sign (U+02B9, U+02BA), with ASCII characters
+local TRANSLITERATOR_ID = "[:Cyrillic:]; Russian-Latin/BGN; Ukrainian-Latin/BGN; Cyrillic-Latin; Latin-ASCII"
+
+-- Check for the API itself, not for a client version, so that this also works on Retail once C_Intl is
+-- available there (it is part of 12.1.5, but not of 12.1.0).
+local TransliterateText = TRANSLITERATOR_ID and C_Intl and C_Intl.Transliterate
+
+LocalizationModule.TransliterationIsSupported = not Addon.HAS_MIDNIGHT_API or TransliterateText ~= nil
+
 function LocalizationModule.TransliterateCyrillicLetters(text)
-  if Addon.HAS_MIDNIGHT_API then return text end
-  
+  if Addon.HAS_MIDNIGHT_API then
+    -- text can be a secret value here, so it must not be inspected (length, pattern matching) or used as
+    -- key for TextCache. C_Intl.Transliterate accepts secret text from tainted code (SecretArguments =
+    -- "AllowedWhenTainted"). The result must be treated as secret as well: only pass it to C-side sinks
+    -- like SetText or concatenate it. If the API returns nothing (MayReturnNothing), the text is used as is.
+    if TransliterateText and text and Addon.db.profile.Localization.TransliterateCyrillicLetters then
+      return TransliterateText(text, TRANSLITERATOR_ID) or text
+    end
+
+    return text
+  end
+
   if Addon.db.profile.Localization.TransliterateCyrillicLetters and text and text:len() > 1 then
     local cache_entry = TextCache[text]
     
