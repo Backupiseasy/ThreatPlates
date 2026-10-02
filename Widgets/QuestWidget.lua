@@ -31,6 +31,8 @@ local C_TooltipInfo_GetUnit = C_TooltipInfo and C_TooltipInfo.GetUnit -- Added i
 
 -- ThreatPlates APIs
 local PlayerName = Addon.PlayerName
+-- Quest tooltip lines only contain UnitName's first return; on WoW Forever, Addon.PlayerName also has the surname appended
+local PlayerFirstName = UnitName("player")
 local RGB_P = Addon.RGB_P
 local UnitDetailedThreatSituationWrapper = Addon.UnitDetailedThreatSituationWrapper
 local IsSecretValueTP = Addon.IsSecretValue
@@ -238,7 +240,8 @@ local function IsQuestUnit(unit)
     -- heuristic below is only for the legacy TooltipScanner emulation on genuinely older clients.
     if Addon.HAS_MIDNIGHT_API then
       if line.type == Enum.TooltipDataLineType.QuestPlayer then
-        quest_progress_player = true
+        -- Skip the objectives of other group members
+        quest_progress_player = (text == PlayerFirstName) or not GroupMembers[text]
       elseif line.type == Enum.TooltipDataLineType.QuestTitle then
         quest_progress_player = true
         quest_title = text
@@ -859,8 +862,8 @@ function Widget:PrintDebug(command)
       Addon.Logging.Debug("=== Line:", text)
       if Addon.HAS_MIDNIGHT_API then
         if line.type == Enum.TooltipDataLineType.QuestPlayer then
-          quest_progress_player = true
-          Addon.Logging.Debug("  Player:", text)
+          quest_progress_player = (text == PlayerFirstName) or not GroupMembers[text]
+          Addon.Logging.Debug("  Player:", text, quest_progress_player and "(own)" or "(group member, skipped)")
         elseif line.type == Enum.TooltipDataLineType.QuestTitle then
           quest_progress_player = true
           quest_title = text

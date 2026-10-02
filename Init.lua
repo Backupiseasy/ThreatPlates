@@ -18,11 +18,11 @@ local UnitDetailedThreatSituation = UnitDetailedThreatSituation
 ---------------------------------------------------------------------------------------------------
 -- WoW Version Check
 ---------------------------------------------------------------------------------------------------
--- WOW_PROJECT_ID alone is not reliable: some official Blizzard clients (e.g. "WoW Forever", a client/
--- product running parallel to Retail and WoW Classic) report WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
--- while running Classic-rules content on a modern,
--- secret-value-capable engine (no legacy globals like _G.GetSpellInfo). Addon.IS_CLASSIC/IS_TBC_CLASSIC/
--- etc. below therefore cross-check GetClassicExpansionLevel() instead of trusting WOW_PROJECT_ID alone.
+-- WOW_PROJECT_ID alone does not identify the ruleset: "WoW Forever" (an official Blizzard client/product
+-- running parallel to Retail and WoW Classic) has its own project id while running Classic-rules content
+-- on a modern, secret-value-capable engine (no legacy globals like _G.GetSpellInfo). Addon.IS_CLASSIC/
+-- IS_TBC_CLASSIC/etc. below therefore cross-check GetClassicExpansionLevel() instead of trusting
+-- WOW_PROJECT_ID alone.
 -- Addon.IS_FOREVER flags this specific combination (Classic ruleset + modern engine) so code that
 -- depends on the client's API surface rather than its ruleset (e.g. which events/globals exist) can
 -- pick the right branch instead of assuming ruleset and engine always match.
@@ -36,12 +36,11 @@ Addon.IS_CATA_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel()
 Addon.IS_MISTS_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_MISTS_OF_PANDARIA) or false
 --Addon.IS_MIDNIGHT = GetServerExpansionLevel() == LE_EXPANSION_MIDNIGHT
 Addon.IS_MIDNIGHT = (select(4, GetBuildInfo()) >= 120000)
--- GetClassicExpansionLevel also exists on Retail/Midnight, where it returns the current (modern) expansion
--- level, so its existence alone does not identify Forever: it must report a Classic-era level (<= Mists).
-Addon.IS_FOREVER = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
-  and (GetClassicExpansionLevel and type(GetClassicExpansionLevel()) == "number" and GetClassicExpansionLevel() <= LE_EXPANSION_MISTS_OF_PANDARIA)
-  or false
-Addon.IS_MAINLINE = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE) and not Addon.IS_FOREVER
+-- Forever reported WOW_PROJECT_MAINLINE (1) in its first beta builds and got its own project id with
+-- beta patch 1.60.1 (build 70170): WOW_PROJECT_CAMELOT (18, Blizzard's internal name for Forever). The
+-- constant is only defined on Forever itself, hence the existence check.
+Addon.IS_FOREVER = (WOW_PROJECT_CAMELOT ~= nil and WOW_PROJECT_ID == WOW_PROJECT_CAMELOT)
+Addon.IS_MAINLINE = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
 
 -- For Mainline, this always returns true. 
 Addon.ExpansionIsAtLeast = function(expansion_id)

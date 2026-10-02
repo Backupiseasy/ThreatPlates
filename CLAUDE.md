@@ -83,8 +83,10 @@ Flags computed once at load and used everywhere to branch behavior:
 - `Addon.IS_MAINLINE`, `Addon.IS_CLASSIC`, `Addon.IS_MISTS_CLASSIC`, `Addon.IS_MIDNIGHT`, plus
   `IS_TBC_CLASSIC` / `IS_WRATH_CLASSIC` / `IS_CATA_CLASSIC` / `IS_CLASSIC_SOM` / `IS_CLASSIC_SOD`.
 - `Addon.IS_CLASSIC` and its siblings cross-check `GetClassicExpansionLevel()` in addition to
-  `WOW_PROJECT_ID`/`WOW_PROJECT_CLASSIC`, because `WOW_PROJECT_ID` alone is unreliable on some official
-  Blizzard clients — see "'WoW Forever' — an Official Client With Midnight's API Surface" below.
+  `WOW_PROJECT_ID`/`WOW_PROJECT_CLASSIC`, because `WOW_PROJECT_ID` alone does not identify the ruleset on
+  some official Blizzard clients — see "'WoW Forever' — an Official Client With Midnight's API Surface" below.
+- `Addon.IS_FOREVER` — `WOW_PROJECT_ID == WOW_PROJECT_CAMELOT` (18; the constant only exists on Forever,
+  hence the `~= nil` check in `Init.lua`). `Addon.IS_MAINLINE` is plain `WOW_PROJECT_ID == WOW_PROJECT_MAINLINE`.
 - `Addon.ExpansionIsAtLeastX` (X = TBC, Wrath, Cata, Mists, WoD, Legion, BfA, Shadowlands, DF, TWW, Midnight) —
   always `true` on Mainline, otherwise compares `GetClassicExpansionLevel()`.
 - `Addon.HAS_MIDNIGHT_API` (`Addon.ExpansionIsAtLeastMidnight or Addon.IS_FOREVER`) — true whenever the running
@@ -362,9 +364,14 @@ end
 ### "WoW Forever" — an official client with Midnight's API surface
 
 "WoW Forever" is an official Blizzard client/product running parallel to Retail and WoW Classic, not a
-third-party or spoofed client. It reports `WOW_PROJECT_ID == WOW_PROJECT_MAINLINE` while running
+third-party or spoofed client. It reports its own project id, `WOW_PROJECT_ID == WOW_PROJECT_CAMELOT` (18,
+"Camelot" being Blizzard's internal name for it; defined in `Blizzard_ProjectConstants/Camelot/` of
+wow-ui-source's `forever` branch), while running
 Classic-rules content on Blizzard's modern (Midnight-era) engine — full secret-value restrictions and API
-parity with Midnight, confirmed via `/tptp debug MidnightAPI`. `Addon.IS_FOREVER` detects this; `Addon.HAS_MIDNIGHT_API`
+parity with Midnight, confirmed via `/tptp debug MidnightAPI`. Its first beta builds reported
+`WOW_PROJECT_MAINLINE` (1) instead; the change with build 70170 broke the original detection [GH-753], so
+never detect Forever via "Mainline project id + Classic expansion level" again.
+`Addon.IS_FOREVER` detects this; `Addon.HAS_MIDNIGHT_API`
 (see "Expansion / version compatibility" above) is the flag to use for any branch that exists to pick the
 secret-value-safe/modern API code path — keep `Addon.ExpansionIsAtLeastMidnight` itself for genuine
 ruleset/feature decisions. Full findings, confirmed fixes, and the open-items list:

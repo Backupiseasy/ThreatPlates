@@ -132,11 +132,12 @@ local function PrintVersion()
 	-- API availability directly instead of inferring it from Addon.IS_MIDNIGHT.
 	Addon.Logging.Print("  " .. L["Secret values supported:"], tostring(_G.issecretvalue ~= nil))
 
-	-- Raw signals behind the flags above, for clients where they disagree (e.g. a custom/private-server
-	-- client reporting WOW_PROJECT_ID == WOW_PROJECT_MAINLINE despite running Classic-rules content) -
+	-- Raw signals behind the flags above, for clients where they disagree (e.g. "WoW Forever", which
+	-- reports its own project id, WOW_PROJECT_CAMELOT, while running Classic-rules content) -
 	-- GetClassicExpansionLevel is only defined on some clients, hence the existence check first.
 	Addon.Logging.Print("  -- " .. L["Raw signals"] .. " --")
 	Addon.Logging.Print("    WOW_PROJECT_ID:", tostring(WOW_PROJECT_ID))
+	Addon.Logging.Print("    WOW_PROJECT_CAMELOT:", tostring(WOW_PROJECT_CAMELOT))
 	Addon.Logging.Print("    WOW_PROJECT_MAINLINE:", tostring(WOW_PROJECT_MAINLINE))
 	Addon.Logging.Print("    WOW_PROJECT_CLASSIC:", tostring(WOW_PROJECT_CLASSIC))
 	Addon.Logging.Print("    GetClassicExpansionLevel exists:", tostring(GetClassicExpansionLevel ~= nil))
