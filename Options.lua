@@ -664,6 +664,24 @@ local function CVarIsUnavailable(info)
   return C_CVar.GetCVarInfo(info.arg) == nil 
 end
 
+-- The CVar nameplateStackingTypes is a bitfield indexed by Enum.NamePlateStackType (Enemy, Friendly) that replaces
+-- nameplateMotion. Currently, this only works on WoW Forever and (presumably) on Retail from patch 12.1.5 on. On
+-- other WoW versions, it will only work once their API is updated. The options are only hidden on clients that
+-- don't know this CVar at all.
+-- WoW stores bitfield CVars as an encoded string, not as a number, so its flags can only be accessed with
+-- C_CVar.GetCVarBitfield/SetCVarBitfield. info.arg is the name of the flag in that enum.
+local function NameplateStackingIsUnavailable(info)
+  return GetCVar("nameplateStackingTypes") == nil or Enum.NamePlateStackType == nil
+end
+
+local function GetValueNameplateStacking(info)
+  return C_CVar.GetCVarBitfield("nameplateStackingTypes", Enum.NamePlateStackType[info.arg]) or false
+end
+
+local function SetValueNameplateStacking(info, value)
+  CVars:OverwriteBitfield("nameplateStackingTypes", Enum.NamePlateStackType[info.arg], value)
+end
+
 ---------------------------------------------------------------------------------------------------
 -- Getter Functions
 ---------------------------------------------------------------------------------------------------
@@ -6622,6 +6640,28 @@ local function CreateBlizzardSettings()
             type = "group",
             inline = true,
             args = {
+              StackEnemy = {
+                name = L["Stack Enemy Nameplates"],
+                order = 10,
+                type = "toggle",
+                width = "double",
+                desc = L["Stack nameplates of enemy units, so that they don't overlap."],
+                set = SetValueNameplateStacking,
+                get = GetValueNameplateStacking,
+                arg = "Enemy",
+                hidden = NameplateStackingIsUnavailable,
+              },
+              StackFriendly = {
+                name = L["Stack Friendly Nameplates"],
+                order = 20,
+                type = "toggle",
+                width = "double",
+                desc = L["Stack nameplates of friendly units, so that they don't overlap."],
+                set = SetValueNameplateStacking,
+                get = GetValueNameplateStacking,
+                arg = "Friendly",
+                hidden = NameplateStackingIsUnavailable,
+              },
               OverlapH = {
                 name = L["Horizontal Overlap"],
                 order = 30,

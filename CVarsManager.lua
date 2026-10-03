@@ -195,6 +195,18 @@ function CVars:OverwriteBool(cvar, value)
   self:Overwrite(cvar, (value and 1) or 0)
 end
 
+-- Bitfield CVars are stored by WoW as an encoded string, not as a number, so a single flag (index) has to be
+-- changed with C_CVar.SetCVarBitfield
+function CVars:OverwriteBitfield(cvar, index, value)
+  if COMBAT_PROTECTED[cvar] then
+    Addon.ExecuteAfterCombatEnds(function()
+      C_CVar.SetCVarBitfield(cvar, index, value)
+    end, L["Unable to change the following console variable while in combat: "] .. cvar .. ". ")
+  else
+    C_CVar.SetCVarBitfield(cvar, index, value)
+  end
+end
+
 function CVars:RestoreFromProfile(cvar)
   local db = Addon.db.profile.CVarsBackup
 
