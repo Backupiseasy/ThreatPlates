@@ -29,3 +29,4 @@
 * Fixed a bug where the Quest widget on WoW Forever also highlighted units for quest objectives of other group members.
 * Fixed a Lua error on WoW Forever when a Battle.net friend is online, caused by Blizzard API changes [Comment #8723].
 * Fixed the transparency for occluded units not working on WoW Forever, caused by a change in the latest beta patch to how the client identifies itself.
+* Fixed the Quest widget on WoW Forever not recognizing quests whose data was not yet available when they were accepted.
