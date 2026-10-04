@@ -360,7 +360,9 @@ function CVars.InvalidCVarsForOcclusionDetection()
   local invalid = nameplateMinAlpha ~= 1 or nameplateMaxAlpha ~= 1 or nameplateOccludedAlphaMult > 0.9 or nameplateSelectedAlpha ~= 1
 
   -- Occlusion detection does not work when a target is selected in Classic, see https://github.com/Stanzilla/WoWUIBugs/issues/134
-  if not Addon.IS_MAINLINE then
+  -- "WoW Forever" runs on the modern client engine, where this CVar is -1 by default (like on Mainline), so it must
+  -- not be checked there.
+  if not Addon.IS_MAINLINE and not Addon.IS_FOREVER then
     local nameplateNotSelectedAlpha = CVars:GetAsNumber("nameplateNotSelectedAlpha")
     return invalid or nameplateNotSelectedAlpha ~= 1
   end
@@ -375,7 +377,7 @@ function CVars.FixCVarsForOcclusionDetection()
   SetCVar("nameplateSelectedAlpha", 1.0)     -- Default: 1.0
 
   -- Occlusion detection does not work when a target is selected in Classic, see https://github.com/Stanzilla/WoWUIBugs/issues/134
-  if not Addon.IS_MAINLINE then
+  if not Addon.IS_MAINLINE and not Addon.IS_FOREVER then
     SetCVar("nameplateNotSelectedAlpha", 1)  -- Default: 0.5
   end
 
