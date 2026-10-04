@@ -130,11 +130,10 @@ local SettingsShowSurname
 -- Wrapper functions for WoW Classic
 ---------------------------------------------------------------------------------------------------
 
--- Old-classic-engine-only quirks (frame naming, UnitChannelInfo/_G.GetSpellInfo). A client that reports
--- Addon.IS_CLASSIC (Vanilla-level content) but has Midnight's API surface (see Addon.HAS_MIDNIGHT_API in
--- Init.lua) runs on a modern engine without these quirks, so it falls through to the modern branch at
--- the bottom of this chain instead.
-if Addon.IS_CLASSIC and not Addon.HAS_MIDNIGHT_API then
+-- Old-classic-engine-only quirks (frame naming, UnitChannelInfo/_G.GetSpellInfo). "WoW Forever" (not part
+-- of Addon.IS_CLASSIC, see Init.lua) runs on a modern engine without these quirks, so it falls through to
+-- the modern branch at the bottom of this chain instead.
+if Addon.IS_CLASSIC then
   GetNameForNameplate = function(plate) return plate:GetName():gsub("NamePlate", "Plate") end
 
     -- Fix for UnitChannelInfo not working on WoW Classic

@@ -42,16 +42,6 @@ local _G =_G
 -- GLOBALS: CreateFrame, UIParent, InCombatLockdown, AnchorUtil, PixelUtil
 
 ---------------------------------------------------------------------------------------------------
--- Crowd Control Auras
----------------------------------------------------------------------------------------------------
-
-local CROWD_CONTROL_SPELLS_BY_EXPANSION = {
-  MAINLINE = {},
-}
-
-Widget.CROWD_CONTROL_SPELLS = CROWD_CONTROL_SPELLS_BY_EXPANSION[Addon.GetExpansionLevel()]
-
----------------------------------------------------------------------------------------------------
 -- Cached configuration settings
 ---------------------------------------------------------------------------------------------------
 local HideOmniCC, ShowDuration

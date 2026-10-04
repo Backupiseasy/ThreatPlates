@@ -95,10 +95,10 @@ Flags computed once at load and used everywhere to branch behavior:
   and "WoW Forever". Without a season `GetActiveSeason()` returns `nil`, not `Enum.SeasonID.NoSeason` (0), so
   never compare against `NoSeason`.
 - **Dual specialization / LibDualSpec** (`Addon.lua`, `OnInitialize`): the database is only handed to
-  LibDualSpec if `not Addon.IS_CLASSIC or Addon.IS_FOREVER or Addon.IS_CLASSIC_SOD or
-  Addon.IS_CLASSIC_ANNIVERSARY`. Classic Era and Hardcore (which follows the Era ruleset) have no dual
-  specialization; Season of Discovery and the Anniversary realms (including Hardcore Anniversary) do, and so
-  does "WoW Forever" - hence the explicit `IS_FOREVER`, as `IS_CLASSIC` is true there too. Without that
+  LibDualSpec if `not Addon.IS_CLASSIC or Addon.IS_CLASSIC_SOD or Addon.IS_CLASSIC_ANNIVERSARY`. Classic Era
+  and Hardcore (which follows the Era ruleset) have no dual specialization; Season of Discovery and the
+  Anniversary realms (including Hardcore Anniversary) do, and so does "WoW Forever" (not part of
+  `IS_CLASSIC`, so it is covered by `not Addon.IS_CLASSIC`). Without that
   condition Threat Plates printed "LibDualSpec-1.0 cannot be loaded" on every login on plain Classic Era, as
   LibDualSpec up to v1.29 refused to load there (v1.34 instead threw "GetNumSpecGroups: API unsupported";
   v1.35 loads cleanly but has nothing to switch). Verified in-game (2026-10) on Classic Era, Hardcore, Season
@@ -106,13 +106,27 @@ Flags computed once at load and used everywhere to branch behavior:
   has dual specialization cannot be queried - only a character that unlocked it proves it
   (`GetNumTalentGroups()` on Classic Era and TBC, `GetNumSpecGroups()` on Mists/Retail/Forever; each errors
   with "API unsupported" or is missing on the other clients).
-- `Addon.IS_CLASSIC` and its siblings cross-check `GetClassicExpansionLevel()` in addition to
-  `WOW_PROJECT_ID`/`WOW_PROJECT_CLASSIC`, because `WOW_PROJECT_ID` alone does not identify the ruleset on
-  some official Blizzard clients — see "'WoW Forever' — an Official Client With Midnight's API Surface" below.
+- `Addon.IS_CLASSIC` is the Classic Era client only (`WOW_PROJECT_ID == WOW_PROJECT_CLASSIC`). **"WoW Forever"
+  is not part of it**, although it branched off Classic Era and also reports `LE_EXPANSION_CLASSIC` as its
+  expansion level: it is a product of its own, with a different engine/API and content that drifts away from
+  Classic Era over time. Code that should apply to both must check `Addon.IS_CLASSIC or Addon.IS_FOREVER`
+  explicitly (e.g. totem ranks in `Constants.lua`, the Arena widget).
+  `IS_TBC_CLASSIC` and the other Classic siblings compare `GetClassicExpansionLevel()`.
 - `Addon.IS_FOREVER` — `WOW_PROJECT_ID == WOW_PROJECT_CAMELOT` (18; the constant only exists on Forever,
   hence the `~= nil` check in `Init.lua`). `Addon.IS_MAINLINE` is plain `WOW_PROJECT_ID == WOW_PROJECT_MAINLINE`.
+  The client flags `IS_MAINLINE`, `IS_FOREVER`, `IS_CLASSIC`, `IS_TBC_CLASSIC`, ... are mutually exclusive.
 - `Addon.ExpansionIsAtLeastX` (X = TBC, Wrath, Cata, Mists, WoD, Legion, BfA, Shadowlands, DF, TWW, Midnight) —
-  always `true` on Mainline, otherwise compares `GetClassicExpansionLevel()`.
+  always `true` on Mainline, otherwise compares `GetClassicExpansionLevel()`. There is no
+  `ExpansionIsAtLeastClassic`. On "WoW Forever" all of them are `false` (expansion level 0), which says nothing
+  about its features: Forever is not part of the Classic expansion sequence, so a feature it has beyond
+  Vanilla (focus, dual specialization, quest tooltips, `UNIT_HEALTH`, ...) is enabled with an explicit
+  `or Addon.IS_FOREVER` (or a `WOW_FEATURE_*` flag), never derived from the expansion level.
+- `Addon.GetExpansionLevel()` is the key for tables with expansion-specific data: `"MAINLINE"`, `"FOREVER"`, or
+  the `LE_EXPANSION_*` value. Forever has a key of its own because its data is no longer identical to Classic
+  Era's - e.g. totems (`TOTEM_DATA_BY_EXPANSION` in `Constants.lua`): no Fire Nova Totem and Tranquil Air Totem,
+  but Decoy Totem (compared against Wowhead's Forever database, 2026-10). A table indexed with it needs a
+  `FOREVER` entry, or the lookup has to map Forever to another key (as `Widgets/QuestWidget.lua` does with
+  `"MAINLINE"`).
 - `Addon.HAS_MIDNIGHT_API` (`Addon.ExpansionIsAtLeastMidnight or Addon.IS_FOREVER`) — true whenever the running
   client's *engine* has Midnight's API/secret-value surface, regardless of its *ruleset*. Use this (not
   `Addon.ExpansionIsAtLeastMidnight`) for any branch that exists purely to pick the secret-value-safe/modern

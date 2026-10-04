@@ -3,7 +3,7 @@
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
 
-if Addon.IS_CLASSIC then return end
+if Addon.IS_CLASSIC or Addon.IS_FOREVER then return end
 
 local Widget = Addon.Widgets:NewWidget("Arena")
 

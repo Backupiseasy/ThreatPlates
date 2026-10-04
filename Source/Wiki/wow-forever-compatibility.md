@@ -39,7 +39,7 @@ restrictions"), which is what caused every crash below.
 
 | Flag | Meaning | Formula |
 | --- | --- | --- |
-| `Addon.IS_CLASSIC` | Vanilla-level content | `WOW_PROJECT_ID == WOW_PROJECT_CLASSIC` **or** `GetClassicExpansionLevel() == LE_EXPANSION_CLASSIC` |
+| `Addon.IS_CLASSIC` | The Classic Era client - **not** Forever (changed 2026-10; before that it also matched `GetClassicExpansionLevel() == LE_EXPANSION_CLASSIC` and was therefore true on Forever, so the `and not Addon.HAS_MIDNIGHT_API` / `or Addon.IS_FOREVER` exclusions in fixes #4 and #6 below are gone again) | `WOW_PROJECT_ID == WOW_PROJECT_CLASSIC` |
 | `Addon.IS_MAINLINE` | Retail ruleset (not the Forever product) | `WOW_PROJECT_ID == WOW_PROJECT_MAINLINE` |
 | `Addon.IS_FOREVER` | The "WoW Forever" product specifically | `WOW_PROJECT_CAMELOT ~= nil` **and** `WOW_PROJECT_ID == WOW_PROJECT_CAMELOT` |
 | `Addon.HAS_MIDNIGHT_API` | Engine has Midnight's API/secret-value surface, regardless of ruleset | `Addon.ExpansionIsAtLeastMidnight` **or** `Addon.IS_FOREVER` |

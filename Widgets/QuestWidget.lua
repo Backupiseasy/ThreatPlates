@@ -144,9 +144,8 @@ local OBJECTIVE_GOAL_ALIGNMENT = {
   ruRU = "RIGHT",
 }
 
--- Set correct regexps for current expansion and locale. Official Blizzard clients with Midnight's API
--- surface (e.g. "WoW Forever") render quest tooltips like the modern engine despite a Classic-level
--- Addon.GetExpansionLevel(), so they use the "MAINLINE" entry instead of looking up their own level.
+-- Set correct regexps for current expansion and locale. "WoW Forever" renders quest tooltips like the
+-- modern engine, so it uses the "MAINLINE" entry instead of an entry of its own.
 local RegexpForExpansion = OBJECTIVE_PARSER_REGEXP_BY_EXPANSION[Addon.IS_FOREVER and "MAINLINE" or Addon.GetExpansionLevel()]
 
 local QUEST_OBJECTIVE_PARSER_LEFT = function(text)
