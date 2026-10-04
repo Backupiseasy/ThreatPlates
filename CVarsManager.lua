@@ -236,9 +236,9 @@ end
 -- 
 ---------------------------------------------------------------------------------------------------
 
--- From addon: AdvancedInterfaceOptions
-function CVars:CVarExists(cvar)
-	return not not select(2, pcall(function() return addon.GetCVarInfo(cvar) end))
+-- GetCVar returns nil for CVars that the running client does not know
+function CVars:IsAvailable(cvar)
+  return GetCVar(cvar) ~= nil
 end
 
 local RESET_TO_DEFAULT = {
@@ -254,9 +254,9 @@ local RESET_TO_DEFAULT = {
 }
 
 function CVars:ResetToDefaults()
-  for k, v in pairs(RESET_TO_DEFAULT) do
-    if self:CVarExists(k) then
-      self:SetToDefault(v)
+  for _, cvar in ipairs(RESET_TO_DEFAULT) do
+    if self:IsAvailable(cvar) then
+      self:SetToDefault(cvar)
     end
   end
 end
