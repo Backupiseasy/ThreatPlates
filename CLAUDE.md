@@ -27,7 +27,8 @@ There is no compile step — the addon is loaded directly by the WoW client from
 - No automated test runner; `Test/` contains standalone scripts/mocks (performance tests, API mocks), not wired
   into CI.
 - Prefer minimal, defensive fixes over broad refactors; keep API and SavedVariables compatibility. If UI text
-  changes, update `Locales/*.lua` too (see Changelog Workflow below for the separate changelog-string workflow).
+  changes, do **not** edit `Locales/*.lua` by hand - the localization pipeline does that (see "Localization"
+  below; see Changelog Workflow for the separate changelog-string workflow).
 
 ### WoW API MCP server (`wow-api`)
 
@@ -477,6 +478,17 @@ Point-in-time notes from past analysis passes — re-verify before relying on th
 - User-facing text is wrapped as `L["..."]` (`local L = Addon.L`); `Locales/enUS.lua` is generated from a code
   scan, not hand-edited. Full pipeline (CurseForge sync, deDE machine translation):
   `Source/Wiki/LocalizationUpdateProcess.md` and `Source/mt_translate_prompt.md`.
+- **Never edit `Locales/*.lua` by hand** when adding, changing or removing an `L["..."]` text - neither
+  `enUS.lua` nor the translations. `.github/workflows/sync_localization_translations.yml` (push to `main` or
+  `release/*`, every Monday, or run manually) regenerates `enUS.lua` from the code scan
+  (`Source/localization_tool.py generate-enus --prune`, which also drops keys no longer used), pulls the
+  translations from CurseForge and opens a pull request with the result. A commit that touches the locale
+  files only adds noise and merge conflicts with that pull request.
+- Until that pull request is merged, new keys are missing from `enUS.lua`. That is harmless in-game - `enUS`
+  is registered as the silent default locale (`NewLocale(..., "enUS", true, true)`), so a missing key simply
+  shows the key text - but `check_localization.yml` (runs on every push with Lua changes, on any branch)
+  fails with "key(s) used in code but missing from Locales/enUS.lua" on `develop` in the meantime. That is
+  expected and not something to fix by hand.
 - **Debug commands are not localized**: everything executed by `ChatCommandDebug` in `Commands.lua`
   (`/tptp debug ...`, `/tptp version`, including helpers called only from there such as `PrintVersion`,
   `PrintNameplateCVarCheck`, `PrintMidnightAPICheck`) prints plain English string literals — no `L[...]`. This
