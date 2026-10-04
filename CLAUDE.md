@@ -93,8 +93,6 @@ Flags computed once at load and used everywhere to branch behavior:
   client's *engine* has Midnight's API/secret-value surface, regardless of its *ruleset*. Use this (not
   `Addon.ExpansionIsAtLeastMidnight`) for any branch that exists purely to pick the secret-value-safe/modern
   API code path; keep `Addon.ExpansionIsAtLeastMidnight` itself for genuine ruleset/feature decisions.
-- `Addon.WOW_USES_CLASSIC_NAMEPLATES` — true for Classic-style nameplates (Vanilla..WoD, excluding Mists
-  Classic, which uses the modern nameplate API).
 - `Compatibility.lua`'s `WOW_EVENTS` table + `Addon:RegisterEvent` / `RegisterUnitEvent` / `UnregisterEvent` gate
   WoW event registration per expansion — events that don't exist for the running client are silently skipped.
   `/tptp debug Compatibility` empirically tries registering every event in the table and reports mismatches.
@@ -164,15 +162,21 @@ Central pub/sub for both real WoW events and internal TP events (`INTERNAL_EVENT
   subsequent event handler still finds valid unit data. (This is also why `NAME_PLATE_UNIT_REMOVED` clears the
   `PlatesByUnit["mouseover"]` stale reference before `wipe(unit)` — it used to nil-crash
   `Transparency.lua:GetTransparency` when `UPDATE_MOUSEOVER_UNIT` fired mid-recycling.)
-- **Personal nameplate filtering**: five locations filter the player's own nameplate; all must stay consistent:
+- **Personal nameplate filtering**: four locations filter the player's own nameplate; all must stay consistent:
   1. `GetThreatPlateForUnit`: `unitid == "player"` (literal string guard).
   2. `GetThreatPlateForUnit`: `Addon.UnitIsUnit("player", unitid)` — **not** redundant with #1:
      `UnitIsUnit("player", unitid)` can return a secret value even with `"player"` as the first argument (a
      real crash was observed with `unitid = "targettarget"` in a PvP/Encounter restriction context) — the safe
      wrapper is required here.
   3. `IgnoreUnitForThreatPlates`: gate for `NAME_PLATE_UNIT_ADDED` and `FrameOnShow` — uses `Addon.UnitIsUnit`.
-  4. `FrameOnShow`: `Addon.UnitIsUnit(unitid, "player")`.
-  5. `FrameOnUpdate`: `Addon.UnitIsUnit(plate.UnitFrame.unit or "", "player")`.
+  4. `FrameOnUpdate`: `Addon.UnitIsUnit(plate.UnitFrame.unit or "", "player")`.
+
+  All clients share Blizzard's nameplate code, in which the personal resource display is a frame of its own
+  (`PersonalResourceDisplayFrame`, mainline game types only) instead of a nameplate:
+  `C_NamePlate.GetNamePlateForUnit("player")` returned `nil` on Retail, Classic and WoW Forever with the display
+  shown (tested 2026-10). Nameplates have `UnitFrame.AurasFrame` instead of the former `UnitFrame.BuffFrame`, and
+  the CVar `nameplateResourceOnTarget` no longer exists - the former "Personal Nameplate" options were removed
+  for that reason.
 
 ### Visual pipeline: Styles → Modules → Elements → Widgets
 

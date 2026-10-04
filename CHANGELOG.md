@@ -18,6 +18,7 @@
 * Fixed several bugs where the Social widget did not recognize friends and guild members (e.g., friends from the in-game friend list, Battle.net friends coming online, or characters with surnames on WoW Forever).
 * Fixed Cyrillic, Chinese, and Korean characters in nameplate texts being shown as squares, caused by the selected font not containing these characters [GH-751].
 * Enabled the option "Transliterate Cyrillic Letters" again on WoW Forever and on WoW Midnight (from patch 12.1.5 on), using a new Blizzard API for transliteration that also works with restricted names (e.g., in combat or battlegrounds).
+* Removed the options for the personal nameplate (hiding buffs and showing Blizzard's resources on the target nameplate), as Blizzard replaced the personal nameplate with the personal resource display and removed both features.
 
 ## WoW Forever Beta
 
