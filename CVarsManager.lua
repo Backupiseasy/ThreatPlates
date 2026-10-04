@@ -32,7 +32,6 @@ local COMBAT_PROTECTED = {
   nameplateOccludedAlphaMult = true,
   nameplateOverlapH = true,
   nameplateOverlapV = true,
-  nameplateResourceOnTarget = true,
   nameplateSelectedAlpha = true,
   nameplateNotSelectedAlpha = true,
   nameplateTargetBehindMaxDistance = true,
@@ -249,22 +248,15 @@ end
 -- 
 ---------------------------------------------------------------------------------------------------
 
--- GetCVar returns nil for CVars that the running client does not know (e.g., nameplateResourceOnTarget on
--- Classic-rules clients)
+-- GetCVar returns nil for CVars that the running client does not know
 function CVars:IsAvailable(cvar)
   return GetCVar(cvar) ~= nil
-end
-
--- From addon: AdvancedInterfaceOptions
-function CVars:CVarExists(cvar)
-	return not not select(2, pcall(function() return addon.GetCVarInfo(cvar) end))
 end
 
 local RESET_TO_DEFAULT = {
   "nameplateOverlapH", "nameplateOverlapV",
   "nameplateMaxDistance", "nameplateTargetBehindMaxDistance",
   "nameplateShowOnlyNames",
-  "nameplateResourceOnTarget",
   -- "nameplateGlobalScale" -- Reset it to 1, if it get's somehow corrupted
   -- Action Target
   "SoftTargetEnemy", "SoftTargetNameplateEnemy", "SoftTargetIconEnemy",
@@ -274,9 +266,9 @@ local RESET_TO_DEFAULT = {
 }
 
 function CVars:ResetToDefaults()
-  for k, v in pairs(RESET_TO_DEFAULT) do
-    if self:CVarExists(k) then
-      self:SetToDefault(v)
+  for _, cvar in ipairs(RESET_TO_DEFAULT) do
+    if self:IsAvailable(cvar) then
+      self:SetToDefault(cvar)
     end
   end
 end

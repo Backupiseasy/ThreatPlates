@@ -209,7 +209,7 @@ local MIDNIGHT_FRAME_METHOD_CHECKS = {
 local CVAR_UNIT_TYPE_CHECKS = { "FriendlyNPC", "FriendlyMinion", "FriendlyPet", "FriendlyGuardian", "FriendlyTotem" }
 
 -- CVars that only exist on some clients; Threat Plates has to skip them if missing.
-local CVAR_OPTIONAL_CHECKS = { "nameplateResourceOnTarget", "nameplateLargerScale", "nameplateGlobalScale" }
+local CVAR_OPTIONAL_CHECKS = { "nameplateLargerScale", "nameplateGlobalScale" }
 
 -- Reports for the CVars Threat Plates uses to show friendly units whether the client knows them (GetCVar returns nil
 -- for unknown CVars). Called by PrintMidnightAPICheck.

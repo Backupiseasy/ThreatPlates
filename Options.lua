@@ -6778,44 +6778,6 @@ local function CreateBlizzardSettings()
           },
         },
       },
-      PersonalNameplate = {
-        name = L["Personal Nameplate"],
-        order = 50,
-        type = "group",
-        inline = false,
-        args = {
-          HideBuffs = {
-            type = "toggle",
-            order = 10,
-            name = L["Hide Buffs"],
-            set = function(info, val)
-              SetValueGeneral(info, val)
-              local plate = C_NamePlate.GetNamePlateForUnit("player")
-              if plate and plate:IsShown() then
-                plate.UnitFrame.BuffFrame:SetShown(not val)
-              end
-            end,
-            get = GetValue,
-            arg = { "PersonalNameplate", "HideBuffs"},
-          },
-          -- ? Why don't I just change the CVar here, why storing the setting internally? It's set on login, different
-          -- ? to all how all other CVars are handled
-          ShowResources = {
-            type = "toggle",
-            order = 20,
-            name = L["Resources on Targets"],
-            desc = L["Enable this if you want to show Blizzard's special resources above the target nameplate."],
-            width = "double",
-            set = function(info, val)
-              SetValueGeneral(info, val)
-              CVars:OverwriteBool("nameplateResourceOnTarget", val)
-            end,
-            get = GetValue,
-            hidden = function() return not CVars:IsAvailable("nameplateResourceOnTarget") end,
-            arg = { "PersonalNameplate", "ShowResourceOnTarget"},
-          },
-        },
-      },
     },
     --  ["ShowNamePlateLoseAggroFlash"] = "When enabled, if you are a tank role and lose aggro, the nameplate with briefly flash.",
   }

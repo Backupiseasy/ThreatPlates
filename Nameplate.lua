@@ -119,7 +119,7 @@ local PlatesByGUID = Addon.PlatesByGUID
 ---------------------------------------------------------------------------------------------------
 -- Cached configuration settings (for performance reasons)
 ---------------------------------------------------------------------------------------------------
-local SettingsShowEnemyBlizzardNameplates, SettingsShowFriendlyBlizzardNameplates, SettingsHideBuffsOnPersonalNameplate
+local SettingsShowEnemyBlizzardNameplates, SettingsShowFriendlyBlizzardNameplates
 local SettingsShowOnlyNames
 local TargetStyleForEnemy, TargetStyleForFriend, TargetStyleForInteract
 local ShowCastBars
@@ -935,7 +935,7 @@ local function FrameOnShow(UnitFrame)
     return
   end
 
-  -- Don't show ThreatPlates for ignored units (e.g., widget-only nameplates (since Shadowlands))
+  -- Don't show ThreatPlates for ignored units (the player's own nameplate, widget-only nameplates (since Shadowlands))
   if IgnoreUnitForThreatPlates(unitid) then
     if UnitFrame:GetParent().TPFrame then
       UnitFrame:GetParent().TPFrame:Hide()
@@ -943,20 +943,11 @@ local function FrameOnShow(UnitFrame)
     return
   end
 
-
-  if UnitIsUnitTP(unitid, "player") then -- or: ns.PlayerNameplate == GetNamePlateForUnit(UnitFrame.unit)
-    -- Skip the personal resource bar of the player character, don't unhook scripts as nameplates, even the personal
-    -- resource bar, get re-used
-    if SettingsHideBuffsOnPersonalNameplate then
-      UnitFrame.BuffFrame:Hide()
-    end
-  else
-    if SettingsShowOnlyNames then
-      ClassicBlizzardNameplatesSetAlpha(UnitFrame, 0)
-    end
-  
-    SetVisibilityOfBlizzardNameplate(UnitFrame, unitid)
+  if SettingsShowOnlyNames then
+    ClassicBlizzardNameplatesSetAlpha(UnitFrame, 0)
   end
+
+  SetVisibilityOfBlizzardNameplate(UnitFrame, unitid)
 end
 
 -- Frame: self = plate
@@ -1310,7 +1301,6 @@ function Addon:UpdateSettings()
 
   SettingsShowFriendlyBlizzardNameplates = db.ShowFriendlyBlizzardNameplates
   SettingsShowEnemyBlizzardNameplates = db.ShowEnemyBlizzardNameplates
-  SettingsHideBuffsOnPersonalNameplate = db.PersonalNameplate.HideBuffs
   SettingsShowOnlyNames = CVars:GetAsBool("nameplateShowOnlyNames") and Addon.db.profile.BlizzardSettings.Names.Enabled
   SettingsShowSurname = Addon.WOW_FEATURE_REGIONAL_SURNAMES and db.Name.HealthbarMode.ShowSurname
 

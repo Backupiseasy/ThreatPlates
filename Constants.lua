@@ -1695,10 +1695,6 @@ Addon.DEFAULT_SETTINGS = {
         }
       },
     },
-    PersonalNameplate = {
-      HideBuffs = false,
-      ShowResourceOnTarget = false,
-    },
     BlizzardSettings = {
       Names = {
         ShowOnlyNames = false,
