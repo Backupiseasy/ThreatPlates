@@ -174,6 +174,9 @@ function Addon:CheckForIncompatibleAddons()
     if IsAddOnLoaded("Plater") then
       StaticPopup_Show("IncompatibleAddon", "Plater Nameplates")
     end
+    if IsAddOnLoaded("Platynator") then
+      StaticPopup_Show("IncompatibleAddon", "Platynator")
+    end
     if IsAddOnLoaded("SpartanUI") and SUI.IsModuleEnabled and SUI:IsModuleEnabled("Nameplates") then
       StaticPopup_Show("IncompatibleAddon", "SpartanUI Nameplates")
     end

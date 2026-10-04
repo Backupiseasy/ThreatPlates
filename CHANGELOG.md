@@ -21,6 +21,7 @@
 * Added options to enable stacking of enemy and friendly nameplates [Comment #8734].
 * Fixed an error message about dual-spec support not being available on Classic Era realms without dual specialization, and removed the options for spec-based profiles there.
 * Removed the options for the personal nameplate (hiding buffs and showing Blizzard's resources on the target nameplate), as Blizzard replaced the personal nameplate with the personal resource display and removed both features.
+* Added a warning if Platynator is enabled together with Threat Plates.
 
 ## WoW Forever Beta
 
