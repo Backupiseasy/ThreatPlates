@@ -27,9 +27,12 @@ local UnitDetailedThreatSituation = UnitDetailedThreatSituation
 -- depends on the client's API surface rather than its ruleset (e.g. which events/globals exist) can
 -- pick the right branch instead of assuming ruleset and engine always match.
 Addon.IS_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC) or (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_CLASSIC) or false
-Addon.IS_CLASSIC_SOM = (Addon.IS_CLASSIC and C_Seasons and C_Seasons.GetActiveSeason() == 1)
-Addon.IS_CLASSIC_SOD = (Addon.IS_CLASSIC and C_Seasons and C_Seasons.GetActiveSeason() == 2)
+Addon.IS_CLASSIC_SOM = (Addon.IS_CLASSIC and C_Seasons and C_Seasons.GetActiveSeason() == Enum.SeasonID.SeasonOfMastery)
+Addon.IS_CLASSIC_SOD = (Addon.IS_CLASSIC and C_Seasons and C_Seasons.GetActiveSeason() == Enum.SeasonID.SeasonOfDiscovery)
+-- Anniversary realms are called "Fresh" by Blizzard
+Addon.IS_CLASSIC_ANNIVERSARY = (Addon.IS_CLASSIC and C_Seasons and (C_Seasons.GetActiveSeason() == Enum.SeasonID.Fresh or C_Seasons.GetActiveSeason() == Enum.SeasonID.FreshHardcore))
 Addon.IS_TBC_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_BURNING_CRUSADE) or false
+-- Enum.SeasonID has no name for the season of the TBC Anniversary realms
 Addon.IS_TBC_CLASSIC_ANNIVERSARY = (Addon.IS_TBC_CLASSIC and C_Seasons and C_Seasons.GetActiveSeason() == 125)
 Addon.IS_WRATH_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_WRATH_OF_THE_LICH_KING) or false
 Addon.IS_CATA_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_CATACLYSM) or false

@@ -20,6 +20,7 @@
 * Fixed Cyrillic, Chinese, and Korean characters in nameplate texts being shown as squares, caused by the selected font not containing these characters [GH-751].
 * Enabled the option "Transliterate Cyrillic Letters" again on WoW Forever and on WoW Midnight (from patch 12.1.5 on), using a new Blizzard API for transliteration that also works with restricted names (e.g., in combat or battlegrounds).
 * Added options to enable stacking of enemy and friendly nameplates [Comment #8734].
+* Fixed an error message about dual-spec support not being available on Classic Era realms without dual specialization, and removed the options for spec-based profiles there.
 
 WoW Forever Beta:
 * Fixed automatic role detection not recognizing Druids in Bear Form as tanks on WoW Forever.

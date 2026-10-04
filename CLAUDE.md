@@ -81,7 +81,30 @@ line (see the comment above it in the TOC).
 Flags computed once at load and used everywhere to branch behavior:
 
 - `Addon.IS_MAINLINE`, `Addon.IS_CLASSIC`, `Addon.IS_MISTS_CLASSIC`, `Addon.IS_MIDNIGHT`, plus
-  `IS_TBC_CLASSIC` / `IS_WRATH_CLASSIC` / `IS_CATA_CLASSIC` / `IS_CLASSIC_SOM` / `IS_CLASSIC_SOD`.
+  `IS_TBC_CLASSIC` / `IS_WRATH_CLASSIC` / `IS_CATA_CLASSIC` / `IS_CLASSIC_SOM` / `IS_CLASSIC_SOD` /
+  `IS_CLASSIC_ANNIVERSARY`.
+- **Classic Era realm types** share one client and differ only by `C_Seasons.GetActiveSeason()`, whose values
+  are Blizzard's `Enum.SeasonID`: none/`nil` = Classic Era, 1 = Season of Mastery (`IS_CLASSIC_SOM`, ended),
+  2 = Season of Discovery (`IS_CLASSIC_SOD`), 3 = Hardcore, 11 = Fresh/Anniversary and 12 = Fresh Hardcore
+  (both `IS_CLASSIC_ANNIVERSARY`). TBC Anniversary is season 125 on the TBC client
+  (`IS_TBC_CLASSIC_ANNIVERSARY`) - not a Classic Era season, and 125 has no name in `Enum.SeasonID`, so
+  that flag compares against the number while the others use the enum names.
+  `Enum.SeasonID` exists with the same six values on every client (verified in-game 2026-10 on Classic Era,
+  TBC Anniversary, Mists Classic, Retail and Forever), `C_Seasons` only on the Classic clients - not on Retail
+  and "WoW Forever". Without a season `GetActiveSeason()` returns `nil`, not `Enum.SeasonID.NoSeason` (0), so
+  never compare against `NoSeason`.
+- **Dual specialization / LibDualSpec** (`Addon.lua`, `OnInitialize`): the database is only handed to
+  LibDualSpec if `not Addon.IS_CLASSIC or Addon.IS_FOREVER or Addon.IS_CLASSIC_SOD or
+  Addon.IS_CLASSIC_ANNIVERSARY`. Classic Era and Hardcore (which follows the Era ruleset) have no dual
+  specialization; Season of Discovery and the Anniversary realms (including Hardcore Anniversary) do, and so
+  does "WoW Forever" - hence the explicit `IS_FOREVER`, as `IS_CLASSIC` is true there too. Without that
+  condition Threat Plates printed "LibDualSpec-1.0 cannot be loaded" on every login on plain Classic Era, as
+  LibDualSpec up to v1.29 refused to load there (v1.34 instead threw "GetNumSpecGroups: API unsupported";
+  v1.35 loads cleanly but has nothing to switch). Verified in-game (2026-10) on Classic Era, Hardcore, Season
+  of Discovery, TBC Anniversary, Mists Classic, Retail and Forever; seasons 11/12 are untested. Whether a realm
+  has dual specialization cannot be queried - only a character that unlocked it proves it
+  (`GetNumTalentGroups()` on Classic Era and TBC, `GetNumSpecGroups()` on Mists/Retail/Forever; each errors
+  with "API unsupported" or is missing on the other clients).
 - `Addon.IS_CLASSIC` and its siblings cross-check `GetClassicExpansionLevel()` in addition to
   `WOW_PROJECT_ID`/`WOW_PROJECT_CLASSIC`, because `WOW_PROJECT_ID` alone does not identify the ruleset on
   some official Blizzard clients — see "'WoW Forever' — an Official Client With Midnight's API Surface" below.
