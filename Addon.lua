@@ -260,11 +260,17 @@ function TidyPlatesThreat:OnInitialize()
   -- Register the database with LibDualSpec right away, so automatic spec-based profile
   -- switching works immediately after login/reload, instead of only once the options window
   -- has been opened (which lazily calls EnhanceOptions on this same lib, see Options.lua) [GH-685].
-  Addon.LibDualSpec = LibStub:GetLibrary("LibDualSpec-1.0", true)
-  if Addon.LibDualSpec then
-    Addon.LibDualSpec:EnhanceDatabase(db, Addon.ADDON_NAME)
-  else
-    Addon.Logging.Error("LibDualSpec-1.0 cannot be loaded, dual-spec support will not be available.")
+  -- Not on Classic Era, which has no dual specialization (except for Season of Discovery and the Anniversary
+  -- realms): there is nothing to switch profiles for, and LibDualSpec either does not load there or runs into
+  -- Lua errors, depending on its version. Addon.IS_CLASSIC is also true on "WoW Forever", which has dual
+  -- specialization.
+  if not Addon.IS_CLASSIC or Addon.IS_FOREVER or Addon.IS_CLASSIC_SOD or Addon.IS_CLASSIC_ANNIVERSARY then
+    Addon.LibDualSpec = LibStub:GetLibrary("LibDualSpec-1.0", true)
+    if Addon.LibDualSpec then
+      Addon.LibDualSpec:EnhanceDatabase(db, Addon.ADDON_NAME)
+    else
+      Addon.Logging.Error("LibDualSpec-1.0 cannot be loaded, dual-spec support will not be available.")
+    end
   end
 
   Addon.LibAceConfigDialog = LibStub("AceConfigDialog-3.0")
