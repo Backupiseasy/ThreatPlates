@@ -1,6 +1,7 @@
 # Nameplate lifecycle: implementation plan
 
-Branch: `feature/nameplate-lifecycle` (created from `release/13.3` @ `cc69d850`). Target version: 13.4.0.
+Branch: `feature/nameplate-lifecycle` (created from `release/13.3` @ `cc69d850`, rebased onto `develop` @ `5c347f60`
+on 2026-10-30). Target version: 13.4.0.
 
 Background: comparison of how Plater and Platynator handle `NAME_PLATE_CREATED` / `NAME_PLATE_UNIT_ADDED` /
 `NAME_PLATE_UNIT_REMOVED`, anchor their own frames and hide Blizzard's `plate.UnitFrame`, versus TP's
@@ -120,7 +121,7 @@ on Retail/Midnight.
 - **Changelog**: `Fixed a bug where nameplates were sometimes briefly shown on top of a different unit or
   disappeared, caused by Blizzard reusing its nameplate frames.` (only if not already covered by the 13.3.0 entry)
 
-### P2: Deduplicate and cancel revalidation timers
+### P2: Deduplicate and cancel revalidation timers — IMPLEMENTED, in-game test pending
 
 - **Problem**: `ScheduleNameplateRevalidation` uses `C_Timer.After` without a handle. `UNIT_FACTION` fires
   for every visible unit at `PLAYER_ENTERING_WORLD`, and `UNIT_FACTION`+`UNIT_FLAGS` bursts create several full
@@ -155,6 +156,11 @@ on Retail/Midnight.
 - **Test**: log the number of `HandlePlateUnitAdded` calls per plate during login/zoning in a crowded area and
   in a BG, before and after. Stale-name bug scenarios ([Comment #8228, #8363, #8408, #8433]) must stay fixed.
 - **Changelog**: none, or `Improved performance when entering the world or zoning with many nameplates visible.`
+
+- **Implemented** (`Nameplate.lua`): as sketched above. The callback uses the timer passed by `C_Timer.NewTimer`
+  (`function(self)`; verified in-game on 2026-09-30 that the timer itself is passed, `arg == t` was `true`).
+  `CancelNameplateRevalidation` cancels and clears the two slots directly (no loop, no new table per
+  `NAME_PLATE_UNIT_REMOVED`, no `wipe()`). CLAUDE.md "Stale unit data after nameplate recycling" is updated.
 
 ### P3: Harden `NAME_PLATE_UNIT_REMOVED`
 
@@ -494,7 +500,7 @@ Error console: BugSack/!BugGrabber, with no `ADDON_ACTION_BLOCKED`/`FORBIDDEN` e
 - CLAUDE.md: update the "Nameplate lifecycle" section (anchoring invariant after P1, revalidation timer slots after
   P2, missed-REMOVED recovery after P4, stacking bounds after P8, hidden parent after L1).
 - `Nameplate.lua` comment block "How TP and Blizzard's own nameplate relate": rewrite after P1/L1.
-- Changelog: **one shared entry for the whole plan** (decided 2026-09-25) in the 13.4.0 block:
+- Changelog: **one shared entry for the whole plan** (decided 2026-09-25) in the 13.4.0 block (appended to `develop`'s existing 13.4.0 block after the rebase):
   `* Reworked how nameplates are added, removed, and anchored to make them more reliable, especially when
   Blizzard re-uses its internal nameplate frames for different units.` The per-item "Changelog" lines above are
   only wording suggestions and are not added separately. Adjust the shared entry if an item adds a clearly
@@ -530,6 +536,12 @@ the branch is merged. Add new entries as items are committed, and tick or remove
       exist there; events for unknown CVars simply never fire).
 - [ ] BG/arena: no errors from secret sizes (`ApplyPlateStackingBounds`), stacking stays correct.
 - [ ] "WoW Forever" (optional, waived for now; the method exists there and is real).
+
+**P2 — revalidation timers**
+- [ ] Stale-name/health scenarios in BG/arena/raid stay fixed ([Comment #8228, #8363, #8408, #8433]).
+- [ ] Fewer `HandlePlateUnitAdded` runs when entering the world or zoning with many plates (temporary counter,
+      removed again afterwards).
+- [ ] No errors when plates are removed while a revalidation is pending (fast zoning, leaving range).
 
 **General**
 - [ ] `luacheck . --config .luacheckrc.ci` clean, and no new warnings in `luacheck . --config .luacheckrc` for touched files.

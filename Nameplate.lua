@@ -1131,6 +1131,7 @@ local	function HandlePlateCreated(plate)
   tp_frame.visual = {}
   tp_frame.style = {}
   tp_frame.unit = {}
+  tp_frame.RevalidationTimers = {}
 
   local textframe = _G.CreateFrame("Frame", nil, tp_frame)
   textframe:SetAllPoints()
@@ -1342,14 +1343,49 @@ end
 -- can still return the previous occupant's stale data, so re-apply once more after a short
 -- delay. Guarded against the plate having legitimately moved on (proper REMOVED/ADDED) in the
 -- meantime.
+-- At most one pending timer per plate and slot: the next-frame revalidation (UNIT_FACTION/UNIT_FLAGS)
+-- and the delayed one (double NAME_PLATE_UNIT_ADDED) serve different purposes and must not replace
+-- each other. A request for the same unit while a timer is pending is dropped (e.g. UNIT_FACTION
+-- firing for every visible unit at PLAYER_ENTERING_WORLD, or UNIT_FACTION + UNIT_FLAGS bursts); a
+-- request for a different unit replaces the pending one. Pending timers are cancelled in
+-- NAME_PLATE_UNIT_REMOVED (CancelNameplateRevalidation).
 local function ScheduleNameplateRevalidation(plate, unitid, delay)
-  C_Timer.After(delay or 0, function()
-    local tp_frame = plate.TPFrame
+  delay = delay or 0
+
+  local tp_frame = plate.TPFrame
+  local timers = tp_frame.RevalidationTimers
+  local slot = (delay > 0 and "delayed") or "immediate"
+
+  local pending_timer = timers[slot]
+  if pending_timer and not pending_timer:IsCancelled() then
+    if pending_timer.unitid == unitid then return end
+    pending_timer:Cancel()
+  end
+
+  -- C_Timer.NewTimer passes the timer itself to the callback (verified in-game)
+  local timer = C_Timer.NewTimer(delay, function(self)
+    if timers[slot] ~= self then return end
+    timers[slot] = nil
+
     if PlatesByUnit[unitid] == tp_frame and tp_frame.unit.unitid == unitid then
       HandlePlateUnitAdded(plate, unitid)
       NamePlateDriverFrame_AcquireUnitFrame(nil, plate)
     end
   end)
+  timer.unitid = unitid
+  timers[slot] = timer
+end
+
+local function CancelNameplateRevalidation(tp_frame)
+  local timers = tp_frame.RevalidationTimers
+  if timers.immediate then
+    timers.immediate:Cancel()
+    timers.immediate = nil
+  end
+  if timers.delayed then
+    timers.delayed:Cancel()
+    timers.delayed = nil
+  end
 end
 
 --------------------------------------------------------------------------------------------------------------
@@ -1850,6 +1886,7 @@ function Addon:NAME_PLATE_UNIT_REMOVED(unitid)
   UpdateTargetMetaUnitReferences(tp_frame, nil)
 
   tp_frame.Active = false
+  CancelNameplateRevalidation(tp_frame)
 
   PlatesByUnit[unitid] = nil
   if not Addon.HAS_MIDNIGHT_API then

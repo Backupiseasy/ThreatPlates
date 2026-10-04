@@ -181,7 +181,10 @@ Central pub/sub for both real WoW events and internal TP events (`INTERNAL_EVENT
   and raids [Comment #8228, #8363, #8408, #8433]. Mitigated by `ScheduleNameplateRevalidation(plate, unitid,
   delay)` in `Nameplate.lua`, which re-runs `HandlePlateUnitAdded` after a short delay (0 frames for
   `UNIT_FACTION`/`UNIT_FLAGS`, 0.5s for a detected double `NAME_PLATE_UNIT_ADDED` without an intervening
-  `REMOVED`), guarded against the plate having legitimately moved on in the meantime. This is a *data* problem
+  `REMOVED`), guarded against the plate having legitimately moved on in the meantime. At most one pending timer per
+  plate and slot (`immediate` / `delayed`, `tp_frame.RevalidationTimers`): a request for the same unit while one is
+  pending is dropped, one for a different unit replaces it, and `NAME_PLATE_UNIT_REMOVED` cancels all of them
+  (`CancelNameplateRevalidation`). This is a *data* problem
   (TP's own `unit` table is wrong); see the next bullet for a look-alike that is a *placement* problem.
 - **`plate.UnitFrame` is pooled — never anchor TP frames to it**: on all current clients (Retail/Midnight, "WoW
   Forever", and all Classic clients — Era/SoD, Anniversary and Mists share byte-identical `Blizzard_NamePlateBase.lua`
