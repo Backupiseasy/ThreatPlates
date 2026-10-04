@@ -92,8 +92,7 @@ Addon.ExpansionIsAtLeastMidnight = Addon.IS_MIDNIGHT
 
 -- True on Midnight, and on any client whose engine has Midnight's full API surface (secret values,
 -- C_Spell/C_UnitAuras/C_CurveUtil, the heal-prediction calculator, ...) even though its content/ruleset
--- isn't Midnight (e.g. "WoW Forever" - see Addon.IS_FOREVER above; /tptp debug MidnightAPI reports every
--- API this addon's Midnight-only code depends on). Use this - not Addon.ExpansionIsAtLeastMidnight -
+-- isn't Midnight (e.g. "WoW Forever" - see Addon.IS_FOREVER above). Use this - not Addon.ExpansionIsAtLeastMidnight -
 -- wherever a branch exists purely to pick the API-safe/modern code path; keep
 -- Addon.ExpansionIsAtLeastMidnight itself for genuine ruleset/feature decisions (e.g. features
 -- intentionally disabled on Midnight, see CLAUDE.md).

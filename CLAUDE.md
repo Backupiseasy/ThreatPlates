@@ -119,7 +119,6 @@ Flags computed once at load and used everywhere to branch behavior:
   API code path; keep `Addon.ExpansionIsAtLeastMidnight` itself for genuine ruleset/feature decisions.
 - `Compatibility.lua`'s `WOW_EVENTS` table + `Addon:RegisterEvent` / `RegisterUnitEvent` / `UnregisterEvent` gate
   WoW event registration per expansion — events that don't exist for the running client are silently skipped.
-  `/tptp debug Compatibility` empirically tries registering every event in the table and reports mismatches.
 
 ### Event system (`EventService.lua`)
 
@@ -396,7 +395,8 @@ third-party or spoofed client. It reports its own project id, `WOW_PROJECT_ID ==
 "Camelot" being Blizzard's internal name for it; defined in `Blizzard_ProjectConstants/Camelot/` of
 wow-ui-source's `forever` branch), while running
 Classic-rules content on Blizzard's modern (Midnight-era) engine — full secret-value restrictions and API
-parity with Midnight, confirmed via `/tptp debug MidnightAPI`. Its first beta builds reported
+parity with Midnight, confirmed by an existence check of every Midnight-exclusive API this
+addon depends on. Its first beta builds reported
 `WOW_PROJECT_MAINLINE` (1) instead; the change with build 70170 broke the original detection [GH-753], so
 never detect Forever via "Mainline project id + Classic expansion level" again.
 `Addon.IS_FOREVER` detects this; `Addon.HAS_MIDNIGHT_API`
@@ -494,8 +494,8 @@ Point-in-time notes from past analysis passes — re-verify before relying on th
   fails with "key(s) used in code but missing from Locales/enUS.lua" on `develop` in the meantime. That is
   expected and not something to fix by hand.
 - **Debug commands are not localized**: everything executed by `ChatCommandDebug` in `Commands.lua`
-  (`/tptp debug ...`, `/tptp version`, including helpers called only from there such as `PrintVersion`,
-  `PrintNameplateCVarCheck`, `PrintMidnightAPICheck`) prints plain English string literals — no `L[...]`. This
+  (`/tptp debug ...`, `/tptp version`, including helpers called only from there such as `PrintVersion`)
+  prints plain English string literals — no `L[...]`. This
   output is for developers and bug reports, is only reachable with `Addon.DEBUG`, and would otherwise create
   phrases on CurseForge that translators have no reason to translate. Do not add `L[...]` to new debug output.
 
