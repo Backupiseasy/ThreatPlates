@@ -23,11 +23,11 @@
 
 ## WoW Forever Beta
 
-* Fixed automatic role detection not recognizing Druids in Bear Form as tanks on WoW Forever.
-* Fixed a Lua error on WoW Forever for Paladins (and some other classes), caused by changes to the Blizzard API used for role detection [Comment #8694].
-* Changed automatic role detection on WoW Forever to also use Blizzard's own tank detection, so that tank auras gained in combat (e.g. Righteous Fury) are recognized.
-* Fixed Lua errors on login and nameplates not working on WoW Forever, caused by a change in the latest beta patch to how the client identifies itself [GH-753].
-* Fixed a bug where the Quest widget on WoW Forever also highlighted units for quest objectives of other group members.
-* Fixed a Lua error on WoW Forever when a Battle.net friend is online, caused by Blizzard API changes [Comment #8723].
-* Fixed the transparency for occluded units not working on WoW Forever, caused by a change in the latest beta patch to how the client identifies itself.
-* Fixed the Quest widget on WoW Forever not recognizing quests whose data was not yet available when they were accepted.
+* Fixed automatic role detection not recognizing Druids in Bear Form as tanks.
+* Fixed a Lua error for Paladins (and some other classes), caused by changes to the Blizzard API used for role detection [Comment #8694].
+* Changed automatic role detection to also use Blizzard's own tank detection, so that tank auras gained in combat (e.g. Righteous Fury) are recognized.
+* Fixed Lua errors on login and nameplates not working, caused by a change in the latest beta patch to how the client identifies itself [GH-753].
+* Fixed a bug where the Quest widget also highlighted units for quest objectives of other group members.
+* Fixed a Lua error when a Battle.net friend is online, caused by Blizzard API changes [Comment #8723].
+* Fixed the transparency for occluded units not working, caused by a change in the latest beta patch to how the client identifies itself.
+* Fixed the Quest widget not recognizing quests whose data was not yet available when they were accepted.
