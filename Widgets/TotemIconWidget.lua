@@ -49,7 +49,7 @@ end
 function Widget:UNIT_NAME_UPDATE(unitid)
   local widget_frame = self:GetWidgetFrameForUnit(unitid)
   if widget_frame then
-    self:OnUnitAdded(widget_frame, unitid)
+    self:OnUnitAdded(widget_frame, widget_frame.unit)
   end
 end
 

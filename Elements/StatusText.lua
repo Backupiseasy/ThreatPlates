@@ -560,7 +560,6 @@ end
 
 SubscribeEvent(Element, "UNIT_NAME_UPDATE", StatusTextUpdateByUnit)
 SubscribeEvent(Element, "UNIT_LEVEL", StatusTextUpdateByUnit)
---SubscribeEvent(Element, "StyleUpdate", StyleUpdate)
 
 -- For now: ignore Guild Roster events
 --SubscribeEvent(Element, "GUILD_ROSTER_UPDATE", StatusTextUpdateByUnit)

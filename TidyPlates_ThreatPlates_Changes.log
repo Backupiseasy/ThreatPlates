@@ -23,6 +23,7 @@
 * Fixed an error message about dual-spec support not being available on Classic Era realms without dual specialization, and removed the options for spec-based profiles there.
 * Removed the options for the personal nameplate (hiding buffs and showing Blizzard's resources on the target nameplate), as Blizzard replaced the personal nameplate with the personal resource display and removed both features.
 * Added a warning if Platynator is enabled together with Threat Plates.
+* Fixed a bug where nameplates were not correctly updated after a unit update (e.g., missing totem icons after a name update or missing arena numbers after a change of the arena opponents).
 
 WoW Forever Beta:
 * Fixed automatic role detection not recognizing Druids in Bear Form as tanks.
