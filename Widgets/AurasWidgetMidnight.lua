@@ -426,8 +426,54 @@ end
 -- without implicating PixelUtil specifically. Restored to the original PixelUtil.SetSize +
 -- ExecuteAfterCombatEnds combination for further, more careful testing rather than left on the
 -- untested plain-SetSize variant.
+local function AppendSettingsToSignature(parts, value)
+  if type(value) == "table" then
+    parts[#parts + 1] = "{"
+    for key, entry in pairs(value) do
+      parts[#parts + 1] = tostring(key)
+      AppendSettingsToSignature(parts, entry)
+    end
+    parts[#parts + 1] = "}"
+  else
+    parts[#parts + 1] = tostring(value)
+  end
+end
+
+-- Everything ReapplyLiveAuraButtonSettings reads, as one string - must be kept in sync with it. Values
+-- still at their default are not part of a pairs() iteration (AceDB serves them via metatable), which is
+-- fine here: a default is constant, so a missing key always stands for the same value.
+local function GetLiveAuraButtonSettingsSignature(aura_type)
+  local db = Widget.db
+  local db_icon = db[aura_type].ModeIcon
+
+  local parts = {}
+  AppendSettingsToSignature(parts, db_icon.IconWidth)
+  AppendSettingsToSignature(parts, db_icon.IconHeight)
+  AppendSettingsToSignature(parts, db_icon.ShowBorder)
+  AppendSettingsToSignature(parts, db_icon.StackCount)
+  AppendSettingsToSignature(parts, db_icon.Duration)
+  AppendSettingsToSignature(parts, db.ShowTooltips)
+  AppendSettingsToSignature(parts, db.ShowCooldownSpiral)
+  AppendSettingsToSignature(parts, db.ShowStackCount)
+  AppendSettingsToSignature(parts, db.ShowAuraType)
+  AppendSettingsToSignature(parts, (aura_type == "Buffs") and db.DefaultBuffColor or db.DefaultDebuffColor)
+  AppendSettingsToSignature(parts, HideOmniCC)
+  AppendSettingsToSignature(parts, ShowDuration)
+
+  return table.concat(parts, "|")
+end
+
+-- Signature of the settings last applied to the buttons of each aura_type. Re-applying them touches every
+-- button of every pooled container (3 pools x 40 containers), which froze the game for 1-2 seconds - and
+-- Widget:UpdateSettings is also called for changes that have nothing to do with auras (every custom
+-- nameplate option re-initializes all widgets, as does a profile change). New buttons don't need this,
+-- InitializeAuraButton reads the current settings itself.
+local AppliedLiveAuraButtonSettings = {}
+
 local function ReapplyLiveAuraButtonSettings(aura_type)
   if not HasAuraContainers then return end
+
+  if AppliedLiveAuraButtonSettings[aura_type] == GetLiveAuraButtonSettingsSignature(aura_type) then return end
 
   -- Aura buttons are forbidden objects while their unit's aura info is secret (any hostile unit in
   -- an Arena/Battleground) - not just combat-gated, see comment above. Warn and skip entirely
@@ -440,6 +486,10 @@ local function ReapplyLiveAuraButtonSettings(aura_type)
   end
 
   Addon.ExecuteAfterCombatEnds(function()
+    -- Checked again here, as this may run later (after combat) and several times then
+    local signature = GetLiveAuraButtonSettingsSignature(aura_type)
+    if AppliedLiveAuraButtonSettings[aura_type] == signature then return end
+
     local db_icon = Widget.db[aura_type].ModeIcon
     for _, container in ipairs(AuraContainerPool[aura_type]) do
       for _, group_key in ipairs(AURA_GROUP_KEYS[aura_type]) do
@@ -510,6 +560,9 @@ local function ReapplyLiveAuraButtonSettings(aura_type)
         end
       end
     end
+
+    -- Only stored after all buttons were updated, so that the settings are applied again if that failed
+    AppliedLiveAuraButtonSettings[aura_type] = signature
   end, "Unable to update the appearance of auras while in combat.")
 end
 
