@@ -33,3 +33,5 @@
 * Fixed a Lua error when a Battle.net friend is online, caused by Blizzard API changes [Comment #8723].
 * Fixed the transparency for occluded units not working, caused by a change in the latest beta patch to how the client identifies itself.
 * Fixed the Quest widget not recognizing quests whose data was not yet available when they were accepted.
+* Added Decoy Totem to the totems recognized on WoW Forever.
+* Enabled the options for the interrupt overlay and interrupt shield of the castbar on WoW Forever.

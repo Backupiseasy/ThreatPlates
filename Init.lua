@@ -18,15 +18,13 @@ local UnitDetailedThreatSituation = UnitDetailedThreatSituation
 ---------------------------------------------------------------------------------------------------
 -- WoW Version Check
 ---------------------------------------------------------------------------------------------------
--- WOW_PROJECT_ID alone does not identify the ruleset: "WoW Forever" (an official Blizzard client/product
--- running parallel to Retail and WoW Classic) has its own project id while running Classic-rules content
--- on a modern, secret-value-capable engine (no legacy globals like _G.GetSpellInfo). Addon.IS_CLASSIC/
--- IS_TBC_CLASSIC/etc. below therefore cross-check GetClassicExpansionLevel() instead of trusting
--- WOW_PROJECT_ID alone.
--- Addon.IS_FOREVER flags this specific combination (Classic ruleset + modern engine) so code that
--- depends on the client's API surface rather than its ruleset (e.g. which events/globals exist) can
--- pick the right branch instead of assuming ruleset and engine always match.
-Addon.IS_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC) or (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_CLASSIC) or false
+-- Addon.IS_CLASSIC is the Classic Era client only. "WoW Forever" (an official Blizzard client/product
+-- running parallel to Retail and WoW Classic, see Addon.IS_FOREVER below) branched off Classic Era and
+-- also reports LE_EXPANSION_CLASSIC as its expansion level, but it is a product of its own: it runs on a
+-- modern, secret-value-capable engine (no legacy globals like _G.GetSpellInfo) and its content drifts
+-- away from Classic Era over time. It is therefore not part of Addon.IS_CLASSIC - code that should apply
+-- to both has to check Addon.IS_FOREVER explicitly.
+Addon.IS_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
 Addon.IS_CLASSIC_SOM = (Addon.IS_CLASSIC and C_Seasons and C_Seasons.GetActiveSeason() == Enum.SeasonID.SeasonOfMastery)
 Addon.IS_CLASSIC_SOD = (Addon.IS_CLASSIC and C_Seasons and C_Seasons.GetActiveSeason() == Enum.SeasonID.SeasonOfDiscovery)
 -- Anniversary realms are called "Fresh" by Blizzard
@@ -45,7 +43,11 @@ Addon.IS_MIDNIGHT = (select(4, GetBuildInfo()) >= 120000)
 Addon.IS_FOREVER = (WOW_PROJECT_CAMELOT ~= nil and WOW_PROJECT_ID == WOW_PROJECT_CAMELOT)
 Addon.IS_MAINLINE = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
 
--- For Mainline, this always returns true. 
+-- For Mainline, this always returns true.
+-- "WoW Forever" reports LE_EXPANSION_CLASSIC, so this (and all Addon.ExpansionIsAtLeastX flags below) is
+-- false there for every expansion. That is only a statement about its ruleset's origin - Forever is not
+-- part of the Classic expansion sequence, so features it has beyond Vanilla (or lacks) must be checked
+-- with Addon.IS_FOREVER, not derived from the expansion level.
 Addon.ExpansionIsAtLeast = function(expansion_id)
 	if Addon.IS_MAINLINE then 
 		return true 
@@ -68,9 +70,13 @@ Addon.ExpansionIsBetween = function(expansion_id_start, expansion_id_end)
 	end
 end
 
+-- Key for tables with expansion-specific data (totems, crowd control spells, ...). "WoW Forever" has a
+-- key of its own, as its data is no longer identical to Classic Era's (LE_EXPANSION_CLASSIC).
 Addon.GetExpansionLevel = function ()
 	if Addon.IS_MAINLINE then
 		return "MAINLINE"
+	elseif Addon.IS_FOREVER then
+		return "FOREVER"
 	elseif Addon.IS_CLASSIC then
 		return LE_EXPANSION_CLASSIC
 	else
@@ -100,7 +106,7 @@ Addon.ExpansionIsAtLeastMidnight = Addon.IS_MIDNIGHT
 Addon.HAS_MIDNIGHT_API = Addon.ExpansionIsAtLeastMidnight or Addon.IS_FOREVER
 
 -- Focus target (PLAYER_FOCUS_CHANGED, "focus" unit token) exists since TBC. "WoW Forever" reports Vanilla
--- as its expansion level, but its modern engine supports focus (see Addon.IS_FOREVER above).
+-- as its expansion level, but supports focus (see Addon.IS_FOREVER above).
 Addon.WOW_FEATURE_FOCUS = Addon.ExpansionIsAtLeastTBC or Addon.IS_FOREVER
 
 -- "WoW Forever" (see Addon.IS_FOREVER above) has a native surname/last-name system: when active,

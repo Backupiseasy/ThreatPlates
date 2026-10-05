@@ -345,7 +345,8 @@ local function GetScriptEnvironment(custom_style)
             end,
           },          
           Data = {
-            CrowdControlAuras = Addon.Widgets.Widgets.Auras.CROWD_CONTROL_SPELLS,
+            -- Not available on clients with Midnight's API surface (see Widgets/AurasWidgetMidnight.lua)
+            CrowdControlAuras = Addon.Widgets.Widgets.Auras.CROWD_CONTROL_SPELLS or {},
             StealthDetectionAuras = Addon.Data.StealthDetectionAuras,
             StealthDetectionUnits = Addon.Data.StealthDetectionUnits,
             -- Totems = Addon.Data.Totems
