@@ -90,6 +90,8 @@ L["Allow action target selection while player has a locked target."] = "Allow ac
 L["Always"] = "Siempre"
 --[[Translation missing --]]
 L["Always do action targeting"] = "Always do action targeting"
+--[[Translation missing --]]
+L["Always enabled if full absorbs are shown."] = "Always enabled if full absorbs are shown."
 L["Always Show Nameplates"] = "Siempre mostrar placas identificativas"
 --[[Translation missing --]]
 L["Always show nameplates for soft enemy target."] = "Always show nameplates for soft enemy target."
@@ -97,8 +99,6 @@ L["Always show nameplates for soft enemy target."] = "Always show nameplates for
 L["Always show nameplates for soft friend target."] = "Always show nameplates for soft friend target."
 --[[Translation missing --]]
 L["Always show nameplates for soft interact target."] = "Always show nameplates for soft interact target."
---[[Translation missing --]]
-L["Always shows the full amount of absorbs on a unit. In overabsorb situations, the absorbs bar is shifted to the left."] = "Always shows the full amount of absorbs on a unit. In overabsorb situations, the absorbs bar is shifted to the left."
 L["Amount"] = "Cantidad"
 L["Anchor"] = "Ancla"
 L["Anchor Point"] = "Punto de Anclar"
@@ -225,6 +225,8 @@ L["Coloring"] = "Coloración"
 L["Colors"] = "Colores"
 --[[Translation missing --]]
 L["Colors the countdown text once the remaining duration drops below the threshold below - the Midnight replacement for Flash When Expiring, which has no equivalent on Midnight."] = "Colors the countdown text once the remaining duration drops below the threshold below - the Midnight replacement for Flash When Expiring, which has no equivalent on Midnight."
+--[[Translation missing --]]
+L["Colors the countdown text once the remaining duration drops below the threshold below."] = ""
 L["Column Limit"] = "Límite de columna"
 L["Combat"] = "Combate"
 L["Combo Points"] = "Puntos de combo"
@@ -562,6 +564,10 @@ L["In combat, use coloring, transparency, and scaling based on threat level as c
 L["In delta mode, show the name of the player who is second in the enemy unit's threat table."] = "En modo delta, muestra el nombre del jugador que ocupa el segundo lugar en la tabla de amenaza de la unidad enemiga."
 L["In Groups"] = "En grupos"
 L["In Instances"] = "En Instancias"
+--[[Translation missing --]]
+L["In over-absorb situations (shield larger than missing health), moves the over-absorb spark to indicate the actual shield magnitude, instead of pinning it to the bar's right edge."] = "In over-absorb situations (shield larger than missing health), moves the over-absorb spark to indicate the actual shield magnitude, instead of pinning it to the bar's right edge."
+--[[Translation missing --]]
+L["In over-absorb situations (shield larger than missing health), shows a reverse-fill shield overlay across the health bar and positions the spark at its left boundary to indicate the actual shield magnitude."] = "In over-absorb situations (shield larger than missing health), shows a reverse-fill shield overlay across the health bar and positions the spark at its left boundary to indicate the actual shield magnitude."
 L["Initials"] = "Iniciales"
 L["Insert a new custom nameplate slot after the currently selected slot."] = "Inserta una nueva ranura de placa identificativa personalizada después de la ranura actualmente seleccionada."
 L["Inset"] = "Recuadro"
@@ -957,6 +963,8 @@ L["Stripes"] = "Rayas"
 L["Style"] = "Estilo"
 L["Supports multiple entries, separated by commas."] = "Admite múltiples entradas, separadas por comas."
 --[[Translation missing --]]
+L["Surname"] = ""
+--[[Translation missing --]]
 L["Swap Area By Reaction"] = "Swap Area By Reaction"
 L["Switch aura areas for buffs and debuffs for friendly units."] = "Cambia las áreas de aura para los beneficios y perjuicios de las unidades amistosas."
 L["Symbol"] = "Símbolo"
@@ -1141,7 +1149,7 @@ L["Use a custom color for the name of your current focus target (in healthbar vi
 L["Use a custom color for the name of your current target (in healthbar view and in headline view)."] = "Usa un color personalizado para el nombre de su objetivo actual (en la vista de la barra de salud y en la Vista de Título)."
 L["Use a heuristic to detect if a mob is in combat with you, but only in instances (like dungeons or raids)."] = "Usa una heurística para detectar si un mob está en combate contigo, pero solo en instancias (como mazmorras o bandas)."
 --[[Translation missing --]]
-L["Use a striped texture for the absorbs overlay. Always enabled if full absorbs are shown."] = "Use a striped texture for the absorbs overlay. Always enabled if full absorbs are shown."
+L["Use a striped texture for the absorbs overlay."] = "Use a striped texture for the absorbs overlay."
 L["Use Blizzard default nameplates for friendly nameplates and disable ThreatPlates for these units."] = "Utiliza las placas identificativas predeterminadas de Blizzard para placas identificativas de aliados y deshabilite las placas de amenaza para estas unidades."
 L["Use Blizzard default nameplates for neutral and enemy nameplates and disable ThreatPlates for these units."] = "Utiliza las placas identificativas predeterminadas de Blizzard para placas identificativas neutrales y enemigas y deshabilite las placas de amenaza para estas unidades."
 --[[Translation missing --]]
