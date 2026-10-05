@@ -449,16 +449,27 @@ local function GetLiveAuraButtonSettingsSignature(aura_type)
   local parts = {}
   AppendSettingsToSignature(parts, db_icon.IconWidth)
   AppendSettingsToSignature(parts, db_icon.IconHeight)
-  AppendSettingsToSignature(parts, db_icon.ShowBorder)
   AppendSettingsToSignature(parts, db_icon.StackCount)
   AppendSettingsToSignature(parts, db_icon.Duration)
   AppendSettingsToSignature(parts, db.ShowTooltips)
   AppendSettingsToSignature(parts, db.ShowCooldownSpiral)
   AppendSettingsToSignature(parts, db.ShowStackCount)
-  AppendSettingsToSignature(parts, db.ShowAuraType)
-  AppendSettingsToSignature(parts, (aura_type == "Buffs") and db.DefaultBuffColor or db.DefaultDebuffColor)
   AppendSettingsToSignature(parts, HideOmniCC)
   AppendSettingsToSignature(parts, ShowDuration)
+
+  return table.concat(parts, "|")
+end
+
+-- The settings for the color of the dispel-type border, separate from the signature above: re-coloring
+-- the border is by far the most expensive step per button (about 85% of the time measured), so it is
+-- only done if one of these settings changed.
+local function GetLiveAuraBorderSettingsSignature(aura_type)
+  local db = Widget.db
+
+  local parts = {}
+  AppendSettingsToSignature(parts, db[aura_type].ModeIcon.ShowBorder)
+  AppendSettingsToSignature(parts, db.ShowAuraType)
+  AppendSettingsToSignature(parts, (aura_type == "Buffs") and db.DefaultBuffColor or db.DefaultDebuffColor)
 
   return table.concat(parts, "|")
 end
@@ -469,11 +480,15 @@ end
 -- nameplate option re-initializes all widgets, as does a profile change). New buttons don't need this,
 -- InitializeAuraButton reads the current settings itself.
 local AppliedLiveAuraButtonSettings = {}
+local AppliedLiveAuraBorderSettings = {}
 
 local function ReapplyLiveAuraButtonSettings(aura_type)
   if not HasAuraContainers then return end
 
-  if AppliedLiveAuraButtonSettings[aura_type] == GetLiveAuraButtonSettingsSignature(aura_type) then return end
+  if AppliedLiveAuraButtonSettings[aura_type] == GetLiveAuraButtonSettingsSignature(aura_type)
+    and AppliedLiveAuraBorderSettings[aura_type] == GetLiveAuraBorderSettingsSignature(aura_type) then
+    return
+  end
 
   -- Aura buttons are forbidden objects while their unit's aura info is secret (any hostile unit in
   -- an Arena/Battleground) - not just combat-gated, see comment above. Warn and skip entirely
@@ -488,28 +503,33 @@ local function ReapplyLiveAuraButtonSettings(aura_type)
   Addon.ExecuteAfterCombatEnds(function()
     -- Checked again here, as this may run later (after combat) and several times then
     local signature = GetLiveAuraButtonSettingsSignature(aura_type)
-    if AppliedLiveAuraButtonSettings[aura_type] == signature then return end
+    local border_signature = GetLiveAuraBorderSettingsSignature(aura_type)
+    local update_buttons = AppliedLiveAuraButtonSettings[aura_type] ~= signature
+    local update_border = AppliedLiveAuraBorderSettings[aura_type] ~= border_signature
+    if not (update_buttons or update_border) then return end
 
     local db_icon = Widget.db[aura_type].ModeIcon
     for _, container in ipairs(AuraContainerPool[aura_type]) do
       for _, group_key in ipairs(AURA_GROUP_KEYS[aura_type]) do
         for i = 1, container:GetAuraGroupFrameCount(group_key) do
           local auraButton = container:GetAuraGroupFrame(group_key, i)
-          PixelUtil.SetSize(auraButton, db_icon.IconWidth, db_icon.IconHeight)
-          auraButton:SetMouseMotionEnabled(Widget.db.ShowTooltips)
-          if auraButton.Cooldown then
-            auraButton.Cooldown:SetShownSwipe(Widget.db.ShowCooldownSpiral, HideOmniCC)
+          if update_buttons then
+            PixelUtil.SetSize(auraButton, db_icon.IconWidth, db_icon.IconHeight)
+            auraButton:SetMouseMotionEnabled(Widget.db.ShowTooltips)
+            if auraButton.Cooldown then
+              auraButton.Cooldown:SetShownSwipe(Widget.db.ShowCooldownSpiral, HideOmniCC)
+            end
+
+            -- Stacks/TimeLeft always exist (created unconditionally in InitializeAuraButton, like
+            -- DispelBorder - see its comment) - this never creates or (re)binds SetApplicationCount/
+            -- SetDurationText itself, only restyles (FontUpdateText - plain Set* calls, nothing
+            -- restricted) and toggles Show()/Hide() for ShowStackCount/ShowDuration.
+            FontUpdateText(auraButton, auraButton.Stacks, db_icon.StackCount)
+            auraButton.Stacks:SetShown(Widget.db.ShowStackCount)
+
+            FontUpdateText(auraButton, auraButton.TimeLeft, db_icon.Duration)
+            auraButton.TimeLeft:SetShown(ShowDuration)
           end
-
-          -- Stacks/TimeLeft always exist (created unconditionally in InitializeAuraButton, like
-          -- DispelBorder - see its comment) - this never creates or (re)binds SetApplicationCount/
-          -- SetDurationText itself, only restyles (FontUpdateText - plain Set* calls, nothing
-          -- restricted) and toggles Show()/Hide() for ShowStackCount/ShowDuration.
-          FontUpdateText(auraButton, auraButton.Stacks, db_icon.StackCount)
-          auraButton.Stacks:SetShown(Widget.db.ShowStackCount)
-
-          FontUpdateText(auraButton, auraButton.TimeLeft, db_icon.Duration)
-          auraButton.TimeLeft:SetShown(ShowDuration)
 
           -- Dispel-type border EXISTENCE (ShowBorder true<->false) reverted to create-time-only
           -- (2026-08-21) - AddDispelTypeTexture/RemoveDispelTypeTexture/ClearDispelTypeTextures turned
@@ -547,7 +567,7 @@ local function ReapplyLiveAuraButtonSettings(aura_type)
           -- registration, self-adapting to either client without hardcoding a version check. No pcall
           -- here (deliberately) - a failure at this point means the API-generation detection above is
           -- wrong for the running client, which should surface as a visible error, not be swallowed.
-          if db_icon.ShowBorder and auraButton:GetDispelTypeTextureCount() > 0 then
+          if update_border and db_icon.ShowBorder and auraButton:GetDispelTypeTextureCount() > 0 then
             auraButton:RemoveDispelTypeTexture(auraButton.DispelBorderRegistration or auraButton.DispelBorder)
             auraButton.DispelBorderRegistration = auraButton:AddDispelTypeTexture(auraButton.DispelBorder, {
               style = DispelTypeTextureStylePreserveAsset,
@@ -563,6 +583,7 @@ local function ReapplyLiveAuraButtonSettings(aura_type)
 
     -- Only stored after all buttons were updated, so that the settings are applied again if that failed
     AppliedLiveAuraButtonSettings[aura_type] = signature
+    AppliedLiveAuraBorderSettings[aura_type] = border_signature
   end, "Unable to update the appearance of auras while in combat.")
 end
 
