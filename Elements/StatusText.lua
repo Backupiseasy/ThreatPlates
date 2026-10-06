@@ -430,10 +430,10 @@ local function StyleUpdate(tp_frame, style, stylename)
 end
 
 -- Called in processing event: NAME_PLATE_UNIT_ADDED
-function Element.PlateUnitAdded(tp_frame)
-  SetStatusText(tp_frame)
-  StyleUpdate(tp_frame, tp_frame.style, tp_frame.stylename)
-end
+-- Not needed: Element.UpdateStyle is always called when a unit is added (before Element.PlateUnitAdded would
+-- be called) and it updates the text as well.
+--function Element.PlateUnitAdded(tp_frame)
+--end
 
 -- Called in processing event: NAME_PLATE_UNIT_REMOVED
 --function Element.PlateUnitRemoved(tp_frame)
@@ -452,6 +452,11 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
 
   status_text:SetSize(db.Font.Width, db.Font.Height)
   FontUpdateText(tp_frame, status_text, db)
+
+  -- Healthbar and headline view have different status text settings, so the text itself (and a custom DogTag
+  -- text) must be updated when the nameplate switches between them (e.g., when the unit is targeted)
+  SetStatusText(tp_frame)
+  StyleUpdate(tp_frame, style, tp_frame.stylename)
 
   status_text:Show()
 end

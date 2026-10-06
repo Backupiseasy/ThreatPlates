@@ -27,6 +27,7 @@
 * Fixed a Lua error after login when another nameplate addon is enabled together with Threat Plates.
 * Removed the Stealth widget, as it no longer worked on WoW Midnight and WoW Forever, caused by Blizzard's restrictions on accessing auras, and was not maintained for the Classic versions.
 * Added keybindings for toggling Headline View separately for friendly players (including their pets and guardians) and friendly NPCs.
+* Fixed a bug where the status text was not updated when a nameplate switched between Headline View and Healthbar View (e.g., when targeting a unit).
 
 ## WoW Forever Beta
 
