@@ -81,31 +81,56 @@ end
 -- ADDON LOADED --
 ------------------
 
-StaticPopupDialogs["TidyPlatesEnabled"] = {
-  preferredIndex = STATICPOPUP_NUMDIALOGS,
-  text = "|cffFFA500" .. Meta("title") .. " Warning|r \n---------------------------------------\n" ..
-    L["|cff89F559Threat Plates|r is no longer a theme of |cff89F559TidyPlates|r, but a standalone addon that does no longer require TidyPlates. Please disable one of these, otherwise two overlapping nameplates will be shown for units."],
-  button1 = OKAY,
-  timeout = 0,
-  whileDead = 1,
-  hideOnEscape = 1,
-  OnAccept = function(self, _, _) end,
-}
+-- The warning about other nameplate addons is shown in a frame of its own, not as a StaticPopup: a StaticPopup
+-- shown by an addon taints all Blizzard code that iterates over the shown popups while it is open. At login,
+-- that is Blizzard's guild control UI: on GUILD_RANKS_UPDATE_ACTIVE_PLAYER it calls StaticPopup_Hide and then
+-- the protected C_Discord.IsUserOAuthed, which resulted in an ADDON_ACTION_FORBIDDEN error blamed on Threat
+-- Plates.
+local IncompatibleAddonDialog
 
-StaticPopupDialogs["IncompatibleAddon"] = {
-  preferredIndex = STATICPOPUP_NUMDIALOGS,
-  text = "|cffFFA500" .. Meta("title") .. " Warning|r \n---------------------------------------\n" ..
-    L["You currently have two nameplate addons enabled: |cff89F559Threat Plates|r and |cff89F559%s|r. Please disable one of these, otherwise two overlapping nameplates will be shown for units."],
-  button1 = OKAY,
-  button2 = L["Don't Ask Again"],
-  timeout = 0,
-  whileDead = 1,
-  hideOnEscape = 1,
-  OnAccept = function(self, _, _) end,
-  OnCancel = function(self, _, _)
-    Addon.db.profile.CheckForIncompatibleAddons = false
-  end,
-}
+local function CreateIncompatibleAddonDialogButton(dialog, text)
+  local button = CreateFrame("Button", nil, dialog, "UIPanelButtonTemplate")
+  button:SetText(text)
+  button:SetSize(math.max(100, button:GetFontString():GetStringWidth() + 30), 22)
+  button:SetScript("OnClick", function() dialog:Hide() end)
+  return button
+end
+
+local function ShowIncompatibleAddonDialog(text)
+  local dialog = IncompatibleAddonDialog
+  if not dialog then
+    dialog = CreateFrame("Frame", nil, UIParent, Addon.BackdropTemplate)
+    dialog:SetFrameStrata("DIALOG")
+    dialog:SetPoint("TOP", UIParent, "TOP", 0, -135)
+    dialog:SetWidth(320)
+    dialog:EnableMouse(true)
+    dialog:SetBackdrop({
+      bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+      edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+      tile = true, tileSize = 32, edgeSize = 32,
+      insets = { left = 11, right = 12, top = 12, bottom = 11 },
+    })
+
+    dialog.Text = dialog:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+    dialog.Text:SetPoint("TOP", dialog, "TOP", 0, -20)
+    dialog.Text:SetWidth(280)
+
+    local okay_button = CreateIncompatibleAddonDialogButton(dialog, OKAY)
+    okay_button:SetPoint("BOTTOMRIGHT", dialog, "BOTTOM", -6, 18)
+
+    local dont_ask_again_button = CreateIncompatibleAddonDialogButton(dialog, L["Don't Ask Again"])
+    dont_ask_again_button:SetPoint("BOTTOMLEFT", dialog, "BOTTOM", 6, 18)
+    dont_ask_again_button:HookScript("OnClick", function()
+      Addon.db.profile.CheckForIncompatibleAddons = false
+    end)
+
+    IncompatibleAddonDialog = dialog
+  end
+
+  dialog.Text:SetText("|cffFFA500" .. Meta("title") .. " Warning|r \n---------------------------------------\n" .. text)
+  dialog:SetHeight(dialog.Text:GetStringHeight() + 76)
+  dialog:Show()
+end
 
 
 function Addon:ReloadTheme()
@@ -161,24 +186,33 @@ function Addon:CheckForIncompatibleAddons()
   -- Check for other active nameplate addons which may create all kinds of errors and doesn't make
   -- sense anyway:
   if Addon.db.profile.CheckForIncompatibleAddons then
+    local warnings = {}
+    local function AddWarning(addon_name)
+      warnings[#warnings + 1] = L["You currently have two nameplate addons enabled: |cff89F559Threat Plates|r and |cff89F559%s|r. Please disable one of these, otherwise two overlapping nameplates will be shown for units."]:format(addon_name)
+    end
+
     if IsAddOnLoaded("TidyPlates") then
-      StaticPopup_Show("TidyPlatesEnabled", "TidyPlates")
+      warnings[#warnings + 1] = L["|cff89F559Threat Plates|r is no longer a theme of |cff89F559TidyPlates|r, but a standalone addon that does no longer require TidyPlates. Please disable one of these, otherwise two overlapping nameplates will be shown for units."]
     end
     if IsAddOnLoaded("Kui_Nameplates") then
-      StaticPopup_Show("IncompatibleAddon", "KuiNameplates")
+      AddWarning("KuiNameplates")
     end
     if IsAddOnLoaded("ElvUI") and ElvUI[1] and ElvUI[1].private and ElvUI[1].private.nameplates and ElvUI[1].private.nameplates.enable then
     --if IsAddOnLoaded("ElvUI") and ElvUI[1].private.nameplates.enable then
-      StaticPopup_Show("IncompatibleAddon", "ElvUI Nameplates")
+      AddWarning("ElvUI Nameplates")
     end
     if IsAddOnLoaded("Plater") then
-      StaticPopup_Show("IncompatibleAddon", "Plater Nameplates")
+      AddWarning("Plater Nameplates")
     end
     if IsAddOnLoaded("Platynator") then
-      StaticPopup_Show("IncompatibleAddon", "Platynator")
+      AddWarning("Platynator")
     end
     if IsAddOnLoaded("SpartanUI") and SUI.IsModuleEnabled and SUI:IsModuleEnabled("Nameplates") then
-      StaticPopup_Show("IncompatibleAddon", "SpartanUI Nameplates")
+      AddWarning("SpartanUI Nameplates")
+    end
+
+    if #warnings > 0 then
+      ShowIncompatibleAddonDialog(table.concat(warnings, "\n\n"))
     end
   end
 end
