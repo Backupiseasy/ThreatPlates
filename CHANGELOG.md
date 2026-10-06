@@ -17,12 +17,27 @@
 * Updated integrated libraries (Ace3 r1414-alpha, LibDualSpec-1.0 v1.35.0, LibSharedMedia-3.0 v12.1.0).
 * Fixed several bugs where the Social widget did not recognize friends and guild members (e.g., friends from the in-game friend list, Battle.net friends coming online, or characters with surnames on WoW Forever).
 * Fixed Cyrillic, Chinese, and Korean characters in nameplate texts being shown as squares, caused by the selected font not containing these characters [GH-751].
+* Enabled the option "Transliterate Cyrillic Letters" again on WoW Forever and on WoW Midnight (from patch 12.1.5 on), using a new Blizzard API for transliteration that also works with restricted names (e.g., in combat or battlegrounds).
+* Added options to enable stacking of enemy and friendly nameplates [Comment #8734].
+* Fixed an error message about dual-spec support not being available on Classic Era realms without dual specialization, and removed the options for spec-based profiles there.
+* Removed the options for the personal nameplate (hiding buffs and showing Blizzard's resources on the target nameplate), as Blizzard replaced the personal nameplate with the personal resource display and removed both features.
+* Added a warning if Platynator is enabled together with Threat Plates.
+* Fixed a bug where nameplates were not correctly updated after a unit update (e.g., missing totem icons after a name update or missing arena numbers after a change of the arena opponents).
+* Fixed the game freezing for 1-2 seconds when changing settings while the Auras widget is enabled.
+* Fixed a Lua error after login when another nameplate addon is enabled together with Threat Plates.
+* Removed the Stealth widget, as it no longer worked on WoW Midnight and WoW Forever, caused by Blizzard's restrictions on accessing auras, and was not maintained for the Classic versions.
+* Added keybindings for toggling Headline View separately for friendly players (including their pets and guardians) and friendly NPCs.
+* Fixed a bug where the status text was not updated when a nameplate switched between Headline View and Healthbar View (e.g., when targeting a unit).
 
 ## WoW Forever Beta
 
-* Fixed automatic role detection not recognizing Druids in Bear Form as tanks on WoW Forever.
-* Fixed a Lua error on WoW Forever for Paladins (and some other classes), caused by changes to the Blizzard API used for role detection [Comment #8694].
-* Changed automatic role detection on WoW Forever to also use Blizzard's own tank detection, so that tank auras gained in combat (e.g. Righteous Fury) are recognized.
-* Fixed Lua errors on login and nameplates not working on WoW Forever, caused by a change in the latest beta patch to how the client identifies itself [GH-753].
-* Fixed a bug where the Quest widget on WoW Forever also highlighted units for quest objectives of other group members.
-* Fixed a Lua error on WoW Forever when a Battle.net friend is online, caused by Blizzard API changes [Comment #8723].
+* Fixed automatic role detection not recognizing Druids in Bear Form as tanks.
+* Fixed a Lua error for Paladins (and some other classes), caused by changes to the Blizzard API used for role detection [Comment #8694].
+* Changed automatic role detection to also use Blizzard's own tank detection, so that tank auras gained in combat (e.g. Righteous Fury) are recognized.
+* Fixed Lua errors on login and nameplates not working, caused by a change in the latest beta patch to how the client identifies itself [GH-753].
+* Fixed a bug where the Quest widget also highlighted units for quest objectives of other group members.
+* Fixed a Lua error when a Battle.net friend is online, caused by Blizzard API changes [Comment #8723].
+* Fixed the transparency for occluded units not working, caused by a change in the latest beta patch to how the client identifies itself.
+* Fixed the Quest widget not recognizing quests whose data was not yet available when they were accepted.
+* Added Decoy Totem to the totems recognized on WoW Forever.
+* Enabled the options for the interrupt overlay and interrupt shield of the castbar on WoW Forever.

@@ -177,7 +177,6 @@ local WIDGET_INFO = {
   FocusWidget = { Name = "Focus", UpdateSettings = true, UpdateAllSettings = true, PublishEvent = "SituationalColorUpdate" },
   ResourceWidget = { Name = "Resource", UpdateSettings = true,  },
   socialWidget = { Name = "Social", UpdateSettings = true, PublishEvent = "ClassColorUpdate" },
-  stealthWidget = { Name = "Stealth", UpdateSettings = false, },
   targetWidget = { Name = "TargetArt", UpdateSettings = true, UpdateAllSettings = true, PublishEvent = "SituationalColorUpdate" },
   questWidget = { Name = "Quest", UpdateSettings = true, PublishEvent = "SituationalColorUpdate" },
   healerTracker = { Name = "HealerTracker", UpdateSettings = false },
@@ -389,7 +388,6 @@ local IconTexturesByOptions = {
   ["Social.Friend"] = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\SocialWidget\\friendicon",
   ["Social.BattleNetFriend"] = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\SocialWidget\\BattleNetFriend", -- "Interface\\FriendsFrame\\PlusManz-BattleNet"
   ["Social.GuildMember"] = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\SocialWidget\\guildicon",
-  ["Stealth"] = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\StealthWidget\\stealthicon",
   -- TargetHighlight.Center|Left|Right
   -- TargetMarker.<NAME>, e.g., TargetMarker.SKULL 
   -- Totem.<SPELL_ID>, e.g., 
@@ -662,6 +660,24 @@ end
 
 local function CVarIsUnavailable(info) 
   return C_CVar.GetCVarInfo(info.arg) == nil 
+end
+
+-- The CVar nameplateStackingTypes is a bitfield indexed by Enum.NamePlateStackType (Enemy, Friendly) that replaces
+-- nameplateMotion. Currently, this only works on WoW Forever and (presumably) on Retail from patch 12.1.5 on. On
+-- other WoW versions, it will only work once their API is updated. The options are only hidden on clients that
+-- don't know this CVar at all.
+-- WoW stores bitfield CVars as an encoded string, not as a number, so its flags can only be accessed with
+-- C_CVar.GetCVarBitfield/SetCVarBitfield. info.arg is the name of the flag in that enum.
+local function NameplateStackingIsUnavailable(info)
+  return GetCVar("nameplateStackingTypes") == nil or Enum.NamePlateStackType == nil
+end
+
+local function GetValueNameplateStacking(info)
+  return C_CVar.GetCVarBitfield("nameplateStackingTypes", Enum.NamePlateStackType[info.arg]) or false
+end
+
+local function SetValueNameplateStacking(info, value)
+  CVars:OverwriteBitfield("nameplateStackingTypes", Enum.NamePlateStackType[info.arg], value)
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -2782,27 +2798,6 @@ end
     },
   }
   AddLayoutOptions(options.args.ModeIcon.args, 20, "questWidget")
-  return options
-end
-
-local function CreateStealthWidgetOptions()
-  local options =  {
-    name = L["Stealth"],
-    order = 80,
-    type = "group",
-    hidden = function() return not Addon.Widgets:IsEnabled("Stealth") end,
-    args = {
-      Enable = GetEnableEntry(L["Enable Stealth Widget"], L["This widget shows a stealth icon on nameplates of units that can detect stealth."], "stealthWidget", true),
-      Layout = {
-        name = L["Layout"],
-        order = 10,
-        type = "group",
-        inline = true,
-        args = {},
-      }
-    },
-  }
-  AddLayoutOptions(options.args.Layout.args, 80, "stealthWidget")
   return options
 end
 
@@ -6283,7 +6278,8 @@ local function CreateLocalizationSettings()
     order = 135,
     type = "group",
     inline = false,
-    hidden = Addon.HAS_MIDNIGHT_API,
+    -- On clients with Midnight's API surface, only transliteration is available (if the client has the API for it)
+    hidden = not Addon.Localization.TransliterationIsSupported,
     args = {
       Texts = {
         name = L["Texts"],
@@ -6305,6 +6301,7 @@ local function CreateLocalizationSettings()
         order = 20,
         type = "group",
         inline = true,
+        hidden = Addon.HAS_MIDNIGHT_API,
         args = {
           MetricUnitSymbols = {
             name = L["Metric Unit Symbols"],
@@ -6620,6 +6617,28 @@ local function CreateBlizzardSettings()
             type = "group",
             inline = true,
             args = {
+              StackEnemy = {
+                name = L["Stack Enemy Nameplates"],
+                order = 10,
+                type = "toggle",
+                width = "double",
+                desc = L["Stack nameplates of enemy units, so that they don't overlap."],
+                set = SetValueNameplateStacking,
+                get = GetValueNameplateStacking,
+                arg = "Enemy",
+                hidden = NameplateStackingIsUnavailable,
+              },
+              StackFriendly = {
+                name = L["Stack Friendly Nameplates"],
+                order = 20,
+                type = "toggle",
+                width = "double",
+                desc = L["Stack nameplates of friendly units, so that they don't overlap."],
+                set = SetValueNameplateStacking,
+                get = GetValueNameplateStacking,
+                arg = "Friendly",
+                hidden = NameplateStackingIsUnavailable,
+              },
               OverlapH = {
                 name = L["Horizontal Overlap"],
                 order = 30,
@@ -6733,44 +6752,6 @@ local function CreateBlizzardSettings()
                 arg = { "BlizzardSettings", "Widgets", "VerticalOffset" },
               },
             },
-          },
-        },
-      },
-      PersonalNameplate = {
-        name = L["Personal Nameplate"],
-        order = 50,
-        type = "group",
-        inline = false,
-        args = {
-          HideBuffs = {
-            type = "toggle",
-            order = 10,
-            name = L["Hide Buffs"],
-            set = function(info, val)
-              SetValueGeneral(info, val)
-              local plate = C_NamePlate.GetNamePlateForUnit("player")
-              if plate and plate:IsShown() then
-                plate.UnitFrame.BuffFrame:SetShown(not val)
-              end
-            end,
-            get = GetValue,
-            arg = { "PersonalNameplate", "HideBuffs"},
-          },
-          -- ? Why don't I just change the CVar here, why storing the setting internally? It's set on login, different
-          -- ? to all how all other CVars are handled
-          ShowResources = {
-            type = "toggle",
-            order = 20,
-            name = L["Resources on Targets"],
-            desc = L["Enable this if you want to show Blizzard's special resources above the target nameplate."],
-            width = "double",
-            set = function(info, val)
-              SetValueGeneral(info, val)
-              CVars:OverwriteBool("nameplateResourceOnTarget", val)
-            end,
-            get = GetValue,
-            hidden = function() return not CVars:IsAvailable("nameplateResourceOnTarget") end,
-            arg = { "PersonalNameplate", "ShowResourceOnTarget"},
           },
         },
       },
@@ -8416,7 +8397,6 @@ local function CreateWidgetOptions()
       FocusWidget = CreateFocusWidgetOptions(),
       ResourceWidget = CreateResourceWidgetOptions(),
       SocialWidget = CreateSocialWidgetOptions(),
-      StealthWidget = CreateStealthWidgetOptions(),
       TargetArtWidget = CreateTargetArtWidgetOptions(),
       QuestWidget = CreateQuestWidgetOptions(),
       HealerTrackerWidget = CreateHealerTrackerWidgetOptions(),

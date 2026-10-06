@@ -119,7 +119,7 @@ local PlatesByGUID = Addon.PlatesByGUID
 ---------------------------------------------------------------------------------------------------
 -- Cached configuration settings (for performance reasons)
 ---------------------------------------------------------------------------------------------------
-local SettingsShowEnemyBlizzardNameplates, SettingsShowFriendlyBlizzardNameplates, SettingsHideBuffsOnPersonalNameplate
+local SettingsShowEnemyBlizzardNameplates, SettingsShowFriendlyBlizzardNameplates
 local SettingsShowOnlyNames
 local TargetStyleForEnemy, TargetStyleForFriend, TargetStyleForInteract
 local ShowCastBars
@@ -130,11 +130,10 @@ local SettingsShowSurname
 -- Wrapper functions for WoW Classic
 ---------------------------------------------------------------------------------------------------
 
--- Old-classic-engine-only quirks (frame naming, UnitChannelInfo/_G.GetSpellInfo). A client that reports
--- Addon.IS_CLASSIC (Vanilla-level content) but has Midnight's API surface (see Addon.HAS_MIDNIGHT_API in
--- Init.lua) runs on a modern engine without these quirks, so it falls through to the modern branch at
--- the bottom of this chain instead.
-if Addon.IS_CLASSIC and not Addon.HAS_MIDNIGHT_API then
+-- Old-classic-engine-only quirks (frame naming, UnitChannelInfo/_G.GetSpellInfo). "WoW Forever" (not part
+-- of Addon.IS_CLASSIC, see Init.lua) runs on a modern engine without these quirks, so it falls through to
+-- the modern branch at the bottom of this chain instead.
+if Addon.IS_CLASSIC then
   GetNameForNameplate = function(plate) return plate:GetName():gsub("NamePlate", "Plate") end
 
     -- Fix for UnitChannelInfo not working on WoW Classic
@@ -659,11 +658,13 @@ local function OnStartCasting(tp_frame, unitid, cast_guid, event_spell_id, castb
   if Addon.HAS_MIDNIGHT_API then
     local target_unit_name = UnitSpellTargetName(unitid)
     if target_unit_name then
+      -- Transliterate the plain name, not the name with the color escape sequence wrapped around it
+      target_unit_name = TransliterateCyrillicLetters(target_unit_name)
       local class_name = UnitSpellTargetClass(unitid)
       if class_name then
         target_unit_name = WrapTextInColor(target_unit_name, GetClassColor(class_name))
       end
-      castbar.CastTarget:SetText(TransliterateCyrillicLetters(target_unit_name))
+      castbar.CastTarget:SetText(target_unit_name)
     else
       castbar.CastTarget:SetText(nil)
     end
@@ -933,7 +934,7 @@ local function FrameOnShow(UnitFrame)
     return
   end
 
-  -- Don't show ThreatPlates for ignored units (e.g., widget-only nameplates (since Shadowlands))
+  -- Don't show ThreatPlates for ignored units (the player's own nameplate, widget-only nameplates (since Shadowlands))
   if IgnoreUnitForThreatPlates(unitid) then
     if UnitFrame:GetParent().TPFrame then
       UnitFrame:GetParent().TPFrame:Hide()
@@ -941,20 +942,11 @@ local function FrameOnShow(UnitFrame)
     return
   end
 
-
-  if UnitIsUnitTP(unitid, "player") then -- or: ns.PlayerNameplate == GetNamePlateForUnit(UnitFrame.unit)
-    -- Skip the personal resource bar of the player character, don't unhook scripts as nameplates, even the personal
-    -- resource bar, get re-used
-    if SettingsHideBuffsOnPersonalNameplate then
-      UnitFrame.BuffFrame:Hide()
-    end
-  else
-    if SettingsShowOnlyNames then
-      ClassicBlizzardNameplatesSetAlpha(UnitFrame, 0)
-    end
-  
-    SetVisibilityOfBlizzardNameplate(UnitFrame, unitid)
+  if SettingsShowOnlyNames then
+    ClassicBlizzardNameplatesSetAlpha(UnitFrame, 0)
   end
+
+  SetVisibilityOfBlizzardNameplate(UnitFrame, unitid)
 end
 
 -- Frame: self = plate
@@ -1308,7 +1300,6 @@ function Addon:UpdateSettings()
 
   SettingsShowFriendlyBlizzardNameplates = db.ShowFriendlyBlizzardNameplates
   SettingsShowEnemyBlizzardNameplates = db.ShowEnemyBlizzardNameplates
-  SettingsHideBuffsOnPersonalNameplate = db.PersonalNameplate.HideBuffs
   SettingsShowOnlyNames = CVars:GetAsBool("nameplateShowOnlyNames") and Addon.db.profile.BlizzardSettings.Names.Enabled
   SettingsShowSurname = Addon.WOW_FEATURE_REGIONAL_SURNAMES and db.Name.HealthbarMode.ShowSurname
 
@@ -2116,13 +2107,14 @@ function Addon:UNIT_SPELLCAST_INTERRUPTED(unitid, cast_guid, spell_id, interrupt
   if castbar_id ~= castbar.CastbarID or not castbar:IsShown() or not interrupted_by then return end
 
   local _, class, _, race, _, name, realm = GetPlayerInfoByGUID(interrupted_by)
-  name = name or UnitNameFromGUID(interrupted_by)
+  -- Transliterate the plain name, not the name with the color escape sequence wrapped around it
+  name = TransliterateCyrillicLetters(name or UnitNameFromGUID(interrupted_by))
   local class_color = class and GetClassColor(class) or nil
   if class_color then
     name = class_color:WrapTextInColorCode(name)
   end
 
-  tp_frame.visual.SpellText:SetText(INTERRUPTED .. " [" .. TransliterateCyrillicLetters(name) .. "]")
+  tp_frame.visual.SpellText:SetText(INTERRUPTED .. " [" .. name .. "]")
 
   castbar:SetMinMaxValues(0, 1)
   castbar:SetValue(1)

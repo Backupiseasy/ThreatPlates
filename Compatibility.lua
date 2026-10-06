@@ -50,7 +50,7 @@ local WOW_EVENTS = {
   PLAYER_TARGET_CHANGED = true,
   PVP_MATCH_ACTIVE = Addon.IS_MAINLINE, -- BfA Patch 8.2.0 (2019-06-25): Added.
   QUEST_ACCEPTED = true,
-  QUEST_DATA_LOAD_RESULT = Addon.IS_MAINLINE, -- Added in 8.2.5
+  QUEST_DATA_LOAD_RESULT = Addon.IS_MAINLINE or Addon.IS_FOREVER, -- Added in 8.2.5; also fires on "WoW Forever" (modern engine)
   QUEST_LOG_UPDATE = true,
   QUEST_REMOVED = true,
   QUEST_WATCH_UPDATE = true,
@@ -124,52 +124,6 @@ function Addon:UnregisterEvent(event_handler_frame, event)
   -- Only need to check if event is known in the current expansion
   if WOW_EVENTS[event] then
     event_handler_frame:UnregisterEvent(event)
-  end
-end
-
--- Diagnostic pass over every event this addon knows about (Compatibility.lua's WOW_EVENTS table): tries
--- to register each one on a throwaway frame via pcall, so a client that rejects/removed an event (hard
--- Lua error, not just "event never fires") can never bring down the whole addon here. Reports every event
--- that failed, together with whether WOW_EVENTS already expected that (its flag says "not supported" for
--- the current expansion) or not (flag says "supported", i.e. WOW_EVENTS is now wrong and needs updating).
--- Blind spot: an ADDON_ACTION_FORBIDDEN taint error (as opposed to a plain Lua error) is tied to the
--- calling context, not just the event name, so it will not necessarily reproduce here even for an event
--- that does fail this way when registered from the addon's normal (non-diagnostic) code paths.
--- Invoke with /tptp debug Compatibility.
-function Addon:DebugCompatibility()
-  local frame = CreateFrame("Frame")
-  local mismatched_events, failed_count, mismatch_count, total_count = {}, 0, 0, 0
-
-  -- Sort event names first so output order is stable and deterministic across runs.
-  local event_names = {}
-  for event in pairs(WOW_EVENTS) do
-    event_names[#event_names + 1] = event
-  end
-  table.sort(event_names)
-
-  for _, event in ipairs(event_names) do
-    total_count = total_count + 1
-    local success = pcall(frame.RegisterEvent, frame, event)
-    if success then
-      frame:UnregisterEvent(event)
-    else
-      failed_count = failed_count + 1
-      if WOW_EVENTS[event] then
-        mismatch_count = mismatch_count + 1
-        mismatched_events[mismatch_count] = event
-        Addon.Logging.Print("  FAILED:", event, "(WOW_EVENTS says supported - MISMATCH)")
-      else
-        Addon.Logging.Print("  FAILED:", event, "(WOW_EVENTS already says unsupported - OK)")
-      end
-    end
-  end
-
-  Addon.Logging.Print(("Compatibility check done: %d/%d events failed to register, %d mismatch(es) with WOW_EVENTS."):format(failed_count, total_count, mismatch_count))
-  if mismatch_count > 0 then
-    Addon.Logging.Print("Mismatched events - WOW_EVENTS needs updating (copy this line):")
-    Addon.Logging.Print(table.concat(mismatched_events, ", "))
-  else
-    Addon.Logging.Print("No mismatches - WOW_EVENTS is up to date for this client.")
   end
 end
 
