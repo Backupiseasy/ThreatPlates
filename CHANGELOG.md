@@ -25,6 +25,7 @@
 * Fixed a bug where nameplates were not correctly updated after a unit update (e.g., missing totem icons after a name update or missing arena numbers after a change of the arena opponents).
 * Fixed the game freezing for 1-2 seconds when changing settings while the Auras widget is enabled.
 * Fixed a Lua error after login when another nameplate addon is enabled together with Threat Plates.
+* Removed the Stealth widget, as it no longer worked on WoW Midnight and WoW Forever, caused by Blizzard's restrictions on accessing auras, and was not maintained for the Classic versions.
 
 ## WoW Forever Beta
 

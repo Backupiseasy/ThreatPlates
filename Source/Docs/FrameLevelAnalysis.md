@@ -67,7 +67,6 @@
 | `ResourceWidget.statusbar.Border` | N+8 | N+8 | ⚠ Same level as statusbar (≠ healthbar.Border pattern) |
 | `ScriptWidget.widget_frame` | **N+0** | **N+0** | ⚠ Same level as tp_frame |
 | `SocialWidget.widget_frame` | N+7 | N+7 | |
-| `StealthWidget.widget_frame` | N+9 | N+9 | |
 | `ThreatWidget.widget_frame` | N+7 | N+7 | |
 | `TotemIconWidget.widget_frame` | N+7 | N+7 | |
 | `UniqueIconWidget.widget_frame` | N+14 | N+14 | |
@@ -220,7 +219,7 @@ N+5   healthbar, textframe, EliteBorder, healthbar.Highlight (*)
         └─ castbar OVERLAY: SpellIcon (sub 7)
 N+7   Arena, ClassIcon, ComboPoints, HealerTracker, Quest, Social, Threat, Totem
 N+8   ResourceWidget
-N+9   StealthWidget, AurasWidget (CbOHb)
+N+9   AurasWidget (CbOHb)
 N+14  UniqueIconWidget
 N+15  UniqueIconWidget.Highlight, BossModsWidget.icon_frame.Highlight
 ```

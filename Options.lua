@@ -177,7 +177,6 @@ local WIDGET_INFO = {
   FocusWidget = { Name = "Focus", UpdateSettings = true, UpdateAllSettings = true, PublishEvent = "SituationalColorUpdate" },
   ResourceWidget = { Name = "Resource", UpdateSettings = true,  },
   socialWidget = { Name = "Social", UpdateSettings = true, PublishEvent = "ClassColorUpdate" },
-  stealthWidget = { Name = "Stealth", UpdateSettings = false, },
   targetWidget = { Name = "TargetArt", UpdateSettings = true, UpdateAllSettings = true, PublishEvent = "SituationalColorUpdate" },
   questWidget = { Name = "Quest", UpdateSettings = true, PublishEvent = "SituationalColorUpdate" },
   healerTracker = { Name = "HealerTracker", UpdateSettings = false },
@@ -389,7 +388,6 @@ local IconTexturesByOptions = {
   ["Social.Friend"] = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\SocialWidget\\friendicon",
   ["Social.BattleNetFriend"] = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\SocialWidget\\BattleNetFriend", -- "Interface\\FriendsFrame\\PlusManz-BattleNet"
   ["Social.GuildMember"] = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\SocialWidget\\guildicon",
-  ["Stealth"] = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\StealthWidget\\stealthicon",
   -- TargetHighlight.Center|Left|Right
   -- TargetMarker.<NAME>, e.g., TargetMarker.SKULL 
   -- Totem.<SPELL_ID>, e.g., 
@@ -2800,27 +2798,6 @@ end
     },
   }
   AddLayoutOptions(options.args.ModeIcon.args, 20, "questWidget")
-  return options
-end
-
-local function CreateStealthWidgetOptions()
-  local options =  {
-    name = L["Stealth"],
-    order = 80,
-    type = "group",
-    hidden = function() return not Addon.Widgets:IsEnabled("Stealth") end,
-    args = {
-      Enable = GetEnableEntry(L["Enable Stealth Widget"], L["This widget shows a stealth icon on nameplates of units that can detect stealth."], "stealthWidget", true),
-      Layout = {
-        name = L["Layout"],
-        order = 10,
-        type = "group",
-        inline = true,
-        args = {},
-      }
-    },
-  }
-  AddLayoutOptions(options.args.Layout.args, 80, "stealthWidget")
   return options
 end
 
@@ -8420,7 +8397,6 @@ local function CreateWidgetOptions()
       FocusWidget = CreateFocusWidgetOptions(),
       ResourceWidget = CreateResourceWidgetOptions(),
       SocialWidget = CreateSocialWidgetOptions(),
-      StealthWidget = CreateStealthWidgetOptions(),
       TargetArtWidget = CreateTargetArtWidgetOptions(),
       QuestWidget = CreateQuestWidgetOptions(),
       HealerTrackerWidget = CreateHealerTrackerWidgetOptions(),

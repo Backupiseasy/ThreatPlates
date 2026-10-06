@@ -1576,15 +1576,6 @@ Addon.DEFAULT_SETTINGS = {
       Font = Addon.DEFAULT_FONT,
       FontSize = 3
     },
-    stealthWidget = {
-      ON = false,
-      scale = 28,
-      x = 0,
-      y = 0,
-      alpha = 1,
-      anchor = "CENTER",
-      ShowInHeadlineView = false,
-    },
     ResourceWidget  = {
       ON = false,
       x = 0,
