@@ -158,6 +158,19 @@ Central pub/sub for both real WoW events and internal TP events (`INTERNAL_EVENT
   `Addon:ExpansionSupportsEvent(event)`, which is `false` for internal events, so `ThreatUpdate` stayed
   subscribed after the Quest widget was disabled; fixed by also checking `INTERNAL_EVENTS[event]`).
 
+- **Config pub/sub** (same file): `EventService.SubscribeConfig(subscriber, path, func)` /
+  `UnsubscribeAllConfig(subscriber)` / `PublishConfig(path)`. `path` is a dot-path prefix (`"AuraWidget"`,
+  `"uniqueSettings"`, `"settings"`); `PublishConfig(info.arg)` notifies each subscriber of every prefix of the
+  published path once. Subscribers are keyed by object identity, so re-subscribing in a repeated `OnEnable`
+  replaces the entry instead of adding one.
+- Setters go through `SetValue(info, ...)`, which writes the value and publishes `info.arg`. For range and color
+  values the publish and the follow-up work (widget enable/disable, repaint) are deferred by 0.2 s and coalesced
+  per setting (`DeferFollowUp`), because color pickers and sliders report a new value every frame while dragged.
+  `SetDBValue` does the same for direct writes. Setters that need extra work (e.g., resizing the clickable area)
+  use `SetValueDeferred(info, follow_up, ...)`.
+- A widget's `OnConfigChanged` handles only its own settings (`UpdateSettings`) and its own plate refresh. Do not
+  publish another widget's settings from a setter.
+
 ### Nameplate lifecycle (`Nameplate.lua`)
 
 - `NAME_PLATE_CREATED` → `NAME_PLATE_UNIT_ADDED` → `HandlePlateUnitAdded(plate, unitid)`: calls
@@ -245,7 +258,10 @@ Modules, Elements and Widgets model different things and use different calling c
 | Examples | Font, Icon, Animation, Threat, Color, Transparency, Scaling, Localization | Healthbar, Name, Castbar, SpellIcon, StatusText, MouseoverHighlight, ThreatGlow, TargetMarker, Classification, Level | Auras, ComboPoints, Quest, Threat, TotemIcon, Arena, BossMods, Social, Stealth, Experience, Resource, ClassIcon, UniqueIcon, TargetArt, HealerTracker, Script |
 
 `WidgetHandler:InitializeAllWidgets()` enables/disables each widget based on `IsEnabled()`. A widget without
-extra lifecycle logic may omit `OnEnable`/`OnDisable` entirely.
+extra lifecycle logic may omit `OnEnable`/`OnDisable` entirely. `WidgetHandler:UpdateEnabledWidgets()` does the
+same for widgets whose enabled state changed, and updates no settings. Enabling a widget updates its frames on
+all plates with its current settings, so settings must be fresh before a widget is enabled
+(`InitializeWidget` updates settings first and then enables).
 
 **Pitfall — dot vs. colon calls**: Module and Element API functions are dot-defined (no `self`). Calling one
 with `:` (e.g. `Font:UpdateText(...)` instead of `Addon.Font.UpdateText(...)`) silently injects the module
@@ -256,10 +272,11 @@ functions as local upvalues (`local FontUpdateText = Addon.Font.UpdateText`,
 `local AnimationFlash, AnimationStopFlash = Addon.Animation.Flash, Addon.Animation.StopFlash`) and call them as
 plain functions.
 
-**Pitfall — a widget's `UpdateSettings` runs for unrelated changes, several times in a row**: `UpdateSpecial`
-(`Options.lua`, behind every custom nameplate option) and `Addon:ReloadTheme()` (profile change) call
-`WidgetHandler:InitializeAllWidgets()`, which calls `UpdateSettings` on **every** enabled widget, and one
-settings change can trigger it two or three times. `UpdateSettings` must therefore be cheap or skip work whose
+**Pitfall — a widget's `UpdateSettings` runs for unrelated changes, several times in a row**: `Addon:ReloadTheme()`
+(profile change) calls `WidgetHandler:InitializeAllWidgets()`, which calls `UpdateSettings` on **every** enabled
+widget. `UpdateSpecial` (`Options.lua`, behind every custom nameplate option) only enables/disables widgets and
+publishes `uniqueSettings` (see the Script widget); other widgets get their settings via pub/sub. Before this
+change one settings change could trigger `UpdateSettings` two or three times. `UpdateSettings` must therefore be cheap or skip work whose
 inputs did not change. Historical bug (fixed 13.3.0): `AurasWidgetMidnight.lua`'s
 `ReapplyLiveAuraButtonSettings` restyled every pooled aura button on each call - 5200 buttons (40 containers per
 aura type x 5/7/1 groups x 10 buttons), about 0.13 ms each - and froze the game for 1-2 seconds on any custom
@@ -276,7 +293,9 @@ picker fires continuously while dragging. Not a relevant cost: the per-nameplate
 AceDB-3.0 based: `Addon.db.profile` (per-character: frame/healthbar/castbar/color/nameplate/totemSettings/custom
 plates), `Addon.db.global`, `Addon.db.char`. Defaults come from `Addon.GetDefaultSettingsV1()` (`Database.lua`)
 plus `Addon.DEFAULT_SETTINGS` (`Constants.lua`). `Addon:ReloadTheme()` (`Addon.lua`) re-creates themes/custom
-plates and pushes settings to all active nameplates after a profile change.
+plates and pushes settings to all active nameplates after a profile change. `Addon:ProfChange()` calls
+`ReloadTheme()` first: enabling a widget can publish to all plates, which needs the module settings of the new
+profile. It then publishes the color and situational updates and repaints; `PublishConfig(nil)` is not used.
 
 ## Midnight (`feature/midnight`) — Secret Values
 

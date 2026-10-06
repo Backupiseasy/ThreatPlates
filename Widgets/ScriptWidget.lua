@@ -451,7 +451,12 @@ function Widget:IsEnabled()
 end
 
 function Widget:OnEnable()
+  Addon.EventService.SubscribeConfig(self, "uniqueSettings", function(p) self:OnConfigChanged(p) end)
   ProcessEvent("OnEnable")
+end
+
+function Widget:OnConfigChanged(changedPath)
+  self:UpdateSettings()
 end
 
 function Widget:OnDisable()
@@ -462,6 +467,7 @@ function Widget:OnDisable()
     end
   end
 
+  Addon.EventService.UnsubscribeAllConfig(self)
   ProcessEvent("OnDisable")
 end
 

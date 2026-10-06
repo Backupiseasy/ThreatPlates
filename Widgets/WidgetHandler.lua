@@ -228,9 +228,38 @@ function WidgetHandler:InitializeWidget(widget_name)
 
   if widget:IsEnabled() then
     self:UpdateSettings(widget_name)
+  end
+  self:ApplyEnabledState(widget_name)
+end
+
+function WidgetHandler:ApplyEnabledState(widget_name)
+  if self.Widgets[widget_name]:IsEnabled() then
     self:EnableWidget(widget_name)
   else
     self:DisableWidget(widget_name)
+  end
+end
+
+function WidgetHandler:IsActive(widget_name)
+  local widget = self.Widgets[widget_name]
+  return (self.EnabledWidgets[widget_name] or self.EnabledTargetWidgets[widget_name] or self.EnabledFocusWidget == widget) and true or false
+end
+
+-- Only widgets whose enabled state changes are initialized, as enabling a widget updates its frames on all
+-- plates with its current settings. Widgets that stay enabled keep their settings, which config pub/sub updates.
+function WidgetHandler:UpdateEnabledWidget(widget_name)
+  if (self.Widgets[widget_name]:IsEnabled() and true or false) ~= self:IsActive(widget_name) then
+    self:InitializeWidget(widget_name)
+  end
+end
+
+function WidgetHandler:UpdateEnabledWidgets()
+  self:UpdateEnabledWidget("Script")
+
+  for widget_name, _ in pairs(self.Widgets) do
+    if widget_name ~= "Script" then
+      self:UpdateEnabledWidget(widget_name)
+    end
   end
 end
 

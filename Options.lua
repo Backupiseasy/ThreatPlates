@@ -587,15 +587,36 @@ local SET_FUNCTIONS = {
 -- Write a value directly into a SavedVariables (sub-)table and publish the config change in one step.
 -- Use this instead of a bare "t[key] = value" for writes that don't go through SetValue (info.arg
 -- doesn't map cleanly, e.g. dynamic indices), so the PublishConfig call can't be forgotten.
-local function SetDBValue(t, key, path, value)
-  t[key] = value
-  Addon.EventService.PublishConfig(path)
+-- Key identifying a setting, so that repeated changes to it are coalesced into one follow-up
+local function SettingKey(arg)
+  if type(arg) == "table" then
+    return arg.Cvar or table.concat(arg, ".")
+  end
+  return tostring(arg)
 end
 
-local function SetValue(info, ...)
-  --print ("SetValue: Function =", "{ " .. table.concat(info.arg, ".") .. " }")
+-- Color pickers and sliders report a new value on every frame while they are dragged. Values are written at
+-- once, but their follow-up work only runs after the value has stopped changing for this long.
+local SETTING_FOLLOW_UP_DELAY = 0.2
+local pendingFollowUps = {}
 
-  -- If arg describes a CVar, set it directly and return
+local function DeferFollowUp(key, func)
+  if pendingFollowUps[key] then
+    pendingFollowUps[key]:Cancel()
+  end
+
+  pendingFollowUps[key] = C_Timer.NewTimer(SETTING_FOLLOW_UP_DELAY, function()
+    pendingFollowUps[key] = nil
+    func()
+  end)
+end
+
+local function SetDBValue(t, key, path, value)
+  t[key] = value
+  DeferFollowUp(SettingKey(path), function() Addon.EventService.PublishConfig(path) end)
+end
+
+local function WriteSetting(info, ...)
   if type(info.arg) == "table" and info.arg.Cvar then
     if info.type == "toggle" then
       CVars:OverwriteBool(info.arg.Cvar, ...) -- Booleans should be written as 1/0
@@ -605,16 +626,13 @@ local function SetValue(info, ...)
     return
   end
 
-  -- For widgets: check if the widget if enabled or disabled. If so, call InitializeWidget additionally
-  local widget_info = WIDGET_INFO[info.arg[1]]
-  local widget_is_enabled = widget_info and Addon.Widgets:IsEnabled(widget_info.Name)
-
   local setter_function = SET_FUNCTIONS[info.type] or SetValueGeneral
   setter_function(info, ...)
+end
 
-  Addon.EventService.PublishConfig(info.arg)
+local function ApplySettingChange(arg, widget_info, widget_was_enabled)
+  Addon.EventService.PublishConfig(arg)
 
-  -- Update the corresponding parts of Threat Plates based on the setting
   if widget_info then
     -- UseUniqueWidget is a cached flag (see Addon:UpdateUseUniqueWidget), not read live from the
     -- profile, so it must be refreshed before comparing enabled-state for custom nameplate changes
@@ -622,9 +640,7 @@ local function SetValue(info, ...)
       Addon:UpdateUseUniqueWidget()
     end
 
-    --print ("SetValue: Enabling/Disabling Widget =>",widget_is_enabled, Addon.Widgets:IsEnabled(widget_info.Name))
-    if widget_is_enabled ~= Addon.Widgets:IsEnabled(widget_info.Name) then
-      --print ("SetValue: Enabling/Disabling Widget =>", widget_info.Name)
+    if widget_was_enabled ~= Addon.Widgets:IsEnabled(widget_info.Name) then
       Addon.Widgets:InitializeWidget(widget_info.Name)
 
       -- If also core parts of the nameplate need to be udpated
@@ -637,13 +653,57 @@ local function SetValue(info, ...)
         Addon:PublishToEachPlate(widget_info.PublishEvent)
       end
     end
-    -- Settings changes are handled by each widget's OnConfigChanged via PublishConfig above
   else
-    --print ("SetValue: Normal =>", info[2])
-
-    -- UpdateSettings for modules/elements is handled by their own PublishConfig subscriptions above
     Addon:ScheduleRepaint()
   end
+end
+
+local function SetValue(info, ...)
+  local arg = info.arg
+
+  -- CVars are written directly, without any follow-up work
+  if type(arg) == "table" and arg.Cvar then
+    WriteSetting(info, ...)
+    return
+  end
+
+  local widget_info = WIDGET_INFO[arg[1]]
+  local widget_was_enabled = widget_info and Addon.Widgets:IsEnabled(widget_info.Name)
+
+  WriteSetting(info, ...)
+
+  if info.type == "range" or info.type == "color" then
+    DeferFollowUp(SettingKey(arg), function() ApplySettingChange(arg, widget_info, widget_was_enabled) end)
+  else
+    ApplySettingChange(arg, widget_info, widget_was_enabled)
+  end
+end
+
+-- For setters that need follow-up work beyond SetValue (e.g., resizing the clickable area), which is
+-- deferred together with the regular follow-up work of the setting
+local function SetValueDeferred(info, follow_up, ...)
+  local arg = info.arg
+  local widget_info = WIDGET_INFO[arg[1]]
+  local widget_was_enabled = widget_info and Addon.Widgets:IsEnabled(widget_info.Name)
+
+  WriteSetting(info, ...)
+
+  DeferFollowUp(SettingKey(arg), function()
+    ApplySettingChange(arg, widget_info, widget_was_enabled)
+    follow_up()
+  end)
+end
+
+local function UpdateClickableArea()
+  Addon.ExecuteOnlyOoC(function() Addon:SetBaseNamePlateSize() end)
+end
+
+local function UpdateClickableAreaAndTargetArt()
+  Addon.ExecuteOnlyOoC(function()
+    Addon:SetBaseNamePlateSize()
+    -- Update Target Art widget because of border adjustments for small healthbar heights
+    Addon.EventService.PublishConfig({ "targetWidget" })
+  end)
 end
 
 local function CVarIsUnavailable(info)
@@ -859,8 +919,9 @@ end
 
 local function UpdateSpecial() -- Need to add a way to update options table.
   Addon:InitializeCustomNameplates()
-  -- Update widgets as well as at least some of them use custom nameplate settings
-  Addon.Widgets:InitializeAllWidgets()
+  Addon.Widgets:UpdateEnabledWidgets()
+  -- Only the Script widget caches data of custom nameplates, see its OnConfigChanged
+  Addon.EventService.PublishConfig({ "uniqueSettings" })
   Addon:ForceUpdate()
 end
 
@@ -5448,7 +5509,7 @@ local function CreateAurasWidgetOptions()
                     get = function(info) return db.AuraWidget.Debuffs.FilterByType[1] end,
                     set = function(info, val)
                       db.AuraWidget.Debuffs.FilterByType[1] = val
-                      Addon.Widgets:UpdateSettings("Auras")
+                      Addon.EventService.PublishConfig({ "AuraWidget", "Debuffs" })
                     end,
                     disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly or not db.AuraWidget.Debuffs.ShowDispellable end,
                   },
@@ -5460,7 +5521,7 @@ local function CreateAurasWidgetOptions()
                     get = function(info) return db.AuraWidget.Debuffs.FilterByType[2] end,
                     set = function(info, val)
                       db.AuraWidget.Debuffs.FilterByType[2] = val
-                      Addon.Widgets:UpdateSettings("Auras")
+                      Addon.EventService.PublishConfig({ "AuraWidget", "Debuffs" })
                     end,
                     disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly or not db.AuraWidget.Debuffs.ShowDispellable end,
                   },
@@ -5472,7 +5533,7 @@ local function CreateAurasWidgetOptions()
                     get = function(info) return db.AuraWidget.Debuffs.FilterByType[3] end,
                     set = function(info, val)
                       db.AuraWidget.Debuffs.FilterByType[3] = val
-                      Addon.Widgets:UpdateSettings("Auras")
+                      Addon.EventService.PublishConfig({ "AuraWidget", "Debuffs" })
                     end,
                     disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly or not db.AuraWidget.Debuffs.ShowDispellable end,
                   },
@@ -5484,7 +5545,7 @@ local function CreateAurasWidgetOptions()
                     get = function(info) return db.AuraWidget.Debuffs.FilterByType[4] end,
                     set = function(info, val)
                       db.AuraWidget.Debuffs.FilterByType[4] = val
-                      Addon.Widgets:UpdateSettings("Auras")
+                      Addon.EventService.PublishConfig({ "AuraWidget", "Debuffs" })
                     end,
                     disabled = function() return not db.AuraWidget.Debuffs.ShowFriendly or not db.AuraWidget.Debuffs.ShowDispellable end,
                   },
@@ -5667,7 +5728,7 @@ local function CreateAurasWidgetOptions()
                     get = function(info) return db.AuraWidget.Debuffs.FilterByTypeEnemy[1] end,
                     set = function(info, val)
                       db.AuraWidget.Debuffs.FilterByTypeEnemy[1] = val
-                      Addon.Widgets:UpdateSettings("Auras")
+                      Addon.EventService.PublishConfig({ "AuraWidget", "Debuffs" })
                     end,
                     disabled = function() return not db.AuraWidget.Debuffs.ShowEnemy or not db.AuraWidget.Debuffs.ShowDispellableEnemy end,
                   },
@@ -5679,7 +5740,7 @@ local function CreateAurasWidgetOptions()
                     get = function(info) return db.AuraWidget.Debuffs.FilterByTypeEnemy[2] end,
                     set = function(info, val)
                       db.AuraWidget.Debuffs.FilterByTypeEnemy[2] = val
-                      Addon.Widgets:UpdateSettings("Auras")
+                      Addon.EventService.PublishConfig({ "AuraWidget", "Debuffs" })
                     end,
                     disabled = function() return not db.AuraWidget.Debuffs.ShowEnemy or not db.AuraWidget.Debuffs.ShowDispellableEnemy end,
                   },
@@ -5691,7 +5752,7 @@ local function CreateAurasWidgetOptions()
                     get = function(info) return db.AuraWidget.Debuffs.FilterByTypeEnemy[3] end,
                     set = function(info, val)
                       db.AuraWidget.Debuffs.FilterByTypeEnemy[3] = val
-                      Addon.Widgets:UpdateSettings("Auras")
+                      Addon.EventService.PublishConfig({ "AuraWidget", "Debuffs" })
                     end,
                     disabled = function() return not db.AuraWidget.Debuffs.ShowEnemy or not db.AuraWidget.Debuffs.ShowDispellableEnemy end,
                   },
@@ -5703,7 +5764,7 @@ local function CreateAurasWidgetOptions()
                     get = function(info) return db.AuraWidget.Debuffs.FilterByTypeEnemy[4] end,
                     set = function(info, val)
                       db.AuraWidget.Debuffs.FilterByTypeEnemy[4] = val
-                      Addon.Widgets:UpdateSettings("Auras")
+                      Addon.EventService.PublishConfig({ "AuraWidget", "Debuffs" })
                     end,
                     disabled = function() return not db.AuraWidget.Debuffs.ShowEnemy or not db.AuraWidget.Debuffs.ShowDispellableEnemy end,
                   },
@@ -6538,12 +6599,7 @@ local function CreateBlizzardSettings()
                 type = "toggle",
                 width = "double",
                 desc = L["The size of the clickable area is always derived from the current size of the healthbar."],
-                set = function(info, val)
-                  Addon.ExecuteOnlyOoC(function()
-                    SetValue(info, val)
-                    Addon:SetBaseNamePlateSize()
-                  end)
-                end,
+                set = function(info, val) SetValueDeferred(info, UpdateClickableArea, val) end,
                 arg = { "settings", "frame", "SyncWithHealthbar"},
               },
               ShowArea = {
@@ -6563,12 +6619,7 @@ local function CreateBlizzardSettings()
                 min = 1,
                 max = 500,
                 step = 1,
-                set = function(info, val)
-                  Addon.ExecuteOnlyOoC(function()
-                    SetValue(info, val)
-                    Addon:SetBaseNamePlateSize()
-                  end)
-                end,
+                set = function(info, val) SetValueDeferred(info, UpdateClickableArea, val) end,
                 arg = { "settings", "frame", "width" },
                 disabled = function() return db.settings.frame.SyncWithHealthbar end,
               },
@@ -6579,12 +6630,7 @@ local function CreateBlizzardSettings()
                 min = 1,
                 max = 100,
                 step = 1,
-                set = function(info, val)
-                  Addon.ExecuteOnlyOoC(function()
-                    SetValue(info, val)
-                    Addon:SetBaseNamePlateSize()
-                  end)
-                end,
+                set = function(info, val) SetValueDeferred(info, UpdateClickableArea, val) end,
                 arg = { "settings", "frame", "height"},
                 disabled = function() return db.settings.frame.SyncWithHealthbar end,
               },
@@ -6595,12 +6641,7 @@ local function CreateBlizzardSettings()
                 min = 1,
                 max = 500,
                 step = 1,
-                set = function(info, val)
-                  Addon.ExecuteOnlyOoC(function()
-                    SetValue(info, val)
-                    Addon:SetBaseNamePlateSize()
-                  end)
-                end,
+                set = function(info, val) SetValueDeferred(info, UpdateClickableArea, val) end,
                 arg = { "settings", "frame", "widthFriend" },
                 disabled = function() return db.settings.frame.SyncWithHealthbar end,
               },
@@ -6611,12 +6652,7 @@ local function CreateBlizzardSettings()
                 min = 1,
                 max = 100,
                 step = 1,
-                set = function(info, val)
-                  Addon.ExecuteOnlyOoC(function()
-                    SetValue(info, val)
-                    Addon:SetBaseNamePlateSize()
-                  end)
-                end,
+                set = function(info, val) SetValueDeferred(info, UpdateClickableArea, val) end,
                 arg = { "settings", "frame", "heightFriend"},
                 disabled = function() return db.settings.frame.SyncWithHealthbar end,
               },
@@ -7188,43 +7224,15 @@ local function CreateHealthbarOptions()
               WidthEnemy = GetRangeEntry(
                 L["Enemy Bar Width"],
                 10, { "settings", "healthbar", "width" }, 5, 500,
-                function(info, val)
-                  Addon.ExecuteOnlyOoC(function()
-                    SetValue(info, val)
-                    Addon:SetBaseNamePlateSize()
-                    -- Update Target Art widget because of border adjustments for small healthbar heights
-                    Addon.EventService.PublishConfig({ "targetWidget" })
-                  end)
-                end),
+                function(info, val) SetValueDeferred(info, UpdateClickableAreaAndTargetArt, val) end),
               HeightEnemy = GetRangeEntry(
                 L["Enemy Bar Height"],
                 11, {"settings", "healthbar", "height" }, 1, 100,
-                function(info, val)
-                  Addon.ExecuteOnlyOoC(function()
-                    SetValue(info, val)
-                    Addon:SetBaseNamePlateSize()
-                    -- Update Target Art widget because of border adjustments for small healthbar heights
-                    Addon.EventService.PublishConfig({ "targetWidget" })
-                  end)
-                end),
+                function(info, val) SetValueDeferred(info, UpdateClickableAreaAndTargetArt, val) end),
               WidthFriendly = GetRangeEntry(L["Friend Bar Width"], 12, { "settings", "healthbar", "widthFriend" }, 5, 500,
-                function(info, val)
-                  Addon.ExecuteOnlyOoC(function()
-                    SetValue(info, val)
-                    Addon:SetBaseNamePlateSize()
-                    -- Update Target Art widget because of border adjustments for small healthbar heights
-                    Addon.EventService.PublishConfig({ "targetWidget" })
-                  end)
-                end),
+                function(info, val) SetValueDeferred(info, UpdateClickableAreaAndTargetArt, val) end),
               HeightFriendly = GetRangeEntry(L["Friend Bar Height"], 13, {"settings", "healthbar", "heightFriend" }, 1, 100,
-                function(info, val)
-                  Addon.ExecuteOnlyOoC(function()
-                    SetValue(info, val)
-                    Addon:SetBaseNamePlateSize()
-                    -- Update Target Art widget because of border adjustments for small healthbar heights
-                    Addon.EventService.PublishConfig({ "targetWidget" })
-                  end)
-                end),
+                function(info, val) SetValueDeferred(info, UpdateClickableAreaAndTargetArt, val) end),
               Spacer1 = GetSpacerEntry(25),
               ShowHealAbsorbs = {
                 name = L["Heal Absorbs"],
@@ -11750,6 +11758,9 @@ end
 function Addon:ProfChange()
   db = Addon.db.profile
 
+  -- Before the options and widgets below: enabling a widget can publish to all plates, which needs the module settings of the new profile
+  Addon:ReloadTheme()
+
   -- Update preview icons: EliteArtWidget, TargetHighlightWidget, ClassIconWidget, QuestWidget, Threat Textures, Totem Icons, Custom Nameplate Icons
   local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\"
 
@@ -11768,9 +11779,9 @@ function Addon:ProfChange()
     CreateCustomNameplatesGroup()
   end
 
-  Addon:ReloadTheme()
-
-  Addon.EventService.PublishConfig(nil)
+  Addon:ScheduleRepaint()
+  Addon:PublishToEachPlate("ClassColorUpdate")
+  Addon:PublishToEachPlate("SituationalColorUpdate")
 end
 
 local function RegisterOptionsTable()
