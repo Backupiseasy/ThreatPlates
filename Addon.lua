@@ -376,41 +376,43 @@ end
 -- Functions for keybindings and addon compartment
 -----------------------------------------------------------------------------------
 
-function TidyPlatesThreat:ToggleNameplateModeFriendlyUnits()
-  local db = Addon.db.profile
+-- Unit types switched by the keybindings. FriendlyMinion and EnemyMinion are not used.
+local FRIENDLY_PLAYER_UNIT_TYPES = { "FriendlyPlayer", "FriendlyPet", "FriendlyGuardian" }
+local FRIENDLY_NPC_UNIT_TYPES = { "FriendlyNPC", "FriendlyMinus" }
+local FRIENDLY_UNIT_TYPES = { "FriendlyPlayer", "FriendlyPet", "FriendlyGuardian", "FriendlyTotem", "FriendlyNPC", "FriendlyMinus" }
+local NEUTRAL_UNIT_TYPES = { "NeutralNPC", "NeutralMinus" }
+local ENEMY_UNIT_TYPES = { "EnemyPlayer", "EnemyNPC", "EnemyPet", "EnemyGuardian", "EnemyTotem", "EnemyMinus" }
 
-  db.Visibility.FriendlyPlayer.UseHeadlineView = not db.Visibility.FriendlyPlayer.UseHeadlineView
-  db.Visibility.FriendlyNPC.UseHeadlineView = not db.Visibility.FriendlyNPC.UseHeadlineView
-  -- db.Visibility.FriendlyMinion.UseHeadlineView = not db.Visibility.FriendlyTotem.UseHeadlineView
-  db.Visibility.FriendlyPet.UseHeadlineView = not db.Visibility.FriendlyPet.UseHeadlineView
-  db.Visibility.FriendlyGuardian.UseHeadlineView = not db.Visibility.FriendlyGuardian.UseHeadlineView
-  db.Visibility.FriendlyTotem.UseHeadlineView = not db.Visibility.FriendlyTotem.UseHeadlineView
-  db.Visibility.FriendlyMinus.UseHeadlineView = not db.Visibility.FriendlyMinus.UseHeadlineView
+-- Toggles every unit type on its own, so unit types with different settings swap their views.
+local function ToggleNameplateMode(unit_types)
+  local visibility = Addon.db.profile.Visibility
+
+  for i = 1, #unit_types do
+    local unit_visibility = visibility[unit_types[i]]
+    unit_visibility.UseHeadlineView = not unit_visibility.UseHeadlineView
+  end
 
   Addon:ForceUpdate()
+end
+
+function TidyPlatesThreat:ToggleNameplateModeFriendlyUnits()
+  ToggleNameplateMode(FRIENDLY_UNIT_TYPES)
+end
+
+function TidyPlatesThreat:ToggleNameplateModeFriendlyPlayers()
+  ToggleNameplateMode(FRIENDLY_PLAYER_UNIT_TYPES)
+end
+
+function TidyPlatesThreat:ToggleNameplateModeFriendlyNPCs()
+  ToggleNameplateMode(FRIENDLY_NPC_UNIT_TYPES)
 end
 
 function TidyPlatesThreat:ToggleNameplateModeNeutralUnits()
-  local db = Addon.db.profile
-
-  db.Visibility.NeutralNPC.UseHeadlineView = not db.Visibility.NeutralNPC.UseHeadlineView
-  db.Visibility.NeutralMinus.UseHeadlineView = not db.Visibility.NeutralMinus.UseHeadlineView
-
-  Addon:ForceUpdate()
+  ToggleNameplateMode(NEUTRAL_UNIT_TYPES)
 end
 
 function TidyPlatesThreat:ToggleNameplateModeEnemyUnits()
-  local db = Addon.db.profile
-
-  db.Visibility.EnemyPlayer.UseHeadlineView = not db.Visibility.EnemyPlayer.UseHeadlineView
-  db.Visibility.EnemyNPC.UseHeadlineView = not db.Visibility.EnemyNPC.UseHeadlineView
-  -- db.Visibility.EnemyMinion.UseHeadlineView = not db.Visibility.EnemyPet.UseHeadlineView
-  db.Visibility.EnemyPet.UseHeadlineView = not db.Visibility.EnemyPet.UseHeadlineView
-  db.Visibility.EnemyGuardian.UseHeadlineView = not db.Visibility.EnemyGuardian.UseHeadlineView
-  db.Visibility.EnemyTotem.UseHeadlineView = not db.Visibility.EnemyTotem.UseHeadlineView
-  db.Visibility.EnemyMinus.UseHeadlineView = not db.Visibility.EnemyMinus.UseHeadlineView
-
-  Addon:ForceUpdate()
+  ToggleNameplateMode(ENEMY_UNIT_TYPES)
 end
 
 function TidyPlatesThreat_OnAddonCompartmentClick(addonName, buttonName)
