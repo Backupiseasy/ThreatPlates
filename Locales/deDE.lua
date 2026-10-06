@@ -197,6 +197,7 @@ L["Color Name by Target Marks in Headline View"] = "Name nach Zielmarkierung im 
 L["Color when Expiring"] = "Einfärben beim Ablaufen"
 L["Coloring"] = "Farben"
 L["Colors"] = "Farben"
+L["Colors the countdown text once the remaining duration drops below the threshold below - the Midnight replacement for Flash When Expiring, which has no equivalent on Midnight."] = "Färbt den Countdown-Text ein, sobald die verbleibende Dauer unter den Schwellenwert unten fällt - der Midnight-Ersatz für \"Aufblinken beim Ablaufen\", das auf Midnight keine Entsprechung hat."
 --[[Machine translation --]]
 L["Colors the countdown text once the remaining duration drops below the threshold below."] = "Färbt den Countdown-Text ein, sobald die verbleibende Dauer unter den Schwellenwert unten fällt."
 L["Column Limit"] = "Spaltenobergrenze"
