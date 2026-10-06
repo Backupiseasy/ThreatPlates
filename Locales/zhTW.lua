@@ -199,6 +199,8 @@ L["Color when Expiring"] = "Color when Expiring"
 L["Coloring"] = "色彩"
 L["Colors"] = "顏色"
 --[[Translation missing --]]
+L["Colors the countdown text once the remaining duration drops below the threshold below - the Midnight replacement for Flash When Expiring, which has no equivalent on Midnight."] = "Colors the countdown text once the remaining duration drops below the threshold below - the Midnight replacement for Flash When Expiring, which has no equivalent on Midnight."
+--[[Translation missing --]]
 L["Colors the countdown text once the remaining duration drops below the threshold below."] = "Colors the countdown text once the remaining duration drops below the threshold below."
 L["Column Limit"] = "行數限制"
 L["Combat"] = "戰鬥"
@@ -852,6 +854,8 @@ L["Striped Texture Color"] = "條紋材質顏色"
 L["Stripes"] = "條紋"
 L["Style"] = "風格"
 L["Supports multiple entries, separated by commas."] = "支援輸入多個項目，使用逗號分隔。"
+--[[Translation missing --]]
+L["Surname"] = "Surname"
 L["Swap Area By Reaction"] = "依互動關係對調區域"
 L["Switch aura areas for buffs and debuffs for friendly units."] = "為友方單位切換增益和減益光環的區域。"
 L["Symbol"] = "符號"
