@@ -63,6 +63,11 @@ comma-delimited (e.g. `120007, 11508, 20506, 50504`), which WoW clients (Mainlin
 packaging processes. Wrath (30405) and Cata (40402) are not yet supported and therefore not in the Interface
 line (see the comment above it in the TOC).
 
+The line also contains "WoW Forever"'s Interface version (`16001`, the 4th return value of `GetBuildInfo()`), so
+the addon is not flagged as out of date there. That number rises with every Forever patch and nothing warns
+when the entry is stale - if the addon is reported as out of date on Forever, read the current value with
+`/tptp version` and update the entry. The packager passes the number through unchanged.
+
 ## Architecture
 
 ### Load order (see `TidyPlates_ThreatPlates.toc`)
@@ -351,7 +356,10 @@ with `issecretvalue` / `Addon.IsSecretValue` before boolean tests, math, string 
   concatenation for a secret target-of-target name) was identified as unnecessary by this reasoning and should
   not be treated as the required pattern for new code.
 - Never do Lua arithmetic (`+ - * /`) or comparisons (`< > == ~=`) on secret values, and never index a table
-  that may itself be secret.
+  that may itself be secret. **Exception: comparing with `nil`** (`value ~= nil`, `value == nil`) does not
+  throw - verified in-game on "WoW Forever" (2026-10-07) with a secret number (`UnitHealth("target")`), with
+  the PvP and the encounter restriction forced on and in an instance in combat. Comparing a secret value with
+  any other value stays forbidden.
 - For status bars, pass raw values to C-side frame APIs (`SetMinMaxValues`, `SetValue`) and avoid Lua-side
   fraction math. If a value is secret in a restricted context, degrade gracefully (skip/hide/fallback) instead
   of forcing computation.
@@ -431,47 +439,58 @@ never detect Forever via "Mainline project id + Classic expansion level" again.
 `Addon.IS_FOREVER` detects this; `Addon.HAS_MIDNIGHT_API`
 (see "Expansion / version compatibility" above) is the flag to use for any branch that exists to pick the
 secret-value-safe/modern API code path — keep `Addon.ExpansionIsAtLeastMidnight` itself for genuine
-ruleset/feature decisions. Full findings, confirmed fixes, and the open-items list:
+ruleset/feature decisions. The in-game checks that are still open on Forever are listed in
 `Source/Wiki/wow-forever-compatibility.md`.
 
-### SavedVariables can be `nil` at `ADDON_LOADED` — confirmed client bug, confirmed NOT addon-fixable
+Forever tracks a build **ahead of** live Retail (product `wow_classic_beta`), so it can get a Blizzard API change
+before Retail does. Example: `AddDispelTypeTexture`/`RemoveDispelTypeTexture` changed their contract there first
+(no return value, removal by region instead of by index, error on a duplicate region), which broke the Options
+window on Forever only. For an API whose shape differs between clients, detect the shape that is actually there
+(as `AurasWidgetMidnight.lua` does with `auraButton.DispelBorderRegistration`) instead of checking a client or
+version flag - "works on Forever today" is no guarantee either.
 
-Confirmed independently by another addon author on Discord: on some clients (observed on "WoW Forever"), the
-SavedVariables global table (`ThreatPlatesDB`) can still be `nil` when `ADDON_LOADED` fires — the event
-`AceAddon-3.0` uses to trigger `OnInitialize`. The Discord report suggested it's "only reliably populated
-later, by `PLAYER_LOGIN`" - **this addon's own live testing disproved that** for at least one affected
-client: see below.
+### SavedVariables were not loaded on "WoW Forever" — client bug, fixed by Blizzard
 
-**No source-code fix is in this codebase for this** — two attempts were tried and reverted after live
-testing showed neither worked; see `Source/Wiki/wow-forever-compatibility.md` fixes #21-#23 for the full
-diagnostic trail (a stray `CreateAceDatabase()` call unconditionally re-run at `PLAYER_LOGIN`, then a
-correctly-deferred-but-still-insufficient version that never touched the SV global before `PLAYER_LOGIN`).
-Both are gone from `Addon.lua` now - do not re-add either pattern without new evidence, since both are
-confirmed dead ends on the client where this was diagnosed:
+Resolved (2026-10): on earlier "WoW Forever" builds the SavedVariables global (`ThreatPlatesDB`) was still `nil`
+when `ADDON_LOADED` fired (the event `AceAddon-3.0` uses to trigger `OnInitialize`) and never received the saved
+data afterwards, so every session started with a blank profile although the file on disk was correct. A later
+client build fixed this on Blizzard's side. **Nothing was changed in the addon for it**, and nothing is needed.
 
-- **Why re-running `CreateAceDatabase()` at `PLAYER_LOGIN` doesn't work**: `AceDB-3.0.lua`'s `AceDB:New()`
-  does `tbl = _G[name]; if not tbl then tbl = {}; _G[name] = tbl end` - the moment it sees the global as
-  `nil`, it creates a blank table and assigns it into that global itself, synchronously. Calling
-  `CreateAceDatabase()` while `ThreatPlatesDB` is still `nil` means the global is never `nil` again for the
-  rest of the session regardless of whether the client ever actually injects the real saved data afterwards,
-  so a later nil-check-based "recovery" can't tell "real data arrived" apart from "still reading back our
-  own blank placeholder".
-- **Why deferring the entire AceDB setup to `PLAYER_LOGIN` (never touching the global before then) doesn't
-  work either**: a purely observational polling watcher (object-identity-based, not content-based, so it
-  couldn't be fooled by the addon's own setup code writing real-looking values - e.g. computed frame sizes -
-  into a fresh blank profile) found that `ThreatPlatesDB` never receives real data at all on the affected
-  client - not at `ADDON_LOADED`, not at `PLAYER_LOGIN`, not within 30 seconds afterward, and not even
-  across a full logout/login (character-select cycle, not just `/reload`). The only table-identity change
-  observed in every test was the addon's own blank `AceDB:New()`-created placeholder - never an external
-  reassignment.
+Two addon-side attempts were tried and reverted back then. If a similar report comes up on another client, do
+not repeat them - both are dead ends by design:
 
-**Conclusion**: the SavedVariables *file* itself was confirmed correct and current on disk in every test -
-saving works. Only loading is affected, and it fails unconditionally on the affected client, not just after
-`/reload`. Since addons have no file-I/O API to read SavedVariables themselves, **there is no addon-side fix
-possible** - the client itself must inject the data, and on the affected client it apparently never does.
-Treat this as a client bug to report upstream (to whoever maintains that client/product), not something to
-keep chasing with more addon-side event-timing fixes, unless new evidence (e.g. a different affected client,
-or a confirmed later trigger point) emerges.
+- **Re-running `CreateAceDatabase()` at `PLAYER_LOGIN`**: `AceDB-3.0.lua`'s `AceDB:New()` does
+  `tbl = _G[name]; if not tbl then tbl = {}; _G[name] = tbl end`, i.e. it assigns a blank table to the global
+  the moment it sees it as `nil`. A later nil-check can then no longer tell "real data arrived" apart from
+  "our own blank placeholder".
+- **Deferring the entire AceDB setup to `PLAYER_LOGIN`**: an object-identity-based watcher showed that the
+  affected client never injected the data at all - not at `PLAYER_LOGIN`, not within 30 seconds afterwards,
+  not across a full relog. Addons have no file-I/O API to read SavedVariables themselves, so only the client
+  can fix a loading failure like this.
+
+### Secret-value audit (2026-10-07)
+
+All secret **booleans** the addon reads are guarded - checked against the secret metadata of every API the addon
+calls (`Blizzard_APIDocumentationGenerated`, wow-ui-source branch `forever`). The only one stored in the `unit`
+table is `unit.CastIsNotInterruptible`. Redo the check when a new unit API is used or the metadata changes. Facts
+from that pass worth knowing:
+
+- **Not secret** according to the API documentation, so safe in a plain `if`: `UnitIsTapDenied`,
+  `UnitAffectingCombat`, `UnitCanAttack`, `UnitExists`, `UnitIsPlayer`, `UnitPlayerControlled`,
+  `UnitIsOtherPlayersPet`, `UnitIsDead`, `UnitIsBattlePet`, `UnitClassification`, `UnitEffectiveLevel` (and with
+  them `unit.IsTapDenied`, `unit.InCombat`, `unit.CanAttack`, `unit.isBoss`, `unit.isElite`, `unit.isRare`).
+  In `UnitCastingInfo`/`UnitChannelInfo`, `isTradeskill` and `castBarID` are `NeverSecret`.
+- **Threat is only secret for some unit pairs.** `UnitThreatSituation("player", unitid)` is not secret, so
+  `Modules/Threat.lua` may index a table and compare with it. Blizzard's documentation of
+  `SecretWhenUnitThreatStateRestricted`: "Queries where only one unit token is specified, or where one unit token
+  is the player, their pet, or an ally while the other is a nameplate, boss, target, etc., are generally not
+  secret." A compound token as first unit (`UnitThreatSituation(unitid .. "target", unitid)`, the off-tank
+  detection) is secret. Verified in-game on Forever with the encounter restriction forced on:
+  `C_Secrets.ShouldUnitThreatStateBeSecret("player", "target")` returned `false`, with `"targettarget"` as first
+  unit `true`. The `C_Secrets.Should...BeSecret` functions answer such questions without having to be in combat.
+- **`Widgets/ExperienceWidget.lua` (`OnUnitAdded`)** does `not UnitIsOwnerOrControllerOfUnit(...)` on a result
+  that can be secret. It is unreachable with `HAS_MIDNIGHT_API` only because `unit.NPCID` is `nil` there and the
+  condition short-circuits earlier - guard it if NPC-ID detection ever comes back.
 
 ### Features intentionally disabled on `feature/midnight`
 
