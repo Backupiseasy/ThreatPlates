@@ -37,7 +37,7 @@ from luaparser import ast
 
 CURSEFORGE_PROJECT_ID = 21217
 CURSEFORGE_BASE = "https://legacy.curseforge.com/api/projects"
-BLOCKED_DIRS = {"Libs", "Locales", "Source", "Test", ".git", ".github", ".idea", ".release"}
+BLOCKED_DIRS = {"Libs", "Locales", "Source", ".git", ".github", ".idea", ".release"}
 DEFAULT_EXPORT_FILE = "phrase_keys_export_file.txt"
 
 # Written by the local MT prompt (Source/mt_translate_prompt.md) immediately above every

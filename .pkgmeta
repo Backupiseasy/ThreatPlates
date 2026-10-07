@@ -49,7 +49,6 @@ wowi-convert-changelog: yes
 ignore:
   # The packager auto-excludes anything starting with a dot, so they don't need to be listed here explicitly.
   - Source
-  - Test
   - README.md
   - CLAUDE.md
   - TidyPlates_ThreatPlates.iml

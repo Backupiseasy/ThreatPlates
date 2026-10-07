@@ -31,11 +31,6 @@ comments or concerns about this addon are appreciated. I'm always looking for wa
 * [Troubleshooting and FAQ](https://www.curseforge.com/wow/addons/tidy-plates-threat-plates/pages/troubleshooting-and-faq)
 * [Help for Aura Filtering](https://github.com/Backupiseasy/ThreatPlates/wiki/Aura-Widget)
 
-***Version for WoW Classic***
-
-A port of Threat Plates for WoW Classic is available
-here: [Threat Plates (Classic)](https://www.curseforge.com/wow/addons/threat-plates-classic).
-
 ***Scripting (Beta)***
 
 Scripting is a new feature of Threat Plates that will be introduced in a future version. It allows you to extend the

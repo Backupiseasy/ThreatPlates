@@ -3,7 +3,6 @@ max_line_length = false
 
 exclude_files = {
   "Libs/**",
-  "Test/**",
   "Source/**",
   ".release/**"
 }

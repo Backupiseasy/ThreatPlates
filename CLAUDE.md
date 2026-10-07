@@ -21,11 +21,11 @@ There is no compile step — the addon is loaded directly by the WoW client from
 
 - Lint, full local profile: `luacheck . --config .luacheckrc`
 - Lint, CI gate (accidental-global-write check only, rules 111/112): `luacheck . --config .luacheckrc.ci`
-- Both configs use `std = "lua51"`, exclude `Libs/`, `Test/`, `Source/`, `.release/`, and whitelist addon globals
+- Both configs use `std = "lua51"`, exclude `Libs/`, `Source/`, `.release/`, and whitelist addon globals
   (`TidyPlatesThreat`, `SLASH_TPTP*`, `SlashCmdList`, `StaticPopupDialogs`, ...).
 - Manual test: in-game `/reload` and check the Lua error console (BugSack/!BugGrabber recommended).
-- No automated test runner; `Test/` contains standalone scripts/mocks (performance tests, API mocks), not wired
-  into CI.
+- No automated test runner for the addon's Lua code (only `Source/test_localization_tool.py`, pytest, for the
+  localization tooling).
 - Prefer minimal, defensive fixes over broad refactors; keep API and SavedVariables compatibility. If UI text
   changes, do **not** edit `Locales/*.lua` by hand - the localization pipeline does that (see "Localization"
   below; see Changelog Workflow for the separate changelog-string workflow).
@@ -440,7 +440,7 @@ never detect Forever via "Mainline project id + Classic expansion level" again.
 (see "Expansion / version compatibility" above) is the flag to use for any branch that exists to pick the
 secret-value-safe/modern API code path — keep `Addon.ExpansionIsAtLeastMidnight` itself for genuine
 ruleset/feature decisions. The in-game checks that are still open on Forever are listed in
-`Source/Wiki/wow-forever-compatibility.md`.
+`Source/Plans/WoWForeverCompatibility.md`.
 
 Forever tracks a build **ahead of** live Retail (product `wow_classic_beta`), so it can get a Blizzard API change
 before Retail does. Example: `AddDispelTypeTexture`/`RemoveDispelTypeTexture` changed their contract there first
@@ -529,7 +529,7 @@ Point-in-time notes from past analysis passes — re-verify before relying on th
 
 - User-facing text is wrapped as `L["..."]` (`local L = Addon.L`); `Locales/enUS.lua` is generated from a code
   scan, not hand-edited. Full pipeline (CurseForge sync, deDE machine translation):
-  `Source/Wiki/LocalizationUpdateProcess.md` and `Source/mt_translate_prompt.md`.
+  `Source/Docs/LocalizationUpdateProcess.md` and `Source/mt_translate_prompt.md`.
 - **Never edit `Locales/*.lua` by hand** when adding, changing or removing an `L["..."]` text - neither
   `enUS.lua` nor the translations. `.github/workflows/sync_localization_translations.yml` (push to `main` or
   `release/*`, every Monday, or run manually) regenerates `enUS.lua` from the code scan

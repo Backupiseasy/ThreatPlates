@@ -111,7 +111,7 @@ def test_new_unforeseen_directory_is_still_scanned(tmp_path):
     assert "FoundMe" in static_keys
 
 
-@pytest.mark.parametrize("blocked_dir", ["Libs", "Locales", "Source", "Test"])
+@pytest.mark.parametrize("blocked_dir", ["Libs", "Locales", "Source"])
 def test_blocked_directories_are_skipped(tmp_path, blocked_dir):
     write(str(tmp_path / blocked_dir / "Thing.lua"), 'x = L["ShouldNotBeFound"]\n')
     static_keys, _ = scan_repository(str(tmp_path))
