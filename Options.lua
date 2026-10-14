@@ -663,9 +663,8 @@ local function CVarIsUnavailable(info)
 end
 
 -- The CVar nameplateStackingTypes is a bitfield indexed by Enum.NamePlateStackType (Enemy, Friendly) that replaces
--- nameplateMotion. Currently, this only works on WoW Forever and (presumably) on Retail from patch 12.1.5 on. On
--- other WoW versions, it will only work once their API is updated. The options are only hidden on clients that
--- don't know this CVar at all.
+-- nameplateMotion. It works on WoW Forever and on Retail (verified in-game on patch 12.1.5). The options are only
+-- hidden on clients that don't know this CVar at all.
 -- WoW stores bitfield CVars as an encoded string, not as a number, so its flags can only be accessed with
 -- C_CVar.GetCVarBitfield/SetCVarBitfield. info.arg is the name of the flag in that enum.
 local function NameplateStackingIsUnavailable(info)
