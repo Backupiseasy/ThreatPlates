@@ -305,7 +305,13 @@ local function InitializeAuraButton(auraButton, aura_type)
   auraButton.DispelBorder:SetAllPoints(auraButton.Icon)
   auraButton.DispelBorder:SetScale(AURA_BORDER_THICKNESS / AURA_BORDER_TEXTURE_BAND)
   if db_icon.ShowBorder then
-    auraButton:AddDispelTypeTexture(auraButton.DispelBorder, {
+    -- Capture the return value: up to Patch 12.1.0, AddDispelTypeTexture returns an index that
+    -- RemoveDispelTypeTexture(index) later needs. Since Patch 12.1.5, it returns nothing,
+    -- RemoveDispelTypeTexture takes the texture region itself, and AddDispelTypeTexture errors if the
+    -- same region is already registered (Blizzard_CustomAuraButton.lua, AddDisplayElement). Store
+    -- whatever came back (an index, or nil) so ReapplyLiveAuraButtonSettings can remove the border
+    -- with the matching API generation without a version check.
+    auraButton.DispelBorderRegistration = auraButton:AddDispelTypeTexture(auraButton.DispelBorder, {
       style = DispelTypeTextureStylePreserveAsset,
       showWhenHarmful = true,
       showWhenHelpful = true,
@@ -474,9 +480,15 @@ local function ReapplyLiveAuraButtonSettings(aura_type)
           -- above) - only re-applies fresh color to one that was already shown. Confirmed live
           -- 2026-08-21: unlike the broader existence-toggle case, Remove+AddDispelTypeTexture works
           -- reliably here for recoloring an already-shown border.
+          --
+          -- Since Patch 12.1.5, RemoveDispelTypeTexture takes the texture region instead of an index,
+          -- so RemoveDispelTypeTexture(1) removed nothing and the following AddDispelTypeTexture failed
+          -- with "Display element '...' has already been added". Remove with whatever
+          -- InitializeAuraButton's AddDispelTypeTexture call returned (an index up to 12.1.0, nil since
+          -- 12.1.5, in which case the region itself is used).
           if db_icon.ShowBorder and auraButton:GetDispelTypeTextureCount() > 0 then
-            auraButton:RemoveDispelTypeTexture(1)
-            auraButton:AddDispelTypeTexture(auraButton.DispelBorder, {
+            auraButton:RemoveDispelTypeTexture(auraButton.DispelBorderRegistration or auraButton.DispelBorder)
+            auraButton.DispelBorderRegistration = auraButton:AddDispelTypeTexture(auraButton.DispelBorder, {
               style = DispelTypeTextureStylePreserveAsset,
               showWhenHarmful = true,
               showWhenHelpful = true,
