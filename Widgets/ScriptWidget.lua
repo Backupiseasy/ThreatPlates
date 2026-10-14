@@ -212,6 +212,10 @@ local BlockedFunctions = {
   PickupPlayerMoney = true,
   AcceptTrade = true,
   SetSendMailMoney = true,
+  -- On Mainline, SetTradeMoney, AddTradeMoney, and PickupTradeMoney only exist in C_TradeInfo (the last
+  -- global shim, PickupTradeMoney, was removed in Patch 12.1.5); the globals above stay blocked for
+  -- clients that still have them
+  ["C_TradeInfo"] = true,
   ["C_AuctionHouse"] 	= true,
   ["C_Bank"] = true,
   ["C_GuildBank"] = true,
