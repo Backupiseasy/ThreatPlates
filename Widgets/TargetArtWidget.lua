@@ -14,7 +14,7 @@ local Widget = Addon.Widgets:NewTargetWidget("TargetArt")
 local abs, max, min = abs, max, min
 
 -- WoW APIs
-local SetUnitCursorTexture, PixelUtil_SetPoint = SetUnitCursorTexture, PixelUtil.SetPoint
+local SetUnitCursorTexture = SetUnitCursorTexture
 local UnitIsUnitTP = Addon.UnitIsUnit
 
 -- ThreatPlates APIs
@@ -364,7 +364,12 @@ local function CreateTargetHighlightFrame(target_unitid)
     soft_target_icon:AddMaskTexture(soft_target_icon_frame.Mask)
 
     soft_target_icon_frame.Mask:ClearAllPoints()
-    PixelUtil_SetPoint(soft_target_icon_frame.Mask, "CENTER", soft_target_icon_frame, "CENTER", 0, 0)
+    -- PixelUtil.SetPoint is deprecated since Patch 12.1.5; clients with the new API round the layout
+    -- to whole pixels natively instead, once enabled for a region.
+    if soft_target_icon_frame.Mask.SetRoundLayoutToNearestPixel then
+      soft_target_icon_frame.Mask:SetRoundLayoutToNearestPixel(true)
+    end
+    soft_target_icon_frame.Mask:SetPoint("CENTER", soft_target_icon_frame, "CENTER", 0, 0)
     soft_target_icon_frame.Mask:SetAllPoints(soft_target_icon)
     soft_target_icon_frame:Hide()     
 
