@@ -966,9 +966,9 @@ function Widget:UpdateAuraContainer(widget_frame, aura_type, group_configs, unit
   end
 
   -- SwitchAreaByReaction (friendly units only, Buffs<->Debuffs - matches the legacy widget's own
-  -- scope, CrowdControl was never swapped there either): swaps which type's *layout* (icon size,
-  -- columns/rows/spacing, sort, alignment, anchor - everything below except the actual filter data,
-  -- which stays on the real aura_type/container) Buffs/Debuffs use. Matches the legacy widget's
+  -- scope, CrowdControl was never swapped there either): swaps which type's *layout* (columns/rows/
+  -- spacing, sort, alignment, anchor - everything below except the actual filter data and the icon
+  -- size, which stay on the real aura_type/container, see button_icon below) Buffs/Debuffs use. Matches the legacy widget's
   -- behavior of feeding buff data straight into the already-Debuffs-styled physical Debuffs frame
   -- (AurasWidget.lua ~2156: `local buff_aura_grid = (db.SwitchAreaByReaction and
   -- widget_frame.Debuffs) or widget_frame.Buffs`) - not just relocating buffs to debuffs' screen
@@ -989,13 +989,19 @@ function Widget:UpdateAuraContainer(widget_frame, aura_type, group_configs, unit
 
   local db = self.db[layout_type]
   local db_icon = db.ModeIcon
+  -- The icon size always comes from aura_type, not layout_type: the container's aura buttons are pooled
+  -- per aura type and were sized for aura_type in InitializeAuraButton. They cannot be resized per unit
+  -- (SetSize on them is forbidden from addon code while auras are secret). Using layout_type's icon size
+  -- here made the layout reserve a slot of the other type's size for each button, so the spacing between
+  -- the icons was wrong whenever the icon sizes of Buffs and Debuffs differ.
+  local button_icon = self.db[aura_type].ModeIcon
   local max_auras = min(db_icon.MaxAuras, db_icon.Rows * db_icon.Columns)
   local anchor_point, horizontal_direction, vertical_direction = GetFlowLayoutForAlignment(db.AlignmentH, db.AlignmentV)
   local sort_method = GetSortMethod(self.db.SortOrder)
   local sort_direction = GetSortDirection(self.db.SortReverse)
   local layout = {
-    elementWidth = db_icon.IconWidth,
-    elementHeight = db_icon.IconHeight,
+    elementWidth = button_icon.IconWidth,
+    elementHeight = button_icon.IconHeight,
     elementSpacing = db_icon.ColumnSpacing,
     lineSpacing = db_icon.RowSpacing,
   }
@@ -1016,7 +1022,7 @@ function Widget:UpdateAuraContainer(widget_frame, aura_type, group_configs, unit
 
   container:SetFlowLayoutAnchorPoint(anchor_point)
   container:SetFlowLayoutGrowthDirection(horizontal_direction, vertical_direction)
-  container:SetFlowLayoutMaximumLineSize(db_icon.Columns * (db_icon.IconWidth + db_icon.ColumnSpacing))
+  container:SetFlowLayoutMaximumLineSize(db_icon.Columns * (button_icon.IconWidth + db_icon.ColumnSpacing))
 
   container:SetUnit(unit.unitid)
   container:SetEnabled(true)
