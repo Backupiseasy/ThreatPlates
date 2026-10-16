@@ -8,7 +8,9 @@
 ## Fundamentals
 
 - **N** = `plate:GetFrameLevel()` (Blizzard nameplate frame level, varies per nameplate)
-- **tp_frame** = ThreatPlates overlay, parent = `WorldFrame`, level = N (synchronized via `OnUpdate`)
+- **tp_frame** = ThreatPlates overlay, parent = `plate`, anchored `CENTER` to the current `plate.UnitFrame`
+  (re-anchored on every `NamePlateDriverFrame_AcquireUnitFrame`, because Blizzard pools its UnitFrames — see
+  `CLAUDE.md`, "Nameplate lifecycle"), level = N (synchronized via `OnUpdate`)
 - **HbOCb** = `HealthbarOverCastbar` (default)
 - **CbOHb** = `CastbarOverHealthbar`
 - Draw layer order within a frame (bottom → top): `BACKGROUND < BORDER < ARTWORK < OVERLAY < HIGHLIGHT`
@@ -23,7 +25,7 @@
 | Frame | HbOCb | CbOHb | Creation Level | Source |
 |---|---|---|---|---|
 | `tp_frame` | N | N | N | `Nameplate.lua` OnUpdate |
-| `HitTestFrame` *(Midnight)* | N | N | N (inherited) | `Nameplate.lua` |
+| `HitTestFrame` | N | N | N (inherited) | `Nameplate.lua` |
 | `ThreatGlow` | **N+4** | **N+3** | N+0 ⚠ | `Healthbar.lua` UpdateStyle: frame_level−1 |
 | `textframe` | **N+5** | **N+4** | N+0 (inherited) | `Healthbar.lua` UpdateStyle: frame_level |
 
@@ -65,7 +67,6 @@
 | `ResourceWidget.statusbar.Border` | N+8 | N+8 | ⚠ Same level as statusbar (≠ healthbar.Border pattern) |
 | `ScriptWidget.widget_frame` | **N+0** | **N+0** | ⚠ Same level as tp_frame |
 | `SocialWidget.widget_frame` | N+7 | N+7 | |
-| `StealthWidget.widget_frame` | N+9 | N+9 | |
 | `ThreatWidget.widget_frame` | N+7 | N+7 | |
 | `TotemIconWidget.widget_frame` | N+7 | N+7 | |
 | `UniqueIconWidget.widget_frame` | N+14 | N+14 | |
@@ -218,7 +219,7 @@ N+5   healthbar, textframe, EliteBorder, healthbar.Highlight (*)
         └─ castbar OVERLAY: SpellIcon (sub 7)
 N+7   Arena, ClassIcon, ComboPoints, HealerTracker, Quest, Social, Threat, Totem
 N+8   ResourceWidget
-N+9   StealthWidget, AurasWidget (CbOHb)
+N+9   AurasWidget (CbOHb)
 N+14  UniqueIconWidget
 N+15  UniqueIconWidget.Highlight, BossModsWidget.icon_frame.Highlight
 ```

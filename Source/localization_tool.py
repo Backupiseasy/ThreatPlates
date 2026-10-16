@@ -522,7 +522,7 @@ def _index_translated_entries(lines):
     index = {}
     for i, line in enumerate(lines):
         m = _LOCALE_ENTRY_RE.match(line.strip())
-        if not (m and m.group(1) != m.group(2)):
+        if not (m and m.group(1) != m.group(2) and m.group(2) != '""'):
             continue
         j = i - 1
         while j >= 0 and lines[j].strip() == "":
@@ -555,16 +555,25 @@ def preserve_existing_translations(existing_lines, incoming_lines):
     multi-line long-bracket string values are left as CurseForge sent them,
     same as before this safeguard existed.
 
-    Returns (merged_lines, preserved_count, carried_over_count)."""
+    Returns (merged_lines, preserved_count, carried_over_count, kept_marker_count)."""
     existing_by_key = _index_translated_entries(existing_lines)
     result = []
     preserved = 0
+    kept_markers = 0
     seen_keys = set()
     i, n = 0, len(incoming_lines)
     while i < n:
         line = incoming_lines[i]
         if line.strip() == "--[[Translation missing --]]" and i + 1 < n:
             m = _LOCALE_ENTRY_RE.match(incoming_lines[i + 1].strip())
+            # CurseForge exports an empty value instead of the key for a phrase
+            # it only knows from a translation import (push-translation) and has
+            # no enUS source text for yet - upload is merge-gated, so that state
+            # lasts until the phrase reaches main. Shipping "" would blank the
+            # text in-game, so treat it as the same placeholder.
+            if m and m.group(2) == '""':
+                incoming_lines[i + 1] = f"L[{m.group(1)}] = {m.group(1)}"
+                m = _LOCALE_ENTRY_RE.match(incoming_lines[i + 1])
             if m and m.group(1) == m.group(2):
                 existing = existing_by_key.get(m.group(1))
                 if existing is not None:
@@ -579,6 +588,17 @@ def preserve_existing_translations(existing_lines, incoming_lines):
         m2 = _LOCALE_ENTRY_RE.match(line.strip())
         if m2:
             seen_keys.add(m2.group(1))
+            # CurseForge's export never carries MT_MARKER_COMMENT, so a machine
+            # translation that push-translation uploaded comes back looking like
+            # any community translation. As long as the value is still exactly
+            # the local machine translation, nobody has changed it on CurseForge
+            # - keep the marker so it stays "pending review".
+            existing = existing_by_key.get(m2.group(1))
+            if existing is not None and existing[1]:
+                m_existing = _LOCALE_ENTRY_RE.match(existing[0].strip())
+                if m_existing and m_existing.group(2) == m2.group(2):
+                    result.append(MT_MARKER_COMMENT)
+                    kept_markers += 1
         result.append(line)
         i += 1
 
@@ -591,7 +611,7 @@ def preserve_existing_translations(existing_lines, incoming_lines):
         result.append(existing_line)
         carried_over += 1
 
-    return result, preserved, carried_over
+    return result, preserved, carried_over, kept_markers
 
 
 def cmd_pull(args):
@@ -639,7 +659,9 @@ def cmd_pull(args):
         if os.path.exists(locale_path):
             with open(locale_path, encoding="utf-8-sig") as f:
                 existing_lines = f.read().splitlines()
-        body_lines, preserved, carried_over = preserve_existing_translations(existing_lines, body_lines)
+        body_lines, preserved, carried_over, kept_markers = preserve_existing_translations(existing_lines, body_lines)
+        if kept_markers:
+            print(f"  Kept {kept_markers} machine-translation marker(s) for entries unchanged on CurseForge.")
         if preserved:
             print(f"  Kept {preserved} existing translation(s) CurseForge reported as missing.")
         if carried_over:

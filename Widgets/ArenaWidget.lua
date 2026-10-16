@@ -3,7 +3,7 @@
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
 
-if Addon.IS_CLASSIC then return end
+if Addon.IS_CLASSIC or Addon.IS_FOREVER then return end
 
 local Widget = Addon.Widgets:NewWidget("Arena")
 
@@ -171,7 +171,7 @@ function Widget:UpdateFriendyPlayerOrPet(unitid)
     end
     local widget_frame = self:GetWidgetFrameForUnit(unitid)
     if widget_frame then
-      self:OnUnitAdded(widget_frame, unitid)
+      self:OnUnitAdded(widget_frame, widget_frame.unit)
     end
   end
 end
@@ -190,7 +190,7 @@ function Widget:ARENA_OPPONENT_UPDATE(unitid, update_reason)
 
     local widget_frame = self:GetWidgetFrameForUnit(unitid)
     if widget_frame then
-      self:OnUnitAdded(widget_frame, unitid)
+      self:OnUnitAdded(widget_frame, widget_frame.unit)
     end
   end
 end

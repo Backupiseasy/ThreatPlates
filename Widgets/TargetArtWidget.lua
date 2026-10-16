@@ -3,7 +3,7 @@
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
 
-local FocusWidget = (Addon.ExpansionIsAtLeastTBC and Addon.Widgets:NewFocusWidget("Focus")) or {}
+local FocusWidget = (Addon.WOW_FEATURE_FOCUS and Addon.Widgets:NewFocusWidget("Focus")) or {}
 local Widget = Addon.Widgets:NewTargetWidget("TargetArt")
 
 ---------------------------------------------------------------------------------------------------
@@ -226,7 +226,7 @@ local UPDATE_TEXTURE_FUNCTIONS = {
   threat_glow = UpdateBorderTexture,
   arrows_legacy = UpdateSideTexture,
   bubble = UpdateSideTexture,
-  crescent = UpdattareSideTexture,
+  crescent = UpdateSideTexture,
   Stripes = UpdateOverlayTexture,
 }
 
@@ -563,7 +563,7 @@ end
 
 function FocusWidget:EnabledForStyle(style, unit)
   if (style == "NameOnly" or style == "NameOnly-Unique") then
-    return FocusSettings.FocusSettings
+    return FocusSettings.ShowInHeadlineView
   elseif style ~= "etotem" then
     return FocusSettings.ON
   end
@@ -575,12 +575,13 @@ function FocusWidget:OnFocusUnitAdded(tp_frame, unit)
   local widget_frame = FocusWidgetFrame
 
   if self:EnabledForStyle(unit.style, unit) then
-    local healthbar = tp_frame.visual.Healthbar
+    -- Same anchor as the target highlight: the healthbar is not shown in headline view
+    local anchor_frame = ((unit.style == "NameOnly" or unit.style == "NameOnly-Unique") and tp_frame.visual.textframe) or tp_frame.visual.Healthbar
     widget_frame:SetParent(tp_frame)
-    widget_frame:SetFrameLevel(healthbar:GetFrameLevel() + FRAME_LEVEL_BY_TEXTURE[FocusSettings.theme])
+    widget_frame:SetFrameLevel(anchor_frame:GetFrameLevel() + FRAME_LEVEL_BY_TEXTURE[FocusSettings.theme])
     --widget_frame.HealthbarMode:SetFrameLevel(widget_frame:GetFrameLevel())
     widget_frame:ClearAllPoints()
-    widget_frame:SetAllPoints(healthbar)
+    widget_frame:SetAllPoints(anchor_frame)
 
     local healthbar_mode_frame = widget_frame.HealthbarMode
     if unit.style == "NameOnly" or unit.style == "NameOnly-Unique" then

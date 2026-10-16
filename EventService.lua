@@ -99,11 +99,6 @@ local INTERNAL_EVENTS = {
   FactionUpdate = true,
   -- Payload:
   --   tp_frame: Frame (table), Nilable = false
-  --   { Name = "style", Type = "table", Nilable = false }
-  --   { Name = "stylename", Type = "string", Nilable = false }
-  StyleUpdate = true,
-  -- Payload:
-  --   tp_frame: Frame (table), Nilable = false
   --   color: Color (table), Nilable = false
   SituationalColorUpdate = true, -- Curently: Updates for Quest (Unit Color) and
   -- Event: ClassColorUpdate

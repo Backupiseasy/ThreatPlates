@@ -31,10 +31,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --]]
 
--- Only load in Classic Era on Season of Discovery and Anniversary realms
-if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC and C_Seasons.GetActiveSeason() ~= 2 and C_Seasons.GetActiveSeason() ~= 11 and C_Seasons.GetActiveSeason() ~= 12 then return end
-
-local MAJOR, MINOR = "LibDualSpec-1.0", 29
+local MAJOR, MINOR = "LibDualSpec-1.0", 35
 assert(LibStub, MAJOR.." requires LibStub")
 local lib, minor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end
@@ -67,31 +64,33 @@ local options = lib.options
 local mixin = lib.mixin
 local upgrades = lib.upgrades
 
--- "Externals"
-local AceDB3 = LibStub('AceDB-3.0', true)
-local AceDBOptions3 = LibStub('AceDBOptions-3.0', true)
-local AceConfigRegistry3 = LibStub('AceConfigRegistry-3.0', true)
+local AceDB3 = LibStub("AceDB-3.0", true)
+local AceDBOptions3 = LibStub("AceDBOptions-3.0", true)
+local AceConfigRegistry3 = LibStub("AceConfigRegistry-3.0", true)
 
 local isSpecBased = ClassicExpansionAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA)
+do -- XXX ClassicExpansionAtLeast is always true in Forever, which uses Dual Specialization
+	local version = select(4, GetBuildInfo())
+	if version > 16000 and version < 20000 then
+		isSpecBased = false
+	end
+end
+
 local numSpecs
 local specNames = {}
 if isSpecBased then
-	-- class id specialization functions don't require player data to be loaded
-	local _, classId = UnitClassBase("player")
+	-- Class id specialization functions don't require player data to be loaded
+	local _, _, classId = UnitClass("player")
 	numSpecs = C_SpecializationInfo.GetNumSpecializationsForClassID(classId)
 	for i = 1, numSpecs do
 		local _, name = GetSpecializationInfoForClassID(classId, i)
 		specNames[i] = name
 	end
-else -- Primary/secondary system
+else
+	-- Primary/secondary system
 	numSpecs = 2
 	specNames[1] = TALENT_SPEC_PRIMARY
 	specNames[2] = TALENT_SPEC_SECONDARY
-end
-
-local GetSpecialization = isSpecBased and GetSpecialization or C_SpecializationInfo.GetActiveSpecGroup
-local CanPlayerUseTalentSpecUI = C_SpecializationInfo.CanPlayerUseTalentSpecUI or function()
-	return true, HELPFRAME_CHARACTER_BULLET5
 end
 
 -- ----------------------------------------------------------------------------
@@ -101,6 +100,7 @@ end
 local L_ENABLED = "Enable spec profiles"
 local L_ENABLED_DESC = "When enabled, your profile will be set to the specified profile when you change specialization."
 local L_CURRENT = "%s - Active"
+local L_DUALSPEC_NOT_UNLOCKED = "Dual Specialization hasn't been unlocked yet."
 
 do
 	local locale = GetLocale()
@@ -108,38 +108,52 @@ do
 		L_ENABLED = "Spezialisierungsprofile aktivieren"
 		L_ENABLED_DESC = "Falls diese Option aktiviert ist, wird dein Profil auf das angegebene Profil gesetzt, wenn du die Spezialisierung wechselst."
 		L_CURRENT = "%s - Aktiv"
-	elseif locale == "esES" or locale == "esMX" then
+		L_DUALSPEC_NOT_UNLOCKED = "Duale Spezialisierung wurde noch nicht freigeschaltet."
+	elseif locale == "esES" then
 		L_ENABLED = "Activar perfiles de especialización"
 		L_ENABLED_DESC = "Cuando está habilitado, su perfil se establecerá en el perfil especificado cuando cambie de especialización."
 		L_CURRENT = "%s - Activo"
+		L_DUALSPEC_NOT_UNLOCKED = "Doble especialización aún no se ha desbloqueado."
+	elseif locale == "esMX" then
+		L_ENABLED = "Activar perfiles de especialización"
+		L_ENABLED_DESC = "Cuando está habilitado, su perfil se establecerá en el perfil especificado cuando cambie de especialización."
+		L_CURRENT = "%s - Activo"
+		L_DUALSPEC_NOT_UNLOCKED = "Aún no has desbloqueado Doble especialización."
 	elseif locale == "frFR" then
 		L_ENABLED = "Activer les profils de spécialisation"
 		L_ENABLED_DESC = "Lorsque cette option est activée, votre profil sera défini sur le profil spécifié lorsque vous changerez de spécialisation."
 		L_CURRENT = "%s - Actifs"
+		L_DUALSPEC_NOT_UNLOCKED = "Double spécialisation n’est pas encore débloquée."
 	elseif locale == "itIT" then
 		L_ENABLED = "Abilita i profili per la specializzazione"
 		L_ENABLED_DESC = "Quando abilitato, il tuo profilo verrà impostato in base alla specializzazione usata."
 		L_CURRENT = "%s - Attivi"
+		L_DUALSPEC_NOT_UNLOCKED = "Doppia specializzazione non è ancora stato sbloccato."
 	elseif locale == "koKR" then
 		L_ENABLED = "전문화 프로필 활성화"
 		L_ENABLED_DESC = "활성화하면 전문화를 변경할 때 프로필이 지정된 프로필로 설정됩니다."
 		L_CURRENT = "%s - 활성화"
+		L_DUALSPEC_NOT_UNLOCKED = "이중 전문화은 잠금 해제되지 않았습니다."
 	elseif locale == "ptBR" then
 		L_ENABLED = "Ativar perfis de especialização"
 		L_ENABLED_DESC = "Quando ativado, seu perfil será definido para o perfil especificado quando você alterar a especialização."
 		L_CURRENT = "%s – ativo"
+		L_DUALSPEC_NOT_UNLOCKED = "Especialização Dupla não foi desbloqueada ainda."
 	elseif locale == "ruRU" then
 		L_ENABLED = "Включить профили специализации"
 		L_ENABLED_DESC = "Если включено, ваш профиль будет зависеть от выбранной специализации."
 		L_CURRENT = "%s - активен"
+		L_DUALSPEC_NOT_UNLOCKED = "Двойная специализация еще не открыта."
 	elseif locale == "zhCN" then
 		L_ENABLED = "启用专精配置文件"
 		L_ENABLED_DESC = "当启用后，当切换专精时配置文件将设置为专精配置文件。"
 		L_CURRENT = "%s - 开启"
+		L_DUALSPEC_NOT_UNLOCKED = "双天赋专精尚未解锁。"
 	elseif locale == "zhTW" then
 		L_ENABLED = "啟用專精設定檔"
 		L_ENABLED_DESC = "當啟用後，當你切換專精時設定檔會設定為專精設定檔。"
 		L_CURRENT = "%s - 啟動"
+		L_DUALSPEC_NOT_UNLOCKED = "尚未解鎖雙天賦專精。"
 	end
 end
 
@@ -265,7 +279,7 @@ end
 -- @param target (table) the AceDB-3.0 instance.
 -- @param name (string) a user-friendly name of the database (best bet is the addon name).
 function lib:EnhanceDatabase(target, name)
-	AceDB3 = AceDB3 or LibStub('AceDB-3.0', true)
+	AceDB3 = AceDB3 or LibStub("AceDB-3.0", true)
 	if type(target) ~= "table" then
 		error("Usage: LibDualSpec:EnhanceDatabase(target, name): target should be a table.", 2)
 	elseif type(name) ~= "string" then
@@ -291,7 +305,6 @@ end
 options.new = {
 	name = "New",
 	type = "input",
-	order = 30,
 	get = false,
 	set = function(info, value)
 		local db = info.handler.db
@@ -301,41 +314,51 @@ options.new = {
 			db:SetProfile(value)
 		end
 	end,
+	order = 30,
 }
 
 options.choose = {
 	name = "Existing Profiles",
 	type = "select",
-	order = 40,
 	get = "GetCurrentProfile",
 	set = "SetProfile",
 	values = "ListProfiles",
 	arg = "common",
 	disabled = function(info)
 		return info.handler.db:IsDualSpecEnabled()
-	end
+	end,
+	order = 40,
 }
 
 options.enabled = {
 	type = "toggle",
-	name = "|cffffd200"..L_ENABLED.."|r",
+	name = function()
+		if lib.currentSpec == 0 then
+			return L_ENABLED
+		end
+		return "|cffffd200"..L_ENABLED.."|r"
+	end,
 	desc = function()
 		local desc = L_ENABLED_DESC
 		if lib.currentSpec == 0 then
-			local _, reason = CanPlayerUseTalentSpecUI()
-			if not reason or reason == "" or reason == "LEVEL_TOO_LOW" then
-				reason = isSpecBased and _G["TALENT_MICRO_BUTTON_NO_SPEC"] or _G["INSTANCE_UNAVAILABLE_SELF_LEVEL_TOO_LOW"]
+			if isSpecBased then
+				local _, reason = C_SpecializationInfo.CanPlayerUseTalentUI()
+				if not reason or reason == "" or reason == "LEVEL_TOO_LOW" then
+					reason = TALENT_MICRO_BUTTON_NO_SPEC -- You have not chosen a class specialization.
+				end
+				desc = desc .. "\n\n" .. RED_FONT_COLOR:WrapTextInColorCode(reason)
+			else
+				desc = desc .. "\n\n" .. RED_FONT_COLOR:WrapTextInColorCode(L_DUALSPEC_NOT_UNLOCKED)
 			end
-			desc = desc .. "\n\n" .. RED_FONT_COLOR:WrapTextInColorCode(reason)
 		end
 		return desc
 	end,
 	descStyle = "inline",
-	order = 41,
-	width = "full",
 	get = function(info) return info.handler.db:IsDualSpecEnabled() end,
 	set = function(info, value) info.handler.db:SetDualSpecEnabled(value) end,
 	disabled = function() return lib.currentSpec == 0 end,
+	order = 41,
+	width = "full",
 }
 
 local points = {}
@@ -379,7 +402,6 @@ for i = 1, numSpecs do
 				end
 			end
 		end or nil,
-		order = 42 + i,
 		get = function(info)
 			local specIndex = tonumber(info[#info]:sub(-1))
 			return info.handler.db:GetDualSpecProfile(specIndex)
@@ -391,6 +413,8 @@ for i = 1, numSpecs do
 		values = "ListProfiles",
 		arg = "common",
 		disabled = function(info) return not info.handler.db:IsDualSpecEnabled() end,
+		order = 42 + i,
+		width = 1.5,
 	}
 end
 
@@ -399,8 +423,8 @@ end
 -- @param optionTable (table) The option table returned by AceDBOptions-3.0.
 -- @param target (table) The AceDB-3.0 the options operate on.
 function lib:EnhanceOptions(optionTable, target)
-	AceDBOptions3 = AceDBOptions3 or LibStub('AceDBOptions-3.0', true)
-	AceConfigRegistry3 = AceConfigRegistry3 or LibStub('AceConfigRegistry-3.0', true)
+	AceDBOptions3 = AceDBOptions3 or LibStub("AceDBOptions-3.0", true)
+	AceConfigRegistry3 = AceConfigRegistry3 or LibStub("AceConfigRegistry-3.0", true)
 	if type(optionTable) ~= "table" then
 		error("Usage: LibDualSpec:EnhanceOptions(optionTable, target): optionTable should be a table.", 2)
 	elseif type(target) ~= "table" then
@@ -418,6 +442,12 @@ function lib:EnhanceOptions(optionTable, target)
 	options.new.desc = optionTable.args.new.desc
 	options.choose.name = optionTable.args.choose.name
 	options.choose.desc = optionTable.args.choose.desc
+
+	-- copy properties
+	options.new.validate = optionTable.args.new.validate
+	options.new.usage = optionTable.args.new.usage
+	options.new.width = optionTable.args.new.width
+	options.choose.width = optionTable.args.choose.width
 
 	-- add our new options
 	if not optionTable.plugins then
@@ -467,12 +497,37 @@ end
 -- Switching logic
 -- ----------------------------------------------------------------------------
 
-local function eventHandler(self, event)
-	local spec = GetSpecialization() or 0
-	-- Newly created characters start at 5 instead of 1 in 9.0.1.
-	if spec == 5 or not CanPlayerUseTalentSpecUI() then
-		spec = 0
+local GetProfileSpecialization do
+	if isSpecBased then
+		function GetProfileSpecialization()
+			local spec = C_SpecializationInfo.GetSpecialization()
+			if not spec or not C_SpecializationInfo.CanPlayerUseTalentUI() or spec > GetNumSpecializations() then
+				-- Player is loading, can't use talents, or is in initial spec.
+				spec = 0
+			end
+			return spec
+		end
+	elseif ClassicExpansionAtMost(LE_EXPANSION_CATACLYSM) then
+		function GetProfileSpecialization()
+			if GetNumTalentGroups() > 1 then
+				-- Player has dual specialization unlocked.
+				return C_SpecializationInfo.GetActiveSpecGroup()
+			end
+			return 0
+		end
+	else -- Forever
+		function GetProfileSpecialization()
+			if GetNumSpecGroups() > 1 then
+				-- Player has dual specialization unlocked.
+				return C_SpecializationInfo.GetActiveSpecGroup()
+			end
+			return 0
+		end
 	end
+end
+
+local function OnEvent(self, event)
+	local spec = GetProfileSpecialization()
 	lib.currentSpec = spec
 
 	if event == "PLAYER_LOGIN" then
@@ -508,9 +563,9 @@ local function eventHandler(self, event)
 	end
 end
 
-lib.eventFrame:SetScript("OnEvent", eventHandler)
+lib.eventFrame:SetScript("OnEvent", OnEvent)
 if IsLoggedIn() then
-	eventHandler(lib.eventFrame, "PLAYER_LOGIN")
+	OnEvent(lib.eventFrame, "PLAYER_LOGIN")
 else
 	lib.eventFrame:RegisterEvent("PLAYER_LOGIN")
 end

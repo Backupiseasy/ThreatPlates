@@ -207,11 +207,13 @@ local function GetColorByReaction(unit)
   return color
 end
 
-if Addon.ExpansionIsAtLeastMidnight then
+if Addon.HAS_MIDNIGHT_API then
   ColorModule.GetColorByHealthDeficit = function(unit)
     return UnitHealthPercent(unit.unitid, true, HealthColorCurve)
   end
 else
+  -- Every client that can return secret health values takes the Addon.HAS_MIDNIGHT_API branch above
+  -- instead, so no secret-value guard is needed on this plain-arithmetic path.
   ColorModule.GetColorByHealthDeficit = function(unit)
     local health_pct = ceil(100 * unit.health / unit.healthmax)
 
@@ -331,8 +333,10 @@ local function GetSituationalColorForHealthbar(unit, plate_style)
   elseif unit.IsFocus and SettingsBase.FocusWidget.ModeHPBar then
     color = SettingsBase.FocusWidget.HPBarColor
   else
+    -- unit.TargetMarkerIcon can be secret on any client with Midnight's API surface (not just Midnight
+    -- itself), and it's used as a table key below - disabled there just like on Midnight.
     local use_target_mark_color
-    if not Addon.ExpansionIsAtLeastMidnight and unit.TargetMarkerIcon then
+    if not Addon.HAS_MIDNIGHT_API and unit.TargetMarkerIcon then
       if unit.CustomPlateSettings then
         use_target_mark_color = unit.CustomPlateSettings.allowMarked
       else
@@ -365,7 +369,7 @@ local function GetSituationalColorForName(unit, plate_style)
     color = SettingsBase.FocusWidget.HPBarColor
   else
     local use_target_mark_color
-    if not Addon.ExpansionIsAtLeastMidnight and unit.TargetMarkerIcon then
+    if not Addon.HAS_MIDNIGHT_API and unit.TargetMarkerIcon then
       if unit.CustomPlateSettings then
         use_target_mark_color = unit.CustomPlateSettings.allowMarked
       else
@@ -585,8 +589,9 @@ function ColorModule.UpdateSettings()
 
   ColorByReaction = SettingsBase.ColorByReaction
   ColorByHealth = SettingsBase.ColorByHealth
-  -- Initialize the ColorCurve for health-based coloring (retail/Midnight)
-  if Addon.ExpansionIsAtLeastMidnight then
+  -- Initialize the ColorCurve for health-based coloring (retail/Midnight, and any client with Midnight's
+  -- API surface - see Addon.HAS_MIDNIGHT_API in Init.lua)
+  if Addon.HAS_MIDNIGHT_API then
     HealthColorCurve = C_CurveUtil.CreateColorCurve()
     HealthColorCurve:AddPoint(0.0, CreateColor(ColorByHealth.Low.r, ColorByHealth.Low.g, ColorByHealth.Low.b))
     HealthColorCurve:AddPoint(1.0, CreateColor(ColorByHealth.High.r, ColorByHealth.High.g, ColorByHealth.High.b))

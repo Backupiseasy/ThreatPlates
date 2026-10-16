@@ -32,7 +32,6 @@ local COMBAT_PROTECTED = {
   nameplateOccludedAlphaMult = true,
   nameplateOverlapH = true,
   nameplateOverlapV = true,
-  nameplateResourceOnTarget = true,
   nameplateSelectedAlpha = true,
   nameplateNotSelectedAlpha = true,
   nameplateTargetBehindMaxDistance = true,
@@ -45,11 +44,7 @@ local COMBAT_PROTECTED = {
   nameplateShowEnemyPets = true,
   nameplateShowEnemyTotems = true,
   nameplateShowFriendlyPlayers = true,
-  nameplateShowFriendlyNPCs = true,
-  nameplateShowFriendlyGuardians = true,
-  nameplateShowFriendlyMinions = true,
-  nameplateShowFriendlyPets = true,
-  nameplateShowFriendlyTotems = true,
+  nameplateShowFriendlyNpcs = true,
   nameplateShowFriendlyPlayerGuardians = true,
   nameplateShowFriendlyPlayerMinions = true,
   nameplateShowFriendlyPlayerPets = true,
@@ -112,8 +107,10 @@ end
 
 -- Blizzard's NamePlateDriverMixin recomputes and re-applies the native plate size via
 -- C_NamePlate.SetNamePlateSize whenever any of these CVars change (see UpdateNamePlateOptions /
--- UpdateNamePlateSize in Blizzard_NamePlates.lua), which can leave already-active plates with a
--- stale hit-test region until TidyPlates re-asserts its own size (see SetCVarHook below)
+-- UpdateNamePlateSize in Blizzard_NamePlates.lua). TP's own hit-test region (ApplyPlateHitTest,
+-- Nameplate.lua) is independent of that native size, but its HitTestFrame is still anchored to
+-- plate.UnitFrame, which Blizzard's resize can reposition/resize - so already-active plates can be
+-- left with a stale clickable area until TidyPlates re-asserts it (see SetCVarHook below).
 local RESYNC_NATIVE_SIZE_CVARS = {
   nameplateSize = true,
   nameplateStyle = true,
@@ -197,6 +194,18 @@ function CVars:OverwriteBool(cvar, value)
   self:Overwrite(cvar, (value and 1) or 0)
 end
 
+-- Bitfield CVars are stored by WoW as an encoded string, not as a number, so a single flag (index) has to be
+-- changed with C_CVar.SetCVarBitfield
+function CVars:OverwriteBitfield(cvar, index, value)
+  if COMBAT_PROTECTED[cvar] then
+    Addon.ExecuteAfterCombatEnds(function()
+      C_CVar.SetCVarBitfield(cvar, index, value)
+    end, L["Unable to change the following console variable while in combat: "] .. cvar .. ". ")
+  else
+    C_CVar.SetCVarBitfield(cvar, index, value)
+  end
+end
+
 function CVars:RestoreFromProfile(cvar)
   local db = Addon.db.profile.CVarsBackup
 
@@ -239,16 +248,15 @@ end
 -- 
 ---------------------------------------------------------------------------------------------------
 
--- From addon: AdvancedInterfaceOptions
-function CVars:CVarExists(cvar)
-	return not not select(2, pcall(function() return addon.GetCVarInfo(cvar) end))
+-- GetCVar returns nil for CVars that the running client does not know
+function CVars:IsAvailable(cvar)
+  return GetCVar(cvar) ~= nil
 end
 
 local RESET_TO_DEFAULT = {
   "nameplateOverlapH", "nameplateOverlapV",
   "nameplateMaxDistance", "nameplateTargetBehindMaxDistance",
   "nameplateShowOnlyNames",
-  "nameplateResourceOnTarget",
   -- "nameplateGlobalScale" -- Reset it to 1, if it get's somehow corrupted
   -- Action Target
   "SoftTargetEnemy", "SoftTargetNameplateEnemy", "SoftTargetIconEnemy",
@@ -258,9 +266,9 @@ local RESET_TO_DEFAULT = {
 }
 
 function CVars:ResetToDefaults()
-  for k, v in pairs(RESET_TO_DEFAULT) do
-    if self:CVarExists(k) then
-      self:SetToDefault(v)
+  for _, cvar in ipairs(RESET_TO_DEFAULT) do
+    if self:IsAvailable(cvar) then
+      self:SetToDefault(cvar)
     end
   end
 end
@@ -344,7 +352,9 @@ function CVars.InvalidCVarsForOcclusionDetection()
   local invalid = nameplateMinAlpha ~= 1 or nameplateMaxAlpha ~= 1 or nameplateOccludedAlphaMult > 0.9 or nameplateSelectedAlpha ~= 1
 
   -- Occlusion detection does not work when a target is selected in Classic, see https://github.com/Stanzilla/WoWUIBugs/issues/134
-  if not Addon.IS_MAINLINE then
+  -- "WoW Forever" runs on the modern client engine, where this CVar is -1 by default (like on Mainline), so it must
+  -- not be checked there.
+  if not Addon.IS_MAINLINE and not Addon.IS_FOREVER then
     local nameplateNotSelectedAlpha = CVars:GetAsNumber("nameplateNotSelectedAlpha")
     return invalid or nameplateNotSelectedAlpha ~= 1
   end
@@ -359,7 +369,7 @@ function CVars.FixCVarsForOcclusionDetection()
   SetCVar("nameplateSelectedAlpha", 1.0)     -- Default: 1.0
 
   -- Occlusion detection does not work when a target is selected in Classic, see https://github.com/Stanzilla/WoWUIBugs/issues/134
-  if not Addon.IS_MAINLINE then
+  if not Addon.IS_MAINLINE and not Addon.IS_FOREVER then
     SetCVar("nameplateNotSelectedAlpha", 1)  -- Default: 0.5
   end
 

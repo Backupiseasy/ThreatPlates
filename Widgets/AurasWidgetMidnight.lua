@@ -3,7 +3,10 @@
 ---------------------------------------------------------------------------------------------------
 local ADDON_NAME, Addon = ...
 
-if not Addon.ExpansionIsAtLeastMidnight then return end
+-- Active on Midnight, and on any client whose engine has Midnight's API/secret-value surface (not just
+-- Midnight itself - see Addon.HAS_MIDNIGHT_API in Init.lua). See AurasWidget.lua for the sibling widget
+-- used on genuinely older clients.
+if not Addon.HAS_MIDNIGHT_API then return end
 
 local Widget = Addon.Widgets:NewWidget("Auras")
 
@@ -37,16 +40,6 @@ local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
 -- List them here for Mikk's FindGlobals script
 -- GLOBALS: CreateFrame, UIParent, InCombatLockdown, AnchorUtil, PixelUtil
-
----------------------------------------------------------------------------------------------------
--- Crowd Control Auras
----------------------------------------------------------------------------------------------------
-
-local CROWD_CONTROL_SPELLS_BY_EXPANSION = {
-  MAINLINE = {},
-}
-
-Widget.CROWD_CONTROL_SPELLS = CROWD_CONTROL_SPELLS_BY_EXPANSION[Addon.GetExpansionLevel()]
 
 ---------------------------------------------------------------------------------------------------
 -- Cached configuration settings
@@ -221,38 +214,65 @@ local AURA_ICON_TEX_COORD = {
   wide = { .07, 1 - .07, .23, 1 - .23 },
 }
 
--- Midnight replacement for AuraWidget.FlashWhenExpiring/FlashTime (Classic-only - no equivalent exists
--- on Midnight, AuraButton has no script-hook for addon-attached icon effects, see the wiki's
--- AddDispelTypeTexture/glow discussion). Colors the duration text itself via a live Blizzard-driven
+-- Midnight implementation of AuraWidget.FlashWhenExpiring/FlashTime (the legacy widget flashes the icon -
+-- no equivalent exists on Midnight, AuraButton has no script-hook for addon-attached icon effects, see the
+-- wiki's AddDispelTypeTexture/glow discussion). Colors the duration text itself via a live Blizzard-driven
 -- binding (SetDurationText's options.textColor) instead of flashing the icon - a Step curve (no
--- interpolation, hard cutoff at ExpiringColorThreshold) snapping to ExpiringColor below the threshold
+-- interpolation, hard cutoff at FlashTime) snapping to ExpiringColor below the threshold
 -- and back to the aura_type's normal duration-text color above it. AddPoint needs real Color objects
 -- (colorRGBA/ColorMixin), not the plain {r=,g=,b=,a=} tables this addon's own color fields use - same
 -- CreateColor() wrapping GetDispelTypeColorMapForAuraType already does for the same reason.
-local function BuildExpiringColorCurve(normal_color)
+-- With FlashWhenExpiring disabled, the curve only has the normal color: used to remove the expiring
+-- color from buttons that already have a curve bound, as SetDurationText without options keeps it
+-- (binding:SetToDefaults does not clear the text color curve).
+local function BuildExpiringColorCurve(aura_type)
+  local db = Widget.db
+  local normal_color = db[aura_type].ModeIcon.Duration.Font.Color
+
   local curve = _G.C_CurveUtil.CreateColorCurve()
   curve:SetType(LuaCurveTypeStep)
-  local expiring_color = Widget.db.ExpiringColor
-  curve:AddPoint(0, _G.CreateColor(expiring_color.r, expiring_color.g, expiring_color.b, expiring_color.a or 1))
-  curve:AddPoint(Widget.db.ExpiringColorThreshold, _G.CreateColor(normal_color.r, normal_color.g, normal_color.b, normal_color.a or 1))
+  if db.FlashWhenExpiring then
+    local expiring_color = db.ExpiringColor
+    curve:AddPoint(0, _G.CreateColor(expiring_color.r, expiring_color.g, expiring_color.b, expiring_color.a or 1))
+    curve:AddPoint(db.FlashTime, _G.CreateColor(normal_color.r, normal_color.g, normal_color.b, normal_color.a or 1))
+  else
+    curve:AddPoint(0, _G.CreateColor(normal_color.r, normal_color.g, normal_color.b, normal_color.a or 1))
+  end
   return curve
 end
 
 -- One curve per aura_type (Buffs/Debuffs/CrowdControl), not per AuraButton - ExpiringColor/
--- ExpiringColorThreshold are global and the "normal" endpoint color only varies by aura_type, so every
--- button of the same type would otherwise build (and leak) an identical curve object. Never
--- invalidated - ExpiringColor/ExpiringColorThreshold/Duration.Font.Color are create-time-only anyway
--- (SetDurationText's binding is never re-registered live - see ReapplyLiveAuraButtonSettings), and the
--- pool is only ever built once per session (PreallocateAuraContainers guards on #pool == 0), so a
--- stale cache entry can't outlive a /reload.
+-- FlashTime are global and the "normal" endpoint color only varies by aura_type, so every
+-- button of the same type would otherwise build (and leak) an identical curve object. Invalidated in
+-- Widget:UpdateSettings (before ReapplyLiveAuraButtonSettings re-binds it to the existing buttons), so
+-- a changed FlashWhenExpiring/FlashTime/ExpiringColor/Duration.Font.Color always gets a fresh curve.
 local ExpiringColorCurveCache = {}
-local function GetExpiringColorCurve(aura_type, normal_color)
+local function InvalidateExpiringColorCurveCache()
+  ExpiringColorCurveCache = {}
+end
+local function GetExpiringColorCurve(aura_type)
   local curve = ExpiringColorCurveCache[aura_type]
   if not curve then
-    curve = BuildExpiringColorCurve(normal_color)
+    curve = BuildExpiringColorCurve(aura_type)
     ExpiringColorCurveCache[aura_type] = curve
   end
   return curve
+end
+
+-- Binds the duration text to the aura button. A color curve is only bound if FlashWhenExpiring is
+-- enabled or the button already has one bound (to reset it to the normal color, see above).
+local function SetAuraButtonDurationText(auraButton, aura_type)
+  if Widget.db.FlashWhenExpiring or auraButton.HasExpiringColorCurve then
+    auraButton:SetDurationText(auraButton.TimeLeft, {
+      textColor = {
+        curve = GetExpiringColorCurve(aura_type),
+        property = DurationTextBindingPropertyRemainingDuration,
+      },
+    })
+    auraButton.HasExpiringColorCurve = true
+  else
+    auraButton:SetDurationText(auraButton.TimeLeft)
+  end
 end
 
 local function InitializeAuraButton(auraButton, aura_type)
@@ -305,12 +325,14 @@ local function InitializeAuraButton(auraButton, aura_type)
   auraButton.DispelBorder:SetAllPoints(auraButton.Icon)
   auraButton.DispelBorder:SetScale(AURA_BORDER_THICKNESS / AURA_BORDER_TEXTURE_BAND)
   if db_icon.ShowBorder then
-    -- Capture the return value: up to Patch 12.1.0, AddDispelTypeTexture returns an index that
-    -- RemoveDispelTypeTexture(index) later needs. Since Patch 12.1.5, it returns nothing,
-    -- RemoveDispelTypeTexture takes the texture region itself, and AddDispelTypeTexture errors if the
-    -- same region is already registered (Blizzard_CustomAuraButton.lua, AddDisplayElement). Store
-    -- whatever came back (an index, or nil) so ReapplyLiveAuraButtonSettings can remove the border
-    -- with the matching API generation without a version check.
+    -- Capture the return value: on the API contract live on retail as of this writing (12.1.0),
+    -- AddDispelTypeTexture returns an index that RemoveDispelTypeTexture(index) later needs. Warcraft
+    -- Wiki documents an upcoming Patch 12.1.5 change where AddDispelTypeTexture returns nothing instead
+    -- and RemoveDispelTypeTexture takes the region object itself (and AddDispelTypeTexture errors if the
+    -- same region is registered twice, which it didn't before) - see ReapplyLiveAuraButtonSettings below,
+    -- where that error was actually observed live on a client already running the newer contract. Store
+    -- whatever came back (an index, or nil post-change) so the removal call there can self-adapt to
+    -- either API generation without hardcoding a version check.
     auraButton.DispelBorderRegistration = auraButton:AddDispelTypeTexture(auraButton.DispelBorder, {
       style = DispelTypeTextureStylePreserveAsset,
       showWhenHarmful = true,
@@ -350,16 +372,7 @@ local function InitializeAuraButton(auraButton, aura_type)
   -- Same font-before-Set* ordering requirement as SetApplicationCount above.
   auraButton.TimeLeft = auraButton:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   FontUpdateText(auraButton, auraButton.TimeLeft, db_icon.Duration)
-  if Widget.db.ShowExpiringColor then
-    auraButton:SetDurationText(auraButton.TimeLeft, {
-      textColor = {
-        curve = GetExpiringColorCurve(aura_type, db_icon.Duration.Font.Color),
-        property = DurationTextBindingPropertyRemainingDuration,
-      },
-    })
-  else
-    auraButton:SetDurationText(auraButton.TimeLeft)
-  end
+  SetAuraButtonDurationText(auraButton, aura_type)
   if not ShowDuration then
     auraButton.TimeLeft:Hide()
   end
@@ -431,8 +444,85 @@ end
 -- without implicating PixelUtil specifically. Restored to the original PixelUtil.SetSize +
 -- ExecuteAfterCombatEnds combination for further, more careful testing rather than left on the
 -- untested plain-SetSize variant.
+local function AppendSettingsToSignature(parts, value)
+  if type(value) == "table" then
+    parts[#parts + 1] = "{"
+    for key, entry in pairs(value) do
+      parts[#parts + 1] = tostring(key)
+      AppendSettingsToSignature(parts, entry)
+    end
+    parts[#parts + 1] = "}"
+  else
+    parts[#parts + 1] = tostring(value)
+  end
+end
+
+-- Everything ReapplyLiveAuraButtonSettings reads, as one string - must be kept in sync with it. Values
+-- still at their default are not part of a pairs() iteration (AceDB serves them via metatable), which is
+-- fine here: a default is constant, so a missing key always stands for the same value.
+local function GetLiveAuraButtonSettingsSignature(aura_type)
+  local db = Widget.db
+  local db_icon = db[aura_type].ModeIcon
+
+  local parts = {}
+  AppendSettingsToSignature(parts, db_icon.IconWidth)
+  AppendSettingsToSignature(parts, db_icon.IconHeight)
+  AppendSettingsToSignature(parts, db_icon.StackCount)
+  AppendSettingsToSignature(parts, db_icon.Duration)
+  AppendSettingsToSignature(parts, db.ShowTooltips)
+  AppendSettingsToSignature(parts, db.ShowCooldownSpiral)
+  AppendSettingsToSignature(parts, db.ShowStackCount)
+  AppendSettingsToSignature(parts, HideOmniCC)
+  AppendSettingsToSignature(parts, ShowDuration)
+
+  return table.concat(parts, "|")
+end
+
+-- The settings for the color of the dispel-type border, separate from the signature above: re-coloring
+-- the border is by far the most expensive step per button (about 85% of the time measured), so it is
+-- only done if one of these settings changed.
+local function GetLiveAuraBorderSettingsSignature(aura_type)
+  local db = Widget.db
+
+  local parts = {}
+  AppendSettingsToSignature(parts, db[aura_type].ModeIcon.ShowBorder)
+  AppendSettingsToSignature(parts, db.ShowAuraType)
+  AppendSettingsToSignature(parts, (aura_type == "Buffs") and db.DefaultBuffColor or db.DefaultDebuffColor)
+
+  return table.concat(parts, "|")
+end
+
+-- The settings for the color curve of the duration text (FlashWhenExpiring), separate from the signature
+-- above, so that the duration text is only re-bound to the buttons if one of these settings changed.
+local function GetLiveAuraDurationColorSettingsSignature(aura_type)
+  local db = Widget.db
+
+  local parts = {}
+  AppendSettingsToSignature(parts, db.FlashWhenExpiring)
+  AppendSettingsToSignature(parts, db.FlashTime)
+  AppendSettingsToSignature(parts, db.ExpiringColor)
+  AppendSettingsToSignature(parts, db[aura_type].ModeIcon.Duration.Font.Color)
+
+  return table.concat(parts, "|")
+end
+
+-- Signature of the settings last applied to the buttons of each aura_type. Re-applying them touches every
+-- button of every pooled container (3 pools x 40 containers), which froze the game for 1-2 seconds - and
+-- Widget:UpdateSettings is also called for changes that have nothing to do with auras (every custom
+-- nameplate option re-initializes all widgets, as does a profile change). New buttons don't need this,
+-- InitializeAuraButton reads the current settings itself.
+local AppliedLiveAuraButtonSettings = {}
+local AppliedLiveAuraBorderSettings = {}
+local AppliedLiveAuraDurationColorSettings = {}
+
 local function ReapplyLiveAuraButtonSettings(aura_type)
   if not HasAuraContainers then return end
+
+  if AppliedLiveAuraButtonSettings[aura_type] == GetLiveAuraButtonSettingsSignature(aura_type)
+    and AppliedLiveAuraBorderSettings[aura_type] == GetLiveAuraBorderSettingsSignature(aura_type)
+    and AppliedLiveAuraDurationColorSettings[aura_type] == GetLiveAuraDurationColorSettingsSignature(aura_type) then
+    return
+  end
 
   -- Aura buttons are forbidden objects while their unit's aura info is secret (any hostile unit in
   -- an Arena/Battleground) - not just combat-gated, see comment above. Warn and skip entirely
@@ -445,26 +535,43 @@ local function ReapplyLiveAuraButtonSettings(aura_type)
   end
 
   Addon.ExecuteAfterCombatEnds(function()
+    -- Checked again here, as this may run later (after combat) and several times then
+    local signature = GetLiveAuraButtonSettingsSignature(aura_type)
+    local border_signature = GetLiveAuraBorderSettingsSignature(aura_type)
+    local update_buttons = AppliedLiveAuraButtonSettings[aura_type] ~= signature
+    local update_border = AppliedLiveAuraBorderSettings[aura_type] ~= border_signature
+    local duration_color_signature = GetLiveAuraDurationColorSettingsSignature(aura_type)
+    local update_duration_color = AppliedLiveAuraDurationColorSettings[aura_type] ~= duration_color_signature
+    if not (update_buttons or update_border or update_duration_color) then return end
+
     local db_icon = Widget.db[aura_type].ModeIcon
     for _, container in ipairs(AuraContainerPool[aura_type]) do
       for _, group_key in ipairs(AURA_GROUP_KEYS[aura_type]) do
         for i = 1, container:GetAuraGroupFrameCount(group_key) do
           local auraButton = container:GetAuraGroupFrame(group_key, i)
-          PixelUtil.SetSize(auraButton, db_icon.IconWidth, db_icon.IconHeight)
-          auraButton:SetMouseMotionEnabled(Widget.db.ShowTooltips)
-          if auraButton.Cooldown then
-            auraButton.Cooldown:SetShownSwipe(Widget.db.ShowCooldownSpiral, HideOmniCC)
+          if update_buttons then
+            PixelUtil.SetSize(auraButton, db_icon.IconWidth, db_icon.IconHeight)
+            auraButton:SetMouseMotionEnabled(Widget.db.ShowTooltips)
+            if auraButton.Cooldown then
+              auraButton.Cooldown:SetShownSwipe(Widget.db.ShowCooldownSpiral, HideOmniCC)
+            end
+
+            -- Stacks/TimeLeft always exist (created unconditionally in InitializeAuraButton, like
+            -- DispelBorder - see its comment) - this never creates or (re)binds SetApplicationCount
+            -- itself, only restyles (FontUpdateText - plain Set* calls, nothing restricted) and toggles
+            -- Show()/Hide() for ShowStackCount/ShowDuration.
+            FontUpdateText(auraButton, auraButton.Stacks, db_icon.StackCount)
+            auraButton.Stacks:SetShown(Widget.db.ShowStackCount)
+
+            FontUpdateText(auraButton, auraButton.TimeLeft, db_icon.Duration)
+            auraButton.TimeLeft:SetShown(ShowDuration)
           end
 
-          -- Stacks/TimeLeft always exist (created unconditionally in InitializeAuraButton, like
-          -- DispelBorder - see its comment) - this never creates or (re)binds SetApplicationCount/
-          -- SetDurationText itself, only restyles (FontUpdateText - plain Set* calls, nothing
-          -- restricted) and toggles Show()/Hide() for ShowStackCount/ShowDuration.
-          FontUpdateText(auraButton, auraButton.Stacks, db_icon.StackCount)
-          auraButton.Stacks:SetShown(Widget.db.ShowStackCount)
-
-          FontUpdateText(auraButton, auraButton.TimeLeft, db_icon.Duration)
-          auraButton.TimeLeft:SetShown(ShowDuration)
+          -- The color curve of the duration text is part of its binding, so the duration text is
+          -- re-bound with the new curve (after FontUpdateText, which sets the static text color).
+          if update_duration_color then
+            SetAuraButtonDurationText(auraButton, aura_type)
+          end
 
           -- Dispel-type border EXISTENCE (ShowBorder true<->false) reverted to create-time-only
           -- (2026-08-21) - AddDispelTypeTexture/RemoveDispelTypeTexture/ClearDispelTypeTextures turned
@@ -481,12 +588,28 @@ local function ReapplyLiveAuraButtonSettings(aura_type)
           -- 2026-08-21: unlike the broader existence-toggle case, Remove+AddDispelTypeTexture works
           -- reliably here for recoloring an already-shown border.
           --
-          -- Since Patch 12.1.5, RemoveDispelTypeTexture takes the texture region instead of an index,
-          -- so RemoveDispelTypeTexture(1) removed nothing and the following AddDispelTypeTexture failed
-          -- with "Display element '...' has already been added". Remove with whatever
-          -- InitializeAuraButton's AddDispelTypeTexture call returned (an index up to 12.1.0, nil since
-          -- 12.1.5, in which case the region itself is used).
-          if db_icon.ShowBorder and auraButton:GetDispelTypeTextureCount() > 0 then
+          -- Root cause of the "Display element '...DispelBorder...' has already been added" error seen
+          -- live (100% reproducible on every already-shown button, not intermittent - ruling out combat/
+          -- taint/timing theories floated earlier): Warcraft Wiki documents an upcoming Patch 12.1.5 API
+          -- change to AddDispelTypeTexture/RemoveDispelTypeTexture's contract - not live on retail as of
+          -- this writing (retail is on 12.1.0), but the client this was reproduced on already has it,
+          -- i.e. that client tracks a newer/PTR-ish build than live retail (matches its
+          -- wow_classic_beta product/build-track elsewhere in this addon's compatibility notes). Pre-
+          -- change, AddDispelTypeTexture returns an index and RemoveDispelTypeTexture(index) takes that
+          -- index; post-change, AddDispelTypeTexture returns nothing, RemoveDispelTypeTexture(region)
+          -- takes the region object itself, and AddDispelTypeTexture now errors if the same region is
+          -- already registered (it silently didn't before) - see
+          -- https://warcraft.wiki.gg/wiki/Patch_12.1.5/API_changes. The old RemoveDispelTypeTexture(1)
+          -- call below never matched InitializeAuraButton's stored registration on a client with the new
+          -- contract (a literal 1 isn't a valid region reference there), so the border was never actually
+          -- removed before the very next AddDispelTypeTexture call re-added it. Fixed by passing back
+          -- whatever InitializeAuraButton's AddDispelTypeTexture call returned
+          -- (auraButton.DispelBorderRegistration - an index pre-change, nil post-change, in which case
+          -- the region itself is used instead) so removal targets the same API generation as the original
+          -- registration, self-adapting to either client without hardcoding a version check. No pcall
+          -- here (deliberately) - a failure at this point means the API-generation detection above is
+          -- wrong for the running client, which should surface as a visible error, not be swallowed.
+          if update_border and db_icon.ShowBorder and auraButton:GetDispelTypeTextureCount() > 0 then
             auraButton:RemoveDispelTypeTexture(auraButton.DispelBorderRegistration or auraButton.DispelBorder)
             auraButton.DispelBorderRegistration = auraButton:AddDispelTypeTexture(auraButton.DispelBorder, {
               style = DispelTypeTextureStylePreserveAsset,
@@ -499,7 +622,12 @@ local function ReapplyLiveAuraButtonSettings(aura_type)
         end
       end
     end
-  end, "Unable to update the appearance of auras while in combat.")
+
+    -- Only stored after all buttons were updated, so that the settings are applied again if that failed
+    AppliedLiveAuraButtonSettings[aura_type] = signature
+    AppliedLiveAuraBorderSettings[aura_type] = border_signature
+    AppliedLiveAuraDurationColorSettings[aura_type] = duration_color_signature
+  end,"Unable to update the appearance of auras while in combat.")
 end
 
 -- Maps the widget's SortOrder setting to the closest AuraContainerSortMethod. Duration/Creation have
@@ -881,9 +1009,9 @@ function Widget:UpdateAuraContainer(widget_frame, aura_type, group_configs, unit
   end
 
   -- SwitchAreaByReaction (friendly units only, Buffs<->Debuffs - matches the legacy widget's own
-  -- scope, CrowdControl was never swapped there either): swaps which type's *layout* (icon size,
-  -- columns/rows/spacing, sort, alignment, anchor - everything below except the actual filter data,
-  -- which stays on the real aura_type/container) Buffs/Debuffs use. Matches the legacy widget's
+  -- scope, CrowdControl was never swapped there either): swaps which type's *layout* (columns/rows/
+  -- spacing, sort, alignment, anchor - everything below except the actual filter data and the icon
+  -- size, which stay on the real aura_type/container, see button_icon below) Buffs/Debuffs use. Matches the legacy widget's
   -- behavior of feeding buff data straight into the already-Debuffs-styled physical Debuffs frame
   -- (AurasWidget.lua ~2156: `local buff_aura_grid = (db.SwitchAreaByReaction and
   -- widget_frame.Debuffs) or widget_frame.Buffs`) - not just relocating buffs to debuffs' screen
@@ -904,13 +1032,19 @@ function Widget:UpdateAuraContainer(widget_frame, aura_type, group_configs, unit
 
   local db = self.db[layout_type]
   local db_icon = db.ModeIcon
+  -- The icon size always comes from aura_type, not layout_type: the container's aura buttons are pooled
+  -- per aura type and were sized for aura_type in InitializeAuraButton. They cannot be resized per unit
+  -- (SetSize on them is forbidden from addon code while auras are secret). Using layout_type's icon size
+  -- here made the layout reserve a slot of the other type's size for each button, so the spacing between
+  -- the icons was wrong whenever the icon sizes of Buffs and Debuffs differ.
+  local button_icon = self.db[aura_type].ModeIcon
   local max_auras = min(db_icon.MaxAuras, db_icon.Rows * db_icon.Columns)
   local anchor_point, horizontal_direction, vertical_direction = GetFlowLayoutForAlignment(db.AlignmentH, db.AlignmentV)
   local sort_method = GetSortMethod(self.db.SortOrder)
   local sort_direction = GetSortDirection(self.db.SortReverse)
   local layout = {
-    elementWidth = db_icon.IconWidth,
-    elementHeight = db_icon.IconHeight,
+    elementWidth = button_icon.IconWidth,
+    elementHeight = button_icon.IconHeight,
     elementSpacing = db_icon.ColumnSpacing,
     lineSpacing = db_icon.RowSpacing,
   }
@@ -931,7 +1065,7 @@ function Widget:UpdateAuraContainer(widget_frame, aura_type, group_configs, unit
 
   container:SetFlowLayoutAnchorPoint(anchor_point)
   container:SetFlowLayoutGrowthDirection(horizontal_direction, vertical_direction)
-  container:SetFlowLayoutMaximumLineSize(db_icon.Columns * (db_icon.IconWidth + db_icon.ColumnSpacing))
+  container:SetFlowLayoutMaximumLineSize(db_icon.Columns * (button_icon.IconWidth + db_icon.ColumnSpacing))
 
   container:SetUnit(unit.unitid)
   container:SetEnabled(true)
@@ -1153,7 +1287,7 @@ Widget.PLAYER_REGEN_DISABLED = Widget.PLAYER_REGEN_ENABLED
 function Widget:UpdateSettings()
   self.db = Addon.db.profile.AuraWidget
 
-  HideOmniCC = not self.db.ShowOmniCC or Addon.ExpansionIsAtLeastMidnight
+  HideOmniCC = not self.db.ShowOmniCC or Addon.HAS_MIDNIGHT_API
   ShowDuration = self.db.ShowDuration and HideOmniCC
 
   EnabledForStyle["NameOnly"] = self.db.ShowInHeadlineView
@@ -1170,6 +1304,7 @@ function Widget:UpdateSettings()
   -- GetDispelTypeColorMapForAuraType) - otherwise a changed DefaultBuffColor/DefaultDebuffColor/
   -- ShowAuraType would keep serving the stale cached map.
   InvalidateDispelTypeColorMapCache()
+  InvalidateExpiringColorCurveCache()
 
   for _, aura_type in ipairs(AURA_CONTAINER_TYPES) do
     ReapplyLiveAuraButtonSettings(aura_type)

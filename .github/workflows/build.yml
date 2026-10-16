@@ -1,7 +1,7 @@
 # Packages and publishes a stable release to CurseForge, WoWInterface, Wago, and GitHub.
 # Triggers on a version tag (e.g. "13.0.24") - explicitly excluding "-alpha"/"-beta" tags,
-# which are handled by build_alpha.yml/build_beta.yml instead. Builds separate packages
-# per game flavor (retail/classic/bcc/mists) from the same multi-version .toc.
+# which are handled by build_alpha.yml/build_beta.yml instead. Builds a single unified
+# package (retail/classic/bcc/mists) from the same multi-version .toc.
 #
 # Actual packaging logic lives in the reusable workflow _package_release.yml - this file
 # only owns the release-channel-specific trigger, naming, and which secrets are forwarded.

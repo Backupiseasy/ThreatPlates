@@ -296,9 +296,11 @@ end
 function ThreatModule.UpdateSettings()
   Settings = Addon.db.profile.threat
 
-  UseThreatTable = Settings.UseThreatTable or Addon.ExpansionIsAtLeastMidnight
-  UseHeuristicInInstances = Settings.UseHeuristicInInstances and not Addon.ExpansionIsAtLeastMidnight
-  ShowOffTank = Settings.toggle.OffTank and not Addon.ExpansionIsAtLeastMidnight
+  -- Off-tank detection and the threat heuristic are disabled on every client with Midnight's API surface
+  -- (Addon.HAS_MIDNIGHT_API, not just Midnight itself): UnitThreatSituation/UnitIsUnit return secret values there.
+  UseThreatTable = Settings.UseThreatTable or Addon.HAS_MIDNIGHT_API
+  UseHeuristicInInstances = Settings.UseHeuristicInInstances and not Addon.HAS_MIDNIGHT_API
+  ShowOffTank = Settings.toggle.OffTank and not Addon.HAS_MIDNIGHT_API
   ShowInstancesOnly = Settings.toggle.InstancesOnly
 
   -- "OFFTANK" is only valid while the player is in tank role; recalculate when the role changes.

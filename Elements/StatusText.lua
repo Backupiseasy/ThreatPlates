@@ -20,7 +20,7 @@ local CreateColor = CreateColor
 -- ThreatPlates APIs
 local SubscribeEvent, UnsubscribeEvent = Addon.EventService.Subscribe, Addon.EventService.Unsubscribe
 local RGB = Addon.RGB
-local FontUpdateText = Addon.Font.UpdateText
+local FontSetInitialFont, FontUpdateText = Addon.Font.SetInitialFont, Addon.Font.UpdateText
 local TransliterateCyrillicLetters = Addon.Localization.TransliterateCyrillicLetters
 local L = Addon.L
 local GetColorByHealthDeficit = Addon.Color.GetColorByHealthDeficit
@@ -39,7 +39,7 @@ local COLOR_GUILD = RGB(178, 178, 229, .7)
 
 local HideAtFullHealthCurve
 --local HideAtZeroAbsorbsCurve
-if Addon.ExpansionIsAtLeastMidnight then
+if Addon.HAS_MIDNIGHT_API then
   HideAtFullHealthCurve = C_CurveUtil.CreateCurve()
   HideAtFullHealthCurve:SetType(Enum.LuaCurveType.Step)
   HideAtFullHealthCurve:AddPoint(0, 1)
@@ -107,7 +107,7 @@ local function GetUnitSubtitle(unit)
         
         -- Strip color escape sequences: "|c"
         -- Name of unit: type = Enum.TooltipDataLineType.UnitName
-        if not Addon.ExpansionIsAtLeastMidnight then
+        if not Addon.HAS_MIDNIGHT_API then
           tooltip_name = gsub( gsub( (tooltip_name), "|c........", "" ), "|r", "" ) 
           if tooltip_name ~= UnitName(unit.unitid) then return end	-- Avoid caching information for the wrong unit
         end
@@ -156,7 +156,9 @@ end
 
 local TextHealthPercentColored
 
-if Addon.ExpansionIsAtLeastMidnight then
+-- Every client that can return secret health/absorb values takes the Addon.HAS_MIDNIGHT_API branch below
+-- instead, so the else branch's plain arithmetic needs no secret-value guard.
+if Addon.HAS_MIDNIGHT_API then
   TextHealthPercentColored = function(unit)
     local text_health, text_absorbs
     local color = GetRoleColor
@@ -337,7 +339,7 @@ end
 
 -- Guild, Role, Level, Health
 local function TextAll(unit)
-  if Addon.ExpansionIsAtLeastMidnight or unit.health == unit.healthmax then
+  if Addon.HAS_MIDNIGHT_API or unit.health == unit.healthmax then
     return TextRoleGuildLevel(unit)
   else
     return TextHealthPercentColored(unit)
@@ -375,7 +377,7 @@ local Element = Addon.Elements.NewElement("StatusText")
 function Element.PlateCreated(tp_frame)
   local status_text = tp_frame.visual.textframe:CreateFontString(nil, "ARTWORK", "GameFontNormal")
   -- At least font must be set as otherwise it results in a Lua error when UnitAdded with SetText is called
-  status_text:SetFont("Fonts\\FRIZQT__.TTF", 11)
+  FontSetInitialFont(status_text)
   status_text:SetWordWrap(false) -- otherwise text is wrapped when plate is scaled down
 
   tp_frame.visual.StatusText = status_text
@@ -404,7 +406,7 @@ local function SetStatusText(tp_frame)
   local status_text_frame = tp_frame.visual.StatusText
   status_text_frame:SetText(status_text)
   if status_text then
-    if Addon.ExpansionIsAtLeastMidnight and status_text_func == TextHealthPercentColored and not Settings.full then
+    if Addon.HAS_MIDNIGHT_API and status_text_func == TextHealthPercentColored and not Settings.full then
       local alpha  = UnitHealthPercent(unit.unitid, true, HideAtFullHealthCurve)
       color = CreateColor(color.r, color.g, color.b, alpha)
     end
@@ -428,10 +430,10 @@ local function StyleUpdate(tp_frame, style, stylename)
 end
 
 -- Called in processing event: NAME_PLATE_UNIT_ADDED
-function Element.PlateUnitAdded(tp_frame)
-  SetStatusText(tp_frame)
-  StyleUpdate(tp_frame, tp_frame.style, tp_frame.stylename)
-end
+-- Not needed: Element.UpdateStyle is always called when a unit is added (before Element.PlateUnitAdded would
+-- be called) and it updates the text as well.
+--function Element.PlateUnitAdded(tp_frame)
+--end
 
 -- Called in processing event: NAME_PLATE_UNIT_REMOVED
 --function Element.PlateUnitRemoved(tp_frame)
@@ -450,6 +452,11 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
 
   status_text:SetSize(db.Font.Width, db.Font.Height)
   FontUpdateText(tp_frame, status_text, db)
+
+  -- Healthbar and headline view have different status text settings, so the text itself (and a custom DogTag
+  -- text) must be updated when the nameplate switches between them (e.g., when the unit is targeted)
+  SetStatusText(tp_frame)
+  StyleUpdate(tp_frame, style, tp_frame.stylename)
 
   status_text:Show()
 end
@@ -527,6 +534,8 @@ function Element.UpdateSettings()
     SettingsStatusText.NameMode.FriendlySubtext == "HEALTH" or SettingsStatusText.NameMode.FriendlySubtext == "ALL" or
     SettingsStatusText.NameMode.EnemySubtext == "HEALTH" or SettingsStatusText.NameMode.EnemySubtext == "ALL" then
 
+    -- UNIT_HEALTH_FREQUENT is an old-classic-engine event; "WoW Forever" (not part of Addon.IS_CLASSIC,
+    -- see Init.lua) runs on the modern engine, which uses the events in the else branch instead.
     if Addon.IS_CLASSIC or Addon.IS_TBC_CLASSIC or Addon.IS_WRATH_CLASSIC then
       SubscribeEvent(Element, "UNIT_HEALTH_FREQUENT", HealthUpdate)
     else
@@ -556,7 +565,6 @@ end
 
 SubscribeEvent(Element, "UNIT_NAME_UPDATE", StatusTextUpdateByUnit)
 SubscribeEvent(Element, "UNIT_LEVEL", StatusTextUpdateByUnit)
---SubscribeEvent(Element, "StyleUpdate", StyleUpdate)
 
 -- For now: ignore Guild Roster events
 --SubscribeEvent(Element, "GUILD_ROSTER_UPDATE", StatusTextUpdateByUnit)

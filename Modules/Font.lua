@@ -14,6 +14,7 @@ local SystemFont_NamePlate, SystemFont_NamePlateFixed = SystemFont_NamePlate, Sy
 local SystemFont_LargeNamePlate, SystemFont_LargeNamePlateFixed = SystemFont_LargeNamePlate, SystemFont_LargeNamePlateFixed
 local SystemFont_NamePlate_Outlined = _G.SystemFont_NamePlate_Outlined
 local C_Timer_After = C_Timer.After
+local CreateFontFamily = _G.CreateFontFamily
 
 -- ThreatPlates APIs
 local ANCHOR_POINT_TEXT = Addon.ANCHOR_POINT_TEXT
@@ -83,8 +84,86 @@ function FontModule.SetJustify(font_string, horz, vert)
   end
 end
 
+---------------------------------------------------------------------------------------------------
+-- Font families: fallback fonts for Cyrillic and CJK characters
+---------------------------------------------------------------------------------------------------
+
+-- A font file only contains glyphs for some alphabets, so text in other alphabets (e.g., Cyrillic or Chinese names)
+-- is shown as squares. A font family lets the client pick the font file per alphabet, like Blizzard's own nameplate
+-- fonts do [GH-751].
+local USE_FONT_FAMILIES = CreateFontFamily ~= nil
+
+local FONT_FAMILY_FALLBACK_FILES = {
+  russian = "Fonts\\FRIZQT___CYR.TTF",
+  korean = "Fonts\\2002.TTF",
+  simplifiedchinese = "Fonts\\ARKai_T.ttf",
+  traditionalchinese = "Fonts\\blei00d.TTF",
+}
+
+-- On these clients, the selected font is (by default) a font for the client's alphabet, so it's used for that
+-- alphabet instead of the fallback font
+local LOCALE_ALPHABET = {
+  ruRU = "russian",
+  koKR = "korean",
+  zhCN = "simplifiedchinese",
+  zhTW = "traditionalchinese",
+}
+local CLIENT_ALPHABET = LOCALE_ALPHABET[GetLocale()]
+
+local FontFamilies = {}
+local FontFamilyCount = 0
+
+local function GetFontFamily(file, size, flags)
+  flags = flags or ""
+  local key = file .. "|" .. tostring(size) .. "|" .. flags
+
+  local font_family = FontFamilies[key]
+  if font_family == nil then
+    local members = {
+      { alphabet = "roman", file = file, height = size, flags = flags },
+    }
+    for alphabet, fallback_file in pairs(FONT_FAMILY_FALLBACK_FILES) do
+      local member_file = (alphabet == CLIENT_ALPHABET) and file or fallback_file
+      members[#members + 1] = { alphabet = alphabet, file = member_file, height = size, flags = flags }
+    end
+
+    FontFamilyCount = FontFamilyCount + 1
+    local success, result = pcall(CreateFontFamily, ADDON_NAME .. "FontFamily" .. FontFamilyCount, members)
+    -- Remember failures (false) so that creating the font family is not tried again
+    font_family = success and result or false
+    FontFamilies[key] = font_family
+  end
+
+  return font_family
+end
+
+-- Drop-in replacement for font_string:SetFont(file, size, flags) that adds fallback fonts for other alphabets
+function FontModule.SetFont(font_string, file, size, flags)
+  local font_family = USE_FONT_FAMILIES and file and GetFontFamily(file, size, flags)
+  if not font_family then
+    font_string:SetFont(file, size, flags)
+  elseif font_string:GetFontObject() ~= font_family then
+    -- SetFontObject also applies the font object's text color, so keep the current one (e.g., set by the Color module)
+    local r, g, b, a = font_string:GetTextColor()
+    font_string:SetFontObject(font_family)
+    font_string:SetTextColor(r, g, b, a)
+  end
+end
+
+local FontSetFont = FontModule.SetFont
+
+-- Sets an initial font for font strings whose font is later updated with FontModule.SetFont. A font set with
+-- SetFont overrides any font object set later with SetFontObject, so it must not be used with font families.
+function FontModule.SetInitialFont(font_string)
+  if USE_FONT_FAMILIES then
+    font_string:SetFontObject(SystemFont_NamePlate)
+  else
+    font_string:SetFont("Fonts\\FRIZQT__.TTF", 11)
+  end
+end
+
 local function UpdateTextFont(font, db)
-  font:SetFont(Addon.LibSharedMedia:Fetch('font', db.Typeface), db.Size, db.flags)
+  FontSetFont(font, Addon.LibSharedMedia:Fetch('font', db.Typeface), db.Size, db.flags)
 
   if db.Shadow then
     font:SetShadowOffset(1, -1)

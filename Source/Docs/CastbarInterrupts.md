@@ -118,9 +118,10 @@ Two mitigations were tried:
    changed: `unit.reaction` crossing a hostile/neutral/friendly boundary, `UnitCanAttack` toggling
    (tracked in a new `unit.CanAttack` field, set here), or the plate not yet being `Active`. When
    it does react, it calls the same `ApplyReactionUpdate(tp_frame, unitid)` helper as
-   `Addon:UNIT_FACTION` (immediate light update: `SetNameplateVisibility`, then if `Active`
-   `SetUnitAttributeReaction`/`ApplyPlateHitTest`/`StyleModule.Update`/
-   `PublishEvent("FactionUpdate", ...)` - extracted from `Addon:UNIT_FACTION`'s two branches,
+   `Addon:UNIT_FACTION` (immediate light update: `SetNameplateVisibility`, then `ApplyPlateHitTest`
+   unconditionally - it falls back to Blizzard's own UnitFrame bounds when not `Active` - plus, if
+   `Active`, `SetUnitAttributeReaction`/`StyleModule.Update`/`PublishEvent("FactionUpdate", ...)` -
+   extracted from `Addon:UNIT_FACTION`'s two branches,
    which now share it too), *plus* `ScheduleNameplateRevalidation` - exactly `Addon:UNIT_FACTION`'s
    per-unit branch shape, kept deliberately even after adding the gate: the light update alone
    doesn't re-read name/health/GUID, so it can't catch a silent nameplate token reassignment (the

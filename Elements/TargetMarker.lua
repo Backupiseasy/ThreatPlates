@@ -33,7 +33,7 @@ function Element.TargetMarkerUpdate(tp_frame)
   local target_marker = tp_frame.visual.TargetMarker
   local icon = (style.raidicon.show and unit.TargetMarkerIcon) or unit.MentorIcon
   if icon then
-    if Addon.ExpansionIsAtLeastMidnight then
+    if Addon.HAS_MIDNIGHT_API then
       SetRaidTargetIconTexture(target_marker, icon)
     else
       Addon:SetIconTexture(target_marker, "TargetMarker." .. icon)

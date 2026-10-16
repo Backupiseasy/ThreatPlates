@@ -77,6 +77,19 @@ local function PrintHelp()
 	Addon.Logging.Print(L["  /tptptank      Toggles Tank threat plates"])
 end
 
+-- Prints the addon version and the exact WoW client version (GetBuildInfo). Meant to be pasted
+-- into bug reports, so its own output always prints (not gated behind Addon.DEBUG or the verbose
+-- setting) - but note the "version" command itself is only reachable via ChatCommandDebug below, which
+-- IS gated behind Addon.DEBUG (only true in unpackaged/source builds, see its definition near the top of
+-- this file) - so end users running a packaged release currently can't invoke it via /tptp version.
+local function PrintVersion()
+	local client_version, build, build_date, toc_version = GetBuildInfo()
+
+	Addon.Logging.Print("|cff89F559Threat Plates|r: Version " .. Addon.Meta("version"))
+	Addon.Logging.Print("  " .. "WoW client:", client_version, "(" .. "build", build .. ", " .. "Interface", toc_version .. ", " .. build_date .. ")")
+	Addon.Logging.Print("  " .. "Expansion Level:", Addon.GetExpansionLevel())
+end
+
 local function SearchDBForString(db, prefix, keyword)
   for key, value in pairs(db) do
     local search_text = prefix .. "." .. key
@@ -93,7 +106,9 @@ end
 local function ChatCommandDebug(cmd_list)
 	local command = cmd_list[1]
 	
-	if command == "searchdb" then
+	if command == "version" then
+		PrintVersion()
+	elseif command == "searchdb" then
 		Addon.Logging.Print("|cff89F559Threat Plates|r: Searching settings:")
 		SearchDBForString(Addon.db.profile, "<Profile>", string.lower(cmd_list[2]))
 		SearchDBForString(Addon.db.global, "<Profile>", string.lower(cmd_list[2]))
@@ -115,8 +130,6 @@ local function ChatCommandDebug(cmd_list)
 			widget:PrintDebug(cmd_list[3])
 		elseif component_name == "WidgetHandler" then
 			Addon:DebugWidgetHandler()
-		elseif component_name == "Compatibility" then
-			Addon:DebugCompatibility()
 		elseif component_name == "EventService" then
 			Addon:PrintEventService()
 		elseif component_name == "Color" then 
@@ -147,42 +160,9 @@ local function ChatCommandDebug(cmd_list)
 				Addon.Logging.Debug("Removing", i)
 			end
 		end			
-	elseif command == "version" then
-		Addon.Logging.Debug("Expansion Level:", Addon.GetExpansionLevel())
-		if Addon.IS_CLASSIC then
-			if Addon.IS_CLASSIC_SOD then
-				Addon.Logging.Debug("Version: Classic Era - Season of Discovery")
-			elseif C_Seasons and (C_Seasons.GetActiveSeason() == 11 or C_Seasons.GetActiveSeason() == 12) then
-				Addon.Logging.Debug("Version: Classic Era - Anniversary Realm")
-			else
-				Addon.Logging.Debug("Version: Classic Era")
-			end
-		end
-		if Addon.IS_TBC_CLASSIC then
-			if C_Seasons and (C_Seasons.GetActiveSeason() == 125) then
-				Addon.Logging.Debug("Version: TBC Classic - Anniversary Edition")
-			else
-				Addon.Logging.Debug("Version: TBC Classic")
-			end
-		end
-		if Addon.IS_MISTS_CLASSIC then
-			Addon.Logging.Debug("Version: Mists Classic")
-		end
-		if Addon.IS_MIDNIGHT then
-			Addon.Logging.Debug("Version: Midnight")
-		end
-		if Addon.IS_MAINLINE then
-			Addon.Logging.Debug("Version: Mainline")
-		end
-
-		Addon.Logging.Debug("-- Enabled Features --")
-		Addon.Logging.Debug("  WOW_FEATURE_ABSORBS:", Addon.WOW_FEATURE_ABSORBS)
-		Addon.Logging.Debug("  WOW_FEATURE_BLIZZARD_AURA_FILTER:", Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER)
-		Addon.Logging.Debug("  NAMEPLATE_MAX_DISTANCE_MAX_VALUE:", Addon.NAMEPLATE_MAX_DISTANCE_MAX_VALUE[Addon.GetExpansionLevel()])
-	elseif command == "version" then
-		--		local unique_unit = Addon.CopyTable(Addon.db.profile.uniqueSettings[1])
-		--		unique_unit.UseAutomaticIcon = nil
-		--		print (Addon.CheckTableStructure(TP.DEFAULT_SETTINGS.profile.uniqueSettings["**"], unique_unit))
+	elseif command == "version-history" then
+		-- Ad-hoc checks for Addon.CurrentVersionIsOlderThan, kept as a manual test since there is no
+		-- automated test runner for this addon (see CLAUDE.md).
 		Addon.Logging.Debug("10.2.11 < 10.3.0:", Addon.CurrentVersionIsOlderThan("10.2.11", "10.3.0"))
 		Addon.Logging.Debug("10.2.11 < 10.3.0-beta2:", Addon.CurrentVersionIsOlderThan("10.2.11", "10.3.0-beta2"))
 		Addon.Logging.Debug("10.3.0-beta2 < 9.3.0:", Addon.CurrentVersionIsOlderThan("10.3.0-beta2", "10.3.0"))
@@ -299,7 +279,7 @@ local function ChatCommandDebug(cmd_list)
 
 		-- If we're in combat, bail out once before making any changes
 		if InCombatLockdown() then
-			Addon.Logging.Warning(L["We're unable to change this while in combat"])
+			Addon.Logging.Warning("We're unable to change this while in combat")
 			return
 		end
 
@@ -308,7 +288,7 @@ local function ChatCommandDebug(cmd_list)
 			for _, name in ipairs(all) do
 				SetCVar(name, 0)
 			end
-			Addon.Logging.Info(L["All restriction CVars are now |cffff0000OFF!|r"]) 
+			Addon.Logging.Info("All restriction CVars are now |cffff0000OFF!|r") 
 			return
 		end
 
@@ -321,8 +301,8 @@ local function ChatCommandDebug(cmd_list)
 		}
 		local target_cvar = map_type[string.lower(cvar_type)]
 		if not target_cvar then
-			Addon.Logging.Error(L["Unknown restrictions type: "] .. (cvar_type or ""))
-			Addon.Logging.Print(L["Valid types: combat, encounter, challenge, pvp, map"]) 
+			Addon.Logging.Error("Unknown restrictions type: " .. (cvar_type or ""))
+			Addon.Logging.Print("Valid types: combat, encounter, challenge, pvp, map") 
 			return
 		end
 
@@ -333,9 +313,9 @@ local function ChatCommandDebug(cmd_list)
 		end
 
 		if selected_on then
-			Addon.Logging.Info(L["All restriction CVars are now |cffff0000OFF!|r"]) 
+			Addon.Logging.Info("All restriction CVars are now |cffff0000OFF!|r") 
 		else
-			Addon.Logging.Info(L["Set restriction: "] .. cvar_type)
+			Addon.Logging.Info("Set restriction: " .. cvar_type)
 		end
 	elseif command == "test" then
     local plate = C_NamePlate.GetNamePlateForUnit("target", true)
@@ -344,7 +324,7 @@ local function ChatCommandDebug(cmd_list)
 		Addon.Logging.Debug("Addon.UnitIsTarget:", Addon.UnitIsTarget)
 		Addon.Logging.Debug("Addon.UnitIsUnit:", Addon.UnitIsUnit)
 	else
-		Addon.Logging.Error(L["Unknown option: "] .. command)
+		Addon.Logging.Error("Unknown option: " .. command)
 		PrintHelp()
 	end
 end

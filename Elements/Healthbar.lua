@@ -8,16 +8,19 @@ local ADDON_NAME, Addon = ...
 ---------------------------------------------------------------------------------------------------
 
 -- WoW APIs
-local UnitIsUnit, UnitName, UnitClass = UnitIsUnit, UnitName, UnitClass
+local UnitClass = UnitClass
 local UnitGetTotalHealAbsorbs = UnitGetTotalHealAbsorbs
 local InCombatLockdown = InCombatLockdown
+local GetClassColor = C_ClassColor.GetClassColor
 
 -- ThreatPlates APIs
-local FontUpdateText, FontUpdateTextSize = Addon.Font.UpdateText, Addon.Font.UpdateTextSize
+local FontSetInitialFont, FontUpdateText, FontUpdateTextSize = Addon.Font.SetInitialFont, Addon.Font.UpdateText, Addon.Font.UpdateTextSize
 local SubscribeEvent, UnsubscribeEvent = Addon.EventService.Subscribe, Addon.EventService.Unsubscribe
 local BackdropTemplate = Addon.BackdropTemplate
 local TransliterateCyrillicLetters = Addon.Localization.TransliterateCyrillicLetters
 local UnitIsUnitTP = Addon.UnitIsUnit
+local IsSecretValueTP = Addon.IsSecretValue
+local GetUnitNameWithSurname = Addon.GetUnitNameWithSurname
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -30,6 +33,7 @@ local IGNORED_STYLES = Addon.IGNORED_STYLES_WITH_NAMEMODE
 -- Local variables
 ---------------------------------------------------------------------------------------------------
 local Settings, SettingsHealthbar, SettingsTargetUnit, SettingsTargetUnitHide, SettingsShowOnlyForTarget
+local SettingsShowSurname
 
 local COLOR_BLACK = Addon.RGB(0, 0, 0)
 
@@ -54,6 +58,7 @@ local function ShowAbsorbStatusBar(healthbar)
 end
 
 local function HideAllAbsorbElements(healthbar)
+  healthbar.AbsorbWanted = false
   healthbar.HealAbsorbGlow:Hide()
   healthbar.HealAbsorb:Hide()
   healthbar.HealAbsorbLeftShadow:Hide()
@@ -75,8 +80,22 @@ local function RenderMidnightAbsorbs(healthbar, absorb_max, absorb_val, absorb_c
 
   absorb_sb:SetMinMaxValues(0, absorb_max)
   absorb_sb:SetValue(absorb_val)
-  absorb_sb:Show()
-  absorb_sb.Overlay:SetShown(Settings.OverlayTexture)
+  -- The fill of a StatusBar set with secret values seems to be resolved by the client only after the first
+  -- frame it is drawn in, so a freshly shown bar (new nameplate) briefly rendered at full width, including the
+  -- striped overlay. Delay showing it by one frame; an already shown bar is updated immediately.
+  healthbar.AbsorbWanted = true
+  if absorb_sb:IsShown() then
+    absorb_sb.Overlay:SetShown(Settings.OverlayTexture)
+  elseif not healthbar.AbsorbShowPending then
+    healthbar.AbsorbShowPending = true
+    C_Timer.After(0, function()
+      healthbar.AbsorbShowPending = false
+      if healthbar.AbsorbWanted then
+        absorb_sb:Show()
+        absorb_sb.Overlay:SetShown(Settings.OverlayTexture)
+      end
+    end)
+  end
 
   spark:ClearAllPoints()
 
@@ -170,7 +189,7 @@ end
 -- UnitGetTotalAbsorbs: Mists - Patch 5.2.0 (2013-03-05): Added.
 -- UnitGetTotalHealAbsorbs: Mists - Patch 5.4.0 (2013-09-10): Added.
 if Addon.WOW_FEATURE_ABSORBS then
-  if Addon.ExpansionIsAtLeastMidnight then
+  if Addon.HAS_MIDNIGHT_API then
     UpdateAbsorbs = function(tp_frame)
       local healthbar = tp_frame.visual.Healthbar
 
@@ -248,18 +267,22 @@ local function ShowTargetUnit(healthbar, unitid)
   if unitid then
     local target_of_target_unit = unitid .. "target"
     if not SettingsTargetUnit.ShowNotMyself or not UnitIsUnitTP("player", target_of_target_unit) then
-      local target_of_target_name = UnitName(target_of_target_unit)
+      local target_of_target_name = GetUnitNameWithSurname(target_of_target_unit, SettingsShowSurname)
       if target_of_target_name then
-        target_of_target_name = 
-        TransliterateCyrillicLetters(target_of_target_name)
+        -- On HAS_MIDNIGHT_API clients, TransliterateCyrillicLetters only hands the string to
+        -- C_Intl.Transliterate (if available and enabled) and never inspects it in Lua; its result must be
+        -- treated as secret like the name itself. Plain ".." concatenation of a secret value just taints
+        -- the result rather than erroring (confirmed via Nameplate.lua's UNIT_SPELLCAST_INTERRUPTED
+        -- handler) - safe to pass straight into the SetText sink below without a secret-value guard here.
+        target_of_target_name = TransliterateCyrillicLetters(target_of_target_name)
         if SettingsTargetUnit.ShowBrackets then
-          target_of_target_name = "|cffffffff[|r " .. target_of_target_name .. " |cffffffff]|r" 
+          target_of_target_name = "|cffffffff[|r " .. target_of_target_name .. " |cffffffff]|r"
         end
         target_of_target:SetText(target_of_target_name)
 
-        local _, class_name = UnitClass(target_of_target_unit)   
+        local _, class_name = UnitClass(target_of_target_unit)
         target_of_target.ClassName = class_name
-        
+
         target_of_target:Show()
       else
         HideTargetUnit(healthbar)
@@ -273,7 +296,11 @@ local function ShowTargetUnit(healthbar, unitid)
   if target_of_target:IsShown() then
     local color
     if SettingsTargetUnit.UseClassColor and target_of_target.ClassName then
-      color = Addon.db.profile.Colors.Classes[target_of_target.ClassName]
+      if IsSecretValueTP(target_of_target.ClassName) then
+        color = GetClassColor(target_of_target.ClassName)
+      else
+        color = Addon.db.profile.Colors.Classes[target_of_target.ClassName]
+      end
     else
       color = SettingsTargetUnit.CustomColor
     end
@@ -282,9 +309,7 @@ local function ShowTargetUnit(healthbar, unitid)
 end
 
 local function UpdateTargetUnit(healthbar, unitid)
-  if Addon.ExpansionIsAtLeastMidnight then return end
-
-  if SettingsTargetUnitHide or (SettingsShowOnlyForTarget and not UnitIsUnit("target", unitid)) or (SettingsTargetUnit.ShowOnlyInCombat and not InCombatLockdown()) then
+  if SettingsTargetUnitHide or (SettingsShowOnlyForTarget and not UnitIsUnitTP("target", unitid)) or (SettingsTargetUnit.ShowOnlyInCombat and not InCombatLockdown()) then
     HideTargetUnit(healthbar)
   else
     ShowTargetUnit(healthbar, unitid)
@@ -322,7 +347,7 @@ local function ColorUpdate(tp_frame, color)
   if tp_frame.PlateStyle ~= "HealthbarMode" then return end
 
   local healthbar = tp_frame.visual.Healthbar
-  if Addon.ExpansionIsAtLeastMidnight then
+  if Addon.HAS_MIDNIGHT_API then
     healthbar:GetStatusBarTexture():SetVertexColor(color.r, color.g, color.b)
   else
     healthbar:SetStatusBarColor(color.r, color.g, color.b, 1)
@@ -395,6 +420,8 @@ function Element.PlateCreated(tp_frame)
     absorb_statusbar:SetStatusBarTexture("Interface\\RaidFrame\\Shield-Fill")
     absorb_statusbar:SetPoint("TOPLEFT", healthbar:GetStatusBarTexture(), "TOPRIGHT")
     absorb_statusbar:SetPoint("BOTTOMLEFT", healthbar:GetStatusBarTexture(), "BOTTOMRIGHT")
+    absorb_statusbar:SetMinMaxValues(0, 1)
+    absorb_statusbar:SetValue(0)
     absorb_statusbar:Hide()
 
     local absorb_overlay = absorb_statusbar:CreateTexture(nil, "ARTWORK", nil, 1)
@@ -418,7 +445,7 @@ function Element.PlateCreated(tp_frame)
 
     healthbar.AbsorbStatusBar = absorb_statusbar
 
-    if Addon.ExpansionIsAtLeastMidnight then
+    if Addon.HAS_MIDNIGHT_API then
       -- OvershieldBar: covers full healthbar with reverse-fill to visualize total (unclamped) absorb
       -- magnitude when AlwaysFullAbsorb is enabled and the shield exceeds missing health.
       local overshield_bar = _G.CreateFrame("StatusBar", nil, healthbar)
@@ -454,7 +481,7 @@ function Element.PlateCreated(tp_frame)
   end
 
   healthbar.TargetUnit = healthbar:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-  healthbar.TargetUnit:SetFont("Fonts\\FRIZQT__.TTF", 11)
+  FontSetInitialFont(healthbar.TargetUnit)
 
   --frame:SetScript("OnSizeChanged", OnSizeChanged)
   tp_frame.visual.Healthbar = healthbar
@@ -528,7 +555,7 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
     color = Settings.OverlayColor
     absorb_sb.Overlay:SetVertexColor(color.r, color.g, color.b, color.a)
 
-    if Addon.ExpansionIsAtLeastMidnight then
+    if Addon.HAS_MIDNIGHT_API then
       -- OvershieldBar uses the same texture and color as AbsorbStatusBar.
       local overshield = healthbar.OvershieldBar
       if overshield then
@@ -560,7 +587,7 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
   healthbar:SetFrameLevel(frame_level)
   if Addon.WOW_FEATURE_ABSORBS then
     healthbar.AbsorbStatusBar:SetFrameLevel(frame_level + 1)
-    if Addon.ExpansionIsAtLeastMidnight and healthbar.OvershieldBar then
+    if Addon.HAS_MIDNIGHT_API and healthbar.OvershieldBar then
       healthbar.OvershieldBar:SetFrameLevel(frame_level + 1)
     end
   end
@@ -570,7 +597,7 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
 
   tp_frame.visual.textframe:SetFrameLevel(frame_level)
 
-  if Addon.WOW_FEATURE_ABSORBS and Addon.ExpansionIsAtLeastMidnight then
+  if Addon.WOW_FEATURE_ABSORBS and Addon.HAS_MIDNIGHT_API then
     UpdateAbsorbs(tp_frame)
   end
 
@@ -614,10 +641,11 @@ function Element.UpdateSettings()
   SettingsTargetUnit = Settings.TargetUnit
   SettingsTargetUnitHide = not SettingsTargetUnit.Show
   SettingsShowOnlyForTarget = SettingsTargetUnit.ShowOnlyForTarget
+  SettingsShowSurname = Addon.WOW_FEATURE_REGIONAL_SURNAMES and Addon.db.profile.Name.HealthbarMode.ShowSurname
 
   SubscribeEvent(Element, "HealthbarColorUpdate", ColorUpdate)
 
-  if not Addon.ExpansionIsAtLeastMidnight and SettingsTargetUnit.Show then
+  if SettingsTargetUnit.Show then
     SubscribeEvent(Element, "UNIT_TARGET", UNIT_TARGET)
     SubscribeEvent(Element, "ThreatUpdate", UnitThreatUpdate)
     SubscribeEvent(Element, "TargetLost", PlayerTargetLost)
@@ -672,7 +700,7 @@ local function UpdateHealthbarConfigMode(tp_frame)
   end
 
   if Addon.WOW_FEATURE_ABSORBS then
-    if Addon.ExpansionIsAtLeastMidnight then
+    if Addon.HAS_MIDNIGHT_API then
       local s = HEALTHBAR_CONFIG_SCENARIOS_MIDNIGHT[((healthbar._config_scenario - 1) % #HEALTHBAR_CONFIG_SCENARIOS_MIDNIGHT) + 1]
 
       healthbar:SetMinMaxValues(0, s[2])
@@ -706,7 +734,7 @@ local function UpdateHealthbarConfigMode(tp_frame)
     healthbar:SetValue(s[1])
   end
 
-  if not Addon.ExpansionIsAtLeastMidnight and not SettingsTargetUnitHide then
+  if not SettingsTargetUnitHide then
     local target_unit = healthbar.TargetUnit
     target_unit:SetText("Thrall")
     local color = SettingsTargetUnit.UseClassColor and Addon.db.profile.Colors.Classes["SHAMAN"] or SettingsTargetUnit.CustomColor

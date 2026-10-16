@@ -177,7 +177,6 @@ local WIDGET_INFO = {
   FocusWidget = { Name = "Focus", UpdateSettings = true, UpdateAllSettings = true, PublishEvent = "SituationalColorUpdate" },
   ResourceWidget = { Name = "Resource", UpdateSettings = true,  },
   socialWidget = { Name = "Social", UpdateSettings = true, PublishEvent = "ClassColorUpdate" },
-  stealthWidget = { Name = "Stealth", UpdateSettings = false, },
   targetWidget = { Name = "TargetArt", UpdateSettings = true, UpdateAllSettings = true, PublishEvent = "SituationalColorUpdate" },
   questWidget = { Name = "Quest", UpdateSettings = true, PublishEvent = "SituationalColorUpdate" },
   healerTracker = { Name = "HealerTracker", UpdateSettings = false },
@@ -389,7 +388,6 @@ local IconTexturesByOptions = {
   ["Social.Friend"] = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\SocialWidget\\friendicon",
   ["Social.BattleNetFriend"] = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\SocialWidget\\BattleNetFriend", -- "Interface\\FriendsFrame\\PlusManz-BattleNet"
   ["Social.GuildMember"] = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\SocialWidget\\guildicon",
-  ["Stealth"] = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\StealthWidget\\stealthicon",
   -- TargetHighlight.Center|Left|Right
   -- TargetMarker.<NAME>, e.g., TargetMarker.SKULL 
   -- Totem.<SPELL_ID>, e.g., 
@@ -662,6 +660,24 @@ end
 
 local function CVarIsUnavailable(info) 
   return C_CVar.GetCVarInfo(info.arg) == nil 
+end
+
+-- The CVar nameplateStackingTypes is a bitfield indexed by Enum.NamePlateStackType (Enemy, Friendly) that replaces
+-- nameplateMotion. Currently, this only works on WoW Forever and (presumably) on Retail from patch 12.1.5 on. On
+-- other WoW versions, it will only work once their API is updated. The options are only hidden on clients that
+-- don't know this CVar at all.
+-- WoW stores bitfield CVars as an encoded string, not as a number, so its flags can only be accessed with
+-- C_CVar.GetCVarBitfield/SetCVarBitfield. info.arg is the name of the flag in that enum.
+local function NameplateStackingIsUnavailable(info)
+  return GetCVar("nameplateStackingTypes") == nil or Enum.NamePlateStackType == nil
+end
+
+local function GetValueNameplateStacking(info)
+  return C_CVar.GetCVarBitfield("nameplateStackingTypes", Enum.NamePlateStackType[info.arg]) or false
+end
+
+local function SetValueNameplateStacking(info, value)
+  CVars:OverwriteBitfield("nameplateStackingTypes", Enum.NamePlateStackType[info.arg], value)
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -2785,27 +2801,6 @@ end
   return options
 end
 
-local function CreateStealthWidgetOptions()
-  local options =  {
-    name = L["Stealth"],
-    order = 80,
-    type = "group",
-    hidden = function() return not Addon.Widgets:IsEnabled("Stealth") end,
-    args = {
-      Enable = GetEnableEntry(L["Enable Stealth Widget"], L["This widget shows a stealth icon on nameplates of units that can detect stealth."], "stealthWidget", true),
-      Layout = {
-        name = L["Layout"],
-        order = 10,
-        type = "group",
-        inline = true,
-        args = {},
-      }
-    },
-  }
-  AddLayoutOptions(options.args.Layout.args, 80, "stealthWidget")
-  return options
-end
-
 local function CreateHealerTrackerWidgetOptions()
   local options =  {
     name = L["Healer Tracker"],
@@ -4120,7 +4115,7 @@ local function CreateAuraAreaLayoutOptions(pos, widget_info)
             set = function(info, val) SetValue(info, true) end,
             get = function(info) return GetValue(info) end,
             arg = { "AuraWidget", widget_info, "ModeBar", "Enabled" },
-            hidden = Addon.ExpansionIsAtLeastMidnight,
+            hidden = Addon.HAS_MIDNIGHT_API,
           },
         },
       },
@@ -4148,7 +4143,7 @@ local function CreateAuraAreaLayoutOptions(pos, widget_info)
             type = "toggle",
             order = 40,
             name = L["Center Auras"],
-            hidden = Addon.ExpansionIsAtLeastMidnight,
+            hidden = Addon.HAS_MIDNIGHT_API,
             arg = { "AuraWidget", widget_info, "CenterAuras" },
           },
         },
@@ -4198,7 +4193,7 @@ local function CreateAuraAreaIconModeOptions(pos, widget_info)
             type = "select",
             desc = function()
               local desc = L["This lets you select the layout style of the auras area."]
-              if Addon.ExpansionIsAtLeastMidnight then
+              if Addon.HAS_MIDNIGHT_API then
                 desc = desc .. " " .. L["The icon crop for Wide/Square requires /reload to take effect on already-displayed auras."]
               end
               return desc
@@ -4280,7 +4275,7 @@ local function CreateAuraAreaIconModeOptions(pos, widget_info)
             type = "toggle",
             order = 130,
             name = L["Border"],
-            desc = function() return Addon.ExpansionIsAtLeastMidnight and L["Requires /reload to take effect on already-displayed auras."] or "" end,
+            desc = function() return Addon.HAS_MIDNIGHT_API and L["Requires /reload to take effect on already-displayed auras."] or "" end,
             arg = { "AuraWidget", widget_info, "ModeIcon", "ShowBorder" },
             disabled = function() return db.AuraWidget[widget_info].ModeIcon.Style ~= "custom" end,
           },
@@ -4320,7 +4315,7 @@ local function CreateAuraAreaBarModeOptions(pos, widget_info)
     order = pos,
     type = "group",
     inline = false,
-    hidden = Addon.ExpansionIsAtLeastMidnight,
+    hidden = Addon.HAS_MIDNIGHT_API,
     args = {
       --Help = { type = "description", order = 0, width = "full", name = L["Show auras as bars (with optional icons)."], },
       Format = {
@@ -4447,7 +4442,7 @@ local function CreateAurasWidgetOptions()
                 desc = L["Show time left on auras that have a duration."],
                 arg = { "AuraWidget", "ShowDuration" },
                 disabled = function()
-                  return db.AuraWidget.ShowOmniCC and not Addon.ExpansionIsAtLeastMidnight
+                  return db.AuraWidget.ShowOmniCC and not Addon.HAS_MIDNIGHT_API
                 end
               },
               OmniCC = {
@@ -4456,7 +4451,7 @@ local function CreateAurasWidgetOptions()
                 order = 35,
                 desc = L["Show the OmniCC cooldown count instead of the built-in duration text on auras."],
                 arg = { "AuraWidget", "ShowOmniCC" },
-                hidden = Addon.ExpansionIsAtLeastMidnight,
+                hidden = Addon.HAS_MIDNIGHT_API,
               },
               Stacks = {
                 name = L["Stack Count"],
@@ -4514,7 +4509,7 @@ local function CreateAurasWidgetOptions()
                 order = 40,
                 desc = L["Shows a glow effect on auras that you can steal or purge."],
                 arg = { "AuraWidget", "Highlight", "Enabled" },
-                hidden = Addon.ExpansionIsAtLeastMidnight,
+                hidden = Addon.HAS_MIDNIGHT_API,
               },
               GlowType = {
                 name = L["Glow Type"],
@@ -4522,14 +4517,14 @@ local function CreateAurasWidgetOptions()
                 values = Addon.GLOW_TYPES,
                 order = 50,
                 arg = { "AuraWidget", "Highlight", "Type" },
-                hidden = Addon.ExpansionIsAtLeastMidnight,
+                hidden = Addon.HAS_MIDNIGHT_API,
               },
               GlowColorEnable = {
                 name = L["Glow Color"],
                 type = "toggle",
                 order = 60,
                 arg = { "AuraWidget", "Highlight", "CustomColor" },
-                hidden = Addon.ExpansionIsAtLeastMidnight,
+                hidden = Addon.HAS_MIDNIGHT_API,
               },
               GlowColor = {
                 name = L["Color"],
@@ -4537,7 +4532,7 @@ local function CreateAurasWidgetOptions()
                 order = 70,
                 arg = { "AuraWidget", "Highlight", "Color" },
                 hasAlpha = true,
-                hidden = Addon.ExpansionIsAtLeastMidnight,
+                hidden = Addon.HAS_MIDNIGHT_API,
               },
             },
           },
@@ -4578,7 +4573,7 @@ local function CreateAurasWidgetOptions()
                 -- to Default there regardless of this setting (see GetSortMethod in
                 -- AurasWidgetMidnight.lua) - hidden rather than left silently inert. Still valid on
                 -- Classic (legacy pull-based aura scanning sorts these itself).
-                hidden = Addon.ExpansionIsAtLeastMidnight,
+                hidden = Addon.HAS_MIDNIGHT_API,
               },
               Creation = {
                 name = L["Creation"], type = "toggle", order = 40, width = "half",
@@ -4586,7 +4581,7 @@ local function CreateAurasWidgetOptions()
                 get = function(info) return db.AuraWidget.SortOrder == "Creation" end,
                 set = function(info, value) SetValue(info, "Creation") end,
                 arg = {"AuraWidget","SortOrder"},
-                hidden = Addon.ExpansionIsAtLeastMidnight,
+                hidden = Addon.HAS_MIDNIGHT_API,
               },
               ReverseOrder = {
                 name = L["Reverse"], type = "toggle", order = 50,
@@ -4648,58 +4643,35 @@ local function CreateAurasWidgetOptions()
               Flash = {
                 type = "toggle",
                 order = 10,
-                name = L["Flash When Expiring"],
-                arg = { "AuraWidget", "FlashWhenExpiring" },
+                name = L["Highlight Expiring"],
                 -- No script-hook/callback exists on AuraButton for addon-attached icon effects on
-                -- Midnight (see AurasWidgetImplementation.md §6) - replaced there by ShowExpiringColor
-                -- below instead of left silently inert.
-                hidden = Addon.ExpansionIsAtLeastMidnight,
+                -- Midnight (see AurasWidgetImplementation.md §6) - the duration text is colored there
+                -- instead of flashing the icon.
+                desc = L["Highlights the aura once the remaining duration drops below the expiring time."],
+                arg = { "AuraWidget", "FlashWhenExpiring" },
               },
               FlashTime = {
                 type = "range",
                 order = 20,
-                name = L["Flash Time"],
+                name = L["Expiring Time"],
                 step = 1,
                 softMin = 1,
                 softMax = 20,
                 isPercent = false,
                 arg = { "AuraWidget", "FlashTime" },
-                hidden = Addon.ExpansionIsAtLeastMidnight,
                 disabled = function()
                   return not db.AuraWidget.FlashWhenExpiring
                 end
               },
-              ShowExpiringColor = {
-                type = "toggle",
-                order = 30,
-                name = L["Color when Expiring"],
-                desc = L["Colors the countdown text once the remaining duration drops below the threshold below - the Midnight replacement for Flash When Expiring, which has no equivalent on Midnight."],
-                arg = { "AuraWidget", "ShowExpiringColor" },
-                hidden = not Addon.ExpansionIsAtLeastMidnight,
-              },
-              ExpiringColorThreshold = {
-                type = "range",
-                order = 40,
-                name = L["Expiring Threshold"],
-                step = 1,
-                softMin = 1,
-                softMax = 20,
-                isPercent = false,
-                arg = { "AuraWidget", "ExpiringColorThreshold" },
-                hidden = not Addon.ExpansionIsAtLeastMidnight,
-                disabled = function()
-                  return not db.AuraWidget.ShowExpiringColor
-                end
-              },
               ExpiringColor = {
                 type = "color",
-                order = 50,
+                order = 30,
                 name = L["Expiring Color"],
                 arg = { "AuraWidget", "ExpiringColor" },
                 hasAlpha = true,
-                hidden = not Addon.ExpansionIsAtLeastMidnight,
+                hidden = not Addon.HAS_MIDNIGHT_API,
                 disabled = function()
-                  return not db.AuraWidget.ShowExpiringColor
+                  return not db.AuraWidget.FlashWhenExpiring
                 end
               },
             },
@@ -4741,7 +4713,7 @@ local function CreateAurasWidgetOptions()
                 type = "group",
                 order = 10,
                 inline = true,
-                hidden = Addon.ExpansionIsAtLeastMidnight,
+                hidden = Addon.HAS_MIDNIGHT_API,
                 args = {
                   Show = {
                     name = L["Show Buffs"],
@@ -4820,7 +4792,7 @@ local function CreateAurasWidgetOptions()
                 type = "group",
                 order = 11,
                 inline = true,
-                hidden = not Addon.ExpansionIsAtLeastMidnight,
+                hidden = not Addon.HAS_MIDNIGHT_API,
                 args = {
                   Show = {
                     name = L["Show Buffs"],
@@ -4922,7 +4894,7 @@ local function CreateAurasWidgetOptions()
                 type = "group",
                 order = 20,
                 inline = true,
-                hidden = Addon.ExpansionIsAtLeastMidnight,                    
+                hidden = Addon.HAS_MIDNIGHT_API,                    
                 args = {
                   ShowEnemy = {
                     name = L["Show Buffs"],
@@ -5077,7 +5049,7 @@ local function CreateAurasWidgetOptions()
                 type = "group",
                 order = 21,
                 inline = true,
-                hidden = not Addon.ExpansionIsAtLeastMidnight,                    
+                hidden = not Addon.HAS_MIDNIGHT_API,                    
                 args = {
                   ShowEnemy = {
                     name = L["Show Buffs"],
@@ -5169,7 +5141,7 @@ local function CreateAurasWidgetOptions()
                 order = 50,
                 type = "group",
                 inline = true,
-                hidden = Addon.ExpansionIsAtLeastMidnight,
+                hidden = Addon.HAS_MIDNIGHT_API,
                 args = {
                   ScopeNote = {
                     name = L["This spell filter only takes effect for buffs on friendly units. On enemy units it has no effect, due to a Blizzard API restriction (Patch 12.1.0)."],
@@ -5231,7 +5203,7 @@ local function CreateAurasWidgetOptions()
                 type = "group",
                 order = 10,
                 inline = true,
-                hidden = Addon.ExpansionIsAtLeastMidnight,
+                hidden = Addon.HAS_MIDNIGHT_API,
                 args = {
                   Show = {
                     name = L["Show Debuffs"],
@@ -5363,7 +5335,7 @@ local function CreateAurasWidgetOptions()
                 type = "group",
                 order = 11,
                 inline = true,                
-                hidden = not Addon.ExpansionIsAtLeastMidnight,
+                hidden = not Addon.HAS_MIDNIGHT_API,
                 args = {
                   Show = {
                     name = L["Show Debuffs"],
@@ -5481,7 +5453,7 @@ local function CreateAurasWidgetOptions()
                 type = "group",
                 order = 20,
                 inline = true,
-                hidden = Addon.ExpansionIsAtLeastMidnight,
+                hidden = Addon.HAS_MIDNIGHT_API,
                 args = {
                   ShowEnemy = {
                     name = L["Show Debuffs"],
@@ -5540,7 +5512,7 @@ local function CreateAurasWidgetOptions()
                 type = "group",
                 order = 21,
                 inline = true,
-                hidden = not Addon.ExpansionIsAtLeastMidnight,
+                hidden = not Addon.HAS_MIDNIGHT_API,
                 args = {
                   ShowEnemy = {
                     name = L["Show Debuffs"],
@@ -5700,7 +5672,7 @@ local function CreateAurasWidgetOptions()
                 order = 50,
                 type = "group",
                 inline = true,
-                hidden = Addon.ExpansionIsAtLeastMidnight,
+                hidden = Addon.HAS_MIDNIGHT_API,
                 args = {
                   ScopeNote = {
                     name = L["This spell filter only takes effect for debuffs on enemy units. On friendly units it has no effect, due to a Blizzard API restriction (Patch 12.1.0)."],
@@ -5760,7 +5732,7 @@ local function CreateAurasWidgetOptions()
                 type = "group",
                 order = 10,
                 inline = true,
-                hidden = Addon.ExpansionIsAtLeastMidnight,
+                hidden = Addon.HAS_MIDNIGHT_API,
                 args = {
                   Show = {
                     name = L["Show Crowd Control"],
@@ -5833,7 +5805,7 @@ local function CreateAurasWidgetOptions()
                 type = "group",
                 order = 11,
                 inline = true,
-                hidden = not Addon.ExpansionIsAtLeastMidnight,
+                hidden = not Addon.HAS_MIDNIGHT_API,
                 args = {
                   Show = {
                     name = L["Show Crowd Control"],
@@ -5877,7 +5849,7 @@ local function CreateAurasWidgetOptions()
                 type = "group",
                 order = 20,
                 inline = true,
-                hidden = Addon.ExpansionIsAtLeastMidnight,                
+                hidden = Addon.HAS_MIDNIGHT_API,                
                 args = {
                   ShowEnemy = {
                     name = L["Show Crowd Control"],
@@ -5923,7 +5895,7 @@ local function CreateAurasWidgetOptions()
                 type = "group",
                 order = 21,
                 inline = true,
-                hidden = not Addon.ExpansionIsAtLeastMidnight,
+                hidden = not Addon.HAS_MIDNIGHT_API,
                 args = {
                   ShowEnemy = {
                     name = L["Show Crowd Control"],
@@ -5950,7 +5922,7 @@ local function CreateAurasWidgetOptions()
                 order = 50,
                 type = "group",
                 inline = true,
-                hidden = Addon.ExpansionIsAtLeastMidnight,
+                hidden = Addon.HAS_MIDNIGHT_API,
                 args = {
                   ScopeNote = {
                     name = L["This spell filter only takes effect for crowd control on enemy units. On friendly units it has no effect, due to a Blizzard API restriction (Patch 12.1.0)."],
@@ -6061,6 +6033,14 @@ local function CreateHeadlineViewShowEntry()
   return args
 end
 
+-- Confirmed in-game: friendly pets and totems get no nameplates while friendly player nameplates are disabled.
+-- Guardians are assumed to behave the same way (not individually verified), based on that pattern.
+local FRIENDLY_UNIT_TYPES_DEPENDING_ON_PLAYERS = { Pet = true, Guardian = true, Totem = true }
+
+local function IsFriendlyPlayerVisibilityDisabled()
+  return not GetUnitVisibilitySetting({ arg = "FriendlyPlayer" })
+end
+
 local function CreateUnitGroupsVisibility(args, pos)
   for _, value in ipairs(UNIT_TYPES) do
     local faction = value.Faction
@@ -6080,6 +6060,7 @@ local function CreateUnitGroupsVisibility(args, pos)
         arg = faction..unit_type,
         get = GetUnitVisibilitySetting,
         set = SetUnitVisibilitySetting,
+        disabled = (faction == "Friendly" and FRIENDLY_UNIT_TYPES_DEPENDING_ON_PLAYERS[unit_type] and IsFriendlyPlayerVisibilityDisabled) or nil,
       }
     end
 
@@ -6149,11 +6130,11 @@ local function CreateVisibilityTab()
             width = "full",
             set = function(info, value)
               CVars:OverwriteBool("nameplateShowFriendlyPlayers", value)
-              CVars:OverwriteBool("nameplateShowFriendlyNPCs", value)
+              CVars:OverwriteBool("nameplateShowFriendlyNpcs", value)
               CVars:OverwriteBool("nameplateShowEnemies", value)
             end,
             get = function(info)
-              return GetCVarBool("nameplateShowFriendlyPlayers") and GetCVarBool("nameplateShowFriendlyNPCs") and GetCVarBool("nameplateShowEnemies")
+              return GetCVarBool("nameplateShowFriendlyPlayers") and GetCVarBool("nameplateShowFriendlyNpcs") and GetCVarBool("nameplateShowEnemies")
             end,
           },
           AllHostile = {
@@ -6274,7 +6255,8 @@ local function CreateLocalizationSettings()
     order = 135,
     type = "group",
     inline = false,
-    hidden = Addon.ExpansionIsAtLeastMidnight,
+    -- On clients with Midnight's API surface, only transliteration is available (if the client has the API for it)
+    hidden = not Addon.Localization.TransliterationIsSupported,
     args = {
       Texts = {
         name = L["Texts"],
@@ -6296,6 +6278,7 @@ local function CreateLocalizationSettings()
         order = 20,
         type = "group",
         inline = true,
+        hidden = Addon.HAS_MIDNIGHT_API,
         args = {
           MetricUnitSymbols = {
             name = L["Metric Unit Symbols"],
@@ -6467,7 +6450,7 @@ local function CreateBlizzardSettings()
                 get = GetValueCVarBool,
                 desc = L["Show only unit names and hide healthbars (requires /reload). Note that the clickable area of friendly nameplates will also be set to zero so that they don't interfere with enemy nameplates stacking (not in Classic or TBC Classic)."],
                 arg = "nameplateShowOnlyNames",
-                hidden = Addon.ExpansionIsAtLeastMidnight,
+                hidden = Addon.HAS_MIDNIGHT_API,
               },
               ShowOnlyNameForFriendlyPlayerUnits = {
                 name = L["Only Names for Friendly Players"],
@@ -6478,7 +6461,7 @@ local function CreateBlizzardSettings()
                 get = GetValueCVarBool,
                 desc = L["Hide healthbars of friendly units"],
                 arg = "nameplateShowOnlyNameForFriendlyPlayerUnits",    
-                hidden = not Addon.ExpansionIsAtLeastMidnight,        
+                hidden = not Addon.HAS_MIDNIGHT_API,        
               },                    
               DebuffsOnFriendly = {
                 name = L["Debuffs on Friendly"],
@@ -6611,6 +6594,28 @@ local function CreateBlizzardSettings()
             type = "group",
             inline = true,
             args = {
+              StackEnemy = {
+                name = L["Stack Enemy Nameplates"],
+                order = 10,
+                type = "toggle",
+                width = "double",
+                desc = L["Stack nameplates of enemy units, so that they don't overlap."],
+                set = SetValueNameplateStacking,
+                get = GetValueNameplateStacking,
+                arg = "Enemy",
+                hidden = NameplateStackingIsUnavailable,
+              },
+              StackFriendly = {
+                name = L["Stack Friendly Nameplates"],
+                order = 20,
+                type = "toggle",
+                width = "double",
+                desc = L["Stack nameplates of friendly units, so that they don't overlap."],
+                set = SetValueNameplateStacking,
+                get = GetValueNameplateStacking,
+                arg = "Friendly",
+                hidden = NameplateStackingIsUnavailable,
+              },
               OverlapH = {
                 name = L["Horizontal Overlap"],
                 order = 30,
@@ -6648,7 +6653,9 @@ local function CreateBlizzardSettings()
                 order = 10,
                 type = "range",
                 min = 0,
-                max = Addon.NAMEPLATE_MAX_DISTANCE_MAX_VALUE[Addon.GetExpansionLevel()],
+                -- Clients with Midnight's API surface (e.g. "WoW Forever") use the Mainline limit, although their
+                -- expansion level is a Classic one (default nameplateMaxDistance there is 45, above the Classic limits).
+                max = Addon.NAMEPLATE_MAX_DISTANCE_MAX_VALUE[Addon.HAS_MIDNIGHT_API and "MAINLINE" or Addon.GetExpansionLevel()],
                 step = 1,
                 width = "double",
                 desc = L["The max distance to show nameplates."],
@@ -6722,43 +6729,6 @@ local function CreateBlizzardSettings()
                 arg = { "BlizzardSettings", "Widgets", "VerticalOffset" },
               },
             },
-          },
-        },
-      },
-      PersonalNameplate = {
-        name = L["Personal Nameplate"],
-        order = 50,
-        type = "group",
-        inline = false,
-        args = {
-          HideBuffs = {
-            type = "toggle",
-            order = 10,
-            name = L["Hide Buffs"],
-            set = function(info, val)
-              SetValueGeneral(info, val)
-              local plate = C_NamePlate.GetNamePlateForUnit("player")
-              if plate and plate:IsShown() then
-                plate.UnitFrame.BuffFrame:SetShown(not val)
-              end
-            end,
-            get = GetValue,
-            arg = { "PersonalNameplate", "HideBuffs"},
-          },
-          -- ? Why don't I just change the CVar here, why storing the setting internally? It's set on login, different
-          -- ? to all how all other CVars are handled
-          ShowResources = {
-            type = "toggle",
-            order = 20,
-            name = L["Resources on Targets"],
-            desc = L["Enable this if you want to show Blizzard's special resources above the target nameplate."],
-            width = "double",
-            set = function(info, val)
-              SetValueGeneral(info, val)
-              CVars:OverwriteBool("nameplateResourceOnTarget", val)
-            end,
-            get = GetValue,
-            arg = { "PersonalNameplate", "ShowResourceOnTarget"},
           },
         },
       },
@@ -7229,7 +7199,7 @@ local function CreateHealthbarOptions()
                 order = 29,
                 type = "toggle",
                 arg = { "settings", "healthbar", "ShowHealAbsorbs" },
-                hidden = function() return not Addon.WOW_FEATURE_ABSORBS or Addon.ExpansionIsAtLeastMidnight end, -- Absorbs were added with Mists; heal absorbs not available on Midnight
+                hidden = function() return not Addon.WOW_FEATURE_ABSORBS or Addon.HAS_MIDNIGHT_API end, -- Absorbs were added with Mists; heal absorbs not available on Midnight
               },
               ShowAbsorbs = {
                 name = L["Absorbs"],
@@ -7408,7 +7378,7 @@ local function CreateHealthbarOptions()
                     order = 120,
                     type = "toggle",
                     desc = function()
-                      if Addon.ExpansionIsAtLeastMidnight then
+                      if Addon.HAS_MIDNIGHT_API then
                         return L["In over-absorb situations (shield larger than missing health), shows a reverse-fill shield overlay across the health bar and positions the spark at its left boundary to indicate the actual shield magnitude."]
                       else
                         return L["In over-absorb situations (shield larger than missing health), moves the over-absorb spark to indicate the actual shield magnitude, instead of pinning it to the bar's right edge."]
@@ -7420,8 +7390,8 @@ local function CreateHealthbarOptions()
                     name = L["Striped Texture"],
                     order = 130,
                     type = "toggle",
-                    desc = L["Use a striped texture for the absorbs overlay."] .. (Addon.ExpansionIsAtLeastMidnight and "" or L["Always enabled if full absorbs are shown."]),
-                    disabled = function() return not Addon.ExpansionIsAtLeastMidnight and db.settings.healthbar.AlwaysFullAbsorb end,
+                    desc = L["Use a striped texture for the absorbs overlay."] .. (Addon.HAS_MIDNIGHT_API and "" or L["Always enabled if full absorbs are shown."]),
+                    disabled = function() return not Addon.HAS_MIDNIGHT_API and db.settings.healthbar.AlwaysFullAbsorb end,
                     arg = { "settings", "healthbar", "OverlayTexture" },
                   },
                   OverlayColor = {
@@ -7580,8 +7550,6 @@ local function CreateHealthbarOptions()
       TargetUnitText = GetTextEntry(L["Target"], 50, { "settings", "healthbar", "TargetUnit" }),
     },
   }
-
-  entry.args.TargetUnitText.hidden = Addon.ExpansionIsAtLeastMidnight
 
   entry.args.TargetUnitText.args.Showing = {
     name = L["Show"],
@@ -8209,9 +8177,16 @@ local function CreateNameOptions()
                 type = "toggle",
                 arg = { "Name", "HealthbarMode", "ShowTitle" },
               },
+              Surname = {
+                name = L["Surname"],
+                order = 20,
+                type = "toggle",
+                arg = { "Name", "HealthbarMode", "ShowSurname" },
+                hidden = function() return not Addon.WOW_FEATURE_REGIONAL_SURNAMES end,
+              },
               Realm = {
                 name = L["Realm"],
-                order = 20,
+                order = 30,
                 type = "toggle",
                 arg = { "Name", "HealthbarMode", "ShowRealm" },
               },
@@ -8296,7 +8271,7 @@ local function CreateNameOptions()
             order = 60,
             type = "group",
             inline = true,
-            hidden = Addon.ExpansionIsAtLeastMidnight,
+            hidden = Addon.HAS_MIDNIGHT_API,
             args = {
               NameAbbreviationForEnemyUnits = {
                 name = L["Enemy Units"],
@@ -8399,7 +8374,6 @@ local function CreateWidgetOptions()
       FocusWidget = CreateFocusWidgetOptions(),
       ResourceWidget = CreateResourceWidgetOptions(),
       SocialWidget = CreateSocialWidgetOptions(),
-      StealthWidget = CreateStealthWidgetOptions(),
       TargetArtWidget = CreateTargetArtWidgetOptions(),
       QuestWidget = CreateQuestWidgetOptions(),
       HealerTrackerWidget = CreateHealerTrackerWidgetOptions(),
@@ -8970,7 +8944,10 @@ CreateCustomNameplateEntry = function(index)
             order = 30,
             func = function()
               if UnitExists("target") then
-                local target_unit = UnitName("target")
+                -- Match unit.basename exactly (incl. Forever surname, if shown) - a raw UnitName here
+                -- would silently never match if the target's basename includes a surname.
+                local tp_frame = Addon:GetThreatPlateForUnit("target")
+                local target_unit = (tp_frame and tp_frame.unit.basename) or UnitName("target")
                 local triggers = { target_unit }
                 local check_ok = CustomPlateCheckIfTriggerIsUniqueWithErrorMessage("Name", triggers, db.uniqueSettings[index])
                 if check_ok then
@@ -10212,8 +10189,8 @@ local function CreateOptionsTable()
                           name = L["Show Focus"],
                           order = 15,
                           type = "toggle",
-                          arg = { "HeadlineView", "ShowFocusHighlight" },
-                          hidden = function() return Addon.IS_CLASSIC end,
+                          arg = { "FocusWidget", "ShowInHeadlineView" },
+                          hidden = function() return not Addon.WOW_FEATURE_FOCUS end,
                         },
                         TargetMouseoverHighlight = {
                           name = L["Show Mouseover"],
@@ -10860,7 +10837,7 @@ local function CreateOptionsTable()
                           order = 30,
                           desc = L["Display absorbs percentage text."],
                           arg = { "text", "AbsorbsPercentage" },
-                          hidden = Addon.ExpansionIsAtLeastMidnight,
+                          hidden = Addon.HAS_MIDNIGHT_API,
                         },
                       },
                     },
@@ -11130,7 +11107,7 @@ local function CreateOptionsTable()
                   type = "group",
                   order = 10,
                   inline = true,
-                  hidden = Addon.ExpansionIsAtLeastMidnight,
+                  hidden = Addon.HAS_MIDNIGHT_API,
                   args = {
                     OffTank = {
                       type = "toggle",
@@ -11148,7 +11125,7 @@ local function CreateOptionsTable()
                   type = "group",
                   order = 20,
                   inline = true,
-                  hidden = Addon.ExpansionIsAtLeastMidnight,
+                  hidden = Addon.HAS_MIDNIGHT_API,
                   args = {
                     Note = {
                       name = L["By default, the threat system works based on a mob's threat table. Some mobs do not have such a threat table even if you are in combat with them. The threat detection heuristic uses other factors to determine if you are in combat with a mob. This works well in instances. In the open world, this can show units in combat with you that are actually just in combat with another player (and not you)."],

@@ -33,6 +33,11 @@ local CastbarChannelDirection = Enum.StatusBarTimerDirection and Enum.StatusBarT
 local WrapTextInColor = C_ColorUtil and C_ColorUtil.WrapTextInColor
 local GetClassColor = C_ClassColor and C_ClassColor.GetClassColor
 local UnitChannelDuration, UnitCastingDuration = UnitChannelDuration, UnitCastingDuration
+-- Constants.CharacterNameSeparatorConsts only exists on WoW Forever (confirmed: not present on live
+-- Retail/Midnight or any Classic flavor as of 2026-09-23) - fall back to the literal separators every
+-- other client hardcodes for realm names.
+local NAME_REALM_SEPARATOR = Constants.CharacterNameSeparatorConsts and Constants.CharacterNameSeparatorConsts.CHARACTERNAME_REALMNAME_SEPARATOR or "-"
+local GetUnitNameWithSurname = Addon.GetUnitNameWithSurname
 
 -- ThreatPlates APIs
 local L = Addon.L
@@ -45,7 +50,6 @@ local IsSecretValueTP = Addon.IsSecretValue
 local UnitIsUnitTP = Addon.UnitIsUnit
 local CombatLogGetCurrentEventInfoTP = Addon.CombatLogGetCurrentEventInfo
 local IsSpellKnownTP = Addon.IsSpellKnown
-local ExpansionIsAtLeastMidnight = Addon.ExpansionIsAtLeastMidnight
 
 local TransliterateCyrillicLetters = Addon.Localization.TransliterateCyrillicLetters
 local SetNamesFonts = Addon.Font.SetNamesFonts
@@ -115,16 +119,20 @@ local PlatesByGUID = Addon.PlatesByGUID
 ---------------------------------------------------------------------------------------------------
 -- Cached configuration settings (for performance reasons)
 ---------------------------------------------------------------------------------------------------
-local SettingsShowEnemyBlizzardNameplates, SettingsShowFriendlyBlizzardNameplates, SettingsHideBuffsOnPersonalNameplate
+local SettingsShowEnemyBlizzardNameplates, SettingsShowFriendlyBlizzardNameplates
 local SettingsShowOnlyNames
 local TargetStyleForEnemy, TargetStyleForFriend, TargetStyleForInteract
 local ShowCastBars
 local ShowInterruptSource
+local SettingsShowSurname
 
 ---------------------------------------------------------------------------------------------------
 -- Wrapper functions for WoW Classic
 ---------------------------------------------------------------------------------------------------
 
+-- Old-classic-engine-only quirks (frame naming, UnitChannelInfo/_G.GetSpellInfo). "WoW Forever" (not part
+-- of Addon.IS_CLASSIC, see Init.lua) runs on a modern engine without these quirks, so it falls through to
+-- the modern branch at the bottom of this chain instead.
 if Addon.IS_CLASSIC then
   GetNameForNameplate = function(plate) return plate:GetName():gsub("NamePlate", "Plate") end
 
@@ -428,26 +436,37 @@ end
 
 local function SetUnitAttributeName(unit, unitid)
   -- Can be UNKNOWNOBJECT => UNIT_NAME_UPDATE
-  local unit_name, realm = UnitName(unitid)
-  -- Let's preserve the unaltered name for the custom styles check…
-  unit.basename = unit_name
+  -- Surname is shown by default (like Blizzard's own nameplate name text), independent of ShowRealm,
+  -- only toggled by ShowSurname (SettingsShowSurname, cached in Addon:UpdateSettings()).
+  local name, second_value = GetUnitNameWithSurname(unitid, SettingsShowSurname)
 
+  -- UnitName's 2nd return means different things depending on the client:
+  --   - WoW Forever (surname system active): a surname, e.g. "Smith" (already appended to name above)
+  --   - Every other client: a realm name (only set when cross-realm)
+  local realm = (not Addon.WOW_FEATURE_REGIONAL_SURNAMES) and second_value
+
+  -- Preserve the unaltered (but surname-complete) name for the custom styles check…
+  unit.basename = name
+
+  -- NPCs/other non-player units: no title, no realm - done.
   if unit.type ~= "PLAYER" then
-    unit.name = unit_name
+    unit.name = name
     return
   end
 
   local db = Addon.db.profile.Name.HealthbarMode
 
+  -- Players only: optional PvP title overrides the name (on Forever, UnitPVPName already includes the
+  -- surname - confirmed live: untitled unit "Gavanda Hughes" -> UnitPVPName returns "Gavanda Hughes").
   if db.ShowTitle then
-    unit_name = UnitPVPName(unitid) or unit_name
+    name = UnitPVPName(unitid) or name
   end
 
-  if db.ShowRealm and realm then
-    unit_name = unit_name .. " - " .. (realm or "")
+  if db.ShowRealm and realm and realm ~= "" then
+    name = name .. " " .. NAME_REALM_SEPARATOR .. " " .. realm
   end
 
-  unit.name = unit_name
+  unit.name = name
 end
 
 Addon.GetUnitReactionToPlayer = function(unitid)
@@ -486,7 +505,10 @@ end
 
 local function SetUnitAttributeTargetMarker(unit, unitid)
   local raid_icon_index = GetRaidTargetIndex(unitid)
-  if ExpansionIsAtLeastMidnight then 
+  -- raid_icon_index can be secret in restricted contexts on any client with Midnight's API surface (not
+  -- just Midnight itself - Addon.HAS_MIDNIGHT_API), and the else branch below uses it as a table key,
+  -- which is unsafe if secret.
+  if Addon.HAS_MIDNIGHT_API then
     unit.TargetMarkerIcon = raid_icon_index
     unit.MentorIcon = raid_icon_index
   else
@@ -526,7 +548,7 @@ local function SetUnitAttributes(unit, unitid)
     unit.class = ""
     unit.type = "NPC"
 
-    if not ExpansionIsAtLeastMidnight then
+    if not Addon.HAS_MIDNIGHT_API then
       local _, _, _, _, _, npc_id = strsplit("-", unit.guid or "")
       unit.NPCID = npc_id
     end
@@ -601,7 +623,9 @@ local function OnStartCasting(tp_frame, unitid, cast_guid, event_spell_id, castb
   end
 
   local unit = tp_frame.unit
-  if not ExpansionIsAtLeastMidnight then
+  -- CastTriggerCheckIfActive keys a table by spell_id/name, which can be secret on any client with
+  -- Midnight's API surface (not just Midnight itself) - skipped there just like on Midnight.
+  if not Addon.HAS_MIDNIGHT_API then
     StyleModule.CastTriggerCheckIfActive(unit, spell_id, name)
   end
 
@@ -618,7 +642,9 @@ local function OnStartCasting(tp_frame, unitid, cast_guid, event_spell_id, castb
   -- this castbar (see Addon:UNIT_SPELLCAST_STOP / Addon:COMBAT_LOG_EVENT_UNFILTERED).
   castbar.InterruptSourceUnknown = nil
 
-  if not ExpansionIsAtLeastMidnight then
+  -- Companion to the CastTriggerCheckIfActive skip above - kept in sync so this doesn't run against
+  -- unit.CustomStyleCast/.PreviousCustomStyleCast state that was never set on this client.
+  if not Addon.HAS_MIDNIGHT_API then
     if StyleModule.CastTriggerUpdateStyle(unit) then
       StyleModule:Update(tp_frame)
     end
@@ -627,14 +653,18 @@ local function OnStartCasting(tp_frame, unitid, cast_guid, event_spell_id, castb
   visual.SpellText:SetText(text)
   visual.SpellIcon:SetTexture(texture)
 
-  if ExpansionIsAtLeastMidnight then
+  -- The else branch below does Lua arithmetic on startTime/endTime, which are secret on any client with
+  -- Midnight's API surface (not just Midnight itself) - use the Midnight-safe timer API there too.
+  if Addon.HAS_MIDNIGHT_API then
     local target_unit_name = UnitSpellTargetName(unitid)
     if target_unit_name then
+      -- Transliterate the plain name, not the name with the color escape sequence wrapped around it
+      target_unit_name = TransliterateCyrillicLetters(target_unit_name)
       local class_name = UnitSpellTargetClass(unitid)
       if class_name then
         target_unit_name = WrapTextInColor(target_unit_name, GetClassColor(class_name))
       end
-      castbar.CastTarget:SetText(TransliterateCyrillicLetters(target_unit_name))
+      castbar.CastTarget:SetText(target_unit_name)
     else
       castbar.CastTarget:SetText(nil)
     end
@@ -652,9 +682,9 @@ local function OnStartCasting(tp_frame, unitid, cast_guid, event_spell_id, castb
     end
   else
     local target_unitid = unit.unitid .. "target"
-    local target_unit_name = UnitName(target_unitid)
+    -- There are situations when UnitName returns nil (OnHealthUpdate, hypothesis: health update when the unit died tiggers this, but then there is no target any more)
+    local target_unit_name = GetUnitNameWithSurname(target_unitid, SettingsShowSurname)
     if target_unit_name then
-      -- There are situations when UnitName returns nil (OnHealthUpdate, hypothesis: health update when the unit died tiggers this, but then there is no target any more)
       local _, class_name = UnitClass(target_unitid)
       castbar.CastTarget:SetText(Addon.ColorByClass(class_name, TransliterateCyrillicLetters(target_unit_name)))
     else
@@ -803,7 +833,10 @@ local SetShownBlizzardPlate
 -- Weak-keyed: the entry disappears on its own once Blizzard releases/GCs the frame.
 local BlizzardPlateOrigParent = setmetatable({}, { __mode = "k" })
 
-if ExpansionIsAtLeastMidnight then
+-- The protected-frame branch below (unit_frame:IsProtected()) exists because plain Show()/Hide()/
+-- SetShown() can be blocked by frame protection on the modern engine, not just on Midnight - see
+-- Addon.HAS_MIDNIGHT_API in Init.lua and the "Use SetAlpha(0/1)..." rule in CLAUDE.md.
+if Addon.HAS_MIDNIGHT_API then
   SetShownBlizzardPlate = function(unit_frame, show)
     if show then
       local orig_parent = BlizzardPlateOrigParent[unit_frame]
@@ -847,7 +880,7 @@ local function ShowBlizzardNameplate(plate, show_blizzard_plate)
     -- Restore frames used from Blizzard namemplates
     WidgetContainerReset(plate)
     -- Clear the TP-managed hit-test so Blizzard's UnitFrame handles mouse events naturally.
-    if ExpansionIsAtLeastMidnight and plate:CanChangeHitTestPoints() then
+    if Addon.HAS_MIDNIGHT_API and plate:CanChangeHitTestPoints() then
       plate:ClearAllHitTestPoints()
     end
   else
@@ -901,7 +934,7 @@ local function FrameOnShow(UnitFrame)
     return
   end
 
-  -- Don't show ThreatPlates for ignored units (e.g., widget-only nameplates (since Shadowlands))
+  -- Don't show ThreatPlates for ignored units (the player's own nameplate, widget-only nameplates (since Shadowlands))
   if IgnoreUnitForThreatPlates(unitid) then
     if UnitFrame:GetParent().TPFrame then
       UnitFrame:GetParent().TPFrame:Hide()
@@ -909,20 +942,11 @@ local function FrameOnShow(UnitFrame)
     return
   end
 
-
-  if UnitIsUnitTP(unitid, "player") then -- or: ns.PlayerNameplate == GetNamePlateForUnit(UnitFrame.unit)
-    -- Skip the personal resource bar of the player character, don't unhook scripts as nameplates, even the personal
-    -- resource bar, get re-used
-    if SettingsHideBuffsOnPersonalNameplate then
-      UnitFrame.BuffFrame:Hide()
-    end
-  else
-    if SettingsShowOnlyNames then
-      ClassicBlizzardNameplatesSetAlpha(UnitFrame, 0)
-    end
-  
-    SetVisibilityOfBlizzardNameplate(UnitFrame, unitid)
+  if SettingsShowOnlyNames then
+    ClassicBlizzardNameplatesSetAlpha(UnitFrame, 0)
   end
+
+  SetVisibilityOfBlizzardNameplate(UnitFrame, unitid)
 end
 
 -- Frame: self = plate
@@ -964,20 +988,27 @@ local function NamePlateDriverFrame_AcquireUnitFrame(_, plate)
     BlizzardPlateOrigParent[unit_frame] = nil
   end
 
-  if unit_frame and not unit_frame:IsForbidden() and not unit_frame.ThreatPlates then
-    unit_frame.ThreatPlates = true
-    unit_frame:HookScript("OnShow", FrameOnShow)
+  if unit_frame and not unit_frame:IsForbidden() then
+    if not unit_frame.ThreatPlates then
+      unit_frame.ThreatPlates = true
+      unit_frame:HookScript("OnShow", FrameOnShow)
 
-    if ExpansionIsAtLeastMidnight then
-      hooksecurefunc(unit_frame, "Show", function(self)
-        if self:IsForbidden() then return end
+      -- Companion to SetShownBlizzardPlate above - kept on the same condition.
+      if Addon.HAS_MIDNIGHT_API then
+        hooksecurefunc(unit_frame, "Show", function(self)
+          if self:IsForbidden() then return end
 
-        SetVisibilityOfBlizzardNameplate(self, self.unit)
-      end)
+          SetVisibilityOfBlizzardNameplate(self, self.unit)
+        end)
+      end
     end
 
-   -- # Nameplate Hierarchy, Anchoring, and Scaling
-    plate.TPFrame:SetPoint("CENTER", plate.UnitFrame, "CENTER")
+    -- # Nameplate Hierarchy, Anchoring, and Scaling
+    -- Must run for every acquire, not only the first time a unit_frame is seen: Blizzard pools its
+    -- UnitFrames and can hand plate a different (already hooked) instance on each NAME_PLATE_UNIT_ADDED.
+    -- Otherwise TPFrame stays anchored to the instance plate used before, which is by now either
+    -- released (no anchor, so the plate is invisible) or in use by another plate (so it shows up there).
+    plate.TPFrame:SetPoint("CENTER", unit_frame, "CENTER")
     --plate.Background:SetAllPoints(plate.TPFrame)
   end
 end
@@ -1059,24 +1090,23 @@ local	function HandlePlateCreated(plate)
 end
 
 -- Applies the C++ hit-test link for a nameplate plate.
--- Guards:
---   • Active: skips when Blizzard plates are shown for this unit.
---   • CanChangeHitTestPoints: skips in restricted C++ contexts.
+-- Click-through (NamePlateFriendlyClickThrough/NamePlateEnemyClickThrough) is decided by the
+-- unit's reaction alone, so it applies the same whether TP or Blizzard's own plate is currently
+-- shown for this unit (Active toggles only which frame's bounds the non-click-through case uses).
+-- Guard: CanChangeHitTestPoints skips in restricted C++ contexts.
 local function ApplyPlateHitTest(tp_frame)
   local plate = tp_frame.Parent
 
   if not plate:CanChangeHitTestPoints() then return end
-  
-  if not tp_frame.Active then 
-    plate:SetAllHitTestPoints(plate.UnitFrame)  
-    return 
-  end
 
   local db = Addon.db.profile
-  local is_friendly = (tp_frame.unit.reaction == "FRIENDLY")
+  local is_friendly = Addon.GetUnitReactionToPlayer(tp_frame.unit.unitid) > 4
   local is_click_through = (is_friendly and db.NamePlateFriendlyClickThrough) or (not is_friendly and db.NamePlateEnemyClickThrough)
+
   if is_click_through then
     plate:ClearAllHitTestPoints()
+  elseif not tp_frame.Active then
+    plate:SetAllHitTestPoints(plate.UnitFrame)
   else
     local db_frame = db.settings.frame
     local width  = (is_friendly and db_frame.widthFriend)  or db_frame.width
@@ -1270,8 +1300,8 @@ function Addon:UpdateSettings()
 
   SettingsShowFriendlyBlizzardNameplates = db.ShowFriendlyBlizzardNameplates
   SettingsShowEnemyBlizzardNameplates = db.ShowEnemyBlizzardNameplates
-  SettingsHideBuffsOnPersonalNameplate = db.PersonalNameplate.HideBuffs
   SettingsShowOnlyNames = CVars:GetAsBool("nameplateShowOnlyNames") and Addon.db.profile.BlizzardSettings.Names.Enabled
+  SettingsShowSurname = Addon.WOW_FEATURE_REGIONAL_SURNAMES and db.Name.HealthbarMode.ShowSurname
 
   TargetStyleForEnemy = db.targetWidget.SoftTarget.TargetStyleForEnemy
   TargetStyleForFriend = db.targetWidget.SoftTarget.TargetStyleForFriend
@@ -1307,6 +1337,10 @@ function Addon:UpdatePlatesVisible()
   -- No need to update only active nameplates, as this is only done when settings are changed, so performance is
   -- not really an issue.
   for unitid, tp_frame in pairs(PlatesByUnit) do
+    -- Name text depends on both unit data (UnitName) and settings (ShowTitle/ShowRealm/ShowSurname), unlike
+    -- most other presentation state, so it must be re-derived here too, not just re-rendered from the
+    -- unchanged unit.name RefreshPlatePresentation would otherwise redraw.
+    SetUnitAttributeName(tp_frame.unit, unitid)
     RefreshPlatePresentation(tp_frame, tp_frame.Parent, unitid)
   end
 end
@@ -1403,12 +1437,12 @@ local PVP_INSTANCE_TYPES = {
 
 local function SetFriendlyNameplatesShown(value)
   CVars:Set("nameplateShowFriendlyPlayers", value)
-  CVars:Set("nameplateShowFriendlyNPCs", value)
+  CVars:Set("nameplateShowFriendlyNpcs", value)
 end
 
 local function RestoreFriendlyNameplatesShown()
   CVars:RestoreFromProfile("nameplateShowFriendlyPlayers")
-  CVars:RestoreFromProfile("nameplateShowFriendlyNPCs")
+  CVars:RestoreFromProfile("nameplateShowFriendlyNpcs")
 end
 
 -- Same as SetFriendlyNameplatesShown, but sets the CVar(s) directly, bypassing the combat-protection queue in
@@ -1416,7 +1450,7 @@ end
 -- apply immediately.
 local function RawSetFriendlyNameplatesShown(value)
   _G.SetCVar("nameplateShowFriendlyPlayers", value)
-  _G.SetCVar("nameplateShowFriendlyNPCs", value)
+  _G.SetCVar("nameplateShowFriendlyNpcs", value)
 end
 
 -- Fired when the player enters the world, reloads the UI, enters/leaves an instance or battleground, or respawns at a graveyard.
@@ -1661,7 +1695,7 @@ function Addon:NAME_PLATE_UNIT_REMOVED(unitid)
   tp_frame.Active = false
 
   PlatesByUnit[unitid] = nil
-  if not ExpansionIsAtLeastMidnight then
+  if not Addon.HAS_MIDNIGHT_API then
     if tp_frame.unit.guid then -- maybe hide directly after create with unit added?
       PlatesByGUID[tp_frame.unit.guid] = nil
     end
@@ -1799,7 +1833,9 @@ function Addon:RAID_TARGET_UPDATE()
     local previous_target_marker_icon = unit.TargetMarkerIcon
     local previous_mentor_icon = unit.MentorIcon
     SetUnitAttributeTargetMarker(unit, unitid)
-    if ExpansionIsAtLeastMidnight or previous_target_marker_icon ~= unit.TargetMarkerIcon or previous_mentor_icon ~= unit.MentorIcon then
+    -- unit.TargetMarkerIcon/.MentorIcon can be secret (see SetUnitAttributeTargetMarker), so the ~=
+    -- comparisons below must be skipped - not just on Midnight, but on any client with its API surface.
+    if Addon.HAS_MIDNIGHT_API or previous_target_marker_icon ~= unit.TargetMarkerIcon or previous_mentor_icon ~= unit.MentorIcon then
       PublishEvent("TargetMarkerUpdate", tp_frame)
     end
   end
@@ -1853,6 +1889,11 @@ local function ApplyReactionUpdate(tp_frame, unitid)
     ApplyPlateHitTest(tp_frame)
     StyleModule.Update(tp_frame)
     PublishEvent("FactionUpdate", tp_frame)
+  else
+    -- ApplyPlateHitTest falls back to Blizzard's own UnitFrame bounds when Active is false, so this
+    -- keeps the hit-test region correct even when SetNameplateVisibility left Blizzard's own plate
+    -- shown for this unit instead of TP's.
+    ApplyPlateHitTest(tp_frame)
   end
 end
 
@@ -2010,8 +2051,9 @@ end
 function Addon:UNIT_SPELLCAST_CHANNEL_STOP(unitid, cast_guid, spell_id, interrupted_by, castbar_id)
   if IGNORED_UNITS[unitid] or not ShowCastBars then return end
 
-  -- Addon:UNIT_SPELLCAST_INTERRUPTED is Retail/Midnight-only code
-  if interrupted_by ~= nil and ExpansionIsAtLeastMidnight then
+  -- Addon:UNIT_SPELLCAST_INTERRUPTED is Retail/Midnight-only code (see Addon.HAS_MIDNIGHT_API in Init.lua
+  -- for clients that share this API surface without being Midnight itself)
+  if interrupted_by ~= nil and Addon.HAS_MIDNIGHT_API then
     Addon:UNIT_SPELLCAST_INTERRUPTED(unitid, cast_guid, spell_id, interrupted_by, castbar_id)
   else
     Addon:UNIT_SPELLCAST_STOP(unitid, cast_guid, spell_id, castbar_id)  -- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED
@@ -2065,13 +2107,14 @@ function Addon:UNIT_SPELLCAST_INTERRUPTED(unitid, cast_guid, spell_id, interrupt
   if castbar_id ~= castbar.CastbarID or not castbar:IsShown() or not interrupted_by then return end
 
   local _, class, _, race, _, name, realm = GetPlayerInfoByGUID(interrupted_by)
-  name = name or UnitNameFromGUID(interrupted_by)
+  -- Transliterate the plain name, not the name with the color escape sequence wrapped around it
+  name = TransliterateCyrillicLetters(name or UnitNameFromGUID(interrupted_by))
   local class_color = class and GetClassColor(class) or nil
   if class_color then
     name = class_color:WrapTextInColorCode(name)
   end
 
-  tp_frame.visual.SpellText:SetText(INTERRUPTED .. " [" .. TransliterateCyrillicLetters(name) .. "]")
+  tp_frame.visual.SpellText:SetText(INTERRUPTED .. " [" .. name .. "]")
 
   castbar:SetMinMaxValues(0, 1)
   castbar:SetValue(1)
@@ -2248,7 +2291,12 @@ if Addon.ExpansionIsAtLeastMists then
 else
   -- GetShapeshiftFormID: not sure when removed
   local GetShapeshiftFormID = GetShapeshiftFormID
-  local BEAR_FORM, DIRE_BEAR_FORM = BEAR_FORM, 8
+  -- Global BEAR_FORM (=5) is only defined by Blizzard_FrameXMLBase's Classic/Constants.lua, which is not
+  -- loaded on "WoW Forever" (see Addon.IS_FOREVER) - there, BEAR_FORM
+  -- is nil and form_index == BEAR_FORM never matches, so Bear Form druids are never detected as tank.
+  -- DRUID_BEAR_FORM (=5) is defined on every flavor (Classic, Mists, Cata, Mainline Constants.lua), so
+  -- prefer it and fall back to BEAR_FORM/the literal for older clients that may only define the latter.
+  local BEAR_FORM, DIRE_BEAR_FORM = DRUID_BEAR_FORM or BEAR_FORM or 5, 8
 
   -- Tanks are only Warriors in Defensive Stance or Druids in Bear form
   local PLAYER_IS_TANK_BY_CLASS = {
@@ -2282,12 +2330,22 @@ else
 
   local PlayerIsTankByClassFunction = PLAYER_IS_TANK_BY_CLASS[Addon.PlayerClass] or PLAYER_IS_TANK_BY_CLASS["DEFAULT"]
 
+  -- UnitHasEffectivelyTankAura (WoW Forever 1.60.1+) is what Blizzard's PlayerUtil.IsPlayerEffectivelyTank uses.
+  -- It also works in combat, where GetPlayerAuraBySpellID (see UNIT_AURA below) returns nil for secret auras.
+  -- As it is not documented which auras count, it only adds to the class-based detection instead of replacing it.
+  -- The result can be secret (SecretWhenUnitIdentityRestricted), then fall back to the class-based detection.
+  local UnitHasEffectivelyTankAura = _G.UnitHasEffectivelyTankAura
+  local PlayerHasTankAura = UnitHasEffectivelyTankAura and function()
+    local has_tank_aura = UnitHasEffectivelyTankAura("player")
+    return not IsSecretValueTP(has_tank_aura) and has_tank_aura == true
+  end or PLAYER_IS_TANK_BY_CLASS["DEFAULT"]
+
   function Addon.GetPlayerRole()
     local db = Addon.db
 
     local role
     if db.profile.optionRoleDetectionAutomatic then
-      role = PlayerIsTankByClassFunction()
+      role = PlayerHasTankAura() or PlayerIsTankByClassFunction()
     else
       role = db.char.spec[1]
     end
@@ -2296,26 +2354,30 @@ else
   end
 
   -- Only registered for player unit
-  local TANK_AURA_SPELL_IDs = {
-    [20468] = true, [20469] = true, [20470] = true, [25780] = true, -- Paladin Righteous Fury
-    [48263] = true,   -- Deathknight Blood Presence
-    [407627] = true,  -- Paladin Righteous Fury (Season of Discovery)
-    [408680] = true,  -- Shaman Way of Earth (Season of Discovery)
-    [403789] = true,  -- Warlock Metamorphosis (Season of Discovery)
+  local TANK_AURA_SPELL_IDs_BY_CLASS = {
+    PALADIN = { 20468, 20469, 20470, 25780, 407627 }, -- Righteous Fury (407627: Season of Discovery)
+    DEATHKNIGHT = { 48263 }, -- Blood Presence
+    SHAMAN = { 408680 }, -- Way of Earth (Season of Discovery)
+    WARLOCK = { 403789 }, -- Metamorphosis (Season of Discovery)
     -- Rogue tanks are detected using IsSpellKnown (as there is no buff for Just a Flesh Wound)
-  }  
+  }
+  local TANK_AURA_SPELL_IDs = TANK_AURA_SPELL_IDs_BY_CLASS[Addon.PlayerClass] or {}
+  -- UnitBuff does not exist on clients with Midnight's API surface (e.g. "WoW Forever"), and the index-based
+  -- C_UnitAuras.GetBuffDataByIndex throws in combat there (auras are secret). GetPlayerAuraBySpellID never throws,
+  -- it only returns nil for a secret aura - so a nil result in combat is inconclusive and keeps the previous value.
+  local GetPlayerAuraBySpellID = C_UnitAuras.GetPlayerAuraBySpellID
+
   function Addon:UNIT_AURA(event, unitid)
-    for i = 1, 40 do
-      local name , _, _, _, _, _, _, _, _, spellId = _G.UnitBuff("player", i, "PLAYER")
-      if not name then
-        break
-      elseif TANK_AURA_SPELL_IDs[spellId] then
+    for i = 1, #TANK_AURA_SPELL_IDs do
+      if GetPlayerAuraBySpellID(TANK_AURA_SPELL_IDs[i]) then
         Addon.PlayerIsTank = true
         return
       end
     end
-  
-    Addon.PlayerIsTank = false
+
+    if not InCombatLockdown() then
+      Addon.PlayerIsTank = false
+    end
   end
 
   function Addon:RUNE_UPDATED()
@@ -2339,7 +2401,7 @@ else
     -- For Season of Discovery
     SHAMAN = Addon.IS_CLASSIC_SOD,
     WARLOCK = Addon.IS_CLASSIC_SOD,
-    ROGUE = Addon.IS_CLASSIC_SOD,
+    -- Rogues have no tank aura (see RUNE_UPDATED above), UNIT_AURA would only reset their PlayerIsTank
   }
   if ENABLE_UNIT_AURA_FOR_CLASS[Addon.PlayerClass] then
     Addon.EventService.SubscribeUnitEvent(Addon, "UNIT_AURA", "player")

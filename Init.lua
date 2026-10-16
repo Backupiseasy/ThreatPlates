@@ -18,21 +18,36 @@ local UnitDetailedThreatSituation = UnitDetailedThreatSituation
 ---------------------------------------------------------------------------------------------------
 -- WoW Version Check
 ---------------------------------------------------------------------------------------------------
+-- Addon.IS_CLASSIC is the Classic Era client only. "WoW Forever" (an official Blizzard client/product
+-- running parallel to Retail and WoW Classic, see Addon.IS_FOREVER below) branched off Classic Era and
+-- also reports LE_EXPANSION_CLASSIC as its expansion level, but it is a product of its own: it runs on a
+-- modern, secret-value-capable engine (no legacy globals like _G.GetSpellInfo) and its content drifts
+-- away from Classic Era over time. It is therefore not part of Addon.IS_CLASSIC - code that should apply
+-- to both has to check Addon.IS_FOREVER explicitly.
 Addon.IS_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
-Addon.IS_CLASSIC_SOM = (Addon.IS_CLASSIC and C_Seasons and C_Seasons.GetActiveSeason() == 1)
-Addon.IS_CLASSIC_SOD = (Addon.IS_CLASSIC and C_Seasons and C_Seasons.GetActiveSeason() == 2)
-Addon.IS_TBC_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_BURNING_CRUSADE)
+Addon.IS_CLASSIC_SOM = (Addon.IS_CLASSIC and C_Seasons and C_Seasons.GetActiveSeason() == Enum.SeasonID.SeasonOfMastery)
+Addon.IS_CLASSIC_SOD = (Addon.IS_CLASSIC and C_Seasons and C_Seasons.GetActiveSeason() == Enum.SeasonID.SeasonOfDiscovery)
+-- Anniversary realms are called "Fresh" by Blizzard
+Addon.IS_CLASSIC_ANNIVERSARY = (Addon.IS_CLASSIC and C_Seasons and (C_Seasons.GetActiveSeason() == Enum.SeasonID.Fresh or C_Seasons.GetActiveSeason() == Enum.SeasonID.FreshHardcore))
+Addon.IS_TBC_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_BURNING_CRUSADE) or false
+-- Enum.SeasonID has no name for the season of the TBC Anniversary realms
 Addon.IS_TBC_CLASSIC_ANNIVERSARY = (Addon.IS_TBC_CLASSIC and C_Seasons and C_Seasons.GetActiveSeason() == 125)
-Addon.IS_WRATH_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_WRATH_OF_THE_LICH_KING)
-Addon.IS_CATA_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_CATACLYSM)
-Addon.IS_MISTS_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_MISTS_OF_PANDARIA)
+Addon.IS_WRATH_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_WRATH_OF_THE_LICH_KING) or false
+Addon.IS_CATA_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_CATACLYSM) or false
+Addon.IS_MISTS_CLASSIC = (GetClassicExpansionLevel and GetClassicExpansionLevel() == LE_EXPANSION_MISTS_OF_PANDARIA) or false
 --Addon.IS_MIDNIGHT = GetServerExpansionLevel() == LE_EXPANSION_MIDNIGHT
 Addon.IS_MIDNIGHT = (select(4, GetBuildInfo()) >= 120000)
+-- Forever reported WOW_PROJECT_MAINLINE (1) in its first beta builds and got its own project id with
+-- beta patch 1.60.1 (build 70170): WOW_PROJECT_CAMELOT (18, Blizzard's internal name for Forever). The
+-- constant is only defined on Forever itself, hence the existence check.
+Addon.IS_FOREVER = (WOW_PROJECT_CAMELOT ~= nil and WOW_PROJECT_ID == WOW_PROJECT_CAMELOT)
 Addon.IS_MAINLINE = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
--- Addon.IS_TBC_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC and LE_EXPANSION_LEVEL_CURRENT == LE_EXPANSION_BURNING_CRUSADE)
--- Addon.IS_WRATH_CLASSIC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC and LE_EXPANSION_LEVEL_CURRENT == LE_EXPANSION_WRATH_OF_THE_LICH_KING)
 
--- For Mainline, this always returns true. 
+-- For Mainline, this always returns true.
+-- "WoW Forever" reports LE_EXPANSION_CLASSIC, so this (and all Addon.ExpansionIsAtLeastX flags below) is
+-- false there for every expansion. That is only a statement about its ruleset's origin - Forever is not
+-- part of the Classic expansion sequence, so features it has beyond Vanilla (or lacks) must be checked
+-- with Addon.IS_FOREVER, not derived from the expansion level.
 Addon.ExpansionIsAtLeast = function(expansion_id)
 	if Addon.IS_MAINLINE then 
 		return true 
@@ -55,9 +70,13 @@ Addon.ExpansionIsBetween = function(expansion_id_start, expansion_id_end)
 	end
 end
 
+-- Key for tables with expansion-specific data (totems, crowd control spells, ...). "WoW Forever" has a
+-- key of its own, as its data is no longer identical to Classic Era's (LE_EXPANSION_CLASSIC).
 Addon.GetExpansionLevel = function ()
 	if Addon.IS_MAINLINE then
 		return "MAINLINE"
+	elseif Addon.IS_FOREVER then
+		return "FOREVER"
 	elseif Addon.IS_CLASSIC then
 		return LE_EXPANSION_CLASSIC
 	else
@@ -77,11 +96,47 @@ Addon.ExpansionIsAtLeastDF = Addon.ExpansionIsAtLeast(LE_EXPANSION_DRAGONFLIGHT)
 Addon.ExpansionIsAtLeastTWW = Addon.ExpansionIsAtLeast(LE_EXPANSION_WAR_WITHIN)
 Addon.ExpansionIsAtLeastMidnight = Addon.IS_MIDNIGHT
 
+-- True on Midnight, and on any client whose engine has Midnight's full API surface (secret values,
+-- C_Spell/C_UnitAuras/C_CurveUtil, the heal-prediction calculator, ...) even though its content/ruleset
+-- isn't Midnight (e.g. "WoW Forever" - see Addon.IS_FOREVER above). Use this - not Addon.ExpansionIsAtLeastMidnight -
+-- wherever a branch exists purely to pick the API-safe/modern code path; keep
+-- Addon.ExpansionIsAtLeastMidnight itself for genuine ruleset/feature decisions (e.g. features
+-- intentionally disabled on Midnight, see CLAUDE.md).
+Addon.HAS_MIDNIGHT_API = Addon.ExpansionIsAtLeastMidnight or Addon.IS_FOREVER
+
+-- Focus target (PLAYER_FOCUS_CHANGED, "focus" unit token) exists since TBC. "WoW Forever" reports Vanilla
+-- as its expansion level, but supports focus (see Addon.IS_FOREVER above).
+Addon.WOW_FEATURE_FOCUS = Addon.ExpansionIsAtLeastTBC or Addon.IS_FOREVER
+
+-- "WoW Forever" (see Addon.IS_FOREVER above) has a native surname/last-name system: when active,
+-- UnitName's 2nd return is a surname, not a realm name. RegionalUniqueNamesEnabled only exists on
+-- clients with that system, hence the existence check.
+Addon.WOW_FEATURE_REGIONAL_SURNAMES = Addon.IS_FOREVER and _G.RegionalUniqueNamesEnabled and RegionalUniqueNamesEnabled() or false
+-- Only exists on WoW Forever - fall back to the literal every other client hardcodes.
+local NAME_SURNAME_SEPARATOR = Constants.CharacterNameSeparatorConsts and Constants.CharacterNameSeparatorConsts.CHARACTERNAME_SURNAME_SEPARATOR or " "
+
+-- Calls UnitName(unitid) and appends the surname (UnitName's 2nd return on WoW Forever) if show_surname
+-- is true - the combined Addon.WOW_FEATURE_REGIONAL_SURNAMES + ShowSurname setting, cached per-file in
+-- UpdateSettings() so callers don't re-read the profile table on every call. Also returns the raw 2nd
+-- return (a realm name on every other client) for callers that still need it (e.g. ShowRealm).
+function Addon.GetUnitNameWithSurname(unitid, show_surname)
+  local name, second_value = UnitName(unitid)
+  -- second_value can be a secret value in restricted contexts; the "~=" comparison below would
+  -- error on one (unlike the "..' concatenation two lines down, which is a safe no-throw taint -
+  -- see CLAUDE.md's "Correction (was previously stated as needing a guard)"), so check first.
+  if show_surname and second_value and not Addon.IsSecretValue(second_value) and second_value ~= "" then
+    name = name .. NAME_SURNAME_SEPARATOR .. second_value
+  end
+  return name, second_value
+end
+
 -- aura.nameplateShowAll/nameplateShowPersonal are a Legion+ feature - confirmed to
 -- always be false on both TBC Classic Anniversary and Mists Classic.
 Addon.WOW_FEATURE_BLIZZARD_AURA_FILTER = Addon.ExpansionIsAtLeast(LE_EXPANSION_LEGION)
 -- Absorbs bug in Mists: https://github.com/Stanzilla/WoWUIBugs/issues/736
-Addon.WOW_FEATURE_ABSORBS = Addon.ExpansionIsAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA)
+-- Detect by API availability (UnitGetTotalAbsorbs, Mists 5.2.0+) instead of expansion, as the
+-- core function is what every absorb-dependent code path actually needs.
+Addon.WOW_FEATURE_ABSORBS = type(_G.UnitGetTotalAbsorbs) == "function"
 
 ---------------------------------------------------------------------------------------------------
 -- Constants with different values in different expansions
@@ -131,7 +186,7 @@ Addon.BackdropTemplate = BackdropTemplateMixin and "BackdropTemplate"
 
 -- Returns if the currently active spec is tank (true) or dps/heal (false)
 Addon.PlayerClass = select(2, UnitClass("player"))
-Addon.PlayerName = select(1, UnitName("player"))
+-- Addon.PlayerName is (re-)defined in Addon.lua, which loads later and needs Addon.WOW_FEATURE_REGIONAL_SURNAMES above
 
 ---------------------------------------------------------------------------------------------------
 -- Define table that contains all addon-global variables and functions
@@ -203,14 +258,16 @@ Addon.Cache = {
 
 -- UnitDetailedThreatSituation: WotLK - Patch 3.0.2 (2008-10-14): Added
 -- C_PvP.IsSoloShuffle: Shadowlands - Patch 9.2.0 (2022-02-22): Added.
+-- Mists Classic and "WoW Forever" (see Addon.IS_FOREVER above) both run on the modern client engine
+-- despite non-Mainline content, so both get the modern (unscaled, C_Spell-based) branch here.
 if Addon.IS_MAINLINE then
 	Addon.UnitDetailedThreatSituationWrapper = UnitDetailedThreatSituation
 	Addon.IsSoloShuffle = C_PvP.IsSoloShuffle
 	Addon.GetSpellInfo = C_Spell.GetSpellInfo
-elseif Addon.IS_MISTS_CLASSIC then
+elseif Addon.IS_MISTS_CLASSIC or Addon.IS_FOREVER then
 	Addon.UnitDetailedThreatSituationWrapper = UnitDetailedThreatSituation
-	
-	-- Not available in Mists Classic
+
+	-- Not available in Mists Classic (and not meaningful on "WoW Forever")
 	Addon.IsSoloShuffle = function() return false end
 
 	Addon.GetSpellInfo = C_Spell.GetSpellInfo

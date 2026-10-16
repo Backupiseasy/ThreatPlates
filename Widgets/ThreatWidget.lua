@@ -21,7 +21,7 @@ local IsInGroup, IsInRaid, GetNumGroupMembers, GetNumSubgroupMembers = IsInGroup
 
 -- ThreatPlates APIs
 local UnitDetailedThreatSituationWrapper = Addon.UnitDetailedThreatSituationWrapper
-local FontUpdateText = Addon.Font.UpdateText
+local FontSetInitialFont, FontUpdateText = Addon.Font.SetInitialFont, Addon.Font.UpdateText
 local ThreatShowFeedback = Addon.Threat.ShowFeedback
 local TransliterateCyrillicLetters = Addon.Localization.TransliterateCyrillicLetters
 local IsSecretValueTP = Addon.IsSecretValue
@@ -89,7 +89,7 @@ function Widget:Create(tp_frame)
   widget_frame.RightTexture:SetSize(64, 64)
 
   widget_frame.Percentage = widget_frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-  widget_frame.Percentage:SetFont("Fonts\\FRIZQT__.TTF", 11)
+  FontSetInitialFont(widget_frame.Percentage)
 
   self:UpdateLayout(widget_frame)
   --------------------------------------
