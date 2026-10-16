@@ -347,6 +347,8 @@ L["Experience Text"] = "Erfahrungstext"
 L["Expiring Color"] = "Farbe beim Ablaufen"
 --[[Machine translation --]]
 L["Expiring Threshold"] = "Schwellenwert für Ablaufen"
+--[[Machine translation --]]
+L["Expiring Time"] = "Ablaufzeit"
 L["Export"] = "Export"
 L["Export all custom nameplate settings as string."] = "Alle benutzerdefinierten Namensplaketten als Zeichenkette exportieren."
 L["Export Custom Nameplates"] = "Benutzerdefinierte Namensplaketten exportieren"
@@ -444,9 +446,13 @@ L["Hide the Blizzard default nameplates for friendly units in instances."] = "Ve
 L["High Threat"] = "Hohe Bedrohung"
 L["Highlight"] = "Highlight"
 L["Highlight Border"] = "Rand hervorheben"
+--[[Machine translation --]]
+L["Highlight Expiring"] = "Hervorheben beim Ablaufen"
 L["Highlight for Expiring Icons"] = "Hervorhebung für ablaufende Icons"
 L["Highlight Mobs on Off-Tanks"] = "Gegner auf Off-Tanks hervorheben"
 L["Highlight Texture"] = "Highlight-Textur"
+--[[Machine translation --]]
+L["Highlights the aura once the remaining duration drops below the expiring time."] = "Hebt die Aura hervor, sobald die verbleibende Dauer unter die Ablaufzeit fällt."
 L["Horizontal Align"] = "Horizontale Ausrichtung"
 L["Horizontal Alignment"] = "Horizontale Ausrichtung"
 L["Horizontal Offset"] = "Horizontaler Versatz"
