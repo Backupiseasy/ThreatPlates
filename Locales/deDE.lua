@@ -838,14 +838,6 @@ L["Spirit Wolf"] = "Geisterwolf"
 L["Square"] = "Square"
 L["Squares"] = "Vierecke"
 L["Stack Count"] = "Anzahl der Stapel"
---[[Machine translation --]]
-L["Stack Enemy Nameplates"] = "Gegnerische Namensplaketten stapeln"
---[[Machine translation --]]
-L["Stack Friendly Nameplates"] = "Freundliche Namensplaketten stapeln"
---[[Machine translation --]]
-L["Stack nameplates of enemy units, so that they don't overlap."] = "Stapelt Namensplaketten gegnerischer Einheiten, damit sie sich nicht überlappen."
---[[Machine translation --]]
-L["Stack nameplates of friendly units, so that they don't overlap."] = "Stapelt Namensplaketten freundlicher Einheiten, damit sie sich nicht überlappen."
 L["Standard"] = "Standard"
 L["Status & Environment"] = "Status & Umgebung"
 L["Status Text"] = "Status-Text"
@@ -976,10 +968,6 @@ L["Title"] = "Titel"
 L["Toggle"] = "Umschalten"
 L["Toggle Enemy Headline View"] = "Headline-View für gegnerische Einheiten umschalten"
 L["Toggle Friendly Headline View"] = "Headline-View für freundliche Einheiten umschalten"
---[[Machine translation --]]
-L["Toggle Friendly NPCs Headline View"] = "Headline-View für freundliche NPCs umschalten"
---[[Machine translation --]]
-L["Toggle Friendly Players Headline View"] = "Headline-View für freundliche Spieler umschalten"
 L["Toggle Neutral Headline View"] = "Headline-View für neutrale Einheiten umschalten"
 L["Toggle on Target"] = "Auf dem Ziel umschalten"
 L["Toggling"] = "Umschalten"
@@ -1089,3 +1077,15 @@ L["You can access the "] = "Die Einstellungen können für "
 L["You cannot delete General Settings, only custom nameplates entries."] = "Du kannst die allgemeinen Einstellungen nicht löschen, nur Einträge für benutzerdefinierte Namensplaketten."
 L["You currently have two nameplate addons enabled: |cff89F559Threat Plates|r and |cff89F559%s|r. Please disable one of these, otherwise two overlapping nameplates will be shown for units."] = "Du hast aktuell zwei Nameplate-Addons aktiviert: |cff89F559Threat Plates|r und |cff89F559%s|r. Bitte deaktiviere eines dieser beiden Addons, da ansonsten zwei überlappende Namensplaketten bei Einheiten angezeigt werden."
 L["Your version of LibDogTag-Unit-3.0 does not support nameplates. You need to install at least v90000.3 of LibDogTag-Unit-3.0."] = "Die installierte Version von LibDogTag-Unit-3.0 unterstützt keine Namensplaketten. Du musst zumindest v90000.3 von LibDogTag-Unit-3.0 installieren."
+--[[Machine translation --]]
+L["Stack Enemy Nameplates"] = "Gegnerische Namensplaketten stapeln"
+--[[Machine translation --]]
+L["Stack Friendly Nameplates"] = "Freundliche Namensplaketten stapeln"
+--[[Machine translation --]]
+L["Stack nameplates of enemy units, so that they don't overlap."] = "Stapelt Namensplaketten gegnerischer Einheiten, damit sie sich nicht überlappen."
+--[[Machine translation --]]
+L["Stack nameplates of friendly units, so that they don't overlap."] = "Stapelt Namensplaketten freundlicher Einheiten, damit sie sich nicht überlappen."
+--[[Machine translation --]]
+L["Toggle Friendly NPCs Headline View"] = "Headline-View für freundliche NPCs umschalten"
+--[[Machine translation --]]
+L["Toggle Friendly Players Headline View"] = "Headline-View für freundliche Spieler umschalten"
