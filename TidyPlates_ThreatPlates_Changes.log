@@ -30,6 +30,8 @@
 * Added keybindings for toggling Headline View separately for friendly players (including their pets and guardians) and friendly NPCs.
 * Fixed a bug where the status text was not updated when a nameplate switched between Headline View and Healthbar View (e.g., when targeting a unit).
 * Fixed the spacing between aura icons being wrong for buffs on friendly units when "Swap Area By Reaction" was enabled.
+* Changed the Auras widget options "Flash When Expiring" and "Color when Expiring" into a single option "Highlight Expiring".
+* Fixed changes to the "Highlight Expiring" settings only being applied after a /reload on WoW Midnight and WoW Forever.
 
 WoW Forever Beta:
 * Fixed automatic role detection not recognizing Druids in Bear Form as tanks.

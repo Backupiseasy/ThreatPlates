@@ -1570,6 +1570,11 @@ local MIGRATION_FUNCTIONS_BY_VERSION = {
   ["13.1.0"] = {
     { Type = "Migrate", Name = "Auras Sort Order (Duration/Creation)", Function = MigrateAurasSortOrder, NoDefaultProfile = true, Version = Addon.HAS_MIDNIGHT_API },
   },
+  ["13.3.0"] = {
+    -- Merged into FlashWhenExpiring/FlashTime ("Highlight Expiring")
+    { Type = "Delete", Key = { "AuraWidget", "ShowExpiringColor" } },
+    { Type = "Delete", Key = { "AuraWidget", "ExpiringColorThreshold" } },
+  },
 }
 
 -- Sort TP versions for which migrations are available in ascending order, so that

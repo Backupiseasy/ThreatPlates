@@ -257,8 +257,9 @@ settings change can trigger it two or three times. `UpdateSettings` must therefo
 inputs did not change. Historical bug (fixed 13.3.0): `AurasWidgetMidnight.lua`'s
 `ReapplyLiveAuraButtonSettings` restyled every pooled aura button on each call - 5200 buttons (40 containers per
 aura type x 5/7/1 groups x 10 buttons), about 0.13 ms each - and froze the game for 1-2 seconds on any custom
-nameplate option, even with no nameplate shown. It is now gated by two settings signatures
-(`GetLiveAuraButtonSettingsSignature`, `GetLiveAuraBorderSettingsSignature`): **a setting newly read in that
+nameplate option, even with no nameplate shown. It is now gated by three settings signatures
+(`GetLiveAuraButtonSettingsSignature`, `GetLiveAuraBorderSettingsSignature`,
+`GetLiveAuraDurationColorSettingsSignature` - the latter re-binds the duration text's expiring-color curve): **a setting newly read in that
 loop must be added to the matching signature**, or its change is silently skipped until `/reload`. The border
 has a signature of its own because `RemoveDispelTypeTexture` + `AddDispelTypeTexture` is about 85% of the cost
 per button (measured in-game 2026-10); a border color change still costs 200-300 ms per aura type, and the color

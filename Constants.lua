@@ -898,13 +898,11 @@ Addon.DEFAULT_SETTINGS = {
       FrameOrder = "HEALTHBAR_AURAS",
       -- SwitchScaleByReaction = false, -- TODO: Remove or implement this feature
       SwitchAreaByReaction = true,
+      -- Highlight Expiring: flashes the icon (legacy widget) or, on Midnight, colors the duration
+      -- text with ExpiringColor (AuraButton has no script-hook for addon-attached icon effects - see
+      -- AurasWidgetImplementation.md §6).
       FlashWhenExpiring = false,
       FlashTime = 5,
-      -- Midnight-only replacement for Flash When Expiring (AuraButton has no script-hook for
-      -- addon-attached icon effects - see AurasWidgetImplementation.md §6). Global, not per-aura-type,
-      -- matching FlashWhenExpiring/FlashTime's existing scope.
-      ShowExpiringColor = false,
-      ExpiringColorThreshold = 5,
       ExpiringColor = RGB_P(1, 0, 0, 1),
       Debuffs = {
         ShowFriendly = false,
