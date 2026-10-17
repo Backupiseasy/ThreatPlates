@@ -25,6 +25,7 @@ local GetNamePlateForUnit = C_NamePlate and C_NamePlate.GetNamePlateForUnit
 local GetPlayerInfoByGUID, UnitNameFromGUID = GetPlayerInfoByGUID, UnitNameFromGUID
 local IsInInstance, InCombatLockdown = IsInInstance, InCombatLockdown
 local NamePlateDriverFrame, UnitNameplateShowsWidgetsOnly = NamePlateDriverFrame, UnitNameplateShowsWidgetsOnly
+local UnitIsGameObject = UnitIsGameObject or function() return false end
 local GetSpecializationInfo = C_SpecializationInfo and C_SpecializationInfo.GetSpecializationInfo or _G.GetSpecializationInfo
 local GetSpecialization = C_SpecializationInfo and C_SpecializationInfo.GetSpecialization or _G.GetSpecialization
 local CastbarInterpolation = Enum.StatusBarInterpolation and Enum.StatusBarInterpolation.Immediate
@@ -824,8 +825,10 @@ end
 --     "locked" flag.
 ---------------------------------------------------------------------------------------------------------------------
 
+-- GameObjects (fishing bobber, Ring of Transference, ...) have nameplates too, which Blizzard uses for
+-- its soft-interact icon. Leave them completely to Blizzard.
 local function IgnoreUnitForThreatPlates(unitid)
-  return UnitIsUnitTP("player", unitid) or UnitNameplateShowsWidgetsOnly(unitid)
+  return UnitIsUnitTP("player", unitid) or UnitNameplateShowsWidgetsOnly(unitid) or UnitIsGameObject(unitid)
 end
 
 local SetShownBlizzardPlate
@@ -890,7 +893,8 @@ local function ShowBlizzardNameplate(plate, show_blizzard_plate)
 end
 
 local function SetNameplateVisibility(plate, unitid)
-  -- ! Interactive objects do also have nameplates. We should not mess with the visibility the of these objects.
+  -- Interactive objects (GameObjects) do also have nameplates. They never get here, as they are filtered out by
+  -- IgnoreUnitForThreatPlates, so we don't mess with the visibility of these nameplates.
   -- We cannot use unit.reaction here as it is not guaranteed that it's update whenever this function is called (see UNIT_FACTION).
   if Addon.GetUnitReactionToPlayer(unitid) > 4 then
     ShowBlizzardNameplate(plate, SettingsShowFriendlyBlizzardNameplates)
@@ -997,6 +1001,8 @@ local function NamePlateDriverFrame_AcquireUnitFrame(_, plate)
       if Addon.HAS_MIDNIGHT_API then
         hooksecurefunc(unit_frame, "Show", function(self)
           if self:IsForbidden() then return end
+          -- Same exclusion as in FrameOnShow, otherwise ignored plates are hidden again on every Show()
+          if self.unit and IgnoreUnitForThreatPlates(self.unit) then return end
 
           SetVisibilityOfBlizzardNameplate(self, self.unit)
         end)
@@ -1631,8 +1637,8 @@ function Addon:NAME_PLATE_UNIT_ADDED(unitid)
   -- Player's personal nameplate:
   --   This nameplate is currently not handled by Threat Plates - HandlePlateUnitAdded is not called on it, therefore plate.TPFrame.Active is nil
   -- Nameplates for GameObjects:
-  --   There are some nameplates for GameObjects, e.g. Ring of Transference in Oribos. For the time being, we don't show them.
-  --   Current assumption: for units of type "GameObject", UnitExists always returns false
+  --   There are some nameplates for GameObjects, e.g. fishing bobber, herbs or Ring of Transference in Oribos (with soft-targeting).
+  --   They are not handled by Threat Plates (UnitIsGameObject), WoW shows its own nameplate with the soft-interact icon.
   --   If TP would show them, the would show as nameplates with health 0 and maybe cause Lua errors
   -- Nameplates with widgets:
   --   If the nameplate only has widgets, don't create a Threat Plate for it and let WoW handle everything,
