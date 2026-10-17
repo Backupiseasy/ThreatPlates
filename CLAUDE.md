@@ -510,7 +510,14 @@ Point-in-time notes from past analysis passes — re-verify before relying on th
   does **not** catch a secret (truthy, non-nil) GUID before it's used as a `UnitIsHealer[guid]` table key —
   needs an `issecretvalue(guid)` guard too. (This widget is disabled on Midnight/`HAS_MIDNIGHT_API` clients
   entirely — see above — but the same file also runs pre-Midnight, where the GUID could still be a secret
-  value in a restricted context depending on future API changes.)
+  value in a restricted context depending on future API changes.) Its arena healer detection cannot simply be
+  re-enabled on Midnight: since Patch 12.1.5, `GetArenaOpponentSpec` is documented as `SecretReturns` ("always
+  returns secrets"), so the spec ID cannot be used as a table key there.
+- `AurasWidgetMidnight.lua`, for a future per-spell filter: since Patch 12.1.5, an aura group with
+  `candidateFilters.includeSpellIDs` rejects **all** auras on a unit where filtering by spell ID is not
+  permitted (before, the filter was just not applied there; `AuraContainerUtil.DoesAuraPassCandidateFilters` in
+  wow-ui-source). Set `includeSpellIDs`/`excludeSpellIDs` only for the unit reactions where they are allowed
+  (see `Source/Docs/AurasWidgetImplementation.md`, §6). The widget does not use them today.
 - `AurasWidgetMidnight.lua`: a past pass flagged a permanent-duration-aura logic issue in a function named
   `FilterEnemyBuffsBySpell()` — that function no longer exists under that name (renamed/refactored since), so
   this finding needs to be re-derived against the current code before acting on it.
