@@ -193,8 +193,12 @@ L["Color"] = "顏色"
 L["Color by Target Mark"] = "標記圖示顏色"
 L["Color Healthbar by Target Marks in Healthbar View"] = "血條檢視時，血條顯示標記圖示顏色。"
 L["Color Name by Target Marks in Headline View"] = "名字檢視時，名字顯示標記圖示顏色。"
+--[[Translation missing --]]
+L["Color when Expiring"] = "Color when Expiring"
 L["Coloring"] = "色彩"
 L["Colors"] = "顏色"
+--[[Translation missing --]]
+L["Colors the countdown text once the remaining duration drops below the threshold below."] = "Colors the countdown text once the remaining duration drops below the threshold below."
 L["Column Limit"] = "行數限制"
 L["Combat"] = "戰鬥"
 L["Combo Points"] = "連擊點數"
@@ -342,6 +346,8 @@ L["Experience"] = "經驗值"
 L["Experience Text"] = "經驗值文字"
 --[[Translation missing --]]
 L["Expiring Color"] = "Expiring Color"
+--[[Translation missing --]]
+L["Expiring Threshold"] = "Expiring Threshold"
 --[[Translation missing --]]
 L["Expiring Time"] = "Expiring Time"
 L["Export"] = "匯出"
