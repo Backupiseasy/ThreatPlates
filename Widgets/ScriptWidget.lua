@@ -245,6 +245,31 @@ local function WarningForBlockedAccess(key)
   Addon.Logging.Warning(string_format(L["Forbidden function or table called from script: %s"], key))
 end
 
+-- Scripts get a stand-in for a blocked function or table that does nothing but warn with the blocked name:
+-- calling it (SendMail(...)), calling something read from it (C_TradeInfo.SetTradeMoney(...)) or writing to it.
+-- Returning WarningForBlockedAccess itself instead made a script error out when it indexed a blocked table
+-- ("attempt to index ... a function value") and logged the script's first call argument instead of the name.
+local BlockedAccessProxies = {}
+
+local function GetBlockedAccessProxy(key)
+  local proxy = BlockedAccessProxies[key]
+  if not proxy then
+    local function Warn()
+      WarningForBlockedAccess(key)
+    end
+
+    proxy = setmetatable({}, {
+      __index = function() return Warn end,
+      __newindex = Warn,
+      __call = Warn,
+      __metatable = false,
+    })
+    BlockedAccessProxies[key] = proxy
+  end
+
+  return proxy
+end
+
 local EnvironmentGetGlobal
 
 --local ScriptEnvironment = setmetatable({},
@@ -284,10 +309,8 @@ local ScriptEnvironment =
         return EnvironmentGetGlobal
 --      elseif k == "ScriptEnvironment" then
 --        return CurrentScriptEnvironment
-      elseif BlockedFunctions[k] then
-        return WarningForBlockedAccess
-      elseif BlockedTables[k] then
-        return WarningForBlockedAccess(k)
+      elseif BlockedFunctions[k] or BlockedTables[k] then
+        return GetBlockedAccessProxy(k)
       elseif OverwrittenFunctionsForScripts[k] then
         return OverwrittenFunctionsForScripts[k]
       else
