@@ -31,6 +31,7 @@
 * Fixed the spacing between aura icons being wrong for buffs on friendly units when "Swap Area By Reaction" was enabled.
 * Changed the Auras widget options "Flash When Expiring" and "Color when Expiring" into a single option "Highlight Expiring".
 * Fixed changes to the "Highlight Expiring" settings only being applied after a /reload on WoW Midnight and WoW Forever.
+* Changed the cooldown swipe on aura icons to be less dark, matching Blizzard's default (e.g., action bars and unit frames).
 * Updated integrated libraries (Ace3 r1421-alpha, LibDualSpec-1.0 v1.35.0, LibSharedMedia-3.0 v12.1.2).
 
 ------------------------------------------------------
