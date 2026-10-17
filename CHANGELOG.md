@@ -1,34 +1,4 @@
 # @project-version@ (@build-time@)
 
-* Added support for WoW Forever.
-* Added support for WoW Forever's character surnames - full names (first and last) are now shown on nameplates, with a new option to show first names only.
-* Enabled Focus widget on WoW Forever.
-* Fixed a Lua error re-applying aura appearance settings (e.g. re-opening the options window), caused by an upcoming Blizzard API change (not yet live on retail, but on Forever).
-* Fixed a bug where a nameplate briefly showed the wrong name/reaction and then disappeared, caused by Blizzard re-using its internal nameplate frames for different units.
-* Fixed the friendly/enemy click-through options not being applied to units whose nameplate is shown by Blizzard instead of Threat Plates.
-* Fixed Threat Plates' nameplate size settings changing the clickable area of Blizzard's own nameplates (e.g., friendly units in instances).
-* Fixed the "Show Focus" option for the Headline View not working.
-* Fixed the Focus and mouseover highlights not being shown in Headline View.
-* Fixed a Lua error when selecting the "Crescent" texture for the Target or Focus highlight.
-* Fixed the options for showing friendly minions, pets, guardians, totems, and NPCs having no effect (checkboxes could not be checked) [Comment #8597].
-* Disabled the options for showing friendly pets, guardians, and totems if showing friendly players is disabled, as Blizzard does not show these nameplates then.
-* Fixed a bug where the absorb bar briefly showed at full width when a new nameplate was displayed.
-* Enabled target of target names again on WoW Midnight and WoW Forever [Comment #8697].
-* Fixed several bugs where the Social widget did not recognize friends and guild members (e.g., friends from the in-game friend list, Battle.net friends coming online, or characters with surnames on WoW Forever).
-* Fixed Cyrillic, Chinese, and Korean characters in nameplate texts being shown as squares, caused by the selected font not containing these characters [GH-751].
-* Enabled the option "Transliterate Cyrillic Letters" again on WoW Forever and on WoW Midnight (from patch 12.1.5 on), using a new Blizzard API for transliteration that also works with restricted names (e.g., in combat or battlegrounds).
-* Added options to enable stacking of enemy and friendly nameplates [Comment #8734].
-* Fixed an error message about dual-spec support not being available on Classic Era realms without dual specialization, and removed the options for spec-based profiles there.
-* Removed the options for the personal nameplate (hiding buffs and showing Blizzard's resources on the target nameplate), as Blizzard replaced the personal nameplate with the personal resource display and removed both features.
-* Added a warning if Platynator is enabled together with Threat Plates.
-* Fixed a bug where nameplates were not correctly updated after a unit update (e.g., missing totem icons after a name update or missing arena numbers after a change of the arena opponents).
-* Fixed the game freezing for 1-2 seconds when changing settings while the Auras widget is enabled.
-* Fixed a Lua error after login when another nameplate addon is enabled together with Threat Plates.
-* Removed the Stealth widget, as it no longer worked on WoW Midnight and WoW Forever, caused by Blizzard's restrictions on accessing auras, and was not maintained for the Classic versions.
-* Added keybindings for toggling Headline View separately for friendly players (including their pets and guardians) and friendly NPCs.
-* Fixed a bug where the status text was not updated when a nameplate switched between Headline View and Healthbar View (e.g., when targeting a unit).
-* Fixed the spacing between aura icons being wrong for buffs on friendly units when "Swap Area By Reaction" was enabled.
-* Changed the Auras widget options "Flash When Expiring" and "Color when Expiring" into a single option "Highlight Expiring".
-* Fixed changes to the "Highlight Expiring" settings only being applied after a /reload on WoW Midnight and WoW Forever.
-* Changed the cooldown swipe on aura icons to be less dark, matching Blizzard's default (e.g., action bars and unit frames).
-* Updated integrated libraries (Ace3 r1421-alpha, LibDualSpec-1.0 v1.35.0, LibSharedMedia-3.0 v12.1.2).
+* Fixed a bug where the size of class icons and of unit portraits for custom nameplates could not be changed when Masque was enabled [GH-718].
+* Fixed a bug where the interaction icon above the fishing bobber and other interactable objects was missing and the fishing bobber could not be used with the interact key [GH-763].

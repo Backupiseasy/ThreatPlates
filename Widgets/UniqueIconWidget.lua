@@ -62,6 +62,11 @@ end
 local function SetPortraitTexture(icon, unitid)
   local icon_texture = icon:GetIconTexture()
   _G.SetPortraitTexture(icon_texture, unitid)
+  -- Masque sizes the skin's regions from the button size at skinning time, so re-skin after size changes.
+  -- Re-skin before setting the tex coords, as Masque resets them for the icon region.
+  if icon.MasqueGroup then
+    icon.MasqueGroup:ReSkin(icon)
+  end
   icon_texture:SetTexCoord(0.14644660941, 0.85355339059, 0.14644660941, 0.85355339059)
 end
 
