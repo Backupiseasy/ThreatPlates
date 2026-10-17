@@ -74,6 +74,11 @@ end
 local function SetIconTexture(self, texture_info, unitid)
   local icon = (UseMasque and self.icon) or self
   Addon:SetIconTexture(icon, texture_info, unitid)
+
+  -- Masque sizes the skin's regions from the button size at skinning time, so re-skin after size changes
+  if UseMasque then
+    self.MasqueGroup:ReSkin(self)
+  end
 end
 
 -- local function ReSkin(self)

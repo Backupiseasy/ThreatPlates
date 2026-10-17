@@ -1,4 +1,9 @@
 ------------------------------------------------------
+13.3.1 (2026-10-17)
+------------------------------------------------------
+* Fixed a bug where the size of class icons and of unit portraits for custom nameplates could not be changed when Masque was enabled [GH-718].
+
+------------------------------------------------------
 13.3.0 (2026-10-17)
 ------------------------------------------------------
 * Added support for WoW Forever.
