@@ -663,9 +663,8 @@ local function CVarIsUnavailable(info)
 end
 
 -- The CVar nameplateStackingTypes is a bitfield indexed by Enum.NamePlateStackType (Enemy, Friendly) that replaces
--- nameplateMotion. Currently, this only works on WoW Forever and (presumably) on Retail from patch 12.1.5 on. On
--- other WoW versions, it will only work once their API is updated. The options are only hidden on clients that
--- don't know this CVar at all.
+-- nameplateMotion. It works on WoW Forever and on Retail (verified in-game on patch 12.1.5). The options are only
+-- hidden on clients that don't know this CVar at all.
 -- WoW stores bitfield CVars as an encoded string, not as a number, so its flags can only be accessed with
 -- C_CVar.GetCVarBitfield/SetCVarBitfield. info.arg is the name of the flag in that enum.
 local function NameplateStackingIsUnavailable(info)
@@ -6616,6 +6615,17 @@ local function CreateBlizzardSettings()
                 arg = "Friendly",
                 hidden = NameplateStackingIsUnavailable,
               },
+              MotionSpeed = {
+                name = L["Motion Speed"],
+                order = 25,
+                type = "range",
+                min = 0,
+                max = 1,
+                step = 0.005,
+                desc = L["Controls the rate at which nameplate animates into their target locations [0.0-1.0]."],
+                arg = "nameplateMotionSpeed",
+                hidden = CVarIsUnavailable,
+              },
               OverlapH = {
                 name = L["Horizontal Overlap"],
                 order = 30,
@@ -6672,6 +6682,42 @@ local function CreateBlizzardSettings()
                 width = "double",
                 desc = L["The max distance to show the target nameplate when the target is behind the camera."],
                 arg = "nameplateTargetBehindMaxDistance",
+                hidden = CVarIsUnavailable,
+              },
+            },
+          },
+          Insets = {
+            name = L["Insets"],
+            order = 40,
+            type = "group",
+            inline = true,
+            -- The inset CVars only exist on Retail (since Patch 12.1.5) and on WoW Forever
+            hidden = function()
+              return not (CVars:IsAvailable("nameplateTopInset") or CVars:IsAvailable("nameplateBottomInset"))
+            end,
+            args = {
+              TopInset = {
+                name = L["Top Inset"],
+                order = 10,
+                type = "range",
+                min = -0.2,
+                max = 0.3,
+                step = 0.01,
+                isPercent = true,
+                desc = L["The inset from the top (in screen percent) that nameplates are clamped to."],
+                arg = "nameplateTopInset",
+                hidden = CVarIsUnavailable,
+              },
+              BottomInset = {
+                name = L["Bottom Inset"],
+                order = 20,
+                type = "range",
+                min = -0.2,
+                max = 0.3,
+                step = 0.01,
+                isPercent = true,
+                desc = L["The inset from the bottom (in screen percent) that nameplates are clamped to."],
+                arg = "nameplateBottomInset",
                 hidden = CVarIsUnavailable,
               },
             },

@@ -11,7 +11,9 @@ flags computed at load time.
 
 - Curseforge: https://wow.curseforge.com/projects/tidy-plates-threat-plates
 - Source: https://github.com/Backupiseasy/ThreatPlates
-- Current branch `feature/midnight` targets the Midnight expansion (`Interface: 120005`).
+- Branches: `main` = released versions (tagged), `release/<major.minor>` = the upcoming release, `develop` =
+  integration; work happens on `feature/...` and `hotfix/...` branches. Retail runs the Midnight expansion; the
+  current `Interface` values are in the TOC (see "Unified TOC").
 - Versioning: major version = WoW expansion (7.x, 8.x, ...), minor = new functionality, patch = bugfixes.
 
 ## Build, Lint & Test
@@ -57,7 +59,7 @@ local GetSpecializationInfo = C_SpecializationInfo and C_SpecializationInfo.GetS
 ## Unified TOC
 
 `TidyPlates_ThreatPlates.toc` is the single manifest for every supported client. Its `## Interface:` line is
-comma-delimited (e.g. `120007, 11508, 20506, 50504`), which WoW clients (Mainline 10.2.7+, Classic Progression
+comma-delimited (e.g. `120105, 11509, 20506, 50504, 16001`), which WoW clients (Mainline 10.2.7+, Classic Progression
 4.4.0+, Classic Era 1.14.0+) read natively to pick the right ruleset — no per-flavor `.toc` files or packager
 `-g`/`-S` build variants are needed. This is also the canonical load-order list and what CurseForge/Wago
 packaging processes. Wrath (30405) and Cata (40402) are not yet supported and therefore not in the Interface
@@ -278,11 +280,11 @@ plates), `Addon.db.global`, `Addon.db.char`. Defaults come from `Addon.GetDefaul
 plus `Addon.DEFAULT_SETTINGS` (`Constants.lua`). `Addon:ReloadTheme()` (`Addon.lua`) re-creates themes/custom
 plates and pushes settings to all active nameplates after a profile change.
 
-## Midnight (`feature/midnight`) — Secret Values
+## Midnight — Secret Values
 
-This branch targets the Midnight expansion (`Interface: 120005`), where many unit-token APIs can return
+Retail runs the Midnight expansion, where many unit-token APIs can return
 **secret values** — a distinct Lua type that errors on boolean/arithmetic/string/table-key use, yet is truthy
-and not `nil`. This is the most critical section for any change touching unit-data paths on this branch.
+and not `nil`. This is the most critical section for any change touching unit-data paths.
 
 ### Core concept
 
@@ -446,9 +448,10 @@ ruleset/feature decisions. The in-game checks that are still open on Forever are
 Forever tracks a build **ahead of** live Retail (product `wow_classic_beta`), so it can get a Blizzard API change
 before Retail does. Example: `AddDispelTypeTexture`/`RemoveDispelTypeTexture` changed their contract there first
 (no return value, removal by region instead of by index, error on a duplicate region), which broke the Options
-window on Forever only. For an API whose shape differs between clients, detect the shape that is actually there
-(as `AurasWidgetMidnight.lua` does with `auraButton.DispelBorderRegistration`) instead of checking a client or
-version flag - "works on Forever today" is no guarantee either.
+window on Forever only; Retail got the same change with Patch 12.1.5 (fixed for Retail in 13.2.1). For an API
+whose shape differs between clients, detect the shape that is actually there (as `AurasWidgetMidnight.lua` does
+with `auraButton.DispelBorderRegistration`) instead of checking a client or version flag - "works on Forever
+today" is no guarantee either.
 
 ### SavedVariables were not loaded on "WoW Forever" — client bug, fixed by Blizzard
 
@@ -493,7 +496,7 @@ from that pass worth knowing:
   that can be secret. It is unreachable with `HAS_MIDNIGHT_API` only because `unit.NPCID` is `nil` there and the
   condition short-circuits earlier - guard it if NPC-ID detection ever comes back.
 
-### Features intentionally disabled on `feature/midnight`
+### Features intentionally disabled on Midnight
 
 Do not re-enable without explicit request: off-tank detection, name abbreviation/transliteration
 (`Modules/Localization.lua` feature flags), `Widgets/HealerTrackerWidget.lua`, NPC-ID parsing from GUID

@@ -39,7 +39,7 @@ local DurationTextBindingPropertyRemainingDuration = _G.Enum.DurationTextBinding
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
 -- List them here for Mikk's FindGlobals script
--- GLOBALS: CreateFrame, UIParent, InCombatLockdown, AnchorUtil, PixelUtil
+-- GLOBALS: CreateFrame, UIParent, InCombatLockdown, AnchorUtil
 
 ---------------------------------------------------------------------------------------------------
 -- Cached configuration settings
@@ -391,7 +391,13 @@ local function InitializeAuraButton(auraButton, aura_type)
   auraButton:SetMouseMotionEnabled(Widget.db.ShowTooltips)
   auraButton:SetHideTooltipInCombat(false)
 
-  PixelUtil.SetSize(auraButton, db_icon.IconWidth, db_icon.IconHeight)
+  -- PixelUtil.SetSize is deprecated since Patch 12.1.5 - Blizzard rounds the layout to whole pixels
+  -- natively instead, once enabled for a region. SetRoundLayoutToNearestPixel is a protected function,
+  -- so enable it here (secure context, see ReapplyLiveAuraButtonSettings), not when settings change.
+  if auraButton.SetRoundLayoutToNearestPixel then
+    auraButton:SetRoundLayoutToNearestPixel(true)
+  end
+  auraButton:SetSize(db_icon.IconWidth, db_icon.IconHeight)
 end
 
 -- Icon size, tooltip-enable, cooldown-spiral-visibility, stack-count/duration-text visibility, and
@@ -444,6 +450,10 @@ end
 -- without implicating PixelUtil specifically. Restored to the original PixelUtil.SetSize +
 -- ExecuteAfterCombatEnds combination for further, more careful testing rather than left on the
 -- untested plain-SetSize variant.
+--
+-- Patch 12.1.5 deprecated PixelUtil.SetSize, so plain SetSize is used again (pixel rounding is enabled
+-- once in InitializeAuraButton). Per the 2026-08-27 finding above, the error is caused by the button's
+-- access restriction, not by PixelUtil, so the IsInPvPInstance skip and ExecuteAfterCombatEnds stay.
 local function AppendSettingsToSignature(parts, value)
   if type(value) == "table" then
     parts[#parts + 1] = "{"
@@ -550,7 +560,7 @@ local function ReapplyLiveAuraButtonSettings(aura_type)
         for i = 1, container:GetAuraGroupFrameCount(group_key) do
           local auraButton = container:GetAuraGroupFrame(group_key, i)
           if update_buttons then
-            PixelUtil.SetSize(auraButton, db_icon.IconWidth, db_icon.IconHeight)
+            auraButton:SetSize(db_icon.IconWidth, db_icon.IconHeight)
             auraButton:SetMouseMotionEnabled(Widget.db.ShowTooltips)
             if auraButton.Cooldown then
               auraButton.Cooldown:SetShownSwipe(Widget.db.ShowCooldownSpiral, HideOmniCC)

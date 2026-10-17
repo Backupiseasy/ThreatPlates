@@ -160,8 +160,8 @@ local TRANSLITERATE_CHARS = {
 --                            soft and hard sign (U+02B9, U+02BA), with ASCII characters
 local TRANSLITERATOR_ID = "[:Cyrillic:]; Russian-Latin/BGN; Ukrainian-Latin/BGN; Cyrillic-Latin; Latin-ASCII"
 
--- Check for the API itself, not for a client version, so that this also works on Retail once C_Intl is
--- available there (it is part of 12.1.5, but not of 12.1.0).
+-- Check for the API itself, not for a client version: C_Intl exists on WoW Forever and on Retail since patch
+-- 12.1.5 (verified in-game), but not on Retail 12.1.0.
 local TransliterateText = TRANSLITERATOR_ID and C_Intl and C_Intl.Transliterate
 
 LocalizationModule.TransliterationIsSupported = not Addon.HAS_MIDNIGHT_API or TransliterateText ~= nil

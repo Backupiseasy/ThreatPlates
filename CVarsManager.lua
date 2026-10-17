@@ -29,12 +29,16 @@ local COMBAT_PROTECTED = {
   nameplateMaxAlpha = true,
   nameplateMaxDistance = true,
   nameplateMinAlpha = true,
+  nameplateMotionSpeed = true,
   nameplateOccludedAlphaMult = true,
   nameplateOverlapH = true,
   nameplateOverlapV = true,
   nameplateSelectedAlpha = true,
   nameplateNotSelectedAlpha = true,
   nameplateTargetBehindMaxDistance = true,
+  -- Since Patch 12.1.5 (Retail) and on WoW Forever; setting them in combat is blocked (verified in-game)
+  nameplateTopInset = true,
+  nameplateBottomInset = true,
   -- Nameplate Visibility CVars
   nameplateShowAll = true,
   nameplateShowEnemies = true,
@@ -254,8 +258,9 @@ function CVars:IsAvailable(cvar)
 end
 
 local RESET_TO_DEFAULT = {
-  "nameplateOverlapH", "nameplateOverlapV",
+  "nameplateOverlapH", "nameplateOverlapV", "nameplateMotionSpeed",
   "nameplateMaxDistance", "nameplateTargetBehindMaxDistance",
+  "nameplateTopInset", "nameplateBottomInset",
   "nameplateShowOnlyNames",
   -- "nameplateGlobalScale" -- Reset it to 1, if it get's somehow corrupted
   -- Action Target
