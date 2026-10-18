@@ -13,11 +13,12 @@ local next = next
 -- WoW APIs
 local wipe, strsplit = wipe, strsplit
 local UIParent, INTERRUPTED = UIParent, INTERRUPTED
+local UNIT_LEVEL_NON_ATTACKABLE = UNIT_LEVEL_NON_ATTACKABLE
 local UnitExists, UnitName, UnitReaction, UnitClass, UnitPVPName = UnitExists, UnitName, UnitReaction, UnitClass, UnitPVPName
 local UnitEffectiveLevel = UnitEffectiveLevel
 local UnitChannelInfo, UnitPlayerControlled = UnitChannelInfo, UnitPlayerControlled
 local UnitSpellTargetName, UnitSpellTargetClass = UnitSpellTargetName, UnitSpellTargetClass
-local UnitIsPlayer = UnitIsPlayer
+local UnitIsPlayer, UnitCanAttack = UnitIsPlayer, UnitCanAttack
 local GetRaidTargetIndex = GetRaidTargetIndex
 local GetTime = GetTime
 local SetNamePlateSimplified = C_NamePlateManager and C_NamePlateManager.SetNamePlateSimplified
@@ -506,7 +507,12 @@ local function SetUnitAttributeLevel(unit, unitid)
   -- Level => UNIT_LEVEL
   local unit_level = UnitEffectiveLevel(unitid)
   unit.level = unit_level
-  unit.LevelColor = GetLevelDifficultyColor(unit_level)
+  -- Like Blizzard's unit frames and nameplates, only color the level by difficulty for attackable units
+  if UnitCanAttack("player", unitid) then
+    unit.LevelColor = GetLevelDifficultyColor(unit_level)
+  else
+    unit.LevelColor = UNIT_LEVEL_NON_ATTACKABLE
+  end
 end
 
 local function SetUnitAttributeHealth(unit, unitid)
