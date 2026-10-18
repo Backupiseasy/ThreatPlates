@@ -363,7 +363,7 @@ function StyleModule.CastTriggerCheckIfActive(unit, spell_id, spell_name)
   unit.PreviousCustomStyleCast = unit.CustomStyleCast
   unit.CustomStyleCast = nil
 
-  local unique_settings = CastTriggers[spell_id] or CastTriggers[spell_name] or NameTriggers["Test"]
+  local unique_settings = CastTriggers[spell_id] or CastTriggers[spell_name]
   if unique_settings and unique_settings.useStyle and unique_settings.Enable.UnitReaction[unit.reaction] then
     unit.CustomStyleCast = (unique_settings.showNameplate and "unique") or (unique_settings.ShowHeadlineView and "NameOnly-Unique") or "etotem"
     unit.CustomPlateSettingsCast = unique_settings
