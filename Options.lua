@@ -8607,21 +8607,13 @@ local function CustomPlateGetSlotName(index)
 end
 
 local function CustomPlateGetIcon(index)
-  local _, icon
+  local custom_plate = db.uniqueSettings[index]
+  local icon = custom_plate.icon
 
-  if db.uniqueSettings[index].UseAutomaticIcon then
-    icon = db.uniqueSettings[index].icon
-  else
-    local spell_id = db.uniqueSettings[index].SpellID
-    if spell_id then
-      icon = GetSpellInfo(spell_id).iconID
-    else
-      icon = db.uniqueSettings[index].icon
-      if type(icon) == "string" and not icon:find("\\") and not icon:sub(-4) == ".blp" then
-        -- Maybe a spell name
-        icon = GetSpellInfo(spell_id).iconID
-      end
-    end
+  -- The stored icon is used as fallback if the spell is unknown on this client (e.g., in an imported custom nameplate)
+  if not custom_plate.UseAutomaticIcon and custom_plate.SpellID then
+    local spell_info = GetSpellInfo(custom_plate.SpellID)
+    icon = (spell_info and spell_info.iconID) or icon
   end
 
   if type(icon) == "string" and icon:sub(-4) == ".blp" then
@@ -8652,12 +8644,13 @@ local function CustomPlateSetIcon(index, icon_location)
 
     local spell_id = tonumber(icon_location)
     if spell_id then -- no string, so val should be a spell ID
-      local spell_info = GetSpellInfo(spell_id)
+      -- GetSpellInfo throws an integer overflow error for numbers that are not a 32-bit integer
+      local spell_info = spell_id > 0 and spell_id <= 2147483647 and spell_id % 1 == 0 and GetSpellInfo(spell_id)
       if spell_info then
         icon = spell_info.iconID
         custom_plate.SpellID = spell_id
       else
-        icon = spell_id -- Set icon to spell_id == icon_location, so that the value gets stored
+        -- icon stays nil, so the question mark icon is used (the number would be an invalid texture ID otherwise)
         Addon.Logging.Error("Invalid spell ID for custom nameplate icon: " .. icon_location)
       end
     else

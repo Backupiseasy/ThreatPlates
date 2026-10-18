@@ -351,8 +351,8 @@ function StyleModule.AuraTriggerCheckIfActive(unit, aura_id, aura_name, aura_cas
     unit.CustomStyleAura = (unique_settings.showNameplate and "unique") or (unique_settings.ShowHeadlineView and "NameOnly-Unique") or "etotem"
     unit.CustomPlateSettingsAura = unique_settings
 
-    local icon = GetSpellInfo(aura_id).iconID
-    unique_settings.AutomaticIcon = icon
+    local spell_info = GetSpellInfo(aura_id)
+    unique_settings.AutomaticIcon = spell_info and spell_info.iconID
   end
 end
 
@@ -368,8 +368,8 @@ function StyleModule.CastTriggerCheckIfActive(unit, spell_id, spell_name)
     unit.CustomStyleCast = (unique_settings.showNameplate and "unique") or (unique_settings.ShowHeadlineView and "NameOnly-Unique") or "etotem"
     unit.CustomPlateSettingsCast = unique_settings
 
-    local icon = GetSpellInfo(spell_id).iconID
-    unique_settings.AutomaticIcon = icon
+    local spell_info = GetSpellInfo(spell_id)
+    unique_settings.AutomaticIcon = spell_info and spell_info.iconID
   end
 end
 
