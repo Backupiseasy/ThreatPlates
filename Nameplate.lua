@@ -13,12 +13,13 @@ local next = next
 -- WoW APIs
 local wipe, strsplit = wipe, strsplit
 local UIParent, INTERRUPTED = UIParent, INTERRUPTED
+local UNIT_LEVEL_NON_ATTACKABLE = UNIT_LEVEL_NON_ATTACKABLE
 local UnitExists, UnitName, UnitReaction, UnitClass, UnitPVPName = UnitExists, UnitName, UnitReaction, UnitClass, UnitPVPName
 local UnitEffectiveLevel = UnitEffectiveLevel
 local UnitChannelInfo, UnitPlayerControlled = UnitChannelInfo, UnitPlayerControlled
 local UnitSpellTargetName, UnitSpellTargetClass = UnitSpellTargetName, UnitSpellTargetClass
-local UnitIsPlayer = UnitIsPlayer
-local GetCreatureDifficultyColor, GetRaidTargetIndex = GetCreatureDifficultyColor, GetRaidTargetIndex
+local UnitIsPlayer, UnitCanAttack = UnitIsPlayer, UnitCanAttack
+local GetRaidTargetIndex = GetRaidTargetIndex
 local GetTime = GetTime
 local SetNamePlateSimplified = C_NamePlateManager and C_NamePlateManager.SetNamePlateSimplified
 local GetNamePlateForUnit = C_NamePlate and C_NamePlate.GetNamePlateForUnit
@@ -63,6 +64,7 @@ local BackdropTemplate = Addon.BackdropTemplate
 
 local GetNameForNameplate
 local UnitCastingInfo
+local GetLevelDifficultyColor
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -281,6 +283,18 @@ else
   UnitCastingInfo = _G.UnitCastingInfo
 end
 
+-- WoW Forever loads Blizzard's Mainline GetCreatureDifficultyColor, which uses Retail's thresholds, so low-level
+-- mobs are shown as gray too early. Use the calculation of Forever's own nameplates instead (from
+-- Blizzard_NamePlates/Camelot/Blizzard_NamePlateLevelFrame.lua; Retail has a mixin of the same name with other
+-- thresholds).
+if Addon.IS_FOREVER then
+  GetLevelDifficultyColor = function(level)
+    return NameplateLevelFrameMixin:GetDifficultyColor(level - UnitEffectiveLevel("player"))
+  end
+else
+  GetLevelDifficultyColor = _G.GetCreatureDifficultyColor
+end
+
 ---------------------------------------------------------------------------------------------------------------------
 --  Initialize unit data after NAME_PLATE_UNIT_ADDED and update it
 ---------------------------------------------------------------------------------------------------------------------
@@ -493,7 +507,12 @@ local function SetUnitAttributeLevel(unit, unitid)
   -- Level => UNIT_LEVEL
   local unit_level = UnitEffectiveLevel(unitid)
   unit.level = unit_level
-  unit.LevelColor = GetCreatureDifficultyColor(unit_level)
+  -- Like Blizzard's unit frames and nameplates, only color the level by difficulty for attackable units
+  if UnitCanAttack("player", unitid) then
+    unit.LevelColor = GetLevelDifficultyColor(unit_level)
+  else
+    unit.LevelColor = UNIT_LEVEL_NON_ATTACKABLE
+  end
 end
 
 local function SetUnitAttributeHealth(unit, unitid)
