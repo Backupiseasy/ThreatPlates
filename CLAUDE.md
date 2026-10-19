@@ -189,6 +189,20 @@ Central pub/sub for both real WoW events and internal TP events (`INTERNAL_EVENT
   re-call from `Addon:NAME_PLATE_UNIT_ADDED`/`ScheduleNameplateRevalidation`. Also note that
   `SetShownBlizzardPlate`'s protected branch does `ClearAllPoints()`+`SetParent(nil)` on `UnitFrame` — anything
   anchored to it loses its rect while it is reparented, so prefer anchoring to the (stable) `plate` for new frames.
+- **Plate frames (`NamePlate1`, `NamePlate2`, ...) are pooled too — keep `PlatesByMetaUnit` in sync**: a unit can
+  get a different plate (and with it a different `TPFrame`) while it stays the (soft) target. Observed in-game
+  (2026-10): with a friendly NPC targeted, toggling only `nameplateShowFriendlyNpcs` off and on moved the
+  target from `NamePlate3` to `NamePlate10`; with that CVar off, the target has no nameplate at all while it
+  stays targeted. (Toggling *all* nameplates instead kept the target's plate and frame.) Therefore
+  `UpdateTargetMetaUnitReferences` sets/clears the `target`/`soft*` entries of `PlatesByMetaUnit` in
+  `HandlePlateUnitAdded` and `NAME_PLATE_UNIT_REMOVED`; otherwise `PlayerTargetChanged` sends `TargetLost` to a
+  stale frame and the re-added plate keeps its target scale/alpha/color [Comment #8666]. Check which frame a
+  unit uses with `/run local p=C_NamePlate.GetNamePlateForUnit("target") print(p and p:GetName())`.
+- **Target events**: `TargetLost`/`TargetGained` (payload `tp_frame`) only concern the nameplate of the old/new
+  (soft) target and are only fired if it has an active TP nameplate. `TargetExistsChanged` (no payload) is fired
+  by `PlayerTargetChanged` after them whenever `Addon.TargetUnitExists()` changes (soft targets count if their
+  target style is enabled), regardless of nameplates — subscribe to it for anything that depends on whether a
+  target exists at all (e.g., non-target/no-target scale and transparency of all other nameplates).
 - **Event-ordering rule**: WoW script handlers (`OnShow`, `OnHide`, `OnEvent`) fire **synchronously** when the
   corresponding C-side API is called (confirmed by WoW Wiki's `ScriptRegion:Show()` docs) — `Show()` fires
   `OnShow` immediately within the same call, and `HookScript("OnShow", ...)` hooks run synchronously too. Game

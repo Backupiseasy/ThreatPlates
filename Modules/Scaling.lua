@@ -10,7 +10,6 @@ local ADDON_NAME, Addon = ...
 -- Lua APIs
 
 -- WoW APIs
-local UnitExists = UnitExists
 
 -- ThreatPlates APIs
 local SubscribeEvent = Addon.EventService.Subscribe
@@ -261,38 +260,12 @@ local function SituationalEvent(tp_frame)
 	ScalePlate(tp_frame, Addon.UIScale * GetScale(tp_frame.unit))
 end
 
--- Update the target unit and all non-target units
-local function TargetGained(tp_frame)
+-- Update all units as they switch between non-target and no-target settings
+local function TargetExistsChanged()
   local ui_scale = Addon.UIScale
 
-  -- Update the nameplate of the current target unit
-	ScalePlate(tp_frame, ui_scale * GetScale(tp_frame.unit))
-
-  local db = Addon.db.profile.nameplate
-  if db.toggle.NonTargetS then
-    -- Update all non-target units
-		for _, active_tp_frame in Addon:GetActiveThreatPlates() do
-      if not Addon.UnitIsTarget(active_tp_frame.unit.unitid) then
-				ScalePlate(active_tp_frame, ui_scale * GetScale(active_tp_frame.unit))
-      end
-		end
-  end
-end
-
--- Update all units unless there is a new target unit (TargetGained will be called then anyway)
-local function TargetLost(tp_frame)
-  local ui_scale = Addon.UIScale
-
-  -- Update the nameplate of the unit that lost the target
-	ScalePlate(tp_frame, ui_scale * GetScale(tp_frame.unit))
-
-  if UnitExists("target") then return end
-
-  -- Update all units as there is no target now (except the unit that lost the target as it was already updated above
   for _, active_tp_frame in Addon:GetActiveThreatPlates() do
-    if active_tp_frame ~= tp_frame then
-			ScalePlate(active_tp_frame, ui_scale * GetScale(active_tp_frame.unit))
-    end
+    ScalePlate(active_tp_frame, ui_scale * GetScale(active_tp_frame.unit))
   end
 end
 
@@ -301,7 +274,8 @@ SubscribeEvent(ScalingModule, "MouseoverOnLeave", SituationalEvent)
 SubscribeEvent(ScalingModule, "CastingStarted", SituationalEvent)
 SubscribeEvent(ScalingModule, "CastingStopped", SituationalEvent)
 SubscribeEvent(ScalingModule, "TargetMarkerUpdate", SituationalEvent)
-SubscribeEvent(ScalingModule, "TargetGained", TargetGained)
-SubscribeEvent(ScalingModule, "TargetLost", TargetLost)
+SubscribeEvent(ScalingModule, "TargetGained", SituationalEvent)
+SubscribeEvent(ScalingModule, "TargetLost", SituationalEvent)
+SubscribeEvent(ScalingModule, "TargetExistsChanged", TargetExistsChanged)
 SubscribeEvent(ScalingModule, "FactionUpdate", SituationalEvent)
 SubscribeEvent(ScalingModule, "ThreatUpdate", SituationalEvent)

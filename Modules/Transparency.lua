@@ -10,7 +10,6 @@ local ADDON_NAME, Addon = ...
 -- Lua APIs
 
 -- WoW APIs
-local UnitExists = UnitExists
 
 -- ThreatPlates APIs
 local Style = Addon.Style
@@ -366,34 +365,10 @@ local function SituationalEvent(tp_frame)
 	end
 end
 
--- Update the target unit and all non-target units
-local function TargetGained(tp_frame)
-  -- Update the nameplate of the current target unit
-  SituationalEvent(tp_frame)
-
-  local db = Addon.db.profile.nameplate
-  if db.toggle.NonTargetA then
-    -- Update all non-target units
-    for _, active_tp_frame in Addon:GetActiveThreatPlates() do
-      if not Addon.UnitIsTarget(active_tp_frame.unit.unitid) then
-        SituationalEvent(active_tp_frame)
-      end
-    end
-  end
-end
-
--- Update all units unless there is a new target unit (TargetGained will be called then anyway)
-local function TargetLost(tp_frame)
-  -- Update the nameplate of the unit that lost the target
-  SituationalEvent(tp_frame)
-
-  if UnitExists("target") then return end
-
-  -- Update all units as there is no target now (except the unit that lost the target as it was already updated above
+-- Update all units as they switch between non-target and no-target settings
+local function TargetExistsChanged()
   for _, active_tp_frame in Addon:GetActiveThreatPlates() do
-    if active_tp_frame ~= tp_frame then
-      SituationalEvent(active_tp_frame)
-    end
+    SituationalEvent(active_tp_frame)
   end
 end
 
@@ -402,7 +377,8 @@ SubscribeEvent(TransparencyModule, "MouseoverOnLeave", SituationalEvent)
 SubscribeEvent(TransparencyModule, "CastingStarted", SituationalEvent)
 SubscribeEvent(TransparencyModule, "CastingStopped", SituationalEvent)
 SubscribeEvent(TransparencyModule, "TargetMarkerUpdate", SituationalEvent)
-SubscribeEvent(TransparencyModule, "TargetGained", TargetGained)
-SubscribeEvent(TransparencyModule, "TargetLost", TargetLost)
+SubscribeEvent(TransparencyModule, "TargetGained", SituationalEvent)
+SubscribeEvent(TransparencyModule, "TargetLost", SituationalEvent)
+SubscribeEvent(TransparencyModule, "TargetExistsChanged", TargetExistsChanged)
 SubscribeEvent(TransparencyModule, "FactionUpdate", SituationalEvent)
 SubscribeEvent(TransparencyModule, "ThreatUpdate", SituationalEvent)
