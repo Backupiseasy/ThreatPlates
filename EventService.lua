@@ -92,6 +92,7 @@ local INTERNAL_EVENTS = {
   TargetMarkerUpdate = true,  -- Parameters: tp_frame
   TargetGained = true,        -- Parameters: tp_frame
   TargetLost = true,          -- Parameters: tp_frame
+  TargetExistsChanged = true, -- Parameters: - (a (soft) target now exists or no longer exists; after TargetLost/TargetGained)
   FocusGained = true,         -- Parameters: tp_frame
   FocusLost = true,           -- Parameters: tp_frame
   -- Payload:

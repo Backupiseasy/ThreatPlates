@@ -104,6 +104,13 @@ local IGNORED_UNITS = {
 ---------------------------------------------------------------------------------------------------
 --local PlateOnUpdateQueue = {}
 
+-- Meta-units that make a nameplate the (soft) target. Their references in PlatesByMetaUnit must also be
+-- kept up to date when nameplates are added or removed, not only on PLAYER_*_CHANGED events.
+local TARGET_META_UNITS = { "target", "softenemy", "softfriend", "softinteract" }
+-- Whether a (soft) target existed after the last PLAYER_*_CHANGED event for these meta-units (to fire
+-- TargetExistsChanged)
+local TargetUnitExisted = false
+
 -- Consolidated array for meta-unit nameplates (target, focus, mouseover, softenemy, softfriend, softinteract)
 local PlatesByMetaUnit = {
   target = nil,
@@ -1196,9 +1203,24 @@ local function RefreshPlatePresentation(tp_frame, plate, unitid)
   RefreshCastbar(tp_frame, unitid)
 end
 
+-- A (soft) target's nameplate can be removed and added again while it stays the target. Without updating
+-- the references here, PlayerTargetChanged fires TargetLost for a stale (recycled) frame, and the
+-- re-added nameplate keeps its target scale, transparency, and color.
+local function UpdateTargetMetaUnitReferences(tp_frame, unitid)
+  for i = 1, #TARGET_META_UNITS do
+    local meta_unitid = TARGET_META_UNITS[i]
+    if unitid and UnitIsUnitTP(meta_unitid, unitid) then
+      PlatesByMetaUnit[meta_unitid] = tp_frame
+    elseif PlatesByMetaUnit[meta_unitid] == tp_frame then
+      PlatesByMetaUnit[meta_unitid] = nil
+    end
+  end
+end
+
 local function HandlePlateUnitAdded(plate, unitid)
   local tp_frame = plate.TPFrame
   RefreshUnitData(tp_frame, plate, unitid)
+  UpdateTargetMetaUnitReferences(tp_frame, unitid)
   RefreshPlatePresentation(tp_frame, plate, unitid)
 end
 
@@ -1341,6 +1363,8 @@ function Addon:UpdateSettings()
     Addon.TargetUnitExists = function() return UnitExists("target") end
     Addon.UnitIsTarget = function(unitid) return UnitIsUnitTP("target", unitid) end
   end
+  -- Soft targets may count as target now (or no longer)
+  TargetUnitExisted = Addon.TargetUnitExists() and true or false
 
   ShowInterruptSource = db.settings.castnostop.ShowInterruptSource
   if ShowInterruptSource then
@@ -1717,6 +1741,8 @@ function Addon:NAME_PLATE_UNIT_REMOVED(unitid)
     RemoveMouseoverFromNameplate()
   end
 
+  UpdateTargetMetaUnitReferences(tp_frame, nil)
+
   tp_frame.Active = false
 
   PlatesByUnit[unitid] = nil
@@ -1772,12 +1798,21 @@ local function PlayerTargetChanged(target_unitid)
   local tp_frame = plate and plate.TPFrame
   if tp_frame then
     PlatesByMetaUnit[target_unitid] = tp_frame
-    
+
     if tp_frame.Active then
       SetUnitAttributeTarget(tp_frame.unit)
       StyleModule.Update(tp_frame)
       PublishEvent("TargetGained", tp_frame)
     end
+  end
+
+  -- Fired after TargetLost/TargetGained, independent of whether the old or new target has a (Threat Plates)
+  -- nameplate (e.g., a friendly target with friendly nameplates disabled), so that all nameplates can switch
+  -- between non-target and no-target settings
+  local target_unit_exists = Addon.TargetUnitExists() and true or false
+  if target_unit_exists ~= TargetUnitExisted then
+    TargetUnitExisted = target_unit_exists
+    PublishEvent("TargetExistsChanged")
   end
 end
 
