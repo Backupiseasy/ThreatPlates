@@ -104,6 +104,10 @@ local IGNORED_UNITS = {
 ---------------------------------------------------------------------------------------------------
 --local PlateOnUpdateQueue = {}
 
+-- Meta-units that make a nameplate the (soft) target. Their references in PlatesByMetaUnit must also be
+-- kept up to date when nameplates are added or removed, not only on PLAYER_*_CHANGED events.
+local TARGET_META_UNITS = { "target", "softenemy", "softfriend", "softinteract" }
+
 -- Consolidated array for meta-unit nameplates (target, focus, mouseover, softenemy, softfriend, softinteract)
 local PlatesByMetaUnit = {
   target = nil,
@@ -1196,9 +1200,24 @@ local function RefreshPlatePresentation(tp_frame, plate, unitid)
   RefreshCastbar(tp_frame, unitid)
 end
 
+-- A (soft) target's nameplate can be removed and added again while it stays the target. Without updating
+-- the references here, PlayerTargetChanged fires TargetLost for a stale (recycled) frame, and the
+-- re-added nameplate keeps its target scale, transparency, and color.
+local function UpdateTargetMetaUnitReferences(tp_frame, unitid)
+  for i = 1, #TARGET_META_UNITS do
+    local meta_unitid = TARGET_META_UNITS[i]
+    if unitid and UnitIsUnitTP(meta_unitid, unitid) then
+      PlatesByMetaUnit[meta_unitid] = tp_frame
+    elseif PlatesByMetaUnit[meta_unitid] == tp_frame then
+      PlatesByMetaUnit[meta_unitid] = nil
+    end
+  end
+end
+
 local function HandlePlateUnitAdded(plate, unitid)
   local tp_frame = plate.TPFrame
   RefreshUnitData(tp_frame, plate, unitid)
+  UpdateTargetMetaUnitReferences(tp_frame, unitid)
   RefreshPlatePresentation(tp_frame, plate, unitid)
 end
 
@@ -1716,6 +1735,8 @@ function Addon:NAME_PLATE_UNIT_REMOVED(unitid)
   if PlatesByMetaUnit.mouseover == tp_frame then
     RemoveMouseoverFromNameplate()
   end
+
+  UpdateTargetMetaUnitReferences(tp_frame, nil)
 
   tp_frame.Active = false
 

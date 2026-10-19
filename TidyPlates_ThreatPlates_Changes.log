@@ -1,4 +1,9 @@
 ------------------------------------------------------
+13.3.2 (2026-10-19)
+------------------------------------------------------
+* Fixed a bug where a nameplate kept its target size, transparency, or color after changing or clearing the target, if the nameplate had been hidden and shown again while the unit was targeted [Comment #8666].
+
+------------------------------------------------------
 13.3.1 (2026-10-18)
 ------------------------------------------------------
 * Fixed a bug where the size of class icons and of unit portraits for custom nameplates could not be changed when Masque was enabled [GH-718].
