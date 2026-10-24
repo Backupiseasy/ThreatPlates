@@ -2595,62 +2595,6 @@ function Widget:UpdateUnitAuras(aura_grid_frame, unit, enabled_auras, enabled_cc
   end
 end
 
--- local function CenterAuraGrid(aura_grid, aura_grid_frame, db_aura_grid)
---   local auras_no = aura_grid_frame.ActiveAuras
---   if aura_grid.IconMode and auras_no > 0 then
---     local x_offset = 0
---     if db_aura_grid.CenterAuras then
---       -- Re-anchor the first frame, if auras should be centered
---       x_offset = (auras_no < aura_grid.Columns) and aura_grid.CenterAurasPositions[auras_no] or 0
---     end
---     local align_layout = aura_grid.AlignLayout
---     local aura_one = aura_grid_frame.AuraFrames[1]
---     aura_one:ClearAllPoints()
---     aura_one:SetPoint(align_layout[3], aura_grid_frame, (aura_grid.AuraWidgetOffset + x_offset) * align_layout[5], (aura_grid.AuraWidgetOffset + aura_grid.RowSpacing) * align_layout[6])
---   end
--- end
-
--- function Widget:ResizeAurasOfAuraGrid(aura_grid, aura_grid_frame)
---   local db_aura_grid = aura_grid.db
---   local aura_frame_list = aura_grid_frame.AuraFrames
---   local auras_no = aura_grid_frame.ActiveAuras
-
---   print ("No: ", auras_no)
---   local auras_no = aura_grid_frame.ActiveAuras
---   for index = 1, auras_no do
---     local aura_frame = aura_frame_list[index]
---     aura_frame:SetSize(db_aura_grid.IconWidth, db_aura_grid.IconHeight)
-
---     -- Need to do this because of different offset
---     local align_layout = aura_grid.AlignLayout
---     aura_frame:ClearAllPoints()
---     if index == 1 then
---       aura_frame:SetPoint(align_layout[3], aura_grid_frame, aura_grid.AuraWidgetOffset * align_layout[5], (aura_grid.AuraWidgetOffset + aura_grid.RowSpacing) * align_layout[6])
---     elseif (index - 1) % aura_grid.Columns == 0 then
---       aura_frame:SetPoint(align_layout[3], aura_frame_list[index - aura_grid.Columns], align_layout[4], 0, aura_grid.RowSpacing * align_layout[6])
---     else
---       aura_frame:SetPoint(align_layout[1], aura_frame_list[index - 1], align_layout[2], aura_grid.ColumnSpacing * align_layout[5], 0)
---     end
---   end
-
---   -- Re-center aura area as size has changed now
---   -- CenterAuraGrid(aura_grid, aura_grid_frame, db_aura_grid)
---   if aura_grid.IconMode and auras_no > 0 then
---     local x_offset = 0
---     if db_aura_grid.CenterAuras then
---       -- Re-anchor the first frame, if auras should be centered
---       x_offset = (auras_no < aura_grid.Columns) and aura_grid.CenterAurasPositions[auras_no] or 0
---     end
---     local align_layout = aura_grid.AlignLayout
---     local aura_one = aura_grid_frame.AuraFrames[1]
---     aura_one:ClearAllPoints()
---     aura_one:SetPoint(align_layout[3], aura_grid_frame, (aura_grid.AuraWidgetOffset + x_offset) * align_layout[5], (aura_grid.AuraWidgetOffset + aura_grid.RowSpacing) * align_layout[6])
---   end
-
---   aura_grid_frame:SetHeight(ceil(auras_no / aura_grid.Columns) * (aura_grid.AuraHeight + aura_grid.AuraWidgetOffset) +
---   aura_grid.RowSpacing + aura_grid.AuraWidgetOffset)
--- end
-
 function Widget:UpdatePositionAuraGrid(widget_frame, aura_type, unit_style)
   local db = self.db
 
@@ -2724,37 +2668,6 @@ function Widget:UpdateAurasGrids(widget_frame, unit)
   else
     widget_frame:Hide()
   end
-
-  -- if unit_is_friendly and db.SwitchScaleByReaction then
-  --   aura_grid_frame:SetHeight(ceil(auras_no / aura_grid.Columns) * (aura_grid.AuraHeight + aura_grid.AuraWidgetOffset) +
-  --   aura_grid.RowSpacing + aura_grid.AuraWidgetOffset)
-  -- end
-
-  -- if unit_is_friendly then
-  --   frame_auras_one, frame_auras_two = widget_frame.Buffs, widget_frame.Debuffs
-  --   auras_one_active, auras_two_active = buffs_active, debuffs_active
-  --   if db.SwitchScaleByReaction then
-  --     scale_auras_one, scale_auras_two = db.Debuffs.Scale, db.Buffs.Scale
-  --   else
-  --     scale_auras_one, scale_auras_two = db.Buffs.Scale, db.Debuffs.Scale
-  --   end
-  -- else
-  --   frame_auras_one, frame_auras_two = widget_frame.Debuffs, widget_frame.Buffs
-  --   auras_one_active, auras_two_active = debuffs_active, buffs_active
-  --   scale_auras_one, scale_auras_two = db.Debuffs.Scale, db.Buffs.Scale
-  -- end
-
-  -- if unit_is_friendly and db.SwitchScaleByReaction then
-  --   print (unit.name, "=> Switch By Reaction")
-  --   -- self:ResizeAurasOfAuraGrid(widget_frame, "Buffs", "Debuffs") 
-  --   -- self:ResizeAurasOfAuraGrid(widget_frame, "Debuffs", "Buffs")
-  --   self:ResizeAurasOfAuraGrid(self.Buffs, widget_frame.Debuffs)
-  --   self:ResizeAurasOfAuraGrid(self.Debuffs, widget_frame.Buffs)
-
-  --   widget_frame.IsSwitchedByReaction = true
-  -- else
-  --   widget_frame.IsSwitchedByReaction = false
-  -- end
 end
 
 function Widget:UpdateAuras(widget_frame, unit, unit_aura_update_info)
@@ -3605,12 +3518,6 @@ function Widget:UpdateSettings()
   else
     self:UpdateSettingsBarMode("CrowdControl")
   end
-
-  -- local buffs_size = (self.Buffs.IconMode and max(self.db.Buffs.ModeIcon.IconWidth, self.db.Buffs.ModeIcon.IconHeight)) or self.db.Buffs.ModeBar.BarHeight
-  -- local debuffs_size = (self.Debuffs.IconMode and max(self.db.Debuffs.ModeIcon.IconWidth, self.db.Debuffs.ModeIcon.IconHeight)) or self.db.Debuffs.ModeBar.BarHeight
-
-  -- self.SwitchScaleBuffsFactor = debuffs_size/ buffs_size
-  -- self.SwitchScaleDebuffsFactor = buffs_size / debuffs_size
 
   self:ParseSpellFilters()
 

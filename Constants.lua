@@ -896,7 +896,6 @@ Addon.DEFAULT_SETTINGS = {
       SortOrder = "TimeLeft",
       SortReverse = false,
       FrameOrder = "HEALTHBAR_AURAS",
-      -- SwitchScaleByReaction = false, -- TODO: Remove or implement this feature
       SwitchAreaByReaction = true,
       -- Highlight Expiring: flashes the icon (legacy widget) or, on Midnight, colors the duration
       -- text with ExpiringColor (AuraButton has no script-hook for addon-attached icon effects - see

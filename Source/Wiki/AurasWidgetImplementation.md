@@ -152,19 +152,24 @@ result means "disable this group" (`Widget:UpdateAuraContainer` sets its `maxFra
   can never set); otherwise returns `nil` (group disabled). Its plain-string return (not the
   group-keyed table shape the other four produce) is wrapped into the same shape via the
   `SingleGroupConfig` helper before reaching `Widget:UpdateAuraContainer`.
-- **`SwitchAreaByReaction`** (2026-08-23) — for `FRIENDLY` units only, swaps which type's *layout*
-  (icon size, columns/rows/spacing, sort, alignment, anchor - `Widget:UpdateAuraContainer`'s `db`/
-  `db_icon`, computed from a `layout_type` local that flips Buffs↔Debuffs, not from `aura_type`
-  directly) Buffs/Debuffs use, while the real `aura_type`/`container`/`AURA_GROUP_KEYS[aura_type]`/
-  filter data stay unswapped. Matches the legacy widget's own behavior exactly: it fed buff data
-  straight into the already-Debuffs-styled physical `widget_frame.Debuffs` frame
-  (`AurasWidget.lua` ~2156), not just relocating the buff icons to the debuff screen position but
-  rendering them *as if configured as debuffs* - counterintuitive for a "switch position" setting, but
-  faithfully replicated here. `CrowdControl` is never swapped (matches legacy scope). Known,
-  unguarded edge case: if the *swapped* config's `AnchorTo` names the other of Buffs/Debuffs (stacking
-  one grid below the other) while this setting is also on, the two containers' anchor chains can end
-  up referencing each other in a way that wasn't reachable before - not expected to be a common
-  configuration, not specially handled.
+- **`SwitchAreaByReaction`** (reworked 2026-10-24, [GH-770]) — for `FRIENDLY` units only, buffs are
+  shown in the debuffs' area and vice versa, each with *that area's* settings (layout, icon size,
+  duration/stack count text, icon style, border). `Widget:UpdateAurasGrids` swaps the group configs
+  (filters), so the Buffs container shows friendly debuffs and the Debuffs container friendly buffs;
+  the layout always comes from the container's own `aura_type`. Matches the legacy widget, which fed
+  buff data into the physical `widget_frame.Debuffs` grid (`AurasWidget.lua` ~2156). `CrowdControl`
+  is never swapped (legacy scope). Prerequisites: a group's HELPFUL/HARMFUL type is just part of its
+  filter string (`AddAuraGroup`'s second parameter is only the initial filter string, changeable via
+  `SetAuraGroupFilterString`), and groups cannot be added after a container was created, so
+  `AURA_GROUP_KEYS` declares the other type's friendly group keys on each container too (Buffs:
+  `boss`, `dispeltype`; Debuffs: `canapply`, `bigdefensive`). The border color for auras without a
+  dispel type (`DefaultBuffColor`/`DefaultDebuffColor`, the `"None"` entry of `customDispelColorMap`)
+  is part of an area's appearance too, so swapped auras intentionally get the color of the area they
+  are shown in (unlike the legacy widget, which colored by the aura's own type).
+  - The first implementation (2026-08-23 until 13.3.1) swapped the *layouts* instead. As aura buttons
+    are pooled per container and only partly restylable per unit (no `SetSize` while auras are
+    secret), icon size, duration/stack count text etc. stayed on the original type - e.g., the
+    duration text kept its area's offset and could be hidden behind the healthbar [GH-770].
 
 ---
 

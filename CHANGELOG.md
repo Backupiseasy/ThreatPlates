@@ -1,7 +1,3 @@
 # @project-version@ (@build-time@)
 
-* Fixed a bug where the size of class icons and of unit portraits for custom nameplates could not be changed when Masque was enabled [GH-718].
-* Fixed a bug where the level colors on WoW Forever did not match Blizzard's nameplates (e.g., mobs were shown in gray too early) [GH-764].
-* Changed the level of units that cannot be attacked (e.g., friendly NPCs and players) to be shown in the same uniform color as on Blizzard's nameplates.
-* Fixed several bugs with icons of custom nameplates set by a spell ID or spell name, e.g., Lua errors for unknown or invalid spell IDs and the spell name being lost when importing the custom nameplate.
-* Fixed a bug where the interaction icon above the fishing bobber and other interactable objects was missing and the fishing bobber could not be used with the interact key [GH-763].
+* Fixed a bug where auras on friendly units kept the settings of their own area when "Swap Area By Reaction" was enabled [GH-770].
