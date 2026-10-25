@@ -192,8 +192,12 @@ L["Color"] = "Farbe"
 L["Color by Target Mark"] = "Einfärben nach Zielmarkierung"
 L["Color Healthbar by Target Marks in Healthbar View"] = "Gesundheitsleiste nach Zielmarkierung in Healthbar-View einfärben"
 L["Color Name by Target Marks in Headline View"] = "Name nach Zielmarkierung im Headline-View einfärben"
+--[[Machine translation --]]
+L["Color when Expiring"] = "Einfärben beim Ablaufen"
 L["Coloring"] = "Farben"
 L["Colors"] = "Farben"
+--[[Machine translation --]]
+L["Colors the countdown text once the remaining duration drops below the threshold below."] = "Färbt den Countdown-Text ein, sobald die verbleibende Dauer unter den Schwellenwert unten fällt."
 L["Column Limit"] = "Spaltenobergrenze"
 L["Combat"] = "Kampf"
 L["Combo Points"] = "Combopunkte"
@@ -337,6 +341,8 @@ L["Experience"] = "Erfahrung"
 L["Experience Text"] = "Erfahrungstext"
 --[[Machine translation --]]
 L["Expiring Color"] = "Farbe beim Ablaufen"
+--[[Machine translation --]]
+L["Expiring Threshold"] = "Schwellenwert für Ablaufen"
 --[[Machine translation --]]
 L["Expiring Time"] = "Ablaufzeit"
 L["Export"] = "Export"
@@ -1077,15 +1083,9 @@ L["You cannot delete General Settings, only custom nameplates entries."] = "Du k
 L["You currently have two nameplate addons enabled: |cff89F559Threat Plates|r and |cff89F559%s|r. Please disable one of these, otherwise two overlapping nameplates will be shown for units."] = "Du hast aktuell zwei Nameplate-Addons aktiviert: |cff89F559Threat Plates|r und |cff89F559%s|r. Bitte deaktiviere eines dieser beiden Addons, da ansonsten zwei überlappende Namensplaketten bei Einheiten angezeigt werden."
 L["Your version of LibDogTag-Unit-3.0 does not support nameplates. You need to install at least v90000.3 of LibDogTag-Unit-3.0."] = "Die installierte Version von LibDogTag-Unit-3.0 unterstützt keine Namensplaketten. Du musst zumindest v90000.3 von LibDogTag-Unit-3.0 installieren."
 L["All restriction CVars are now |cffff0000OFF!|r"] = "Alle Einschränkungs-CVars sind jetzt |cffff0000OFF!|r"
---[[Machine translation --]]
-L["Color when Expiring"] = "Einfärben beim Ablaufen"
 L["Colors the countdown text once the remaining duration drops below the threshold below - the Midnight replacement for Flash When Expiring, which has no equivalent on Midnight."] = "Färbt den Countdown-Text ein, sobald die verbleibende Dauer unter den Schwellenwert unten fällt - der Midnight-Ersatz für \"Aufblinken beim Ablaufen\", das auf Midnight keine Entsprechung hat."
---[[Machine translation --]]
-L["Colors the countdown text once the remaining duration drops below the threshold below."] = "Färbt den Countdown-Text ein, sobald die verbleibende Dauer unter den Schwellenwert unten fällt."
 L["Enable Stealth Widget"] = "Stealth-Widget einschalten"
 L["Enable this if you want to show Blizzard's special resources above the target nameplate."] = "Schaltet die Blizzard-Anzeige für spezielle Ressourcen über der Namensplakette des Ziels ein."
---[[Machine translation --]]
-L["Expiring Threshold"] = "Schwellenwert für Ablaufen"
 L["Flash When Expiring"] = "Blinken bei Auslaufen"
 L["Hide Buffs"] = "Verstecke Buffs"
 L["Personal Nameplate"] = "Persönliche Namensplakette"
