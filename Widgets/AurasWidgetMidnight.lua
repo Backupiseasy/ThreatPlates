@@ -259,20 +259,34 @@ local function GetExpiringColorCurve(aura_type)
   return curve
 end
 
+-- Formats the duration text like the countdown numbers of Blizzard's cooldowns: "12", "2m", "2h",
+-- "2d" (rounded up), without the unit (and the space before it, e.g. "12 s") of the default
+-- formatter that SetDurationText uses otherwise (Blizzard_AuraContainerShared.lua). Same bands as
+-- that formatter: seconds up to 90 seconds, minutes up to 90 minutes, hours up to 36 hours. Shared by
+-- all aura buttons.
+local AuraDurationFormatter = _G.C_StringUtil.CreateNumericRuleFormatter()
+do
+  local rounding_up = _G.Enum.NumericRuleFormatRounding.Up
+  AuraDurationFormatter:SetBreakpoints({
+    { threshold = 0, step = 1, rounding = rounding_up, format = "%d" },
+    { threshold = 90, format = "%dm", components = { { div = 60, step = 1, rounding = rounding_up } } },
+    { threshold = 5400, format = "%dh", components = { { div = 3600, step = 1, rounding = rounding_up } } },
+    { threshold = 129600, format = "%dd", components = { { div = 86400, step = 1, rounding = rounding_up } } },
+  })
+end
+
 -- Binds the duration text to the aura button. A color curve is only bound if FlashWhenExpiring is
 -- enabled or the button already has one bound (to reset it to the normal color, see above).
 local function SetAuraButtonDurationText(auraButton, aura_type)
+  local options = { textFormatter = AuraDurationFormatter }
   if Widget.db.FlashWhenExpiring or auraButton.HasExpiringColorCurve then
-    auraButton:SetDurationText(auraButton.TimeLeft, {
-      textColor = {
-        curve = GetExpiringColorCurve(aura_type),
-        property = DurationTextBindingPropertyRemainingDuration,
-      },
-    })
+    options.textColor = {
+      curve = GetExpiringColorCurve(aura_type),
+      property = DurationTextBindingPropertyRemainingDuration,
+    }
     auraButton.HasExpiringColorCurve = true
-  else
-    auraButton:SetDurationText(auraButton.TimeLeft)
   end
+  auraButton:SetDurationText(auraButton.TimeLeft, options)
 end
 
 local function InitializeAuraButton(auraButton, aura_type)

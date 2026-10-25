@@ -113,9 +113,18 @@ local CLIENT_ALPHABET = LOCALE_ALPHABET[GetLocale()]
 local FontFamilies = {}
 local FontFamilyCount = 0
 
-local function GetFontFamily(file, size, flags)
+local function SetShadow(font, shadow)
+  if shadow then
+    font:SetShadowOffset(1, -1)
+    font:SetShadowColor(0, 0, 0, 1)
+  else
+    font:SetShadowColor(0, 0, 0, 0)
+  end
+end
+
+local function GetFontFamily(file, size, flags, shadow)
   flags = flags or ""
-  local key = file .. "|" .. tostring(size) .. "|" .. flags
+  local key = file .. "|" .. tostring(size) .. "|" .. flags .. "|" .. tostring(shadow or false)
 
   local font_family = FontFamilies[key]
   if font_family == nil then
@@ -132,14 +141,27 @@ local function GetFontFamily(file, size, flags)
     -- Remember failures (false) so that creating the font family is not tried again
     font_family = success and result or false
     FontFamilies[key] = font_family
+
+    -- The text is rendered with the member fonts of the font family, so a shadow set on the font string itself is
+    -- ignored. Like with Blizzard's font families (defined in XML), the shadow must be set on the member fonts.
+    if font_family then
+      SetShadow(font_family, shadow)
+      for i = 1, #members do
+        local member_font = font_family:GetFontObjectForAlphabet(members[i].alphabet)
+        if member_font then
+          SetShadow(member_font, shadow)
+        end
+      end
+    end
   end
 
   return font_family
 end
 
--- Drop-in replacement for font_string:SetFont(file, size, flags) that adds fallback fonts for other alphabets
-function FontModule.SetFont(font_string, file, size, flags)
-  local font_family = USE_FONT_FAMILIES and file and GetFontFamily(file, size, flags)
+-- Drop-in replacement for font_string:SetFont(file, size, flags) that adds fallback fonts for other alphabets. It
+-- also sets the shadow, as the shadow of texts using a font family must be set on the font family's fonts.
+function FontModule.SetFont(font_string, file, size, flags, shadow)
+  local font_family = USE_FONT_FAMILIES and file and GetFontFamily(file, size, flags, shadow)
   if not font_family then
     font_string:SetFont(file, size, flags)
   elseif font_string:GetFontObject() ~= font_family then
@@ -148,6 +170,8 @@ function FontModule.SetFont(font_string, file, size, flags)
     font_string:SetFontObject(font_family)
     font_string:SetTextColor(r, g, b, a)
   end
+
+  SetShadow(font_string, shadow)
 end
 
 local FontSetFont = FontModule.SetFont
@@ -163,14 +187,7 @@ function FontModule.SetInitialFont(font_string)
 end
 
 local function UpdateTextFont(font, db)
-  FontSetFont(font, Addon.LibSharedMedia:Fetch('font', db.Typeface), db.Size, db.flags)
-
-  if db.Shadow then
-    font:SetShadowOffset(1, -1)
-    font:SetShadowColor(0, 0, 0, 1)
-  else
-    font:SetShadowColor(0, 0, 0, 0)
-  end
+  FontSetFont(font, Addon.LibSharedMedia:Fetch('font', db.Typeface), db.Size, db.flags, db.Shadow)
 
   if db.Color then
     font:SetTextColor(db.Color.r, db.Color.g, db.Color.b, db.Transparency or 1)
