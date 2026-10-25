@@ -13,18 +13,20 @@ local next = next
 -- WoW APIs
 local wipe, strsplit = wipe, strsplit
 local UIParent, INTERRUPTED = UIParent, INTERRUPTED
+local UNIT_LEVEL_NON_ATTACKABLE = UNIT_LEVEL_NON_ATTACKABLE
 local UnitExists, UnitName, UnitReaction, UnitClass, UnitPVPName = UnitExists, UnitName, UnitReaction, UnitClass, UnitPVPName
 local UnitEffectiveLevel = UnitEffectiveLevel
 local UnitChannelInfo, UnitPlayerControlled = UnitChannelInfo, UnitPlayerControlled
 local UnitSpellTargetName, UnitSpellTargetClass = UnitSpellTargetName, UnitSpellTargetClass
-local UnitIsPlayer = UnitIsPlayer
-local GetCreatureDifficultyColor, GetRaidTargetIndex = GetCreatureDifficultyColor, GetRaidTargetIndex
+local UnitIsPlayer, UnitCanAttack = UnitIsPlayer, UnitCanAttack
+local GetRaidTargetIndex = GetRaidTargetIndex
 local GetTime = GetTime
 local SetNamePlateSimplified = C_NamePlateManager and C_NamePlateManager.SetNamePlateSimplified
 local GetNamePlateForUnit = C_NamePlate and C_NamePlate.GetNamePlateForUnit
 local GetPlayerInfoByGUID, UnitNameFromGUID = GetPlayerInfoByGUID, UnitNameFromGUID
 local IsInInstance, InCombatLockdown = IsInInstance, InCombatLockdown
 local NamePlateDriverFrame, UnitNameplateShowsWidgetsOnly = NamePlateDriverFrame, UnitNameplateShowsWidgetsOnly
+local UnitIsGameObject = UnitIsGameObject
 local GetSpecializationInfo = C_SpecializationInfo and C_SpecializationInfo.GetSpecializationInfo or _G.GetSpecializationInfo
 local GetSpecialization = C_SpecializationInfo and C_SpecializationInfo.GetSpecialization or _G.GetSpecialization
 local CastbarInterpolation = Enum.StatusBarInterpolation and Enum.StatusBarInterpolation.Immediate
@@ -63,6 +65,7 @@ local BackdropTemplate = Addon.BackdropTemplate
 
 local GetNameForNameplate
 local UnitCastingInfo
+local GetLevelDifficultyColor
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -100,6 +103,13 @@ local IGNORED_UNITS = {
 -- Local variables
 ---------------------------------------------------------------------------------------------------
 --local PlateOnUpdateQueue = {}
+
+-- Meta-units that make a nameplate the (soft) target. Their references in PlatesByMetaUnit must also be
+-- kept up to date when nameplates are added or removed, not only on PLAYER_*_CHANGED events.
+local TARGET_META_UNITS = { "target", "softenemy", "softfriend", "softinteract" }
+-- Whether a (soft) target existed after the last PLAYER_*_CHANGED event for these meta-units (to fire
+-- TargetExistsChanged)
+local TargetUnitExisted = false
 
 -- Consolidated array for meta-unit nameplates (target, focus, mouseover, softenemy, softfriend, softinteract)
 local PlatesByMetaUnit = {
@@ -279,6 +289,18 @@ elseif Addon.ExpansionIsBetween(LE_EXPANSION_WRATH_OF_THE_LICH_KING, LE_EXPANSIO
 else
   GetNameForNameplate = function(plate) return plate:GetName() end
   UnitCastingInfo = _G.UnitCastingInfo
+end
+
+-- WoW Forever loads Blizzard's Mainline GetCreatureDifficultyColor, which uses Retail's thresholds, so low-level
+-- mobs are shown as gray too early. Use the calculation of Forever's own nameplates instead (from
+-- Blizzard_NamePlates/Camelot/Blizzard_NamePlateLevelFrame.lua; Retail has a mixin of the same name with other
+-- thresholds).
+if Addon.IS_FOREVER then
+  GetLevelDifficultyColor = function(level)
+    return NameplateLevelFrameMixin:GetDifficultyColor(level - UnitEffectiveLevel("player"))
+  end
+else
+  GetLevelDifficultyColor = _G.GetCreatureDifficultyColor
 end
 
 ---------------------------------------------------------------------------------------------------------------------
@@ -493,7 +515,12 @@ local function SetUnitAttributeLevel(unit, unitid)
   -- Level => UNIT_LEVEL
   local unit_level = UnitEffectiveLevel(unitid)
   unit.level = unit_level
-  unit.LevelColor = GetCreatureDifficultyColor(unit_level)
+  -- Like Blizzard's unit frames and nameplates, only color the level by difficulty for attackable units
+  if UnitCanAttack("player", unitid) then
+    unit.LevelColor = GetLevelDifficultyColor(unit_level)
+  else
+    unit.LevelColor = UNIT_LEVEL_NON_ATTACKABLE
+  end
 end
 
 local function SetUnitAttributeHealth(unit, unitid)
@@ -824,8 +851,10 @@ end
 --     "locked" flag.
 ---------------------------------------------------------------------------------------------------------------------
 
+-- GameObjects (fishing bobber, Ring of Transference, ...) have nameplates too, which Blizzard uses for
+-- its soft-interact icon. Leave them completely to Blizzard.
 local function IgnoreUnitForThreatPlates(unitid)
-  return UnitIsUnitTP("player", unitid) or UnitNameplateShowsWidgetsOnly(unitid)
+  return UnitIsUnitTP("player", unitid) or UnitNameplateShowsWidgetsOnly(unitid) or UnitIsGameObject(unitid)
 end
 
 local SetShownBlizzardPlate
@@ -890,7 +919,8 @@ local function ShowBlizzardNameplate(plate, show_blizzard_plate)
 end
 
 local function SetNameplateVisibility(plate, unitid)
-  -- ! Interactive objects do also have nameplates. We should not mess with the visibility the of these objects.
+  -- Interactive objects (GameObjects) do also have nameplates. They never get here, as they are filtered out by
+  -- IgnoreUnitForThreatPlates, so we don't mess with the visibility of these nameplates.
   -- We cannot use unit.reaction here as it is not guaranteed that it's update whenever this function is called (see UNIT_FACTION).
   if Addon.GetUnitReactionToPlayer(unitid) > 4 then
     ShowBlizzardNameplate(plate, SettingsShowFriendlyBlizzardNameplates)
@@ -997,6 +1027,8 @@ local function NamePlateDriverFrame_AcquireUnitFrame(_, plate)
       if Addon.HAS_MIDNIGHT_API then
         hooksecurefunc(unit_frame, "Show", function(self)
           if self:IsForbidden() then return end
+          -- Same exclusion as in FrameOnShow, otherwise ignored plates are hidden again on every Show()
+          if self.unit and IgnoreUnitForThreatPlates(self.unit) then return end
 
           SetVisibilityOfBlizzardNameplate(self, self.unit)
         end)
@@ -1171,9 +1203,24 @@ local function RefreshPlatePresentation(tp_frame, plate, unitid)
   RefreshCastbar(tp_frame, unitid)
 end
 
+-- A (soft) target's nameplate can be removed and added again while it stays the target. Without updating
+-- the references here, PlayerTargetChanged fires TargetLost for a stale (recycled) frame, and the
+-- re-added nameplate keeps its target scale, transparency, and color.
+local function UpdateTargetMetaUnitReferences(tp_frame, unitid)
+  for i = 1, #TARGET_META_UNITS do
+    local meta_unitid = TARGET_META_UNITS[i]
+    if unitid and UnitIsUnitTP(meta_unitid, unitid) then
+      PlatesByMetaUnit[meta_unitid] = tp_frame
+    elseif PlatesByMetaUnit[meta_unitid] == tp_frame then
+      PlatesByMetaUnit[meta_unitid] = nil
+    end
+  end
+end
+
 local function HandlePlateUnitAdded(plate, unitid)
   local tp_frame = plate.TPFrame
   RefreshUnitData(tp_frame, plate, unitid)
+  UpdateTargetMetaUnitReferences(tp_frame, unitid)
   RefreshPlatePresentation(tp_frame, plate, unitid)
 end
 
@@ -1316,6 +1363,8 @@ function Addon:UpdateSettings()
     Addon.TargetUnitExists = function() return UnitExists("target") end
     Addon.UnitIsTarget = function(unitid) return UnitIsUnitTP("target", unitid) end
   end
+  -- Soft targets may count as target now (or no longer)
+  TargetUnitExisted = Addon.TargetUnitExists() and true or false
 
   ShowInterruptSource = db.settings.castnostop.ShowInterruptSource
   if ShowInterruptSource then
@@ -1631,8 +1680,8 @@ function Addon:NAME_PLATE_UNIT_ADDED(unitid)
   -- Player's personal nameplate:
   --   This nameplate is currently not handled by Threat Plates - HandlePlateUnitAdded is not called on it, therefore plate.TPFrame.Active is nil
   -- Nameplates for GameObjects:
-  --   There are some nameplates for GameObjects, e.g. Ring of Transference in Oribos. For the time being, we don't show them.
-  --   Current assumption: for units of type "GameObject", UnitExists always returns false
+  --   There are some nameplates for GameObjects, e.g. fishing bobber, herbs or Ring of Transference in Oribos (with soft-targeting).
+  --   They are not handled by Threat Plates (UnitIsGameObject), WoW shows its own nameplate with the soft-interact icon.
   --   If TP would show them, the would show as nameplates with health 0 and maybe cause Lua errors
   -- Nameplates with widgets:
   --   If the nameplate only has widgets, don't create a Threat Plate for it and let WoW handle everything,
@@ -1692,6 +1741,8 @@ function Addon:NAME_PLATE_UNIT_REMOVED(unitid)
     RemoveMouseoverFromNameplate()
   end
 
+  UpdateTargetMetaUnitReferences(tp_frame, nil)
+
   tp_frame.Active = false
 
   PlatesByUnit[unitid] = nil
@@ -1747,12 +1798,21 @@ local function PlayerTargetChanged(target_unitid)
   local tp_frame = plate and plate.TPFrame
   if tp_frame then
     PlatesByMetaUnit[target_unitid] = tp_frame
-    
+
     if tp_frame.Active then
       SetUnitAttributeTarget(tp_frame.unit)
       StyleModule.Update(tp_frame)
       PublishEvent("TargetGained", tp_frame)
     end
+  end
+
+  -- Fired after TargetLost/TargetGained, independent of whether the old or new target has a (Threat Plates)
+  -- nameplate (e.g., a friendly target with friendly nameplates disabled), so that all nameplates can switch
+  -- between non-target and no-target settings
+  local target_unit_exists = Addon.TargetUnitExists() and true or false
+  if target_unit_exists ~= TargetUnitExisted then
+    TargetUnitExisted = target_unit_exists
+    PublishEvent("TargetExistsChanged")
   end
 end
 

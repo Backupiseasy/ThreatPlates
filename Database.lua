@@ -1725,7 +1725,7 @@ local SETTINGS_TYPE_CHECK = {
   -- Not part of default values, dynamically inserted
   AutomaticIcon = { number = true },
   SpellID = { number = true },
-  SpellName = { number = true },
+  SpellName = { string = true },
 }
 
 local CUSTOM_STYLE_TYPE_CHECK = {
@@ -1733,7 +1733,7 @@ local CUSTOM_STYLE_TYPE_CHECK = {
   -- Not part of default values, dynamically inserted
   AutomaticIcon = { number = true },
   SpellID = { number = true },
-  SpellName = { number = true },
+  SpellName = { string = true },
 }
 
 -- Updates existing entries in current settings  with the corresponding values from the

@@ -202,12 +202,21 @@ function AnimationModule.StopFade(frame)
 end
 
 function AnimationModule.ScalePlate(frame, target_scale)
-  local current_scale = frame:GetScale()
-  if floor(abs(current_scale - target_scale) * 100) < 1 then return end
-
-  frame.ScaleAnimation = frame.ScaleAnimation or {}
-
   local animation = frame.ScaleAnimation
+
+  local current_scale = frame:GetScale()
+  if floor(abs(current_scale - target_scale) * 100) < 1 then
+    -- An animation started just before (e.g., target gained and lost in the same frame) would otherwise
+    -- continue to its old target scale
+    if animation and animation.Playing then
+      animation.Playing = nil
+      SetPlateScale(frame, target_scale)
+    end
+    return
+  end
+
+  frame.ScaleAnimation = animation or {}
+  animation = frame.ScaleAnimation
   animation.StartScale = current_scale
   animation.TargetScale = target_scale
   animation.Duration = abs(current_scale - target_scale) * ScaleToDuration

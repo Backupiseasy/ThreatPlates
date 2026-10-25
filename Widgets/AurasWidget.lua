@@ -3029,7 +3029,9 @@ local function UpdateAuraFrameIconMode(self, frame)
   -- Setting the OnEnter/Leave, OnMouseDown/Up script automatically implies EnableMouse(true)
   -- And with that, right clicking and moving the camera does not work anymore when hovering over an aura.
   frame:EnableMouse(false)
-  frame:SetMouseMotionEnabled(true)
+  -- Without tooltips, auras must not catch the mouse at all, otherwise they block mouseover of the
+  -- nameplates (units) behind them
+  frame:SetMouseMotionEnabled(db.ShowTooltips)
 
   db = self.db
 
@@ -3182,7 +3184,9 @@ local function UpdateAuraFrameBarMode(self, frame)
   -- Setting the OnEnter/Leave, OnMouseDown/Up script automatically implies EnableMouse(true)
   -- And with that, right clicking and moving the camera does not work anymore when hovering over an aura.
   frame:EnableMouse(false)
-  frame:SetMouseMotionEnabled(true)
+  -- Without tooltips, auras must not catch the mouse at all, otherwise they block mouseover of the
+  -- nameplates (units) behind them
+  frame:SetMouseMotionEnabled(db.ShowTooltips)
 
   db = self.db
   local font = Addon.LibSharedMedia:Fetch('font', db.Font)

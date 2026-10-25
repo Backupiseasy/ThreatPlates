@@ -288,6 +288,9 @@ else
 	Addon.GetSpellInfo = function(...) 
 		--local name, rank, icon, castTime, minRange, maxRange, spellID, originalIcon = _G.GetSpellInfo()
 		local name, _, icon = _G.GetSpellInfo(...)
+		-- Unknown spells return nil, like C_Spell.GetSpellInfo
+		if not name then return nil end
+
 		return {
 			name = name,
 			iconID = icon 
