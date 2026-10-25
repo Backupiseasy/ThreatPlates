@@ -363,15 +363,9 @@ function Element.UpdateStyle(tp_frame, style)
   local spell_text, spell_text_style = tp_frame.visual.SpellText, style.spelltext
 
   -- At least font must be set as otherwise it results in a Lua error when UnitAdded with SetText is called
-  FontSetFont(spell_text, spell_text_style.typeface, spell_text_style.size, spell_text_style.flags)
+  FontSetFont(spell_text, spell_text_style.typeface, spell_text_style.size, spell_text_style.flags, spell_text_style.shadow)
 
   FontSetJustify(spell_text, spell_text_style.align, spell_text_style.vertical)
-  if spell_text_style.shadow then
-    spell_text:SetShadowColor(0,0,0, 1)
-    spell_text:SetShadowOffset(1, -1)
-  else
-    spell_text:SetShadowColor(0,0,0,0)
-  end
 
   spell_text:ClearAllPoints()
   spell_text:SetSize(spell_text_style.width, spell_text_style.height)
