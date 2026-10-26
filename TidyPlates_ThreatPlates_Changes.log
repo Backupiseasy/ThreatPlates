@@ -1,4 +1,9 @@
 ------------------------------------------------------
+13.3.4 (2026-10-26)
+------------------------------------------------------
+* Fixed a bug where auras on friendly units kept the settings of their own area when "Swap Area By Reaction" was enabled [GH-770].
+
+------------------------------------------------------
 13.3.3 (2026-10-25)
 ------------------------------------------------------
 * Changed the duration of auras on WoW Retail and Forever to be shown without a unit for seconds (e.g., "12" instead of "12 s") and as "2m", "2h", or "2d" for longer durations.
