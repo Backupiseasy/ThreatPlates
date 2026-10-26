@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:ad26ef6cee1868458719fab203945cd65abfd57daebd6b005257f0c3741d9791",
+  "claims": [
+    {
+      "id": "claim_57a4bf8a39fa4a929c874de3f18bec9b",
+      "statement": "The addon is a single TOC-driven Lua/XML addon loaded directly from the repository folder for Retail, Classic Era, TBC, Mists Classic and Forever.",
+      "evidence": [
+        {
+          "resource": "repo://TidyPlates_ThreatPlates.toc#L1-L57",
+          "version": "repo-lines-v1:sha256:b55818b717dc0d4eb43d5850cf6354d6ec98deb9cddfb0d615f2a0889839ef13:eyJzZWxlY3RlZExpbmVDb3VudCI6NTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQxNzNkMzQ5NmI0OWJmYTgzYTlkMjJmYWRjNDEwYTc0MTJiZWExYzRiOGNhMTJiOWM4MzFkMmYxYjFkNTI3YzciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZiODI5NGMyNmMyZDZlYjg3ZWM2M2UyZWE1MTA1ZTY5ODg2Zjc4YTQzZTI1ZTg3MWYwNmRiNDNkZjI3M2IzZGEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_56edce37995249c4ba1f9922340fb20d",
+      "statement": "The core code is split into Init/Compatibility, EventService, Nameplate.lua, Modules, Elements, Widgets, Styles and the settings files Database, Constants, Options and CVarsManager.",
+      "evidence": [
+        {
+          "resource": "repo://TidyPlates_ThreatPlates.toc#L37-L57",
+          "version": "repo-lines-v1:sha256:eb49b481456d8df9035ade517091844282c7e6408fbb96d77c58dffe49ad6ff8:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY5ZWM4NDQ0YTFkMjc4MjVjYjYxNGVjNWJmMGNjZGI3MjkxOTYyYjExM2M4NzkyY2RhNjViMmY3NWQ2OWQ0ZWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZiODI5NGMyNmMyZDZlYjg3ZWM2M2UyZWE1MTA1ZTY5ODg2Zjc4YTQzZTI1ZTg3MWYwNmRiNDNkZjI3M2IzZGEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjMyYzRiOTFjNzgwZWQ3NzZlODg3NWU2MDE1N2M3MDU0MTYxYmUyMDcxMTE5ZWUxNThiNDYxZjgyZTAzMTE4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-25T18:59:51.751Z"
+  }
+}

@@ -1,0 +1,21 @@
+# Paths OpenWiki must not read or document (gitignore syntax, last match wins).
+
+# Third-party libraries (Ace3, LibSharedMedia, LibDualSpec, ...) - not our code
+/Libs/
+
+# Generated localization files - maintained by the localization pipeline, not by hand
+/Locales/
+
+# Binary assets
+/Artwork/
+/Fonts/
+
+# Packager output, tooling caches and editor/agent settings
+/.release/
+/.pytest_cache/
+/.vscode/
+/.claude/
+*.code-workspace
+
+# Full release history since the beginning - too large and only of historical value
+/TidyPlates_ThreatPlates_Changes.log

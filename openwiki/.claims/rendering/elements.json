@@ -1,0 +1,154 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:c5bb7215bab1870d19bc206fe7bfcb72793dfa46183f5fbc790edfe02f913316",
+  "claims": [
+    {
+      "id": "claim_6c7235c807084b74b84440e28b632e5e",
+      "statement": "Addon.Elements.NewElement appends elements to an ordered priority list, and ElementHandler calls PlateCreated for all elements, PlateUnitAdded only when PlateStyle is not \"None\", UpdateStyle with the plate style as third argument, and UpdateSettings where defined.",
+      "evidence": [
+        {
+          "resource": "repo://Elements/ElementHandler.lua#L28-L87",
+          "version": "repo-lines-v1:sha256:96931a3a3863c1da29426e161d648394065324754ad0493e1ffcdf4981b8ddcd:eyJzZWxlY3RlZExpbmVDb3VudCI6NjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEwNzY2NTc0ZTU2MGEzMzYzOWQzN2I0NjUzMTcwZjI1NDgxNzgyODhlNjhiODUwODEyOTk3NGM4NDdjYTI4MDIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM2MWU0OGQwMzA4ZjIwZTMyZGJhNWZiNTYzMjhiYWYxOGQ3MmVmMGNjYjQzYjg0ZjVjMjYyZDJhNmExZmM2YzgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkzODFiNjMzNWVhY2Y4MGRlOWU0MmFlNDA4NDc0OGVjYzUwZTFjODMyZjg1YzM3Yzg5YzkxZmI1OWY0YzE4NTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_8e3bbf53384643b5b65fd844bd94d6a4",
+      "statement": "Elements are loaded and therefore called in the order given in Elements.xml, after the Statusbar helper and ElementHandler.",
+      "evidence": [
+        {
+          "resource": "repo://Elements/Elements.xml#L3-L15",
+          "version": "repo-lines-v1:sha256:d50702baaef993fc7d8f18cc08b400151f45d4f109cb8f86eb7f3ba2b33e62cb:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNlOTYzZmMzNGQ3N2E0MTBlZTVhNWMzNTRiYTM3NTdiNDQ1ZTIyZDY0NmNlZjkzNmIyODQ1NjQzODEyZmMzYjQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdjZmZiYjhiMGEyZWE1NGY0NDI5NzM2ZTdlMDRmOTZmNmJlZjM0YjhjM2VlMjhhNzEzYTA1NzBjMmM0ZDZhMWEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjoyLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ0ZTE2ZjcwMTExZjc1MmI5MTAwYmYxOTM1MTJkNWU0Y2RlYmU5MDU3OGI4MjFlZmY1MzNjNTc4ZDA5ZDg5NTAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQ5YmY3YjVjMzZlOTZhYTI3ZTVkYzkxYzc4N2Y1NTg3ZmMyMTBhZTJhMThmODc0Y2M3YjlkMzkxZjZlOWJkZDcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_c66ca62eb2f14fa8b72d72dabcec0e8d",
+      "statement": "The healthbar element updates values on unit added and on health events, applies colors from HealthbarColorUpdate (vertex color on HAS_MIDNIGHT_API clients) and chooses between a Lua-computed and a heal-prediction-calculator absorb implementation at load time.",
+      "evidence": [
+        {
+          "resource": "repo://Elements/Healthbar.lua#L189-L256",
+          "version": "repo-lines-v1:sha256:4d37f6b43b81901c7ad4f416e1b2c20cf8bebfd329bda590d4e4d8efa5031b4c:eyJzZWxlY3RlZExpbmVDb3VudCI6NjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI3N2ZmZGJiYmZiZDY1ZWRkN2VjMzY0Y2RjYTY2NjAxNzhjNjdkOTI1M2YwMDA5MTVlZjc5ZDNjZGJjYmFiNGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc1OWVmNGM0YTJiZThhMjNlZTMzMzZjZjk0MWJlNjRhNzFiMDdiMjk2NjQxZDJiYWY1YzA1YzRiNDZiYjgwN2YiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijk1ZTk5NzcxZGIwZmI4ZTYxZmQyNzNjZGJkMTlmNzBlOWRmMzY2ZGIyMmU3NTE2NWI3ZTIxZWUyMWJlNjNmMmIifQ"
+        },
+        {
+          "resource": "repo://Elements/Healthbar.lua#L344-L373",
+          "version": "repo-lines-v1:sha256:046e41fd727055d45ef109c2417ae459db843c769bb15c1b753bef4010295678:eyJzZWxlY3RlZExpbmVDb3VudCI6MzAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNhMTkzODAwZGFjYTg0YmY3ZTgwOTc1NGI1ZjBhNzE5YmVlOTU2ZWFjNTdlZWEzM2FjNGYyMTFkMjM2OTQwZjIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU2NmUwZWNhZDNhYmU2NDUxM2ZiMDljYjA2NTU2NWQ0ZTdjZTYxM2Y1MjdhOWE1NDEyNmIyMThjY2U2ZGQzMDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA4ZmNhNGRkZjE3NGZhZTMwNDA4NmMwZmUyOTg4MDczYjhjOTY5YWZjZDlmZGQ3NTRkMGNmNjNjZjRlOTA1NzYifQ"
+        },
+        {
+          "resource": "repo://Elements/Healthbar.lua#L491-L501",
+          "version": "repo-lines-v1:sha256:21342c03819cb01ab2e3bbf4d640135b6c084a2c09e98304facf60fe91362581:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZkYmE1ZTk1ZmVjNmFkMGVmZTg1NTdkMjY1YTMwYjIzNzY5MDI3NTBjYmU2NjBmN2M5ZDZlZjUwYTA4OTAyY2EiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjBlMWY3ZTdhNDg3N2MwZjJjMzA3MmZkOWMwMjk5YmU0YTQwYjliZWRiMGU2YWE5ZmNlMWE3NTAzMjU1YmVjMmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZhNjBiNTY1ZDc1Y2VkNDg0NDI5NGNhMmVhYzM5MDIwOTIzY2I3ZWU0OTdkMDc0OTYyZGNlZjlmNjE1NmMzMmQifQ"
+        },
+        {
+          "resource": "repo://Elements/Healthbar.lua#L610-L667",
+          "version": "repo-lines-v1:sha256:7708d5394e46052572bceb899e0027b6573338e9f08768493ece8565e6dde166:eyJzZWxlY3RlZExpbmVDb3VudCI6NTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVkZDM3ZjQ1NTUwNWRhNzI2NWRkNTg4M2M4YjNmM2ExZTNiMzE2YjQ3NTQ0ODdhZjAwNDFmN2MwZTlkYTlmNGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM2Nzg0NGE5MzEyNTYyMzNjZjNkNWQ2ODQyZjRhMDYyNzAwYjBkMjhkMmViYzQzNjI4ZTY0YTY0NjFjYzU1YjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJkOGFjOWQ5NzRkZjIxMGZiMTgwMDJhZWQzODNmZmE0YmI5N2Y4MGQ3N2U5Mjc0ODI5ZjRiNWM3MjVlMDNkZmQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU0YzA4NGRhMWUxNDY2MTljZDljOTM5OGI3NjgwMzI4NDQ1ZmYzYWNlMzk3NzVlYmJiNDdhMjk5YjRhYjFmMTYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_fdbef67756df40859d8d23daf8807299",
+      "statement": "The target-of-target text on the healthbar is only subscribed to UNIT_TARGET, ThreatUpdate and target events while the option is enabled.",
+      "evidence": [
+        {
+          "resource": "repo://Elements/Healthbar.lua#L637-L659",
+          "version": "repo-lines-v1:sha256:14b1bb9792ae50e83a2c962faeb118fe4ce0f7674eb48f55e34dbb43a511fa07:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg4NzM1YjMwODhhMjE5NmQwYjllOTRjNDRhMmRiZGE4OTQ1YzE3Njc1Y2M1NWUwMGRkNjI0ZDQ4MzUzMzA0ZDQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU2NmUwZWNhZDNhYmU2NDUxM2ZiMDljYjA2NTU2NWQ0ZTdjZTYxM2Y1MjdhOWE1NDEyNmIyMThjY2U2ZGQzMDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQwZjAzMGYyOWEzZTkwMmUyODY4MjM4NGJjYzZiYTVlNmUyMTU5ZmZlOTA1OTI2YzQ0YmNiN2UzNTExNjRjNDQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_0f4abfdf48d441acabd559ca946572ca",
+      "statement": "On HAS_MIDNIGHT_API clients the name element passes the possibly secret name through transliteration directly to SetText, while other clients may abbreviate NPC names and cache the result.",
+      "evidence": [
+        {
+          "resource": "repo://Elements/Name.lua#L52-L96",
+          "version": "repo-lines-v1:sha256:dde689ebf495ebe309d57e42f1f1f31dce7ae2124f0be7509e281c66d632c0f8:eyJzZWxlY3RlZExpbmVDb3VudCI6NDUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZkYmE1ZTk1ZmVjNmFkMGVmZTg1NTdkMjY1YTMwYjIzNzY5MDI3NTBjYmU2NjBmN2M5ZDZlZjUwYTA4OTAyY2EiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUxYTZhYWE5OGRmNTVkZDI1ZTgxZTlkNzlhMjgwYzI1ODQ5MjQ1ZDIyZWE5ZTU5Y2RhNGE0MmFiMWQwOTlkY2MiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZhNjBiNTY1ZDc1Y2VkNDg0NDI5NGNhMmVhYzM5MDIwOTIzY2I3ZWU0OTdkMDc0OTYyZGNlZjlmNjE1NmMzMmQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_0482e4593a2847b1842c34f9da0201d3",
+      "statement": "The status text type is chosen per plate mode and reaction from a reference table, and health events are subscribed only if some mode shows health.",
+      "evidence": [
+        {
+          "resource": "repo://Elements/StatusText.lua#L355-L365",
+          "version": "repo-lines-v1:sha256:156205c9086e5ed141caa278efa0d98b6ac03179f9613f8f34a7531c1f249685:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdlZGM3N2NhZWJmZmIzMTA5OTZlZDhjZDI0Nzk1NGU1YzkxYWNmN2M2Yzc0YTFjYzVkOWRjMjIzMWE5ZWMwMjMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU2NmUwZWNhZDNhYmU2NDUxM2ZiMDljYjA2NTU2NWQ0ZTdjZTYxM2Y1MjdhOWE1NDEyNmIyMThjY2U2ZGQzMDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY4MDhkZmZkYTQzYWQyOTRmYWMxZGY4NTYxODEyMWQyNDczOGNlZGQzNjVlYTFkZjViZDhlMTkwMzU2MGZkMjkifQ"
+        },
+        {
+          "resource": "repo://Elements/StatusText.lua#L488-L560",
+          "version": "repo-lines-v1:sha256:16c3e71b65cf7ff66f0bba5e0372506431ceac017faee1c5de19f2420a1e50d4:eyJzZWxlY3RlZExpbmVDb3VudCI6NzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg4NzM1YjMwODhhMjE5NmQwYjllOTRjNDRhMmRiZGE4OTQ1YzE3Njc1Y2M1NWUwMGRkNjI0ZDQ4MzUzMzA0ZDQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU2NmUwZWNhZDNhYmU2NDUxM2ZiMDljYjA2NTU2NWQ0ZTdjZTYxM2Y1MjdhOWE1NDEyNmIyMThjY2U2ZGQzMDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjJmYjYxNjQ4Yzg1ZmZkYjAyMGY2MjgzOGRiNGVhZmVhMWU1NzRiMDFiZTM0ZjdiZGFjNGFkODM4YzExYzJhNDgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_619054b269ce4dba9b7a2234feb24cbb",
+      "statement": "On HAS_MIDNIGHT_API clients the ALL status text always shows role, guild and level, and a health text is hidden at full health via an alpha computed from a step curve.",
+      "evidence": [
+        {
+          "resource": "repo://Elements/StatusText.lua#L340-L347",
+          "version": "repo-lines-v1:sha256:f699bd8c32ed365dd638f0bc652eee1eb6bef70a1a002e7d4f717ffa8b0c58b3:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNmU3ZTI2YTkyZThhY2U1YzVhZGIxMjAwMTVkZjk2MmIzNjIwYjk5NmNmOThkNDYwMjZlYWQyNzIwZjVmY2Q0ZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDgzMzJmZTY2N2JjNTFhYzRhNTFiYTBlZmU3MzQ0NDFjOTBkZWY1NWM2MGEyNmQ3ZGIyNzVlY2JiY2Y0MmYxNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYmQ4NmQ3ODljYjM1ZjczNmNiODNkYjg0ZDUxZDMzMjY5M2EwMjdjN2M2Nzc3NTY5MzI1YzU4YzVhMmYyMTNjZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZDdjZTM0ODgzYTY1ZjJmNzZhYmM4NzA1ZmRiOTZiZDdkZjFhZTllNzUyY2U0MmY0N2Y3MDdhNzM5MGRjOTAwMyJ9"
+        },
+        {
+          "resource": "repo://Elements/StatusText.lua#L40-L54",
+          "version": "repo-lines-v1:sha256:a78e087f04b90b1d487c491bb1ce2e00e458983e30a40c41dc404e2cd87c2712:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg5ZTJiMTEzYWYyZTFjZDYzNzBmZGU2Y2JjYjc4OTZhNDQxMTEzOTI2MTI3MGFiOTU4Zjk5OTFlMmE1YTIzMDMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjVlMmUzN2VmZGJlZmY1NzUyMmNkNmUzNjE1MDQwODhhNGU2ZThjMDJkMTZiMGY4MWExMjMxZTJlOTU2ZmEyNmQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY2NzcyMzVhNDQyMmJiNjA0OTRkMWVmMTFmNzBjZDMzN2E4MTE4ZjAwOTNlMTIwM2Q3MGQ3MzU5Y2NiNDIyYzQifQ"
+        },
+        {
+          "resource": "repo://Elements/StatusText.lua#L406-L416",
+          "version": "repo-lines-v1:sha256:0b96916cf14d95f2f138fc7cbfa03460b99d7d1bab38e6cb473f849f50e76ece:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIwNGY3NWU1ZTQyY2Y5OTA5ZjU0ZTAzYWY1OWYzMjU5MjhkYzllZDVhNzJmMmNmZDRiMTA2NmE3OTViYTRlZjgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRhNDYxY2U0YzIwZmFhNGNlZjdmNGU5NjJkMmI3NzFlOTkxMzJkYjNiNjY2MzI1OWEwMjQwYjYwYTBhYTkzZWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjI4OTIyMTBhODM2N2I1ZjJhMDg3NGMxN2Q4MWNlZDY2ZWY4NGM3MDQ5MWRiYmZlOTFkZWE2YTk0YzZmMGI0YzgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_b90272c12092495f964120aeeafb6080",
+      "statement": "The threat glow is shown only for plates with a threat level and a style with threat border, colored by threat color or tapped color for hostile NPCs, and refreshed on ThreatUpdate.",
+      "evidence": [
+        {
+          "resource": "repo://Elements/ThreatGlow.lua#L44-L129",
+          "version": "repo-lines-v1:sha256:39e0512e91fd60501dab55abc89261c7f260db4a8df22f7bc847802daaed1bb3:eyJzZWxlY3RlZExpbmVDb3VudCI6ODYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU0MjQxYjBkY2RlMzFiZjU4ZjFhMTRhMmQ4Y2E3NWJhYTE5YTUzZWRlZTk5NWE0YjE1ZWVhOWU0MjEwMTFiZmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdkM2NlODBkNzQ0YTFiNWM1MGYyYjRhMTYyYWU2OGQxOTI5OGMxYmY1NDgwMGEwYmY0Y2Y5MjZjNjE3MmZiM2IiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_900c974e8eb74f45aae7918a90c3c703",
+      "statement": "Addon.CreateStatusbar builds a reusable status bar with text areas that the Experience widget uses and the Script widget exposes to scripts.",
+      "evidence": [
+        {
+          "resource": "repo://Elements/Statusbar.lua#L108-L129",
+          "version": "repo-lines-v1:sha256:3d95f666f370dc19ac7f7133d3bf2c4c41a2b60745057bf0f9fcff94eebcc442:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVjZmMwNzdlZjI1ZjI0MjMzNDBhOWUwYzExMmJmODk2ZDNmODMxY2Q5Njk0NWI0Yzc3NjgxNGJlM2RhNjM2MGYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQzYmMyYWFjMDhjOGY5NTVlMzgwNTk5ODNhMzE3ZGQyMDcxNWIwYzhhMjU5NGM2MjU2MmJhNTAyZGRmMmNhNmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIifQ"
+        },
+        {
+          "resource": "repo://Widgets/ExperienceWidget.lua#L130-L130",
+          "version": "repo-lines-v1:sha256:b74e37965e6e48f569c96fabed8b9270f459ca89f44406f6e7049458e4e7104d:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYjc0ZTM3OTY1ZTZlNDhmNTY5Yzk2ZmFiZWQ4YjkyNzBmNDU5Y2E4OWY0NDQwNmY2ZTcwNDk0NThlNGU3MTA0ZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYjc0ZTM3OTY1ZTZlNDhmNTY5Yzk2ZmFiZWQ4YjkyNzBmNDU5Y2E4OWY0NDQwNmY2ZTcwNDk0NThlNGU3MTA0ZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYTI4YTI4NjhkZDZiYTNhYWY4NTVlZGJhNjkyMTI3ZmEyMjEyZjc2NWFhY2IwNDk0NWI5NTk0MDYzNDUwMzg3NiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYjVmNmFmM2MxYzYzN2QxYTljNDk1Mjk2MmEzMDg0Mjg5OTZmZjRkY2RmMjdjMzA1ZjcyZDhmYWFkNmMxZDVhMiJ9"
+        },
+        {
+          "resource": "repo://Widgets/ScriptWidget.lua#L389-L389",
+          "version": "repo-lines-v1:sha256:0134e398e141160cb15e6d4ab8f7455a63170be2df93beded5f7619ad6f8d829:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMDEzNGUzOThlMTQxMTYwY2IxNWU2ZDRhYjhmNzQ1NWE2MzE3MGJlMmRmOTNiZWRlZDVmNzYxOWFkNmY4ZDgyOSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDEzNGUzOThlMTQxMTYwY2IxNWU2ZDRhYjhmNzQ1NWE2MzE3MGJlMmRmOTNiZWRlZDVmNzYxOWFkNmY4ZDgyOSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNmQ4Njg1MzI1ZTgxZDU1YTA1NzFhMWNkMzY3OWRmYjk3MjNmZDE1MDI5N2FlMmQwZTRjMjUzNzJlYzczYzZlZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZjYxNjJmNzJkMDRhMjU5Yjc5ZjdkNGJmZWY5MTRkNjNlMTBlYjJjYjNjOGE5NWJlNmI3Y2MzYjQ0NDBhMzM3NCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_e40810a0ec0d416cb2a7bf04f55e7357",
+      "statement": "The healthbar's absorb functions check IGNORED_STYLES_WITH_NAMEMODE, a table keyed by style name, with tp_frame.style, which is the style table, so the check never matches.",
+      "evidence": [
+        {
+          "resource": "repo://Constants.lua#L157-L162",
+          "version": "repo-lines-v1:sha256:516a779d2e200ea2f5752376ab2a021aeb7130293a7b087c9111b40dd7d9b369:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMDY0MTQ5ZGE3MzNkOTBjMWM5MGJhYzg5MjAyNTIxOGE0NGMxYjlmNDZjYmVkZGI4NjQ4NWE2OWI1MDBiZjcxNCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMjdjZTBjZmEyNTJjOWUzNzRjYjBmYjY3YjNmYzEwZmYyMjhiN2FkZGU5MjEyMTIwMmE3M2JjZWFhYzQwNmU3NiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYTI0ZjY3NGMwMDI5ZDFiMDU5ZmNmZGI5Yjg4NmQ4ZDVjYWNlY2M0YTc3NDgzODJmZThmMjMzZGMyMmQ2ZjM5NSJ9"
+        },
+        {
+          "resource": "repo://Elements/Healthbar.lua#L196-L196",
+          "version": "repo-lines-v1:sha256:a5db3e0bfe1f4be5fea2e127e3e27c8de05b0a4ae20e338f7e4c9036dafceeb1:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYTVkYjNlMGJmZTFmNGJlNWZlYTJlMTI3ZTNlMjdjOGRlMDViMGE0YWUyMGUzMzhmN2U0YzkwMzZkYWZjZWViMSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYTVkYjNlMGJmZTFmNGJlNWZlYTJlMTI3ZTNlMjdjOGRlMDViMGE0YWUyMGUzMzhmN2U0YzkwMzZkYWZjZWViMSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZDIyOTI3NzVlY2EyYjA4NjA2NzQ2OWYxNmFmN2YxMTc1YzBlNjY1NWQzNTcyMGVlZTY2OTQwOTdkNGM3NWQ3YyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZWVhYjY1ZjZjZWNlMDljZTQyOTU1ODM1YTYzZTc5NDNkYzA1N2E3YjAzMmRmYWI2YmExYmUxNDlhMjRkMDA3YiJ9"
+        },
+        {
+          "resource": "repo://Elements/Healthbar.lua#L30-L30",
+          "version": "repo-lines-v1:sha256:1b302a2b6593edd08129cc863ceb89228cd05e3d2c1433bcf4a78840588d3336:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMWIzMDJhMmI2NTkzZWRkMDgxMjljYzg2M2NlYjg5MjI4Y2QwNWUzZDJjMTQzM2JjZjRhNzg4NDA1ODhkMzMzNiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMWIzMDJhMmI2NTkzZWRkMDgxMjljYzg2M2NlYjg5MjI4Y2QwNWUzZDJjMTQzM2JjZjRhNzg4NDA1ODhkMzMzNiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOWJlNmQxMThlNjBmNTdlN2Q5NWJiNjRiMmY5YzA2ZDQ1N2EwZjFlOWE2NzY5MjE2MTU3NWFmNThhZDhmODNkNyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZjY3NzIzNWE0NDIyYmI2MDQ5NGQxZWYxMWY3MGNkMzM3YTgxMThmMDA5M2UxMjAzZDcwZDczNTljY2I0MjJjNCJ9"
+        },
+        {
+          "resource": "repo://Styles/Styles.lua#L486-L497",
+          "version": "repo-lines-v1:sha256:85f15b453e2e8591bbc98816d819d45d2fa2aa130c5c8c5a5daa3c973aade159:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU4MzdlN2E1ZWMzYjM2ZGMwZTU2ZDViZTZlYjc2YzgyZjZlNGEwOTg5MGFiMDcyYmY5YTk5YWEwOTA1OTA5ZTMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNjZWUxZDBjZmE1ODliZTQ1YWUxNzEwMzAwM2MxNzk1NGIwMWU3MGRjZmFmNjg3YWM3ZjIwMzYzY2E4MGZlYzUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI0ZjBlMWJhMzM3YzcyZTNiNDYxMTkyZTNmNzFkZjJmYTBkMjhjMTg5MTA5N2ZjMWUwN2EzOWIwYWQzMTA3NzgifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-25T18:59:51.751Z"
+  }
+}

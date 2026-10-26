@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:8c26a3124f8adf99f53c53002f4b86574da7bd27548ea4c9d6fd6cf7d53b5296",
+  "claims": [
+    {
+      "id": "claim_1f227be4208b43649fd8d94be99afadc",
+      "statement": "The TOC has a single comma-separated Interface line covering Retail, Classic Era, TBC, Mists Classic and Forever, with Wrath and Cata intentionally not listed, and a @project-version@ placeholder version.",
+      "evidence": [
+        {
+          "resource": "repo://TidyPlates_ThreatPlates.toc#L1-L12",
+          "version": "repo-lines-v1:sha256:d45731c8200db68bfdb9efc66a385e542e99e3a3b6369bb122b2ca44d075384c:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQxNzNkMzQ5NmI0OWJmYTgzYTlkMjJmYWRjNDEwYTc0MTJiZWExYzRiOGNhMTJiOWM4MzFkMmYxYjFkNTI3YzciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI3MzdjYmVkYTg5ZDhmNjRhNzUyZDk2MjkzODAzYzQ2ODA3NzYwMjdmNDI1MWY4NjJkNjM3NDYzOWU4YjZmMDAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImMzZTZlZGQxNjU3ZTI1MWYwZjY4NmY5NDUxMmIzMGM0MDMxNTUzZTBlNWU4N2U0NjU5YjMyMjFmZDY1M2ZhYWMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_520aee2e0d404dce91cb71b646b458f3",
+      "statement": ".pkgmeta packages the addon as TidyPlates_ThreatPlates, pulls libraries as externals, embeds UTF8, disables nolib packages, uses CHANGELOG.md as manual changelog, and ignores Source, README.md, CLAUDE.md, AGENTS.md and openwiki.",
+      "evidence": [
+        {
+          "resource": "repo://.pkgmeta#L1-L58",
+          "version": "repo-lines-v1:sha256:1e5e6f127868c3cd11db465a58e386ac540072360affcc8f5ac2f2d7d9a91963:eyJzZWxlY3RlZExpbmVDb3VudCI6NTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI5YzNkN2Q5ZjRhN2I5Zjc2YjRjOTZiN2FhNjAyMjI3NDg1NzY2NzNiNjQyNDFlMTQwNmFmNjNhMDgwMjRhN2EiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE3ZjhmNTQ5YTk2NjIyMTg4ODM2ZjlhNmI0Y2RiOTE4OTQzMTE2YjY1MWUwMGM3NzFlMGM5YWVhN2Q4NzFkMjkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_fcea14059bd140878c4bcd4f9f7a3c27",
+      "statement": "The reusable packaging workflow fails without the @build-time@ placeholder in CHANGELOG.md, replaces it with the current date, and runs the BigWigs packager.",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/_package_release.yml#L41-L61",
+          "version": "repo-lines-v1:sha256:9bc5118f0042818b6bf6aaa90a0099164760b6432ce45cafb15ede71ec2f2cb4:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk5M2M1ZDA0YTBjYzk4NDcxZDFiM2U4YjM0MWY1MTNkZmIzNzYyNmUxYmQyNjhhYTJlNjM5ZTgwZDY0NjQwYzUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFhN2E2ODZkOTI0YTM5Y2I0OTlkYzdjYzVmMTE3N2JiOTdiYTU1MTcxYmM5ODNlYjJiMGZiMGE2N2VjYWFiZjUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE2MDA2YjA0ODUwZmM2Zjk5YjhiMzZlN2M4MDQ4MTA4NTcwOWFkYTU3OTQxZWQ5Mzc3YTE5YmIxOTI3ZTc0ZTciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_22d3e1db26924e4daf1a47e625d8eae7",
+      "statement": "Release tags without alpha or beta publish to CurseForge, WoWInterface and Wago; beta tags to CurseForge and Wago; alpha tags only to GitHub, depending on the forwarded secrets.",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/build.yml#L10-L34",
+          "version": "repo-lines-v1:sha256:221466d7359d9c3f992299459175dbde08ed5ede52d409caa8bb008b46749085:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU5NmRjNDgxNDlmNWE4M2QxZWQ2ZGJiMzliYmM3ZTJiOTAyYWEzZDM0ZDZiZDVhZTRiMjkxYjY4ZGYwY2E3OWEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE4MjMxZGY3NGUzYTA1YmUyNTJjNWNiMzM1MTgyMGExNjBjYTk0YTkwYmNiMGEyYmYzYTBhY2RhNGU1MzM1Y2UiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJiMjRkN2Y5YjQxYjNhZWZiNjFkMjk4MDc5NzMyNmE2YzkyNjEyYzMyNDE2OGQ4ODZlNzY5N2JlNjIxYTNlOWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://.github/workflows/build_alpha.yml#L9-L30",
+          "version": "repo-lines-v1:sha256:0663bb2c49a280ef72399b671b8fcca3cb034221c3256af3e8277e5d9e91058a:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU5NmRjNDgxNDlmNWE4M2QxZWQ2ZGJiMzliYmM3ZTJiOTAyYWEzZDM0ZDZiZDVhZTRiMjkxYjY4ZGYwY2E3OWEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFhZDk0NDMyN2Y1MzQ2N2VmOWM4ZmQ4NjlkNjFlNTk4MjY4NmExMTYxMmY3OTAzNzk5MzZhN2Q1ZTk3YWJlZDciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZmYjVmYzJhMDEwZDRkZDMxZWY2ZjFiZTczMWFiMWM5YWQ0MjQxNGY2NWRjMzY1NzhiOGMyN2M3ZDQxOWU1MTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://.github/workflows/build_beta.yml#L9-L31",
+          "version": "repo-lines-v1:sha256:3ffaf4284218943b63ca4db9ab7b7f56288408c64f739ab04df5224740862b5a:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU5NmRjNDgxNDlmNWE4M2QxZWQ2ZGJiMzliYmM3ZTJiOTAyYWEzZDM0ZDZiZDVhZTRiMjkxYjY4ZGYwY2E3OWEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYyODRjNjA1Yjk5ZDE1ODAyOWE5YTBjOWFhNzk5ODgxYWYwYmFlNmQ5MjIzNmFmZjliYjM1ODA3Yzc3OGYxZmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjcyYzBlOWE0NWMyZjMxNjQ4OGVkYzU5YmEzZjQwNTBiMjk5ZjE2MGFhMGU3MDQyMzRiN2M5ZTI1MDBiNGE1NmEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_f43aff01afb74480ac0b3ada8114745c",
+      "statement": "Pull request test builds are triggered by a /buildtest comment from an owner, member or collaborator or manually, tagged pr<N>-test<run>, marked as prerelease and linked on the pull request, and deleted when the pull request is closed.",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/build_pr_test.yml#L10-L100",
+          "version": "repo-lines-v1:sha256:8c5f17d7b5536def8f1b9c33df1a9fe09def09e4ce4b8ca8a92e3799a14e6665:eyJzZWxlY3RlZExpbmVDb3VudCI6OTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU5NmRjNDgxNDlmNWE4M2QxZWQ2ZGJiMzliYmM3ZTJiOTAyYWEzZDM0ZDZiZDVhZTRiMjkxYjY4ZGYwY2E3OWEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI2ZmQ4NzMzZDI1Mzc3NmM2MDEyZjQ3YjNiYmI2ZDA1MDQ1NTRlN2EzZWNkYzk4OGUzZTNjZmNlZGVhZmQwZjYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIxOTk2ZDQxZDI1NWNlZDQxMTY3NDk1ZDE1ZDA5M2I0NzIwZTgyYTUzZjc2YjVjYTkzMzMzNjljZTg1YThlZWIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://.github/workflows/cleanup_pr_test.yml#L5-L30",
+          "version": "repo-lines-v1:sha256:4cdadac7316b7d97c7beebb283a3e8d079aec18dc834e024d25be093567e3c6f:eyJzZWxlY3RlZExpbmVDb3VudCI6MjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU5NmRjNDgxNDlmNWE4M2QxZWQ2ZGJiMzliYmM3ZTJiOTAyYWEzZDM0ZDZiZDVhZTRiMjkxYjY4ZGYwY2E3OWEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM4MTMzM2RmNjZkNTk1YzYyMjM3NDEyZTdkMTYwN2I1Y2ZiMDExNDdmMGYzYTlkYjdiN2FjNGU3MjljNDNkMjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNkNjg2OTUyOTA1YmE0YTBkMDRjNzIzMWY0YTFjYWFjYzQzZjRjNmYyNTI1ZjE1MTAxMjU4OTNiMzBhN2MyODIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-25T18:59:51.751Z"
+  }
+}

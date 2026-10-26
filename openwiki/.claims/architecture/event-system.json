@@ -1,0 +1,154 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:70b6f38c9faffdf16b1a1b00c0f8e4da1d5c10198e14591c2606266a04292b56",
+  "claims": [
+    {
+      "id": "claim_5f9a79bbdb234267aa68f11f152e296a",
+      "statement": "EventService keeps one main subscriber per WoW event in RegisteredEvents and additional subscribers in SubscribersByEvent; EventHandler calls the main subscriber first and then all other subscribers.",
+      "evidence": [
+        {
+          "resource": "repo://EventService.lua#L26-L62",
+          "version": "repo-lines-v1:sha256:966a7f28cfad91268de45607203b295d66f1facda94b7246753f5409334f3669:eyJzZWxlY3RlZExpbmVDb3VudCI6MzcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJlNjkzNzFhM2E2Y2FjZjlmOTA1ZTU3OWUwNTc1YWE0Y2M5ZWM5OTdkN2M0NTY5MThmN2NjOWIyOGJlNzdjMmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjBiODg0MGI3ZDNjNzhmMTg2OGM1NDU0MjEzNjc3YTJiMzJlODYyZjU0ZWM3NGZhZDI3YTM4NmIyY2RhMDdlYjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjlhNzUyYmQ3NmE4MjVlMGEzOTdkMDQyYWU0NzRhMmIzYTgyYzZkMDQwMmZiOWUxNDhhODAwNzZmZTY3ODdlZjgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_72debe54eb324ea581e88cdeef30718d",
+      "statement": "When the main subscriber is Addon, the handler is invoked as Addon[event](Addon, ...); subscribers registered with true are invoked as subscriber[event](subscriber, ...), with a function as func(...).",
+      "evidence": [
+        {
+          "resource": "repo://EventService.lua#L36-L62",
+          "version": "repo-lines-v1:sha256:76a4301b57c95a5f3fa0ae84f9267ed4bd45743274eb151dab43a7514220683a:eyJzZWxlY3RlZExpbmVDb3VudCI6MjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBjYTk0NDgzMGZkY2FlNGM0NTg3ZDZlZTFkYTUxYzI1NGQ2YmY5YzFmZGZiZTMwODUzZDZjZmM4YTlkMjcyZDgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZlNTg5YjY1OWVhZDc0ZmZmODFmYTcxM2YwNjk2ZmFlZDA1MzIyNzIzYjFlMDJjZmMzZTA4M2E3Njk3M2MyMDQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjlhNzUyYmQ3NmE4MjVlMGEzOTdkMDQyYWU0NzRhMmIzYTgyYzZkMDQwMmZiOWUxNDhhODAwNzZmZTY3ODdlZjgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_bff5789955674b039c5db62d095d3de2",
+      "statement": "Unit events use one frame per unit token, and a function subscriber of a unit event receives the event name as its first argument.",
+      "evidence": [
+        {
+          "resource": "repo://EventService.lua#L167-L189",
+          "version": "repo-lines-v1:sha256:5991f25df6e5981de9489797c3b3f617661ce6e558fddc7caecdabf46a08e9a4:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY4YmY3NTQ3YTJmNGUyMTdlMjg2NzQ1YTkyMGQ2ZGVkNDk1YjBkY2ZiNmM5YWU2YzY5ZmZhNmM0OGE5Mjk5MmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImFkMTIzNGRkNjNmMDBjYjlkZDIxZjdmMmQyNWJiMDQzY2E1NGM5OGVjM2U0N2ViNzc0ZTEyMzQ2ODhlMjhiNTgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjM0ODU1ZjE3OGFkNDlhMTVkZWJkYTIxNGY1MTIyMzU0MjY4YTM0YmJhMjlhNjZhMDBkZDAxNzNkNzBkYWEwNmYifQ"
+        },
+        {
+          "resource": "repo://EventService.lua#L64-L75",
+          "version": "repo-lines-v1:sha256:e3031484c2fda21f08d81bf1aace7431ba98d821dcecf124397931f6b481e567:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk5YjI5MjRmMjYzNGFhZmFiZTU1ZjkyNWM1YjliM2MzOWMwMmMwNmU0YzY4NTY2ZDY4MTYxMjQxOGNmY2I4MWIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU2NmUwZWNhZDNhYmU2NDUxM2ZiMDljYjA2NTU2NWQ0ZTdjZTYxM2Y1MjdhOWE1NDEyNmIyMThjY2U2ZGQzMDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjcxNDRjNzA1MzBhZmI3NTg3Njg0MDJkOGM3ODhhYzBiOTIzODQwN2U0YjdiZDJmMjIyZTkyMTYxZWI3N2VhMGIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_2a276e54b8ba46cfa36f7b3d35cb7376",
+      "statement": "All EventService entry points silently skip events that are neither internal nor supported on the running client according to Addon:ExpansionSupportsEvent, which reads the WOW_EVENTS table.",
+      "evidence": [
+        {
+          "resource": "repo://Compatibility.lua#L24-L128",
+          "version": "repo-lines-v1:sha256:923e471520bfaf74729afcb70dd656cee33ad58a11a21d6644aafd65c068bad7:eyJzZWxlY3RlZExpbmVDb3VudCI6MTA1LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJiODQwYWUyYjUwZjdhYjI5NjVhMTIxY2JmMzQ5ZmYzNjViOGM2ZjA5ZDZmY2I2MDkxNTdiY2MyYzZlMmNkNzU1IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0ODMzMmZlNjY3YmM1MWFjNGE1MWJhMGVmZTczNDQ0MWM5MGRlZjU1YzYwYTI2ZDdkYjI3NWVjYmJjZjQyZjE1IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIxNGQzODExOGZhNWM0OGJmOWExNmU4ODZmNDY3NjI2Mzg2M2VhZjUxMTdiOWZhZTRkZDBmM2ZlZDU0MmM4ODY4IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI1NzJiY2YzYzMzMTlkMWFlMDQ4OTBkMGNiOGM3MzJmZDg1OWIwZGQ0ZDJmODgzNjkxZjc4YWE4MWJjODExN2IwIn0"
+        },
+        {
+          "resource": "repo://EventService.lua#L131-L168",
+          "version": "repo-lines-v1:sha256:c86814d1877de441674ca730ee32d68247c3f32855cf7c8e8ea4241745832670:eyJzZWxlY3RlZExpbmVDb3VudCI6MzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY4ZjNkNzZmYTc5NDEzZWNmNWYyMjE4MGY0MWUwODI2ZGVhNjc0NGUwYTZlOTAzNDYzZGM5ZmY5ODljMzRhYTMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM4Yjc4ZmVhNDdjNGU4YjQ4NmRmYzBmMjExNmE3NGFiNTFhZjE1YmRiNjAyNjYwMTUyNTFiMWQ4YTNiMjg1YTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImFmNzRjZDQ4ZGI3OGFlNDM5ZWFlNzAyNmFkYTZiZmExZjRjOTljMzZiZDk0NjIyOGNjYjhkZDY0ZjViOTliMTgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjM1MjUyMjIzZjg3NTk0MTI2NDY0MTNmZWYzMjQ1ZjRlYzRjMGViMTc1Y2QxOTI2MTNhMGU1NWRhMTFmYjJkM2EifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_188b38a582dd4838a736b213e6f07c50",
+      "statement": "Publish does nothing once Addon.IsShuttingDown is set, which happens in AceDB's OnDatabaseShutdown callback to avoid errors from handlers reading stripped profile defaults during logout.",
+      "evidence": [
+        {
+          "resource": "repo://Addon.lua#L324-L329",
+          "version": "repo-lines-v1:sha256:6a5f15f545485196b774536457a8765492aff745b2e3a2d410a1d2fd4b002b83:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiY2U5ZTllNzUyM2FjYjc1MTk3ODA2N2IwMWRjNDZjYWQ5YWVhYjg2MmQwZGExYTA4ZTBkYTI4MDIxNjU3YzNmNSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYWI3NWYzNTQ0NDZiMDliODNmNDY5MzA0NDZhMDljYzVkYWFkOWE1M2Q0MGEzNzU2NTIxMWVmMmUwMTk4OWRmYSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOGYwYTU2NTkwMGNlNDYxZjBkZDEyNDlmN2VkYTE1OGE0Mzg0MGNlNjJhOThhMWMxODAzZDRkODcwZTMxZGJkYyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNDgzYzJjOTE4NzViNzlhN2Y4NzUzNTFiYTA3Yzg2NzhiOGU0YTExNzc4ZGRjYWQ0MGViYTRiYTQ2MzRkOWM3YiJ9"
+        },
+        {
+          "resource": "repo://EventService.lua#L191-L206",
+          "version": "repo-lines-v1:sha256:a189f1bfea62977f27089f332909ecb68845f7711de9ff82e3e22e8e5c277d38:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE0OWE2Yjc3ZDBhYzkyNDU3M2Y2NTJkNDVmYmE5YzVhOTZhOGRmNjhiMWM0ZTQzYjY1YTgyYzg4ZWQ0ZDhhMDYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM4YTJlZDhiZjljYmZkMGVlNWNhMjg3ODlhY2QxNzIzNmI5MzRmNWZjZmI3YjcyMGFmN2RmOWQ4MjE5YWRhNzUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQ4ZDg4YTBjMTYzNGU3OTJhNTU0ZGUwMGE3ZGU3MjRjOTYwNzIwNTU5ODk4YWFjZTI4YmVkM2NiYjlkMTViYzEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_1c08576e2c6b47a09efc3538108815fc",
+      "statement": "UnsubscribeAll also unregisters internal events by checking INTERNAL_EVENTS in addition to ExpansionSupportsEvent.",
+      "evidence": [
+        {
+          "resource": "repo://EventService.lua#L235-L249",
+          "version": "repo-lines-v1:sha256:d277ed05ff47afdfe3e3e0c353f7d488e7250e86e08d9b58cda9cdf9f1898d77:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY3NGQ4ODM4M2IzOWJkOTBiOTg2OWE0YzhjNTA3YzJjMTQ2MzhjZWVmYzExMjA2MTdmMjM2MjVjMDQzNDg2NGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJmZWEwNjZmOWM3YTcwOTRkZDNlNGE3NTVmMzQzZjlhZjYzZjFjZGNmNjA2Yjc0MTk5NzI1ZWRiZTE1ZmMyMWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQ1YzBmNTYxOWQ4MzYxOWRlZGI2NWY1YWQ2NDNmN2Q2ZDM2YzVmOTA4NTViNmI2MWM3MWEyNzFkNzQ5YzAwOTcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_5d741789794d4ab5b9ccf018e9cf4fe7",
+      "statement": "Addon:EnableEvents registers Addon as main subscriber for all events in ENABLED_EVENTS and is called from OnInitialize so PLAYER_LOGIN is received; ACTIVE_TALENT_GROUP_CHANGED is added only from Mists on.",
+      "evidence": [
+        {
+          "resource": "repo://Addon.lua#L349-L350",
+          "version": "repo-lines-v1:sha256:6fa0ec1fbac5b6c0d9fe34fde30aa586b4140e0675d540275b7897a9d936f0a1:eyJzZWxlY3RlZExpbmVDb3VudCI6MiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZTdkM2VlMGU3MzNlZTFkMDA0YmQ0MGQ0NmZmNTc2MTU5N2NiMjEyN2Q4NGM2OWNkOTA2ZGQ0OTk2NTU2Yjg4NSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZWY0NjA1NDc4Mjk0OTJlMGU4NWZmODA0OWQ4YmVjYTQ2ZTExN2RkOTViMmRiNWU1NzlmYzgyNmYyNWEwMmY5YyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiODg1ODllNTU0MGI5NTcwMmZhZmQxZjEzN2Y2ZGE0M2I3NjQ3NWY5NjY3YWY0NDQ5MDFmYWJkM2Y0MmI4N2YxOCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYjM5YTExZjQyYjAzZTUyZjYyZmFlYjc4YTU4MTVjZGViNGVlZDc1Y2I5MTU0MjFhYTgxNGIwOWUzYTBkMzYyMSJ9"
+        },
+        {
+          "resource": "repo://Nameplate.lua#L2264-L2350",
+          "version": "repo-lines-v1:sha256:e18a5ce34365b5e59501f4fc3a265915051b2fbe86d810bfb2689b8a24e8311f:eyJzZWxlY3RlZExpbmVDb3VudCI6ODcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY5NTA5ZDc0MmZjMDUzMGFlYzEyMTQ3NTI3MTAwZDA2ZGJlMzJhN2I5OTU3YTIzMDgzZDI2NzA0ZTA2NGI3YmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI4ZDExODljZGYwNTAwYWI4NGI2ZjA0M2IzNWEyODgwZDBmYzRhZmMxN2MwNTZhNjZiMDZhMTc1ZTFlMmU2YjYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE2ZTJhMzAyODIxMzRhZGE4YWY5MDdhMjg5YzVjM2Q4MDUyY2E2M2Q3N2Y2MjM3ZDQ1ZGEyNDJjNmY3NGUzZDciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjI4YjVlZTEzMThhNDdkNDJkN2JmYmU2ZGFlMGU0YmNhOWE0ZTkzODk2Mzc3OWZhZmJkOWQ2NDk1MjMwNGFmNWIifQ"
+        },
+        {
+          "resource": "repo://Nameplate.lua#L2473-L2481",
+          "version": "repo-lines-v1:sha256:ffae82463b00c40c22386616fce509a3691cc9504dfe07029f82f3b9c1a1e5bc:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiODFmNzg4MDYwODU3ZWFmZDljMGQ3YzIxOWRkYjY1NjY0MjUxYTlkMTYxY2E0MjBlZGY2ZWQ1ZDA3ZGRiNjUyMiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDgzMzJmZTY2N2JjNTFhYzRhNTFiYTBlZmU3MzQ0NDFjOTBkZWY1NWM2MGEyNmQ3ZGIyNzVlY2JiY2Y0MmYxNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNTY2ZTBlY2FkM2FiZTY0NTEzZmIwOWNiMDY1NTY1ZDRlN2NlNjEzZjUyN2E5YTU0MTI2YjIxOGNjZTZkZDMwNSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOTRhODg4MTY1MjlmZjRjOTIwOTE4N2U2ZDAwYzNmYjcyY2Y0ZThiOGRjMWM1OWI4ZWYzNTQwNjgxYTNhYjIwNiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_b4f0bf7f8ed24ef7be5e5e03624ffef8",
+      "statement": "COMBAT_LOG_EVENT_UNFILTERED is registered or unregistered in Addon:UpdateSettings depending on the ShowInterruptSource setting, and ARENA_OPPONENT_UPDATE only in solo shuffles in PLAYER_ENTERING_WORLD.",
+      "evidence": [
+        {
+          "resource": "repo://Nameplate.lua#L1369-L1374",
+          "version": "repo-lines-v1:sha256:7282227e0ace6216cff9f724fa52aef5a67bf8df1583f5b547171961bc1e74f6:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZmMzY2Y5YmIzOGU5OWFiYTY5OTZiNDgxZGM2YzAyZGMwNzRhMmFhZjUxMzI4YTFjMTRmZGU2MTVlZmM0ZDMyYSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNzc5ODExYzVmYmUyNWMzZDRlNWYzZDFmZDM1YWI5ZGE2YmNmOGE2OGM1ZWRmOWQ2YmE5N2Y2ODY4NmMzOTY4MCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNjhkY2QxNjc0M2Q2OTJmMDU1YTNjMmU3YmRkNjA5NmU1MGU4MzQxYTIyZTVjZTUyZjNmNDQyOWQ1NjQ1YTFlNiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOWFhODQ4OWQ5ZTcwYjZlYWM3MDBmZTIzM2UzZjRkODEzMDk1MDQ1NTY0OTIwZGEyMjc5ZDA5MWQ2NmQ1OTA2NiJ9"
+        },
+        {
+          "resource": "repo://Nameplate.lua#L1561-L1567",
+          "version": "repo-lines-v1:sha256:e36a51beec7bf5f747405841f8293fa107fd3759c558752624e1989d027cee0f:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMTFmNWY5MmVlYzk1Yjk0ZjNiZGRmZTUxMDgyNjE0ZGFmYTE4NzUzZjY5NThhM2FmYmE0ZTEwYWUzYTBmZTAwMiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNzc5ODExYzVmYmUyNWMzZDRlNWYzZDFmZDM1YWI5ZGE2YmNmOGE2OGM1ZWRmOWQ2YmE5N2Y2ODY4NmMzOTY4MCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZDgxODkzMTM0NDM3YjViYjA4N2Q3ZjBmZGE4ODJhOWZlYjZhM2FiMDMyY2Q0YmEyYWFlNTkxN2RkOWRiYTQ3ZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNTIzYzlmNGIyY2UyNTVlMDI0NGUzYWJmNDg2MGU1ODNjYTcwMGYyZjBhNDA0NzRmYjUzZjBhNjYyMmY4YjhiNCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_20e7b7c0a64c45dba54f527cf0799cda",
+      "statement": "UnregisterGameEvent unregisters a WoW event once its last subscriber is removed without checking for a main subscriber, and Subscribe only registers at WoW when no main subscriber exists, so unsubscribing the last widget from an event such as PLAYER_REGEN_ENABLED can stop the main subscriber Addon from receiving it until reload.",
+      "evidence": [
+        {
+          "resource": "repo://EventService.lua#L156-L165",
+          "version": "repo-lines-v1:sha256:6c5d43c01bec54379b0e2e98aad127308d866fe6d0fdde4234dd56376305f790:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYxZGQzZmJjZDgzZDkxZjdmODFkMDE0NTJkYjY4OWY1OWFkZTU4Y2U1YjEyNWNjNDJlMmU3YTVkZGFlY2IxNTMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA0YjkxZjlhYzUzZTkxNjZiNjllNDc4MDkzNjYwOTUyYjkyYmM1NzhiZDgwYTBmN2U5ZWE4NTAyNDhiMGMxY2MiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQ1NmVhNzc2NDQwMjZkZjUzODllOTNlNDk5MGYwOTAyM2UwOTEyZWIzOGUyYmFlZTNiZjQxZjc1MjQ5MTQ0M2EifQ"
+        },
+        {
+          "resource": "repo://EventService.lua#L208-L249",
+          "version": "repo-lines-v1:sha256:7a505e2bdadd32fe805875810405deb1ff671d1bd9c4d29d4bb2c024e46faf00:eyJzZWxlY3RlZExpbmVDb3VudCI6NDIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVmMmEyYWU1M2Y3MzY4MWE4NTc5MDBiMzk2YTM0OTRiMzZmMDRmOGEwNWE2NThlNzg0MjkwZThiY2Q4NzQ2ZjkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU2NmUwZWNhZDNhYmU2NDUxM2ZiMDljYjA2NTU2NWQ0ZTdjZTYxM2Y1MjdhOWE1NDEyNmIyMThjY2U2ZGQzMDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQ1YzBmNTYxOWQ4MzYxOWRlZGI2NWY1YWQ2NDNmN2Q2ZDM2YzVmOTA4NTViNmI2MWM3MWEyNzFkNzQ5YzAwOTcifQ"
+        },
+        {
+          "resource": "repo://Widgets/AurasWidgetMidnight.lua#L1231-L1237",
+          "version": "repo-lines-v1:sha256:7775aec450cc3917ecd4e8a6785ced2e851d107e063be00d1c739d6282a5ac7b:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNTMyNjE3Mzc1YTBkZTYzN2IwYWY2MGJlMDU0MDZjNTU2ODZlNjQwZWZjMTExMzgxMjMxMjM0MWM1YTkwNThjNiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDgzMzJmZTY2N2JjNTFhYzRhNTFiYTBlZmU3MzQ0NDFjOTBkZWY1NWM2MGEyNmQ3ZGIyNzVlY2JiY2Y0MmYxNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZWI0NGY4ZThiODA4YWE5NzljODE2YzgxY2FkZjhiZjgyNTYxYWEzMjdjMzE0ZDA2MDViZjBiNTE0MWI4M2QyOSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMjM5YjNmNGUwNDYxZDFjMmM0ZDJiNzkxY2QyM2IyZjRlN2I4ZGE1ODQwMzAwYmY0MTA4NDkwMzFkOTAzZjc0MiJ9"
+        },
+        {
+          "resource": "repo://Widgets/QuestWidget.lua#L663-L665",
+          "version": "repo-lines-v1:sha256:88f0020bee9dcc0c1f95d5d1dd87869493e112ff74cf13ab2ea8da311521f7d9:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiODY4OWRkYWNiNWMxMzM4NDllZjI4MjQyODY3ZjY2ZDNiYTBlNjdkYzM3NDgyMTc4MmZjNDExZjEyNzNlYWRiNyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYTE4Yzg0NjY1NGE5MzNhYmM0ZGM5YjI3MzQ5MGNjYTc3ZGE5MGE5NzdmZWJiOGM1MzA3YjU3NDc2NTZkZmUwMCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNGQ3ZDY4NWViYTRkZTgzYzJmYTExYzViMDUwMzhjZTgxNTJmYmU1Yjk1OTIyYTJmMDk5NDJmMzgxOGRkZGQzOCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYmYxZmE0OWNlM2I3YmZkNjE2ODA4N2RlZjg1NDE2ZmExNjljNGJlOGQxNzNlMDgxZGVlZmI3ZDljYmZjNzlhMCJ9"
+        },
+        {
+          "resource": "repo://Widgets/WidgetHandler.lua#L184-L188",
+          "version": "repo-lines-v1:sha256:a42659336fd63314f2178d4aa40f41598492da22189a0661c534e417e08c5771:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMDc0ZTZmMTI2Y2JjYWM3ZjZjNTNkYjFjYTljODYzNDIyOWY1ZTI2OWZkYTQwZWI5YTU4YzI1ZGYzNDkxZWYwMCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiM2U0MTVmMWZhYWRjMTZkMjRhYTQ0M2E4N2MzZDUwOTZmMjE5ZGI3ODZmNzAyZmM5NmU3NTJjODZmN2EzZjVjYyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZDczZjU2ODEwNTAxOTg4M2VlMjU1MjRjMDM4YTVlYTExNjMyNzMzY2Y1OTE4NTg1NGRjOTk3MjRkMWFjNTMzYiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMDY2Yzc3MTgwNjdkOGViOGQ3NDI5Njk3Y2RlNmU4NmE2MmIxODM1MmZiYzcyZjg1NDU5Y2VlZjY0NGMxMzUzOSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_b7e71a37d3004814b9b0b7fc3734c502",
+      "statement": "Addon:PrintEventService and Addon:DebugWidgetHandler print the registered events and widget subscriptions and are called from the debug chat commands.",
+      "evidence": [
+        {
+          "resource": "repo://Commands.lua#L130-L135",
+          "version": "repo-lines-v1:sha256:bce095bc00e4f2ffc0f5ba30931127742530058b5da2b43d3169d86d0ca25774:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiY2U5NTkwYzhhMjkzZDE1NTliOTA0MzRmMDE3ZjY4OTU3NmRjZmFkYmJjOGFlYzVhZmM3MGVlNDk0NmU1ZTZiOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMjRiODU2NWJlZDVkZDdiYmQyNDJmYjc1MzhlMjcyYjQ0NDZmYzE3YjQ4ZDU3OTVhZTFmMDRmNjBlOTc3MmY0MyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOGZkMjUwNDIxNjcyNDEwNzE2ZWRkODAxNTNjMjMyYTc0YTQ0M2JmMDM1YmJlZGEwZWY1MzBhYTk2ZjkxYTZlMiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZGNjOTI4MzQyZDg5Y2JlZDRhZjI3ZGUzYzQ5MDIxNDc0OGU2NzIzNjJlZDEwYTQ0NjMxYjFhYjdiM2RmYzJjOSJ9"
+        },
+        {
+          "resource": "repo://EventService.lua#L280-L358",
+          "version": "repo-lines-v1:sha256:2167daa7fd3c2b30e9db22bf2c9f954546784ac008f3c4bc01d596c02ae698fd:eyJzZWxlY3RlZExpbmVDb3VudCI6NzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYxOTI0ZmE2NTQzMzkxMjU4YzE2ODk5MGI2YzA0ZmU3NTkwYzljOGRkYWM1MDVlZTI4YWQ0MWM1NGZjZjM0ZjIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM2MWU0OGQwMzA4ZjIwZTMyZGJhNWZiNTYzMjhiYWYxOGQ3MmVmMGNjYjQzYjg0ZjVjMjYyZDJhNmExZmM2YzgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk0YTIxODYzNGVjMWZiOTUxZGY5ZjUxZGJlZDVhNTVlNThkMGNkMzM1Mjc0NWUzOTU3YTk0NmVjYjdiYTZlY2EiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-25T18:59:51.751Z"
+  }
+}

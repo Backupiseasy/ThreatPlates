@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:ac80d43f4a4065bfc4731c3e0c99a4926ef78cba7a0e57e8fa07a3b5c0ef460e",
+  "claims": [
+    {
+      "id": "claim_bdba7c221ef94e5f857be42be7b576fa",
+      "statement": "NewWidget returns a widget table with event wrappers, update helpers and default OnEnable/OnDisable, where the default OnDisable unsubscribes all events; NewTargetWidget and NewFocusWidget flag the widget as target-only or focus-only.",
+      "evidence": [
+        {
+          "resource": "repo://Widgets/WidgetHandler.lua#L169-L219",
+          "version": "repo-lines-v1:sha256:d356ddd564df30c9038494663c8dbba0f5623b32f3f6d71897b8fb2712ca5057:eyJzZWxlY3RlZExpbmVDb3VudCI6NTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZlNTZiYTY4MzI3N2U0MDU3MDA2MmVkZjQ5M2E2MmNlNjM4Njc2YzUzZmExMmE5MzRjOGIyNzVjZjkzNjhhMDIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQzYTgxMDg3YmNmYjg4OGRiZjNjN2ViMThmZTI5MWIwMzEzNmZiMTU2MmRmNjE1YjEwNjFiMjJhZjRjNTJiMjEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNhNzM3NDU5YjA5MDMwZjM3NGQwZjIzNThmZWMwOWE5ODg4NWQwOGRkYTg4Y2Y4ZmY3NzQ5YzQ3MDg3MTFlMDIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_0b2abdcb59874e55841ea2a0de67b1ca",
+      "statement": "InitializeAllWidgets initializes the Script widget first and then all others; InitializeWidget calls UpdateSettings and EnableWidget when IsEnabled is true and DisableWidget otherwise.",
+      "evidence": [
+        {
+          "resource": "repo://Widgets/WidgetHandler.lua#L226-L247",
+          "version": "repo-lines-v1:sha256:264a23350bd8015bc93a0883481adfd9cbbece32e224264ef5ad990b4438c782:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVmY2QxNmNlY2QyZDRkZjY1MjExYjhlYzc5OGU0YzEwNmMyMTE5OGYwMWMzZGNjN2FjOWYzOWVmZmMyMjM1OGYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFhZDc0ZWRjMGY3N2NiNTBjMzQwMTBjYzI3N2NkOTc0OWJjN2YyZDBkNWJiNjQ1YTc0MGI2YWNhZmQyMGQ0ODciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRmOTQ1MzEyYTQyZGFlNDczYzIyNjkzOTk4YjYxYWIyYWI2ZjczZDc4OWU5MTk5YjQ3ZDUyMWY5MjQ0NGIyZjMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_566d31eee70448118284f3541bb32e78",
+      "statement": "EnableWidget creates frames on all created plates, activates them on active plates via EnabledForStyle and OnUnitAdded, and calls OnEnable only afterwards so events cannot arrive before frames exist.",
+      "evidence": [
+        {
+          "resource": "repo://Widgets/WidgetHandler.lua#L249-L293",
+          "version": "repo-lines-v1:sha256:dd454ffa218e361f45661c9b01687e545715b0932f241a85ab235ca5c40f7478:eyJzZWxlY3RlZExpbmVDb3VudCI6NDUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM3MGU4YjEzZGFjMzg3M2MxYmQ3MDZhZDBhZjBmMGIxYTE1MzE3MTJmMWIwOTBmOWU2MjdmOTk3NDJiNWQ0YjciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU2NmUwZWNhZDNhYmU2NDUxM2ZiMDljYjA2NTU2NWQ0ZTdjZTYxM2Y1MjdhOWE1NDEyNmIyMThjY2U2ZGQzMDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU5NTc0MDRhODhiYTgyZjcyMmFjYWVkNDc4MzhkNTBmYzg2MDg4M2EyMzM2YjhiMTNlOGFjYzhmNzBiMWMzYWYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_ab1f7e4298d04f509c08e22306a25c91",
+      "statement": "DisableWidget only acts on enabled widgets, calls OnDisable and hides the widget frames or calls the target/focus removal callbacks.",
+      "evidence": [
+        {
+          "resource": "repo://Widgets/WidgetHandler.lua#L295-L332",
+          "version": "repo-lines-v1:sha256:75fb92f69ded1faf161ff017169f3e453a5c2b6009427da00afd112cc9a60813:eyJzZWxlY3RlZExpbmVDb3VudCI6MzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIzMGYwNzNmMzliNDJlNTQ4YWRjYjY5MmM4ODA3NjU1ZTVlZjNiZGQyZDUzNjMyYmE4YjdjM2NjMTJlYzM5M2IiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY2ZDQyYmExODAyM2U0YmNlNDRmOGNmM2RmNGI4ODRiMDY4NWQ0OWI4ZDQwMjU0MWRiNzlkMTA1MzVkYThkMGEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImNmZWMxMDVlOTQ2NWVmMDIzMTIzNmI4MDA0ODViMmM4MWZmOTFiZjI1OGRlNzE2Njc0NmJlNDYxZTlmZGY0NDkifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_e23d3030eb1c4f1284a195c9e182119e",
+      "statement": "OnUnitAdded calls target and focus widgets for (soft) target and focus units and re-evaluates Active and OnUnitAdded for every enabled per-plate widget; OnUnitRemoved deactivates and hides all widget frames.",
+      "evidence": [
+        {
+          "resource": "repo://Widgets/WidgetHandler.lua#L334-L404",
+          "version": "repo-lines-v1:sha256:85b93e894ba738ca699ae47574132afe6e40ce7d14b2c5407571504e6a117151:eyJzZWxlY3RlZExpbmVDb3VudCI6NzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNiMGEwODVhOWFjMDFhZmU4M2EzMjNhZGVjMGUzMWFmODU3MGQ1OWJlNTdkOTg1NTEyNjZjZmJjOWUyYWZjN2MiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU2NmUwZWNhZDNhYmU2NDUxM2ZiMDljYjA2NTU2NWQ0ZTdjZTYxM2Y1MjdhOWE1NDEyNmIyMThjY2U2ZGQzMDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE2MjA1OThmNTM3NjhhYmJiNzhiZmZlMjBjNTIzZWZkNmEyMWQ2N2RlNDJmYmU2ZDhmYWU0OTJjMGFhNWQ3MTcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_16306ad546b04891a2392531ef0d2b7d",
+      "statement": "UpdateSettings calls the widget's UpdateSettings and, for per-plate widgets, re-runs layout and activation on all created plates.",
+      "evidence": [
+        {
+          "resource": "repo://Widgets/WidgetHandler.lua#L406-L448",
+          "version": "repo-lines-v1:sha256:8604a1bb7a44493b6865ed0ac4d176a0c855b8764c2b5df9e270391aa969ba77:eyJzZWxlY3RlZExpbmVDb3VudCI6NDMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY1ZTQ2NmI1YjQwOGU1NmVjZGI1ZTI3MDg0ZWVkM2YyYzQwY2JhNDEzZTAzZGVkMjk1YWVjYzUwZGU4ZWRjODkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU2NmUwZWNhZDNhYmU2NDUxM2ZiMDljYjA2NTU2NWQ0ZTdjZTYxM2Y1MjdhOWE1NDEyNmIyMThjY2U2ZGQzMDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjUxOTM5MmZiMjA1YWE4ZjJmZTI3NTQ5ZWE5NzNkYWUwZDUzY2M5MDI2NGJjYjRlZGQxNDI5OWM0OWQ5MTljZmMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_8526a65d187c47d19cb2f9cebff8c00c",
+      "statement": "UpdateAllFrames calls UpdateFrame for active widget frames on active plates, and UpdateAllFramesWithPublish additionally publishes an internal event per plate.",
+      "evidence": [
+        {
+          "resource": "repo://Widgets/WidgetHandler.lua#L101-L122",
+          "version": "repo-lines-v1:sha256:374a1039894bc6482930e34915fe8a63ee427b09f1f881ad67315f81d0f9a900:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZmOTI3MDc5Yjg3NWUwZjkxMDIwZThkMDRkYWRiMmRjZWJjYjUwZWRhZGRhNDg2NTk5YTkyMTZjMTVkZTUxZDYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjBhZGQzODMxYjVmNDkyMjI3OTIyZGE0MGQ5YjMxNDAzNWVmODdjNGU0YWRkYTZkMWIyY2RhYTU2OGYxMjBkOGQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImJlMWU4M2VmZWE4MTk3MmMzZDg1NTZiMzUzYTUzYjFmYmVjMDNkODU1YWNjMzg4YzRjMDk3MWM1YjVlZTQxYTAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_baf575625b264bcb9b4b0c8530f10426",
+      "statement": "The widget SubscribeUnitEvent wrapper creates a new unused EventHandlerFrame on every call.",
+      "evidence": [
+        {
+          "resource": "repo://Widgets/WidgetHandler.lua#L50-L61",
+          "version": "repo-lines-v1:sha256:8bda13a956c10e5b6cb3fc017624b4f34d1670106e2578dcf6915e26ea608d2d:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY4YThkNTdiYTRiYmY1N2I1YzhlNjg3YTY2N2MyOGRmYTZkNjA2Y2YzZTZkOWE4N2Q4NDA4ZDU1YTJiYmJiYTUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA2NTZlYTg1NDVmYzYzMjU2N2FkZjdiMDhiN2Y5NzY2ZDBiM2U0MTI3YTQwNGM1NTIwZTY1YzJiYjQ2OWZkMTEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU3ZDMzY2NmYjRmOTEzMWI4YmU3NWNlZGU0YzJhODE2YmQ1MzE5ZDNlYzNlMjQzNDZlZDU3MmVhNjE0YzQ2OWUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_8e54e6197cb24b618234fdbbc32b30b5",
+      "statement": "The debug command /tptp debug calls a widget's PrintDebug or prints the WidgetHandler state.",
+      "evidence": [
+        {
+          "resource": "repo://Commands.lua#L123-L137",
+          "version": "repo-lines-v1:sha256:676acdded1349bd72f78dcbd8be4bc2fe2cb52d05f537fb96236bdb1c76659ed:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJhZDAyOGM4MWQ2MGRkNzVhNDEzMzQ4YWYzMmE0NGVjZGM5ZjEzZjNiMGUwMDBkM2I4N2M0MWM1NDI0MDE5YWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUzZTk1ODYwYzJkMDkxZTZiZTA2NmI0OWUyNWY5NjRkYjBkNjc4MGNjNjU1MTMzNjRhZGUzNTgyMTUwNmZkYmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImY2YTE4MzlhYzRhM2E4ZjhjYTM3NmQ3MTQ0N2EyNTQwMjczMWY3OTUyY2JlMDg0YTQ5YTE3YzY0N2UzM2Q0MDkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjYwMzEwMDFjNTUzNWQ5MDY4MjMwZTgyMTU5Mjg3MGM0OWVhYjQ4YTNlZmIyNTI1YzVmYzk4NGJkODJjNzYyNDQifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-25T18:59:51.751Z"
+  }
+}
