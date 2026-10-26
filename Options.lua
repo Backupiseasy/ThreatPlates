@@ -11740,10 +11740,10 @@ end
 
 function TidyPlatesThreat:OpenOptionsDialog(group)
   RegisterOptionsTable()
-  Addon.LibAceConfigDialog:Open(t.ADDON_NAME)
+  Addon.LibAceConfigDialog:Open(Addon.ADDON_NAME)
 
   if group == "BossMods" then
-    Addon.LibAceConfigDialog:SelectGroup(t.ADDON_NAME, "Widgets", "BossModsWidget")
+    Addon.LibAceConfigDialog:SelectGroup(Addon.ADDON_NAME, "Widgets", "BossModsWidget")
   end
 end
 
