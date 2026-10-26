@@ -242,8 +242,8 @@ local function ChatCommandDebug(cmd_list)
     Addon.Logging.Info("    ThreatLevel:", unit.ThreatLevel)
     Addon.Logging.Info("    InCombat:", unit.InCombat)
     Addon.Logging.Info("    Threat.ShowFeedback:", Addon.Threat.ShowFeedback(unit))
-    Addon.Logging.Info("    Style:GetThreatStyle:", Addon.Style:GetThreatStyle(unit))
-		local color = Addon.Color.GetThreatColor(unit, Addon.Style:GetThreatStyle(unit))
+    Addon.Logging.Info("    Style.GetThreatStyle:", Addon.Style.GetThreatStyle(unit))
+		local color = Addon.Color.GetThreatColor(unit)
 		if color then
 			Addon.Logging.Info("    GetThreatColor:", color.r, color.g, color.b)
 		end
