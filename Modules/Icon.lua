@@ -114,6 +114,11 @@ function IconModule.CreateIcon(widget, parent)
 end
 
 function IconModule.UpdateSettings()
-  UseMasque = Addon.db.profile.Appearance.UseMasque and Addon.LibMasque
+  -- Icons are created either as Masque buttons or as textures, so the Masque setting must not change until the UI
+  -- is reloaded (as the option does). Otherwise, a profile change or reset with a different setting results in Lua
+  -- errors as existing icons are then accessed as the wrong type.
+  if UseMasque == nil then
+    UseMasque = (Addon.db.profile.Appearance.UseMasque and Addon.LibMasque) or false
+  end
   UseBorderlessIcons = Addon.db.profile.Appearance.UseBorderlessIcons
 end
