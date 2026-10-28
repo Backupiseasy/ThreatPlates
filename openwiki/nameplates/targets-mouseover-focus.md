@@ -3,25 +3,21 @@ type: subsystem
 title: Target, soft target, mouseover and focus
 description: How Threat Plates tracks which nameplate is the target, a soft target, the mouseover unit or the focus, which internal events it publishes for them, and how transparency, scaling, highlights and the target/focus widgets react.
 tags: [target, soft-target, mouseover, focus, events, transparency, scaling]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-10-25T18:59:51.751Z
 sources:
   - id: openwiki-source-7202aa0fc899f694222f9477
     resource: repo://Elements/MouseoverHighlight.lua
   - id: openwiki-source-fba3ffd29735bf7da3a29a47
     resource: repo://Modules/Scaling.lua
-  - id: openwiki-source-312a116495eb1f8e57717a6d
-    resource: repo://Modules/Threat.lua
   - id: openwiki-source-0eaf2cc03cbb31b69fad2f30
     resource: repo://Modules/Transparency.lua
   - id: openwiki-source-7a3e837cfb6d3795c0c95431
     resource: repo://Nameplate.lua
-  - id: openwiki-source-8c1a2f1346df95ad59b63c21
-    resource: repo://Styles/Styles.lua
   - id: openwiki-source-0a31e436682c2bf333a46db9
     resource: repo://Widgets/TargetArtWidget.lua
-generated: { by: "claude-code", at: "2026-10-25T18:59:51.751Z" }
+generated: { by: "claude-code", at: "2026-10-28T19:52:11.033Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-10-28T19:52:11.033Z
 ---
 
 # Target, soft target, mouseover and focus
@@ -118,15 +114,17 @@ Transparency and scaling use a priority order: the target never gets situational
 mouseover and casting override the target/non-target/no-target settings, which in turn add to (or with
 "absolute" replace) the per-unit-type value. Threat styles (`dps`/`tank`) use the threat settings instead.
 
-## Known bug: threat style lookup with a colon
+## Threat style of custom styles and headline view
 
-`Modules/Transparency.lua` (`AlphaNormal`) and `Modules/Scaling.lua` (`ScaleNormal`) call
-`Style:GetThreatStyle(unit)`. `GetThreatStyle` is dot-defined (`StyleModule.GetThreatStyle = GetThreatStyle`),
-so the call passes the `Style` table as `unit` and the real unit is ignored. With that table,
-`ThreatModule.ShowFeedback` returns `false`, so the result is always `"normal"`. Effect: for custom styles with
-"use threat color"/"override alpha/scale" and for headline view with "use alpha/scaling", the threat-based alpha
-and scale are never applied; the general transparency/scale is used instead. In `ScaleNormal` the unreachable
-non-normal branch also calls `ScaleGeneral` where `ScaleThreat` was probably intended. The debug output in
-`Commands.lua` uses the same colon call. Fix: `Style.GetThreatStyle(unit)`.
+`Modules/Transparency.lua` (`AlphaNormal`) and `Modules/Scaling.lua` (`ScaleNormal`) look up the threat style with
+`Style.GetThreatStyle(unit)` (dot call - `GetThreatStyle` is dot-defined). For a custom style with "use threat
+color" and for headline view with "use alpha/scaling", a `dps`/`tank` threat style therefore gets the threat-based
+alpha and scale (`TransparencyThreat`/`ScaleThreat`); a `normal` threat style gets the general values. A custom style
+that uses the threat system passes its own alpha/scale as `non_combat_*` value: it is used instead of the general
+value when threat alpha/scale is turned off, and as base value for additive threat alpha/scale.
+
+Until 13.3.4 the lookup was a colon call (`Style:GetThreatStyle(unit)`), which passed the `Style` table as unit,
+so the threat style was always `"normal"` and threat alpha/scale were never applied there [GH-623]. The bug came
+from commit `08f1fa77`, which turned the method into a dot function without updating its callers.
 
 Related: [Modules](../rendering/modules.md), [Other widgets](../widgets/catalog.md).

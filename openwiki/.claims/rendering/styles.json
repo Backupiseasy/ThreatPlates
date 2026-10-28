@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:06910db9902b21548812190ea268ee253b63e169df6f3ce381916b9d9e08f1ed",
+  "pageVersion": "sha256:7ca016e56f9b1e6466c32ff05ae7d524aaf1e34fba0ca2dcd7eab24b5368b8ac",
   "claims": [
     {
       "id": "claim_ca0b968098c24a28b359af4fb9b769b7",
@@ -107,7 +107,7 @@
           "version": "repo-lines-v1:sha256:3c0449dcf6b5c8951de8b27243494cb2529cc4d042c208eda8fbafcbeda1f1ce:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYjVlOTZhZmJiNTQ0ZGJjYzgzZDgwMWI1NWVjMDkzZjZjMzY5ZjQzZTg5MmMwN2FiMTlmZjQ2OWVjN2U0OThjOSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMjM5NzZkMTQ0NjY0MTNlMzI2YjExMmM1MDEwMjJkYTlkZTRjYzQ2MTA4OTZmMjAwMTI3NWJjZjcxZmQyY2Q1YiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNjQ0YjQzODhjZTJkNThmOGU0Mzk3OThhNjRiYzYwMzFmMjIyNTdhMWJmZTc0YjM5MTUwNjFmZTY0YTA0YTg3NiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNDk5ZTY1Y2NiYzdiODRhMjU0MzgzYTc2ZGViMDg0MGJlYTg3MDk3Y2FjMTdiYTc3NmQ0ZmRjZWY0YmI2ZDIyNCJ9"
         },
         {
-          "resource": "repo://Widgets/ScriptWidget.lua#L468-L476",
+          "resource": "repo://Widgets/ScriptWidget.lua#L487-L495",
           "version": "repo-lines-v1:sha256:ce4e5a4e289537746fb93e01901e8c485724de07a44db29ff798a9a841a86261:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNGU3ZDhkOTU0MjlhM2JjOGJiY2FhYjJjODI5NDNkMTAyYWI3OTQyMTRlMDAzMDI1OGJiZjA1YTU2YWEzY2RmZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDgzMzJmZTY2N2JjNTFhYzRhNTFiYTBlZmU3MzQ0NDFjOTBkZWY1NWM2MGEyNmQ3ZGIyNzVlY2JiY2Y0MmYxNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiY2VmMWU4ZmQxMThmNzdhNjI2MDY3NDBkNmE3MzM2OWYyNDdiYTk3MGE1YmEyOGQ2ZTc4Y2NmNGNlNGQxNmQwMCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiM2FiMTcyNjQxOWQ3ZGVhZDlhZmM4OGUwMzI3NTNkY2E3NTVhYTFjMzljOTEzMDU4OGMxZDlkY2FhNThhNmRkNiJ9"
         },
         {
@@ -118,53 +118,77 @@
     },
     {
       "id": "claim_c20b445e548a47efbe48faf4060d20ca",
-      "statement": "Scripts are compiled with loadstring into a sandbox environment that exposes a Threat Plates API table and replaces blocked functions and tables with proxies that only log a warning; all script calls run through pcall.",
+      "statement": "Scripts are compiled with loadstring into a sandbox environment that exposes a Threat Plates API table and replaces blocked functions and tables with proxies that only log a warning; all script calls run through pcall, and IsEnabled/OnEnable/OnDisable/OnUpdate are called for all custom styles with scripts.",
       "evidence": [
         {
           "resource": "repo://Widgets/ScriptWidget.lua#L233-L409",
           "version": "repo-lines-v1:sha256:1f12b4e5f265979a65a8f90f55661456626d25ea9d16d8199b76dd176f86f28b:eyJzZWxlY3RlZExpbmVDb3VudCI6MTc3LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJlZjQzZDI3MzdhZjEzNTg4ZTc5MzA4NzIwYTU0MTQ1NmUyN2VjNTRkMDEyNTU1ODdhMTI2YWIxMDkyNWU4YjU4IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0ODMzMmZlNjY3YmM1MWFjNGE1MWJhMGVmZTczNDQ0MWM5MGRlZjU1YzYwYTI2ZDdkYjI3NWVjYmJjZjQyZjE1IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIyNGM3NjY2ZmMwODQ4N2RmZmU1NWNmNjY0OTdlYTNlNGVlMDM1ZWY3MmI1OWMxMmNmMzliM2UxMDk5MGZiMzA1IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJkOTgyZjExMTRiMjVhOGRmZDAyNjE0ODBhOTY5NmNjYTBhZTAzZTk0OTRkNWNkYTg5MzRhNWZmZTdhNDI4YTY4In0"
         },
         {
-          "resource": "repo://Widgets/ScriptWidget.lua#L425-L460",
-          "version": "repo-lines-v1:sha256:c08c9075264352f034b295695da231043228562f08de4b2e314dfca729759d72:eyJzZWxlY3RlZExpbmVDb3VudCI6MzYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVmM2MxM2Y4ODIxMGJiNDc0NDE5MDhhOTAzM2EwYjU0OThlNjM5NzIxNTIyOTZkMGRhZDA5OGM1OTRjZDYyZTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRlMTU2NzhjMjMzNDRhYmVhMTIxNDM5OWUyOGZjYzYzZGYzN2FkOWQ5OWIyYTZlMmY1ZGNiZTZjMjUyZmUxNzMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImIwODkwYzYwODI4YWE3M2YxN2ZmZGEzYjNjMTczM2FkZjY1ODU1NWI5ZDAyOTc2MjcyZmYyZGU0NjBmNjQyOWQifQ"
-        },
-        {
-          "resource": "repo://Widgets/ScriptWidget.lua#L745-L766",
-          "version": "repo-lines-v1:sha256:f4f9617562d004eb23e34a884997872bc426d37401a7fa19fbb799a8da72809c:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY4ZjNlMGRmZWVjZDExYWRjZjkyOTFjM2QzZTJhMTIxMWJhZWY2OWNhYmVjZDkyMzk5MmM5YmRlZmVjODRiMDYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM2MWU0OGQwMzA4ZjIwZTMyZGJhNWZiNTYzMjhiYWYxOGQ3MmVmMGNjYjQzYjg0ZjVjMjYyZDJhNmExZmM2YzgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjYwMjYzYzY0NzAxNzA1M2EwZmNkN2VhOWRkMGZmNTdhMmNiNWUwNzZjNzUxZTM3ZjllMzNkMjRkMDlmZGZiZDgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+          "resource": "repo://Widgets/ScriptWidget.lua#L424-L480",
+          "version": "repo-lines-v1:sha256:286c7a3c88271b56b14d003384720f31a739cd7eefbc9397afe814f159ba6d86:eyJzZWxlY3RlZExpbmVDb3VudCI6NTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEyODg4NGVhNmI2MzBkMDc2ZDY0MzExOGNjMGEzNGFmODdkMGU4Yjg1NGRhMzgzMTVlMWQ3NjQ0YTI3ZGE4NDYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJhNzVjM2M2MjY0MTQ1Nzg3YWQ0ODkxMzFmYzFiYzViMTkwODEwNmMwYjFlNWFhM2Y4NzhhODE1MzI5YTdmZGYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjYzZGQ0ZDUwY2EzMmIwNzFlOGFjNGMyNjZmNDhhMzUwZGVmMzY3NDhlNjUwNmFjNWEwZmIzZjljZjIwMGZkODAifQ"
         }
       ]
     },
     {
       "id": "claim_e17351a314b247c5a28964ee1f956249",
-      "statement": "WoW event scripts are subscribed with a function handler that expects the event name as first argument, while EventService calls function subscribers without the event name.",
+      "statement": "WoW event scripts are subscribed with a closure that passes the event name to HandleWoWEvent, because EventService calls function subscribers without the event name.",
       "evidence": [
         {
-          "resource": "repo://EventService.lua#L50-L61",
-          "version": "repo-lines-v1:sha256:f85d574877526703d0af22f824a5a8cf00688ea32539af2057a9247276990458:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM5MzQzNzI3ZGQ0OThmOGY3NDlkNDVhZTljZWM0MjJkYTFmODE0MDM5OTZmZDI4MjBkYzM1MDZlMTBkOTk0YmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc3OTgxMWM1ZmJlMjVjM2Q0ZTVmM2QxZmQzNWFiOWRhNmJjZjhhNjhjNWVkZjlkNmJhOTdmNjg2ODZjMzk2ODAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRhNDYxY2U0YzIwZmFhNGNlZjdmNGU5NjJkMmI3NzFlOTkxMzJkYjNiNjY2MzI1OWEwMjQwYjYwYTBhYTkzZWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc4MGE4NDZkNDc4NjRmZGEwZDdjOTY3MjFhZjc5YmIzMWM1OTg2NjA4NTljMzc5MjU3YzM5MDdhZGFjZDVhOWUifQ"
+          "resource": "repo://EventService.lua#L36-L62",
+          "version": "repo-lines-v1:sha256:76a4301b57c95a5f3fa0ae84f9267ed4bd45743274eb151dab43a7514220683a:eyJzZWxlY3RlZExpbmVDb3VudCI6MjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBjYTk0NDgzMGZkY2FlNGM0NTg3ZDZlZTFkYTUxYzI1NGQ2YmY5YzFmZGZiZTMwODUzZDZjZmM4YTlkMjcyZDgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZlNTg5YjY1OWVhZDc0ZmZmODFmYTcxM2YwNjk2ZmFlZDA1MzIyNzIzYjFlMDJjZmMzZTA4M2E3Njk3M2MyMDQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjlhNzUyYmQ3NmE4MjVlMGEzOTdkMDQyYWU0NzRhMmIzYTgyYzZkMDQwMmZiOWUxNDhhODAwNzZmZTY3ODdlZjgifQ"
         },
         {
-          "resource": "repo://Widgets/ScriptWidget.lua#L608-L620",
-          "version": "repo-lines-v1:sha256:a7da63f441fa2c08cecdd62432f709eec382f136a0235c2fc94e7db775b8e211:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM2NmZhNDFiYzM4OTI4N2I4ZDQxNDgzNWFlODA5Y2I2NmMyNzhmYjQ5N2MyMzEyMzU3ZWVhMzQyMWIwNjkyMmMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc2NDNlNzkyODZiNmI3M2NkZDBlNTRlNWFiYjFmNDRiZGRhYzBlMTAxZmI0MWFjZTViMzZiYzZlNjExNmE0MjQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU2ZmNlNzFiYzE4NmRiOWVmN2M1ZThmODIzNDFiM2Q1ZmFjNjAzYTYzOGE0ZTVlYzAyOWEyMmEwNWUyYmZkZjYifQ"
-        },
-        {
-          "resource": "repo://Widgets/ScriptWidget.lua#L660-L673",
-          "version": "repo-lines-v1:sha256:9fbde878ab616887c7a237bad4bcfbaec196ec0d41325df71c58f843ecfe0c23:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJlMjJlY2JmY2U2MWNhN2ZjNjU5ZDE1ODNjNzg0OTc4ZDM2ZTE0NTVlNjcyZjlhYjRjMjczZTdkZjIzMGIzYjkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU0ZDM4OTdhMGY5ZDY5YzlkYjgxYmM5Nzc0MTVlNDBiNzIyYTVkNDRkZGU1YmQ4ZjcyNjQ1MWJhZWQyNDhhNDAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZhNGY4YjNiMzc1Yzk4ZTk2N2ExOTNkNDU1ZmYzNTk2MTRkMzI5ODM4MzE1MTBjMDBhYjllYmI1ODFjMmVmYTEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjAzMmMyZmEyZDYxNGU1OTcwM2NhYzQzOTgxZmZjYWMwYTcyZDRlMWM1NzgyOGE0NDE0MzViYWViNDEyOWViZTYifQ"
+          "resource": "repo://Widgets/ScriptWidget.lua#L730-L795",
+          "version": "repo-lines-v1:sha256:ab50f91330a24c405dc2f425a667f7658acb555cedff0c0cf0de0d95bd268519:eyJzZWxlY3RlZExpbmVDb3VudCI6NjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ3YWRmNGMyOGM2NTEyZGUzMzY2ZmZiNzA3M2NjMDMxNDQxZDE5YzllMWNhZTFhOTEzZDNlYTE2ZjljNDJhYmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc3OTgxMWM1ZmJlMjVjM2Q0ZTVmM2QxZmQzNWFiOWRhNmJjZjhhNjhjNWVkZjlkNmJhOTdmNjg2ODZjMzk2ODAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIzNGIxOTIxM2JmYmI0NTgzYzYzNTE4MzZlNjkxMWI4ZTE3YzQ1NThjOTE0NWQwYmIzYTdlNGY1OGZlMGUxNjYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjEwNzk5Yzc5OWFlYTMwN2RjMjc1NjlhNWVmZjE0YjNlZGQwZDQwYzU5ODlkOGY1NWFhMDNjZTNlN2I2ZGE3ZDEifQ"
         }
       ]
     },
     {
       "id": "claim_aee535141b1a4865bbdbab0da43bcb49",
-      "statement": "Widget:OnUnitRemoved in the Script widget passes the undefined variable tp_frame to OnTargetUnitRemoved scripts.",
+      "statement": "Target and focus scripts receive widget_frame and unit and are called on unit added/removed and on TargetGained/TargetLost/FocusGained/FocusLost, guarded by TargetScriptsActive/FocusScriptsActive flags so each is called once per change.",
       "evidence": [
         {
-          "resource": "repo://Widgets/ScriptWidget.lua#L586-L598",
-          "version": "repo-lines-v1:sha256:35fd762012fcc69dad53b4b395daca9fcde7a959582c514556b64faae20d7527:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBkZWUyZmRlOTNkODUyYjllZTlhMTc3YWJjNTdmN2MzNmY4OThkOWFjNzc1NzFmNDFmOTQ1Y2MxYmZhNDcyMTkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQ3YWNiYTBlZmUyZDg3Njk4YTQ1ZTdkMmUwNDdhMmQ3NTkxNmE3YTc4NzkxMThhMWNlNGUxODVlNTk3YWY3MzciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc4MTk3ZTc2YmRkZmMzNjQyNjM0OTkzM2NhYWRkNjgxOWNhMTFiOTg1YWRmYTA4ZWYyZTViMWRlMjYwYzE1ZTUifQ"
+          "resource": "repo://Widgets/ScriptWidget.lua#L497-L530",
+          "version": "repo-lines-v1:sha256:40837a3ac5c29936eb46c5ccfa69c244b3a91e43955f72bfe4821c5e5f6e3648:eyJzZWxlY3RlZExpbmVDb3VudCI6MzQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUzMjYxNzM3NWEwZGU2MzdiMGFmNjBiZTA1NDA2YzU1Njg2ZTY0MGVmYzExMTM4MTIzMTIzNDFjNWE5MDU4YzYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY2MzMxYjkxMjA5NmEyMDlkNDEyNGIzYTY5YmUxMzIzMDVkMGI1ZDc2MmYwM2VjYzQ3MGQzM2FlNGVlNTViOWIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjM4ZDYwYjJlOTYzODMyMjIzY2RhYTZjOTE5NmQ5YmNlZGY5YWM4ODc0ZDVhMTk1MGM5MjdkMmFlZDkwMWJlMzkifQ"
+        },
+        {
+          "resource": "repo://Widgets/ScriptWidget.lua#L629-L705",
+          "version": "repo-lines-v1:sha256:b6e178326a7bef36081d7ca96362820752e8e818d06b69a13c1e4b2fc4368227:eyJzZWxlY3RlZExpbmVDb3VudCI6NzcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYyZDdjODY5ODg3ZmYxN2NiZDNlNjcwMjUyZmM4OWZjNWRhOTgxMzg4Yjc2YzY1N2IzN2RmNjk1YjgyMDczZjIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU2NmUwZWNhZDNhYmU2NDUxM2ZiMDljYjA2NTU2NWQ0ZTdjZTYxM2Y1MjdhOWE1NDEyNmIyMThjY2U2ZGQzMDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc4MTk3ZTc2YmRkZmMzNjQyNjM0OTkzM2NhYWRkNjgxOWNhMTFiOTg1YWRmYTA4ZWYyZTViMWRlMjYwYzE1ZTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_1849880a606e4cc9b0dc851775bae417",
+      "statement": "Create scripts run once per custom style and widget frame via CallCreateScript (InitializedPlatesByStyle), from Widget:Create and, for already existing frames, from OnUnitAdded and UpdateLayout; UpdateLayout passes the unit only after the style's Create has run.",
+      "evidence": [
+        {
+          "resource": "repo://Widgets/ScriptWidget.lua#L577-L627",
+          "version": "repo-lines-v1:sha256:6c389f0c8910f0875c79668f64d161ace673aa599fa925bf9b11f43338e7de0f:eyJzZWxlY3RlZExpbmVDb3VudCI6NTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk5NWRkMjllY2ViZGNmMDg4MjZkNmMyYTBhM2ViNDg1MjllMWJlZjcxNzRjMTUzODQ5M2U3YzFjYTUyZjIxYzMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImRjYjFiYjM2ZjU5NmY4ZTcxZGU5M2QwOWZhZGFmYmJmOTUyNmM1MjRhYjkwZDIyMzYzMzFmMTU1ZTI3M2JmMzkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImMxODJjYTE5ZmM4NTQwMDY2MDVkODEyYzdjZmNjYTgzZjFkZGI5ODEyMGUxMDAxZjk0ZTg5OWFiODg5Njg1YzcifQ"
+        },
+        {
+          "resource": "repo://Widgets/ScriptWidget.lua#L711-L726",
+          "version": "repo-lines-v1:sha256:a2d2a8efeea1041cfa910d2688833fb43ae228cca543bfb253109a0185bfd57d:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQzMGY1YTU0MWI4MTQwMWY4ODlmM2M2MzdlNTZjYjFjMmQwZWE0MjBjODk1ZDJhZjQ4YzkzZmMzNWJhOWNhYzIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjBhNjAxOGJhZDQ2NThmMGRhYzU0MjZiM2M1YzA1NjBlMDU3NTY1ZTBkNGQyNWI5OGNlNjgyNzQ0ZDEyZjQwYTYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjIzNGIxOTIxM2JmYmI0NTgzYzYzNTE4MzZlNjkxMWI4ZTE3YzQ1NThjOTE0NWQwYmIzYTdlNGY1OGZlMGUxNjYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a264c7b35513441b8b9cc7e60ad18bb0",
+      "statement": "A trigger-based custom style whose IsEnabled script returns false is removed from ScriptsByCustomStyle, and toggling Never for a script-triggered custom style calls UpdateSpecial although it has no trigger value.",
+      "evidence": [
+        {
+          "resource": "repo://Options.lua#L8758-L8770",
+          "version": "repo-lines-v1:sha256:cbec55f10b38d075f35d99dd9bce844ec7c54e35248ddc50a24534eba90d711a:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFlYjk1MWYyODZmMjMxNTA3ZWZiNDQ1MjY3ZGYyOThiZjk1NTc1ZTdiYmFiMjEyZTFiNGUyZTUxMDk2ZjgxYjUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZmYTA1NTYyODZkYmMzYjBmYTA4MDA4ZDJlNWE1MTIyYTBjMzNkMDBiMTk3ODQ0YzI1MTVlNmNmMzQ4NDIzNTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImIwZTJmNmExY2JmNzU4ZGEzNzQwYTM4MDc3NTVhZjE3ZWFmNDE1YWJmNmUyMmI2ZTM4ZTNmNDM4NDFlMjEyYmQifQ"
+        },
+        {
+          "resource": "repo://Widgets/ScriptWidget.lua#L828-L858",
+          "version": "repo-lines-v1:sha256:ea94fe085e75cd9cc840be6174cebfe3ee347b5429773c40cbf29facd06b647d:eyJzZWxlY3RlZExpbmVDb3VudCI6MzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdmNzVhOTllM2I3YTEzN2U3NmJhNThhOTE4OTZkZTEzYzVlOTgyMzEzNTE1MTcyYTAyY2NhM2VlNzgyNTQ2NDMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRhNDYxY2U0YzIwZmFhNGNlZjdmNGU5NjJkMmI3NzFlOTkxMzJkYjNiNjY2MzI1OWEwMjQwYjYwYTBhYTkzZWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNlNjdkZTMzNmY4MzU4N2U5M2Q5MjU2Yzk0ZDA5NTk2ZThkYzc5NmJhOTlmMzA0MTA3MWI3ODdhZjk5MDQ4YzcifQ"
         }
       ]
     }
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-10-25T18:59:51.751Z"
+    "at": "2026-10-28T19:52:11.033Z"
   }
 }

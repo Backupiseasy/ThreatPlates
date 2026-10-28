@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:1d5b3bbb8a7175be2252fcdfb1e26aa75aae251c11414c2698dedb000f2c12f6",
+  "pageVersion": "sha256:f23f063098c854503bdf20e71e4e91fcf7dab9463339ff35b687e2b591930329",
   "claims": [
     {
       "id": "claim_9fb723abee874b288ff20b798b6c6d64",
@@ -76,11 +76,11 @@
     },
     {
       "id": "claim_3f7eebb637a54cc8b2db3cba78579e37",
-      "statement": "With the interrupt source option off, UNIT_SPELLCAST_INTERRUPTED only calls UNIT_SPELLCAST_STOP; otherwise it resolves the interrupter by GUID, colors the name with a C-API class color, sets the interrupted color and hold time and then calls UNIT_SPELLCAST_STOP.",
+      "statement": "With the interrupt source option off, UNIT_SPELLCAST_INTERRUPTED only calls UNIT_SPELLCAST_STOP; otherwise it resolves the interrupter by GUID, colors the name with a C-API class color, sets the interrupted color and hold time and then calls UNIT_SPELLCAST_STOP. WoW fires UNIT_SPELLCAST_STOP after UNIT_SPELLCAST_INTERRUPTED, which is ignored once CastbarID is cleared.",
       "evidence": [
         {
-          "resource": "repo://Nameplate.lua#L2151-L2196",
-          "version": "repo-lines-v1:sha256:6efaf80ddbd00003be4f894bd231452fe47291c8a40933261073bc898cfdac9d:eyJzZWxlY3RlZExpbmVDb3VudCI6NDYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVhNTRiMGQ1MGE1ZjM2M2VhOWUzNWIzOGZmZjUzMjJmZjc2ZmE3YzQ4Mjk1OTJiZmNiODc0NmVmYzdkZDNhMDUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjEyZWFmY2RiYjE3NWM5Yjc0ZDI1MTRjYzZkNTYzZmQ4Yjg0YmIyOTFiYmM0MTc0OGQ0ODcyNzdkYTkxZjQ4ODIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU0YWJjNzU1MzdhNmUzYzIwMmIxYjI2NGY0ZTc5ZDEzNjUwNDkxNmM4NzA4NTAyYzBlOTQ2NmJmYjYwZjM5MDAifQ"
+          "resource": "repo://Nameplate.lua#L2151-L2200",
+          "version": "repo-lines-v1:sha256:6e6ea984e04800271db9cce4b370208b58aab1fee990119da7f965c281c8bbe3:eyJzZWxlY3RlZExpbmVDb3VudCI6NTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVhNTRiMGQ1MGE1ZjM2M2VhOWUzNWIzOGZmZjUzMjJmZjc2ZmE3YzQ4Mjk1OTJiZmNiODc0NmVmYzdkZDNhMDUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZhNGQ4MDNhYzM5YjUzZjVlOWMyOTlmYjNlMDEwMDZiMmZiMGI3NzhmNWIyMWFmNjljOWY2OGFhZWIyMmRiNDAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjEyZWFmY2RiYjE3NWM5Yjc0ZDI1MTRjYzZkNTYzZmQ4Yjg0YmIyOTFiYmM0MTc0OGQ0ODcyNzdkYTkxZjQ4ODIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQ0NGFiMjNiZWFjN2MzYTJjMzc0M2JmY2MwODdjNGJkNjg5MzhlZDg0YTI5NTNjMzIxNWM4NDQxOWE0YzE1ZjEifQ"
         }
       ]
     },
@@ -93,7 +93,7 @@
           "version": "repo-lines-v1:sha256:acc9678e7777ca060db102df36be4e2858da8f96953310d431865f2cec32065a:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI3MTUxNGNhYzQ3OGQ0N2QzNDc1NWUxYTViYjM0ZDAyNWM2Y2FkODk1NzJhNjgxYWJlMDIzMjU3MTBlZTAyMzciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU2NmUwZWNhZDNhYmU2NDUxM2ZiMDljYjA2NTU2NWQ0ZTdjZTYxM2Y1MjdhOWE1NDEyNmIyMThjY2U2ZGQzMDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI4NDFkMjM1NDEwZTk4ZTM1OGNmMmMzYzc5ZGJkODBmMDYyMGY3ZTY3Yjg4OTdlOTVlYzUyNzg1NDI2YWUxNGYifQ"
         },
         {
-          "resource": "repo://Nameplate.lua#L2198-L2235",
+          "resource": "repo://Nameplate.lua#L2199-L2236",
           "version": "repo-lines-v1:sha256:1e1bcccefbee1b9578109b22c23102d8a8996286c9bf474866a9e7cfd57f3239:eyJzZWxlY3RlZExpbmVDb3VudCI6MzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRhZmFlYzQ5YWE5MjU4Y2U3MjRkOTYzNTEzYzY3M2M3NWQ3NTNlZWMzZGM4OTMxMGMyM2ZlNTM5NTEyNTZiZTAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc1Y2Y4ZTZkMzY0YzJlODkzZjVkNTJjYzA5M2Y0YThjOGQ1ZWVhNjUyNjc1NDRmZjM3N2E0NmMxNGI1ZjQ4ZGQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjVhOGY1ZDBiNjU0MDQ0YTdmZGE5ZTFlMTExZDNhYTEyNmQwOGEwNTAzZmYyYjE3MWFkMmRhZmNkMGIwMDFhYWMifQ"
         }
       ]
@@ -134,17 +134,17 @@
     },
     {
       "id": "claim_0e888c799d904081ae2ec113c8fe2599",
-      "statement": "With the interrupt source option on, UNIT_SPELLCAST_INTERRUPTED returns without calling UNIT_SPELLCAST_STOP when the castbar id does not match, the castbar is hidden, or interrupted_by is nil.",
+      "statement": "With the interrupt source option on, UNIT_SPELLCAST_INTERRUPTED returns without calling UNIT_SPELLCAST_STOP when the castbar id does not match, the castbar is hidden, or interrupted_by is nil; the cast is then ended by the UNIT_SPELLCAST_STOP event WoW fires after the interrupt.",
       "evidence": [
         {
-          "resource": "repo://Nameplate.lua#L2163-L2167",
-          "version": "repo-lines-v1:sha256:983eb7543bb8fdcabb7e61b0305b16f445f88656db07e49e34000b5cd94b6c94:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZWM1MWRmYTgzMTMxYjdmZTczNWZmYjYzZWU2M2IzNzViNDNhYTBlMWMwMThjYmNmMDgyYzA0ZjIyMWRhZTdjMSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYjhlMjE5YjE4ODI2ZGM5MzhlOTFiZjdlNDNmNGY1NDc2NTYxZjkwNDVlNWIwZmQ4MTE3YTU5ZDQzODkzZmE5OSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOGQ5ODk5MzliYTIyNDI4MjQzZDkyMDI5M2I2MmY2NzRkZmE5ZDIzZjRiNGI4Njg2ZDdlOGUyNDk3YmUwNzMzNCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZGNiMzkzZjdlYzc2ZGJhODdiMDQxYmQ3YTlmMzc4MWIyZjFjZTU3NzVjYzQyYWU0Y2QxMWFiYWNmYWQxY2QxOCJ9"
+          "resource": "repo://Nameplate.lua#L2151-L2170",
+          "version": "repo-lines-v1:sha256:4fa8fa5abe5a46d84e32fcc56c09038e8ae1f6be41c41d0f9a61fa3b2366e363:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVhNTRiMGQ1MGE1ZjM2M2VhOWUzNWIzOGZmZjUzMjJmZjc2ZmE3YzQ4Mjk1OTJiZmNiODc0NmVmYzdkZDNhMDUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkzZTg2ZDZjNzE0MWIwOTU2N2E1Yjk4NDg2NDI2MGQ0OTk2MzFjMzViYzFkMmVlOTRjYTdmMDA0NDJjYWRiYjkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjEyZWFmY2RiYjE3NWM5Yjc0ZDI1MTRjYzZkNTYzZmQ4Yjg0YmIyOTFiYmM0MTc0OGQ0ODcyNzdkYTkxZjQ4ODIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjM0ZGE1YzI0ZGY4OTNjNDA3MTZhN2I3MTA3MDQ0OWU5ZTJhNDQ1YTI4YTA4YzZiZDY0ZmE3NTJjNzViYmVjOTgifQ"
         }
       ]
     }
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-10-25T18:59:51.751Z"
+    "at": "2026-10-28T19:52:11.033Z"
   }
 }

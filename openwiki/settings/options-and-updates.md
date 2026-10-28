@@ -3,9 +3,6 @@ type: subsystem
 title: Options UI and propagating setting changes
 description: How the Threat Plates options dialog (Options.lua, AceConfig) is built and opened, how a changed setting is written and pushed to live nameplates (SetValue, UpdateSpecial, ReloadTheme, ForceUpdate, UpdatePlatesVisible), why modules cache settings, and how changes are deferred in combat.
 tags: [options, aceconfig, settings, update-propagation, combat-lockdown]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-10-25T18:59:51.751Z
 sources:
   - id: openwiki-source-014010f28568c5a3c3664449
     resource: repo://Addon.lua
@@ -19,7 +16,10 @@ sources:
     resource: repo://Options.lua
   - id: openwiki-source-6794fbfa2ece0a99802c941d
     resource: repo://Widgets/WidgetHandler.lua
-generated: { by: "claude-code", at: "2026-10-25T18:59:51.751Z" }
+generated: { by: "claude-code", at: "2026-10-28T19:52:11.033Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-10-28T19:52:11.033Z
 ---
 
 # Options UI and propagating setting changes
@@ -118,8 +118,9 @@ Protected actions (CVar writes, nameplate size) cannot run in combat:
 Keybindings (`Bindings.xml`) call `TidyPlatesThreat:ToggleNameplateMode*`, which flip `UseHeadlineView` per unit
 type group and call `Addon:ForceUpdate()`.
 
-## Observation from reading the code (unverified)
+## Opening the options from outside
 
-`TidyPlatesThreat:OpenOptionsDialog(group)` uses `t.ADDON_NAME`, but no `t` is defined in `Options.lua`, so the
-function would raise an error if called. No caller exists in the addon itself; the working entry point is
-`Addon:OpenOptions()`.
+`TidyPlatesThreat:OpenOptionsDialog(group)` registers the options table, opens the dialog for
+`Addon.ADDON_NAME` and selects the BossMods widget group for `group == "BossMods"`. No caller exists in the addon
+itself; the entry point used internally is `Addon:OpenOptions()`. (Until 13.3.4 it referenced an undefined `t`
+and would have raised an error.)

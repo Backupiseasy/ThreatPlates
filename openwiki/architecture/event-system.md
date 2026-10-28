@@ -5,7 +5,7 @@ description: EventService.lua is the single dispatcher for WoW events and Threat
 tags: [events, eventservice, pubsub, wow-events, internal-events]
 verified:
   - by: openwiki/0.7.2
-    at: 2026-10-25T18:59:51.751Z
+    at: 2026-10-28T19:52:11.033Z
 sources:
   - id: openwiki-source-014010f28568c5a3c3664449
     resource: repo://Addon.lua
@@ -17,13 +17,7 @@ sources:
     resource: repo://EventService.lua
   - id: openwiki-source-7a3e837cfb6d3795c0c95431
     resource: repo://Nameplate.lua
-  - id: openwiki-source-a50841d1619063914118d2a2
-    resource: repo://Widgets/AurasWidgetMidnight.lua
-  - id: openwiki-source-4174717d9513e533ba3cdafd
-    resource: repo://Widgets/QuestWidget.lua
-  - id: openwiki-source-6794fbfa2ece0a99802c941d
-    resource: repo://Widgets/WidgetHandler.lua
-generated: { by: "claude-code", at: "2026-10-25T18:59:51.751Z" }
+generated: { by: "claude-code", at: "2026-10-28T19:52:11.033Z" }
 ---
 
 # Event system
@@ -144,29 +138,24 @@ Some events are registered conditionally at runtime:
   `NAME_PLATE_UNIT_ADDED` in solo shuffles. Clear derived state (mouseover, target references) before wiping
   unit data; see [Nameplate lifecycle](../nameplates/lifecycle.md).
 
-## Pitfall: unsubscribing can unregister the main subscriber's event
+## Unsubscribing never unregisters a main subscriber's event
 
-Found by reading the code, not verified in-game. `UnregisterGameEvent` unregisters a WoW event from its frame as
-soon as the last *subscriber* is removed. It does not check whether `RegisteredEvents[event]` still has a main
-subscriber. `Subscribe` also only registers at WoW if there is no main subscriber. Taken together:
+`UnregisterGameEvent` (used by `Unsubscribe` and `UnsubscribeAll`) unregisters a WoW event from its frame only
+when the last subscriber is removed **and**, for `EventHandlerFrame`, `RegisteredEvents[event]` has no main
+subscriber. Unit-event frames have no main subscribers, so their events are unregistered as soon as the last
+subscriber is gone. The rule: an event registered with `EventService.RegisterEvent` is only unregistered at WoW
+by `EventService.UnregisterEvent`, which in turn keeps it registered while subscribers remain.
 
-1. `Addon` is main subscriber of `PLAYER_REGEN_ENABLED`; the Auras and Quest widgets subscribe to it too.
-2. Both widgets are disabled at runtime. Their default `OnDisable` calls `UnsubscribeAllEvents`, and the last
-   removal unregisters `PLAYER_REGEN_ENABLED` from `EventHandlerFrame`.
-3. `Addon:PLAYER_REGEN_ENABLED` no longer runs, so tasks queued with `Addon.ExecuteAfterCombatEnds` are not
-   executed and the combat automation of nameplates stops. Re-enabling a widget does not register the event
-   again, because a main subscriber exists. A `/reload` restores it.
-
-`UnsubscribeAll` also visits events whose subscriber table is already empty, so any later `UnsubscribeAll` can
-unregister such an event again. Other core events with only optional subscribers are affected the same way, e.g.
-`PLAYER_TARGET_CHANGED` (subscribed by the Auras, ComboPoints, Resource and TargetArt widgets; the subscription in
-`Elements/Classification.lua` is commented out) and `PLAYER_ENTERING_WORLD` (Quest, ComboPoints, Arena widgets,
-and the Threat module only while the heuristic is used in instances; `ThreatModule.UpdateSettings` also calls
-`Unsubscribe` for it on every settings update). A fix would check `RegisteredEvents[event]` before
-unregistering.
+This matters because `Subscribe` registers at WoW only when there is no main subscriber. Before 13.3.4,
+`UnregisterGameEvent` did not check for a main subscriber: disabling the Auras and Quest widgets at runtime
+unregistered `PLAYER_REGEN_ENABLED`/`PLAYER_REGEN_DISABLED` and `PLAYER_ENTERING_WORLD`, so `Addon`'s handlers
+stopped running until `/reload` (combat automation of nameplates and tasks queued with
+`Addon.ExecuteAfterCombatEnds` no longer worked; verified in-game on Retail 12.1.5).
 
 ## Debugging
 
-`Addon:PrintEventService()` lists main subscribers, subscribers per event and unit events.
+`Addon:PrintEventService()` lists main subscribers, subscribers per event and unit events. A main-subscriber
+event that is no longer registered at `EventHandlerFrame` (checked with `IsEventRegistered`) is marked in red with
+"(not registered at WoW)".
 `Addon:DebugWidgetHandler()` prints for each widget whether it is enabled and which events it holds. Both are
 reachable through the debug chat commands (see [Development workflow](../workflows/development.md)).

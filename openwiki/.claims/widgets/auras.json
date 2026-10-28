@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:8d3493b43bdcb46c73cbc23646faab30e171de0191d3ee5ed000fe982ce9dbce",
+  "pageVersion": "sha256:2ade2497452371156faaa6d54f099b6e24c0fd000d86b37773df2e173e5410cb",
   "claims": [
     {
       "id": "claim_d282c3f1832c4331a9cbb122ee896496",
@@ -59,20 +59,12 @@
       "statement": "AuraContainers are pre-allocated out of combat in pools of 40 per aura type, retried on combat state changes, and claimed per plate in Widget:Create without being returned; an exhausted pool logs an error.",
       "evidence": [
         {
-          "resource": "repo://Widgets/AurasWidgetMidnight.lua#L115-L124",
-          "version": "repo-lines-v1:sha256:96841acc678b5b3aae4974327ab4bdc75a0af92ae824191c1697a4bc83246471:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM5OGFkN2M4ZDFlZGYzNjE0YzE4NTcyYTQ5ZTExZDI5M2IzOTZhMDA0NzhlNTg4ZmQ3NjAxMjU2NDM5MmI2ZWIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNhMTM2NzYwMGQyZGQ1NDc4MmY1YmE4ZTdkZDAzMDQ4MThiZjVlNWRkNDViM2FhN2E1MjU3M2NkODBiMGNhMjAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImE2YWQwM2QxNWViNDc5N2IxNjg4OGE2YTgxMGZiZDYzODRmYzA2MzM1MWExMzRiYmNjZGQxMDAxMWI1MzAwNTQifQ"
+          "resource": "repo://Widgets/AurasWidgetMidnight.lua#L116-L117",
+          "version": "repo-lines-v1:sha256:11ae09ebde0135af8ad8b619bf70eb47540dd3834aadb7d83960288bb330b780:eyJzZWxlY3RlZExpbmVDb3VudCI6MiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMzk4YWQ3YzhkMWVkZjM2MTRjMTg1NzJhNDllMTFkMjkzYjM5NmEwMDQ3OGU1ODhmZDc2MDEyNTY0MzkyYjZlYiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYTllODZiZWE5NTIyNjg3N2E5NjY4ZWU0NTQzNDRkYmI2ZjkzNDI5ZWQyMTk1MzQzNzBjZTNlNGJjYjc5OTA4ZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiY2ExMzY3NjAwZDJkZDU0NzgyZjViYThlN2RkMDMwNDgxOGJmNWU1ZGQ0NWIzYWE3YTUyNTczY2Q4MGIwY2EyMCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOTY0OGNkOTE4NmQ4YWIzNTM2MTNjNGYxMTRkYzZhNDI1NzM4ODgzMDgyMGExY2FmY2IxN2VhYzNjNDIzNzE0MSJ9"
         },
         {
-          "resource": "repo://Widgets/AurasWidgetMidnight.lua#L1199-L1237",
-          "version": "repo-lines-v1:sha256:154299cecddef8e9bad0e7dd3e9a84a067e92911e01c5f807eb4afa5f850e6b9:eyJzZWxlY3RlZExpbmVDb3VudCI6MzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjExOTE5NjA1MjhjMjFlYWRjNjkxOWJhMWU5NDM0ZmVmMzU1OTZjMzIzNWZmNzQxOGY3OWQ4MzRjYmRhMTg4NGYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJhNzVjM2M2MjY0MTQ1Nzg3YWQ0ODkxMzFmYzFiYzViMTkwODEwNmMwYjFlNWFhM2Y4NzhhODE1MzI5YTdmZGYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjIzOWIzZjRlMDQ2MWQxYzJjNGQyYjc5MWNkMjNiMmY0ZTdiOGRhNTg0MDMwMGJmNDEwODQ5MDMxZDkwM2Y3NDIifQ"
-        },
-        {
-          "resource": "repo://Widgets/AurasWidgetMidnight.lua#L1287-L1294",
-          "version": "repo-lines-v1:sha256:dba1bda204a9620e1b373a3baf8cabae7405704b06d05960c0322e2087d3a0c3:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZWYxYmEyNzlhY2Q1MjdjMzU5OGU3NjY3MDJjNzhlMTRmNDBmYWJiNmU1NTE3NGI2MDFmNmVlMGQ5M2MwOTFmZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZDBkYzZjZmI3MWVkYTBmOWQyODVhNDE0NDEwY2JlZDk0MmJhMzQxMmNhYjAxOGQwZDE4ZWZjZDhlMjFkM2FkMyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNTY2ZTBlY2FkM2FiZTY0NTEzZmIwOWNiMDY1NTY1ZDRlN2NlNjEzZjUyN2E5YTU0MTI2YjIxOGNjZTZkZDMwNSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNTZmY2U3MWJjMTg2ZGI5ZWY3YzVlOGY4MjM0MWIzZDVmYWM2MDNhNjM4YTRlNWVjMDI5YTIyYTA1ZTJiZmRmNiJ9"
-        },
-        {
-          "resource": "repo://Widgets/AurasWidgetMidnight.lua#L660-L710",
-          "version": "repo-lines-v1:sha256:caf392280752a6ed266fea7103b91fa468939720ad06a70cc490cc9a6f6c1db3:eyJzZWxlY3RlZExpbmVDb3VudCI6NTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNiZWM0ZDVjMWUwMjQ5OTNhNzliNjQ5Yzc3N2QzMzk4ZWFiNWRmMzM4ZTdiZGI0M2FkNDc0NzcyM2VjMzM4YmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjVhNjg3MTIwYzQwODkwZDUzOTA3Zjg2Y2E1MDM5ZmE4MjNlOWNmM2RmYTE0NDU0NmQ0MDk3Y2U4YjExNjFiN2EiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQ4YzU0M2FjNjg2M2IzMTc5ZGExYWNmMTU2NDk0ZTdiYzZhNWQzZTEwN2M3ODYzOTEzM2QwYjM2NjkzZmQwM2QifQ"
+          "resource": "repo://Widgets/AurasWidgetMidnight.lua#L690-L712",
+          "version": "repo-lines-v1:sha256:9d95a6905490a164880935c6132043dcc816cf9eb467cd9ae016a5aa66ec0d14:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRjZDk5MWY0YmI1OWE0OGRmNTdlY2M5ZTA4NTUxNTJhMjEwYzg0ODY4NTJlNjg4YjRmNzZiNmEyYjk0ZTJlNDgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdkNGY3MTQwNDhkYjgzYmVkZDE5MmUyY2Y2Nzk1ZTAwNDlkMTJjZjdjZTg2YWY1NTgxODk2OTk5MGI1Yzk3MDgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQzMTVhY2IxMmRkODc2YzMyZjc4OTdlNDQzYTViNmNkMjdlZDI1NTZjNGVjNWM5N2NmN2E2YTY4ODIxNTc1NTQifQ"
         }
       ]
     },
@@ -81,7 +73,7 @@
       "statement": "BuildGroupConfigsFromConditions makes each condition exclude only the conditions before it, so an aura matching several active toggles is shown via exactly one group.",
       "evidence": [
         {
-          "resource": "repo://Widgets/AurasWidgetMidnight.lua#L712-L739",
+          "resource": "repo://Widgets/AurasWidgetMidnight.lua#L716-L743",
           "version": "repo-lines-v1:sha256:4361c6ac67c030c9b5538df9b0864b7fb8597de55f3858c4510fd375c9b99f9d:eyJzZWxlY3RlZExpbmVDb3VudCI6MjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUxNjIxMzMzMjQ3ZTRmYzFmMDNmNDJkN2E2ZmJkZTE0YjYzZGViYzQ4Y2M2NGZkYmNlNjY1Yzg3ZDkwMjA0MmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMyNDgyNWYxM2Q5MTJmYmYzNDc0Njc3YmU1M2FmOTEzOGQxNDk0ZjZhZGJlYTJlYmEwZmYxYzdhMzc1YjFlZGQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQzMTVhY2IxMmRkODc2YzMyZjc4OTdlNDQzYTViNmNkMjdlZDI1NTZjNGVjNWM5N2NmN2E2YTY4ODIxNTc1NTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjViNmRlODNiY2YzN2QxZmRkOWViYzU4NTcxMDA1NTM5MzdiM2M4YWQwYjM4NzgyNzgzMzRmNmZlNzBkN2NmZmQifQ"
         }
       ]
@@ -91,7 +83,7 @@
       "statement": "Sort order AtoZ maps to AuraContainerSortMethod.Name, TimeLeft to Expiration, and all others to Default.",
       "evidence": [
         {
-          "resource": "repo://Widgets/AurasWidgetMidnight.lua#L644-L658",
+          "resource": "repo://Widgets/AurasWidgetMidnight.lua#L648-L662",
           "version": "repo-lines-v1:sha256:61bdcfbc8d31c58e967f7b240b4b9966023e97c0e30148e89ceae33f435492a7:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRjZjNlMWU2ODFiMDAwMWU5ZDc5MzdiYThlZWJlYmRiMTU2OTgwM2FmYTg4N2UwMTdkOWRiMGJlYjE2YTU3MTYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU2N2Y5MGJjYjQxMTQyOTY4NGQxZjI3NGNkNjkzNWFlZGEwYWQxMzZlMzY0NmRlYTllYTVmZDRlYjJkZjRjM2MiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQ2NDhmMzAzYmQyMjg5MGQ1NDZlNjdmZmM3M2QzYzc0YjFkZWE1NTQ4YzA2YjhlN2MxNWJmNjlhZWZhNTQ1NzcifQ"
         }
       ]
@@ -101,11 +93,11 @@
       "statement": "ReapplyLiveAuraButtonSettings is skipped when three settings signatures are unchanged, skipped with a warning in PvP instances, and deferred until combat ends.",
       "evidence": [
         {
-          "resource": "repo://Widgets/AurasWidgetMidnight.lua#L485-L566",
+          "resource": "repo://Widgets/AurasWidgetMidnight.lua#L489-L570",
           "version": "repo-lines-v1:sha256:4e973732c9af7e029725f8af1c15a6667a3c7f1dc56bf6d85b43b960642b153d:eyJzZWxlY3RlZExpbmVDb3VudCI6ODIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY4MjA0MzY0ZjEyMzRhZmY0ZTgxZjdlMzQ1MjZlNjY2ODBlMGZjYWUzYzkyOTc4MTdjZWM5NmIwMDY1MTUwNGUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZiMmM0NGEyZjcyNjEwZWZhOWI5NTYxNzZkZjJiOTI5OWQ1MTU0NWY2NmFmZDY1MWFhZThhNmFmNTg3ZTg0YzEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAxZTg1NzhmNTAxZmM0YmUyMzIwZjM3NWE1NzU5Y2EyYTFhYzUzY2JjNzMxYmQxZTIzMjQ1NjI0MjFhNDk4NTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZlODE4ZDY5NzM4OGU3MGU4ZDBkNjNjMzgxOWYxNTIxNDg0OWUyYTE4ZmE0MmFmMTUwMzc2MTE4MmVkYTE2NTQifQ"
         },
         {
-          "resource": "repo://Widgets/AurasWidgetMidnight.lua#L637-L641",
+          "resource": "repo://Widgets/AurasWidgetMidnight.lua#L641-L645",
           "version": "repo-lines-v1:sha256:d9338110c9e4fcc69e0c7badb7231e103979d2f404e806f04466cb818984057e:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiODk3YzJkZmE1NmIwZjQwOGZhNTZlZmQ0MzkwOGM0YTY3ZWI3YzM1M2NlNzk0MzNmMmE1NWEyODJhNzZkZTZkYSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMWNlNTY2MWY2NjI2MDI0N2Q2ODM3NDcxYTU0YzNmMzhiZDdkNDhjZTE0NDIyZmY1MWIyMThjZDQ1ZWEwMzRiMSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNmE0ZjhiM2IzNzVjOThlOTY3YTE5M2Q0NTVmZjM1OTYxNGQzMjk4MzgzMTUxMGMwMGFiOWViYjU4MWMyZWZhMSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMjY0NGRhMDE4ZTY0OTQzM2ZjNzhiMDlkNmViMWQ1MTIxOGExZTg5OGZhNDc2ODc2YjJkMTViMDc4YjBkMDhmNSJ9"
         }
       ]
@@ -115,7 +107,7 @@
       "statement": "Widget:UpdateSettings re-applies live button settings for every aura type and then re-runs UpdateAuras for all active plates via UpdateAllFrames.",
       "evidence": [
         {
-          "resource": "repo://Widgets/AurasWidgetMidnight.lua#L1298-L1339",
+          "resource": "repo://Widgets/AurasWidgetMidnight.lua#L1285-L1326",
           "version": "repo-lines-v1:sha256:24a0cb407af322d638e9e4a9c30bdd5a79258cd19e659a82cd100a4dd66524c0:eyJzZWxlY3RlZExpbmVDb3VudCI6NDIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFkMjk2MDI2ODkzNzIwMjExMmRjYmJhODA0MTAwM2Q2NmYzYzQ0MWIzMDRjMjJiYWJhMDYyN2NhYjc4NmRjNWEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU2ZmNlNzFiYzE4NmRiOWVmN2M1ZThmODIzNDFiM2Q1ZmFjNjAzYTYzOGE0ZTVlYzAyOWEyMmEwNWUyYmZkZjYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFmNTE4ZTA3OGMwMjQ0YzNkM2JkOWY4ZDY3NjFhMzVhMzk0ZjE5ZGFmMjlmZGNkZGY2NjFkNzkxYzYwMzI3MTAifQ"
         }
       ]
@@ -125,11 +117,11 @@
       "statement": "The dispel border registration stores the return value of AddDispelTypeTexture and removes it with that value or the texture region, detecting the API generation without a version check.",
       "evidence": [
         {
-          "resource": "repo://Widgets/AurasWidgetMidnight.lua#L341-L362",
+          "resource": "repo://Widgets/AurasWidgetMidnight.lua#L345-L366",
           "version": "repo-lines-v1:sha256:51a2a7b49e30a425cbccf693b3d09278f3d4041a13be250730b3d6e4c9486ca8:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY4NzViMWIzMjI2Y2Q3ZWY4MmE0MzQ2ZjAwY2EzMGY0MGU2Y2IzNTk4ODEyZTI3MDE0MjU1MGU4N2YwNmNkOGYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc3OTgxMWM1ZmJlMjVjM2Q0ZTVmM2QxZmQzNWFiOWRhNmJjZjhhNjhjNWVkZjlkNmJhOTdmNjg2ODZjMzk2ODAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjlkYTgwOWE0ZGE5ZWVkMjZkZjU4MmVlYmU2NTUyYzI5NTgyNzBiOWY1NzRmYmRkNDhhZGJmZGU4YWEyYTA0NWIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQxZDk2Njk3OGU4MTBjNzQ4MjNlNmJiMjQxYTk2YjAwZDg3NGFhODcwNzhhMmViMjdjMWNiOGI2ZDU2YTMwODcifQ"
         },
         {
-          "resource": "repo://Widgets/AurasWidgetMidnight.lua#L613-L632",
+          "resource": "repo://Widgets/AurasWidgetMidnight.lua#L617-L636",
           "version": "repo-lines-v1:sha256:d5470b8ca7f9a350b55e124da55221a45aaba94a37d160d9e288c234c69fc10f:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYzMzRhZWY0ZGIxNWEwMGM1OWQxODdkYjZjMjZkZmI3M2U1YmNlNWM5ODkwOGNlYjM0YjUzMjFmMWI2NzkwYmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk0NGViZTAzMThlN2QxNDg1OThjM2U5NTJhZDk4MWRmZTFlMDFmYzFmYzdhYzgzNDdmZjY3YjJmOGIxYjJhNzUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIzYjRkMDkyZmE2ZDZmOTNkMWEzNDQ5NzQ3MjkyZDg5ZTMyMGU4ZjhjZTdmZjMzZGFhOTg4OTY5Y2RkYTAwYWEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImYxNDBmYWUwZGE0NWM3MjJmZjUzMzhmMDliMjAwNDYxYzZjZTEwNGMyN2M0YzJmMWJhOWU5OTYzYmFmMDAwMWEifQ"
         }
       ]
@@ -139,11 +131,11 @@
       "statement": "The Midnight widget calls AuraTriggerInitialize and AuraTriggerUpdateStyle but never AuraTriggerCheckIfActive, and its configuration mode and debug dump are stubs.",
       "evidence": [
         {
-          "resource": "repo://Widgets/AurasWidgetMidnight.lua#L1123-L1148",
+          "resource": "repo://Widgets/AurasWidgetMidnight.lua#L1101-L1126",
           "version": "repo-lines-v1:sha256:40ee803821537e40b6933cb801ff222306d3e93b646f5f46ee000d33275a07d4:eyJzZWxlY3RlZExpbmVDb3VudCI6MjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZiZDkwZGE4MTg3YzIyMGE0OTVlNjQwOTgyOGE4ZmE1MmZkNGZhNTgyMWRlZWI1NGFkM2E1OWZjNTBmYTg3OGEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA0ZmQ4ZmRlNmMwYzQ3NDY0MTgwNDc1ZjEyNmIxYWVmODQ1MmM5NTk0ODkzY2U1OWIyMDg0M2EzYjQ4MDUyN2EiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjUzYTYzMTg1NDI4OTZhOWQxYzU0NjRiYmE5MjUxMzkyZWI1MzNiNzNiZjk0MDg3YjUzY2M3YTc3MzMxZmZjYjQifQ"
         },
         {
-          "resource": "repo://Widgets/AurasWidgetMidnight.lua#L1341-L1354",
+          "resource": "repo://Widgets/AurasWidgetMidnight.lua#L1328-L1341",
           "version": "repo-lines-v1:sha256:ea30a7aa2f2285023d840d5cfc52cbdedc74403741b3aedb404a9e953b9bf9d4:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUwMGMxMDBkYTM3Y2M4OGE0NzRkZWVmODQ4OTNlZWFjNGJkMWI4MDY5MDgyYmY3ZDgwNTdlMDRmYTlhNDIzNjciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImEzOTc1NDkxZDA0YzMyMmIzOTdmZTJkNjlkOTM3NWY5MjhjYzg1NjEyNGE1NzkzNGMzODE1MGFlY2M0OGY3ZmQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
         },
         {
@@ -157,28 +149,28 @@
       "statement": "OmniCC support is forced off on HAS_MIDNIGHT_API clients.",
       "evidence": [
         {
-          "resource": "repo://Widgets/AurasWidgetMidnight.lua#L1301-L1302",
+          "resource": "repo://Widgets/AurasWidgetMidnight.lua#L1288-L1289",
           "version": "repo-lines-v1:sha256:2b94dc129d1c07b8eb7802b76bf1ffdf4ce469a7d38ac2651c71f879639b2e7e:eyJzZWxlY3RlZExpbmVDb3VudCI6MiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiN2NmNjAxZjZlNGFjOGI3NmI4NDZhNmE4NGI3MjM4ODBjMzlhNjEzNGIyYzMzOTUzYjNkMmI5MzQzM2JhMzRhYiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZGQxNjEyZmQxNjNhMDBhNDQyYmQxYzk3ZmI5NTZlNzUzMmZiZjliNjhlZmMwZWE4NTBlODIzYTg5ODVhNjk3MyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTI4NWVhMTI2NmUzNmE2OWExZTBkNDYzNDk3N2RkYWVhNGM3Y2E5MWVlNmU5NmIxZDQ0ZjI0ZmQ3OTU0ODQ5MCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOGI4Y2Y1NTVmOWVlNmU0YjZjOWYwOTAyYmM0NGRkNGFiYzZhMGY5YjE5OTVkOGZlODNkNjhiM2ZmY2JmNDg5NiJ9"
         }
       ]
     },
     {
       "id": "claim_009abd4559d54f4e8e43747a2eca9d7b",
-      "statement": "SwitchAreaByReaction is implemented in the Midnight widget although its header comment still lists it as not implemented.",
+      "statement": "SwitchAreaByReaction swaps the filter configurations, not the layouts, of the Buffs and Debuffs containers for friendly units, so swapped auras use the settings of the area they are shown in; CrowdControl is never swapped.",
       "evidence": [
         {
-          "resource": "repo://Widgets/AurasWidgetMidnight.lua#L1036-L1036",
-          "version": "repo-lines-v1:sha256:59efd87b45459f468010b6ad25bac916928fd3503438a26b9d398a33a0451e6e:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNTllZmQ4N2I0NTQ1OWY0NjgwMTBiNmFkMjViYWM5MTY5MjhmZDM1MDM0MzhhMjZiOWQzOThhMzNhMDQ1MWU2ZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNTllZmQ4N2I0NTQ1OWY0NjgwMTBiNmFkMjViYWM5MTY5MjhmZDM1MDM0MzhhMjZiOWQzOThhMzNhMDQ1MWU2ZSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiODEzNGM2NWMwODY2NzkyMjQyMzk0MWQwNjk2OTNiOTM0NjEzMmNkZTZlMzc1YmY4MTJiNzMyYmQ5ZDA4N2Q2NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMGI1N2QyZTIyNDE2MDNmNTczZWJmNmViMDk1NzA5NGIyOWY0NWY5NDA4ZDA0NmQ1YjJhOWE2NjY5MTE3Yzc0NSJ9"
+          "resource": "repo://Widgets/AurasWidgetMidnight.lua#L1152-L1159",
+          "version": "repo-lines-v1:sha256:5eae497288a617098812ba56e79a3745f6bacb9252b8b9ac07763e9a789f1f71:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZTU2Yjc5NmFlMTI5NGE4YTE1OTM5M2FmNjM1Yjk2M2Q2OTNiMGNkNTcxMmYyOTI5NTE2NzRhOWFlM2E5NDQ2NCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNzc5ODExYzVmYmUyNWMzZDRlNWYzZDFmZDM1YWI5ZGE2YmNmOGE2OGM1ZWRmOWQ2YmE5N2Y2ODY4NmMzOTY4MCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZWZhZjRkNjA5YzRhMGMyOWQwM2ZmMjMyZjQxNWE5OWQ0NDBlZGYzYjhiYjM1ZmEwMWRjNGRkY2UyZmZlNGMyMiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTAwOWQzNmI4M2RiMzJiNTA2YWJmY2VkYTlhYmQwMjEyYWE3MjNhNGRkNjc1MDFhNTcyYzE4NzIxMGUxMTAzZSJ9"
         },
         {
-          "resource": "repo://Widgets/AurasWidgetMidnight.lua#L69-L71",
-          "version": "repo-lines-v1:sha256:7574715871f5b5420f779d905b134f13a0cb8adcf9fbbb5202d6787c0156e4b7:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMmMwODJiMWVjZjIyOWNlMDQ5ZjE0NmJlOTQ3ODQ3MGU4MTUzYzUxZjYyZGNjM2I1MDEwZGE2MWNhYWVkNmVjZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOTZjMmNlMDQ1YjdjNmZhMWIyZDE3NjI1Nzg5MmZhYzIwYzY2OGVjNzY0MjY2NDNhNmU3MDNiY2Q0ZWRjMWRkNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMGQ2ODk0ZWFjMzA1NjI3Zjc5Y2YyMzM1ZTkwNTUxN2ZkZTkzMjVjMTdkNWJjOTA2NGNkMjI3NzE0NTg0MDJmZiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMTYwZTM4MDNiMDRjM2ZkNjNiY2U1MTU0YWNlNjNhYWY4NmUxNWVlNDc0ZTAwYjE4MDZhOGNlMmUyMTMwZmI1ZSJ9"
+          "resource": "repo://Widgets/AurasWidgetMidnight.lua#L69-L72",
+          "version": "repo-lines-v1:sha256:158dd1fa2d4d40b6979246f4502b934cf072417e4b1af74053fbd5ecf2ec590f:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZjJmYzk5NTRiN2IwMzcxYmVkNTQwZGQ4MzhjOWJlMzIxMWFhYzljNDE3ZTNhZGY0MGI2ZmVhODY2Y2U3OTJiZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYTJhNzNiNTM0MzUyZDNmOWNhMWE4ZWNjMjQ3NWQ5ZGM3MTYyMDY0ZTdjNzFkZWE1MWUyZjRjNzg3NDk2ODc1YSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMGQ2ODk0ZWFjMzA1NjI3Zjc5Y2YyMzM1ZTkwNTUxN2ZkZTkzMjVjMTdkNWJjOTA2NGNkMjI3NzE0NTg0MDJmZiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMTYwZTM4MDNiMDRjM2ZkNjNiY2U1MTU0YWNlNjNhYWY4NmUxNWVlNDc0ZTAwYjE4MDZhOGNlMmUyMTMwZmI1ZSJ9"
         }
       ]
     }
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-10-25T18:59:51.751Z"
+    "at": "2026-10-28T19:52:11.033Z"
   }
 }

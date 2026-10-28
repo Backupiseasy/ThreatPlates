@@ -1,21 +1,21 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:b9dfd759972132fe909464e1f5ff20c7e565161ee2987f68cfc8c793bc4dfe2f",
+  "pageVersion": "sha256:15504e4fe6245b0eb45ce2d1f76e3c5930853f0de5cd779438f22a41081cb519",
   "claims": [
     {
       "id": "claim_ec06b3b1c99f49f58a203f6e108af163",
       "statement": "The options table is created lazily on first open, registered under Addon.ADDON_NAME with a default size of 1000 x 640, and uses GetValue/SetValue as default getter and setter.",
       "evidence": [
         {
-          "resource": "repo://Options.lua#L10157-L10170",
+          "resource": "repo://Options.lua#L10143-L10156",
           "version": "repo-lines-v1:sha256:c86ac8951b9b5bc7473bef55fa4a0d881a8edc20ed29c0fc304b935aa7641016:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE2MDk3YjllY2UyYWFkMjZhZGUwODMxN2RmNjFjNDljODgyYTBmMGFjMmNkZDgxZDgzODMwMmZlNzFhMDk1MzEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBhODU0ZGIxODY0OThjYmUyYzMzYTUyMmRkYWM2MTdjMjA1NTI0NmM1ZmE1ZjJmNWMzNDBkMTEwNDExNDM2YzgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUwY2JhMDYzNzRmNzYyYTM5MzFlOGE0ZmE5OTU5NWM3ODA2NDdjZGQzOWY1OTQ3OTM4YzExMWNmNDlkMmRiMjMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImIyZjQxZTBlZmNjMWNhMzg5OTlmNjlhZGI3NDJlMWFiNGI3MGNiNDk0MjFkNDczZTczMjI2MGMwMDdiYjI0NTEifQ"
         },
         {
-          "resource": "repo://Options.lua#L11785-L11798",
+          "resource": "repo://Options.lua#L11771-L11784",
           "version": "repo-lines-v1:sha256:64e5686349118d10f92aa8bd9b7fa53c98d3de95cbeef4388b14516c06c937f9:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM2MjIwNjQyOWQ2ZmQ3ZDE1ZGNhNzBjOGQ4MDk0ZDBmNzhlMzAyMWY3M2EwOTJjZGFlZmM4NTIyMDMyN2I1YjUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIxOTE4N2FkNjM0YTEyODk4ZTc5N2JlOGI4YWQzZGQzMTJmODZjOGJmNDIxMTk4YTVhMDQ4OGU0YzI3YTRmNzgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjljMjI5NzVlMTlhMzkwNTI4YTAxOTk1ZDMyNDg3ZTA0NmZiOGY0MTY0ZjhhZjNlZWI2ZDJmODAzYTA5NmE0MDgifQ"
         },
         {
-          "resource": "repo://Options.lua#L11816-L11822",
+          "resource": "repo://Options.lua#L11802-L11808",
           "version": "repo-lines-v1:sha256:2b1afda4fdcaf24ae081794462345f91c71341a60989479f90dce44efd809836:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMThkYWE3OWMwZTBlM2Y3MGM0ZmEzZDBhOWZlZTJhNWEyNzA5MjAwODVmY2QzMjcxOGY4ZTMwM2JhY2Q4ZjQ2ZiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDgzMzJmZTY2N2JjNTFhYzRhNTFiYTBlZmU3MzQ0NDFjOTBkZWY1NWM2MGEyNmQ3ZGIyNzVlY2JiY2Y0MmYxNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNTY2ZTBlY2FkM2FiZTY0NTEzZmIwOWNiMDY1NTY1ZDRlN2NlNjEzZjUyN2E5YTU0MTI2YjIxOGNjZTZkZDMwNSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYTVlNGFjZjkyNzFjNmZhMDkwM2EyZjg1ZjZhNDA1ZjBmZmViODNkM2ExNWIyODM5NzhhMmUyYjM2MjYwYzlmNSJ9"
         }
       ]
@@ -25,7 +25,7 @@
       "statement": "The profiles tab is the AceDBOptions table enhanced with LibDualSpec where available and extended with import/export entries.",
       "evidence": [
         {
-          "resource": "repo://Options.lua#L11716-L11725",
+          "resource": "repo://Options.lua#L11702-L11711",
           "version": "repo-lines-v1:sha256:66c893690d2cda66250c748cdb2743f83c20be284643fbd4411e21a1a53a0aa0:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI3ZWI0ZjViZTM5ODZiMTlkY2VjNjE0NmNkMmU1NzgwM2VjYTE4OGVlODY5OWZjOGY1M2E0YWM4ZDZiMjczNDkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcyOGQ2ZTg2ZTIxMzkzNzJmZmZjZmYzMDc3NmU0MDEyNGZkOTIzNzY0NTViZjMyY2VkOWFhZmJhNmE3MTdiYzEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNiMThhMGEzMGViZDE3OGI2ZDJjMTEzNDJlMDM5MWE4M2VlYWNmYTkyZmEzNWM0NzNkZDYxNWE4NzQ1YmRhZjMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRjYjJkYmY3YjEwYWQ3ODZjZTU5YTA0YWZlM2YxYWM0NjQwZjY3ZmY1NzVmMTNhMDg0NTVkZDA0YTMyMDQxMWMifQ"
         }
       ]
@@ -140,17 +140,17 @@
     },
     {
       "id": "claim_afcad547aae848adbe5f91c46dfeaa77",
-      "statement": "TidyPlatesThreat:OpenOptionsDialog references an undefined variable t.",
+      "statement": "TidyPlatesThreat:OpenOptionsDialog registers the options table, opens the dialog for Addon.ADDON_NAME and selects the BossMods widget group when requested.",
       "evidence": [
         {
-          "resource": "repo://Options.lua#L11807-L11814",
-          "version": "repo-lines-v1:sha256:ac5a615d32be2949b66f3867e1645dee7a2dd8c35af2f815eb2c9bacec2ef778:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZGE2Yzg1NDdjZTE0NGFlZjkyNWNlYzY3OTY5YTFiNjA3NWRkNTZkZTcxZWZmYWM3ODFmYzU5NzAzNDIxZjE0YSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDgzMzJmZTY2N2JjNTFhYzRhNTFiYTBlZmU3MzQ0NDFjOTBkZWY1NWM2MGEyNmQ3ZGIyNzVlY2JiY2Y0MmYxNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNTY2ZTBlY2FkM2FiZTY0NTEzZmIwOWNiMDY1NTY1ZDRlN2NlNjEzZjUyN2E5YTU0MTI2YjIxOGNjZTZkZDMwNSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiODkwMmU0MTRhNzkwYWIwMDFkODI5OGQ3ODFlNmM0Nzc0N2U0MTk1OWE5ZmUwNzI0ZWZkNmVlNTUyY2FlYmVhMCJ9"
+          "resource": "repo://Options.lua#L11793-L11800",
+          "version": "repo-lines-v1:sha256:b6926a9e199ad82ae59b335164626e8e997b10a42d7139ea753993b44c42f7d9:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZGE2Yzg1NDdjZTE0NGFlZjkyNWNlYzY3OTY5YTFiNjA3NWRkNTZkZTcxZWZmYWM3ODFmYzU5NzAzNDIxZjE0YSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDgzMzJmZTY2N2JjNTFhYzRhNTFiYTBlZmU3MzQ0NDFjOTBkZWY1NWM2MGEyNmQ3ZGIyNzVlY2JiY2Y0MmYxNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNTY2ZTBlY2FkM2FiZTY0NTEzZmIwOWNiMDY1NTY1ZDRlN2NlNjEzZjUyN2E5YTU0MTI2YjIxOGNjZTZkZDMwNSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiODkwMmU0MTRhNzkwYWIwMDFkODI5OGQ3ODFlNmM0Nzc0N2U0MTk1OWE5ZmUwNzI0ZWZkNmVlNTUyY2FlYmVhMCJ9"
         }
       ]
     }
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-10-25T18:59:51.751Z"
+    "at": "2026-10-28T19:52:11.033Z"
   }
 }

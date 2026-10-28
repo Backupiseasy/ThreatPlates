@@ -3,15 +3,15 @@ type: subsystem
 title: Auras widgets
 description: The two mutually exclusive implementations of the Auras widget - AurasWidget.lua, which scans and filters auras in Lua on older clients, and AurasWidgetMidnight.lua, which hands declarative filters to Blizzard's AuraContainer/AuraButton frames on clients with secret values - with their data flow, settings handling, pitfalls and limitations.
 tags: [auras, widget, midnight, auracontainer, filters, buffs, debuffs, crowd-control]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-10-25T18:59:51.751Z
 sources:
   - id: openwiki-source-38f76d8a763c81931c0b6872
     resource: repo://Widgets/AurasWidget.lua
   - id: openwiki-source-a50841d1619063914118d2a2
     resource: repo://Widgets/AurasWidgetMidnight.lua
-generated: { by: "claude-code", at: "2026-10-25T18:59:51.751Z" }
+generated: { by: "claude-code", at: "2026-10-28T19:52:11.033Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-10-28T19:52:11.033Z
 ---
 
 # Auras widgets
@@ -86,8 +86,13 @@ unrestricted group. The user-facing meaning of every toggle is documented in
 
 `UpdateAuraContainer` also applies layout (`SetAuraGroupLayout`, flow layout anchor/growth/line size), sorting
 (`AtoZ` -> `Name`, `TimeLeft` -> `Expiration`; "Duration"/"Creation" have no equivalent and fall back to
-`Default`), anchoring between grids, and "switch area by reaction" for friendly units (layout of Buffs and
-Debuffs swapped, data unchanged; the header comment of the file still calls it not implemented).
+`Default`), and anchoring between grids.
+
+"Switch area by reaction" (friendly units only; CrowdControl is never swapped) swaps the **filters**, not the
+layouts, of the Buffs and Debuffs containers in `Widget:UpdateAurasGrids`: friendly buffs are shown in the Debuffs
+area and vice versa, each with all settings of the area it is shown in. Each container therefore also declares
+the aura group keys of the other type's friendly groups (`AURA_GROUP_KEYS`), as groups cannot be added later.
+Until 13.3.4 the layouts were swapped, so swapped auras kept the settings of their own area [GH-770].
 
 ### Button appearance
 

@@ -3,9 +3,6 @@ type: subsystem
 title: Castbar and interrupts
 description: How Threat Plates tracks casts, channels and empowered casts on nameplates, draws the castbar with either secret-safe timer objects or Lua arithmetic, shows the interrupter's name on Retail/Forever and Classic, and keeps castbar visibility consistent.
 tags: [castbar, spellcast, interrupts, combat-log, nameplate, midnight]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-10-25T18:59:51.751Z
 sources:
   - id: openwiki-source-b28f0469e713ffab5d099af7
     resource: repo://Elements/Castbar.lua
@@ -13,7 +10,10 @@ sources:
     resource: repo://Nameplate.lua
   - id: openwiki-source-8c1a2f1346df95ad59b63c21
     resource: repo://Styles/Styles.lua
-generated: { by: "claude-code", at: "2026-10-25T18:59:51.751Z" }
+generated: { by: "claude-code", at: "2026-10-28T19:52:11.033Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-10-28T19:52:11.033Z
 ---
 
 # Castbar and interrupts
@@ -83,19 +83,23 @@ otherwise the legacy `OnUpdate` would see no `MaxValue` and hide the bar immedia
 ## Interrupts
 
 WoW signals an interrupted plain cast with `UNIT_SPELLCAST_INTERRUPTED` and an interrupted channel with
-`UNIT_SPELLCAST_CHANNEL_STOP` and a non-nil `interruptedBy`. Background: `Source/Docs/CastbarInterrupts.md`
-(it still names `ExpansionIsAtLeastMidnight`/`ResolveNameFromGUID`; the code uses `HAS_MIDNIGHT_API` and a
-`UnitNameFromGUID` fallback).
+`UNIT_SPELLCAST_CHANNEL_STOP` and a non-nil `interruptedBy`. For a plain cast, WoW also fires
+`UNIT_SPELLCAST_STOP` right after `UNIT_SPELLCAST_INTERRUPTED` (verified on Retail 12.1.5 for a kick, a stun and
+movement). Background: `Source/Docs/CastbarInterrupts.md` (it still mentions a `ResolveNameFromGUID` helper; the
+code calls `UnitNameFromGUID` directly).
 
 **Retail/Forever** (`Addon:UNIT_SPELLCAST_INTERRUPTED`):
 
-- With "show interrupt source" off, it just calls `UNIT_SPELLCAST_STOP` - for a plain cast this event is the
-  only signal that the cast ended.
+- With "show interrupt source" off, it just calls `UNIT_SPELLCAST_STOP` right away. The `STOP` event WoW sends
+  afterwards is then ignored, because `castbar.CastbarID` is already cleared.
 - Otherwise it resolves the interrupter from the GUID (`GetPlayerInfoByGUID`, fallback `UnitNameFromGUID`),
   transliterates and colors it with `class_color:WrapTextInColorCode` (C-API, safe for a secret name - not
   `Addon.ColorByClass`, which concatenates in Lua and broke on Midnight), shows `INTERRUPTED [name]`, fills the
   bar, sets the interrupted color and `PostCastHoldTime = CASTBAR_INTERRUPT_HOLD_TIME`, sets
   `unit.IsInterrupted`, then calls `UNIT_SPELLCAST_STOP` and reconciles visibility.
+- It returns early when `castbar_id ~= castbar.CastbarID`, the castbar is hidden, or `interrupted_by` is `nil`.
+  The cast still ends then: the `UNIT_SPELLCAST_STOP` that WoW fires after the interrupt clears
+  `unit.isCasting`/`CastbarID`.
 
 **Classic** - `interrupted_by` is `nil` even for real interrupts (confirmed on Mists Classic), so:
 
@@ -137,11 +141,6 @@ subscription).
 
 ## Observations from reading the code (unverified)
 
-- `Addon:UNIT_SPELLCAST_INTERRUPTED` with the interrupt source option on returns early when
-  `castbar_id ~= castbar.CastbarID`, the castbar is hidden, or `interrupted_by` is `nil` - without calling
-  `UNIT_SPELLCAST_STOP`. If WoW really never sends `STOP` for an interrupted plain cast, `unit.isCasting` and
-  `CastbarID` would stay set in those cases (for example a cast cancelled without an interrupter) until the
-  next cast or refresh. Not confirmed in-game.
 - `OnStartCasting` stores `castbar.CastbarID` before it returns for a style without castbar, so `CastbarID` can
   be set while nothing is shown.
 

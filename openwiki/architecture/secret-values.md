@@ -3,9 +3,6 @@ type: concept
 title: Secret values (Midnight and Forever)
 description: How Threat Plates handles WoW's secret values on clients with Midnight's API surface - what they are, which data is affected, the guard patterns and safe sinks used in the code, disabled features, and open issues.
 tags: [midnight, forever, secret-values, taint, safety, guards]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-10-25T18:59:51.751Z
 sources:
   - id: openwiki-source-6eee19a5c8ad4d5edaf05fe2
     resource: repo://Compatibility.lua
@@ -30,6 +27,9 @@ sources:
   - id: openwiki-source-45c8931b000866c388b94c2a
     resource: repo://Widgets/HealerTrackerWidget.lua
 generated: { by: "claude-code", at: "2026-10-25T18:59:51.751Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-10-28T19:52:11.033Z
 ---
 
 # Secret values (Midnight and Forever)

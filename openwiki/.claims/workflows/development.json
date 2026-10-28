@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:9384de5349fad15a54c4b17476e17600b45b1e34004778402e88d805622f3a10",
+  "pageVersion": "sha256:6341630c938d6f692c4597fd86d889885100cc07b79b3578b83b7c9aa2f24d21",
   "claims": [
     {
       "id": "claim_9fa3bcd9e9d648488e0c815cb7a99bb8",
@@ -40,11 +40,11 @@
     },
     {
       "id": "claim_278af996b46d4dcca37852ab6564f031",
-      "statement": "The debug commands include version, unit, debug, threat, reaction, role, auras, guid, searchdb, cache, custom-styles, cleanup-custom-styles and restrictions, which toggles the secret*RestrictionsForced CVars.",
+      "statement": "The debug commands include version, searchdb, unit, cache, debug, custom-styles, guid, cleanup-custom-styles, version-history, reaction, auras, threat, role, restrictions (which toggles the secret*RestrictionsForced CVars) and test.",
       "evidence": [
         {
-          "resource": "repo://Commands.lua#L106-L330",
-          "version": "repo-lines-v1:sha256:678d3cfd2b2eb36a461267f36f930533382a4624ff50e1947899b9b776d91842:eyJzZWxlY3RlZExpbmVDb3VudCI6MjI1LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI4ZWQxYTIwYjVhZDIwMTU1ZTc4NmM0MjAxNzE5YjRiNzE5MDkzYWU5YjNmODYzN2RmNjU5ODUzMGI1ZTQ0YWMxIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0ODMzMmZlNjY3YmM1MWFjNGE1MWJhMGVmZTczNDQ0MWM5MGRlZjU1YzYwYTI2ZDdkYjI3NWVjYmJjZjQyZjE1IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI1NjZlMGVjYWQzYWJlNjQ1MTNmYjA5Y2IwNjU1NjVkNGU3Y2U2MTNmNTI3YTlhNTQxMjZiMjE4Y2NlNmRkMzA1IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIwODUzMGM1NzY1Mjc3NmEwNGYxNDJkNWRhMTQzOTJjZDE0ZTFjYmQxM2FkMzE3MTg5MmMzNDgwOGVkOGMxN2Q3In0"
+          "resource": "repo://Commands.lua#L106-L331",
+          "version": "repo-lines-v1:sha256:9d0d40363a4d814fdc7c40532ddfde49c04dc6e2c5f76e16651c38b1b2ed60b5:eyJzZWxlY3RlZExpbmVDb3VudCI6MjI2LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI4ZWQxYTIwYjVhZDIwMTU1ZTc4NmM0MjAxNzE5YjRiNzE5MDkzYWU5YjNmODYzN2RmNjU5ODUzMGI1ZTQ0YWMxIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIwMWJhNDcxOWM4MGI2ZmU5MTFiMDkxYTdjMDUxMjRiNjRlZWVjZTk2NGUwOWMwNThlZjhmOTgwNWRhY2E1NDZiIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI1NjZlMGVjYWQzYWJlNjQ1MTNmYjA5Y2IwNjU1NjVkNGU3Y2U2MTNmNTI3YTlhNTQxMjZiMjE4Y2NlNmRkMzA1IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI5NjJhNDhhMzhlNTZhNDMzMTFhZjVlYzJkMmI4ZDNkMDkwZTNkMTc1MjM2OWM5YzJjNmM0YWQ1NDViZmFmZjg4In0"
         }
       ]
     },
@@ -75,6 +75,6 @@
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-10-25T18:59:51.751Z"
+    "at": "2026-10-28T19:58:16.774Z"
   }
 }

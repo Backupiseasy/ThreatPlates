@@ -5,7 +5,7 @@ description: Overview of every Threat Plates widget except Auras - what it shows
 tags: [widgets, quest, threat, combo-points, resource, bossmods, arena, social, experience, healer-tracker, target-art]
 verified:
   - by: openwiki/0.7.2
-    at: 2026-10-25T18:59:51.751Z
+    at: 2026-10-28T19:58:16.774Z
 sources:
   - id: openwiki-source-65a8e958e1c834c2baafb605
     resource: repo://Modules/Color.lua
@@ -37,7 +37,7 @@ sources:
     resource: repo://Widgets/UniqueIconWidget.lua
   - id: openwiki-source-6794fbfa2ece0a99802c941d
     resource: repo://Widgets/WidgetHandler.lua
-generated: { by: "claude-code", at: "2026-10-25T18:59:51.751Z" }
+generated: { by: "claude-code", at: "2026-10-28T19:58:16.774Z" }
 ---
 
 # Other widgets
@@ -130,8 +130,7 @@ file works the same way for `focus`. See [Target, soft target, mouseover and foc
 - UniqueIcon: enabled when any custom style uses an icon or glow (`Addon.UseUniqueWidget`); shows the custom
   style's icon, the aura/cast spell icon (`AutomaticIcon`) or the unit portrait (refreshed on
   `UNIT_PORTRAIT_UPDATE`), and LibCustomGlow effects.
-<!-- openwiki: broken internal link [../rendering/modules.md#icon-modulesicon] heading anchor "icon-modulesicon" does not exist in "../rendering/modules.md". Fix the href or restore the target, then delete this comment. -->
-- ClassIcon and UniqueIcon register Masque groups (see [Modules](../rendering/modules.md#icon-modulesicon)).
+- ClassIcon and UniqueIcon register Masque groups (see [Modules](../rendering/modules.md#icon-modulesiconlua)).
 
 ### Social
 

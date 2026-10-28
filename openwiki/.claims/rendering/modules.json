@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:d44068228c7cde9d5ebb348cba56c6a60ce07c98e98dccf430a5261ee3546a79",
+  "pageVersion": "sha256:abd6735062d8729e0938eeaf508fca716c9ac2ebac7f4be1771cfa3824ae6c6f",
   "claims": [
     {
       "id": "claim_1d0ec2d35df742249d68de6d34be0450",
@@ -85,12 +85,12 @@
       "statement": "Transparency and scaling map each style name to a function that combines situational, target and per-unit-type settings, and threat styles use per-threat-level values.",
       "evidence": [
         {
-          "resource": "repo://Modules/Scaling.lua#L98-L189",
-          "version": "repo-lines-v1:sha256:c8e5880a15216404118b5f33815e57a0e47e886317defc0657e4fdcc4754c9af:eyJzZWxlY3RlZExpbmVDb3VudCI6OTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdiNzlkNTNmZTdlNDMwYzY4NTg2ZmVjMTUxMTIxZWIyMDllNjVlYjQ3ODMxYjI2N2NlZDRkZTFhNDFlOGFkMWUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM0NzlmNWQ0OGJiYmI5YzM4NTgxZTNjMGE3MmEyMTg0NmY2MzU1N2YwZWEwZDIxMTc5MzYzMzg0MmEzNmRkNmYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijg1MTllZWRkMDc0NzdhYTkyMjUyOTY1YzQ0OTU2Mjk3YjAxYTBlYjVkZjFhZjdiZTQ1MTAxNTI4ZTNhYjJhZWIifQ"
+          "resource": "repo://Modules/Scaling.lua#L98-L191",
+          "version": "repo-lines-v1:sha256:a442ce429413814111376901971fc55fb3f84fb23e43976206701e96924a214c:eyJzZWxlY3RlZExpbmVDb3VudCI6OTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIxYzA2NTZkMjQxMTZkOGIwMjIzNTM4MTJlZDg2YTg3ZDU5NjIyYzA3Zjk1YTFlNWNjNjc4ZDUxNTdjY2MwYTciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM0NzlmNWQ0OGJiYmI5YzM4NTgxZTNjMGE3MmEyMTg0NmY2MzU1N2YwZWEwZDIxMTc5MzYzMzg0MmEzNmRkNmYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijg1MTllZWRkMDc0NzdhYTkyMjUyOTY1YzQ0OTU2Mjk3YjAxYTBlYjVkZjFhZjdiZTQ1MTAxNTI4ZTNhYjJhZWIifQ"
         },
         {
-          "resource": "repo://Modules/Transparency.lua#L100-L189",
-          "version": "repo-lines-v1:sha256:23cc0cae2906209f27a8f321b8114c153e8e39c9f2958cad7a9ba40b27e39cf2:eyJzZWxlY3RlZExpbmVDb3VudCI6OTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFlMjZmOTEyN2IwMjlhZDE0YWI5NDcyYzYwOWZmOTUyNWVhOTNmNTdjYmE5YzcwYjVkOTgxMmJjZmNlMzNhN2YiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg5ODRlOTFlNjJjMTFmOTk5ZGFiM2IyZWU4YjRhYzRhYTg4OGJkMGFhMzhlMGJiMWYzZjFjY2I0NThmYzE2MmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM1OTE4NDAyZjkzZTIzMWUzNTA0ZmQwODQ1ODExNjk0YTkwYzI5OTg0ZWYxZTNkOGRjODY3ZWZkYzZhNGMyYTcifQ"
+          "resource": "repo://Modules/Transparency.lua#L100-L191",
+          "version": "repo-lines-v1:sha256:f415abf2caddbd9641e5f7b2c474945afc3d5646b8e2f3811cfdf5902964b451:eyJzZWxlY3RlZExpbmVDb3VudCI6OTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI3ZWU2YjY0NmQ3NzA5MmVjZWNkMWFjMzlkMTg4MDgyMTMwZGM3MDk0ZTljNzA1ZDhhMTU3MGFkMDcwZjFiMWQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg5ODRlOTFlNjJjMTFmOTk5ZGFiM2IyZWU4YjRhYzRhYTg4OGJkMGFhMzhlMGJiMWYzZjFjY2I0NThmYzE2MmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM1OTE4NDAyZjkzZTIzMWUzNTA0ZmQwODQ1ODExNjk0YTkwYzI5OTg0ZWYxZTNkOGRjODY3ZWZkYzZhNGMyYTcifQ"
         }
       ]
     },
@@ -99,7 +99,7 @@
       "statement": "Occlusion transparency compares the Blizzard plate's alpha with nameplateOccludedAlphaMult on every frame update and is disabled when the CVars do not allow occlusion detection.",
       "evidence": [
         {
-          "resource": "repo://Modules/Transparency.lua#L224-L340",
+          "resource": "repo://Modules/Transparency.lua#L226-L342",
           "version": "repo-lines-v1:sha256:c1b79c1fbcbbebd8d2e901490145fe4395afbd048bbe01a3258ff4d7a5b1ddae:eyJzZWxlY3RlZExpbmVDb3VudCI6MTE3LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJkMTg4MDNjYmNiNjZjYWIxODU3YmI3MDhlYjg4NTFhM2Q3ZTcwOWM4ZDA2NzQxMmQwMTU3YWNlNjIxMjY3YzE5IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0ODMzMmZlNjY3YmM1MWFjNGE1MWJhMGVmZTczNDQ0MWM5MGRlZjU1YzYwYTI2ZDdkYjI3NWVjYmJjZjQyZjE1IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI4MjlhYWU2ODhjNjg4MTkyMzVhOWI0YjczOTMzOGU3N2UyN2QwOTk3NWJjZmFkZDRhNzM5NjllYjUxMWM3MGI3IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI3YzE3MjQzYWZkMzFkYjA5YTM0YjUxZjA5ZDUxYmY0NzcyNWQ3NjdiNzZjODNlNWU5NWE3OGRhODM3ZjIxNTAzIn0"
         },
         {
@@ -127,8 +127,8 @@
       "statement": "IconModule.CreateIcon creates a plain texture or, with Masque, an ActionButtonTemplate button added to the widget's Masque group.",
       "evidence": [
         {
-          "resource": "repo://Modules/Icon.lua#L42-L119",
-          "version": "repo-lines-v1:sha256:513d0a6b1d9f5dc342421dd13a30f78f00626e705f15138a7569a3fa10925b56:eyJzZWxlY3RlZExpbmVDb3VudCI6NzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJlOTczNTQxNDQwY2ZkMjEwMjZkOTJhNDdhNjQzYTI3MDY5OGY3OWU2MzMyZDQ1YzNjNDI0NjM4YTg3NzdkMmEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM2MWU0OGQwMzA4ZjIwZTMyZGJhNWZiNTYzMjhiYWYxOGQ3MmVmMGNjYjQzYjg0ZjVjMjYyZDJhNmExZmM2YzgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI5MjczMWNmY2FmOWQ4NzQ5ZTJhOTA5NGVkZjY1YWI3MTZkNGY0NzdhMWYxZTQ0ZGI3YzAwYjMwZGMzYWNhNzgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+          "resource": "repo://Modules/Icon.lua#L42-L124",
+          "version": "repo-lines-v1:sha256:c69b50a0463938a3a4392dac63b45e4f8f75019936d3bf99648d9d6ca7c5c986:eyJzZWxlY3RlZExpbmVDb3VudCI6ODMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJlOTczNTQxNDQwY2ZkMjEwMjZkOTJhNDdhNjQzYTI3MDY5OGY3OWU2MzMyZDQ1YzNjNDI0NjM4YTg3NzdkMmEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM2MWU0OGQwMzA4ZjIwZTMyZGJhNWZiNTYzMjhiYWYxOGQ3MmVmMGNjYjQzYjg0ZjVjMjYyZDJhNmExZmM2YzgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI5MjczMWNmY2FmOWQ4NzQ5ZTJhOTA5NGVkZjY1YWI3MTZkNGY0NzdhMWYxZTQ0ZGI3YzAwYjMwZGMzYWNhNzgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
         }
       ]
     },
@@ -145,10 +145,20 @@
           "version": "repo-lines-v1:sha256:f1d6cc09ce757eb0b1dd8c934ab29be5025da474456c150c871b8647e3a33456:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMDg3ODFiZTAwNjU1MjljYjg1MTY5ODY0YTkyZWNmODg3MzBkNzdkN2ZjOWU3YTQzNGJlZmU0ZGM1YjQxYTBhNiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMTg2NDc2N2FlMmFhMjYwZDdmZTg0MTQ2ZDc3NjJkYTFkMTEzYmFiOGE3MGJmNTkwM2RiYjk0NWJjNmZhN2MwMCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNzE5YTdlZDc2ZGM5MDA0Y2VjYWQ4ZTQzYjRhNjg4ZmY2M2ViY2EyNWRlYWEwOTBhYjYzYTVjN2I4NDhiZGZiZiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZGZmNjA0YmFiMDNmN2ExYzI5ZTg5ZTY3OTMzYzEyNGQ0YTM0YmY3YjU0NmM4Y2IzODY2ODIxYjNiYTk3ZWZmNiJ9"
         }
       ]
+    },
+    {
+      "id": "claim_ff431e75a02947d2893b6b86bb18b0c4",
+      "statement": "IconModule.UpdateSettings reads the Masque setting only once (while UseMasque is nil) and keeps it until the UI is reloaded, because existing icons are either Masque buttons or textures.",
+      "evidence": [
+        {
+          "resource": "repo://Modules/Icon.lua#L114-L123",
+          "version": "repo-lines-v1:sha256:ec2bca983d7a2e29341ea8045ad506690c105eafd1bfae273b384e623ba9de7f:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYwMmJjZTE5NzU4MTkxNGQ5ZmVmMjg1OWI0ZmFjNTQ5MDE2NWI3YjFiNGJjMGUyMDJjNzMxNzAwODNlMmFiYWYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImViYjllNDQ2NjcxMDNiYmRmNTdkYTc1N2ExYzIzYTA2MGE5YTM0NDA5NWRlM2UyZGUwYWNkMGY1NzM2Njk0NTEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjM2MWU0OGQwMzA4ZjIwZTMyZGJhNWZiNTYzMjhiYWYxOGQ3MmVmMGNjYjQzYjg0ZjVjMjYyZDJhNmExZmM2YzgifQ"
+        }
+      ]
     }
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-10-25T18:59:51.751Z"
+    "at": "2026-10-28T19:52:11.033Z"
   }
 }

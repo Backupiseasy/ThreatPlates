@@ -3,9 +3,6 @@ type: subsystem
 title: Styles and custom styles
 description: How Threat Plates builds its themes, picks a style for every unit (visibility, headline view, custom style triggers, threat styles), applies a style to a nameplate in a fixed order, and runs scripted custom styles through the Script widget.
 tags: [styles, themes, custom-styles, triggers, headline-view, scripting]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-10-25T18:59:51.751Z
 sources:
   - id: openwiki-source-cfe0b084e5798ad70d26514c
     resource: repo://Commands.lua
@@ -29,7 +26,10 @@ sources:
     resource: repo://Widgets/ScriptWidget.lua
   - id: openwiki-source-6794fbfa2ece0a99802c941d
     resource: repo://Widgets/WidgetHandler.lua
-generated: { by: "claude-code", at: "2026-10-25T18:59:51.751Z" }
+generated: { by: "claude-code", at: "2026-10-28T19:52:11.033Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-10-28T19:52:11.033Z
 ---
 
 # Styles and custom styles
@@ -145,20 +145,26 @@ widget is initialized before all other widgets (`InitializeAllWidgets`), so othe
   (standard), `OnTargetUnitAdded/Removed` (target-only), `OnFocusUnitAdded/Removed` (focus-only), `OnUpdate`
   and WoW events.
 - Script-triggered styles run on all plates (`ScriptsForAllPlates`); scripts attached to a trigger-based style
-  run only on plates whose `unit.CustomPlateSettings` is that style (`ScriptsByCustomStyle`). Every call goes
-  through `pcall` and logs errors with the style name.
+  run only on plates whose `unit.CustomPlateSettings` is that style (`ScriptsByCustomStyle`). Functions not tied
+  to a nameplate (`IsEnabled`, `OnEnable`, `OnDisable`, `OnUpdate`; `SCRIPT_FUNCTIONS_WITHOUT_UNIT`) are called
+  for all custom styles with scripts. Every call goes through `pcall` and logs errors with the style name.
+- `Create` runs once per custom style and widget frame (`CallCreateScript`, tracked in
+  `InitializedPlatesByStyle`): from `Widget:Create`, and for frames that already existed when a style or its
+  `Create` script was added, from `OnUnitAdded` and `UpdateLayout`. `UpdateLayout` passes the unit only once the
+  style's `Create` (if any) has run for that frame.
+- Parameters: plate functions get `widget_frame` (and `unit`), `OnUpdate` gets `elapsed`. Target and focus scripts
+  (`OnTargetUnitAdded/Removed`, `OnFocusUnitAdded/Removed`) get `widget_frame, unit` and are called on
+  unit added/removed and on `TargetGained`/`TargetLost`/`FocusGained`/`FocusLost`; the flags
+  `TargetScriptsActive`/`FocusScriptsActive` on the widget frame make sure each is called once per change.
+- WoW event scripts are subscribed with a closure that adds the event name (`HandleWoWEvent(event, ...)`), because
+  `EventService` calls function subscribers without it (see [Event system](../architecture/event-system.md)).
+- A trigger-based style whose `IsEnabled` script returns false is removed from `ScriptsByCustomStyle`.
+  Script-triggered styles toggled with "Never" in the options are applied immediately (`CustomPlateUpdateEntry`
+  calls `UpdateSpecial()` for them although they have no trigger value).
 - User documentation: `Source/Wiki/ScriptingCustomStyles.md` (marked as unstable API).
 
-### Observations from reading the code (unverified)
-
-- WoW event scripts are subscribed with `self:SubscribeEvent(event, HandleWoWEvent)`. A function subscriber is
-  called as `func(...)` without the event name (see [Event system](../architecture/event-system.md)), but
-  `HandleWoWEvent(event, ...)` expects the event name first and looks up `ScriptsForWoWEvents[event]`. The lookup
-  therefore uses the event's first payload value, and WoW event scripts would never run.
-- `Widget:OnUnitRemoved` passes the undefined global `tp_frame` (always `nil`) to `OnTargetUnitRemoved` scripts.
-- In `Widget:UpdateSettings`, the error message for a failing `UpdateSettings` script of a trigger-based style
-  uses the undefined `return_value` instead of `error_message`, and `IsEnabled` returning false does not
-  disable such scripts (unlike script-triggered ones).
+Several of these points were broken until 13.3.4 (WoW event scripts never ran, functions were not called for
+trigger-based styles or got wrong parameters, target/focus scripts did not react to target changes).
 
 Related: [Nameplate lifecycle](../nameplates/lifecycle.md), [Elements](elements.md),
 [Widget framework](../widgets/framework.md).

@@ -3,9 +3,6 @@ type: subsystem
 title: "Modules: threat, color, transparency, scaling and helpers"
 description: The shared, dot-called Modules of Threat Plates - threat level detection, healthbar and name colors, transparency, scaling, fonts, icons, animations and localization helpers - with their inputs, events and calling order.
 tags: [modules, threat, color, transparency, scaling, font, animation, localization]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-10-25T18:59:51.751Z
 sources:
   - id: openwiki-source-8e65c9af5eec1ce3c038cede
     resource: repo://Constants.lua
@@ -29,7 +26,10 @@ sources:
     resource: repo://Nameplate.lua
   - id: openwiki-source-3109d6b4b39ada7d983ff1d5
     resource: repo://TidyPlates_ThreatPlates.toc
-generated: { by: "claude-code", at: "2026-10-25T18:59:51.751Z" }
+generated: { by: "claude-code", at: "2026-10-28T19:52:11.033Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-10-28T19:52:11.033Z
 ---
 
 # Modules: threat, color, transparency, scaling and helpers
@@ -119,9 +119,9 @@ every frame; a plate whose Blizzard alpha drops to `nameplateOccludedAlphaMult` 
 the occluded alpha (target excepted), optionally faded. It is disabled when the CVars do not allow detection
 (`CVars.InvalidCVarsForOcclusionDetection`).
 
-Known bug: the custom style and headline view paths call `Style:GetThreatStyle(unit)` with a colon, so threat
-alpha/scale never applies there; see
-[Target, soft target, mouseover and focus](../nameplates/targets-mouseover-focus.md#known-bug-threat-style-lookup-with-a-colon).
+Custom styles that use the threat system and headline view with "use alpha/scaling" get the threat-based alpha
+and scale for `dps`/`tank` threat styles; with threat alpha/scale turned off, a custom style keeps its own value.
+See [Target, soft target, mouseover and focus](../nameplates/targets-mouseover-focus.md#threat-style-of-custom-styles-and-headline-view).
 
 ## Font (`Modules/Font.lua`)
 
@@ -140,6 +140,10 @@ alpha/scale never applies there; see
 `ActionButtonTemplate` button in a Masque group registered with `RegisterMasqueGroup(widget, name)`. Icons get
 `SetIconTexture`, `SetTPIconTexture`, `GetIconTexture` and `GetParentFrame`, so widgets work the same with and
 without Masque. Borderless icons crop the texture coordinates.
+
+Whether Masque is used is read once, at the first `IconModule.UpdateSettings()`, and kept until the UI is reloaded
+(as the option says). Existing icons are either Masque buttons or textures; switching the setting on a profile
+change or reset would access them as the wrong type and caused Lua errors before 13.3.4.
 
 ## Animation (`Modules/Animation.lua`)
 

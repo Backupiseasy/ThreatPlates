@@ -3,9 +3,6 @@ type: workflow
 title: Development workflow
 description: How to work on Threat Plates - running the addon from the repository, linting with luacheck, testing in-game with debug commands and forced secret-value restrictions, branching, changelog rules and the coding conventions that matter most.
 tags: [development, luacheck, testing, debugging, changelog, conventions, branching]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-10-25T18:59:51.751Z
 sources:
   - id: openwiki-source-0a794ce9aca922a34bf9e225
     resource: repo://.luacheckrc
@@ -21,7 +18,10 @@ sources:
     resource: repo://Init.lua
   - id: openwiki-source-3109d6b4b39ada7d983ff1d5
     resource: repo://TidyPlates_ThreatPlates.toc
-generated: { by: "claude-code", at: "2026-10-25T18:59:51.751Z" }
+generated: { by: "claude-code", at: "2026-10-28T19:58:16.774Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-10-28T19:58:16.774Z
 ---
 
 # Development workflow
@@ -63,10 +63,12 @@ Debug commands (development builds only, `/tptp <command>`, implemented in `Chat
 | --- | --- |
 | `version` | addon version, client version, build, Interface number, `GetExpansionLevel()` (also for the Forever entry in the TOC) |
 | `unit` | the `unit` table of the target's (or mouseover's) plate (`Addon.Debug.PrintUnit`) |
-| `debug WidgetHandler` / `debug EventService` / `debug Color` / `debug <Widget>` | widget states and events, event registrations, color calculation, widget-specific dumps |
+| `debug WidgetHandler` / `debug EventService` / `debug Color` / `debug <Widget>` | widget states and events, event registrations (main-subscriber events no longer registered at WoW in red), color calculation, widget-specific dumps |
 | `threat`, `reaction`, `role`, `auras`, `guid` | threat values, reaction data, spec roles, aura fields and filter tokens, NPC id of the target |
 | `searchdb <text>` | settings keys matching the text |
 | `cache`, `custom-styles`, `cleanup-custom-styles` | caches, custom style list, remove empty custom styles |
+| `version-history` | manual checks of `Addon.CurrentVersionIsOlderThan` |
+| `test` | scratch command for ad-hoc checks on the target's plate |
 | `restrictions [combat\|encounter\|challenge\|pvp\|map]` | toggles the `secret*RestrictionsForced` CVars to force secret-value restrictions outside combat; without argument all off |
 
 The `restrictions` command is the way to test [secret-value](../architecture/secret-values.md) code paths
@@ -122,8 +124,8 @@ of WoW behavior (never internal function names), references before the final per
   versions where they differ.
 - **Specialization APIs**: always use the `C_SpecializationInfo ... or _G.GetSpecialization` shim.
 - **Dot vs. colon**: Modules and Elements are dot-defined, Widgets colon-defined. Import module functions as local
-  upvalues. A colon call on a dot function silently shifts all arguments (see the known bug in
-  [Target, soft target, mouseover and focus](../nameplates/targets-mouseover-focus.md#known-bug-threat-style-lookup-with-a-colon)).
+  upvalues. A colon call on a dot function silently shifts all arguments (see the former bug in
+  [Target, soft target, mouseover and focus](../nameplates/targets-mouseover-focus.md#threat-style-of-custom-styles-and-headline-view)).
 - **Upvalue caching**: cache WoW API functions and settings as file locals for speed, but not values that are
   replaced at runtime (`Addon.UnitIsTarget`, `Addon.TargetUnitExists`).
 - **New tables instead of `wipe`**, except where other code holds a reference to the table (e.g. `tp_frame.unit`,

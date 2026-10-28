@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:5c742438b7b5efa511833c815bc32824ae9d75a4d6933bda7af7664b6d78220d",
+  "pageVersion": "sha256:159f9b22e6ab9520feb749f79f8354f32d8025ba0644b11ea9caa5815049b520",
   "claims": [
     {
       "id": "claim_be99eeb8127d4261b87a3240c6572360",
@@ -73,11 +73,11 @@
       "statement": "Transparency and Scaling recompute a plate's value on mouseover, casting, raid marker, target, faction and threat events, and recompute all active plates on TargetExistsChanged.",
       "evidence": [
         {
-          "resource": "repo://Modules/Scaling.lua#L259-L281",
+          "resource": "repo://Modules/Scaling.lua#L261-L283",
           "version": "repo-lines-v1:sha256:6024bf26e1d10bd3ed23be69594d050d6eadc1aa8f0717e227ba72bd9ab886ab:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMxYzE2NmIzMmI1OGYzNDU3ODI2N2FiYTg2NjNiYjBhMWRmZmQ1M2I3ZGQzMjJjYWY5Y2FiNThiYmM1MjIyMTkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJkNmQ4ZTNlZjFkYmQ4ZGQ3OGFlZGI0ZWIxOGU4MjE2NGFlMTIyODE3NmVmODk5OWFhNzRhNzMwYWRhZDE1MjYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU3MWY3YTAwOTlhYThiYjYxZDNhMmE0YmM4MTc1OGU3YjI3Y2ZmMDFkYWQzNjIyMDZjZDA3NTBkNmEzZTk4MjIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
         },
         {
-          "resource": "repo://Modules/Transparency.lua#L350-L384",
+          "resource": "repo://Modules/Transparency.lua#L352-L386",
           "version": "repo-lines-v1:sha256:48a4bf22765115976f3b28fab371f9f0aec65ebe6d5184b5342bd4e8e4444496:eyJzZWxlY3RlZExpbmVDb3VudCI6MzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJhMWVkYWI4NDIzNTljMjgwZTZmYjU0ZDQ1YjViNzhiYzA2Y2IyNWI2YmM5YTQwZTdjOGYyNjFlOTE3MjRiYTYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBkMmEzNjkyZGRhOTMxMmJmOWIwY2IyYTBiY2Q5YTUwN2M1OTA3ODE1ZTI0N2FjZDc4MTZlMzliZGI3M2RkMWQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU3MWY3YTAwOTlhYThiYjYxZDNhMmE0YmM4MTc1OGU3YjI3Y2ZmMDFkYWQzNjIyMDZjZDA3NTBkNmEzZTk4MjIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
         }
       ]
@@ -108,27 +108,15 @@
     },
     {
       "id": "claim_8a098bf2697b4b87afdebd58e875973b",
-      "statement": "AlphaNormal and ScaleNormal call the dot-defined GetThreatStyle with a colon, passing the Style table instead of the unit, so ShowFeedback returns false and the threat style is always \"normal\" for custom styles and headline view.",
+      "statement": "AlphaNormal and ScaleNormal look up the threat style with a dot call Style.GetThreatStyle(unit); for dps/tank they use TransparencyThreat/ScaleThreat, which fall back to the custom style's own value (non_combat_*) or the general value when threat alpha/scale is off and use it as base for additive values.",
       "evidence": [
         {
-          "resource": "repo://Modules/Scaling.lua#L121-L128",
-          "version": "repo-lines-v1:sha256:9d9d540919c330863ca6321278bf9b325bdcaca5903dcf10a3a2203b478fad78:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOTA4MzZhZjgxNGI2MTA1MGM3ZjVkNzkyOGJlZDI1NzU5ZDYyYzMzZWMwNWQxNjU5ODhjYzg3NzVlOTc2MTM0ZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDgzMzJmZTY2N2JjNTFhYzRhNTFiYTBlZmU3MzQ0NDFjOTBkZWY1NWM2MGEyNmQ3ZGIyNzVlY2JiY2Y0MmYxNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNDZjMTlmMTllYzZiNTY0MzI1MDY0ODY5NDlkMjQ5NjI0MDZkODc0YzI2MWRjMzJiYmM5NGM3ZmYyYmMwOGYwZiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiODcwNmI3YTgwMzc1MjUwN2VkYzBkZDlhOThhM2EwNjY5MzQ1Y2E2MDMyY2I5YzQ4M2I2NTIwYTRmNjAwMjg1NiJ9"
+          "resource": "repo://Modules/Scaling.lua#L98-L131",
+          "version": "repo-lines-v1:sha256:01d67e93658c08200c4d9f0cd701416ac91eade65ca09c3d47b7ae38f219aaed:eyJzZWxlY3RlZExpbmVDb3VudCI6MzQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIxYzA2NTZkMjQxMTZkOGIwMjIzNTM4MTJlZDg2YTg3ZDU5NjIyYzA3Zjk1YTFlNWNjNjc4ZDUxNTdjY2MwYTciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM0NzlmNWQ0OGJiYmI5YzM4NTgxZTNjMGE3MmEyMTg0NmY2MzU1N2YwZWEwZDIxMTc5MzYzMzg0MmEzNmRkNmYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjliOWE3ZjlhN2MyYjk3NzQ0MzI4ZmRlZDI3YjkxMWIwYmNlZGM4ZGE3ZjdjZTdkNTAyMDNmNGNlZmI0OTRhZDkifQ"
         },
         {
-          "resource": "repo://Modules/Threat.lua#L111-L125",
-          "version": "repo-lines-v1:sha256:1c26180e06a3b926d5aaadf8ca170fbad9e408e611e6cb710d03cba327c69ada:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVlOGZlNWQ5MDQzMDVhODM3YjM0NzAwYzNmYWI1MWVkNDlmYmFmODYxNzZhMDYwNDQ0YjhiNGJjYmI1ODA4NjEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdjZGY0ODJiNGQ3Y2VmNWQ4OTNhMmQzZGUwMTNlNzNlMzZhZTJmOGM1Y2RmMWIyM2M1YWU3OWQwYzgyMDAxYTAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijg2MGIzNmI4NDRiZWExMTZlZjk3ZTAxMWMxMDI2ZDdjMmVlNzZhZDQ5NzUyMDJiNGVhNGVmODUzZjMxMzlmODMifQ"
-        },
-        {
-          "resource": "repo://Modules/Transparency.lua#L123-L130",
-          "version": "repo-lines-v1:sha256:029881718c070a0718210391c1d7d4ea8c672b6af858801ca60cf1184fc2998c:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZDVlNWU0ZTFjMmFkZGM4YzhlNjZiOTljMjM3MzNmMzc4ZjBjYTcwM2ZmY2E5NDNlNTQ2OWZiN2I5MzZiM2QyMCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDgzMzJmZTY2N2JjNTFhYzRhNTFiYTBlZmU3MzQ0NDFjOTBkZWY1NWM2MGEyNmQ3ZGIyNzVlY2JiY2Y0MmYxNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZDQzMGJkYzQ3MWEyZjkxMjU4NDQzYmQ2ZmE3MWNjNjlhNmVjM2VmM2M5OGJmMTQ5NDYyMGRiNjkyMGU5ZGNlMSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYjRkNjYyODc5ZjAyMjNkYzc2YTU2YTRlMTBjNjE4YzRlMjUwNTUxYmY0ZmViNTk2OTdmNTViZjZhYWEyZjJiYSJ9"
-        },
-        {
-          "resource": "repo://Styles/Styles.lua#L227-L240",
-          "version": "repo-lines-v1:sha256:2b02ba52e55a8ac3362b02cd3ec5145a80f7f6837ab59283465e1b680021862b:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQwZTQ3YWVmMjA1MjA3N2UwOWZmNjA0NmMzOWE3ZTA5OGRlYmUxNmM2ZWVmZmUwNWRjODA1MmFhMmViZjhiNDUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAzNmI1MzFmMzU1OGRmYmFjMzFlZmYxNTY1ZmJkNzcxYzUyOWYyODQyMTRhOTVhM2M0ZjEzOGQwMDM4NGFlYTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjVhMDQxOGViNzM3YmY1YWIwNDc2OGY4NGJmYTU1MWYxYjRlNTljZDM4NWI4YzM5MTA5MmQ1NGUzODY3MDZhNjQifQ"
-        },
-        {
-          "resource": "repo://Styles/Styles.lua#L532-L532",
-          "version": "repo-lines-v1:sha256:92d7b12652e7fe36298c8f385b7e6efc8d2cf99dc3e7e870114b867f2752548c:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOTJkN2IxMjY1MmU3ZmUzNjI5OGM4ZjM4NWI3ZTZlZmM4ZDJjZjk5ZGMzZTdlODcwMTE0Yjg2N2YyNzUyNTQ4YyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOTJkN2IxMjY1MmU3ZmUzNjI5OGM4ZjM4NWI3ZTZlZmM4ZDJjZjk5ZGMzZTdlODcwMTE0Yjg2N2YyNzUyNTQ4YyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYmJjNTc5ZTI2ZDA3ZTZmZDRiZTRlNjA1ZTA3OWE2Zjc2YzJiYzhiNGRlODAzM2RkOWQ5OGIwMjRkYWYyY2RlMyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYzIzZTVlYmUzNjg0NWYxOTM0NTMzNmFkYWVmNDlkOTNjZjI0MmY3MDIwNzBlNmE5MDg2NWRjODkyMmIxOTBmZSJ9"
+          "resource": "repo://Modules/Transparency.lua#L100-L132",
+          "version": "repo-lines-v1:sha256:13f8f4858b4496b580680287a613218bbd65470e40d5d3431014374f7271fb53:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI3ZWU2YjY0NmQ3NzA5MmVjZWNkMWFjMzlkMTg4MDgyMTMwZGM3MDk0ZTljNzA1ZDhhMTU3MGFkMDcwZjFiMWQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg5ODRlOTFlNjJjMTFmOTk5ZGFiM2IyZWU4YjRhYzRhYTg4OGJkMGFhMzhlMGJiMWYzZjFjY2I0NThmYzE2MmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI0ZDY2Mjg3OWYwMjIzZGM3NmE1NmE0ZTEwYzYxOGM0ZTI1MDU1MWJmNGZlYjU5Njk3ZjU1YmY2YWFhMmYyYmEifQ"
         }
       ]
     },
@@ -149,6 +137,6 @@
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-10-25T18:59:51.751Z"
+    "at": "2026-10-28T19:52:11.033Z"
   }
 }

@@ -5,11 +5,11 @@ description: Entry point to the Threat Plates developer wiki - what the addon is
 tags: [quickstart, overview, navigation]
 verified:
   - by: openwiki/0.7.2
-    at: 2026-10-25T18:59:51.751Z
+    at: 2026-10-28T19:57:48.711Z
 sources:
   - id: openwiki-source-3109d6b4b39ada7d983ff1d5
     resource: repo://TidyPlates_ThreatPlates.toc
-generated: { by: "claude-code", at: "2026-10-25T18:59:51.751Z" }
+generated: { by: "claude-code", at: "2026-10-28T19:57:48.711Z" }
 ---
 
 # Quickstart
@@ -65,17 +65,18 @@ repository folder is loaded by the client directly.
 | An event handler is not called | [Event system](architecture/event-system.md) |
 | Prepare a release / changelog entry | [Release and packaging](workflows/release-packaging.md), [Development workflow](workflows/development.md) |
 
-## Known issues found while writing this wiki
+## Findings from writing this wiki
 
-Code observations that are not verified in-game; each is described on the linked page:
+The code observations found while writing this wiki were all checked in-game and fixed in 13.3.4, or disproved.
+The pages describe the current behavior and how it used to fail:
 
-- Unsubscribing the last widget from an event can unregister it for the core's main handler
-  ([Event system](architecture/event-system.md#pitfall-unsubscribing-can-unregister-the-main-subscribers-event)).
-- `Style:GetThreatStyle(unit)` called with a colon disables threat alpha/scale for custom styles and headline view
-  ([Target, soft target, mouseover and focus](nameplates/targets-mouseover-focus.md#known-bug-threat-style-lookup-with-a-colon)).
-- WoW event scripts of custom styles receive the payload instead of the event name
-  ([Styles and custom styles](rendering/styles.md#observations-from-reading-the-code-unverified)).
-- Possible stuck cast state after `UNIT_SPELLCAST_INTERRUPTED` without interrupter
-  ([Castbar and interrupts](nameplates/castbar.md#observations-from-reading-the-code-unverified)).
-- Absorb style check uses the style table instead of its name ([Elements](rendering/elements.md)).
-- `OpenOptionsDialog` references an undefined variable ([Options](settings/options-and-updates.md)).
+- [Event system](architecture/event-system.md#unsubscribing-never-unregisters-a-main-subscribers-event):
+  unsubscribing no longer unregisters an event that `Addon` still handles.
+- [Target, soft target, mouseover and focus](nameplates/targets-mouseover-focus.md#threat-style-of-custom-styles-and-headline-view):
+  threat alpha/scale for custom styles and headline view.
+- [Styles and custom styles](rendering/styles.md#scripted-custom-styles-widgetsscriptwidgetlua): script functions
+  of custom styles.
+- [Castbar and interrupts](nameplates/castbar.md#interrupts): `UNIT_SPELLCAST_STOP` follows
+  `UNIT_SPELLCAST_INTERRUPTED`, so no cast state is left behind.
+- [Elements](rendering/elements.md#absorbs-and-styles-without-healthbar) and
+  [Options](settings/options-and-updates.md#opening-the-options-from-outside): smaller fixes.

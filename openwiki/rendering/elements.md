@@ -3,12 +3,7 @@ type: subsystem
 title: Elements
 description: The always-present building blocks of a Threat Plates nameplate - how ElementHandler registers and drives them, the lifecycle hooks, and what each element (healthbar with absorbs, name, status text, castbar, level, classification, threat glow, raid marker, mouseover highlight) does.
 tags: [elements, healthbar, absorbs, name, status-text, rendering]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-10-25T18:59:51.751Z
 sources:
-  - id: openwiki-source-8e65c9af5eec1ce3c038cede
-    resource: repo://Constants.lua
   - id: openwiki-source-2b32510fb51ea7529fa5de93
     resource: repo://Elements/ElementHandler.lua
   - id: openwiki-source-2e898f0a8b59a083a80489b8
@@ -23,13 +18,14 @@ sources:
     resource: repo://Elements/StatusText.lua
   - id: openwiki-source-f05fe1718262283b50e8ba34
     resource: repo://Elements/ThreatGlow.lua
-  - id: openwiki-source-8c1a2f1346df95ad59b63c21
-    resource: repo://Styles/Styles.lua
   - id: openwiki-source-74b884af48fed2a7832905b5
     resource: repo://Widgets/ExperienceWidget.lua
   - id: openwiki-source-e7384fc6a84ab77ee3ed1921
     resource: repo://Widgets/ScriptWidget.lua
-generated: { by: "claude-code", at: "2026-10-25T18:59:51.751Z" }
+generated: { by: "claude-code", at: "2026-10-28T19:52:11.033Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-10-28T19:52:11.033Z
 ---
 
 # Elements
@@ -156,12 +152,13 @@ Level text on the healthbar (`+` suffix for elites, empty for level `-1`), color
 (`AddTextArea`, `UpdateSettings(db)`, `UpdatePositioning(unit, db)`). The Experience widget uses it, and the
 Script widget exposes it to custom scripts as `CreateStatusBar`; it is not an element itself.
 
-## Observation from reading the code (unverified)
+## Absorbs and styles without healthbar
 
-`Elements/Healthbar.lua` checks `IGNORED_STYLES[tp_frame.style]` in both absorb implementations and in config
-mode. `IGNORED_STYLES` (`Addon.IGNORED_STYLES_WITH_NAMEMODE`) is keyed by style **name**, but `tp_frame.style` is
-the style **table** (`tp_frame.stylename` holds the name), so the check is never true. Absorbs are therefore also
-computed for headline view and empty styles. The healthbar is hidden there, so the effect is extra work rather
-than visible output.
+Both absorb implementations and the healthbar config mode check `IGNORED_STYLES[tp_frame.stylename]`
+(`Addon.IGNORED_STYLES_WITH_NAMEMODE`, keyed by style name). For headline view and empty styles they hide all
+absorb elements and skip the calculation. Because of that, `Element.UpdateStyle` calls `UpdateAbsorbs` on every
+client with absorbs (`Addon.WOW_FEATURE_ABSORBS`), so the absorbs are rendered again when a nameplate switches back
+to the healthbar view (e.g., when the unit is targeted). Until 13.3.4 the check used `tp_frame.style` (the style
+table), never matched, and absorbs were computed for every style.
 
 Related: [Styles and custom styles](styles.md), [Modules](modules.md).
