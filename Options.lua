@@ -8713,7 +8713,13 @@ local function CustomPlateUpdateEntry(index)
   -- Check for empty trigger value and don't update anything in that case (except the above)
   local custom_plate = db.uniqueSettings[index]
   local trigger_value = custom_plate.Trigger[custom_plate.Trigger.Type].Input
-  if trigger_value == nil or trigger_value == "" then return end
+  if trigger_value == nil or trigger_value == "" then
+    -- Script-triggered custom styles have no trigger value, but must still be updated (e.g., after toggling Never)
+    if custom_plate.Trigger.Type == "Script" then
+      UpdateSpecial()
+    end
+    return
+  end
 
   CustomPlateSetIcon(index) -- Executes UpdateSpecial()
 end
@@ -11740,10 +11746,10 @@ end
 
 function TidyPlatesThreat:OpenOptionsDialog(group)
   RegisterOptionsTable()
-  Addon.LibAceConfigDialog:Open(t.ADDON_NAME)
+  Addon.LibAceConfigDialog:Open(Addon.ADDON_NAME)
 
   if group == "BossMods" then
-    Addon.LibAceConfigDialog:SelectGroup(t.ADDON_NAME, "Widgets", "BossModsWidget")
+    Addon.LibAceConfigDialog:SelectGroup(Addon.ADDON_NAME, "Widgets", "BossModsWidget")
   end
 end
 

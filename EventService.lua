@@ -205,10 +205,12 @@ function EventService.Publish(event, ...)
   end
 end
 
--- Unregister the event if the last subscriber was removed an there is no main subscriber
+-- Unregister the event if the last subscriber was removed and there is no main subscriber (main subscribers only
+-- exist for events registered at the EventHandlerFrame, not for unit events)
 local function UnregisterGameEvent(event, subscribers_for_event, subscriber, event_handler_frame)
   subscribers_for_event[subscriber] = nil
-  if not INTERNAL_EVENTS[event] and next(subscribers_for_event) == nil then
+  if not INTERNAL_EVENTS[event] and next(subscribers_for_event) == nil and
+    not (event_handler_frame == EventHandlerFrame and RegisteredEvents[event]) then
     Addon:UnregisterEvent(event_handler_frame, event)
   end
 end
@@ -224,9 +226,9 @@ function EventService.Unsubscribe(subscriber, event)
 
   -- unitid, event_handler_frame for unit
   for _, event_handler_frame in pairs(RegisteredUnitEvents) do
-    local subscribers_for_event = event_handler_frame.Events and event_handler_frame.Events[event]
-    if subscribers_for_event then
-      UnregisterGameEvent(event, subscribers_for_event, subscriber, event_handler_frame)
+    local unit_subscribers_for_event = event_handler_frame.Events and event_handler_frame.Events[event]
+    if unit_subscribers_for_event then
+      UnregisterGameEvent(event, unit_subscribers_for_event, subscriber, event_handler_frame)
     end
   end
 end
@@ -280,7 +282,11 @@ end
 function Addon:PrintEventService()
   print ("EventService: Registered Events")
   for event, _ in PairsByKeys(RegisteredEvents) do
-    print ("  " .. event)
+    if INTERNAL_EVENTS[event] or EventHandlerFrame:IsEventRegistered(event) then
+      print ("  " .. event)
+    else
+      print ("  " .. event .. " |cffff0000(not registered at WoW)|r")
+    end
   end
 
   print ("EventService: Subscribed Events")

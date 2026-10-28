@@ -105,7 +105,7 @@ end]]
   UpdateLayout = {
     FunctionExample = [[
 -- Example for function UpdateLayout:
-function()
+function(widget_frame)
   -- ...
 end]]
   },
@@ -126,35 +126,35 @@ end]]
   OnTargetUnitAdded = {
     FunctionExample = [[
 -- Example for function OnTargetUnitAdded:
-function(tp_frame, unit)
+function(widget_frame, unit)
   -- ...
 end]]
   },
   OnTargetUnitRemoved = {
     FunctionExample = [[
 -- Example for function OnTargetUnitRemoved:
-function(tp_frame, unit)
+function(widget_frame, unit)
   -- ...
 end]]
   },
   OnFocusUnitAdded = {
     FunctionExample = [[
 -- Example for function OnFocusUnitAdded:
-function(tp_frame, unit)
+function(widget_frame, unit)
   -- ...
 end]]
   },
   OnFocusUnitRemoved = {
     FunctionExample = [[
 -- Example for function OnFocusUnitRemoved:
-function()
+function(widget_frame, unit)
   -- ...
 end]]
   },
   OnUpdate = {
     FunctionExample = [[
--- Example for function OnUpdate:
-function(tp_frame)
+-- Example for function OnUpdate (called every frame, not for a particular nameplate):
+function(elapsed)
   -- ...
 end]]
   },
@@ -394,14 +394,33 @@ local EnabledForStyle = {}
 -- Widget functions for creation and update
 ---------------------------------------------------------------------------------------------------
 
+-- Functions that are not called for a particular nameplate: they are called for all custom styles with scripts,
+-- not only for the custom style of a unit
+local SCRIPT_FUNCTIONS_WITHOUT_UNIT = {
+  IsEnabled = true,
+  OnEnable = true,
+  OnDisable = true,
+  OnUpdate = true,
+}
+
 -- arg1 can be nil, widget_frame or style, depending on the event processed
 local function ProcessEvent(event, widget_frame, unit)
   local func
 
   --print("ProcessEvent:", event, unit and unit.CustomPlateSettings or "nil")
 
+  if SCRIPT_FUNCTIONS_WITHOUT_UNIT[event] then
+    for custom_style, funcs_by_event in pairs(ScriptsByCustomStyle) do
+      func = funcs_by_event[event]
+      if func then
+        local call_ok, return_value = pcall(func, widget_frame)
+        if not call_ok then
+          Addon.Logging.Error(string_format(L["Error in event script '%s' of custom style '%s': %s"], event, Addon.CustomPlateGetHeaderName(custom_style), return_value))
+        end
+      end
+    end
   -- unit might be nil, e.g., when ProcessEvent is called for Create
-  if unit then
+  elseif unit then
     local custom_style = unit.CustomPlateSettings
 
     if custom_style and ScriptsByCustomStyle[custom_style] then
@@ -434,8 +453,8 @@ end
 
 local OnUpdateHandler = CreateFrame("Frame", "ThreatPlatesScriptOnUpdateHandler", UIParent)
 
-local function OnUpdate(widget_frame, elapsed)
-  ProcessEvent("OnUpdate")
+local function OnUpdate(_, elapsed)
+  ProcessEvent("OnUpdate", elapsed)
 end
 
 function Widget:IsEnabled()
@@ -449,6 +468,12 @@ function Widget:IsEnabled()
 end
 
 function Widget:OnEnable()
+  -- Target and focus scripts must also be called when the (soft) target or focus changes
+  self:SubscribeEvent("TargetGained")
+  self:SubscribeEvent("TargetLost")
+  self:SubscribeEvent("FocusGained")
+  self:SubscribeEvent("FocusLost")
+
   ProcessEvent("OnEnable")
 end
 
@@ -457,6 +482,20 @@ function Widget:OnDisable()
     for event, _ in pairs(custom_style.Scripts.Code.Events) do
       --print ("Unregistering:", event)
       self:UnsubscribeEvent(event)
+    end
+  end
+
+  self:UnsubscribeEvent("TargetGained")
+  self:UnsubscribeEvent("TargetLost")
+  self:UnsubscribeEvent("FocusGained")
+  self:UnsubscribeEvent("FocusLost")
+
+  -- Target and focus scripts must be called again once the widget is enabled again
+  for _, tp_frame in pairs(Addon.PlatesCreated) do
+    local widget_frame = tp_frame.widgets and tp_frame.widgets[self.Name]
+    if widget_frame then
+      widget_frame.TargetScriptsActive = nil
+      widget_frame.FocusScriptsActive = nil
     end
   end
 
@@ -508,6 +547,26 @@ function Widget:EnabledForStyle(style, unit)
   return true
 end
 
+-- Calls the Create script of a custom style once for a widget frame. A widget frame is only marked as initialized
+-- if the custom style has a Create script, so that a Create script added later (or a custom style created after the
+-- nameplate) is still called for already existing nameplates.
+local function CallCreateScript(custom_style, funcs_by_event, widget_frame)
+  local func = funcs_by_event and funcs_by_event.Create
+  if not func then return end
+
+  local custom_style_init = InitializedPlatesByStyle[custom_style] or {}
+  InitializedPlatesByStyle[custom_style] = custom_style_init
+
+  if not custom_style_init[widget_frame] then
+    custom_style_init[widget_frame] = true
+
+    local call_ok, return_value = pcall(func, widget_frame)
+    if not call_ok then
+      Addon.Logging.Error(string_format(L["Error in event script '%s' of custom style '%s': %s"], "Create", Addon.CustomPlateGetHeaderName(custom_style), return_value))
+    end
+  end
+end
+
 function Widget:Create(tp_frame)
   -- Required Widget Code
   local widget_frame = CreateFrame("Frame", nil, tp_frame)
@@ -518,39 +577,58 @@ function Widget:Create(tp_frame)
   widget_frame:SetAllPoints(tp_frame)
   widget_frame:Hide()
 
-  ProcessEvent("Create", widget_frame)
+  for custom_style, funcs_by_event in pairs(ScriptsForAllPlates) do
+    CallCreateScript(custom_style, funcs_by_event, widget_frame)
+  end
   --------------------------------------
   -- End Custom Code
 
   return widget_frame
 end
 
-local function InitializeNonScriptTriggerScripts(widget_frame, unit)
-  -- If this is a trigger-based script (not script-trigger), the nameplate might not
-  -- yet have been initialized with Create
+-- Widget frames can already exist when a custom style or its Create script is added, so Create is (also) called
+-- here before any other script of the custom style processes the nameplate
+local function InitializeScripts(widget_frame, unit)
+  for custom_style, funcs_by_event in pairs(ScriptsForAllPlates) do
+    CallCreateScript(custom_style, funcs_by_event, widget_frame)
+  end
+
   local custom_style = unit.CustomPlateSettings
   if custom_style then
-    local custom_style_init = InitializedPlatesByStyle[custom_style] or {}
-    InitializedPlatesByStyle[custom_style] = custom_style_init
+    CallCreateScript(custom_style, ScriptsByCustomStyle[custom_style], widget_frame)
+  end
+end
 
-    if not custom_style_init[widget_frame] then
-      ProcessEvent("Create", widget_frame)
-      custom_style_init[widget_frame] = true
-    end
+-- Target and focus scripts are called when a nameplate becomes or is no longer the (soft) target/focus, either
+-- when the target/focus changes (TargetGained, ...) or when the nameplate is (re-)initialized (OnUnitAdded,
+-- OnUnitRemoved). The widget frame remembers if the Added script was called, so that each script is called only
+-- once per change.
+local function UpdateTargetScripts(widget_frame, unit, is_target)
+  if is_target and not widget_frame.TargetScriptsActive then
+    widget_frame.TargetScriptsActive = true
+    ProcessEvent("OnTargetUnitAdded", widget_frame, unit)
+  elseif not is_target and widget_frame.TargetScriptsActive then
+    widget_frame.TargetScriptsActive = false
+    ProcessEvent("OnTargetUnitRemoved", widget_frame, unit)
+  end
+end
+
+local function UpdateFocusScripts(widget_frame, unit, is_focus)
+  if is_focus and not widget_frame.FocusScriptsActive then
+    widget_frame.FocusScriptsActive = true
+    ProcessEvent("OnFocusUnitAdded", widget_frame, unit)
+  elseif not is_focus and widget_frame.FocusScriptsActive then
+    widget_frame.FocusScriptsActive = false
+    ProcessEvent("OnFocusUnitRemoved", widget_frame, unit)
   end
 end
 
 function Widget:OnUnitAdded(widget_frame, unit)
-  InitializeNonScriptTriggerScripts(widget_frame, unit)
+  InitializeScripts(widget_frame, unit)
   ProcessEvent("OnUnitAdded", widget_frame, unit)
 
-  if unit.IsSoftTarget then
-    ProcessEvent("OnTargetUnitAdded", widget_frame, unit)
-  end
-
-  if unit.IsFocus then
-    ProcessEvent("OnFocusUnitAdded", widget_frame, unit)
-  end
+  UpdateTargetScripts(widget_frame, unit, unit.IsSoftTarget)
+  UpdateFocusScripts(widget_frame, unit, unit.IsFocus)
 
   --widget_frame:Show()
   widget_frame:SetShown(unit.CustomPlateSettings or next(ScriptsForAllPlates))
@@ -559,15 +637,44 @@ end
 function Widget:OnUnitRemoved(widget_frame, unit)
   ProcessEvent("OnUnitRemoved", widget_frame, unit)
 
-  if unit.IsSoftTarget then
-    ProcessEvent("OnTargetUnitRemoved", tp_frame, unit)
-  end
-
-  if unit.IsFocus then
-    ProcessEvent("OnFocusUnitRemoved")
-  end
+  UpdateTargetScripts(widget_frame, unit, false)
+  UpdateFocusScripts(widget_frame, unit, false)
 
   --widget_frame:SetShown(unit.CustomPlateSettings or next(ScriptsForAllPlates))
+end
+
+local function GetActiveWidgetFrame(tp_frame)
+  local widget_frame = tp_frame.widgets and tp_frame.widgets[Widget.Name]
+  return widget_frame and widget_frame.Active and widget_frame
+end
+
+function Widget:TargetGained(tp_frame)
+  local widget_frame = GetActiveWidgetFrame(tp_frame)
+  if widget_frame then
+    UpdateTargetScripts(widget_frame, tp_frame.unit, true)
+  end
+end
+
+function Widget:TargetLost(tp_frame)
+  local widget_frame = GetActiveWidgetFrame(tp_frame)
+  if widget_frame then
+    -- Another (soft) target meta unit might still point to this unit
+    UpdateTargetScripts(widget_frame, tp_frame.unit, tp_frame.unit.IsSoftTarget)
+  end
+end
+
+function Widget:FocusGained(tp_frame)
+  local widget_frame = GetActiveWidgetFrame(tp_frame)
+  if widget_frame then
+    UpdateFocusScripts(widget_frame, tp_frame.unit, true)
+  end
+end
+
+function Widget:FocusLost(tp_frame)
+  local widget_frame = GetActiveWidgetFrame(tp_frame)
+  if widget_frame then
+    UpdateFocusScripts(widget_frame, tp_frame.unit, false)
+  end
 end
 
 function Widget:UpdateFrame(widget_frame, unit)
@@ -575,7 +682,20 @@ function Widget:UpdateFrame(widget_frame, unit)
 end
 
 function Widget:UpdateLayout(widget_frame)
-  ProcessEvent("UpdateLayout", widget_frame)
+  -- UpdateLayout runs before OnUnitAdded after a settings change, so Create of script-triggered custom styles
+  -- added since the widget frame was created must be called here first
+  for custom_style, funcs_by_event in pairs(ScriptsForAllPlates) do
+    CallCreateScript(custom_style, funcs_by_event, widget_frame)
+  end
+
+  -- unit is passed so that the script of the unit's custom style is called too, but only if its Create script
+  -- (if it has one) was already called for this widget frame
+  local unit = widget_frame.unit
+  local custom_style = unit and unit.CustomPlateSettings
+  local funcs_by_event = custom_style and ScriptsByCustomStyle[custom_style]
+  local is_initialized = funcs_by_event and (not funcs_by_event.Create or
+    (InitializedPlatesByStyle[custom_style] and InitializedPlatesByStyle[custom_style][widget_frame]))
+  ProcessEvent("UpdateLayout", widget_frame, is_initialized and unit or nil)
 end
 
 local ScriptsForWoWEvents = {}
@@ -638,7 +758,8 @@ function Widget:UpdateSettings()
         if func then
           ScriptsForWoWEvents[event] = ScriptsForWoWEvents[event] or {}
           ScriptsForWoWEvents[event][custom_style] = func
-          if not pcall(self.SubscribeEvent, self, event, HandleWoWEvent) then
+          -- EventService calls a function subscriber with the event's payload only, without the event name
+          if not pcall(self.SubscribeEvent, self, event, function(...) HandleWoWEvent(event, ...) end) then
             Addon.Logging.Error(string_format(L["Attempt to register script for unknown WoW event \"%s\""], event))
           end
         end
@@ -695,12 +816,16 @@ function Widget:UpdateSettings()
 
     --Addon.Logging.Debug("  =>", (script_is_enabled and "Enabled") or "Disabled")
 
-    local func = funcs_by_event.UpdateSettings
-    if func then
-      local call_ok, error_message = pcall(func)
-      if not call_ok then
-        Addon.Logging.Error(string_format(L["Error in event script '%s' of custom style '%s': %s"], "UpdateSettings", Addon.CustomPlateGetHeaderName(custom_style), return_value))
+    if script_is_enabled then
+      func = funcs_by_event.UpdateSettings
+      if func then
+        local call_ok, error_message = pcall(func)
+        if not call_ok then
+          Addon.Logging.Error(string_format(L["Error in event script '%s' of custom style '%s': %s"], "UpdateSettings", Addon.CustomPlateGetHeaderName(custom_style), error_message))
+        end
       end
+    else
+      ScriptsByCustomStyle[custom_style] = nil
     end
   end
 
