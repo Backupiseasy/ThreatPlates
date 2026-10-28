@@ -66,9 +66,10 @@ local EnabledForStyle = {}
 -- - A crowd-control-classified aura is strictly exclusive to the CrowdControl grid (filtered out of
 --   Debuffs via "!CROWD_CONTROL"); the old per-aura fallback (show as a normal debuff if the
 --   CC-specific filter rejects it) is not replicated.
--- - SwitchAreaByReaction (swapping which screen position shows buffs vs. debuffs for friendly units)
---   is not implemented - each AuraContainer's aura type (buff/debuff) is now fixed to its own screen
---   position for both reactions.
+-- - SwitchAreaByReaction swaps the filters, not the layouts, of the Buffs and Debuffs containers for
+--   friendly units (see Widget:UpdateAurasGrids). Swapped auras use all appearance settings of the
+--   area they are shown in - intentionally also the border color for auras without a dispel type
+--   (DefaultBuffColor/DefaultDebuffColor).
 -- - SortOrder "Duration"/"Creation" have no AuraContainerSortMethod equivalent and fall back to
 --   Default (None/AtoZ/TimeLeft+Reverse are supported via GetSortMethod/GetSortDirection).
 -- - Per-spell FilterBySpell (spell name/ID text list) is not implemented; candidateFilters.
@@ -117,9 +118,12 @@ local AURA_CONTAINER_TYPES = { "Buffs", "Debuffs", "CrowdControl" }
 -- AddAuraGroup keys declared per aura type - Debuffs (either reaction) and Buffs (friendly) get one
 -- group per independent OR-condition (see GetEnemyDebuffsGroupConfigs/GetFriendlyDebuffsGroupConfigs/
 -- GetFriendlyBuffsGroupConfigs); Buffs (enemy) and CrowdControl (either reaction) only ever use "main".
+-- With SwitchAreaByReaction, the Buffs container shows friendly debuffs and the Debuffs container
+-- friendly buffs, so each one also declares the keys of the other type's friendly groups (appended,
+-- as groups are displayed in registration order). Groups cannot be added to a container later on.
 local AURA_GROUP_KEYS = {
-  Buffs = { "main", "canapply", "bigdefensive", "dispellable", "magic" },
-  Debuffs = { "main", "important", "importantpersonal", "boss", "priority", "dispellable", "dispeltype" },
+  Buffs = { "main", "canapply", "bigdefensive", "dispellable", "magic", "boss", "dispeltype" },
+  Debuffs = { "main", "important", "importantpersonal", "boss", "priority", "dispellable", "dispeltype", "canapply", "bigdefensive" },
   CrowdControl = { "main" },
 }
 local DISPEL_TYPE_NAMES = { "Curse", "Disease", "Magic", "Poison" } -- index matches Debuffs.FilterByType[1..4]
@@ -1019,43 +1023,17 @@ function Widget:UpdateAuraContainer(widget_frame, aura_type, group_configs, unit
     return false
   end
 
-  -- SwitchAreaByReaction (friendly units only, Buffs<->Debuffs - matches the legacy widget's own
-  -- scope, CrowdControl was never swapped there either): swaps which type's *layout* (columns/rows/
-  -- spacing, sort, alignment, anchor - everything below except the actual filter data and the icon
-  -- size, which stay on the real aura_type/container, see button_icon below) Buffs/Debuffs use. Matches the legacy widget's
-  -- behavior of feeding buff data straight into the already-Debuffs-styled physical Debuffs frame
-  -- (AurasWidget.lua ~2156: `local buff_aura_grid = (db.SwitchAreaByReaction and
-  -- widget_frame.Debuffs) or widget_frame.Buffs`) - not just relocating buffs to debuffs' screen
-  -- position, but rendering them as if they were configured as debuffs (that reads oddly for
-  -- "switch position", but is what the legacy widget actually did, so replicated here for parity).
-  -- Known edge case, not specially guarded: if AnchorTo on the *swapped* config names the other of
-  -- Buffs/Debuffs (stacking one below the other) while this setting is also on, the two containers'
-  -- anchor chains can reference each other in a way that wasn't possible before switching was
-  -- implemented - not expected to be a common configuration.
-  local layout_type = aura_type
-  if unit.reaction == "FRIENDLY" and self.db.SwitchAreaByReaction then
-    if aura_type == "Buffs" then
-      layout_type = "Debuffs"
-    elseif aura_type == "Debuffs" then
-      layout_type = "Buffs"
-    end
-  end
-
-  local db = self.db[layout_type]
+  -- The layout always comes from aura_type, also with SwitchAreaByReaction: only the filters (i.e.,
+  -- the auras shown) are swapped, see Widget:UpdateAurasGrids.
+  local db = self.db[aura_type]
   local db_icon = db.ModeIcon
-  -- The icon size always comes from aura_type, not layout_type: the container's aura buttons are pooled
-  -- per aura type and were sized for aura_type in InitializeAuraButton. They cannot be resized per unit
-  -- (SetSize on them is forbidden from addon code while auras are secret). Using layout_type's icon size
-  -- here made the layout reserve a slot of the other type's size for each button, so the spacing between
-  -- the icons was wrong whenever the icon sizes of Buffs and Debuffs differ.
-  local button_icon = self.db[aura_type].ModeIcon
   local max_auras = min(db_icon.MaxAuras, db_icon.Rows * db_icon.Columns)
   local anchor_point, horizontal_direction, vertical_direction = GetFlowLayoutForAlignment(db.AlignmentH, db.AlignmentV)
   local sort_method = GetSortMethod(self.db.SortOrder)
   local sort_direction = GetSortDirection(self.db.SortReverse)
   local layout = {
-    elementWidth = button_icon.IconWidth,
-    elementHeight = button_icon.IconHeight,
+    elementWidth = db_icon.IconWidth,
+    elementHeight = db_icon.IconHeight,
     elementSpacing = db_icon.ColumnSpacing,
     lineSpacing = db_icon.RowSpacing,
   }
@@ -1076,7 +1054,7 @@ function Widget:UpdateAuraContainer(widget_frame, aura_type, group_configs, unit
 
   container:SetFlowLayoutAnchorPoint(anchor_point)
   container:SetFlowLayoutGrowthDirection(horizontal_direction, vertical_direction)
-  container:SetFlowLayoutMaximumLineSize(db_icon.Columns * (button_icon.IconWidth + db_icon.ColumnSpacing))
+  container:SetFlowLayoutMaximumLineSize(db_icon.Columns * (db_icon.IconWidth + db_icon.ColumnSpacing))
 
   container:SetUnit(unit.unitid)
   container:SetEnabled(true)
@@ -1170,6 +1148,15 @@ function Widget:UpdateAurasGrids(widget_frame, unit)
     enabled_cc = db.CrowdControl.ShowEnemy
   end
   local cc_configs = enabled_cc and SingleGroupConfig(GetCrowdControlFilterString(db.CrowdControl, is_friendly))
+
+  -- SwitchAreaByReaction (friendly units only, Buffs<->Debuffs, CrowdControl is never swapped): shows
+  -- buffs in the debuffs' area and vice versa, each with that area's settings (layout, icon size,
+  -- duration and stack count text, ...). Done by swapping the filters, not the layouts, as the aura
+  -- buttons of a container can only partly be restyled per unit (e.g., not resized while auras are
+  -- secret). Same as the legacy widget, which feeds buffs into the Debuffs grid.
+  if is_friendly and db.SwitchAreaByReaction then
+    buffs_configs, debuffs_configs = debuffs_configs, buffs_configs
+  end
 
   local buffs_active = self:UpdateAuraContainer(widget_frame, "Buffs", buffs_configs, unit)
   local debuffs_active = self:UpdateAuraContainer(widget_frame, "Debuffs", debuffs_configs, unit)

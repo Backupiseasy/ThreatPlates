@@ -97,11 +97,13 @@ local function TransparencyGeneral(unit)
 	return db.alpha[unit.TP_DetailedUnitType] or 1
 end
 
-local function TransparencyThreat(unit, style)
+-- non_combat_transparency: transparency of a custom style that uses the threat system, used instead of the
+-- general transparency when threat transparency is disabled (or as base value for additive threat transparency)
+local function TransparencyThreat(unit, style, non_combat_transparency)
 	local db = Addon.db.profile.threat
 
 	if not db.useAlpha then
-		return TransparencyGeneral(unit)
+		return non_combat_transparency or TransparencyGeneral(unit)
 	end
 
 	if db.marked.alpha then
@@ -114,18 +116,18 @@ local function TransparencyThreat(unit, style)
   local alpha = db[style].alpha[unit.ThreatLevel]
 
   if db.AdditiveAlpha then
-    alpha = alpha + TransparencyGeneral(unit) - 1
+    alpha = alpha + (non_combat_transparency or TransparencyGeneral(unit)) - 1
   end
 
   return alpha
 end
 
 local function AlphaNormal(unit, non_combat_transparency)
-  local style = Style:GetThreatStyle(unit)
+  local style = Style.GetThreatStyle(unit)
   if style == "normal" then
     return non_combat_transparency or TransparencyGeneral(unit)
   else -- dps, tank
-    return TransparencyThreat(unit, style)
+    return TransparencyThreat(unit, style, non_combat_transparency)
   end
 end
 

@@ -2152,9 +2152,10 @@ function Addon:UNIT_SPELLCAST_INTERRUPTED(unitid, cast_guid, spell_id, interrupt
   -- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED
   if IGNORED_UNITS[unitid] or not ShowCastBars then return end
 
-  -- Still need to stop the castbar here even with the option off: for a non-channeled cast,
-  -- WoW fires only UNIT_SPELLCAST_INTERRUPTED on interrupt, never UNIT_SPELLCAST_STOP, so this
-  -- is the sole signal that the cast ended.
+  -- Stop the castbar here right away. WoW also fires UNIT_SPELLCAST_STOP after UNIT_SPELLCAST_INTERRUPTED
+  -- (verified on Retail 12.1.5 for casts interrupted by a kick, a stun, or movement), but that STOP is then
+  -- ignored as castbar.CastbarID was already cleared. The same STOP also ends the cast if this handler returns
+  -- early below (no interrupter, castbar hidden).
   if not ShowInterruptSource then
     Addon:UNIT_SPELLCAST_STOP(unitid, cast_guid, spell_id, castbar_id)
     return

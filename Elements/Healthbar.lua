@@ -193,7 +193,7 @@ if Addon.WOW_FEATURE_ABSORBS then
     UpdateAbsorbs = function(tp_frame)
       local healthbar = tp_frame.visual.Healthbar
 
-      if IGNORED_STYLES[tp_frame.style] then
+      if IGNORED_STYLES[tp_frame.stylename] then
         HideAllAbsorbElements(healthbar)
         return
       end
@@ -231,7 +231,7 @@ if Addon.WOW_FEATURE_ABSORBS then
     UpdateAbsorbs = function(tp_frame)
       local healthbar = tp_frame.visual.Healthbar
 
-      if IGNORED_STYLES[tp_frame.style] then
+      if IGNORED_STYLES[tp_frame.stylename] then
         HideAllAbsorbElements(healthbar)
         return
       end
@@ -597,7 +597,9 @@ function Element.UpdateStyle(tp_frame, style, plate_style)
 
   tp_frame.visual.textframe:SetFrameLevel(frame_level)
 
-  if Addon.WOW_FEATURE_ABSORBS and Addon.HAS_MIDNIGHT_API then
+  -- Absorbs are hidden for styles without healthbar (see UpdateAbsorbs), so they must be re-rendered when the
+  -- nameplate switches back to the healthbar view (e.g., when the unit is targeted).
+  if Addon.WOW_FEATURE_ABSORBS then
     UpdateAbsorbs(tp_frame)
   end
 
@@ -690,7 +692,7 @@ local HEALTHBAR_CONFIG_HP_SCENARIOS = {
 }
 
 local function UpdateHealthbarConfigMode(tp_frame)
-  if IGNORED_STYLES[tp_frame.style] then return end
+  if IGNORED_STYLES[tp_frame.stylename] then return end
 
   local healthbar = tp_frame.visual.Healthbar
 

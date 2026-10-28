@@ -95,11 +95,13 @@ local function ScaleGeneral(unit)
   return db.scale[unit.TP_DetailedUnitType] or 1 -- This should also return for totems.
 end
 
-local function ScaleThreat(unit, style)
+-- non_combat_scale: scale of a custom style that uses the threat system, used instead of the general scale
+-- when threat scaling is disabled (or as base value for additive threat scaling)
+local function ScaleThreat(unit, style, non_combat_scale)
 	local db = Addon.db.profile.threat
 
 	if not db.useScale then
-		return ScaleGeneral(unit)
+		return non_combat_scale or ScaleGeneral(unit)
 	end
 
 	if db.marked.scale then
@@ -112,18 +114,18 @@ local function ScaleThreat(unit, style)
 	local scale = db[style].scale[unit.ThreatLevel]
 
 	if db.AdditiveScale then
-		scale = scale + ScaleGeneral(unit)
+		scale = scale + (non_combat_scale or ScaleGeneral(unit))
 	end
 
 	return scale
 end
 
 local function ScaleNormal(unit, non_combat_scale)
-	local style = Style:GetThreatStyle(unit)
+	local style = Style.GetThreatStyle(unit)
 	if style == "normal" then
 		return non_combat_scale or ScaleGeneral(unit)
 	else -- dps, tank
-		return ScaleGeneral(unit, style)
+		return ScaleThreat(unit, style, non_combat_scale)
 	end
 end
 
