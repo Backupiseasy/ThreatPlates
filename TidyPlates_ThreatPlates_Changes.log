@@ -6,6 +6,7 @@
 * Fixed threat-based transparency and scale for custom styles that use the threat system and for nameplates in headline view [GH-623].
 * Fixed several script functions of custom styles not being called or not receiving the documented parameters.
 * Fixed enabling or disabling a script-triggered custom style with "Never" only taking effect after a UI reload.
+* Fixed a bug where certain game events (e.g., entering or leaving combat) were no longer processed after disabling a widget until the UI was reloaded.
 
 ------------------------------------------------------
 13.3.3 (2026-10-25)
