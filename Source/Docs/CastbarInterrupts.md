@@ -7,15 +7,21 @@ handlers in `Nameplate.lua`.
 
 WoW fires `UNIT_SPELLCAST_INTERRUPTED` for a plain (non-channeled) cast that gets interrupted,
 and `UNIT_SPELLCAST_CHANNEL_STOP` (with a non-nil `interruptedBy` 4th arg) for an interrupted
-channel. WoW never also fires `UNIT_SPELLCAST_STOP` for an interrupted cast, so these are the
-only signal that the cast ended.
+channel. **Correction (verified in-game on Retail 12.1.5, 2026-10-28):** WoW also fires
+`UNIT_SPELLCAST_STOP` (with the same `castBarID`) right after `UNIT_SPELLCAST_INTERRUPTED` - observed for
+casts interrupted by a kick, a stun and movement (`interruptedBy` is `nil` for the latter two), for nameplate
+units and the player. An earlier version of this page stated the opposite. Consequences:
+`Addon:UNIT_SPELLCAST_INTERRUPTED` calls `Addon:UNIT_SPELLCAST_STOP` itself, which clears
+`castbar.CastbarID`, so the real `STOP` that follows is ignored (`castbar_id ~= castbar.CastbarID`) and
+does not cut the interrupt display short; and if the handler returns early (no interrupter, castbar
+hidden), the real `STOP` still ends the cast, so no cast state is left behind.
 
-`Addon:UNIT_SPELLCAST_INTERRUPTED` is Retail/Midnight-only code: it calls `GetClassColor`
-(`C_ClassColor.GetClassColor`, version support uncertain across older Classic tiers) and
+`Addon:UNIT_SPELLCAST_INTERRUPTED` is code for clients with Midnight's API surface only: it calls
+`GetClassColor` (`C_ClassColor.GetClassColor`, version support uncertain across older Classic tiers) and
 `class_color:WrapTextInColorCode(...)`. `Compatibility.lua`'s `WOW_EVENTS` gates the *event*
-itself to `Addon.ExpansionIsAtLeastMidnight`, and `Addon:UNIT_SPELLCAST_CHANNEL_STOP` - the only
+itself to `Addon.HAS_MIDNIGHT_API`, and `Addon:UNIT_SPELLCAST_CHANNEL_STOP` - the only
 other caller, a direct Lua call rather than event dispatch - additionally checks
-`ExpansionIsAtLeastMidnight` before routing an interrupted channel there, so the function is
+`HAS_MIDNIGHT_API` before routing an interrupted channel there, so the function is
 unreachable on Classic by construction, not just because `interrupted_by` empirically comes
 back `nil` there (see below). On Classic, both paths instead fall through to
 `Addon:UNIT_SPELLCAST_STOP`, which always calls itself to clear cast-tracking state regardless
@@ -57,8 +63,9 @@ So on Classic the interruptor's name is never known at the point the cast stops.
 Confirmed in-game (Mists Classic, debug logging): `Addon:UNIT_SPELLCAST_STOP` reliably fires and
 sets `InterruptSourceUnknown = true` *before* `SPELL_INTERRUPT` arrives, for both channeled and
 plain (non-channeled) interrupted casts - Classic's server evidently always sends a stop signal
-when a cast ends for any reason, unlike Retail/Midnight's model of separate `UNIT_SPELLCAST_STOP`
-(normal completion only) vs. `UNIT_SPELLCAST_INTERRUPTED` (interrupted only, never both). An
+when a cast ends for any reason. (Retail does the same, see the correction under "Event model"; the
+assumed Retail split of `UNIT_SPELLCAST_STOP` for normal completion only vs. `UNIT_SPELLCAST_INTERRUPTED`
+for interrupts only does not exist.) An
 earlier version of this code assumed Classic followed the Retail split (reasoning from
 Retail/Midnight's `CastingBarFrame.lua` source, which doesn't apply to Classic's actual
 server-side cast handling) and added a broader `InterruptSourceUnknown or castbar.IsCasting or
