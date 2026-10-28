@@ -280,7 +280,11 @@ end
 function Addon:PrintEventService()
   print ("EventService: Registered Events")
   for event, _ in PairsByKeys(RegisteredEvents) do
-    print ("  " .. event)
+    if INTERNAL_EVENTS[event] or EventHandlerFrame:IsEventRegistered(event) then
+      print ("  " .. event)
+    else
+      print ("  " .. event .. " |cffff0000(not registered at WoW)|r")
+    end
   end
 
   print ("EventService: Subscribed Events")
