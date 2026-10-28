@@ -226,9 +226,9 @@ function EventService.Unsubscribe(subscriber, event)
 
   -- unitid, event_handler_frame for unit
   for _, event_handler_frame in pairs(RegisteredUnitEvents) do
-    local subscribers_for_event = event_handler_frame.Events and event_handler_frame.Events[event]
-    if subscribers_for_event then
-      UnregisterGameEvent(event, subscribers_for_event, subscriber, event_handler_frame)
+    local unit_subscribers_for_event = event_handler_frame.Events and event_handler_frame.Events[event]
+    if unit_subscribers_for_event then
+      UnregisterGameEvent(event, unit_subscribers_for_event, subscriber, event_handler_frame)
     end
   end
 end
