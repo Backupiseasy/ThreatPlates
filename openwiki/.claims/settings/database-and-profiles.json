@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:c86072c6bd1f8bd76ad5481102192c24df7b14163256b4a26e0df5c80a5cba35",
+  "claims": [
+    {
+      "id": "claim_bb1fcc85a6954f83921f8a510aea087b",
+      "statement": "The AceDB defaults table Addon.DEFAULT_SETTINGS has global (version, DefaultsVersion, CustomNameplatesVersion, ScriptingIsEnabled), char (spec roles) and profile sections.",
+      "evidence": [
+        {
+          "resource": "repo://Constants.lua#L572-L584",
+          "version": "repo-lines-v1:sha256:2276a5b4b4d3d3c37369c1335d8e419a8fcb4ce833f2a2b9cf8771d142f35d69:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZhZDZkYTVhN2IxMzliNTdjZjEwMTVkODQ4OTk4YzRkYjA2MDU2M2NlZDU5ZWQ1OTZjMjM1OWVhNzZjMzg0MzYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM3ZWIxMTNhMjZhYTA0ZjNmNGEyMDAyOWFjOTYxNmI1NGMzZGRiNzdlYzdlZmRiZGQ4NGY2NWM2ZjQxOGJmNWIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM1NjVkNTBkZjAwZDU5YWZmMzYwOTQzNDY3ZmU0MTlmMGNhNDUwMjk4NDA3MmRlMDRhZGMzMTZkMmNmMGYzMDQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZiYWRiNDVmNTBmYTY0ZjNjMjM5ODlkZDY0NTY4MGVkNDAzOTA1ZmY4MDdiZGQ2ZDkxMGE1OGMzMTY2ODZiMWMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_3b10698997a84dd8a2346008fe04600d",
+      "statement": "OnInitialize creates the database ThreatPlatesDB with the Default profile, uses the V1 defaults when the global DefaultsVersion is CLASSIC, and registers ProfChange for profile change, copy and reset.",
+      "evidence": [
+        {
+          "resource": "repo://Addon.lua#L285-L329",
+          "version": "repo-lines-v1:sha256:6b9830ba104728952c5b8a32a995228ea799809a7f4cbbcfbe1bdbd8e737fc2a:eyJzZWxlY3RlZExpbmVDb3VudCI6NDUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIzNThhZDRkYjMwN2U0YzlmOWVmNTQ2YWI5Y2E3ZjVjMTk3ZjEwNTdmMjRmY2FjMTFkMjNjZDVhYTcxZDVlY2QiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFiNzVmMzU0NDQ2YjA5YjgzZjQ2OTMwNDQ2YTA5Y2M1ZGFhZDlhNTNkNDBhMzc1NjUyMTFlZjJlMDE5ODlkZmEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImY2YTkyMjM2ZmExYTAwZDQ5MjJiMTY1MTk0NGVkNjE5NGJlNTJkYThiZDY2YmZlMzJkZWE4Yjk0M2VhMWZmYWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQ4M2MyYzkxODc1Yjc5YTdmODc1MzUxYmEwN2M4Njc4YjhlNGExMTc3OGRkY2FkNDBlYmE0YmE0NjM0ZDljN2IifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_389e127befba45f1b46c64c08e763d1c",
+      "statement": "Switching the default design registers the other defaults through a temporary _ThreatPlatesInternal profile and then reloads the theme.",
+      "evidence": [
+        {
+          "resource": "repo://Database.lua#L506-L529",
+          "version": "repo-lines-v1:sha256:6f1654ec8f93313403e0c6f9a7dcd0c15d2cae0ecdf6a9c2feff8aeede79844c:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkwNjk1MWU2MTA3ZGQ1YTg4NDI1Yjc5YTUyZGI3Y2I2M2VmYmMwZTRlNjVjM2JhNTUzZGY5MjlhZDkxOWI5ZTMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjI1ZmE1NjJkODRmNGFhN2M0NjBiODU0YTMyNDcyZWI2MmEyZjVlMGRhMDAzNjlmMjVmNzMxZmY0YmYzNjA1MmEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImYwNmYwZmJiZDZiMGIwMWY5NjZhMTUwOTNiZTY2N2U0NTBjYTVkZDllYjIzNTE3NjY2NjIzYTZhMjEzNzc1YzUifQ"
+        },
+        {
+          "resource": "repo://Options.lua#L7002-L7018",
+          "version": "repo-lines-v1:sha256:30bab1122a3f0f57e8c8563ef58478717b2c36c1d7cf66307f5288aa4943451f:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcwNjBiZDJmZDFjNTU0OWFjYTNhNTMxNTFkNzQzOTZhYjk4MzQ5ZmE3MjUzYjg0MDZjMjM0NjY5ZmRiOWZmZmUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMxMWUxZWQ4MGQyYTI1NDZkMDg5YTY2YjI2NDE1ZDBhMmM1ZTljYmI5MDg2NmZlZWZhMzJkNWNmZTljNjU3OTAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImMxMGI0MjBiNTRiMDA4ZDY1OWU4MTAwNjkwZjlhYjk1OWZkMjE0NmM1MmY0YTA0ODUyN2NmNWZiNjA5ZjljOWQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI5NjQzYTk0YzlhNjUzMjczOGEwZWI4MjMwNDQ2OGRmNmJkNjliYmQ1MzVkYTVmZGJjYjA2ZGQzZDA1YTNmNTYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_ad18ae3ba7f34653b8bce7fc46526903",
+      "statement": "ProfChange reloads the theme, updates option preview images and rebuilds the custom style option groups.",
+      "evidence": [
+        {
+          "resource": "repo://Options.lua#L11759-L11783",
+          "version": "repo-lines-v1:sha256:3dceb55bec0542e2f5366b4cf51b86c070a8f762cbdcfdd73404947388fe4cae:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFmNjFjMzNlMGM2YzJiZTNhM2FmOWExZDc3ODI2MzE2YzE5N2MzN2E0Y2IwZTM3ZDllZjQxZDQ1ODA0MTc4NjkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM1MzM0ZGVjY2E4ZGE0ZjNkZWMwYWQxODNjYTJkNWMzZTcyM2U1MTU2NjBlNzMwZWNlNDYxZWVmNjJmYzI4YzciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjJhNDc2ODY4NTU2MDAzOTc3ZGM3ZjkxMzE5Y2E2ODU1ZmIyNjlkMTVhYzA0OTY4NmU4NDNiNzdmZDAzMWYwMTQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_795d822ad68a4d7cb8d1ef0a9d5596ff",
+      "statement": "CheckForFirstStartUp fills missing per-specialization tank roles and runs MigrateDatabase with the stored version when the addon version changed.",
+      "evidence": [
+        {
+          "resource": "repo://Addon.lua#L159-L183",
+          "version": "repo-lines-v1:sha256:2af8120804c833b06266e04708772cfcbc8083d09304c322167dccef9c7a72b6:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA3ZmNlNGM1MjY0ODA4YjAxZjBjMTQ4MWZkOGMwM2JhMDQxM2E5MDdhZTAzM2UyMjQ5Njc5MDliYjEwYjFiNmUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjcxMmQ0YjJlOTZhNjZmM2U0NDk1Mzg4MDNlYzkzOTUzMmU2YzY4YjQyMGFhYTMwZTBiOTBjMTcyODIzZjM1YTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijk3MTdjMTcyMzU4N2I2NjA0ZjMyYWZjOWJlY2ZjYWZiYWJmZGM0ZTUwNWRkMTkzM2MxYjE3MzhhZjc3Y2QxZTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_23413f53170744b19d678869d4f47eac",
+      "statement": "Migration steps are of type Rename, Delete or Migrate; Migrate steps only run if their Version condition is nil or true and can temporarily register empty defaults with NoDefaultProfile.",
+      "evidence": [
+        {
+          "resource": "repo://Database.lua#L1364-L1378",
+          "version": "repo-lines-v1:sha256:9c7866bf994366f50f03a71cc187d738d7939114753cff49659669d4e0fb8262:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMzZDI1MjRkOTVkOTAyZTI5ZmVlNzNkM2IxNjBkOTdlZDk0NGFmZmY1ZjNlYWUxZjNjMWJlNTM4NzY0Y2M1NjIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRkNWNkMmZiNGYzZGY4ODQ1MTUyNTViMzk1MjNmMmY4YjU0NzJiZWVhOWY1NjZmZmNhMjA0ZGI4MDI1NjEwNDEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIyYWViM2FhNDE2NDY1ZGQ4NTVhODA1ZjFmYjY3MzhjZDZhYmY0NmU2OTk2ZGQ2MTJiMzBmNTRlOGZhMDI5OTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImZjNjE2YjMwYzU0YjRjM2UzOGUxMTAzYTdmM2IzNTI2NmIzYTAwY2NhOTE1NzhmMTRlZDM3ZDM1OTExMDNhZGIifQ"
+        },
+        {
+          "resource": "repo://Database.lua#L1588-L1661",
+          "version": "repo-lines-v1:sha256:45d833441ed4bcf805d5497f55dcd6619a29ed2903abb08262a4f9b0a069d9dd:eyJzZWxlY3RlZExpbmVDb3VudCI6NzQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBlYzMxMzQ4ZTdjNWRkNjdiOWI3ZjcyMjI1N2YyNjAxNzliMDQxMjJmNzI0MDVhODM3NTA2ZGIwMWM3YzUwMTMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk5ZDhmZjJhYmMxYzRkYWVlMmYzYjg3MWVjYzkwNjBiOWY3NDM1YTFjZGNjYWVkMzliZTdlYWNhOGZhZTVlYjIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImYwYzM4NWI5NWM1N2Y5MGVkZDAwMWI5YmIwZTMwMjAwMzY3NmRiMTJlOTJjZmE2Y2Y5NDA4YzhhNTg2NWVjZWYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_f125343484a5487fb738d3bd0b605432",
+      "statement": "Migration versions are sorted with CurrentVersionIsOlderThan, which compares major.minor.patch and orders alpha and beta builds before the release.",
+      "evidence": [
+        {
+          "resource": "repo://Database.lua#L1580-L1586",
+          "version": "repo-lines-v1:sha256:13d2a56ef59cbe6694e740b8abc2a8c95253b73a1b3c975b60f0f0d9f3baf372:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNWIxN2RjNDZlOGU0NGY1MjA5MzJjOWFjOTU4NDljMDZjZjc4NjIwNzkyZDYyN2YwY2IwMzg2MzYyZGI1NDEzNiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNzQzNmU1ZGJmNTI5OTkzMTIxZWIxM2EzNWRmYmM5ZDNkYmE2NDQ2Y2YxMTU2YjhiYWNjNzA0ZWNiYTA5YjlmMyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYTRmMDEzOGUzMjg2ZmM1YWMzNWRhNDEwMjNmNDlkN2RiNTZjMjA0NzZlMDYwMjk0YThlYTJiOTYyMTNhN2UwZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNDBjZTVlOGI0NWQwNzE5ZTg3NmQyMzMyM2YyZDVmNzk4OTViZTlkZDk4MGQ2ZjJjOGEzZTQ5NmI2Mjc5MWIzZSJ9"
+        },
+        {
+          "resource": "repo://Database.lua#L531-L552",
+          "version": "repo-lines-v1:sha256:360a30385cf86dafd2c313b4192c06809f5d1fa319683de226c6de564816e3c8:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI0MThkNzUzMmJjNzFkZTEwNWUwYjVlYzkzODRlMzVlNDQzMjA3NDA5M2M0ZTI0YmNiMGNjMGVmYTZlZWU2ODMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjYyOGJiYTI3NWU5ZGJjNDk0NzlkNGYyZmE0OWQ3MTE3YjcyM2QzNGQ4MjI0MjQ1MTZjNWFkYWQyZDJjOTY1YTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZiYjZmZDdhMzA0OGI4NmRlYTY0YmRiZDQ0ZjI1YjZmMzZkNTM1M2Q0ZGQyNmYzYTMzNmIxMmQzOGIwMTVkZDAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_cff402aa7f774ad8af50ea3a6902d5fe",
+      "statement": "MigrateDatabase migrates every profile and then switches through all profiles so AceDB removes values equal to the defaults.",
+      "evidence": [
+        {
+          "resource": "repo://Database.lua#L1663-L1676",
+          "version": "repo-lines-v1:sha256:0712877c22d394fbde51466fcf026a9c4d43e697692b018781e08735dc0a947e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIwMzRkNWMwZTJkMGYxMDgzNzRkNGIyYjNmNzQ4ZDZkYWIyNGJiNzQ0MDQ1MDcwNDE1ZjFmZWZmM2JkMWZlMjgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU2NmUwZWNhZDNhYmU2NDUxM2ZiMDljYjA2NTU2NWQ0ZTdjZTYxM2Y1MjdhOWE1NDEyNmIyMThjY2U2ZGQzMDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM1NTZiMWExNmMwNzA1NDJhNWFhNmE0ODdlNWMwM2Q3MDliODhhYjBmYTE3ZTQyM2ExY2I3MGIyZmQ4YTAyY2MifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_5454e0a7084d4301a200d921753c3d86",
+      "statement": "Profiles are exported as an AceSerializer string compressed and encoded with LibDeflate, and imported profiles get a non-conflicting name, are migrated in pcall and merged only for existing keys with matching types.",
+      "evidence": [
+        {
+          "resource": "repo://Database.lua#L1739-L1768",
+          "version": "repo-lines-v1:sha256:5574ff5ce2ee7223d03ba2a2ceddaf9e67e021a8118c31a2b4a73da880b2de2d:eyJzZWxlY3RlZExpbmVDb3VudCI6MzAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZhMDQxZTNmMWFiMDdiNzJiYjU0MzhlZDliNzA2MDQ2Y2U3NGExMTFkMmQ5MDY5OTMwZDZhMTcwODBiYmFkNmYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkzMTZhMmJkYmEwYmIxODcxMGFkNzdmMWRlMTE0ZWZjNmI2NzY2ODczNjU0NDY4OWVlMGZmNmQ3YzNmNjMwMTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBmMTNmMTAzMDEzMzZkMjc0OWVjZWY0YzE4N2YzZWI2ZTkyMzY5YTAzM2ZlZDU1OTIyNTE5YWZkYzMxZDEzZGUifQ"
+        },
+        {
+          "resource": "repo://Database.lua#L1827-L1854",
+          "version": "repo-lines-v1:sha256:02e82ef3d415c21ac11082ffbc95782140f80692200098634bebe0391b43a5b0:eyJzZWxlY3RlZExpbmVDb3VudCI6MjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNjMzk3ZGY5N2ViM2I1ZDE1ZDU2MTM3Y2E1NTY5NGY5ZGMyYmQzMDczN2YyZDQ4NDZmYTVkMDY4MzNmYmZjZjkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc3YjJiNjg3ZmQzODk1MjNmNTdmYWI3NjlmYjkwMGJlNmE5MTljMzhiNjZjNDU0MTlkZTVmNDNkZDlhMzNiNjEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://Options.lua#L258-L369",
+          "version": "repo-lines-v1:sha256:e47dad52318f5e75b87947b991903f427e65f64e477f5b0bc943a056f53ad881:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEyLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI0NjViNTBkYmQ0YjNlZGNhMDI1NDRhNjgwNjRjOWFhZjFhZTcxNDZhNjQ4YjMyY2IyMTRmNjlhYzRmMjkzY2UzIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0ODMzMmZlNjY3YmM1MWFjNGE1MWJhMGVmZTczNDQ0MWM5MGRlZjU1YzYwYTI2ZDdkYjI3NWVjYmJjZjQyZjE1IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIzMDYzNWRmNDYwZDRiNTVmMmQ2YjllZTM4ZmFhYmZkNDk4MTlmZDEyY2UwMWFiZmJmNzIxZTE1YTkwZmY5NmI3IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlOTE4ZTI3MjgzMjc3ZDc5NGYwZjhiYWFkZTNiNmEwODU3Y2Q2YWM4MzZmYTJkZTQ3YzA3YmQxZjMzNjY5NTQ4In0"
+        }
+      ]
+    },
+    {
+      "id": "claim_be6f749eaa00452c96f1c31dfc210915",
+      "statement": "Imported custom styles are rebuilt from the default custom style with type-checked values and regenerated trigger arrays.",
+      "evidence": [
+        {
+          "resource": "repo://Database.lua#L1770-L1825",
+          "version": "repo-lines-v1:sha256:261055cc5b472ac78a75debc9df6bbfed702ff0e8c8cdbcaf071d95f45fad8e0:eyJzZWxlY3RlZExpbmVDb3VudCI6NTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFmZDg5ZDlmYzFkZjM2YjI5OWE0NTUyZTFkZTJlNTU4YjlhNWY1NjBmMWEwYmU4YmI1ZTQ3M2JjZjFkZDUwZmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU2NmUwZWNhZDNhYmU2NDUxM2ZiMDljYjA2NTU2NWQ0ZTdjZTYxM2Y1MjdhOWE1NDEyNmIyMThjY2U2ZGQzMDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjczODdiODQyMDNiNGE2NTMxYmE4M2IwMWEyYTE4ZmQwYmMyMzE3ZDc4NjczODRlYWNkZjI2MzFiNWU5ZDY3MzUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_24b01eb7926e4113b87eca71ca886873",
+      "statement": "VersionIsAtLeast always returns true in development builds where the version is @project-version@.",
+      "evidence": [
+        {
+          "resource": "repo://Database.lua#L554-L561",
+          "version": "repo-lines-v1:sha256:1b70d412749440234fa7076713b6ca6cb3c974be133939808207efb47cb1d27d:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOGI1ZWU2MDIzNTE1ZTUxOTAxOTA4NTIzZjJmOWVkOTIwZjQ5ZGYzZmFiMmZjODc3NmM4MmE2YjkxZGZlNzRhNyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDgzMzJmZTY2N2JjNTFhYzRhNTFiYTBlZmU3MzQ0NDFjOTBkZWY1NWM2MGEyNmQ3ZGIyNzVlY2JiY2Y0MmYxNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNTY2ZTBlY2FkM2FiZTY0NTEzZmIwOWNiMDY1NTY1ZDRlN2NlNjEzZjUyN2E5YTU0MTI2YjIxOGNjZTZkZDMwNSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYzQ0MTVmMjIxM2UzNjU5OGFiZTE5ZTQzMzRhNDJhZDg3Y2JhMjEyYjY5MTYyNDFjMWE5OGQ3NmVjZjY3ZjBhMSJ9"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-25T18:59:51.751Z"
+  }
+}

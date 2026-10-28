@@ -51,6 +51,8 @@ ignore:
   - Source
   - README.md
   - CLAUDE.md
+  - AGENTS.md
+  - openwiki
   - TidyPlates_ThreatPlates.iml
 
 # move-folders:  # not needed - single top-level addon folder, kept as placeholder

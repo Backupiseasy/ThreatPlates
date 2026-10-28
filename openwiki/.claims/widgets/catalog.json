@@ -1,0 +1,204 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:591eb5532b30ff7d3a6158c850eeb50f0b719714add0036777799e657059f2ec",
+  "claims": [
+    {
+      "id": "claim_aaf357828e774b639f4dd366be4abff6",
+      "statement": "Widgets decide their client availability with an early return: Quest requires Mists+ or Forever, Arena is skipped on Classic Era and Forever, Experience requires BfA+, and BossMods and HealerTracker are skipped with HAS_MIDNIGHT_API.",
+      "evidence": [
+        {
+          "resource": "repo://Widgets/ArenaWidget.lua#L6-L8",
+          "version": "repo-lines-v1:sha256:aaf9e34da134a1f8507c49804ec65633c347c2ac6f25caa45204fc02393680d1:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYmY2YjY2MGM3Zjk1MWUzMzM5ZjYwODhiNTk5ZmY5NjdjNWFhZjk0NDdmZjlkZmE3ZjRjY2NkY2JhZjhjYjI2NiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiM2JkNGRiNTQ4MmM5YjdiNzM2M2YyNWNlZWE0ZTkyYzM4YjUyNjI2YWRiMTJlMzRjYzE5N2MwMDk2NGQ3NDlmNCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYzcwODNjMTk4ZGMyMTcxMDU5YThlNWE4ODIwMmY2ZDMwM2JlMTg5YmQxMGY5NTQ5ZWE3MWJiZjg4M2MzNWUzZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMDE4MjI1ZDUyMDg2ZmQ0ZDk2ZjliNTEzNjAzZTkzNTA0ODFlZGM4MDZlY2MxM2EwMDA4MWQwNTJhYTgwZWRmNyJ9"
+        },
+        {
+          "resource": "repo://Widgets/BossModsWidget.lua#L3-L5",
+          "version": "repo-lines-v1:sha256:0cd34b29dfd63ecadc686aec53db54fc1e99095865fe157ed481d8107659242f:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMjMyYzFhYjA4OTI3NDc1MGZiZWI1MzM3MTNmOWVmNmViZDk2OTFkZjExMWU5MzYzYTdlY2Y5ZWFjZjhkN2VmMCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZjEyYWQ3MzAyMmQ2ODQ2NGI2NTVkNGE2ZWVhYzJjMzBmMjhlOTBlNDE1MDRkZWUwNTUyZDBmNGY5MTU1MDI4ZiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjIsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZWRjZjQzMGJjYTcwZjMxMmM3ZTFiMWM5MjA5MDUxNTdkZDU1ZDI2ODJjNmQ5NDI1YTIyYzhkMjU3MjMzMDhiNSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMDE4MjI1ZDUyMDg2ZmQ0ZDk2ZjliNTEzNjAzZTkzNTA0ODFlZGM4MDZlY2MxM2EwMDA4MWQwNTJhYTgwZWRmNyJ9"
+        },
+        {
+          "resource": "repo://Widgets/ExperienceWidget.lua#L3-L5",
+          "version": "repo-lines-v1:sha256:604a226f4b11fa075f70e41c946aec57a59f3c65570d8fdd2afbbb7cd37a9d73:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiN2UwYjFlNTYwMGZiOTA3Njc3Y2I1ZWE3OTkzODg3OTQ3ZDVhMGVhZDdlYWEyNzQ2YzZjMjMwOTcwNTc4ODk1ZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMWUzOWUwNzA1OTk4NDUwZWM2NDc3NTE3MWJiMTFiZTNkZWJhN2U5YzQ5ZTRhNmJhZGRiZjMyZTA0NWY0NzY1MiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjIsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZWRjZjQzMGJjYTcwZjMxMmM3ZTFiMWM5MjA5MDUxNTdkZDU1ZDI2ODJjNmQ5NDI1YTIyYzhkMjU3MjMzMDhiNSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMDE4MjI1ZDUyMDg2ZmQ0ZDk2ZjliNTEzNjAzZTkzNTA0ODFlZGM4MDZlY2MxM2EwMDA4MWQwNTJhYTgwZWRmNyJ9"
+        },
+        {
+          "resource": "repo://Widgets/HealerTrackerWidget.lua#L21-L23",
+          "version": "repo-lines-v1:sha256:eaaa5b2f4f2f2400b93451d5741861da47d7eed02cdfe16b4325f742277baceb:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMjMyYzFhYjA4OTI3NDc1MGZiZWI1MzM3MTNmOWVmNmViZDk2OTFkZjExMWU5MzYzYTdlY2Y5ZWFjZjhkN2VmMCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYTk2ODJlNDA4YzQ3Zjg4ZGVlZDk2NGE3MDFjZjMwZTcwM2NlZjE4ZDA5N2E5Y2QyM2JhZDUzOTcyY2NmMjhkYSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZGIzYzUzZWFhYjkzZWVmNzZjOTUzMGYwZDhmMWIxOWNkZmJkYzE3MGI2MjUyNWQ4ZDIzODFiYzY5ZTMwNWUzMCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMDE4MjI1ZDUyMDg2ZmQ0ZDk2ZjliNTEzNjAzZTkzNTA0ODFlZGM4MDZlY2MxM2EwMDA4MWQwNTJhYTgwZWRmNyJ9"
+        },
+        {
+          "resource": "repo://Widgets/QuestWidget.lua#L6-L10",
+          "version": "repo-lines-v1:sha256:4a1c7fde89e4ece0b073cca637dbd7dfed99b0df09f0d6101234cb0f4c5881ba:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZTY4ZmZiMTkxMjE5ZTBlOGE1ZDQ0NTI3MGJhMGRmZWJjNTk1N2E0M2I5MTEzODQ0NWRmNzdlZGRhOWQ4MTViMSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYjVlMGUzMzNlZGEzNGI4Yjk0ZGMxYTU4MWNlZTI3YjkzMzUzMjcwOGE4NDQ4YjQyMDBjYzYyYjZhNzliNmZkYiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYzcwODNjMTk4ZGMyMTcxMDU5YThlNWE4ODIwMmY2ZDMwM2JlMTg5YmQxMGY5NTQ5ZWE3MWJiZjg4M2MzNWUzZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMDE4MjI1ZDUyMDg2ZmQ0ZDk2ZjliNTEzNjAzZTkzNTA0ODFlZGM4MDZlY2MxM2EwMDA4MWQwNTJhYTgwZWRmNyJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_62a946ff10cd48e58f246101a04b471d",
+      "statement": "ComboPoints and Resource are target-only widgets, TargetArt is a target-only widget and Focus a focus-only widget created only where focus exists.",
+      "evidence": [
+        {
+          "resource": "repo://Widgets/ComboPointsWidget.lua#L9-L9",
+          "version": "repo-lines-v1:sha256:4f9eeb4ea1db22fc0f33ee99b579bd6c7527d68031093adfb5a47c88ff8902d6:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNGY5ZWViNGVhMWRiMjJmYzBmMzNlZTk5YjU3OWJkNmM3NTI3ZDY4MDMxMDkzYWRmYjVhNDdjODhmZjg5MDJkNiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNGY5ZWViNGVhMWRiMjJmYzBmMzNlZTk5YjU3OWJkNmM3NTI3ZDY4MDMxMDkzYWRmYjVhNDdjODhmZjg5MDJkNiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYzcwODNjMTk4ZGMyMTcxMDU5YThlNWE4ODIwMmY2ZDMwM2JlMTg5YmQxMGY5NTQ5ZWE3MWJiZjg4M2MzNWUzZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMDE4MjI1ZDUyMDg2ZmQ0ZDk2ZjliNTEzNjAzZTkzNTA0ODFlZGM4MDZlY2MxM2EwMDA4MWQwNTJhYTgwZWRmNyJ9"
+        },
+        {
+          "resource": "repo://Widgets/ResourceWidget.lua#L6-L6",
+          "version": "repo-lines-v1:sha256:f0d423ecc57aef7e87cab9af9507fdf16a6da6bca6f4e31a03c22e9899d292ff:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZjBkNDIzZWNjNTdhZWY3ZTg3Y2FiOWFmOTUwN2ZkZjE2YTZkYTZiY2E2ZjRlMzFhMDNjMjJlOTg5OWQyOTJmZiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZjBkNDIzZWNjNTdhZWY3ZTg3Y2FiOWFmOTUwN2ZkZjE2YTZkYTZiY2E2ZjRlMzFhMDNjMjJlOTg5OWQyOTJmZiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYzcwODNjMTk4ZGMyMTcxMDU5YThlNWE4ODIwMmY2ZDMwM2JlMTg5YmQxMGY5NTQ5ZWE3MWJiZjg4M2MzNWUzZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMDE4MjI1ZDUyMDg2ZmQ0ZDk2ZjliNTEzNjAzZTkzNTA0ODFlZGM4MDZlY2MxM2EwMDA4MWQwNTJhYTgwZWRmNyJ9"
+        },
+        {
+          "resource": "repo://Widgets/TargetArtWidget.lua#L6-L7",
+          "version": "repo-lines-v1:sha256:ccce3ea87d1edf4bab97dc85c626a09ce521e0c90a8862017be0d745ed2702be:eyJzZWxlY3RlZExpbmVDb3VudCI6MiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYTA5OWExMWQ4Y2Q3MDU4ZGE2ZjBhMmYwNGVkYjFiMDJjMmVjZDFhMjc1MTE5ZmI0MGMwOTQ3ZTE3ZmM1MTI3ZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiY2RlYjRmNTU3NzhlOGUyZDc1MjY3ODg3NGQwOWY0MDNhMjRlZTU2NzI0OTc2NzQ4ZGVjMTc0OWU5MTY0ZTI3NSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYzcwODNjMTk4ZGMyMTcxMDU5YThlNWE4ODIwMmY2ZDMwM2JlMTg5YmQxMGY5NTQ5ZWE3MWJiZjg4M2MzNWUzZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMDE4MjI1ZDUyMDg2ZmQ0ZDk2ZjliNTEzNjAzZTkzNTA0ODFlZGM4MDZlY2MxM2EwMDA4MWQwNTJhYTgwZWRmNyJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_f25c7acfd6e44992815a3aa6f9883a55",
+      "statement": "The Quest widget identifies quest objectives from tooltip line types on HAS_MIDNIGHT_API clients and from line colors on other clients, comparing player lines with the first name only.",
+      "evidence": [
+        {
+          "resource": "repo://Widgets/QuestWidget.lua#L229-L278",
+          "version": "repo-lines-v1:sha256:903a8fda2e7230250580dbc9e28de92af6e421cb4804c262bc3f36ca38e2674c:eyJzZWxlY3RlZExpbmVDb3VudCI6NTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM0NTg3Y2Q3MzdkYTE2OGVkYjFjZTYxNjJhMTM0ZjQxYWU1ODQzNzU0MTExYjhhOWRiNjNmY2RjOWVmNjI3OWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJhNzA3MjhmZmFiZjE3ZWVmYjc4NDc0ZTAyY2JjZWU3ODMzNzllMjg3YjBmNzAxY2NhNGEyZGI5ZDQ4MWJmYTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImNkMWQ0NTEyYTgzMDZhYmY4MjQzMGRlMTNhNjA3YmI3M2VmMjg3YmE0NWFkZjg0MDFlNmZjOTE3ZDU4N2FhYzAifQ"
+        },
+        {
+          "resource": "repo://Widgets/QuestWidget.lua#L33-L35",
+          "version": "repo-lines-v1:sha256:8a7d5cf4032dbf28fb6a80b02889dd3dc859899f9d58c7d86069e5dc53fea6f2:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiN2NhYzhiYTFhNGI2YWM4Y2VjZTgyNjQ1YzZkMjU4YmE3NGEzY2NhZTdmNzEyNjc2OTcwOWQ2ZDhkYTk1OGYyMSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOTU3YTViMDFiM2MyZjM2YjBkMWMzOTQ2ZTU5ODQ1ZDE2MTY3OTUyZDM1Yjk0Mzc4ODBiMjgwNTYxYWM2ZDBhZiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNzgxMDA4OGRjZGNmZjYzOTFiMzQzZTA0YjQxYjA4OTYyNmVmNmQyNzAwMGY5OTAwY2RmNjdkNmI3ODY0NzZkYyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMGI1MzNlZjU5Nzc2N2NmNzkzZTYyZmRmMDYwNzE2YjlmNmIxYWU5NmY5YmFjMzA4NmQ3Njk3ZGUxN2E4ZmFlZiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_c2ffdd9f0dac4c8e8bddcc58e1667c38",
+      "statement": "The Quest widget exports Addon.ShowQuestUnit and Addon:IsPlayerQuestUnit for quest healthbar coloring and forces showQuestTrackingTooltips on enable.",
+      "evidence": [
+        {
+          "resource": "repo://Modules/Color.lua#L352-L352",
+          "version": "repo-lines-v1:sha256:948c584b8fb43ae408407880405fee39b481781bdc7cab4de45155b1901c8b28:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOTQ4YzU4NGI4ZmI0M2FlNDA4NDA3ODgwNDA1ZmVlMzliNDgxNzgxYmRjN2NhYjRkZTQ1MTU1YjE5MDFjOGIyOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOTQ4YzU4NGI4ZmI0M2FlNDA4NDA3ODgwNDA1ZmVlMzliNDgxNzgxYmRjN2NhYjRkZTQ1MTU1YjE5MDFjOGIyOCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNTYwNDIyODU5NzUxZTAzODQzMGVlMzQ2ZTYwZTUyNmFlMmYzNWRkYjM0YzJhODAzZjBmM2U3NGU5ZjE0NDE0MiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZWI0NGE3MTlhZmU4ZWY2NGVjZWJhZTQ3YjdhNmQyM2YyNDA4ODUwZDM3MGEwNjIyNTAzZWMwYmVhYTI1ZjEzZCJ9"
+        },
+        {
+          "resource": "repo://Widgets/QuestWidget.lua#L280-L307",
+          "version": "repo-lines-v1:sha256:2c3169ad627539855bee4005c5ecbde78dd0eba2aa0ad8f462b227d426b9cf74:eyJzZWxlY3RlZExpbmVDb3VudCI6MjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE1NWQ0M2UxZmRjODZiYzhjZmVhNjBmZTMwM2VmNWRhMDFlOTYwNjJkYzQ3NDJmMGQyZmMzM2ZhNzU2MjQxMzUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNjMTQ5OGIyNGI4MGNmNmViMjJmNjgzYzdmNjRhNjM1ZDViNGJjZWI3ODg2NDY1Mjk2NTNhYjI5NTk2MmM4NjUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjcxYmQ2NWEzYzhjYWJhNDg5NGQyOGFhNjhkZDIwZjFiNTE3MmNhMjVmYjA3ZWY3N2Y5MTBiYzY1YWI0MjkzNzQifQ"
+        },
+        {
+          "resource": "repo://Widgets/QuestWidget.lua#L676-L676",
+          "version": "repo-lines-v1:sha256:a891f39d0c55e19ae91f8657d31be7d3b3998e4b408ee099a28eeba57b522e92:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYTg5MWYzOWQwYzU1ZTE5YWU5MWY4NjU3ZDMxYmU3ZDNiMzk5OGU0YjQwOGVlMDk5YTI4ZWViYTU3YjUyMmU5MiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYTg5MWYzOWQwYzU1ZTE5YWU5MWY4NjU3ZDMxYmU3ZDNiMzk5OGU0YjQwOGVlMDk5YTI4ZWViYTU3YjUyMmU5MiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMzRiODcyYzZhOTliZmNkYTBiOTYzM2RjODQ2MWUwMGZlMWMxN2IxMDU4Zjc4OTg2YmUzN2IyZjIzZjM5MjkzZiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMDkzNTU4MjAxMzBmMTI0MTcwYTVmMjhmYWY4ZDczMWVhZDA0OGY5MGUwN2VmMWIxOGUzYWVhYTk5OWY2ZDk3MSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_8dd6ed9b1343471c85da3c080313675f",
+      "statement": "The Threat widget is enabled by threat art or threat percentage options, shown for non-player units outside headline view, and updated on UNIT_THREAT_LIST_UPDATE, TargetMarkerUpdate and GROUP_ROSTER_UPDATE.",
+      "evidence": [
+        {
+          "resource": "repo://Widgets/ThreatWidget.lua#L350-L406",
+          "version": "repo-lines-v1:sha256:eadd7830ddfd03dc82a1953cad571322d5a6581df9341346d4f7ede2e56c0980:eyJzZWxlY3RlZExpbmVDb3VudCI6NTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjljNGZkYzkxYTMxNzg5YjdhZWUyYzJhYTEzZGI3ODcwZDczNTUxM2QxNDgzZTgzZWY2NDQ1NDBmN2Q2N2ZlNzAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFhYjYzMWRiMTAwYTRlN2VjNzg3NWFmMjliNzdmZTM0MDBlMmE0OWVhMzc2MWE5MGY1Y2E2NGFhOGVlNTM3ZTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjEyYTE1OTNiNDk1OGRhZDMwNWEwYjM0ZDUwY2ZiN2U4ODcwZTYxNzM0ZDQ1ODAyYzYzMjA5MDZkODdhYWY3ZWIifQ"
+        },
+        {
+          "resource": "repo://Widgets/ThreatWidget.lua#L55-L123",
+          "version": "repo-lines-v1:sha256:2e00e52171b53cea35e7e7790e7e38eca8d602143d7aa2bdb978b5bbb7c8f4cd:eyJzZWxlY3RlZExpbmVDb3VudCI6NjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjlhN2NjM2JkMWEyZWU1NjY1ZDliYmI5YzNkZTUyZWNjY2ZhODNlZmRlNGM1ZWRjMGU5ZGRjMmY3M2QxNDZmMTciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRmYmQ3MDFhMjQzZWNhNTIwNjllM2I2MWUxYjdlNDMwMjIwNjMyMzY5NzFmNzI2ZGE1MWFiYjU1ZGViYWY0NTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjMwMTU5MzdkYzIwZjdjMDM2YWRjZDY5ZThjODMxZjY4ODZkODY0YTY3N2I3OWFmZmI0MWU2ZDg0NTk5M2Q0ZGUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_5913fe96ea074bddb412b0c011fb01e2",
+      "statement": "ComboPoints subscribes to ACTIVE_TALENT_GROUP_CHANGED and TRAIT_CONFIG_UPDATED inside IsEnabled, is disabled when the current spec has no supported power type, and keeps these subscriptions in OnDisable while the widget is configured on.",
+      "evidence": [
+        {
+          "resource": "repo://Widgets/ComboPointsWidget.lua#L1022-L1045",
+          "version": "repo-lines-v1:sha256:dfe8fdf2e0e17a8a3ab7b8072e1b8113937d44600c02e482d12761060acb8cfe:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM5ZjI1Y2RmMjU5YmNjOTFkNDBmZGYzYzk4NjhjZmEyYzRhMGViYjkxOTFlZmU0MDYxYjFlZThkMmVhNTA5ODAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJkYTE1OWViZTEwOWM2NGViNWY1MjI0YjhiM2JlZTc3ODgxOWU5NDg2ZDVjNjcxNjQ2MDEzNmI4OWQxNmZiMGMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQ4MDQ2MzgzZTE0YWI1ZTg1ZDE1MWJjMTRlNzZkYzVkMzE4ZTJlNDVjMDBkYjU5OWZlMTk5MTdkZDJjYWViOWQifQ"
+        },
+        {
+          "resource": "repo://Widgets/ComboPointsWidget.lua#L962-L983",
+          "version": "repo-lines-v1:sha256:b7977d78910889c0b3fd79a3b312380931482660e52d0642eb5dfdb5e12e59e4:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRlN2Q4ZDk1NDI5YTNiYzhiYmNhYWIyYzgyOTQzZDEwMmFiNzk0MjE0ZTAwMzAyNThiYmYwNWE1NmFhM2NkZmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJhNzVjM2M2MjY0MTQ1Nzg3YWQ0ODkxMzFmYzFiYzViMTkwODEwNmMwYjFlNWFhM2Y4NzhhODE1MzI5YTdmZGYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjgwYmEwZWIxMDQ2Yzg1MzI3ZTI4YzY0NzhmMjc4MDFiNTMxY2E5NTk3ZWEyYmRhZTBiNTA5NmRkYWY2ZDI4NTcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_d493868897844eb18882e3b5151c967f",
+      "statement": "The widget SubscribeEvent wrapper takes a handler function as its third parameter, so ComboPoints passes an expansion flag where a function is expected.",
+      "evidence": [
+        {
+          "resource": "repo://Widgets/ComboPointsWidget.lua#L975-L976",
+          "version": "repo-lines-v1:sha256:3faa674febf3faf70b04c63aec4d714a6024b574852d065418bbf44e4a99ebc8:eyJzZWxlY3RlZExpbmVDb3VudCI6MiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYzUzZTE5ZmFmNzM1YzllODU5ODhhNWFlNDExMTBjNjFiMzVlMjJmYWY2MGFjMzZjNDVjMTYyZWU4ZWYyMTRmMiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZjRiZGU1OTk3MzYzNGVhMGM4NjU0MTg0NjljNDAzNzIyMThiOTM0MjY5NDU4YjIyM2Y4Yjk0ZjEwNzk2MTQzYiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNDdlZmZhM2U5MGVmYmRmM2FhN2JhOWY0M2NjOGMyMWYwMDVmYjhhYmFkZjRjYTEyMGZiN2Y5MWNmOGE5NzZhMCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMGVkYTViNjg2ZmM4ZTFkNWZiY2I2ZmM2MzkzYzRhY2NkODNkYTEyYTg0NTE3NzdhOTI1OWVhODFiZWU0YWYxMCJ9"
+        },
+        {
+          "resource": "repo://Widgets/WidgetHandler.lua#L39-L48",
+          "version": "repo-lines-v1:sha256:b3fe2c2e4fe53dbd26dab5055f393a97dec8bc8c29d670e530c4ec4e2261dc84:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMyNWUxY2IyNjQ4MTI5NGQzZTljY2Y5ZjExMzgzZTgzYTRlZWZmNTBlNzlmZWE3ZTA2YTc3ZDUzZWE2MDM2MzUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ1NjExNGY4OGU5NGIzNGFjNDYyZTcyYjQ4Y2EwMTRjZDg3Yjc1MzRmYzg2NDIzYjA4YmI4MzFkNWExOGUxOTYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc2YjdiYzg4ZWZiMmY1Nzk4MzA1ZmVhZThmZWNkNTMwMTU3ZGJhMDRjZTg1M2IwMDU1OWUyZGQ5MTFiNDMxYjgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_17cdaa03f00743cfb9b33ad9451a1d7f",
+      "statement": "The Resource widget skips a secret max power value and updates from target unit power events.",
+      "evidence": [
+        {
+          "resource": "repo://Widgets/ResourceWidget.lua#L107-L139",
+          "version": "repo-lines-v1:sha256:841ecdb677a97f3b6e747d4039bf480de1cfe967c9b4cffa929ec05a02c2a016:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNjMTNiODY1MTNlMTkyMTQ2ZjMxZDllNGRlZjVmNjMzN2ZlNGQ5MzgzYTc4NWQwZDFiYjg1MWU0NDI0ZTlhMmEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY3MDI2MDk0MTVlOTRiOTJiZmVlZTMzNzQ1ZjU3YTE0NzEyZTY4NWVkZjQyMTgyZWI4MDRkNTMwZTdhODEwODMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImJmNjk3ZWE2Zjc4NWEyNjBhMWFhNzZiODRjMGEzMjlkMjExNjk1ODEyY2FjM2I5N2M4OGFhNWI1OGI1MDNlY2QifQ"
+        },
+        {
+          "resource": "repo://Widgets/ResourceWidget.lua#L216-L220",
+          "version": "repo-lines-v1:sha256:845d760a4ea7ac562ee33899705e7d12564c741983268a403dbe560e064637e6:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNTMyNjE3Mzc1YTBkZTYzN2IwYWY2MGJlMDU0MDZjNTU2ODZlNjQwZWZjMTExMzgxMjMxMjM0MWM1YTkwNThjNiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDgzMzJmZTY2N2JjNTFhYzRhNTFiYTBlZmU3MzQ0NDFjOTBkZWY1NWM2MGEyNmQ3ZGIyNzVlY2JiY2Y0MmYxNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMTdhYjhiMDA1OTZhOTM5ZmRlMTI5NDc1YjUyZGYzNmM3ZDE4YmU0YmJlOWYyNzBkNDUyNGQyYTQyZTNiMDdmYyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMDdjMjhlZThkM2ZiODA5ZWEwM2U5OWQ1OGY2NTA2YzUwNmY2MGYyMGZjY2EwZWVkNzIxZjAyOWVmM2M0NzlkYyJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_ca2bc77a3f604737ac59176951514053",
+      "statement": "The Social widget keys its guild, friend and Battle.net friend lists by GUID, skipping secret GUIDs, and provides IsFriend and IsGuildmate for healthbar colors.",
+      "evidence": [
+        {
+          "resource": "repo://Widgets/SocialWidget.lua#L38-L155",
+          "version": "repo-lines-v1:sha256:859107127ae473df1cdc37c962e832e1f0c7bdb10fa7f3900df4451e2497c656:eyJzZWxlY3RlZExpbmVDb3VudCI6MTE4LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJmMTBjOTA5NjdkZTYwZWM3Nzc4MWQ5NTA2ZWEwMzg2MGU4N2E4Y2JhNmY1OGE0YjVhZDA0OGE1NjNmMTVkY2Y1IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0ODMzMmZlNjY3YmM1MWFjNGE1MWJhMGVmZTczNDQ0MWM5MGRlZjU1YzYwYTI2ZDdkYjI3NWVjYmJjZjQyZjE1IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIzODA1ZjM2ODhiOTcyZDM1OTcxY2Q3YWFlZmU0YzY4MDdlZDVlZDE0MGVkMmQ0ZTA1N2NkZjdkMDRlZjc3MjBkIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI3MjQ2MmY1ZDkwZTY0OTU3M2E0Nzc5NmNmMDU4M2I1N2ZmNDQ3MTUyZGU2NTU2ZGNhNmJjYmNhMTc5OWE2ODI1In0"
+        }
+      ]
+    },
+    {
+      "id": "claim_566dfe4c455f48d58777f97e120aa424",
+      "statement": "The ClassIcon widget hides itself if the unit's class is a secret value.",
+      "evidence": [
+        {
+          "resource": "repo://Widgets/ClassIconWidget.lua#L69-L76",
+          "version": "repo-lines-v1:sha256:b2a81755d94dcf62700063ff4f7e8de2b0b0517c52253ee062648a2f3de1bbc8:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZWY5MzY2NmQ4MTUzYjZlNDk2OWNkZDhiYmRlYjEwMDkxOTk5MDUzNWE3OWRhMWYyMzYyZjU0MmQ5YjlmMjNlMiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNzc5ODExYzVmYmUyNWMzZDRlNWYzZDFmZDM1YWI5ZGE2YmNmOGE2OGM1ZWRmOWQ2YmE5N2Y2ODY4NmMzOTY4MCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNTY2ZTBlY2FkM2FiZTY0NTEzZmIwOWNiMDY1NTY1ZDRlN2NlNjEzZjUyN2E5YTU0MTI2YjIxOGNjZTZkZDMwNSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYmVjOTA0ZDU4YTNhN2MxMTg2YWUyM2U5M2M4MmY2MTc5MzUyYjY2M2MzMGY5OWI2NzhhNGU4YjNjYjNmMGFiMCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_c4c556bbdfe140b8892e3a8eee3ec66b",
+      "statement": "The Experience widget maps NPC ids to UI widget ids and hides itself when the unit has no mapped NPC id.",
+      "evidence": [
+        {
+          "resource": "repo://Widgets/ExperienceWidget.lua#L146-L151",
+          "version": "repo-lines-v1:sha256:51aad0a18fca4c95f16f343d8eb5de661ef5eeed63107c3b3235cdce9abe2421:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZWY5MzY2NmQ4MTUzYjZlNDk2OWNkZDhiYmRlYjEwMDkxOTk5MDUzNWE3OWRhMWYyMzYyZjU0MmQ5YjlmMjNlMiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNzc5ODExYzVmYmUyNWMzZDRlNWYzZDFmZDM1YWI5ZGE2YmNmOGE2OGM1ZWRmOWQ2YmE5N2Y2ODY4NmMzOTY4MCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNTY2ZTBlY2FkM2FiZTY0NTEzZmIwOWNiMDY1NTY1ZDRlN2NlNjEzZjUyN2E5YTU0MTI2YjIxOGNjZTZkZDMwNSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiODdjZjAxMGRkNzM1MWM4ZTlkNmVhODYyMTA1MDhiNGRiODNhNDRmZDFiN2IxNWFiNzkxM2MzMTc2MjIwMjcwZiJ9"
+        },
+        {
+          "resource": "repo://Widgets/ExperienceWidget.lua#L38-L71",
+          "version": "repo-lines-v1:sha256:941692921a1f77cdb02a03ff20127830305413852d947f34c6e8c2141d5cd076:eyJzZWxlY3RlZExpbmVDb3VudCI6MzQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM1YTM0M2FjZWRjMzJkMTRlZjZmMDVmOGI3ZmYxNTgwZGQyZmJlMjgzM2ZkY2NhYjBmODAyZWJmMGIzYmZmNzMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjEzMWEwM2M0YzcwZTc4ODBjZGJkYjM0NDFlYTg5ZjM2NmViYmUwMjZiZTkzMzA4ODk1MDQ0ZjdhOTQ0YTEzZjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjcxZGFiZjljYTZiMDNjNGJjYTU5NmIyZjA5NmQyZGNjMzY0ODY2N2Q0MTliODFhMWFkZTI1ZDViZmIxMzYyOGUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_8d4893569b4e4b75bc8b7a54053bbee9",
+      "statement": "The BossMods widget registers DBM callbacks for nameplate auras and sets the global TidyPlatesThreatDBM according to its enabled state.",
+      "evidence": [
+        {
+          "resource": "repo://Widgets/BossModsWidget.lua#L551-L555",
+          "version": "repo-lines-v1:sha256:b8b57145883daa7baac7f8dad1c900d9d233bc8884838642b9d63aec4a1a03e7:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNGU3ZDhkOTU0MjlhM2JjOGJiY2FhYjJjODI5NDNkMTAyYWI3OTQyMTRlMDAzMDI1OGJiZjA1YTU2YWEzY2RmZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDFiYTQ3MTljODBiNmZlOTExYjA5MWE3YzA1MTI0YjY0ZWVlY2U5NjRlMDljMDU4ZWY4Zjk4MDVkYWNhNTQ2YiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYmE3NWMzYzYyNjQxNDU3ODdhZDQ4OTEzMWZjMWJjNWIxOTA4MTA2YzBiMWU1YWEzZjg3OGE4MTUzMjlhN2ZkZiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZDdkYjNhMGY4ZjkzM2UyMjBlMzIyNjdiZjMwODVkMTg1MDI2ZWUzMDAyOGQ0MDU4MjBhMWEzZWY1NzUzNWNlNCJ9"
+        },
+        {
+          "resource": "repo://Widgets/BossModsWidget.lua#L645-L655",
+          "version": "repo-lines-v1:sha256:c3507372db49f5970c69815162dffc307ffdab75588708d51d2b7b1d219afbb6:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY5NzgzN2FhNThlYTFmYWI1OTllYzFkOTM5MTEyMzE1OGUzMjVlMzJmNTc2ZDgwMTUwMGIwZmY3Nzg4M2Q2NmYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgxNzNhMmZiMTliNTM5ZmFjOWJmOWQzY2JkZTU5YTk3NDZmMjhhYzI5NDhmZTUyN2NiOTE4OGExNThiODljZjUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM0MWYxZjMzYzFiYTEzNTMzOGFhYzY2OWVhOTJkODI3YzEyOWM5YzM2NTMzY2Y2YTNhMGVjZGJhZTMzODI2NWIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY4ZjdkM2JhNDhmYTdiMDVlY2ZhYTIxMTMyZGY0YjY0OTU0YmNjM2NkMDRlZmVmMjFlZDM2OTgyOTM3YzllMjAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_96114e2b943f4fd4975c2d6f0c57d1cc",
+      "statement": "The UniqueIcon widget is enabled when custom styles need it and refreshes portraits on UNIT_PORTRAIT_UPDATE; the TotemIcon widget shows icons for totem styles of totem units.",
+      "evidence": [
+        {
+          "resource": "repo://Widgets/TotemIconWidget.lua#L45-L85",
+          "version": "repo-lines-v1:sha256:cf9a705f716159457ec42279f5e31bd6c6493a45d9d93f57397dbe88a5c5782a:eyJzZWxlY3RlZExpbmVDb3VudCI6NDEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRlN2Q4ZDk1NDI5YTNiYzhiYmNhYWIyYzgyOTQzZDEwMmFiNzk0MjE0ZTAwMzAyNThiYmYwNWE1NmFhM2NkZmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjBjNzg3Y2E4M2NmOTg4MDE3ZmUxNTdmY2E0ZjgxMTg2ZTkzYjY2NGI2OWQ1ZjNiNmM0MzIxMzcwNzI0MGExZTciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI0YTJjMjdiYzk4YTg5OWIzZTU4NWE1NDg2MTE3NzQyNDMwYTNkMmY2NzFlNTY2OTk2N2Q1OTY5ZTczMTMzYjMifQ"
+        },
+        {
+          "resource": "repo://Widgets/UniqueIconWidget.lua#L58-L99",
+          "version": "repo-lines-v1:sha256:baf5534f75ebd0d54f9605b60c070bc298848306253699c5ff0fd16066acf078:eyJzZWxlY3RlZExpbmVDb3VudCI6NDIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRlN2Q4ZDk1NDI5YTNiYzhiYmNhYWIyYzgyOTQzZDEwMmFiNzk0MjE0ZTAwMzAyNThiYmYwNWE1NmFhM2NkZmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA5MGZiMWZhMWQxYWIyOGQyMDU4MGI0NmFiM2Y3NDNiY2NlNWYxOGVkZjkxODRjMDJlNjMyN2FmNjk0MGMzNjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdlM2VlZGY3MDEyMzFlYzYyY2E3NTQ5MzJkZjZmNDk5ZDE1YjEyODk1MDIxMTU1NTBiNjNkZTIxNjJiMWU3NGIifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-25T18:59:51.751Z"
+  }
+}

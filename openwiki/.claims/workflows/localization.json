@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:f1c005e8ba60401b07bd5151371cdbc6e564d5901d994bd60b1888b56624ed99",
+  "claims": [
+    {
+      "id": "claim_11b44dc03f454f4dbc969989d2d1a6e8",
+      "statement": "Addon.L is the AceLocale-3.0 locale table TidyPlatesThreat.",
+      "evidence": [
+        {
+          "resource": "repo://Init.lua#L158-L158",
+          "version": "repo-lines-v1:sha256:d8e1e11729795db469202c494603270a2932bf5eac6f462fc2e4177d7b36932e:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZDhlMWUxMTcyOTc5NWRiNDY5MjAyYzQ5NDYwMzI3MGEyOTMyYmY1ZWFjNmY0NjJmYzJlNDE3N2Q3YjM2OTMyZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZDhlMWUxMTcyOTc5NWRiNDY5MjAyYzQ5NDYwMzI3MGEyOTMyYmY1ZWFjNmY0NjJmYzJlNDE3N2Q3YjM2OTMyZSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZDI2ODgyMjVhMjZhMWJkNjgxNzIyZWZkMDYwZmNmZGYzNTM3YmVlOWNjZTBmZTQyNmVhZTI0NzZmNmZkMzU2ZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNDUxZDllZjQ1ZTM1ODllNWQ5NTZmOTAwOWE5OGJkZjkxNDhhYWNjYmVkYjAzMTM5OWI0MzA1ZjE3OTIwMjc4MyJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_cad0b0ce10024ff38fa6160b21eaf992",
+      "statement": "localization_tool.py provides the subcommands extract, check, generate-enus, upload, pull and push-translation.",
+      "evidence": [
+        {
+          "resource": "repo://Source/localization_tool.py#L693-L736",
+          "version": "repo-lines-v1:sha256:12d6c3d2047528431dc7dfae434cab54e732286e850510d53cb73b83aceefe94:eyJzZWxlY3RlZExpbmVDb3VudCI6NDQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFlMmZiMzIxNDExZDAxMWQwYWJmZmU2MjFmODY4YjU4YThkOWFkMDJhZjNhMDkxNDcyZjY2MTBmZmIzM2I4YzgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU5ODgwMmNhZDg2YWE5MzZkNGViY2Q2MmIzMTUzOGM2NmY1Y2Y3Nzc0ZjViMjY0OGY4ZTI3OGZmOTU2NDM4NzciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU0OTgwYjU3ODZjOTBlZjRjMzFhODI4MGFiOTI2NjM0M2Q3ZmQ4ZDU5MDEwNmM3OGRhZTUxYzJjZjZlM2ExN2YiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImVjYmUwZjZiMTNiNTE0MTBhMWFlZDhkMWI5MDc5NDM1NTgwNjAyY2JkMzdjNDQxNjA3ZTE1YTJiZTk1OThjMGIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_717eb2d882a5490882a7a663993fdc34",
+      "statement": "The sync workflow runs on pushes to main and release/* with Lua or locale changes, weekly and manually, runs extract, generate-enus --prune and pull, opens a pull request on localization-sync-<branch> with PAT_TOKEN, and skips runs caused by merging its own pull request.",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/sync_localization_translations.yml#L55-L134",
+          "version": "repo-lines-v1:sha256:440e2da0a2a01fbe8dfba55d34d5f8352a3a76cbb9a60554326136040078f89d:eyJzZWxlY3RlZExpbmVDb3VudCI6ODAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU5NmRjNDgxNDlmNWE4M2QxZWQ2ZGJiMzliYmM3ZTJiOTAyYWEzZDM0ZDZiZDVhZTRiMjkxYjY4ZGYwY2E3OWEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc2ZjY4OTBkN2QwY2E4M2M5ZGNhYjViYjhjMGE2MzUyNTAxZGZhODU0OTU5ZjM4YjViZGI4ZWVjNDhjNmEyMDUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjUyYzA4ODY0MTE3OThiNmIyOTQ5ZWNlODBlMjQ5MjY3ZGNhMWY3NDgyM2VlNWRiM2MwOTEzYTNjYmUxMzQ1MzIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_396131f3f17045e38bedcfa649ebb94c",
+      "statement": "The check workflow runs the check subcommand on every push and pull request touching Lua or locale files, posts a sticky comment on pull requests and fails the job if the check failed.",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/check_localization.yml#L21-L90",
+          "version": "repo-lines-v1:sha256:ea7a91bdfe4913ba411fff40d653839a0b870e2f0a531d2ab40df81c57c15193:eyJzZWxlY3RlZExpbmVDb3VudCI6NzAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU5NmRjNDgxNDlmNWE4M2QxZWQ2ZGJiMzliYmM3ZTJiOTAyYWEzZDM0ZDZiZDVhZTRiMjkxYjY4ZGYwY2E3OWEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM2NzE4ZjA2N2I1ZTVjMWYwOTkxYTZlNzQ3MjZmZTJhMjNkMjY0MzQ1ZTA4ZTRlYWQwNGZhZjczYzI3ZWQ0NDMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImYyMDQxYTU5NTI5YzNkNjg1OGNjZmI4ZWY1NDBmZWVkMTI4OTMyYzZlYjYwMDFjOTlmMDg3MWE0NDM1MTBmMmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_c0aa1b2b7d7d4832b71beb1442ec53f7",
+      "statement": "The publish workflow runs on pushes to main touching Locales/enUS.lua and runs extract, upload, pull for deDE and push-translation for deDE against CurseForge.",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/publish_localization_to_curseforge.yml#L26-L68",
+          "version": "repo-lines-v1:sha256:9b4ec56b624dd692cfb5db0c928c416586150b901fd44dec979b2d91a5ecb8b3:eyJzZWxlY3RlZExpbmVDb3VudCI6NDMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU5NmRjNDgxNDlmNWE4M2QxZWQ2ZGJiMzliYmM3ZTJiOTAyYWEzZDM0ZDZiZDVhZTRiMjkxYjY4ZGYwY2E3OWEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ1ZGY5YWEyOTg3Y2ZjOTcwNWQzNjQxODg0NmI0NThjNWIyNTNiNjVkMWZlYmQ4MGM3YTMzYjZlZjgyOWUzNDMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE5MzVjN2E4NGRhZjNkOTJmNzc1Mzg1NzZkMTVhZjlkMWNiMDEyYTM2NmM0ODIwMjQ2ZjYwNzc4N2VkZGViMjQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_f377ce5e24ea4178aa17f955da9a088a",
+      "statement": "pull preserves existing local translations when CurseForge reports a key as missing or does not know it yet.",
+      "evidence": [
+        {
+          "resource": "repo://Source/Docs/LocalizationUpdateProcess.md#L58-L67",
+          "version": "repo-lines-v1:sha256:bd7db32cba8069587d50bade5a5c181a040f1dede6ccc4d1f920fca9facd0733:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhkYmUxMzhkNDc5ZTllMTk3NTgxM2RmZGQ4ZmQ0NzFhNjJmYTVlNzViOTM1NDJhN2FiMzRjMmE0NWQ4YjkyODEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRjMGE2OTZiNDdhMjhiYWUzMDQ2YWM3MzgwNDQxYWZkZTJlZTEwYjJiZTJhMDRlM2M4YzNhYjkzMGI0NjNjYjUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA1NzRmODdkNjRjYmQyYzI2NzAzZjJmMmVkMDUzNjYxZWU1NTJkNDA4ZWIxZjUyNTJlMDRkM2ZlNmFmNGYyM2QiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBkMzI2Njg4MjQ5YTBlMjJlM2FhZWM2NTJkMDhiYTBmYjMwY2U2ZDljY2RlOTljM2IxYTgwY2I4NWM3N2Q5N2EifQ"
+        },
+        {
+          "resource": "repo://Source/localization_tool.py#L535-L617",
+          "version": "repo-lines-v1:sha256:8872314fac451951bc35bedadcbbf0446e206d7a52b7ef3ada07bc9e1dfded02:eyJzZWxlY3RlZExpbmVDb3VudCI6ODMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk2M2U3Y2JjNWZlYWJiNzUwNzAxYjVmYmI4NDhlZTFhNDk4NDY1OGYwZDdmZWU0OGUzYzBkMzkwYzI1OWE3ZjgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRkZmQwN2M1NWQyYzA5MTUzMmNiNmQwNmI3OGNhYWEwMzFlZjE5OGFkYTlhODc5MWU3N2VlOTRmYjEwMWI0MjYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM3ZjJhN2FlOTgxMGJlYTJhNmM2NjQ1YzMxMjViNzIzNzFkMTllODliYTdlYThkOWEwNTNiNTZjYmM0YjVhMTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE3NzdhOTQzYmVhOWRkZjEwZjU1ZTZjZjgzOWIxMmNiZGZmZjMzNzg1ZTYyOTRjYzcyNGMwNmRhYjc2NDdhMzIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_d3b5a60c750443968582c0ce9b95e93f",
+      "statement": "push-translation only uploads entries marked as machine translations.",
+      "evidence": [
+        {
+          "resource": "repo://Source/localization_tool.py#L443-L477",
+          "version": "repo-lines-v1:sha256:013e4161634367ecb0aef8c217d26258a72bd01b8bd6474659060c5658998dce:eyJzZWxlY3RlZExpbmVDb3VudCI6MzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNkODllODg1MWU4ZWU2MWYyNjY2ZjM1NjdmNGI0MjQzOGJkMTBkNGIzZWExYTFmNTliNWRhZWI5NjM0ZDgwMTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjI2N2EwODMyYTQzZGM1M2YwN2NkNGMzODk4ZTZkN2IyNzM4MDg0ZjY3NTU3NjZiN2ZiZTc2MjRmMDBiOGExYTgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjUwMDkyMzlhNDliOWU1NGM2MzcxYTFkZmU1MDlhZjU1MDA0YTE2Y2YyNjA3NTY2Y2U0NjE4YzE4ZDRkZTViMTcifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-25T18:59:51.751Z"
+  }
+}

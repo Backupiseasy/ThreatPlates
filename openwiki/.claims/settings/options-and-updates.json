@@ -1,0 +1,156 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:b9dfd759972132fe909464e1f5ff20c7e565161ee2987f68cfc8c793bc4dfe2f",
+  "claims": [
+    {
+      "id": "claim_ec06b3b1c99f49f58a203f6e108af163",
+      "statement": "The options table is created lazily on first open, registered under Addon.ADDON_NAME with a default size of 1000 x 640, and uses GetValue/SetValue as default getter and setter.",
+      "evidence": [
+        {
+          "resource": "repo://Options.lua#L10157-L10170",
+          "version": "repo-lines-v1:sha256:c86ac8951b9b5bc7473bef55fa4a0d881a8edc20ed29c0fc304b935aa7641016:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE2MDk3YjllY2UyYWFkMjZhZGUwODMxN2RmNjFjNDljODgyYTBmMGFjMmNkZDgxZDgzODMwMmZlNzFhMDk1MzEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBhODU0ZGIxODY0OThjYmUyYzMzYTUyMmRkYWM2MTdjMjA1NTI0NmM1ZmE1ZjJmNWMzNDBkMTEwNDExNDM2YzgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUwY2JhMDYzNzRmNzYyYTM5MzFlOGE0ZmE5OTU5NWM3ODA2NDdjZGQzOWY1OTQ3OTM4YzExMWNmNDlkMmRiMjMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImIyZjQxZTBlZmNjMWNhMzg5OTlmNjlhZGI3NDJlMWFiNGI3MGNiNDk0MjFkNDczZTczMjI2MGMwMDdiYjI0NTEifQ"
+        },
+        {
+          "resource": "repo://Options.lua#L11785-L11798",
+          "version": "repo-lines-v1:sha256:64e5686349118d10f92aa8bd9b7fa53c98d3de95cbeef4388b14516c06c937f9:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM2MjIwNjQyOWQ2ZmQ3ZDE1ZGNhNzBjOGQ4MDk0ZDBmNzhlMzAyMWY3M2EwOTJjZGFlZmM4NTIyMDMyN2I1YjUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIxOTE4N2FkNjM0YTEyODk4ZTc5N2JlOGI4YWQzZGQzMTJmODZjOGJmNDIxMTk4YTVhMDQ4OGU0YzI3YTRmNzgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjljMjI5NzVlMTlhMzkwNTI4YTAxOTk1ZDMyNDg3ZTA0NmZiOGY0MTY0ZjhhZjNlZWI2ZDJmODAzYTA5NmE0MDgifQ"
+        },
+        {
+          "resource": "repo://Options.lua#L11816-L11822",
+          "version": "repo-lines-v1:sha256:2b1afda4fdcaf24ae081794462345f91c71341a60989479f90dce44efd809836:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMThkYWE3OWMwZTBlM2Y3MGM0ZmEzZDBhOWZlZTJhNWEyNzA5MjAwODVmY2QzMjcxOGY4ZTMwM2JhY2Q4ZjQ2ZiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDgzMzJmZTY2N2JjNTFhYzRhNTFiYTBlZmU3MzQ0NDFjOTBkZWY1NWM2MGEyNmQ3ZGIyNzVlY2JiY2Y0MmYxNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNTY2ZTBlY2FkM2FiZTY0NTEzZmIwOWNiMDY1NTY1ZDRlN2NlNjEzZjUyN2E5YTU0MTI2YjIxOGNjZTZkZDMwNSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYTVlNGFjZjkyNzFjNmZhMDkwM2EyZjg1ZjZhNDA1ZjBmZmViODNkM2ExNWIyODM5NzhhMmUyYjM2MjYwYzlmNSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_fab098e48fd74b9fb4b995256008a0f0",
+      "statement": "The profiles tab is the AceDBOptions table enhanced with LibDualSpec where available and extended with import/export entries.",
+      "evidence": [
+        {
+          "resource": "repo://Options.lua#L11716-L11725",
+          "version": "repo-lines-v1:sha256:66c893690d2cda66250c748cdb2743f83c20be284643fbd4411e21a1a53a0aa0:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI3ZWI0ZjViZTM5ODZiMTlkY2VjNjE0NmNkMmU1NzgwM2VjYTE4OGVlODY5OWZjOGY1M2E0YWM4ZDZiMjczNDkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcyOGQ2ZTg2ZTIxMzkzNzJmZmZjZmYzMDc3NmU0MDEyNGZkOTIzNzY0NTViZjMyY2VkOWFhZmJhNmE3MTdiYzEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNiMThhMGEzMGViZDE3OGI2ZDJjMTEzNDJlMDM5MWE4M2VlYWNmYTkyZmEzNWM0NzNkZDYxNWE4NzQ1YmRhZjMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRjYjJkYmY3YjEwYWQ3ODZjZTU5YTA0YWZlM2YxYWM0NjQwZjY3ZmY1NzVmMTNhMDg0NTVkZDA0YTMyMDQxMWMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_7372f8baaf6140be86ec20844391ed59",
+      "statement": "An option's arg is the key path into the profile, written by SetValueGeneral or SetValueColor.",
+      "evidence": [
+        {
+          "resource": "repo://Options.lua#L557-L582",
+          "version": "repo-lines-v1:sha256:d854076d54042249e6859d3f348f95f65c9a1d1e153fd3b85ed0c662b0ab92b9:eyJzZWxlY3RlZExpbmVDb3VudCI6MjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU3NjU0NDc5M2Y3YmUyYjZmYTUwNjQzNDQ2MGFlNjFmMDUxYTI2YjVmNjMxNmZmNmE2N2VhYzBlNGZiOTkwMDMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjJiZWE4Nzg5OWNmZDBmMTlmMDQ0MzMzNWVjZWU5OTZkMmUyZWUzOWNkOTEwNWU4NmZjMDUwNTYwMTY1Zjc3NzYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjY3Yzg5MGVhODFmZTk4NGFiOGE5ZjQ3NjMxMzEzNmM3MjE0MThiODBkMzIxYTk4MDJlMDEyNTQ2NTNkZjQxZDgifQ"
+        },
+        {
+          "resource": "repo://Options.lua#L686-L716",
+          "version": "repo-lines-v1:sha256:cadf838e64dd19dc28081f0e8771a5a09f220863cdf04808580df86fa607c067:eyJzZWxlY3RlZExpbmVDb3VudCI6MzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM1YzdmMDk5NjIwNmY3MzkzNDFkNmZjM2ZlNGFmYWYxNThiNDQ4OThlMmIxYjM3MGNhOThlOTBlMTg3NTM3ZDQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdmN2JjMmVhZjg1MjA2NWZiNmMwYmJlN2I0ZDNiY2NhNGYyMzQzZDRjOWRhYmQ3MjQzNDlmNDE5ZTMzMTNjYzAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjcxYTRlNmRmYjAzZDk4MjI4YzQ0Y2M4NmExYzkxZTVlY2VkYmRhODk2OGM1M2Y5MWM3YzUwNmM3ZWZlMTRiZDcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_64f5912d26bd46c0b22baebb00974b99",
+      "statement": "SetValue re-initializes a widget when the change toggled its enabled state, otherwise calls the widget's UpdateSettings, ForceUpdate, UpdateSettings or PublishToEachPlate depending on WIDGET_INFO flags, and for non-widget settings rebuilds themes for theme settings before ForceUpdate.",
+      "evidence": [
+        {
+          "resource": "repo://Options.lua#L169-L186",
+          "version": "repo-lines-v1:sha256:b495587f7916d9b3be0e87b61caf1c6d07fffa79bb0f20dfe9b99e40ce82d312:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk4NjVjZDA2NTJjMzM1ZTE1ZTBhYmMxNjNjMGJiNTBiN2RlODIwOTQyOWExZmQxMzU4ZjlhZDg4MTAzYWMxNmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg5YmFlMGQwYzY2ZDdiODM5OTgwMzRjMDE0ZjY0MjJlMDdiNzEwZjRmOWQzOWVmMTI3MDBkOTk4NjZmNjYyNjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQzNWYxNmI4MmRjNjMyMjA3YjVjNDYyN2JlZDdmNWM0NjYyYWIwZTQ0NjU5YTc2ZDJmMTAxNTYyNzE1ODcwMjYifQ"
+        },
+        {
+          "resource": "repo://Options.lua#L584-L643",
+          "version": "repo-lines-v1:sha256:57ba98a4f6f6f2a2f5e5ffcdd54c6e3f5c31e376cfc9408ad87a9f82074ca5de:eyJzZWxlY3RlZExpbmVDb3VudCI6NjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdjMmUwYzI1MjQ1YzllMDdiMGNhODAwNDhmMThjZjBmMDJhM2Y2YjNkNWUwZjI5MzMxZDI4MmY2NTU3YzdmMjUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhlZDQzMTIwNjQ5MzBjNTkyZWJkOWMzMzc0ZmI5YjdkNGYzZTQ0MTRlNTY3ZTY1MWE0NGFmODI5NjlmOGU5M2EiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjY4ZGZhMTk5NTZmNjUzMGMxOGY5ZmM5NzAxYWQ3OTBhMzRkN2U1ZjFhMTllMWIwZGI0YzJiZmI2MzU2MTc2ZDEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_f0ed9018f86446239e7288e32b07742b",
+      "statement": "UpdateSpecial rebuilds custom style triggers, initializes all widgets and forces an update, and is exported as Addon.UpdateCustomStyles.",
+      "evidence": [
+        {
+          "resource": "repo://Options.lua#L847-L854",
+          "version": "repo-lines-v1:sha256:724a88e917d6231c841a0e399171975dc7b73203185eaf0bdfe4fc068aee5034:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiY2YxYTRhZTYzYzQwYTQ3MmQzOWQxZGNlZTQ5ZTZkYTZmOWNmYzU3MTBlNDNlMGYyOGI4NTlhYTU3MDZkZTAyZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNzEwNzYyMjliYTIxNjY0YmVjOWJkODFiMDJlYmQyMWJhODZlMjBkY2NkY2U4YTM1Y2ExY2FjZjMyMmY4MGM4NyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMGNjNjRkZTMwZTI1NDYzMjlhYzcyMjA0NGU3YjhkY2U4M2U3YTYxNWZkZGY4OTI1N2RjYzgzMzI4ZGM2OWY5NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMjBlODBmY2Y5YWU1ZjFiMDc0M2Q2ZjNlZTEwY2ZiYzhmNGI2NDIzMmM2MDJjYTY0NjE5MDRkZmU1YmNhODc3YyJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_59e1931dd6a8435888c5a02ad4e6d43a",
+      "statement": "ForceUpdate is UpdateSettings followed by UpdatePlatesVisible, which re-derives names and re-applies presentation for all plates without re-reading other unit data.",
+      "evidence": [
+        {
+          "resource": "repo://Nameplate.lua#L1385-L1413",
+          "version": "repo-lines-v1:sha256:1aa4fda76f2faaff97bab9d9a803a8bcca122c21e115f5f44619ac72d8ae02f6:eyJzZWxlY3RlZExpbmVDb3VudCI6MjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNjNmRiOTA1ODRlMGY4N2I2ZjU0NzRkNDc4YTM1YTQyOGViMjc3ODRiYzYwMDE2OTQ3YTY1ZTBkZGJhOTQ2NWQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU2NmUwZWNhZDNhYmU2NDUxM2ZiMDljYjA2NTU2NWQ0ZTdjZTYxM2Y1MjdhOWE1NDEyNmIyMThjY2U2ZGQzMDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRlMTViN2Y0YmQ2MmE5NWQ4YWIyOWQ2MzE4ZjFmNDU1YjBlOTg2ODNlZWQ4MTQ5ZWU1Y2VjNDFmZmZiMTA3YjcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_b9675395dca84023a069fd1952515ba8",
+      "statement": "InitializeAllWidgets calls UpdateSettings for every enabled widget, and it is called from both UpdateSpecial and ReloadTheme.",
+      "evidence": [
+        {
+          "resource": "repo://Addon.lua#L136-L157",
+          "version": "repo-lines-v1:sha256:ca5c1f33ef7018fce60dec2a26f91c2fbee68870c195efca70401bde75cfdb5d:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc0NjhkOWQxN2IzNzk2YjNlMTRhYzc3MDcyZDIyMzRjY2Y0MGZhY2I1MjUwNDg2MTY0ZDRiZDE2NjRhOTRkMjUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc1OWVmNGM0YTJiZThhMjNlZTMzMzZjZjk0MWJlNjRhNzFiMDdiMjk2NjQxZDJiYWY1YzA1YzRiNDZiYjgwN2YiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjEyMDkxNGJlYTFlOWI3N2ZlZDZiNDRlZjY4NGE3ZWRhMDVjZWUxMTAwNWM3NjQxOGQ3NDM2ODMxZDJhZGZlMjgifQ"
+        },
+        {
+          "resource": "repo://Options.lua#L847-L852",
+          "version": "repo-lines-v1:sha256:08cce0b188e21942f170837cc54271135362f3527e2a2158d8ff4c6aa84e5ae0:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiY2YxYTRhZTYzYzQwYTQ3MmQzOWQxZGNlZTQ5ZTZkYTZmOWNmYzU3MTBlNDNlMGYyOGI4NTlhYTU3MDZkZTAyZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDgzMzJmZTY2N2JjNTFhYzRhNTFiYTBlZmU3MzQ0NDFjOTBkZWY1NWM2MGEyNmQ3ZGIyNzVlY2JiY2Y0MmYxNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMGNjNjRkZTMwZTI1NDYzMjlhYzcyMjA0NGU3YjhkY2U4M2U3YTYxNWZkZGY4OTI1N2RjYzgzMzI4ZGM2OWY5NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiY2Q2OTQ0NGI1NTM1M2JhOTdhNWQwZGZmZTAwMTFhOTQ0Mjk2ODdjM2JhYWU2YmQ4ZGEyZGVkNzE2ODY0MGE5OSJ9"
+        },
+        {
+          "resource": "repo://Widgets/WidgetHandler.lua#L226-L247",
+          "version": "repo-lines-v1:sha256:264a23350bd8015bc93a0883481adfd9cbbece32e224264ef5ad990b4438c782:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVmY2QxNmNlY2QyZDRkZjY1MjExYjhlYzc5OGU0YzEwNmMyMTE5OGYwMWMzZGNjN2FjOWYzOWVmZmMyMjM1OGYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFhZDc0ZWRjMGY3N2NiNTBjMzQwMTBjYzI3N2NkOTc0OWJjN2YyZDBkNWJiNjQ1YTc0MGI2YWNhZmQyMGQ0ODciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRmOTQ1MzEyYTQyZGFlNDczYzIyNjkzOTk4YjYxYWIyYWI2ZjczZDc4OWU5MTk5YjQ3ZDUyMWY5MjQ0NGIyZjMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_9e008e9e13e04fcd908324402e2d8c70",
+      "statement": "ExecuteAfterCombatEnds queues a function during combat lockdown and runs it in PLAYER_REGEN_ENABLED, while ExecuteOnlyOoC refuses with an error in combat.",
+      "evidence": [
+        {
+          "resource": "repo://Nameplate.lua#L1430-L1449",
+          "version": "repo-lines-v1:sha256:270411efca27fa288d3584cd92ed37247e06a181c2fc363a61b6a664258ee1e6:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBhOGQyYjM0ZGViNjhiNmExNWEyZjEwZWE0OTY4NDE2N2I5YzhhZDQwNTBjNGRiYTJiZWJiZmI0NGQ5MTMzYWIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA0NmM0OGZkMTlkMDFhZjc4YzIwNWYzMGQ1NzZkZjRkZmFmMGY3YzNjZTRlNjhlOTJkMDUxMWY1ODI1OWQzZjQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUwMmQwMzU3ZDE5MDJlZTNhMjQwODNmYTBlYTFjMjRlYTdjM2JlYzFkYzJjOWU0YmI5YjZiNzkwN2E1OTU5MDkifQ"
+        },
+        {
+          "resource": "repo://Nameplate.lua#L1615-L1622",
+          "version": "repo-lines-v1:sha256:b773d842ea3da68041ad09f8e140460af507ea8156596e2f7cf4bc824fd189f6:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNWE1MmViY2JmYjU2NDRhNjE0YmU5NzgxZjU4ZmQzMTQ3ZjQ0ZDlhZjlkZGRjZTc4MzE5MjgxNGIzMzZjYzZkNCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNzc5ODExYzVmYmUyNWMzZDRlNWYzZDFmZDM1YWI5ZGE2YmNmOGE2OGM1ZWRmOWQ2YmE5N2Y2ODY4NmMzOTY4MCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNWNhYTIzYWVkYzYxNTA5YjliZGU3YmFmNTFhZTFmNDRmZjJjMmZmODNlYzY5ZmQ2MmUzMzgwNzI0YTIyYWI0ZiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMjhlYjQzOGFlODcxODhkN2M3ZjhlNDJlNDRhZmViNWZkZjlkZGNkMWYxMmQ4ZWE3MmQ2MjZlYzBiNGIzYjVmOCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_65cbfffa7be7430cb6f218320492d201",
+      "statement": "The /tptp command opens the options without argument and supports help, profile, legacy-custom-styles, toggle-scripting and clickable-area, falling back to debug commands only in development builds.",
+      "evidence": [
+        {
+          "resource": "repo://Commands.lua#L332-L396",
+          "version": "repo-lines-v1:sha256:e8e915829203520cea5241a4c72d30235793710b75b76a4021137ef0e3a1b55a:eyJzZWxlY3RlZExpbmVDb3VudCI6NjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE5NTc5MjBlYWI0YzQ0ZmY4NWQ2MGFhNWZiY2I1N2I0MTQ2MzJjMjJjYWMyYjg0Yzg0YjczZmNiY2JhYjA2MGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM2MWU0OGQwMzA4ZjIwZTMyZGJhNWZiNTYzMjhiYWYxOGQ3MmVmMGNjYjQzYjg0ZjVjMjYyZDJhNmExZmM2YzgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhlMzBkZmZjNmM0NDNjOGRiNjE1NWEyZmZkMjYyNTUzYmQxZTZjY2JkZDdiMDkwNDQ4YTJkMmJkM2JhNzY5MjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://Commands.lua#L9-L9",
+          "version": "repo-lines-v1:sha256:f66b29ad7becf47d84a15eb8449a7673797d31d1607ea30de87df3a477ed661b:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZjY2YjI5YWQ3YmVjZjQ3ZDg0YTE1ZWI4NDQ5YTc2NzM3OTdkMzFkMTYwN2VhMzBkZTg3ZGYzYTQ3N2VkNjYxYiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZjY2YjI5YWQ3YmVjZjQ3ZDg0YTE1ZWI4NDQ5YTc2NzM3OTdkMzFkMTYwN2VhMzBkZTg3ZGYzYTQ3N2VkNjYxYiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiODE3YjdlYjY0MTU1OTlkMjJmMTA5NDgwNGIwMzMxNjM4YmEyMGU4M2QxZTBlNGZhYTdkMTFmZmIwMGI5ZTU2YyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMmRhYzZjOGRkYzNmYmVhYzA3OGFlY2NkNGYxNjNlMmRkYTY5YjliYjllMzRlZjVhZWZiYTZhNWE5ZDcyMjYwNyJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_0d4420ca8fdc4ed0b593d4e8970144b1",
+      "statement": "Key bindings toggle headline view per unit type group and force an update.",
+      "evidence": [
+        {
+          "resource": "repo://Addon.lua#L379-L416",
+          "version": "repo-lines-v1:sha256:90fd980f6cac171b8c637b16f380a87f152eef606a8c6053beaa1260ac25232f:eyJzZWxlY3RlZExpbmVDb3VudCI6MzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE5NDBiZjI2MTUxY2I3ZWNjNmRiMDA1MGIxMDhiODc4Mzk1ZTBiMmNmNzJiMmIyNDdiNDRlYjk3YzE3ODhkNTgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImVlNjU0MjM3OTM5MWE3YzZlZDJmNTdlMzA5ZDg3Njk1ZmZkZDAwYTVhZTk3NzU2N2ZmMmY4Y2FmZmIyODU0NTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImYwN2JmOWFmOGJhNmQzNWQyYjRhZDUwYmM5MmU0YzkzZmYxNzI3NGE5MzNkNDQ3YjIxNWE0MmNjYTAxYzM1MDgifQ"
+        },
+        {
+          "resource": "repo://Bindings.xml#L1-L17",
+          "version": "repo-lines-v1:sha256:262423c1a127d012a5a99b4e734730c023e5e355c1b836eac854b3c0508073de:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEzMmE4NzEwNWM4YzdkNDdlNzZhYjA3NTJkYTFmYTUxMDRjODI5ODMyMmFmYmEzMjdlZGEzMmU1MjBjYTNlZDAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEwMDkyNjc2ZGE0ZTQ4MTM2NzI4YWRmY2U4MDdjMjllNDRhNTFkMWI5NjJhYmY3NDMxNDc2NGEyYjczM2Q5MWIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_afcad547aae848adbe5f91c46dfeaa77",
+      "statement": "TidyPlatesThreat:OpenOptionsDialog references an undefined variable t.",
+      "evidence": [
+        {
+          "resource": "repo://Options.lua#L11807-L11814",
+          "version": "repo-lines-v1:sha256:ac5a615d32be2949b66f3867e1645dee7a2dd8c35af2f815eb2c9bacec2ef778:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZGE2Yzg1NDdjZTE0NGFlZjkyNWNlYzY3OTY5YTFiNjA3NWRkNTZkZTcxZWZmYWM3ODFmYzU5NzAzNDIxZjE0YSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDgzMzJmZTY2N2JjNTFhYzRhNTFiYTBlZmU3MzQ0NDFjOTBkZWY1NWM2MGEyNmQ3ZGIyNzVlY2JiY2Y0MmYxNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNTY2ZTBlY2FkM2FiZTY0NTEzZmIwOWNiMDY1NTY1ZDRlN2NlNjEzZjUyN2E5YTU0MTI2YjIxOGNjZTZkZDMwNSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiODkwMmU0MTRhNzkwYWIwMDFkODI5OGQ3ODFlNmM0Nzc0N2U0MTk1OWE5ZmUwNzI0ZWZkNmVlNTUyY2FlYmVhMCJ9"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-25T18:59:51.751Z"
+  }
+}

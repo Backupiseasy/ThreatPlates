@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:afb3dfcbbf3594a35bce0e7260c353b9580257cc936b1c7da248a8ecb48f1719",
+  "claims": [
+    {
+      "id": "claim_d6b819b4872f4d918bfded7d43dc9f59",
+      "statement": "The TOC defines the load order: libraries and locales, ThreatPlates.xml, Init.lua, Debug/Compatibility/Localization, EventService, CVarsManager, Media, Constants, Modules, Elements, WidgetHandler, Nameplate.lua, Database, Addon, Commands, Options, then Styles and Widgets.",
+      "evidence": [
+        {
+          "resource": "repo://TidyPlates_ThreatPlates.toc#L32-L57",
+          "version": "repo-lines-v1:sha256:1b1d854ccd03ab687efd23e7c1941685f3d123b1e72157ee367f11f52864edf0:eyJzZWxlY3RlZExpbmVDb3VudCI6MjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE4NTc2Y2UzM2UwYTkxNzdiMGIzODY0YjZlN2Q3MjYzNmE1MDZiNWExYjJhNzEyMWRlNmVkYjEyNGNiMTM3OTYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZiODI5NGMyNmMyZDZlYjg3ZWM2M2UyZWE1MTA1ZTY5ODg2Zjc4YTQzZTI1ZTg3MWYwNmRiNDNkZjI3M2IzZGEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImRjZDVkNGRlODI3NzYyYmUzZTk1MjQ4ZTRiYzdkZmE1M2Q3NmFjOWIwYmJmZmY4NDQ2NTgyZGM2NjFlNzViNTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a81619516f6c448aa0868a0652ba119e",
+      "statement": "Init.lua creates the AceAddon object TidyPlatesThreat and pre-creates the shared module tables and nameplate registries on the Addon namespace so that later files can fill them in.",
+      "evidence": [
+        {
+          "resource": "repo://Init.lua#L163-L216",
+          "version": "repo-lines-v1:sha256:558a25ef2ede7bde3f4f34ed851d9d956c67995e8438aa271a977979dad1e91f:eyJzZWxlY3RlZExpbmVDb3VudCI6NTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg0MjdhZTZkYzRkYTA0OWYxZDY2ZTU3MDZjMDJhMjVhOWE4NzM3YjVhNTY1MGUwMjQzNTBiNGU2OWI1NjAzNDIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImViZjExM2ZiMDA5ZWU5NDNiMzU3N2Q4OWM5YjBlMDNjMDMxNWExMWUzMTNlYWE4NzE2ZWExNzMzNTg5Y2E0N2EiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjlhZjY0OThhMmI4YWU0ZmEwNmQ3YjA3ZDUyMjc3OTBjYWI1Yzc4OTI4MDE2MzY0MTdmZTUxZTViNGRjYmIwNjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijk1YzAwMWRlMTIyMWYzZjI3MWRjMjI5NjNiZWU4NmRlNGQzY2E1Yzk1MGFkZWVlNTAxZjNkZDY0ZDc0OGJhODgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_c0d46d8038d147b590329a7e241cfdf9",
+      "statement": "Nameplate.lua holds a reference to the Addon.Style table before Styles.lua is loaded and calls its functions at call time.",
+      "evidence": [
+        {
+          "resource": "repo://Nameplate.lua#L58-L58",
+          "version": "repo-lines-v1:sha256:667c7c94f9655cd6b5e881b8ab7c475a44fc703158817b33935b14e1d4363e00:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNjY3YzdjOTRmOTY1NWNkNmI1ZTg4MWI4YWI3YzQ3NWE0NGZjNzAzMTU4ODE3YjMzOTM1YjE0ZTFkNDM2M2UwMCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNjY3YzdjOTRmOTY1NWNkNmI1ZTg4MWI4YWI3YzQ3NWE0NGZjNzAzMTU4ODE3YjMzOTM1YjE0ZTFkNDM2M2UwMCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMWI5YzY0ZTI3Zjc1ZDllYmUzYmIwZmIxNDQyODA5ZjE5ZjYwN2QxYjUyY2E5ZTczNjMyMTRiYTMzZWVlNmUzMiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYjlhNjA2ODE1YjE5YTAzZjVmMzU5OWI1ODEzOGMxNTJlMWYxYWMzNmVjMTgwYzRkYjY4NzQ4YWQxMTgzNDM3MiJ9"
+        },
+        {
+          "resource": "repo://Styles/Styles.lua#L44-L44",
+          "version": "repo-lines-v1:sha256:564ff7fe909e304981826cde30183fd785d68b3a23b9188be672d4981b3e1012:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNTY0ZmY3ZmU5MDllMzA0OTgxODI2Y2RlMzAxODNmZDc4NWQ2OGIzYTIzYjkxODhiZTY3MmQ0OTgxYjNlMTAxMiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNTY0ZmY3ZmU5MDllMzA0OTgxODI2Y2RlMzAxODNmZDc4NWQ2OGIzYTIzYjkxODhiZTY3MmQ0OTgxYjNlMTAxMiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiN2NkOGJmNDFlN2ViNzIzYjk4NzY2NGY2NDVkODRmYzVkYzQzZGQzNzUwOTVkZDM1NmUyOThiOGZiYmY3MDdjOSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMzIwNGMzNmJkZmZhYTZlZDUzOTk0NTZjNDQwZDk5NWFlNjNlOGM2NDNkMTkxNTgwNzA1MjU2MWEwOWY0OGJiMyJ9"
+        },
+        {
+          "resource": "repo://Styles/Styles.lua#L527-L532",
+          "version": "repo-lines-v1:sha256:47eefd68596dbd6e9b21dd816197323b35227fe9f2419c0fb8c17a716eca2dce:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZmMwNGVmODQyNWE3NzkwMDc5Y2M4Mjk5YzZlNWJlNjQ2NTRiZTY1MjI4ODNjYmIyYTZkNzliYjY4YWFmZjI1NyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOTJkN2IxMjY1MmU3ZmUzNjI5OGM4ZjM4NWI3ZTZlZmM4ZDJjZjk5ZGMzZTdlODcwMTE0Yjg2N2YyNzUyNTQ4YyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNTY2ZTBlY2FkM2FiZTY0NTEzZmIwOWNiMDY1NTY1ZDRlN2NlNjEzZjUyN2E5YTU0MTI2YjIxOGNjZTZkZDMwNSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYzIzZTVlYmUzNjg0NWYxOTM0NTMzNmFkYWVmNDlkOTNjZjI0MmY3MDIwNzBlNmE5MDg2NWRjODkyMmIxOTBmZSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_eef4c2e70e534790af300a78aa35c664",
+      "statement": "OnInitialize creates the AceDB database, registers callbacks, options and the /tptp chat command, initializes CVars, checks first start-up and incompatible addons, enables events, hooks CVar changes and finally calls ReloadTheme.",
+      "evidence": [
+        {
+          "resource": "repo://Addon.lua#L285-L356",
+          "version": "repo-lines-v1:sha256:0e3e11093f52f9f6257af65bf1faa69b8e9a2f6c8ff05617ce853a68ddf47a46:eyJzZWxlY3RlZExpbmVDb3VudCI6NzIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIzNThhZDRkYjMwN2U0YzlmOWVmNTQ2YWI5Y2E3ZjVjMTk3ZjEwNTdmMjRmY2FjMTFkMjNjZDVhYTcxZDVlY2QiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImY2YTkyMjM2ZmExYTAwZDQ5MjJiMTY1MTk0NGVkNjE5NGJlNTJkYThiZDY2YmZlMzJkZWE4Yjk0M2VhMWZmYWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRkMzA2MzUzYWMwOWE1YTA2ZTk2NGIwMzg4ODAyNTQzNzIxN2ZlM2ViOGI2YzcwMGExZTUxMTU5MjNlOGIyNGMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_04fffc234f194423900c5c0a013087fe",
+      "statement": "ReloadTheme re-creates themes and custom styles, re-reads settings, initializes all widgets, updates UI scale and click area, and refreshes all visible and created plates.",
+      "evidence": [
+        {
+          "resource": "repo://Addon.lua#L136-L157",
+          "version": "repo-lines-v1:sha256:ca5c1f33ef7018fce60dec2a26f91c2fbee68870c195efca70401bde75cfdb5d:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc0NjhkOWQxN2IzNzk2YjNlMTRhYzc3MDcyZDIyMzRjY2Y0MGZhY2I1MjUwNDg2MTY0ZDRiZDE2NjRhOTRkMjUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc1OWVmNGM0YTJiZThhMjNlZTMzMzZjZjk0MWJlNjRhNzFiMDdiMjk2NjQxZDJiYWY1YzA1YzRiNDZiYjgwN2YiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjEyMDkxNGJlYTFlOWI3N2ZlZDZiNDRlZjY4NGE3ZWRhMDVjZWUxMTAwNWM3NjQxOGQ3NDM2ODMxZDJhZGZlMjgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_92d9e226c37e408da7b26a748826cf00",
+      "statement": "Themes are registered with Addon:RegisterTheme(name, create) and instantiated into Addon.Theme by Addon:SetThemes().",
+      "evidence": [
+        {
+          "resource": "repo://Styles/init.lua#L1-L20",
+          "version": "repo-lines-v1:sha256:edd681aa5a1cac62fc4bf15c8b4794f325bf7013f0789f05647f3dea4823dadd:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIyOWYwNTk1YTczOTlhZDVlZGJiMzgyNzFhZDNhY2E1OTg5YzY0MDg5ZGNjYzEzZWUzZmI5NmMwNjFmMTdjOGIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM2MWU0OGQwMzA4ZjIwZTMyZGJhNWZiNTYzMjhiYWYxOGQ3MmVmMGNjYjQzYjg0ZjVjMjYyZDJhNmExZmM2YzgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_382d3b247bb2465b8412c9d7e18989d9",
+      "statement": "Elements are loaded in the priority order given by Elements.xml, and the module load order in Modules.xml is relevant for creation.",
+      "evidence": [
+        {
+          "resource": "repo://Elements/Elements.xml#L3-L15",
+          "version": "repo-lines-v1:sha256:d50702baaef993fc7d8f18cc08b400151f45d4f109cb8f86eb7f3ba2b33e62cb:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNlOTYzZmMzNGQ3N2E0MTBlZTVhNWMzNTRiYTM3NTdiNDQ1ZTIyZDY0NmNlZjkzNmIyODQ1NjQzODEyZmMzYjQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdjZmZiYjhiMGEyZWE1NGY0NDI5NzM2ZTdlMDRmOTZmNmJlZjM0YjhjM2VlMjhhNzEzYTA1NzBjMmM0ZDZhMWEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjoyLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ0ZTE2ZjcwMTExZjc1MmI5MTAwYmYxOTM1MTJkNWU0Y2RlYmU5MDU3OGI4MjFlZmY1MzNjNTc4ZDA5ZDg5NTAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQ5YmY3YjVjMzZlOTZhYTI3ZTVkYzkxYzc4N2Y1NTg3ZmMyMTBhZTJhMThmODc0Y2M3YjlkMzkxZjZlOWJkZDcifQ"
+        },
+        {
+          "resource": "repo://Modules/Modules.xml#L4-L12",
+          "version": "repo-lines-v1:sha256:81802ef5973e2b3f9aab242c9a9195276042a8a6e95ddd2fd061229f134fcb52:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYTJmNzA4NWQzZmQxMmM4NzZiN2U0NDYyY2ZhYmNlNmY1NjNkZThiOWMzN2YwYTI5YzViNjY4ODNiODRmNmIzNSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiM2ZkNDVmOGYxNDExYzAxZWJlY2M1NzUyNjQ3Y2YwZjc3M2VkODA1NzEwOGVmNjIzZjkzMDQ0Y2FjNjM5YmEyMCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMWZkNDE2NDM2MTQyMmY4MTMzYWVkOTc1YjI1YWI3NjQyZmE3ZmQ4MTM4NjczYmYyNDg2MzUzZmNlOTQ0MzEzOSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjEsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZDliZjdiNWMzNmU5NmFhMjdlNWRjOTFjNzg3ZjU1ODdmYzIxMGFlMmExOGY4NzRjYzdiOWQzOTFmNmU5YmRkNyJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_2afcb06466d94197952490da222c905b",
+      "statement": "When a style is applied, Styles.lua updates the Color, Transparency and Scaling modules, then all elements, then all enabled widgets, then the castbar.",
+      "evidence": [
+        {
+          "resource": "repo://Styles/Styles.lua#L470-L484",
+          "version": "repo-lines-v1:sha256:332b5cf73d530989b0294973a4ce6ac52392efbad2205f018c6d1d19e2d0a25f:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ1MzFiM2RjOTQwYmM3ZWM1NDQ3NTkwMWQ0ODRmNDQ0MTc1NjhkNWZhOTkzNmQ4NWE5YzU3ZmYyZjU2NTRjNDQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI5YTlmNzlhMmM1MzI0MGU4OTcxZTlkZjA0ZTk5NWFkNjA3MjZkZTY5ZmE3MzRmMDY5NGJmNTE1M2E4MjM2YTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjhkNTc0YjQwMjVhNTg1ZDMzNTQ4NmU3OTlmMmM2NTNlZDQ3YTQ3Yzg4MGI1ZjcxY2E0MzhiNmI3NDc1Y2RmYmQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_36c22065f1ad4177a07912bf0ddf988a",
+      "statement": "HandlePlateCreated creates a TPFrame per Blizzard plate with visual, style and unit tables, then creates all elements and enabled widgets on it.",
+      "evidence": [
+        {
+          "resource": "repo://Nameplate.lua#L1080-L1122",
+          "version": "repo-lines-v1:sha256:cb7553465b7c59ac42b19f164631bc8d8c83cd9cac47526cd8dcbce759335749:eyJzZWxlY3RlZExpbmVDb3VudCI6NDMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNhMjcxZTljNGFmMGIzYzUyZTMxYzNhNjlhNjAxZmM4OTU5MTcyNDg5NjE4YjVhMzJlMTJjODI5MTdhMzcyMjAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU2NmUwZWNhZDNhYmU2NDUxM2ZiMDljYjA2NTU2NWQ0ZTdjZTYxM2Y1MjdhOWE1NDEyNmIyMThjY2U2ZGQzMDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImVjNzI1YWQ2YzNmZjJlNGY1ZGY3NTI3MmVmMzhhYjIxZTFiMGE3MGI5YmE4YjBjOTI2MGZiNGI2ZDBhODk2ZDQifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-25T18:59:51.751Z"
+  }
+}

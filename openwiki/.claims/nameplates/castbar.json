@@ -1,0 +1,150 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:1d5b3bbb8a7175be2252fcdfb1e26aa75aae251c11414c2698dedb000f2c12f6",
+  "claims": [
+    {
+      "id": "claim_9fb723abee874b288ff20b798b6c6d64",
+      "statement": "All spellcast handlers skip special unit tokens listed in IGNORED_UNITS and return when castbars are disabled for both healthbar and headline view.",
+      "evidence": [
+        {
+          "resource": "repo://Nameplate.lua#L1376-L1376",
+          "version": "repo-lines-v1:sha256:3b8b22e76d264f9dcf4134de2a81b9ee688abb029d05329c991ba00fbbfd2a06:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiM2I4YjIyZTc2ZDI2NGY5ZGNmNDEzNGRlMmE4MWI5ZWU2ODhhYmIwMjlkMDUzMjljOTkxYmEwMGZiYmZkMmEwNiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiM2I4YjIyZTc2ZDI2NGY5ZGNmNDEzNGRlMmE4MWI5ZWU2ODhhYmIwMjlkMDUzMjljOTkxYmEwMGZiYmZkMmEwNiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMDI0YzIwYTYxMGYyZjYzYTRkYmFhYWMwNzBmMjJhMzY0ODM4OWFmNmVlNjkyZjJkOGIyYWFkZDhjZTg4Yzk3MyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNTcxNmU5ZGFhZGEzNzNkZTM2NTgyM2I1MWFkNzYxMjZmYmVkZmM5NWZhZjNiNGEwNTY5NmE1ODIyMTA3ZGVmMCJ9"
+        },
+        {
+          "resource": "repo://Nameplate.lua#L2029-L2121",
+          "version": "repo-lines-v1:sha256:515c5bd3218fbf89ff91bf159cee977554dab54bdab0886506bfe56501d0173e:eyJzZWxlY3RlZExpbmVDb3VudCI6OTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRiN2IxODA3ZTYzMWZiNzU4OTgyMmY3MWRiNzcwOTZkNjZkYTBhYWI4ZDk5M2VjOWViNTU2OTczOTI4NDI2OGYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU2NmUwZWNhZDNhYmU2NDUxM2ZiMDljYjA2NTU2NWQ0ZTdjZTYxM2Y1MjdhOWE1NDEyNmIyMThjY2U2ZGQzMDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUxNmJjODkzMDQ5YzMzNWQyOTUwZDViNWFhNmFmYWI1YmEyOTQ3ZWFiNTBlMGMxOTBkZjgzM2U3MWE2Nzc1YjUifQ"
+        },
+        {
+          "resource": "repo://Nameplate.lua#L91-L100",
+          "version": "repo-lines-v1:sha256:556db06bb232d050fe4efaa84860b32f824e7b4d425e6e2026e3832c4a4ad3f7:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE1ZmQwNzMxZWQzYjA0NjEwZjEwZTUyMjAwZWYyN2I4MWMxZjBlOGUyNDg1MzY0MWUwMGY0ODk4ZDVlMmRhYmEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM1ZGVmYmQ3MjQ3NDAyMDE4MGYwNjY5ZjZkZGFhM2E4NGNiOWFlYjdkOThjNGM5YzVjYjNiZGRlZWY2NjU0NmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY2NzcyMzVhNDQyMmJiNjA0OTRkMWVmMTFmNzBjZDMzN2E4MTE4ZjAwOTNlMTIwM2Q3MGQ3MzU5Y2NiNDIyYzQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_e4ddab0541e54468afa1e20a408e2997",
+      "statement": "UnitSpellcastInterruptible guards on castbar.CastbarID being set rather than on castbar visibility or an event cast id, because on Midnight the interruptible events carry only the unit token.",
+      "evidence": [
+        {
+          "resource": "repo://Nameplate.lua#L2043-L2055",
+          "version": "repo-lines-v1:sha256:bf7a2749a33181729f964165a6d977484324b5e02cba51551428c79bf47f6275:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk4ZWY0YjM5MDgwZGM1NzVkMmMxYzNhMGEzMDkwYjQ1NTc2MjVkZDNjMWQ2OWU0NzA0NGY0MmY2MTk2MmZkNDYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkyMGJiYzNhYTc5NjE4YzdiZTk0ZGIxNzk2YzZiYzEyYTA1OTQyY2U3ZDE3OTkwYjMwOGQ1NmU0NTY3MWVmNTgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImJjZjZhMTE1MzcxNmVjYjIyZWI1OWE0MTA0ZWEwY2NlNDZkNTYzODZhOGJmYThlMzQzNjMzMjE4YzMzNWRkYzMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_f3d66c21139748298d2c072228470654",
+      "statement": "UNIT_SPELLCAST_CHANNEL_STOP routes to UNIT_SPELLCAST_INTERRUPTED only if interrupted_by is non-nil and HAS_MIDNIGHT_API is true, and EMPOWER_STOP is mapped onto CHANNEL_STOP with re-ordered parameters.",
+      "evidence": [
+        {
+          "resource": "repo://Nameplate.lua#L2111-L2149",
+          "version": "repo-lines-v1:sha256:ebe63c338e10d17e9684c6eb234f369d7b5b0fe0e0a9ef78eab8d274e433fd21:eyJzZWxlY3RlZExpbmVDb3VudCI6MzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk0NmEzYTc4MDYxMGI0ZDg1ZTgzOTA0MjMxMWM2NjIwZTdkNTI0MTMwZjA3ZmZlYzQxMzhiODllOGRiMjllNTciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU2NmUwZWNhZDNhYmU2NDUxM2ZiMDljYjA2NTU2NWQ0ZTdjZTYxM2Y1MjdhOWE1NDEyNmIyMThjY2U2ZGQzMDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQwM2Q4NmU3ZjZlMzAyZjc4Mjg2OGQzNDc0YWM3Nzk1ZDQxM2E3MzM5NzdmMDc0MmI0NjA1YjJmMzJlNTRhODEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_c646f64bb2114406a814b9249463293e",
+      "statement": "OnStartCasting stores the castbar id, applies cast custom style triggers only without HAS_MIDNIGHT_API, sets the unit's casting state, and publishes CastingStarted only if the castbar was not yet shown.",
+      "evidence": [
+        {
+          "resource": "repo://Nameplate.lua#L626-L751",
+          "version": "repo-lines-v1:sha256:cbbd8d9a144a889a61dace1091751d9c95973c74114b6f13c9fc2ecef87704b4:eyJzZWxlY3RlZExpbmVDb3VudCI6MTI2LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJkMmJhNmM2ZDZhZWQxNmQyODJhYzg5NjdjY2NkYjExY2MzN2VmMGZlOTJkN2QxNGQzNTliODJkNzI1MDIyYWU0IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0ODMzMmZlNjY3YmM1MWFjNGE1MWJhMGVmZTczNDQ0MWM5MGRlZjU1YzYwYTI2ZDdkYjI3NWVjYmJjZjQyZjE1IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJkMmYyZjhmNzRlZmNjODk2YzA0NTg0OTMyNWYwNWI1ODY2NzNmNWUxM2Y5OWViMjkwNjdlODQ5MmY5YThhYzQ4IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJhM2IzNTU4ODdkZmYyMWFmZWU2MzBlMTg4N2E3MzdkZGRjYmZiMTM1MTFjY2RiMzczNDYxMjU5ZjQ0ZWZjMDBhIn0"
+        }
+      ]
+    },
+    {
+      "id": "claim_504f738c9e0d408086ab75ca07052140",
+      "statement": "RefreshCastbar queries UnitCastingInfo and UnitChannelInfo live and calls OnStartCasting or only reconciles visibility; it is exported as Addon.RefreshCastbar and called when a style is applied.",
+      "evidence": [
+        {
+          "resource": "repo://Nameplate.lua#L753-L768",
+          "version": "repo-lines-v1:sha256:b732286ba87cbdf3cc62bd1fd05b9c1666ab9c52141c6df31f29943bf4151d46:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZjZTllNWQ5ZDgzNWVjMzhiYWY2MTZiMmRiYWZkZTAwNzkzODUzZjBhMzI2ZDQxNGJkMjhjMjQ1MmZkMzhhNTciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU1Zjg4NzNlMjE2NWM0MDA1YzllNDBhYzM3Nzg3NzM4NmYzY2NjMTc2MzhjMWM2OGJmZTFjMzBmMDNlOWJhYTkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc1Y2Y4ZTZkMzY0YzJlODkzZjVkNTJjYzA5M2Y0YThjOGQ1ZWVhNjUyNjc1NDRmZjM3N2E0NmMxNGI1ZjQ4ZGQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRhYmU3ZWJjMDM5NDg4NDAwNmVmMDc3MDgwMzI4MzRjNzU0YTA1ZTZhZTkwM2EzOGU5NTQ3YWZkZTM3NzIzOWMifQ"
+        },
+        {
+          "resource": "repo://Styles/Styles.lua#L483-L483",
+          "version": "repo-lines-v1:sha256:13662d4ee28efc61a968e1f081eaca879306287d53134fd126937e2b8c4f3880:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMTM2NjJkNGVlMjhlZmM2MWE5NjhlMWYwODFlYWNhODc5MzA2Mjg3ZDUzMTM0ZmQxMjY5MzdlMmI4YzRmMzg4MCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMTM2NjJkNGVlMjhlZmM2MWE5NjhlMWYwODFlYWNhODc5MzA2Mjg3ZDUzMTM0ZmQxMjY5MzdlMmI4YzRmMzg4MCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNTc1Njc1ZmIzY2I5NjJjNDliZDY3ZWYzNDFmOThkMDY0NGRiNDA5Y2JlZmQyZDRmZWRjNzY3NGM2ZWFkZWY4MSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMGYwYThmYzdlYzk3YWE0NGJjZTljYmVlMWNhYmRhYzkxMTU1Njg4NTJlZDg0YTNkNDRlNmM0ZTNiNDEzNWJjNiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_d9d8d2e12a0c4d0fa5967fec5b59ffcc",
+      "statement": "The castbar OnUpdate script is OnUpdateMidnight on HAS_MIDNIGHT_API clients, reading the remaining duration of the timer object, and the Value/MaxValue-based OnUpdate elsewhere; it must match the branch in OnStartCasting.",
+      "evidence": [
+        {
+          "resource": "repo://Elements/Castbar.lua#L45-L98",
+          "version": "repo-lines-v1:sha256:8ba80bb65a11885df712669cd844a9dbf1f1056285614068ae712402727689aa:eyJzZWxlY3RlZExpbmVDb3VudCI6NTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcyZTEwYTg5NmFiM2QwNTg4Njg1NjJhMjVmZTY4MTcwMGE1MThiM2Q1MjlmZmE5Zjc2OWU1OWM2ZTA0MGViYjYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQwYWE3NThlYThkNDNiNGM1NDk0NjBjZjQzNTNlM2RiMDA4NTQ1MzYwZWM2NjJlYmZjNjYyNGZmZGQ2MDQyMDkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU1YmIyOTQ0Yjc3NDFjNTc5M2VmMjgxNWE3OTgzODk3ZGNhOTI4ODgwMmEyZDdmMWExMzg1OWY3ZGFmNDJmMTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFlNDVmMGM3ZGJhOTU1NTM1NzVjY2JjNTUwZjc1NjUwYWFiZTBhMTQyOGUyNWFiMWRjNTdmOTgyYTRlN2M4NWQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_3f7eebb637a54cc8b2db3cba78579e37",
+      "statement": "With the interrupt source option off, UNIT_SPELLCAST_INTERRUPTED only calls UNIT_SPELLCAST_STOP; otherwise it resolves the interrupter by GUID, colors the name with a C-API class color, sets the interrupted color and hold time and then calls UNIT_SPELLCAST_STOP.",
+      "evidence": [
+        {
+          "resource": "repo://Nameplate.lua#L2151-L2196",
+          "version": "repo-lines-v1:sha256:6efaf80ddbd00003be4f894bd231452fe47291c8a40933261073bc898cfdac9d:eyJzZWxlY3RlZExpbmVDb3VudCI6NDYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVhNTRiMGQ1MGE1ZjM2M2VhOWUzNWIzOGZmZjUzMjJmZjc2ZmE3YzQ4Mjk1OTJiZmNiODc0NmVmYzdkZDNhMDUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjEyZWFmY2RiYjE3NWM5Yjc0ZDI1MTRjYzZkNTYzZmQ4Yjg0YmIyOTFiYmM0MTc0OGQ0ODcyNzdkYTkxZjQ4ODIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU0YWJjNzU1MzdhNmUzYzIwMmIxYjI2NGY0ZTc5ZDEzNjUwNDkxNmM4NzA4NTAyYzBlOTQ2NmJmYjYwZjM5MDAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_479458be238e42cf8f1f62a32653cfa9",
+      "statement": "UNIT_SPELLCAST_STOP marks castbar.InterruptSourceUnknown so that a later SPELL_INTERRUPT combat log entry, looked up by destination GUID, can backfill the interrupter name on Classic.",
+      "evidence": [
+        {
+          "resource": "repo://Nameplate.lua#L2067-L2099",
+          "version": "repo-lines-v1:sha256:acc9678e7777ca060db102df36be4e2858da8f96953310d431865f2cec32065a:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI3MTUxNGNhYzQ3OGQ0N2QzNDc1NWUxYTViYjM0ZDAyNWM2Y2FkODk1NzJhNjgxYWJlMDIzMjU3MTBlZTAyMzciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU2NmUwZWNhZDNhYmU2NDUxM2ZiMDljYjA2NTU2NWQ0ZTdjZTYxM2Y1MjdhOWE1NDEyNmIyMThjY2U2ZGQzMDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI4NDFkMjM1NDEwZTk4ZTM1OGNmMmMzYzc5ZGJkODBmMDYyMGY3ZTY3Yjg4OTdlOTVlYzUyNzg1NDI2YWUxNGYifQ"
+        },
+        {
+          "resource": "repo://Nameplate.lua#L2198-L2235",
+          "version": "repo-lines-v1:sha256:1e1bcccefbee1b9578109b22c23102d8a8996286c9bf474866a9e7cfd57f3239:eyJzZWxlY3RlZExpbmVDb3VudCI6MzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRhZmFlYzQ5YWE5MjU4Y2U3MjRkOTYzNTEzYzY3M2M3NWQ3NTNlZWMzZGM4OTMxMGMyM2ZlNTM5NTEyNTZiZTAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc1Y2Y4ZTZkMzY0YzJlODkzZjVkNTJjYzA5M2Y0YThjOGQ1ZWVhNjUyNjc1NDRmZjM3N2E0NmMxNGI1ZjQ4ZGQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjVhOGY1ZDBiNjU0MDQ0YTdmZGE5ZTFlMTExZDNhYTEyNmQwOGEwNTAzZmYyYjE3MWFkMmRhZmNkMGIwMDFhYWMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_0c720439adcb49909af9030667dfe5c8",
+      "statement": "castbar:UpdateVisibility is the only place deciding castbar and spell text visibility from casting, interrupted and post-cast hold state, and clears the spell text when it is hidden.",
+      "evidence": [
+        {
+          "resource": "repo://Elements/Castbar.lua#L202-L234",
+          "version": "repo-lines-v1:sha256:6259c36436df2d855bcf433c29ad96e4695aa9b81b5c86bcd220d04dfc15d102:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFiOWZjMjA1YTY3NmFiYzgxOWQ4YjQ1ZGQwMjU0OTYxZmU0YjlkZWM4YmE5NzlmYTYxOWZjY2ZhNzVmZmIzZjIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg4NGM4ZmIxOTU5M2U1ZjVjY2NjMjQ3ZTllNGFiYzRlNzgxNWZiOTUxZTMwZTZhNzkwMDJiNjIwZWNmNmY3YjIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA4ZmNhNGRkZjE3NGZhZTMwNDA4NmMwZmUyOTg4MDczYjhjOTY5YWZjZDlmZGQ3NTRkMGNmNjNjZjRlOTA1NzYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_5f08ec6847414e7eb38ca244d6257f1f",
+      "statement": "An OnHide hook re-shows the castbar while PostCastHoldTime is still running, and PlateUnitAdded resets PostCastHoldTime to 0.",
+      "evidence": [
+        {
+          "resource": "repo://Elements/Castbar.lua#L104-L108",
+          "version": "repo-lines-v1:sha256:ef645fdbacdf43954b79ea399988229c42aa5961217f6c23454d6aa7d2610327:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZWM1YmE0OWE1YzJjOTA5NWQzZjZjNTRiNzE0YjhiZGYwMTdlNzYzY2Y3YjMxM2RmYmE1ZjkyZDgxY2ZjNjBiZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDgzMzJmZTY2N2JjNTFhYzRhNTFiYTBlZmU3MzQ0NDFjOTBkZWY1NWM2MGEyNmQ3ZGIyNzVlY2JiY2Y0MmYxNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMGQ0NDI3MDMyNDA0MjdkMjI1MjhmZDQ3N2MzMGYwZDc1NjE0MzczYThjN2UyNzY4ZTdiZmI2ZDE3MmM0ODQ3MCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYzE2MjMwYWI4NmYzZmNhOTNkMDg5MWEzZTc2NTk4ZTcyNGRlZTY1Yzk1ZmFlNzY3N2FmZDMwZWM3YmZmYjNjMCJ9"
+        },
+        {
+          "resource": "repo://Elements/Castbar.lua#L303-L306",
+          "version": "repo-lines-v1:sha256:4dea3a8d7349d0576df99e69e300929a0e27e719731808e36f65261c8a205f61:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZmRiYTVlOTVmZWM2YWQwZWZlODU1N2QyNjVhMzBiMjM3NjkwMjc1MGNiZTY2MGY3YzlkNmVmNTBhMDg5MDJjYSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDgzMzJmZTY2N2JjNTFhYzRhNTFiYTBlZmU3MzQ0NDFjOTBkZWY1NWM2MGEyNmQ3ZGIyNzVlY2JiY2Y0MmYxNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMTNkZjg0Yjg4NDA2MGIxYzZmNzQ3ODRiOWE0MTE5ZjkxZTE2MDkzZDIzMDA5NGJjNzQ2NGNjYWM4NGY5NmQ1YyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNmE2MGI1NjVkNzVjZWQ0ODQ0Mjk0Y2EyZWFjMzkwMjA5MjNjYjdlZTQ5N2QwNzQ5NjJkY2VmOWY2MTU2YzMyZCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_3bee061912dc486d880d6316f8dcdd29",
+      "statement": "Castbar config mode replaces the castbar's OnUpdate and Hide on the target plate to draw a static demo cast and restores them when turned off.",
+      "evidence": [
+        {
+          "resource": "repo://Elements/Castbar.lua#L449-L530",
+          "version": "repo-lines-v1:sha256:cebebba4aac152c1b25a445cd5a35a8e25482b091c4540b07149e973d7a45999:eyJzZWxlY3RlZExpbmVDb3VudCI6ODIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImViNTMxZjk3NmExZjY2N2EzNTY0MTY1ZmI1Mjc2YTY1OGFlZWRiNGZiNmRiNzY1NzU5NjA3NTk5YjE2OTkwNTMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM2MWU0OGQwMzA4ZjIwZTMyZGJhNWZiNTYzMjhiYWYxOGQ3MmVmMGNjYjQzYjg0ZjVjMjYyZDJhNmExZmM2YzgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY4MmRlMTczNThjNDkyOWRmZThlYTRiMzczNzI5YzZmNjNlYTFlYzQ5YTk0NGNhMjVlNGI1MDZjYWZmYTkwYzMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_0e888c799d904081ae2ec113c8fe2599",
+      "statement": "With the interrupt source option on, UNIT_SPELLCAST_INTERRUPTED returns without calling UNIT_SPELLCAST_STOP when the castbar id does not match, the castbar is hidden, or interrupted_by is nil.",
+      "evidence": [
+        {
+          "resource": "repo://Nameplate.lua#L2163-L2167",
+          "version": "repo-lines-v1:sha256:983eb7543bb8fdcabb7e61b0305b16f445f88656db07e49e34000b5cd94b6c94:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZWM1MWRmYTgzMTMxYjdmZTczNWZmYjYzZWU2M2IzNzViNDNhYTBlMWMwMThjYmNmMDgyYzA0ZjIyMWRhZTdjMSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYjhlMjE5YjE4ODI2ZGM5MzhlOTFiZjdlNDNmNGY1NDc2NTYxZjkwNDVlNWIwZmQ4MTE3YTU5ZDQzODkzZmE5OSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOGQ5ODk5MzliYTIyNDI4MjQzZDkyMDI5M2I2MmY2NzRkZmE5ZDIzZjRiNGI4Njg2ZDdlOGUyNDk3YmUwNzMzNCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZGNiMzkzZjdlYzc2ZGJhODdiMDQxYmQ3YTlmMzc4MWIyZjFjZTU3NzVjYzQyYWU0Y2QxMWFiYWNmYWQxY2QxOCJ9"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-25T18:59:51.751Z"
+  }
+}

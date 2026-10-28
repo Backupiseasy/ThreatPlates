@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:9384de5349fad15a54c4b17476e17600b45b1e34004778402e88d805622f3a10",
+  "claims": [
+    {
+      "id": "claim_9fa3bcd9e9d648488e0c815cb7a99bb8",
+      "statement": "Development mode is active when the TOC version placeholder @project-version@ is not replaced, which enables debug logging and the debug chat commands.",
+      "evidence": [
+        {
+          "resource": "repo://Commands.lua#L390-L392",
+          "version": "repo-lines-v1:sha256:49e97aa2a6e06f845e751b97a57c93c8515c42e204d993f5a6ca1c1a16799e2c:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMzkzN2FlNDk2NzJhMjAwMjNjMDk3NWMyNmUyNzE2NDdhY2ExNDkyNjhmYzYyNWIyMTg0ZTVjYTkzNmZlOWJlZiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZjNhOTM3OGRiZDZlMmU5NDRmNjI2ZGFkZmRmNWI4NWQzMjgxOTEzYTI2Yjg0MjY1OTZmNWMzNDM5ODU5MDJhNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMzU3NDQ5MGM3Nzc4ZWFlMWVmMTZkNDhlOWI0MDJlZWRhMmMyOWM3YTU5ODMzZTk0NTIwMDAxMjlmOTllNjJhNCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOGZiODg4ZGQ1ZWNjMzE5OTg0MTUxMDFhN2NjODc2MThmMzU0YzkzOGQ4NTE1YmQ4YWY3OGE0ZDA5MGJmMjk5OCJ9"
+        },
+        {
+          "resource": "repo://Commands.lua#L9-L9",
+          "version": "repo-lines-v1:sha256:f66b29ad7becf47d84a15eb8449a7673797d31d1607ea30de87df3a477ed661b:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZjY2YjI5YWQ3YmVjZjQ3ZDg0YTE1ZWI4NDQ5YTc2NzM3OTdkMzFkMTYwN2VhMzBkZTg3ZGYzYTQ3N2VkNjYxYiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZjY2YjI5YWQ3YmVjZjQ3ZDg0YTE1ZWI4NDQ5YTc2NzM3OTdkMzFkMTYwN2VhMzBkZTg3ZGYzYTQ3N2VkNjYxYiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiODE3YjdlYjY0MTU1OTlkMjJmMTA5NDgwNGIwMzMxNjM4YmEyMGU4M2QxZTBlNGZhYTdkMTFmZmIwMGI5ZTU2YyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMmRhYzZjOGRkYzNmYmVhYzA3OGFlY2NkNGYxNjNlMmRkYTY5YjliYjllMzRlZjVhZWZiYTZhNWE5ZDcyMjYwNyJ9"
+        },
+        {
+          "resource": "repo://Init.lua#L533-L537",
+          "version": "repo-lines-v1:sha256:2bee0c2a2ac12e9a63f1faab04c5be9a34edb7cb283bf4ed661d19a89cc0784b:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYjFlMTJiZDYyODQ2ZTk0Y2RjYTQ2ZmYzOTM5ZWY4ZWFjZTFjMGQ5ODQxZTE5ZGM4YzA4NGVhYWNiODcxYWQzZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDgzMzJmZTY2N2JjNTFhYzRhNTFiYTBlZmU3MzQ0NDFjOTBkZWY1NWM2MGEyNmQ3ZGIyNzVlY2JiY2Y0MmYxNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOGUzMGRmZmM2YzQ0M2M4ZGI2MTU1YTJmZmQyNjI1NTNiZDFlNmNjYmRkN2IwOTA0NDhhMmQyYmQzYmE3NjkyOCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNTlmOWI2MDMyNDlhNzI3M2I4NDQxOTAxYTQ4NWM1MjVkZTU4NjRkNmVlZTlhNWI3MmI0MTZjY2ExZDA1MWU3MiJ9"
+        },
+        {
+          "resource": "repo://TidyPlates_ThreatPlates.toc#L6-L6",
+          "version": "repo-lines-v1:sha256:edf94f5f80a671f3b7cbfb2af79aa8ce428ec8debc4c7670c3d7cba9266781c5:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZWRmOTRmNWY4MGE2NzFmM2I3Y2JmYjJhZjc5YWE4Y2U0MjhlYzhkZWJjNGM3NjcwYzNkN2NiYTkyNjY3ODFjNSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZWRmOTRmNWY4MGE2NzFmM2I3Y2JmYjJhZjc5YWE4Y2U0MjhlYzhkZWJjNGM3NjcwYzNkN2NiYTkyNjY3ODFjNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZjVjMTNkNTA0MTEyYjNiYWJiZWQ5ZWM4NTVjMmY4NGIzNDc4ZGY5YjFlNmU0YjQ1ZDA0YmRkZDdhMzEyZmIwOCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNTc2YmQ5NDNhZGUwZjE1NzU2NTM2ZjUzMjY5MDcxZGYzZDgzMzYzZTY0YWNhMDAzMzk1ODE5MGY3N2UxNDU4NSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_a11a70dfe1c5482f97fdf3fb4ad76f7e",
+      "statement": "Both luacheck configurations use lua51, exclude Libs, Source and .release, whitelist the addon's globals, and the CI configuration only reports warnings 111 and 112.",
+      "evidence": [
+        {
+          "resource": "repo://.luacheckrc#L1-L21",
+          "version": "repo-lines-v1:sha256:4c02fc09765ffca1bc3be9e4534880b64cd6014ef0f3e05d86839ec0ec8529d7:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdiZmU5NzEyZmI3NTU2NGIxMjRhM2JlZjdkYjc5MzUzOTRmZjJlMGI0MTljYTQ0OWI3YTNjZmUzZDJkYWY4YzciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://.luacheckrc.ci#L1-L24",
+          "version": "repo-lines-v1:sha256:7d3b985e157cc0099ad937f10f6fb43588e19fc22cb6aebcb6b3da3ff5a66e0e:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdiZmU5NzEyZmI3NTU2NGIxMjRhM2JlZjdkYjc5MzUzOTRmZjJlMGI0MTljYTQ0OWI3YTNjZmUzZDJkYWY4YzciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQzYjQzZWZjYTVlYjNhZTQ3NmZkODVhMjJhY2ViODY2YjZlNjkzZWYyNGQ4NTU5YTFjMjgxNGFiYjU3MmMyNDAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_278af996b46d4dcca37852ab6564f031",
+      "statement": "The debug commands include version, unit, debug, threat, reaction, role, auras, guid, searchdb, cache, custom-styles, cleanup-custom-styles and restrictions, which toggles the secret*RestrictionsForced CVars.",
+      "evidence": [
+        {
+          "resource": "repo://Commands.lua#L106-L330",
+          "version": "repo-lines-v1:sha256:678d3cfd2b2eb36a461267f36f930533382a4624ff50e1947899b9b776d91842:eyJzZWxlY3RlZExpbmVDb3VudCI6MjI1LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI4ZWQxYTIwYjVhZDIwMTU1ZTc4NmM0MjAxNzE5YjRiNzE5MDkzYWU5YjNmODYzN2RmNjU5ODUzMGI1ZTQ0YWMxIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0ODMzMmZlNjY3YmM1MWFjNGE1MWJhMGVmZTczNDQ0MWM5MGRlZjU1YzYwYTI2ZDdkYjI3NWVjYmJjZjQyZjE1IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI1NjZlMGVjYWQzYWJlNjQ1MTNmYjA5Y2IwNjU1NjVkNGU3Y2U2MTNmNTI3YTlhNTQxMjZiMjE4Y2NlNmRkMzA1IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIwODUzMGM1NzY1Mjc3NmEwNGYxNDJkNWRhMTQzOTJjZDE0ZTFjYmQxM2FkMzE3MTg5MmMzNDgwOGVkOGMxN2Q3In0"
+        }
+      ]
+    },
+    {
+      "id": "claim_85bae9d38c094722b7e5677a360edb90",
+      "statement": "CHANGELOG.md contains only the entries of the current unreleased version under the @project-version@ header.",
+      "evidence": [
+        {
+          "resource": "repo://CHANGELOG.md#L1-L4",
+          "version": "repo-lines-v1:sha256:c98884eed8eeab8da69f8710dc3e443ed5781546b6b1e758d0e072dc289a8871:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYzg2YTU5NGJmYTJhYTdhYjFhOGFiNjBmZmRkMGQ3OGUwMjM0YjIyZjJkOGQ0YTFiZDc5NzQwNWUwMDM4NDdkNSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYmRmMjZjNWU3MTdhYTRkYTczMGU2ZDczY2I3Njg4ZTIxODRjZTUxMjhlODUyNTc1ODRiOWYzZmE3NjQyNTFhMSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_fafe49153cea4e2380483fbce3785586",
+      "statement": "Addon.Debug.PrintUnit dumps the unit data of a nameplate for the unit command.",
+      "evidence": [
+        {
+          "resource": "repo://Commands.lua#L115-L120",
+          "version": "repo-lines-v1:sha256:b00d7ac7bb00c647409e5053c5f49ec24c4cdc2c21a30eae53dee5ed3fecd1d1:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNmIyNzRlMGE0YmFiMTEzMmM0MDhjZjA4ZDU5NzMzMDIzM2ExODEzYjc5MjJiODc3YjEzNTQ3ZTdiNjRlNWVjMSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNTNlOTU4NjBjMmQwOTFlNmJlMDY2YjQ5ZTI1Zjk2NGRiMGQ2NzgwY2M2NTUxMzM2NGFkZTM1ODIxNTA2ZmRiYyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZGFhMTg0ZWUxYzY1ODZhMzkxOTljNmI2NmU5MjFlMzk3ZGNiMmZkM2NiODY0ZGU1YTQyYWY1YTk0ZWYwYmI0ZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYWJhMjM5MWU3MDIzZjRiODFkMmNlZWNiZTYzOTQ3YzgxN2Y3ZDRmZDgzY2U5ODdmNGQzYjU3N2U3ZTAxZmY0OSJ9"
+        },
+        {
+          "resource": "repo://Debug.lua#L79-L79",
+          "version": "repo-lines-v1:sha256:4f1478dfdef78ac4f5a5b07b6d4e0656c6ab9b76adf6182d230bdc4300fbd99d:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNGYxNDc4ZGZkZWY3OGFjNGY1YTViMDdiNmQ0ZTA2NTZjNmFiOWI3NmFkZjYxODJkMjMwYmRjNDMwMGZiZDk5ZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNGYxNDc4ZGZkZWY3OGFjNGY1YTViMDdiNmQ0ZTA2NTZjNmFiOWI3NmFkZjYxODJkMjMwYmRjNDMwMGZiZDk5ZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNTY2ZTBlY2FkM2FiZTY0NTEzZmIwOWNiMDY1NTY1ZDRlN2NlNjEzZjUyN2E5YTU0MTI2YjIxOGNjZTZkZDMwNSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMWNkYzk5OTk4OWNkMzg1YTg0ODIxYmJlZDNkNzI1OTExNzYwOTg1Zjk3NjUzOGU5NDk0MGJkN2ZiYzY1MjA4ZSJ9"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-25T18:59:51.751Z"
+  }
+}

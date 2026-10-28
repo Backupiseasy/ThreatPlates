@@ -1,0 +1,154 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:5c742438b7b5efa511833c815bc32824ae9d75a4d6933bda7af7664b6d78220d",
+  "claims": [
+    {
+      "id": "claim_be99eeb8127d4261b87a3240c6572360",
+      "statement": "PlayerTargetChanged handles target and the three soft-target events: it clears the old reference and publishes TargetLost for an active old frame, stores the new frame and publishes TargetGained if it is active, and publishes TargetExistsChanged whenever Addon.TargetUnitExists() changes.",
+      "evidence": [
+        {
+          "resource": "repo://Nameplate.lua#L1779-L1836",
+          "version": "repo-lines-v1:sha256:14f477dbbbdd0d2ff21615fd1cdf86a5048d35d3583c4516becd696a7729031f:eyJzZWxlY3RlZExpbmVDb3VudCI6NTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY5YThjZTA0OGRiNWRmNDZhN2RjOGQwYTgzYzEyMmIyNTE3MGFiZGFiNjg3MzZlYzFmOTQzMjY1MDNlMDhmZmYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU2NmUwZWNhZDNhYmU2NDUxM2ZiMDljYjA2NTU2NWQ0ZTdjZTYxM2Y1MjdhOWE1NDEyNmIyMThjY2U2ZGQzMDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBlYzI2YjA2ZWI5ZTMwN2MxOTU2Y2M4MzY4YjcwYmVlZDk2MWZjYWYzMDNiNjVmY2Y0YTY2ZjcxNjJhZTE3ZmQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_b3a38a80d4164572bab99f4ec3f2095d",
+      "statement": "Addon.TargetUnitExists and Addon.UnitIsTarget are replaced in Addon:UpdateSettings depending on whether target styles for soft targets are enabled, so they must not be cached as upvalues.",
+      "evidence": [
+        {
+          "resource": "repo://Nameplate.lua#L1353-L1367",
+          "version": "repo-lines-v1:sha256:5989644486ca7dd2bd69ee1cf08d1cda9ee83b181e4b4098353a58f5dccd7634:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJhMzllNjE1N2NkYzFjOTQwYjE2NmM5MWVkMGJjNmQ2NWNhMTFhOGEwNTVhOGY2ZjZjOTY2NDNiNjQwOTlhZDkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUwMzIxOWE4ZGYxMzNiMDFjNGQ0YzgzNTIyYmM1MmM3YjY5NDY0YTk5M2UwYjBhNzllZDZjMjM5YWZiYTE1ZTIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE5YzNhYzdlZTc3NTkwNWEzNjM5NGY2YjU0YzBkZTAwZThjNmJjMzliNGVkM2EyNWUzYjQzMTA1MDY3Y2VkODciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImYyMmMzY2Q2MjdjZjljOTNmZWJhM2I4NTVmNGY1MGMwNTg0ZjcwZjgyMjRmYTc2MWI5ZjI1YzcyMjE4N2NjYzIifQ"
+        },
+        {
+          "resource": "repo://Nameplate.lua#L608-L620",
+          "version": "repo-lines-v1:sha256:567b68f41c58ee18b39d90ceab397ffcc64f8d43a8912e5d09f59385a8310ce4:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc4OTBhNTU0NzdjZTIwMjcxNGQyYWMwZTVjZTdjMmUyNWIzMDc5ODYyZTU0NjEzM2Q1Nzc5NTY4NDk3NjcxMTAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImRhODRhMTc5M2MxODhhY2Q3MDAzODE3ZmVlMTQ2OTcwNWNkYjA4NWViNjQ3NzAzOTYxYTQzNTE4YjNmMzgzMTYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQ4Yzg0NzMyMjgzM2FlMGFkYjE0ODhkZGRhZjQyM2Q5Mjc3ZjBjZGQ3OGJiMzE3YzU2M2FjMWIyNWQ0MTZmZDQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_b099fcb375274caab700add83cac1bbb",
+      "statement": "UpdateTargetMetaUnitReferences updates the target and soft-target references in PlatesByMetaUnit when a plate gets a unit and when it loses it.",
+      "evidence": [
+        {
+          "resource": "repo://Nameplate.lua#L107-L109",
+          "version": "repo-lines-v1:sha256:63c81f65f07936283dd7f61e95d4c36943dc69d9585256dace9d5a433459f79b:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZTg1NDUxNWQxYWIzMDJlNzZkNDY1NTc4NDEyZDJiYjEwMGJkMmI1MTk0OTQ2ZmY4MzQyNWQ2MDBiZGJjZjhiOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYjY1MjJhODgzMjUyYmJiM2Y3OWU5NDY5OWY3Mzg2YTRiMGUwODkyMDkzZmY0N2NkNzQyOGNkYjY3YTRhNjM2ZSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYmM0NWJlNzA1ZWU3YzYzMjI0NTJmZTM2MDk1NTJlMWM4NTQ3ZjUzYmZlOGU5ODNjNGFkMWI4MWJhYmE2MzU5YyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMjk2Mzc0MzJkMGIzZTgzMzRkNmQxZDNhMTFiZTIwMmU0Y2Y0NWNjMzY4MjhkYWM2MzE1ZWE2YmQ5ZmJlYzZiOCJ9"
+        },
+        {
+          "resource": "repo://Nameplate.lua#L1206-L1225",
+          "version": "repo-lines-v1:sha256:4eecc9df42b05a5520522a694bb08d84c05b239c99c67f1dca42e2ecd450a866:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZlY2QzYzMxNzM1ZDVhZGNhZWRlZjdjZmIxMWYyZGZjODJkMWUwODRkMTE0YjJiOGIzMTRmNzA0ODVhZGFkYzgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImMzNDgyMDA2YzZkODg2MGRiMzFkMjUwMmRlMzI3MTM4NDc5NzFhMTYyNWYyNmE0YjE4NjQ3MzI5YWQxODUwMmYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjhlNTdkM2UzMmNiODk1ZWIzZjA2MDhmYjhlMDg2NmQ1NjE5YjlmNDE2NGFkMDM1YjgyNmFlNDVmOWViMDE4MzYifQ"
+        },
+        {
+          "resource": "repo://Nameplate.lua#L1744-L1744",
+          "version": "repo-lines-v1:sha256:7ccd04efb4d468d18386fad96346d928d33b20612adcd9e048e23580a28e3cf8:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiN2NjZDA0ZWZiNGQ0NjhkMTgzODZmYWQ5NjM0NmQ5MjhkMzNiMjA2MTJhZGNkOWUwNDhlMjM1ODBhMjhlM2NmOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiN2NjZDA0ZWZiNGQ0NjhkMTgzODZmYWQ5NjM0NmQ5MjhkMzNiMjA2MTJhZGNkOWUwNDhlMjM1ODBhMjhlM2NmOCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNDVhODllMDQzMzY0MmUyMmQyMDQ2Y2E0MjNhMjMzYjg3ZTc0YzhhODM4ODIxOTliYjU5ODE5MTU3MTQ4NTgzMyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiM2M3ZmI5M2MxNTUwY2I1NTdmZmU3NTQ1NDA4YTNkMGRmMWMyNWFhMjU2NzdiNzMyZDU5MmI1YWNlNzZjOTY2ZiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_135bc7db91f747a6a7eafd39d9d1e983",
+      "statement": "PLAYER_FOCUS_CHANGED resets the old focus frame and sets the new one, publishing FocusLost/FocusGained only for active frames and without a style update.",
+      "evidence": [
+        {
+          "resource": "repo://Nameplate.lua#L1838-L1861",
+          "version": "repo-lines-v1:sha256:49ffb22eac181912e20a13c41e148531ba0a84ff6e92cd121d859f080b84c8e2:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIyNDEzZjcxNmNkOGYyMDViNDEyZDE1YzVkYzFmZjNiNzc0OWFjMDAxOTM2ZTc4NDgzYjIzNDdiNmU1YjU3ODMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjgyMGFiMzQyNmU3ZWNmNDI3Mzg0YzM5Y2Q4Yzc0YTIwOTIwY2RlMzYzZDE0YjkxYzE1ZDAxN2ZkZDQ4ZmYyMGUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQ1M2JhYjE5MGM4ZDM3MWZhNDRjYjkxZjc3ZDZiMTBjOWM4MDgwZWU3OWEzZGUxMjQxNjY2NTYyZGJkNGQxMzgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_c0bf69dbce5445429f2b419c2c27fe4f",
+      "statement": "UPDATE_MOUSEOVER_UNIT removes the previous mouseover state, publishes MouseoverOnEnter for the new active plate, and starts a 0.1s ticker that removes the mouseover state once no mouseover unit exists.",
+      "evidence": [
+        {
+          "resource": "repo://Nameplate.lua#L1717-L1729",
+          "version": "repo-lines-v1:sha256:b77de80d3d83b6c6fea8626cb245293c1f7005225a9393ff9ba526eb378eb50c:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc5NjMzMzFiNzE4NjlhYWQ2MGRhMDY1MjIzN2Q0NDE3MzNiOWEwY2ViZDA5Mzg5NWM2OThjZjc2Y2NmY2Q4MGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU2NmUwZWNhZDNhYmU2NDUxM2ZiMDljYjA2NTU2NWQ0ZTdjZTYxM2Y1MjdhOWE1NDEyNmIyMThjY2U2ZGQzMDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRlY2RiNzVlMGJkNjAwMmU5MTkyZjJmZjQyZGM4YTViZDQ4YmU2ZjZkZjY0ODRjZGZhZTAwMDVkYjM2YjMxMTIifQ"
+        },
+        {
+          "resource": "repo://Nameplate.lua#L1863-L1886",
+          "version": "repo-lines-v1:sha256:cfc070507bbbd14c43361506d8ba47b2d0fc9fd0d1412f3bdc316edcff35b9e7:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMwNWY4ZThkMTA3OTY0YWRiYzFmNzQyNGYxNzY5MWEyNTJmYWY2YjBjZGQ1NjExNjAyMDY5NDZlMDFiN2ZhNjMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU2NmUwZWNhZDNhYmU2NDUxM2ZiMDljYjA2NTU2NWQ0ZTdjZTYxM2Y1MjdhOWE1NDEyNmIyMThjY2U2ZGQzMDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc1ZWFhNDAwZjQ0NTc1Y2NjMzc4MGMxNjExNmFjYzdlZDI3MGM4Y2UzNzUxM2RmMzNiZTgzYjQ1MWZlMzQxNmMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_d8d2f9342b7343b785802d286eda7bc4",
+      "statement": "Transparency and Scaling recompute a plate's value on mouseover, casting, raid marker, target, faction and threat events, and recompute all active plates on TargetExistsChanged.",
+      "evidence": [
+        {
+          "resource": "repo://Modules/Scaling.lua#L259-L281",
+          "version": "repo-lines-v1:sha256:6024bf26e1d10bd3ed23be69594d050d6eadc1aa8f0717e227ba72bd9ab886ab:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMxYzE2NmIzMmI1OGYzNDU3ODI2N2FiYTg2NjNiYjBhMWRmZmQ1M2I3ZGQzMjJjYWY5Y2FiNThiYmM1MjIyMTkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJkNmQ4ZTNlZjFkYmQ4ZGQ3OGFlZGI0ZWIxOGU4MjE2NGFlMTIyODE3NmVmODk5OWFhNzRhNzMwYWRhZDE1MjYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU3MWY3YTAwOTlhYThiYjYxZDNhMmE0YmM4MTc1OGU3YjI3Y2ZmMDFkYWQzNjIyMDZjZDA3NTBkNmEzZTk4MjIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://Modules/Transparency.lua#L350-L384",
+          "version": "repo-lines-v1:sha256:48a4bf22765115976f3b28fab371f9f0aec65ebe6d5184b5342bd4e8e4444496:eyJzZWxlY3RlZExpbmVDb3VudCI6MzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJhMWVkYWI4NDIzNTljMjgwZTZmYjU0ZDQ1YjViNzhiYzA2Y2IyNWI2YmM5YTQwZTdjOGYyNjFlOTE3MjRiYTYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBkMmEzNjkyZGRhOTMxMmJmOWIwY2IyYTBiY2Q5YTUwN2M1OTA3ODE1ZTI0N2FjZDc4MTZlMzliZGI3M2RkMWQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU3MWY3YTAwOTlhYThiYjYxZDNhMmE0YmM4MTc1OGU3YjI3Y2ZmMDFkYWQzNjIyMDZjZDA3NTBkNmEzZTk4MjIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_965a37bfed2c4655aa42d3463daa06c9",
+      "statement": "The mouseover highlight is hidden when a plate becomes target and re-shown on TargetLost if the unit is still the mouseover unit.",
+      "evidence": [
+        {
+          "resource": "repo://Elements/MouseoverHighlight.lua#L124-L145",
+          "version": "repo-lines-v1:sha256:8d1706ec5635580a289faba61d362b4a74efeb0b0f62152db921a6ff2e625750:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYyMWVjZDY0ZWU3NzAyZmI0ZjdmNDMxMTkwOWU5N2NmYmIyNjU3MDc1OTdkZmEwNDYwZmFmOGNmMTRiZWQyYmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRkOWMwODU0ZmYzOGY1MTgzNjdlNWUyNTgyOTZhMWE2MWRhNmU5ZDk5ZTYxNmU0ZmRmMjk4MTY5Mjg5M2VmMTAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdlY2JkNGIyNTlhMWY5MjNlNDc0NWNlNTRhM2Q1YTJmYzc1OTkzYjVjZDc1MjE1MWNjZjE2NzliNGU0MzBkMGEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_8b54a0aa3e3d41a2bbc35ebdfbdc2676",
+      "statement": "Transparency and scaling give the target no situational values and apply raid marker, mouseover and casting settings before target, non-target and no-target settings.",
+      "evidence": [
+        {
+          "resource": "repo://Modules/Scaling.lua#L39-L96",
+          "version": "repo-lines-v1:sha256:36908a99e4c8d33e1cefc2280b9ecc8fc7c5327b05e5757c566d556536a3445d:eyJzZWxlY3RlZExpbmVDb3VudCI6NTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZiOGRmNmEyMzA4MzZjYTk1M2M1Yjc4NGEzNjMwNzhkNWFiY2M0Yzg2NWIwZjQzZGUzYjAxYjJkNTNiNTMzNjUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE4NjUzNjg5MDEwMTllNWExOGRiMzIxOTg4Mjk3OTk3NWRmMGRjMzlkMjM4ZjUzNGQ3NTg3ZGU2N2ZjM2RiZjMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQ3MzMzZDQ1MDExNGQ1ZGM1MjVkYWY2ZGEwMjFiNWRkMTUwZThlMzExMGNjYWU2Mzk1MTZmMmRhYWRlMzU5ODgifQ"
+        },
+        {
+          "resource": "repo://Modules/Transparency.lua#L43-L98",
+          "version": "repo-lines-v1:sha256:eb07247a27b07dd0d21db5a2d85ca7cabb574c96804f1e079841b67b8f8934db:eyJzZWxlY3RlZExpbmVDb3VudCI6NTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjExNDZmMjhhNTMwZmQ0Y2VlZmVkZTgwMzQzZDE4OTIxOTVjZmNlN2MxNjYzZDlmMTM5ODcyMmMxNWI1MzUzNmEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImRmOWFiOWI3YTlhNDE3YTU5YzljMzdhNThiZWEyYTlmOTJiZWNiOTgxMTljMzkyZjlkM2RmZjJlMzNjZDNmM2QiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImEyZjQ1NjBhZGM1NzE3ZTAxYzk1NmYxMmEwOWZlNmI0NWJlYTVlOWY4ZjEwYTY5NTNkMjBlYTMwNTg1YmMwY2MifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_8a098bf2697b4b87afdebd58e875973b",
+      "statement": "AlphaNormal and ScaleNormal call the dot-defined GetThreatStyle with a colon, passing the Style table instead of the unit, so ShowFeedback returns false and the threat style is always \"normal\" for custom styles and headline view.",
+      "evidence": [
+        {
+          "resource": "repo://Modules/Scaling.lua#L121-L128",
+          "version": "repo-lines-v1:sha256:9d9d540919c330863ca6321278bf9b325bdcaca5903dcf10a3a2203b478fad78:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOTA4MzZhZjgxNGI2MTA1MGM3ZjVkNzkyOGJlZDI1NzU5ZDYyYzMzZWMwNWQxNjU5ODhjYzg3NzVlOTc2MTM0ZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDgzMzJmZTY2N2JjNTFhYzRhNTFiYTBlZmU3MzQ0NDFjOTBkZWY1NWM2MGEyNmQ3ZGIyNzVlY2JiY2Y0MmYxNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNDZjMTlmMTllYzZiNTY0MzI1MDY0ODY5NDlkMjQ5NjI0MDZkODc0YzI2MWRjMzJiYmM5NGM3ZmYyYmMwOGYwZiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiODcwNmI3YTgwMzc1MjUwN2VkYzBkZDlhOThhM2EwNjY5MzQ1Y2E2MDMyY2I5YzQ4M2I2NTIwYTRmNjAwMjg1NiJ9"
+        },
+        {
+          "resource": "repo://Modules/Threat.lua#L111-L125",
+          "version": "repo-lines-v1:sha256:1c26180e06a3b926d5aaadf8ca170fbad9e408e611e6cb710d03cba327c69ada:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVlOGZlNWQ5MDQzMDVhODM3YjM0NzAwYzNmYWI1MWVkNDlmYmFmODYxNzZhMDYwNDQ0YjhiNGJjYmI1ODA4NjEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdjZGY0ODJiNGQ3Y2VmNWQ4OTNhMmQzZGUwMTNlNzNlMzZhZTJmOGM1Y2RmMWIyM2M1YWU3OWQwYzgyMDAxYTAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijg2MGIzNmI4NDRiZWExMTZlZjk3ZTAxMWMxMDI2ZDdjMmVlNzZhZDQ5NzUyMDJiNGVhNGVmODUzZjMxMzlmODMifQ"
+        },
+        {
+          "resource": "repo://Modules/Transparency.lua#L123-L130",
+          "version": "repo-lines-v1:sha256:029881718c070a0718210391c1d7d4ea8c672b6af858801ca60cf1184fc2998c:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZDVlNWU0ZTFjMmFkZGM4YzhlNjZiOTljMjM3MzNmMzc4ZjBjYTcwM2ZmY2E5NDNlNTQ2OWZiN2I5MzZiM2QyMCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDgzMzJmZTY2N2JjNTFhYzRhNTFiYTBlZmU3MzQ0NDFjOTBkZWY1NWM2MGEyNmQ3ZGIyNzVlY2JiY2Y0MmYxNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZDQzMGJkYzQ3MWEyZjkxMjU4NDQzYmQ2ZmE3MWNjNjlhNmVjM2VmM2M5OGJmMTQ5NDYyMGRiNjkyMGU5ZGNlMSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYjRkNjYyODc5ZjAyMjNkYzc2YTU2YTRlMTBjNjE4YzRlMjUwNTUxYmY0ZmViNTk2OTdmNTViZjZhYWEyZjJiYSJ9"
+        },
+        {
+          "resource": "repo://Styles/Styles.lua#L227-L240",
+          "version": "repo-lines-v1:sha256:2b02ba52e55a8ac3362b02cd3ec5145a80f7f6837ab59283465e1b680021862b:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQwZTQ3YWVmMjA1MjA3N2UwOWZmNjA0NmMzOWE3ZTA5OGRlYmUxNmM2ZWVmZmUwNWRjODA1MmFhMmViZjhiNDUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAzNmI1MzFmMzU1OGRmYmFjMzFlZmYxNTY1ZmJkNzcxYzUyOWYyODQyMTRhOTVhM2M0ZjEzOGQwMDM4NGFlYTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjVhMDQxOGViNzM3YmY1YWIwNDc2OGY4NGJmYTU1MWYxYjRlNTljZDM4NWI4YzM5MTA5MmQ1NGUzODY3MDZhNjQifQ"
+        },
+        {
+          "resource": "repo://Styles/Styles.lua#L532-L532",
+          "version": "repo-lines-v1:sha256:92d7b12652e7fe36298c8f385b7e6efc8d2cf99dc3e7e870114b867f2752548c:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOTJkN2IxMjY1MmU3ZmUzNjI5OGM4ZjM4NWI3ZTZlZmM4ZDJjZjk5ZGMzZTdlODcwMTE0Yjg2N2YyNzUyNTQ4YyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOTJkN2IxMjY1MmU3ZmUzNjI5OGM4ZjM4NWI3ZTZlZmM4ZDJjZjk5ZGMzZTdlODcwMTE0Yjg2N2YyNzUyNTQ4YyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYmJjNTc5ZTI2ZDA3ZTZmZDRiZTRlNjA1ZTA3OWE2Zjc2YzJiYzhiNGRlODAzM2RkOWQ5OGIwMjRkYWYyY2RlMyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYzIzZTVlYmUzNjg0NWYxOTM0NTMzNmFkYWVmNDlkOTNjZjI0MmY3MDIwNzBlNmE5MDg2NWRjODkyMmIxOTBmZSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_39911381da364fce97e1f6c46249bd19",
+      "statement": "The target art widget keeps one highlight frame per target token and subscribes to the target and soft-target change events; the focus widget subscribes to PLAYER_FOCUS_CHANGED.",
+      "evidence": [
+        {
+          "resource": "repo://Widgets/TargetArtWidget.lua#L386-L403",
+          "version": "repo-lines-v1:sha256:b54526143bba134c152c499f573c663e5028ba8377e9e9f81a1c22a86a32a545:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ4Y2RlNzVkZDZlYmE3ZjUxMWYzN2MzMTk1YzgzZGJlNjNkYmZmNTJjNWY5NzVjNzM5NDQ0ZjcxZDI1MjVjMTMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU2NmUwZWNhZDNhYmU2NDUxM2ZiMDljYjA2NTU2NWQ0ZTdjZTYxM2Y1MjdhOWE1NDEyNmIyMThjY2U2ZGQzMDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA3YzI4ZWU4ZDNmYjgwOWVhMDNlOTlkNThmNjUwNmM1MDZmNjBmMjBmY2NhMGVlZDcyMWYwMjllZjNjNDc5ZGMifQ"
+        },
+        {
+          "resource": "repo://Widgets/TargetArtWidget.lua#L521-L563",
+          "version": "repo-lines-v1:sha256:6b3c93e56f70758827f616fcf5caa1cd1643a125105abf8291c13795797d8b2a:eyJzZWxlY3RlZExpbmVDb3VudCI6NDMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY0MTNiOTZmNGY5Mjk4Y2Y5NGNmYWE4YjBiNGNmYTQ5ODFlNGQ5NTQyODg3OTUyYTYxNDVlODY3ZWQ0ZjZkZDAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI3NTA0MmFmMjMyNDAyYjcwNDEwYTc4MjQ1ZDRkZTY5NGEyODA0Y2FhYTJmZjI3ZGU3M2IwNGI0MTU3ZGNhYTciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA3YzI4ZWU4ZDNmYjgwOWVhMDNlOTlkNThmNjUwNmM1MDZmNjBmMjBmY2NhMGVlZDcyMWYwMjllZjNjNDc5ZGMifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-25T18:59:51.751Z"
+  }
+}

@@ -1,0 +1,170 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:06910db9902b21548812190ea268ee253b63e169df6f3ce381916b9d9e08f1ed",
+  "claims": [
+    {
+      "id": "claim_ca0b968098c24a28b359af4fb9b769b7",
+      "statement": "Themes are registered by name with a constructor and instantiated into Addon.Theme by SetThemes; dps, tank, normal, totem and unique share the basic theme, empty and etotem the empty theme, and NameOnly and NameOnly-Unique the headline theme.",
+      "evidence": [
+        {
+          "resource": "repo://Styles/Style_NameOnly.lua#L164-L165",
+          "version": "repo-lines-v1:sha256:1a8c4a20ab6ff63cc739a50a03737d0a5b98560b6ab81fd3036880d51f23c5b7:eyJzZWxlY3RlZExpbmVDb3VudCI6MiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZDIwMTVlYTAwYjdiZmQxMTkzZTJmMjNhYThkMjg4MzA3MjM2MTlkZjhmN2M0NmU5M2ViYzMzMDc4MDYyNTk1NSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNmY4MTllMGEwYmE5MDEyYzY2ODEzNmJmNTg2Y2ExMTY4ZDI1YWExMTQxNWYzOWI3NzQ3NzM0NTgwNDE1M2QwOCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYmZkMjI3ZjMwNTQ5NzY5OGE4ZTMxMmE1Njg1NjBmYWIwMDM1MDE1ZTIzNzFmNzQyMWUzYjMxNDAxNzQwYmM0ZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        },
+        {
+          "resource": "repo://Styles/basicThemes.lua#L156-L168",
+          "version": "repo-lines-v1:sha256:4644ddb19e65b420d04115bc028243760560a0dd9d1a44effb279abf86e4f81a:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNkYWRkYzY3OTk3YjFhMDk3YTdmNmUzM2I3OWY5MzIzYWI3YzBkMGNiZDNkZTk1NTI4ZjcyN2IzYzlkOGJhOWEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE2YmZhMTczOWI4N2ZjZGM1YTM0YzI0M2M5ODhiZmI5NjZmM2RlZGUxZjVjNTQ5ZjdlYWQ1MTkwNTRkZDgyMDkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://Styles/emptyThemes.lua#L165-L174",
+          "version": "repo-lines-v1:sha256:b349953aec059e1b35af7063bba81711c18aa8dd4c835c3df615ffeb66428106:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNkYWRkYzY3OTk3YjFhMDk3YTdmNmUzM2I3OWY5MzIzYWI3YzBkMGNiZDNkZTk1NTI4ZjcyN2IzYzlkOGJhOWEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc5NGY4ZmRkODk2MzAzMmI3ZWZlYmQwM2I2Njg0NTE0ODllNjRmNDBkNzdlOGI1ODM2ZTczMTdjYWIyOTQ3MzIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://Styles/init.lua#L1-L20",
+          "version": "repo-lines-v1:sha256:edd681aa5a1cac62fc4bf15c8b4794f325bf7013f0789f05647f3dea4823dadd:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIyOWYwNTk1YTczOTlhZDVlZGJiMzgyNzFhZDNhY2E1OTg5YzY0MDg5ZGNjYzEzZWUzZmI5NmMwNjFmMTdjOGIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM2MWU0OGQwMzA4ZjIwZTMyZGJhNWZiNTYzMjhiYWYxOGQ3MmVmMGNjYjQzYjg0ZjVjMjYyZDJhNmExZmM2YzgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_f3058934f6a54dbe9104fc68d3248769",
+      "statement": "Each style name maps to a plate mode: HealthbarMode, NameMode or None.",
+      "evidence": [
+        {
+          "resource": "repo://Styles/Styles.lua#L458-L468",
+          "version": "repo-lines-v1:sha256:b540c3e4f36e75e14337d90f768cc92c35722709a44855f3144040cfaf8e0619:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRhMzljN2M3ZjY2NjEyMjQ3YmFlOGRlYjYzZDA5OTg5YWY0Y2JlN2EyMTFjMjgzNDhiNzBjY2E0NDI3OTdhOGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImVkZjY5MDNmZGUyOTRhMGVjYjI0MDVlNzNlOGUxN2I5NjdhYzYyMzc1MmY4M2Q2YWY3YTkxMDMyMDI2OTllZmYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijg3MDU0NTcxODZkNmUyYzBlNDhmYTUzYjZlMGQ3MjIyZTc0OWIyNTlkZDZjZGEzNzc1OGM4Y2RjOWE2ZmRkODYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_013d0315215c4a72a2e1d4a5ca6ee74b",
+      "statement": "ShowUnit determines visibility and headline view from the detailed unit type via Addon.GetUnitVisibility, always shows soft targets, and applies hiding and headline view rules.",
+      "evidence": [
+        {
+          "resource": "repo://Database.lua#L28-L39",
+          "version": "repo-lines-v1:sha256:7cc9d162cd57aec92fb527fa4fe23bb19758856bf5df2c0e828643f44cd5673c:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc1NjZjODFlNzViODI1ZGEwZTM3MzgwNDA0N2I2YzMzYmM0N2Y5NzE3OGQ0NTI2ZDVhZDBlODQ3ZTc3NGY3MWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc2NTlmOWFhNGQxNjkyNjdmZWY0YTE5OWU0NmU5Mjk2ZDY1YzczYzZjZTYyNDM4MTQyZTljN2Y4MTNlMTM2NzQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjIzODkwN2I0MWJhNTNlY2ZkMDZkZWIxNThhYTM3MzdkNThjMzE2NmJlYzU4OWQ4NjI2NmJlZjBhYTU2ZDQ3NTEifQ"
+        },
+        {
+          "resource": "repo://Styles/Styles.lua#L124-L225",
+          "version": "repo-lines-v1:sha256:956733e07cd9e0d546e7d12c6ad658e82c2c10e22a8aa305d3fd65dcf3c1845d:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAyLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIyZDIwYTNmZDJmZjJhMDhlNTYyYjgxNDBjNjRhNDcxZmNjN2U4NzM1ZGM4NjFkODI2ZGNjODU4ZjU2MWU0MjY4IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0ODMzMmZlNjY3YmM1MWFjNGE1MWJhMGVmZTczNDQ0MWM5MGRlZjU1YzYwYTI2ZDdkYjI3NWVjYmJjZjQyZjE1IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI1NjZlMGVjYWQzYWJlNjQ1MTNmYjA5Y2IwNjU1NjVkNGU3Y2U2MTNmNTI3YTlhNTQxMjZiMjE4Y2NlNmRkMzA1IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJhM2YwNmQzNDdiMDFmZWU4MjVkMjA1OWFmOTU3MWI1NjMwMGYxNjFiNGVlMWQzMmZmYjM5NjZkYzUzYWZmNjc4In0"
+        }
+      ]
+    },
+    {
+      "id": "claim_234e088f4edb411894cc16ab0fd17501",
+      "statement": "SetStyle gives cast triggers priority over aura triggers over name triggers, applies instance restrictions of custom styles, returns empty for dead units, etotem for units that no longer exist, and otherwise the threat style.",
+      "evidence": [
+        {
+          "resource": "repo://Styles/Styles.lua#L393-L452",
+          "version": "repo-lines-v1:sha256:7fae29b52237ad43a6c647e51905133a9fac9ad61e6aa95bd764f4d88e0e8fb6:eyJzZWxlY3RlZExpbmVDb3VudCI6NjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE4MzM1NTE4ODJlMWE5OGE3OTBlOWIzNGViYjI5MDBiMjdkYzgzNWI2MTg0M2EyZTU1ZjAzMzVjNTg3N2M4MDMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU2NmUwZWNhZDNhYmU2NDUxM2ZiMDljYjA2NTU2NWQ0ZTdjZTYxM2Y1MjdhOWE1NDEyNmIyMThjY2U2ZGQzMDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjcyNzFmYWNhYTc0M2ZjZjhkZTljN2RjMGY1YzMwZGMyZmIwOWJjYmU4Yzc5ZGNlNzYwZWIyZDNkYWI5MTEyZTIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_42b04423f84c4f7b87260b1d2c4fec50",
+      "statement": "GetThreatStyle returns the player's role when threat feedback applies to the unit and \"normal\" otherwise.",
+      "evidence": [
+        {
+          "resource": "repo://Styles/Styles.lua#L227-L240",
+          "version": "repo-lines-v1:sha256:2b02ba52e55a8ac3362b02cd3ec5145a80f7f6837ab59283465e1b680021862b:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQwZTQ3YWVmMjA1MjA3N2UwOWZmNjA0NmMzOWE3ZTA5OGRlYmUxNmM2ZWVmZmUwNWRjODA1MmFhMmViZjhiNDUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAzNmI1MzFmMzU1OGRmYmFjMzFlZmYxNTY1ZmJkNzcxYzUyOWYyODQyMTRhOTVhM2M0ZjEzOGQwMDM4NGFlYTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjVhMDQxOGViNzM3YmY1YWIwNDc2OGY4NGJmYTU1MWYxYjRlNTljZDM4NWI4YzM5MTA5MmQ1NGUzODY3MDZhNjQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_e430e111dce54513a2224bc0840d152f",
+      "statement": "InitializeCustomNameplates rebuilds the name, wildcard, aura, cast and script trigger caches and the per-instance style caches from the profile's custom styles, keeping table references intact with wipe.",
+      "evidence": [
+        {
+          "resource": "repo://Options.lua#L770-L845",
+          "version": "repo-lines-v1:sha256:0d8a6c79e74ebf5d2639baa40b5a3672f7416d2eb19f3ff9bd7fd215d66923e1:eyJzZWxlY3RlZExpbmVDb3VudCI6NzYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRhODVkN2YwMzk2NjFlNjA1MjhkZjYzOWNiMmQzNmEyNTYzMWI3N2JkODE3YjY0NjQ4NjY3ZjA2NDYwMTRlODAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI2OGNlYjYzNTlmOGI3NDBmOGNhNWM3Yzk3MmQxMTliZmMxNmU3YmIzMmY3ZjA5MDNjNjlhN2NiNWExZTBhOWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImJlNGMyMzNkOGMxZGU3OGI0Y2ZhMzY1MTVjZWE4NzYwMTQ3MDIzM2FkMzNmNzU2Njg1MmMxOGFkNDE5NWI2MWQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_55317a19e8a04af081a45e7316d7e0d2",
+      "statement": "SetNameplateStyle stores the style name, style table and plate mode, and UpdateNameplateStyle sizes the frame and updates Color, Transparency, Scaling, all Elements, all Widgets and the castbar in this order.",
+      "evidence": [
+        {
+          "resource": "repo://Styles/Styles.lua#L470-L497",
+          "version": "repo-lines-v1:sha256:b700e3cad56df4a2b9755d93b8aa8ee003282248733fea7ae1572d80937fe882:eyJzZWxlY3RlZExpbmVDb3VudCI6MjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ1MzFiM2RjOTQwYmM3ZWM1NDQ3NTkwMWQ0ODRmNDQ0MTc1NjhkNWZhOTkzNmQ4NWE5YzU3ZmYyZjU2NTRjNDQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI5YTlmNzlhMmM1MzI0MGU4OTcxZTlkZjA0ZTk5NWFkNjA3MjZkZTY5ZmE3MzRmMDY5NGJmNTE1M2E4MjM2YTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI0ZjBlMWJhMzM3YzcyZTNiNDYxMTkyZTNmNzFkZjJmYTBkMjhjMTg5MTA5N2ZjMWUwN2EzOWIwYWQzMTA3NzgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_e211a2d1a14246d8b378289d8345b1b7",
+      "statement": "StyleModule.Update only re-applies the style if the style name changed or a unique style's custom style changed.",
+      "evidence": [
+        {
+          "resource": "repo://Styles/Styles.lua#L506-L517",
+          "version": "repo-lines-v1:sha256:f4da0cea970e89e1a7c3d2defd765a458e2d00a4d063970113a1ab96573477d4:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVlOWFhZjJhMGMzZTc5N2MzZjRjMzEwOTZhNDQzNjliNGRjNmE2NWZjMDI4ZTkxYjcxYzlhN2M0NTc5YjAzOWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJmZTIxYzEwMWVkYWViYjFjNTdkOTEzN2JkZGE4YmVhNDE1NmI2MzRjMTY3YWRlMDRjMzRmYWM2NDNiNmQ0ZmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImMzZGI4OGFmODhlZjcyNzg4ZTRjY2I4ODExMjM0M2M0ODJiN2EzYzkyYjJhZjZmNzFiNDkyYTkyMWMyNzMxNjEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_abb3ebd1b34648b0b5c8fa9c9e023c6e",
+      "statement": "The Script widget is initialized before all other widgets and is enabled only with active script triggers and globally enabled scripting, toggled by /tptp toggle-scripting.",
+      "evidence": [
+        {
+          "resource": "repo://Commands.lua#L355-L363",
+          "version": "repo-lines-v1:sha256:3c0449dcf6b5c8951de8b27243494cb2529cc4d042c208eda8fbafcbeda1f1ce:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYjVlOTZhZmJiNTQ0ZGJjYzgzZDgwMWI1NWVjMDkzZjZjMzY5ZjQzZTg5MmMwN2FiMTlmZjQ2OWVjN2U0OThjOSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMjM5NzZkMTQ0NjY0MTNlMzI2YjExMmM1MDEwMjJkYTlkZTRjYzQ2MTA4OTZmMjAwMTI3NWJjZjcxZmQyY2Q1YiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNjQ0YjQzODhjZTJkNThmOGU0Mzk3OThhNjRiYzYwMzFmMjIyNTdhMWJmZTc0YjM5MTUwNjFmZTY0YTA0YTg3NiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNDk5ZTY1Y2NiYzdiODRhMjU0MzgzYTc2ZGViMDg0MGJlYTg3MDk3Y2FjMTdiYTc3NmQ0ZmRjZWY0YmI2ZDIyNCJ9"
+        },
+        {
+          "resource": "repo://Widgets/ScriptWidget.lua#L468-L476",
+          "version": "repo-lines-v1:sha256:ce4e5a4e289537746fb93e01901e8c485724de07a44db29ff798a9a841a86261:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNGU3ZDhkOTU0MjlhM2JjOGJiY2FhYjJjODI5NDNkMTAyYWI3OTQyMTRlMDAzMDI1OGJiZjA1YTU2YWEzY2RmZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDgzMzJmZTY2N2JjNTFhYzRhNTFiYTBlZmU3MzQ0NDFjOTBkZWY1NWM2MGEyNmQ3ZGIyNzVlY2JiY2Y0MmYxNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiY2VmMWU4ZmQxMThmNzdhNjI2MDY3NDBkNmE3MzM2OWYyNDdiYTk3MGE1YmEyOGQ2ZTc4Y2NmNGNlNGQxNmQwMCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiM2FiMTcyNjQxOWQ3ZGVhZDlhZmM4OGUwMzI3NTNkY2E3NTVhYTFjMzljOTEzMDU4OGMxZDlkY2FhNThhNmRkNiJ9"
+        },
+        {
+          "resource": "repo://Widgets/WidgetHandler.lua#L237-L247",
+          "version": "repo-lines-v1:sha256:b3ff664be1fc1723e55b6a9da0374b3b682222a34b51efc20c2f693aa67b3088:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBmZDE4ODg1ZGM3MDZjYTZlNWE5NTdlODRjMDQ5MzIzYjFkY2Y0YzU3NDNhZGY2YWJlMjU5MmZjOTE4YTVjYTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU2NmUwZWNhZDNhYmU2NDUxM2ZiMDljYjA2NTU2NWQ0ZTdjZTYxM2Y1MjdhOWE1NDEyNmIyMThjY2U2ZGQzMDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRmOTQ1MzEyYTQyZGFlNDczYzIyNjkzOTk4YjYxYWIyYWI2ZjczZDc4OWU5MTk5YjQ3ZDUyMWY5MjQ0NGIyZjMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_c20b445e548a47efbe48faf4060d20ca",
+      "statement": "Scripts are compiled with loadstring into a sandbox environment that exposes a Threat Plates API table and replaces blocked functions and tables with proxies that only log a warning; all script calls run through pcall.",
+      "evidence": [
+        {
+          "resource": "repo://Widgets/ScriptWidget.lua#L233-L409",
+          "version": "repo-lines-v1:sha256:1f12b4e5f265979a65a8f90f55661456626d25ea9d16d8199b76dd176f86f28b:eyJzZWxlY3RlZExpbmVDb3VudCI6MTc3LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJlZjQzZDI3MzdhZjEzNTg4ZTc5MzA4NzIwYTU0MTQ1NmUyN2VjNTRkMDEyNTU1ODdhMTI2YWIxMDkyNWU4YjU4IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0ODMzMmZlNjY3YmM1MWFjNGE1MWJhMGVmZTczNDQ0MWM5MGRlZjU1YzYwYTI2ZDdkYjI3NWVjYmJjZjQyZjE1IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIyNGM3NjY2ZmMwODQ4N2RmZmU1NWNmNjY0OTdlYTNlNGVlMDM1ZWY3MmI1OWMxMmNmMzliM2UxMDk5MGZiMzA1IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJkOTgyZjExMTRiMjVhOGRmZDAyNjE0ODBhOTY5NmNjYTBhZTAzZTk0OTRkNWNkYTg5MzRhNWZmZTdhNDI4YTY4In0"
+        },
+        {
+          "resource": "repo://Widgets/ScriptWidget.lua#L425-L460",
+          "version": "repo-lines-v1:sha256:c08c9075264352f034b295695da231043228562f08de4b2e314dfca729759d72:eyJzZWxlY3RlZExpbmVDb3VudCI6MzYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVmM2MxM2Y4ODIxMGJiNDc0NDE5MDhhOTAzM2EwYjU0OThlNjM5NzIxNTIyOTZkMGRhZDA5OGM1OTRjZDYyZTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRlMTU2NzhjMjMzNDRhYmVhMTIxNDM5OWUyOGZjYzYzZGYzN2FkOWQ5OWIyYTZlMmY1ZGNiZTZjMjUyZmUxNzMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImIwODkwYzYwODI4YWE3M2YxN2ZmZGEzYjNjMTczM2FkZjY1ODU1NWI5ZDAyOTc2MjcyZmYyZGU0NjBmNjQyOWQifQ"
+        },
+        {
+          "resource": "repo://Widgets/ScriptWidget.lua#L745-L766",
+          "version": "repo-lines-v1:sha256:f4f9617562d004eb23e34a884997872bc426d37401a7fa19fbb799a8da72809c:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY4ZjNlMGRmZWVjZDExYWRjZjkyOTFjM2QzZTJhMTIxMWJhZWY2OWNhYmVjZDkyMzk5MmM5YmRlZmVjODRiMDYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM2MWU0OGQwMzA4ZjIwZTMyZGJhNWZiNTYzMjhiYWYxOGQ3MmVmMGNjYjQzYjg0ZjVjMjYyZDJhNmExZmM2YzgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjYwMjYzYzY0NzAxNzA1M2EwZmNkN2VhOWRkMGZmNTdhMmNiNWUwNzZjNzUxZTM3ZjllMzNkMjRkMDlmZGZiZDgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_e17351a314b247c5a28964ee1f956249",
+      "statement": "WoW event scripts are subscribed with a function handler that expects the event name as first argument, while EventService calls function subscribers without the event name.",
+      "evidence": [
+        {
+          "resource": "repo://EventService.lua#L50-L61",
+          "version": "repo-lines-v1:sha256:f85d574877526703d0af22f824a5a8cf00688ea32539af2057a9247276990458:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM5MzQzNzI3ZGQ0OThmOGY3NDlkNDVhZTljZWM0MjJkYTFmODE0MDM5OTZmZDI4MjBkYzM1MDZlMTBkOTk0YmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc3OTgxMWM1ZmJlMjVjM2Q0ZTVmM2QxZmQzNWFiOWRhNmJjZjhhNjhjNWVkZjlkNmJhOTdmNjg2ODZjMzk2ODAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRhNDYxY2U0YzIwZmFhNGNlZjdmNGU5NjJkMmI3NzFlOTkxMzJkYjNiNjY2MzI1OWEwMjQwYjYwYTBhYTkzZWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc4MGE4NDZkNDc4NjRmZGEwZDdjOTY3MjFhZjc5YmIzMWM1OTg2NjA4NTljMzc5MjU3YzM5MDdhZGFjZDVhOWUifQ"
+        },
+        {
+          "resource": "repo://Widgets/ScriptWidget.lua#L608-L620",
+          "version": "repo-lines-v1:sha256:a7da63f441fa2c08cecdd62432f709eec382f136a0235c2fc94e7db775b8e211:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM2NmZhNDFiYzM4OTI4N2I4ZDQxNDgzNWFlODA5Y2I2NmMyNzhmYjQ5N2MyMzEyMzU3ZWVhMzQyMWIwNjkyMmMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc2NDNlNzkyODZiNmI3M2NkZDBlNTRlNWFiYjFmNDRiZGRhYzBlMTAxZmI0MWFjZTViMzZiYzZlNjExNmE0MjQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU2ZmNlNzFiYzE4NmRiOWVmN2M1ZThmODIzNDFiM2Q1ZmFjNjAzYTYzOGE0ZTVlYzAyOWEyMmEwNWUyYmZkZjYifQ"
+        },
+        {
+          "resource": "repo://Widgets/ScriptWidget.lua#L660-L673",
+          "version": "repo-lines-v1:sha256:9fbde878ab616887c7a237bad4bcfbaec196ec0d41325df71c58f843ecfe0c23:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJlMjJlY2JmY2U2MWNhN2ZjNjU5ZDE1ODNjNzg0OTc4ZDM2ZTE0NTVlNjcyZjlhYjRjMjczZTdkZjIzMGIzYjkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU0ZDM4OTdhMGY5ZDY5YzlkYjgxYmM5Nzc0MTVlNDBiNzIyYTVkNDRkZGU1YmQ4ZjcyNjQ1MWJhZWQyNDhhNDAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZhNGY4YjNiMzc1Yzk4ZTk2N2ExOTNkNDU1ZmYzNTk2MTRkMzI5ODM4MzE1MTBjMDBhYjllYmI1ODFjMmVmYTEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjAzMmMyZmEyZDYxNGU1OTcwM2NhYzQzOTgxZmZjYWMwYTcyZDRlMWM1NzgyOGE0NDE0MzViYWViNDEyOWViZTYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_aee535141b1a4865bbdbab0da43bcb49",
+      "statement": "Widget:OnUnitRemoved in the Script widget passes the undefined variable tp_frame to OnTargetUnitRemoved scripts.",
+      "evidence": [
+        {
+          "resource": "repo://Widgets/ScriptWidget.lua#L586-L598",
+          "version": "repo-lines-v1:sha256:35fd762012fcc69dad53b4b395daca9fcde7a959582c514556b64faae20d7527:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBkZWUyZmRlOTNkODUyYjllZTlhMTc3YWJjNTdmN2MzNmY4OThkOWFjNzc1NzFmNDFmOTQ1Y2MxYmZhNDcyMTkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQ3YWNiYTBlZmUyZDg3Njk4YTQ1ZTdkMmUwNDdhMmQ3NTkxNmE3YTc4NzkxMThhMWNlNGUxODVlNTk3YWY3MzciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc4MTk3ZTc2YmRkZmMzNjQyNjM0OTkzM2NhYWRkNjgxOWNhMTFiOTg1YWRmYTA4ZWYyZTViMWRlMjYwYzE1ZTUifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-25T18:59:51.751Z"
+  }
+}

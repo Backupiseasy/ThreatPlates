@@ -1,0 +1,154 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:4328498421b8556cd09ed554e1e2b9dcb970cd078c2e59e6298e1b7034e383eb",
+  "claims": [
+    {
+      "id": "claim_53b72aaf58b24769a5c22e6af6779e63",
+      "statement": "IS_CLASSIC is true only for the Classic Era project id, and IS_FOREVER requires WOW_PROJECT_CAMELOT to exist and equal WOW_PROJECT_ID, so WoW Forever is not part of IS_CLASSIC.",
+      "evidence": [
+        {
+          "resource": "repo://Init.lua#L27-L44",
+          "version": "repo-lines-v1:sha256:87f34e3e4a6e920347ae05cc2838c72bfa28e55f1685b87a77247ca6f820ce8d:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNlNzZjMmRiOTJjMGI5N2RjOGJhNzdmZTcwOTY1MWRjNmQ2ZWI2MGU4MDBkOWQ0NmIzMTFlOGQzMGJkZGNlZTgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEzZWU1NDQwNGExYjZlNDVjZjlkMTVmOThkMjExZDllZTkwOGExMjgzYzAwMDJkMmY1YWMxM2IwNTAwNzcxODAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ3NGM0MDQ2YWVjMGIxMjE3MWZjMGRjMjhjMzU0MzdhNWIyYjI3ZGI1NjBhNWVjMDQ3MTJkODhiNWVhMGQ4ZTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM4MTRiNzdhODY2NzgzNzY2ZWI0NzgwNmQyZjE0NjhlMGZmMThkY2IyYjEzODUxYTFjODc1YjAwZmU2ZTAwZGEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_ace4bc5ddc384fa1b61091c02c0f8cb8",
+      "statement": "Classic Era season flags are derived from C_Seasons.GetActiveSeason() compared with Enum.SeasonID values, while TBC Anniversary is detected by comparing the season with the literal 125.",
+      "evidence": [
+        {
+          "resource": "repo://Init.lua#L28-L34",
+          "version": "repo-lines-v1:sha256:f7c05ee98553bfd5da03a67220ef4d3aa641ffc5b2810e9de5766e9d871d1288:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYzc3YjcwNDg3YjYyMDFhZTA0NTQyYWZhNGEyNmQ1Y2E1YWUyY2IwOGRlNWNkMmRkODMwNTBmMTUxZDc4MWUzZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMWIyYTRjZjNkOGM4YWExYzA1N2MwMGM2ZGNlZjMxMmRmZTcyMTQ1ZmVjY2NiMWFjMTdhZjk4ZThkMGZkM2VkMyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMTcwZjk4ZmEwNjg0MzM1ZTIwYzA2ZTI4ZWQ4NDk2ZTQ3NTRkOTZmY2E0MDdmZTg5OTBjZjIyMTU4NjZkZDE3OCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYjI4YmY4NjMwYjVmMWNiYjBjZTRlYzc3MmZkMWY5MzFiYTJjNzA4MzY5OTY5ZWFkOWZlYmVhZDdkOWEyZWUzNyJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_002b318087ee4cb0b127e6e07070c56d",
+      "statement": "ExpansionIsAtLeast returns true on Mainline unconditionally and otherwise compares GetClassicExpansionLevel(), so all ExpansionIsAtLeastX flags are false on Forever, which reports LE_EXPANSION_CLASSIC.",
+      "evidence": [
+        {
+          "resource": "repo://Init.lua#L46-L61",
+          "version": "repo-lines-v1:sha256:c29fddd999287d3fe11f36d3853a409e2401f2049dfc39a0d74ab305d8f3a6cc:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY1MjA4NWUyNDFiYTAzMTRjNjcxMzk2MDhkOWMwNzY0ZDEwMTRhZjZlNWEyOWQxNDNkMGRiMzViN2FmNmFmNmUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk5OTljZjFkMGJmYjk3Mjc4Yjc5MTFlOWQ3ZWQyZGJlNmQ1MzJmZDIzOTE5M2FhNjljODZkYTJkZjE0MjBlMzUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjVhYTE0OTZkOGQ4NGZlYzA2YWZlNTZhZDg4NjNhYjUzZDQzZDJjYWI3NWFlOTYwNjgxOTgyNWMwNjA4YWQyODQifQ"
+        },
+        {
+          "resource": "repo://Init.lua#L87-L97",
+          "version": "repo-lines-v1:sha256:91b6d08eb9d90b896eff60ac59db391f3606ad8037c877a4b84340eadc45d036:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgxNzk2M2E1ODkwMWUyYTRjMDY3ZjI5Y2NiNjc3Y2Q4ZmY5Y2ExZGQxNzA3MTAzNjBmZDQ1ZmNlNTg1NWRiOWUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzEzMTlmMTUxNzc0ZWFlNzc0N2RiYzMzZGMzNDRiNjYzYTYxZTFkNDYzMWJjYjZlZjhlN2VjODE5M2M4YjEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhlMzBkZmZjNmM0NDNjOGRiNjE1NWEyZmZkMjYyNTUzYmQxZTZjY2JkZDdiMDkwNDQ4YTJkMmJkM2JhNzY5MjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdmNGRiYTc3NjFlYzhjMWYyNDk2OTU1OTE2YTllNzU1MDFjNDY0YTc4OWI3ODFkNzVmNjg0MzM4MWE4MWQ4N2IifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_65a22c43807f48d0bd4b9e2afb0c5130",
+      "statement": "GetExpansionLevel returns \"MAINLINE\", \"FOREVER\", LE_EXPANSION_CLASSIC or the Classic expansion level, and the totem data table has a dedicated FOREVER entry indexed by it.",
+      "evidence": [
+        {
+          "resource": "repo://Constants.lua#L487-L525",
+          "version": "repo-lines-v1:sha256:17094983df28ffb18639060ee0ceb55ea1bcc740818111b050ec1eaa86771765:eyJzZWxlY3RlZExpbmVDb3VudCI6MzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ3YjkyMTdlOTE2ZmM5ZWYwMDMyNmMyMGE0OTMyNzc2NGJmNDA0NjQzMmQ4Y2U3YjhjM2Q3ZGVlNjRkYjdjZTAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk4N2MwZmI5NjllOTMwM2E2NDJlMmVmMzI3N2IwYzVjY2JjNTAzOGQzYjA5YWUyMjE0NjIxM2IyNTAxMjk3YTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk0YTU5M2I0YzEyNGIyNWI0ZDM4MTJhMmVkOTEzYWIxZWZlM2I5ZDMxYmQyM2E4YmVjNTU2ZDc5ZTJjZDIyZmUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImE0ZjY3Y2MxZTc3YjM2ZGE3ZDM2YjRmOWVjNGU1OWUyZDIzM2IxMTMxNDMzMWRmMmY0YTZkMDY1YjEzNDMyYTYifQ"
+        },
+        {
+          "resource": "repo://Init.lua#L73-L85",
+          "version": "repo-lines-v1:sha256:a8711429a24607e404837fc7d8202c07c67065712492eb25db9cd426a0af2c64:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQyNWI0NDk2ZThhOTA4ZjRjMTg2NWU3ZWNiMjhmN2NlMTA3Zjc3M2ExNjVjYmZkNjQwZmQ0ODk3MTMxOWUyYzMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhlMzBkZmZjNmM0NDNjOGRiNjE1NWEyZmZkMjYyNTUzYmQxZTZjY2JkZDdiMDkwNDQ4YTJkMmJkM2JhNzY5MjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijg5ZmNhYThhNmNlMTU2OTQ3NjRkODQ1MWUyMTMzMWM1YzAxNTIyMjhjNGE2NmY4OWYzNTIwOWI3MjA1OGQ4NWEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_8ccf8f6553ba422d9d880a0e4a02642a",
+      "statement": "HAS_MIDNIGHT_API is defined as ExpansionIsAtLeastMidnight or IS_FOREVER and selects the modern/secret-value-safe code path, e.g. the two auras widget files return early on opposite values of it.",
+      "evidence": [
+        {
+          "resource": "repo://Init.lua#L99-L105",
+          "version": "repo-lines-v1:sha256:4d0daa0c7dd8e45a594fea1064ebee03073c688d3ded0a4416534c7d8f15d7f8:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiN2FkYWVjOTBhMDY0MWIwMjhiY2FjYzRkMmM1Mjk4MDAxZWFkNzU1ODJjZjhkMjRkMzZhNGQ1YjI3MDM1YWYxNyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiM2ViMTBiMjAxNzY0MWNmY2UxOWY1Zjg4MTViZGRhNzJiNjdhNzQzMWNlMzZhNTM1ZGNlMDA1ZmJiYTYyMTVhYyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiM2U5MmE3NTEwYjZhNmQxYzQ2ZDEyY2ZlYzMyYmE2NDdlZWI1OTc0NzIxNDQ2OWU0MzBhOGU2NzE1MjJmOTQ4NCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMGJkNzM3Y2Q2YmIwY2M3Yzc0ZTc2YTAxYjgzZWIxOGZhYTU3NGMxOTQzYWM2NjdjYjdiOWY0MmNjNTg2ZDcxZiJ9"
+        },
+        {
+          "resource": "repo://Widgets/AurasWidget.lua#L9-L9",
+          "version": "repo-lines-v1:sha256:232c1ab089274750fbeb533713f9ef6ebd9691df111e9363a7ecf9eacf8d7ef0:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMjMyYzFhYjA4OTI3NDc1MGZiZWI1MzM3MTNmOWVmNmViZDk2OTFkZjExMWU5MzYzYTdlY2Y5ZWFjZjhkN2VmMCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMjMyYzFhYjA4OTI3NDc1MGZiZWI1MzM3MTNmOWVmNmViZDk2OTFkZjExMWU5MzYzYTdlY2Y5ZWFjZjhkN2VmMCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMGI5Yjk0NDBiMjYxMmZjMWNlYTg0MjI4Mzc1YmMyNDY5M2VlOWU0ODRhY2I2MDE4NTkwMzViY2U2YWNmODcwYiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNDcyOWRhMDAxMGFlYjgyNDhiNDM2OTJkZGM3YmFiNmM0MzVmMjliY2I2YTE1MGY0YmUxZTgwNmJiZGIwNmY1MiJ9"
+        },
+        {
+          "resource": "repo://Widgets/AurasWidgetMidnight.lua#L9-L9",
+          "version": "repo-lines-v1:sha256:40df694af9694bda1687010d6a8152c95b42fb70309ff5f248b38a0347148227:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNDBkZjY5NGFmOTY5NGJkYTE2ODcwMTBkNmE4MTUyYzk1YjQyZmI3MDMwOWZmNWYyNDhiMzhhMDM0NzE0ODIyNyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDBkZjY5NGFmOTY5NGJkYTE2ODcwMTBkNmE4MTUyYzk1YjQyZmI3MDMwOWZmNWYyNDhiMzhhMDM0NzE0ODIyNyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMWYwZDNmODFjYjYzNzU2MmU1OGJmYjFlMDczN2E2YzJlMzY0NjQ3MDJlOWZhMTk3NTIxNDM3NTE2MzZjZDlmOCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNDcyOWRhMDAxMGFlYjgyNDhiNDM2OTJkZGM3YmFiNmM0MzVmMjliY2I2YTE1MGY0YmUxZTgwNmJiZGIwNmY1MiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_243e216702704b4197fed3c8c3065e68",
+      "statement": "BossMods and HealerTracker widgets are not loaded on clients with HAS_MIDNIGHT_API, and the Arena widget is not loaded on Classic Era or Forever.",
+      "evidence": [
+        {
+          "resource": "repo://Widgets/ArenaWidget.lua#L6-L6",
+          "version": "repo-lines-v1:sha256:bf6b660c7f951e3339f6088b599ff967c5aaf9447ff9dfa7f4cccdcbaf8cb266:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYmY2YjY2MGM3Zjk1MWUzMzM5ZjYwODhiNTk5ZmY5NjdjNWFhZjk0NDdmZjlkZmE3ZjRjY2NkY2JhZjhjYjI2NiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYmY2YjY2MGM3Zjk1MWUzMzM5ZjYwODhiNTk5ZmY5NjdjNWFhZjk0NDdmZjlkZmE3ZjRjY2NkY2JhZjhjYjI2NiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYzcwODNjMTk4ZGMyMTcxMDU5YThlNWE4ODIwMmY2ZDMwM2JlMTg5YmQxMGY5NTQ5ZWE3MWJiZjg4M2MzNWUzZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYzJjY2I4N2ZkZWFjMmE0M2FmYzBlYzNiYTBmZTQyYmUyZWI3YzQwNDZhY2QyNzYxNjg1NmFlMTY0NmZjYzU2NyJ9"
+        },
+        {
+          "resource": "repo://Widgets/BossModsWidget.lua#L3-L3",
+          "version": "repo-lines-v1:sha256:232c1ab089274750fbeb533713f9ef6ebd9691df111e9363a7ecf9eacf8d7ef0:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMjMyYzFhYjA4OTI3NDc1MGZiZWI1MzM3MTNmOWVmNmViZDk2OTFkZjExMWU5MzYzYTdlY2Y5ZWFjZjhkN2VmMCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMjMyYzFhYjA4OTI3NDc1MGZiZWI1MzM3MTNmOWVmNmViZDk2OTFkZjExMWU5MzYzYTdlY2Y5ZWFjZjhkN2VmMCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjIsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZWRjZjQzMGJjYTcwZjMxMmM3ZTFiMWM5MjA5MDUxNTdkZDU1ZDI2ODJjNmQ5NDI1YTIyYzhkMjU3MjMzMDhiNSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMGEzYjQ2NGVmODYyMWM1ZmUyNzliOWRlNzcwNmFmM2E0ODBmMDMyZDVkZTg1YjU0Y2ZkMjQxNzk0MmFjMjUyZCJ9"
+        },
+        {
+          "resource": "repo://Widgets/HealerTrackerWidget.lua#L21-L21",
+          "version": "repo-lines-v1:sha256:232c1ab089274750fbeb533713f9ef6ebd9691df111e9363a7ecf9eacf8d7ef0:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMjMyYzFhYjA4OTI3NDc1MGZiZWI1MzM3MTNmOWVmNmViZDk2OTFkZjExMWU5MzYzYTdlY2Y5ZWFjZjhkN2VmMCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMjMyYzFhYjA4OTI3NDc1MGZiZWI1MzM3MTNmOWVmNmViZDk2OTFkZjExMWU5MzYzYTdlY2Y5ZWFjZjhkN2VmMCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZGIzYzUzZWFhYjkzZWVmNzZjOTUzMGYwZDhmMWIxOWNkZmJkYzE3MGI2MjUyNWQ4ZDIzODFiYzY5ZTMwNWUzMCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZDlkOWFkNjQ5OGUyZDI2ZWNlMTczZTRiMWU5NzRkMmEyODA4NGM5NDAwMjNkYmVmZDhlNWFmNjU3YWNjYWEwNSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_31847283fceb4509b349445c945e6b39",
+      "statement": "WOW_FEATURE_FOCUS, WOW_FEATURE_REGIONAL_SURNAMES, WOW_FEATURE_BLIZZARD_AURA_FILTER and WOW_FEATURE_ABSORBS gate features independent of expansion level; absorbs are detected by the existence of UnitGetTotalAbsorbs.",
+      "evidence": [
+        {
+          "resource": "repo://Init.lua#L107-L139",
+          "version": "repo-lines-v1:sha256:1b4b876d00bd0448a239fe69962da38509aea6825e4999e897a2fe61e9da01e0:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhhN2RiZDZkZTQ5NjhlNDRhZTQwMzRmMGZlOWI2NzAyZjU1Zjk2ZDY4YjdlNGZlNjYzNWM3NGQzZWUxNjI0N2EiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQzZDUwNjBkMzdkMGU5MmQxYjhhZTQ0MjFmMGVlYWI3NDM5MDhjZTE0M2FlNmJlZDhiZjgwYTc2ZDVhMzllYWMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFiNTAzM2I3MzFkYzM0ZmYxODFjYmY1MmEwM2UwZjE0NjY3YzkwMWMyMDY5NjgwMTI2MzNjNjRmMTA5MmI5MzQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQ2MDZiNmE5NTMzMDkxZTA3ODY5NjUwMjZmZTg4YzFmYWRjYTM1ZThiYTdhNjg2YTUwY2Q2NzExOTk3MGY3NTkifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_7cab1d3189304d189fad934afe726588",
+      "statement": "GetSpellInfo, the threat situation wrapper and IsSoloShuffle are selected per client in Init.lua, with Mists Classic and Forever using C_Spell.GetSpellInfo and a stubbed IsSoloShuffle.",
+      "evidence": [
+        {
+          "resource": "repo://Init.lua#L263-L304",
+          "version": "repo-lines-v1:sha256:f7d4eba0313cf2af1f5e9fed9bb73b8806a31b114e3433d4b11efc9918cd2e1d:eyJzZWxlY3RlZExpbmVDb3VudCI6NDIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU4M2MyMzVmYjgyNDc5MTAwMjQ0MzM0MjU1ZjA1M2ZiNjVmZThhYmJkNzFiMjY3OGQzMDBkOWM4ZmVlMDU3NTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImVlOTM4MGRkNGYwMWY1OGE4Y2JhODRkMjdkODMyZDJkNWUyODkyZDc5M2U5YTc3YzI3MjVhYWZhMzg4ZDdiNzgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjJlYjdjYTllMmZhNjFiNDc2MzgzN2FiNTgwM2Q0MmE2ZDBjOTI3NThiMzVmMjc5MzMxMGU3MjcwYThlNmE0N2EifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_31b75be58abe425b98316b3d671b4ac4",
+      "statement": "Tooltip access uses C_TooltipInfo.GetUnit on Dragonflight+ and Forever and a hidden GameTooltip scanner on other clients.",
+      "evidence": [
+        {
+          "resource": "repo://Compatibility.lua#L134-L186",
+          "version": "repo-lines-v1:sha256:98b4140d2a8285f5061d938428caa8c5dc542b4f5d5b75f934314c9ae0e7a743:eyJzZWxlY3RlZExpbmVDb3VudCI6NTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMzNTMyOGZkMTJiNzMyM2EwZmZmZmM2MGZlZWU1MTcxZTQ4NzYxMGUyM2JhOTNkMTZiMzM1N2MwM2U1NTM4ZGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImFiMjIwZWI4YzBmMTNkMjUwMDFiOTYzYjZhMDhiNzEwMTE3YTMxOWRlZThkNjM3Y2RiNjg3NTA2YWExNWFjNzMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY4MTY4ODhkN2E4NjIxMzYyOTQzNDc5YzU4N2MwZDllOTU0YWJlOTdhYTAyMWEyZDE5MTllZTMwYjRkYjZjYjYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_8a453ecaba4742f785951d6bbaee277e",
+      "statement": "The database is registered with LibDualSpec only if not IS_CLASSIC, or on Season of Discovery or Anniversary realms.",
+      "evidence": [
+        {
+          "resource": "repo://Addon.lua#L297-L310",
+          "version": "repo-lines-v1:sha256:2bfddea722c2387428e1e4cde4aa0b431afb4ef593e38b738a4af99e5c8bfe0c:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYxYzU3ZDUxZjRmYmU3NzZhZWVjYzEzYzAwODBhNzQ5NGFkNjg3MDBmNGVmYjhkNmNiZTg2Y2VjZDZjNzQzNDkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc3OTgxMWM1ZmJlMjVjM2Q0ZTVmM2QxZmQzNWFiOWRhNmJjZjhhNjhjNWVkZjlkNmJhOTdmNjg2ODZjMzk2ODAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRkZDBlNjVjYmZhMjRlZjBiNGQ2OGE4ZjgwY2E1Y2ZhNDRlMmRkOTY3YjgzODliOTZiYjJiM2ZkNzQ2MTc4OGIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImVjN2M2YzYxMmQwYmEyZmQ3NDMyOTljYjMyYTZlMGRjMTBmYzQ0ZDYwZWNkMmYzZGFlNjY4NWE0NTY5MjU0NTQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_3b51241497d8480eaad0f71c9d148fc1",
+      "statement": "Before Mists (and on Forever), player role is determined by class, stance and tank auras, preferring UnitHasEffectivelyTankAura when it exists and its result is not secret; from Mists on it uses GetSpecialization.",
+      "evidence": [
+        {
+          "resource": "repo://Nameplate.lua#L2331-L2414",
+          "version": "repo-lines-v1:sha256:b05d2f5e4f298ae1a5d32739ffbd5ba8c17bf3c9b9889855e66a5c72e9242f0c:eyJzZWxlY3RlZExpbmVDb3VudCI6ODQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM3MDc4OTliZTM0ZmU4MmE1MmZjODE3ODIyZTYxMGFkOWY5MDI2YTRiOGM1MmFmNmJkNTc4ZGE0NGRlMTZhNTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc3OTgxMWM1ZmJlMjVjM2Q0ZTVmM2QxZmQzNWFiOWRhNmJjZjhhNjhjNWVkZjlkNmJhOTdmNjg2ODZjMzk2ODAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJiNjhkNWE0ZTUzZDZmN2FiNmEzOGMzMTQ0NDYzMzM5YzI0MWUwZGE4ZDBkMDIxZWFmNmRmMWY1ZGNhNjNlNjAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjFhMDU4ZDQxNWQxZmZiOTdlNmU4YmQ1ZDNmNWFkYzhjNjk0YjUyNjA5ZDYyYWQ3NTc1MGQxZTNmZmEzMmVkZjEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a9ebec398fa74cca966283d700ee3d1f",
+      "statement": "Forever uses NameplateLevelFrameMixin:GetDifficultyColor for level colors instead of GetCreatureDifficultyColor, which uses Retail thresholds there.",
+      "evidence": [
+        {
+          "resource": "repo://Nameplate.lua#L294-L304",
+          "version": "repo-lines-v1:sha256:26ea2dd0119268ee35cde6aa51f997d053ddd4bdbff1041c6d977e2486b93646:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNiMTZlZDkzNGI1ODBlZjgwNjcyMjlmMGViZTc4ZTIxYzk0NmNjZmM0YWYwOThiMjNjNWYyMmY2ZGYxYTNhNWIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY4ZjA1Njg4ZjkwOGU1YzcwYzBiZmRlYWE1NTEwOGVhNWJlYzBjM2JlMjQ0NzE0MTRkMTBlMDhiNDA2NmQyZDMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFmM2YxNjZiYmFkMzkwODgyOGM1ODZmZGZjMDhkOTgzYzI2YzUzNDVmZjFlODg4ZGVkMmExNWY3ODgzMTM5OWQifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-25T18:59:51.751Z"
+  }
+}

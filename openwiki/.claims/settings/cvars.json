@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:a0b8756aae4e2bb96143c554fb7b9befcd540bf1b51bcb968ee5b83d8ac54532",
+  "claims": [
+    {
+      "id": "claim_2cf08db19a074a22a2af76a3b3a1a38a",
+      "statement": "CVars:Set backs up the current value in profile.CVarsBackup only if it differs from both the new value and the existing backup, and RestoreFromProfile restores and clears that backup.",
+      "evidence": [
+        {
+          "resource": "repo://CVarsManager.lua#L144-L173",
+          "version": "repo-lines-v1:sha256:267d512ef9553a2c0d1e25ed659990a1924972ed855e487a9bfece716d36ee9f:eyJzZWxlY3RlZExpbmVDb3VudCI6MzAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQzNmJiMGQzNTBhMWFhYTlmOWU1OTRiNGYxMDE3NDAxZDY2NDEwZWRhNmMzODE3OTc0Mjg3MjNkOTdiNDc4YzgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZhM2ZhOTFiZTI5ZTZlZjUyMDc4YTFlZDYyOTMyNTZlNTM1MGI3NGI1YzRlM2Q1MzQ1MTNhY2Y3NWJkNWQzY2MiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjI2MTYwNjhiM2Q4ZDBmNGQ0NzI0NjE2NzE4MGEzMGM0MjUyZjNjZmYwNDU1MDAwNGRmMjQ5Y2Y1ZDUxZTkzMjgifQ"
+        },
+        {
+          "resource": "repo://CVarsManager.lua#L213-L220",
+          "version": "repo-lines-v1:sha256:cfabbe8005947a44a0e7afc39190d20700375fc7cfb1d688c733ebbeb90cf4f0:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZDY5YWRiMDIyZGFjNzQxMzNjZDU2ODNiZWUzYjkxYzdiZTM1NTcyNGJhMmQ3ZDA2YWU4MTA4ZmFlOTg1Njg1NiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDgzMzJmZTY2N2JjNTFhYzRhNTFiYTBlZmU3MzQ0NDFjOTBkZWY1NWM2MGEyNmQ3ZGIyNzVlY2JiY2Y0MmYxNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNTY2ZTBlY2FkM2FiZTY0NTEzZmIwOWNiMDY1NTY1ZDRlN2NlNjEzZjUyN2E5YTU0MTI2YjIxOGNjZTZkZDMwNSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMzkyOTFhOTNiMGFiYWQ2OTI0NjNiNjJhNDI0NmIwNzdjZjc2NTMyOTE5ZDExYjFhMmI4MjE0YWIyNWJmODMyNSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_29e0635b2b5848a181a2f0371eaa4836",
+      "statement": "Writes to CVars listed in COMBAT_PROTECTED via Set, SetToDefault, Overwrite and OverwriteBitfield are deferred with Addon.ExecuteAfterCombatEnds, which queues them until PLAYER_REGEN_ENABLED.",
+      "evidence": [
+        {
+          "resource": "repo://CVarsManager.lua#L161-L211",
+          "version": "repo-lines-v1:sha256:a94a08036b9ce7ad29f93349db5efc0e22ce60525844394f2b47887e02c14bb0:eyJzZWxlY3RlZExpbmVDb3VudCI6NTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEwNWUxMmY1NDE0MWFkMTE2MTA3MzBjMmMyM2NhMWM5Y2VhNWQ5YWQwYWJjNDM2ZDgxZDljZjRlZTllYTZjMGIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImRkMDU4ZGFjMTkxNTBkNGVjYTgwNzMyM2QwYWFjMGJmYWNlZDEyM2EwZmRlY2RkMTM0MWE4M2U5MzZiMjBiODEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdlNzdiMWVhNzE5NzkyYTJlMDBiMDY2MjY1YjVmNmU4MWY5M2U4NTQzMWIyMDAzNjkzNTMxYjAzYjk5OWVhNzcifQ"
+        },
+        {
+          "resource": "repo://CVarsManager.lua#L25-L76",
+          "version": "repo-lines-v1:sha256:b32e991e0ff91b103feb450c6079fa40adf95d1d3f17221b9578200a1f116711:eyJzZWxlY3RlZExpbmVDb3VudCI6NTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZmM2IyZWFjM2FhYjY0NDczOTk1M2E5YjM4OTNkNDYzMDU1NDY4MGE5YjY0MTkyZDlkYmU4MDVmMjAwNmJiM2IiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM5MDYyYWFiYjNmODU1M2Y3NDg4OWNlNmE1NDhkNjg1YTVkNjAyYzYyMjU2ODY2ZjYzNThiMTg5ZjQzOTI1ZjYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjcyNWM0NWFiMDM5MjRmNjI1OTBlNzRiZjUzOGQxMzliZGIxZmNlZDRmOGE0MjQzYTJiNzQwNThkNmI2MTUwMWIifQ"
+        },
+        {
+          "resource": "repo://Nameplate.lua#L1430-L1441",
+          "version": "repo-lines-v1:sha256:343c316ee5984f2f16e47e56f23304922a9fc7f7e060b3cbc0925b6119f9d9aa:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBhOGQyYjM0ZGViNjhiNmExNWEyZjEwZWE0OTY4NDE2N2I5YzhhZDQwNTBjNGRiYTJiZWJiZmI0NGQ5MTMzYWIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA0NmM0OGZkMTlkMDFhZjc4YzIwNWYzMGQ1NzZkZjRkZmFmMGY3YzNjZTRlNjhlOTJkMDUxMWY1ODI1OWQzZjQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM3ZDM0NDQyZDJlMzVjNGVhNjhlMzY0NGJlZTM5ZmMzNTg2MzNmMjRkODJkZmU5N2JjZDFlMWZmZTgwMjIzN2UifQ"
+        },
+        {
+          "resource": "repo://Nameplate.lua#L1615-L1622",
+          "version": "repo-lines-v1:sha256:b773d842ea3da68041ad09f8e140460af507ea8156596e2f7cf4bc824fd189f6:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNWE1MmViY2JmYjU2NDRhNjE0YmU5NzgxZjU4ZmQzMTQ3ZjQ0ZDlhZjlkZGRjZTc4MzE5MjgxNGIzMzZjYzZkNCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNzc5ODExYzVmYmUyNWMzZDRlNWYzZDFmZDM1YWI5ZGE2YmNmOGE2OGM1ZWRmOWQ2YmE5N2Y2ODY4NmMzOTY4MCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNWNhYTIzYWVkYzYxNTA5YjliZGU3YmFmNTFhZTFmNDRmZjJjMmZmODNlYzY5ZmQ2MmUzMzgwNzI0YTIyYWI0ZiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMjhlYjQzOGFlODcxODhkN2M3ZjhlNDJlNDRhZmViNWZkZjlkZGNkMWYxMmQ4ZWE3MmQ2MjZlYzBiNGIzYjVmOCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_dc5c47fc0d514444802e8cd8b393774b",
+      "statement": "CVars:Initialize registers nameplateShowOnlyNames if unknown and re-applies its value from the profile on every login because WoW does not persist it.",
+      "evidence": [
+        {
+          "resource": "repo://CVarsManager.lua#L82-L106",
+          "version": "repo-lines-v1:sha256:fd646011856c83deb4a7092f9266e6936407672bf8f1ea89ce20b79a52a2fb4e:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFjNTk3ZjE3ZjcxMTgwY2RmZTZhNmM3NWZmNWFjMWUxNDlkNmNmM2Y2ZDRlYTc2NDEyZmU4MjhhYzUyNjllMzAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjcxZDEzYmZlZDQ2NzhhMzA0MDQwOGUwYzE4Zjg3NWRlNzg2ZTNkYThmOWJkMzFlMDExMjE4NDYwOGNjYTFkMDYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjczN2Y4MTcyYTI5YjNmNjAzOGI1ZTdkYTljNmViMGIwNmQ1MGMyNDIwMjBhYTRlNDU5YzcwMDdlYzVhYmRjYjYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_26abf4ad5166495e90f609c027f7fe0c",
+      "statement": "The CVar hook post-hooks C_CVar.SetCVar and ConsoleExec, re-applies the nameplate size after combat for CVars that change Blizzard's native plate size, and re-evaluates occlusion detection for alpha CVars.",
+      "evidence": [
+        {
+          "resource": "repo://CVarsManager.lua#L112-L142",
+          "version": "repo-lines-v1:sha256:e4a5249aaa75270b09440e2b5f72589822e16022fb93313fa1954390026d8f73:eyJzZWxlY3RlZExpbmVDb3VudCI6MzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjlkNjgzMzQyODc3NjViZGZlODc1MTM5ZjM1MzA3YTkzZTQ3ZjkwYTBkMjQxMDdjM2M1OGYzNTJiZjhhN2UxZjkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk0NWJkZDkyZTAwYjg4YWEwNjUxYTRkOTc2OTdmMjIwYjFlZTFiNDM5ZTgxYzQ0Yjg5N2ZjYmNiMTkzZGJkOGEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA5M2RlMjAxMTUxYWI4M2M4OTZjZWMzZmFiNDNjY2JjMDlhMjI2ZGVjZTZkZTNlY2UwZjJlMTgwYTYzOWU3NWMifQ"
+        },
+        {
+          "resource": "repo://CVarsManager.lua#L281-L333",
+          "version": "repo-lines-v1:sha256:ec9f638bfdea06435aff97db9a6e77259980ee1b7c3e74e9ee839b101e2c2d60:eyJzZWxlY3RlZExpbmVDb3VudCI6NTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIzZTY5ZDk2OTdjMjhhNGI1OTk2Zjc3M2FmZWFmYjc5MDNiOWJjN2RlODY5Y2RmYmE1YTZhMGI1MjgwOTc1MWMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU2NmUwZWNhZDNhYmU2NDUxM2ZiMDljYjA2NTU2NWQ0ZTdjZTYxM2Y1MjdhOWE1NDEyNmIyMThjY2U2ZGQzMDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImMyMzlhYmMxMGE0MTMyOTU1YThlYTI5NjEyNjAyMThjYWIyZDE4MzE3MjIzMTUyZjUyZmZkOWJmNmJjZThkMjEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_b6a178e9bfa347f9b73984fcfedc8ab6",
+      "statement": "Occlusion detection requires min, max and selected alpha of 1 and an occluded alpha multiplier of at most 0.9, plus not-selected alpha of 1 on clients other than Mainline and Forever.",
+      "evidence": [
+        {
+          "resource": "repo://CVarsManager.lua#L351-L368",
+          "version": "repo-lines-v1:sha256:b53f4b474e253a20c501601765cfbf22733517030521f2a3a7f877ae6fabe36c:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3YzJkYTMyNzcyZDIwMDg0MDQ1OWYzMDUwY2FhNTUwZTdlZWM5MjUxZTk4ZjdhOTY2NjU4NjMxYzhmZDZiN2YiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjljZjRmZGIyYjk5MmFkMjE4NTM0NTJiNmJiNTJiZjI0MTE0YmUzYzEzMmRkYTg1MzUyNTViZGY2OTUxNGRmZjEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImVlNTY0YTIyM2IxODgzNjYyMjdmODA0YmQxYmExYmUwMTJkOGRmNzE5ZDMyMWJhZDc4NmU2N2NmNmU2OTQ1NjQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_ae92c4e502a24717ad26d7965adc63f2",
+      "statement": "Nameplate stacking options use the bitfield CVar nameplateStackingTypes indexed by Enum.NamePlateStackType and are hidden where the CVar or enum is missing.",
+      "evidence": [
+        {
+          "resource": "repo://Options.lua#L665-L680",
+          "version": "repo-lines-v1:sha256:ab1a1eed335fec4d04a0ac48b4048e01e2e951acfd6cc1c4726f50e813dc2a86:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjlmYmY3OWIwOGQwYWFkYzJkZGQ5YWE5YTBmZWYxNmViMGUxZjlhYmQ3ZDc4MDAwZTVmODQ3YmUwMmM5YzkwMWMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImY1NDlkMmJjMjA0MTgyY2UzNTY1ZjQyYjU1ODBjZWM4MDYxZmE5NDZhYjJlZWRmMTRlNmVhZDkxOTI3MzkyYWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA3MzhlYzc0NGExMmI0Mzk2NzE2NzcyZWM1MTQ3MDg0MGY4MWMyNGQ1M2E1OGFmMTg5ZDJmMDgyYjY0YTViNzgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_952b17985b794ac6a11396b8fdd470ec",
+      "statement": "Combat automation sets the friendly and enemy nameplate visibility CVars directly with SetCVar at PLAYER_REGEN_DISABLED and PLAYER_REGEN_ENABLED, bypassing the combat queue.",
+      "evidence": [
+        {
+          "resource": "repo://Nameplate.lua#L1497-L1503",
+          "version": "repo-lines-v1:sha256:f17f7c0091db62e060abc0896a2ca89a34fb6e20d4ea6942dc0882dde114de67:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMjY0MmU4MzY0NmEwYjI5YjNhNjk4YmZmZDI1M2Y0OWNiMDA5MTM0YjdmZjI5MGNkN2Y0MmZhM2I2M2U5NGZmOSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDgzMzJmZTY2N2JjNTFhYzRhNTFiYTBlZmU3MzQ0NDFjOTBkZWY1NWM2MGEyNmQ3ZGIyNzVlY2JiY2Y0MmYxNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMGIzM2E1OWQyNDlkOWM0ZWFmNWE1YzAzYWU1ZmQ4Yjg4NjkyZDJkNmRhNTMyMGVhNWEzMWUxNjQ1NTJlODRiYSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiODI0YTUwOTRhNjViNjk5ZmIwODBmMTMxNDcwMWM2ZTAyYTJmZmYzYmMzZGY5Y2JjY2EwMjcwZTQ3NjBiOWM0NiJ9"
+        },
+        {
+          "resource": "repo://Nameplate.lua#L1632-L1663",
+          "version": "repo-lines-v1:sha256:0bf76477d1a0e21f63aca6a198756ba459fb59e7dd3a1a159a4bea3327bf76fb:eyJzZWxlY3RlZExpbmVDb3VudCI6MzIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZkNzJhNWJmOThjMTJmZDQ2OWE4MmYxZTMzY2ZlMzAxNDAwOGFmMmYyN2YyNzZjYjAwYTRhNmFlMDk5OWFjM2QiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjJkNjY1ZGQ4ZTg2NmIzMmJlZTQwMjVhZTFjOTY4N2RkNjBmNzdmYjNiYjIxNDFkNzhkYWY1ZmZmZmU0NzYwYjMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImEyNWMwZDkwOWJlNmFhMmE0NzYxYWU1YTdiNjAxNWZmYjc1NjM5MjE0YzEyMTk3OWVmZThmYjAyNDkwNGRkNDQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_aed364a7384444e2accb344dd446f242",
+      "statement": "On entering the world, friendly nameplate and name CVars are set inside PvE instances and restored from the backup outside, and delves trigger this via PLAYER_MAP_CHANGED with a 3 second delay.",
+      "evidence": [
+        {
+          "resource": "repo://Nameplate.lua#L1505-L1547",
+          "version": "repo-lines-v1:sha256:c7b0ca56b9c00a67f48511f5b1958ca7ed3f90e727ecc720ac29e9916d24e9b0:eyJzZWxlY3RlZExpbmVDb3VudCI6NDMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImViNzY4NWIxZGYzOGM5OGYwZWJmMzQ2ZDZiMWE4YjQ2Y2M2NDBhYWRkYTQxNDVhMzZhZjAxN2Y0NmUzMmUxODEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc3OTgxMWM1ZmJlMjVjM2Q0ZTVmM2QxZmQzNWFiOWRhNmJjZjhhNjhjNWVkZjlkNmJhOTdmNjg2ODZjMzk2ODAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImVkNWRjNTg3YmJmNzQ0YWJkZTg3YjNjMDAxNzdhOWUyMTBiZGYzNGUyYmI5ZDU0MzUxYjE3OTM4YmM5YTdmZGMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjVlNjE1NzVmNTI0MzM5ZWRmNzJjYjVhNmVkOTBlZTU4N2U2ZTgxYWE5MGE1NGZjMDJhNjRjNjkzYjQ1ZDY0NjQifQ"
+        },
+        {
+          "resource": "repo://Nameplate.lua#L1570-L1610",
+          "version": "repo-lines-v1:sha256:24e18979d249f2389aeaf8a413d938173faa6408cf4b0a0407a5f1c16eae81ca:eyJzZWxlY3RlZExpbmVDb3VudCI6NDEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZjOTMwYTk4NTkwMDFiOWQ1NjIwZTBmYzY0NTFmNWM2MDIxNzg5NmIxYzM0NTM3OWYzZjM1MDAyNTMzYzkxZGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU2NmUwZWNhZDNhYmU2NDUxM2ZiMDljYjA2NTU2NWQ0ZTdjZTYxM2Y1MjdhOWE1NDEyNmIyMThjY2U2ZGQzMDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRhZDRiNjE3MzcwNjI5ZjVkNWFjNGI0OTZmYjM3NTQ1ZjExNzJjYzRiNzFiMzAyNjQ0MDYxNDQyMWFlY2U4MjIifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-25T18:59:51.751Z"
+  }
+}

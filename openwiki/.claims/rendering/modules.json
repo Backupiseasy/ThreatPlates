@@ -1,0 +1,154 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:d44068228c7cde9d5ebb348cba56c6a60ce07c98e98dccf430a5261ee3546a79",
+  "claims": [
+    {
+      "id": "claim_1d0ec2d35df742249d68de6d34be0450",
+      "statement": "Addon:UpdateSettings calls the UpdateSettings functions of Localization, Font, Icon, Threat, Transparency, Scaling, Animation and Color, then of all Elements.",
+      "evidence": [
+        {
+          "resource": "repo://Nameplate.lua#L1330-L1341",
+          "version": "repo-lines-v1:sha256:528dc1636e67da1ce259099f8ea039af942567923bd9ed741c0e28669c73113f:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ2YTczZmQ2OTU0ZjkxZDY5ZWI2ZGU3NGI2N2Q5Yzg0N2M5MjQ3Y2Y4MTUxMDE2Mzg1NWRhNzEzZjZiNGY3ZmUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI3ZTdjNGIwZDE5MjY1N2U4OGRjZjU0YWUyZWY2ZjllZWFlN2I5MDc2YWI2OTQ2YWU2NGMyYjI5MDc5NjNkODciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzODJlMzIwZWI5OWFmNGVmNDM4MzVjMmJkYmY5Y2NlZWEzYTQxYmJiNWZlZmZlOThkM2ZhZmVhYzhhMTMzMzYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImZlNGZiNjNhNGI4YTg4ZDlkYzNjMTYzZjMzNGJkMjA4MjllODQzNWFkMTM0NzkyMDZmMGMxYWViNzk1Njk4OTcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_d2c0ee05fd60488da007850f2f2d0f0b",
+      "statement": "Modules.xml loads Font, Icon, Animation, Threat, Color, Transparency and Scaling; ColorImproved.lua is not loaded.",
+      "evidence": [
+        {
+          "resource": "repo://Modules/Modules.xml#L4-L12",
+          "version": "repo-lines-v1:sha256:81802ef5973e2b3f9aab242c9a9195276042a8a6e95ddd2fd061229f134fcb52:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYTJmNzA4NWQzZmQxMmM4NzZiN2U0NDYyY2ZhYmNlNmY1NjNkZThiOWMzN2YwYTI5YzViNjY4ODNiODRmNmIzNSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiM2ZkNDVmOGYxNDExYzAxZWJlY2M1NzUyNjQ3Y2YwZjc3M2VkODA1NzEwOGVmNjIzZjkzMDQ0Y2FjNjM5YmEyMCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMWZkNDE2NDM2MTQyMmY4MTMzYWVkOTc1YjI1YWI3NjQyZmE3ZmQ4MTM4NjczYmYyNDg2MzUzZmNlOTQ0MzEzOSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjEsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZDliZjdiNWMzNmU5NmFhMjdlNWRjOTFjNzg3ZjU1ODdmYzIxMGFlMmExOGY4NzRjYzdiOWQzOTFmNmU5YmRkNyJ9"
+        },
+        {
+          "resource": "repo://TidyPlates_ThreatPlates.toc#L37-L57",
+          "version": "repo-lines-v1:sha256:eb49b481456d8df9035ade517091844282c7e6408fbb96d77c58dffe49ad6ff8:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY5ZWM4NDQ0YTFkMjc4MjVjYjYxNGVjNWJmMGNjZGI3MjkxOTYyYjExM2M4NzkyY2RhNjViMmY3NWQ2OWQ0ZWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZiODI5NGMyNmMyZDZlYjg3ZWM2M2UyZWE1MTA1ZTY5ODg2Zjc4YTQzZTI1ZTg3MWYwNmRiNDNkZjI3M2IzZGEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjMyYzRiOTFjNzgwZWQ3NzZlODg3NWU2MDE1N2M3MDU0MTYxYmUyMDcxMTE5ZWUxNThiNDYxZjgyZTAzMTE4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_0a3a4b4593f048bdb20e7065ae0c1bf6",
+      "statement": "The threat module derives the threat level from UnitThreatSituation(\"player\", unitid) mapped through THREAT_REFERENCE, optionally falls back to a target-based heuristic, and detects off-tanking by other tanks, pets or tank-like creatures.",
+      "evidence": [
+        {
+          "resource": "repo://Constants.lua#L168-L173",
+          "version": "repo-lines-v1:sha256:bcbe4a2adac00847acf90c18652c2a533a5dc2add2b305d1b4abcf92b093fd89:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYjUzYzkzOTE1YmZlNGI2MDZjZTcwZjdhMWJlM2U3NmEwYTg2ZGY3ZDY1MzBjMDcyMGMyNGM5NGI5NmQyNDNhMCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYWUzOWI5NGU0ZTdmZDlhZjU3ZGU2MTdmMjE0Y2E4NmYxNDhiNjk4YWYzNTJkOTNlMjdlMGUzZmE3ZjAxNzY4NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTVhM2I0MDNiMjRhMmM4NTIzN2JiOTQ4MjgyZTczZDBjMTgwNGVhMzU4ZDlhNjQ5ZjJkMmQ4MjhkZDYzNjQ1OCJ9"
+        },
+        {
+          "resource": "repo://Modules/Threat.lua#L72-L197",
+          "version": "repo-lines-v1:sha256:ac8cfd521b2533556b2f509e17558743734cdbbc8213d6a8d8103876ed527d69:eyJzZWxlY3RlZExpbmVDb3VudCI6MTI2LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI3YmRkNTI2ZjA5NTQ5NzQyMWEwYzU5MTRmNDdiYjQ1MWQyMGY2OGUyMDRmZGU4MzI4N2U0MDA0OWQyY2NmM2ZhIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0ODMzMmZlNjY3YmM1MWFjNGE1MWJhMGVmZTczNDQ0MWM5MGRlZjU1YzYwYTI2ZDdkYjI3NWVjYmJjZjQyZjE1IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJjYzRjZmUyZDFiMzIxMWFlODYyOTRjMTQzNjVlMzc5ZWZkMWUyNjdmMTkwMjBlMzUyZDk0MzhjODdhYzI4YzA3IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIwM2I4YTIxMGY3ODI5NWY1YTg4MjI1NTQ3ZGJkNDQ4MzZlMmQ5ZjI1MmI3ZDNhNTQ3NmQzNjZkMGZkYjRhMDc5In0"
+        }
+      ]
+    },
+    {
+      "id": "claim_692fe3f81a6e4cf786c5e9e9a6764e49",
+      "statement": "ThreatModule.SetUnitAttribute sets the threat level without side effects, while Update and LeavingCombat call StyleModule.Update and publish ThreatUpdate when the level changes.",
+      "evidence": [
+        {
+          "resource": "repo://Modules/Threat.lua#L199-L253",
+          "version": "repo-lines-v1:sha256:c6c53b65a8e39d4aa1f5493999658604f8b13b14dd99dc8797233507c18fc5bb:eyJzZWxlY3RlZExpbmVDb3VudCI6NTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE3MWEzZTA3MTYzMzU0YjllYzYyMzk2MGY0NzIwZWNjNTMyYjgxYzJhNGU0ZTZkYWYyZjY2NjgyNDZkYmIxYzAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU2NmUwZWNhZDNhYmU2NDUxM2ZiMDljYjA2NTU2NWQ0ZTdjZTYxM2Y1MjdhOWE1NDEyNmIyMThjY2U2ZGQzMDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjI2YTBmMDNjN2MxOWEwNzMxZDA3OTA3NzU5MzQ4MmE4NmRlODFjY2ZlYmRjYTFiNWZhNzQzNjNlZmIxMmZiMTgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_f77622720d4b4c29b2b1e6ff54b30af4",
+      "statement": "ShowFeedback returns false for players and friendly units, outside instances if limited to instances, and otherwise depends on the per-classification toggle and an existing threat level.",
+      "evidence": [
+        {
+          "resource": "repo://Modules/Threat.lua#L109-L125",
+          "version": "repo-lines-v1:sha256:6e701d46ef1a43bbbd00943cc8ccfcc4eb5f9a487badcee69cbe762a01ce875f:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAzMWE0YTQ3OTFjYzI3NjVkZTc4YTRhMjEwNjFlM2NiMmVmODU1YzE5MTllMDI4YWMyODYwNGIzNjM0N2M5NmMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImFiMjllYTZjZDE0MTVlNThhZTI1MGVlYTM1YTFjOWNjMjkyNTcwNzVkZjIyYjYyYWRlYzk1NDg2ZWRkZjI1Y2MiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijg2MGIzNmI4NDRiZWExMTZlZjk3ZTAxMWMxMDI2ZDdjMmVlNzZhZDQ5NzUyMDJiNGVhNGVmODUzZjMxMzlmODMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_044509ef3fcb4d518d14c1fa55ad2424",
+      "statement": "The color module selects healthbar and name color functions per reaction and mode in UpdateStyle, computes the colors as priority chains of situational, threat, class and reaction colors, and publishes HealthbarColorUpdate and NameColorUpdate.",
+      "evidence": [
+        {
+          "resource": "repo://Modules/Color.lua#L394-L523",
+          "version": "repo-lines-v1:sha256:e559542c46d34f6970cb415330c58346af36bdd8a9ce7b1eb625dc63b7ea9f0e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMwLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIxZDBlM2VlMzliYmVkOWQ5ZGY0NDRjYjQyOTNmN2QxOGFmN2Q1OTc5NzIzOTBiNmVlN2ZkYWY0NTE3ZDZlMzQ3IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0ODMzMmZlNjY3YmM1MWFjNGE1MWJhMGVmZTczNDQ0MWM5MGRlZjU1YzYwYTI2ZDdkYjI3NWVjYmJjZjQyZjE1IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI4ZTAxOTFhZjliMzc4ODVlOWRhZmRmOWJiMWQ4MjJhOWE5NWVkNmMyZWM5ZDkzNWRiZTc0YjUzNWYxNGU4ZTQ4IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI4NDI5ODFjZjM1MDViMWRhZjY1ZWIwYTIyYmRmYTI4NTNhMzBkZmQ2ZDRmODNlMmNmMDcxMzdhNjVjOWUzMTFkIn0"
+        }
+      ]
+    },
+    {
+      "id": "claim_a62193d3d97444d5bd2f1ab832c82ce2",
+      "statement": "The color module recomputes colors on UNIT_HEALTH, ThreatUpdate, target, focus and marker changes, FactionUpdate, SituationalColorUpdate and ClassColorUpdate.",
+      "evidence": [
+        {
+          "resource": "repo://Modules/Color.lua#L616-L658",
+          "version": "repo-lines-v1:sha256:5d8b0a13412f56991ece27a305581af449e054d51d86dddf9c9f9438fbfa8d4a:eyJzZWxlY3RlZExpbmVDb3VudCI6NDMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA2OTUxZWZjODdkMTk1MjViNzRhZmZhMjBjYWY1OGQwZTA4MjZhY2YyMDFlMWE0ZTgxYTNmMzVjOGMzZjVjYzIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjlkNDNkNmU1MjE1N2QyNDdjNGNjYmVjOTY2NzMwZjhhODYwM2Y0MjA1NWJmZDg0OGQ1ODU4NzcwNTUxMzcxMjciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRhNDYxY2U0YzIwZmFhNGNlZjdmNGU5NjJkMmI3NzFlOTkxMzJkYjNiNjY2MzI1OWEwMjQwYjYwYTBhYTkzZWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRiNjBkNmYyNDVkNGU4NWU3NjdkOTI0NTFmYWZmOTIxYTAwNGRhZWE3YWNhZTM5MDM4ZmQwMzc1YmQxYzIyNDYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_fe4ce99ca07d49ca830e033d875d399a",
+      "statement": "Transparency and scaling map each style name to a function that combines situational, target and per-unit-type settings, and threat styles use per-threat-level values.",
+      "evidence": [
+        {
+          "resource": "repo://Modules/Scaling.lua#L98-L189",
+          "version": "repo-lines-v1:sha256:c8e5880a15216404118b5f33815e57a0e47e886317defc0657e4fdcc4754c9af:eyJzZWxlY3RlZExpbmVDb3VudCI6OTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdiNzlkNTNmZTdlNDMwYzY4NTg2ZmVjMTUxMTIxZWIyMDllNjVlYjQ3ODMxYjI2N2NlZDRkZTFhNDFlOGFkMWUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM0NzlmNWQ0OGJiYmI5YzM4NTgxZTNjMGE3MmEyMTg0NmY2MzU1N2YwZWEwZDIxMTc5MzYzMzg0MmEzNmRkNmYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijg1MTllZWRkMDc0NzdhYTkyMjUyOTY1YzQ0OTU2Mjk3YjAxYTBlYjVkZjFhZjdiZTQ1MTAxNTI4ZTNhYjJhZWIifQ"
+        },
+        {
+          "resource": "repo://Modules/Transparency.lua#L100-L189",
+          "version": "repo-lines-v1:sha256:23cc0cae2906209f27a8f321b8114c153e8e39c9f2958cad7a9ba40b27e39cf2:eyJzZWxlY3RlZExpbmVDb3VudCI6OTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFlMjZmOTEyN2IwMjlhZDE0YWI5NDcyYzYwOWZmOTUyNWVhOTNmNTdjYmE5YzcwYjVkOTgxMmJjZmNlMzNhN2YiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg5ODRlOTFlNjJjMTFmOTk5ZGFiM2IyZWU4YjRhYzRhYTg4OGJkMGFhMzhlMGJiMWYzZjFjY2I0NThmYzE2MmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM1OTE4NDAyZjkzZTIzMWUzNTA0ZmQwODQ1ODExNjk0YTkwYzI5OTg0ZWYxZTNkOGRjODY3ZWZkYzZhNGMyYTcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_976d43a72c12475094b50cac1fa3bbee",
+      "statement": "Occlusion transparency compares the Blizzard plate's alpha with nameplateOccludedAlphaMult on every frame update and is disabled when the CVars do not allow occlusion detection.",
+      "evidence": [
+        {
+          "resource": "repo://Modules/Transparency.lua#L224-L340",
+          "version": "repo-lines-v1:sha256:c1b79c1fbcbbebd8d2e901490145fe4395afbd048bbe01a3258ff4d7a5b1ddae:eyJzZWxlY3RlZExpbmVDb3VudCI6MTE3LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJkMTg4MDNjYmNiNjZjYWIxODU3YmI3MDhlYjg4NTFhM2Q3ZTcwOWM4ZDA2NzQxMmQwMTU3YWNlNjIxMjY3YzE5IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0ODMzMmZlNjY3YmM1MWFjNGE1MWJhMGVmZTczNDQ0MWM5MGRlZjU1YzYwYTI2ZDdkYjI3NWVjYmJjZjQyZjE1IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI4MjlhYWU2ODhjNjg4MTkyMzVhOWI0YjczOTMzOGU3N2UyN2QwOTk3NWJjZmFkZDRhNzM5NjllYjUxMWM3MGI3IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI3YzE3MjQzYWZkMzFkYjA5YTM0YjUxZjA5ZDUxYmY0NzcyNWQ3NjdiNzZjODNlNWU5NWE3OGRhODM3ZjIxNTAzIn0"
+        },
+        {
+          "resource": "repo://Nameplate.lua#L996-L998",
+          "version": "repo-lines-v1:sha256:ed6c1f5bccf5d0daeba9dd87e2f2e8db8f472fa207732bf821a13addf15c3ced:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOTVlYzQyODZjMWE0NjFhZWNkMTdlYmEwNDZjMzk1NWJlMzQ4ZDUyZGRlMTRhZDBkNWZhMzM0OTBlZDkyZDAxOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNjMwNjJjYjFiNGVhZTg5ZTNiODIzMTEwNDg0ZDkzZWY5Y2I0MmQ4OWJjZDMyZWFkZTY1M2Y2MWNlOTM3YmQ2NCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYTUyMzY4N2ViYWJlMTNhYzE0MzM1M2U4MTEwMmFkYWYyYmJlYjk1OGVjNjc1MGM5MTBhNGE3NzViZmUzYWY5MCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNmQ4ZDRlZThkNDEwZjc0YjkzZmY1NDg3OTFiODAzMWY2ZTcxNjQ5M2U3MjBiNjM4MGQxZjRmZjcxNDYzYmQzMCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_a1bc03c79c984017805a41f157b10029",
+      "statement": "FontModule.SetFont uses font families with fallback fonts where available and sets the shadow on the family's fonts, and SetNamesFonts re-applies Blizzard nameplate system fonts after one frame and after 0.1s.",
+      "evidence": [
+        {
+          "resource": "repo://Modules/Font.lua#L161-L187",
+          "version": "repo-lines-v1:sha256:7e930cf67872da0e555129682d9b51b5fe78c50dcb20ff937af7a81c0394324f:eyJzZWxlY3RlZExpbmVDb3VudCI6MjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ5ZjcxODExYmFmZGQ2ZGI1MzRlMjg5MGIwNDIwNTNhNDA5MzdlM2U3ZGEzNmU3NDg2NjM3ZmUxODYyNGUzYTYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM2MGRjYzg1MzUxYWI1MjQxZmI4YmYyYzhjYmY4MzcxZjk1YmFjM2NkZjZiM2U1ODY1MzlkM2Y1MDVjMGNiYzMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU2NGMyMzBkM2FhNWRlN2Q3Y2MxODVmMWI5MjEwNzExODBkNjYxZDA3NjdjMzI4N2YxZjhmZTU3ODM3M2E1ZjcifQ"
+        },
+        {
+          "resource": "repo://Modules/Font.lua#L238-L280",
+          "version": "repo-lines-v1:sha256:1a5eb9d91e54ba060235e81a065ab531987203e055195e5e5c6bbb69758c90f5:eyJzZWxlY3RlZExpbmVDb3VudCI6NDMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYzZTM2ODg1YmQ5MWNmZGRlMjBmNDM3MjkxZTZhNGRjYjUzMDY2MzBkMjRkMzRhZDY0MDZmZGZhYWZjNzI4NzAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU2NmUwZWNhZDNhYmU2NDUxM2ZiMDljYjA2NTU2NWQ0ZTdjZTYxM2Y1MjdhOWE1NDEyNmIyMThjY2U2ZGQzMDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM4YTU3MGY1ODlkZDczYTA5YjU5MDViZTM2YjdjN2Y2ZWM1YjE1N2MzYTA1NjcxYWZkOTIwNGU2NjRhZDNlNmIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_98b1af51a48f4c5ca54565a8102d59ab",
+      "statement": "IconModule.CreateIcon creates a plain texture or, with Masque, an ActionButtonTemplate button added to the widget's Masque group.",
+      "evidence": [
+        {
+          "resource": "repo://Modules/Icon.lua#L42-L119",
+          "version": "repo-lines-v1:sha256:513d0a6b1d9f5dc342421dd13a30f78f00626e705f15138a7569a3fa10925b56:eyJzZWxlY3RlZExpbmVDb3VudCI6NzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJlOTczNTQxNDQwY2ZkMjEwMjZkOTJhNDdhNjQzYTI3MDY5OGY3OWU2MzMyZDQ1YzNjNDI0NjM4YTg3NzdkMmEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM2MWU0OGQwMzA4ZjIwZTMyZGJhNWZiNTYzMjhiYWYxOGQ3MmVmMGNjYjQzYjg0ZjVjMjYyZDJhNmExZmM2YzgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI5MjczMWNmY2FmOWQ4NzQ5ZTJhOTA5NGVkZjY1YWI3MTZkNGY0NzdhMWYxZTQ0ZGI3YzAwYjMwZGMzYWNhNzgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_daa28459952944d4aff9a032dd0ffc9c",
+      "statement": "The animation module runs one OnUpdate frame over all animated frames for fading, scaling and flashing.",
+      "evidence": [
+        {
+          "resource": "repo://Modules/Animation.lua#L139-L233",
+          "version": "repo-lines-v1:sha256:afd32d1ebdac2c6975b50fa37326326cba51107f2f4ff94a1828ad6939e71bdf:eyJzZWxlY3RlZExpbmVDb3VudCI6OTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM1NmYxNDdjMGI0ZTgwMjI2N2VjYjE5MjBlNjQ4YjFjNDQxZTg5ZWQwZjU0NWEyM2YxYTgwZTdlZWFjYTBhZDciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVjMWQ1YmQ4MWY2YzFlNjEwMTFlNDQzZDJjY2YwY2Q4NzZlMGM1YjRkNTg3OWFiMDAxZjZlYmFkOTBmYzgzMjEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImEwMDRhNjg4NDYwNjMyZjg3MDJkMGY0OTgyNWEwYWZhYTVlZWYyZDM4YWNkZTFkM2JkOGMyOTRhN2ExOTY1YjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijk1MjBlMTVmODM3YWZkNWNiZGJmZWM2NDhkMzVjNWEwNzI0MmNmYjA3NWRiY2M2NTFiNzllMDFmOTk2OWE1OTIifQ"
+        },
+        {
+          "resource": "repo://Modules/Animation.lua#L56-L60",
+          "version": "repo-lines-v1:sha256:f1d6cc09ce757eb0b1dd8c934ab29be5025da474456c150c871b8647e3a33456:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMDg3ODFiZTAwNjU1MjljYjg1MTY5ODY0YTkyZWNmODg3MzBkNzdkN2ZjOWU3YTQzNGJlZmU0ZGM1YjQxYTBhNiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMTg2NDc2N2FlMmFhMjYwZDdmZTg0MTQ2ZDc3NjJkYTFkMTEzYmFiOGE3MGJmNTkwM2RiYjk0NWJjNmZhN2MwMCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNzE5YTdlZDc2ZGM5MDA0Y2VjYWQ4ZTQzYjRhNjg4ZmY2M2ViY2EyNWRlYWEwOTBhYjYzYTVjN2I4NDhiZGZiZiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZGZmNjA0YmFiMDNmN2ExYzI5ZTg5ZTY3OTMzYzEyNGQ0YTM0YmY3YjU0NmM4Y2IzODY2ODIxYjNiYTk3ZWZmNiJ9"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-25T18:59:51.751Z"
+  }
+}

@@ -1,0 +1,162 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:3514d93a27bde9944e46177ce133314fcbd1ae8a433fd62de47bdf772a18dce9",
+  "claims": [
+    {
+      "id": "claim_4e091c393ae04946ae88fb6c826e159e",
+      "statement": "HandlePlateCreated creates a TPFrame per Blizzard plate, a HitTestFrame parented to the plate, neutralizes parent alpha and scale, exposes GetAnchor for other addons, and creates all elements and enabled widgets.",
+      "evidence": [
+        {
+          "resource": "repo://Nameplate.lua#L1049-L1122",
+          "version": "repo-lines-v1:sha256:911ec0c9c931422975da9065ea7916e92385f428aa3657818729c363868b14b6:eyJzZWxlY3RlZExpbmVDb3VudCI6NzQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJiMzg2NDhhNDViYmMyZGViM2NmZDgzZjkyODE5YjUzODFhOTY1YjMyOGI3ZWY4NjBiNTAwOWFlM2RkN2VmYjIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU4ODNkYTVkMTE2YWFiMTRlMjBiM2I3OWZkOTI2MzJmNmZiZWNjNzE3ZGI3MWJmOWQ0YzFjNjVkZDljNWI3MjUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImVjNzI1YWQ2YzNmZjJlNGY1ZGY3NTI3MmVmMzhhYjIxZTFiMGE3MGI5YmE4YjBjOTI2MGZiNGI2ZDBhODk2ZDQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_60c72be851d443b58b544a732e8807f4",
+      "statement": "NAME_PLATE_CREATED registers the plate in PlatesCreated and hooks the plate's OnHide and OnUpdate scripts; OnUpdate keeps the frame level, applies occlusion transparency and re-anchors the widget container.",
+      "evidence": [
+        {
+          "resource": "repo://Nameplate.lua#L1665-L1676",
+          "version": "repo-lines-v1:sha256:d3a3cc92efecc1775aacb4977a81b4955a859caaadff88e076a1f179b6e1c32a:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE1NGU4NmVmZTY2ODU1NDEyZWI1ZDUwODI5YjY2NzExMzRmZjk2OGNhYTVkYzU3ODYxNDQ4ZjYzN2YyZjFiZjIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImY1OTdhOWQ2MmVlNDY0MzI5NDEwODU5OTA2NTc2NDgxN2EyMWQ3ODcyMDgzMTdjZDUwZDc4YzUwZGQzMTYxMDMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBlMmYwZThlNDU0M2QxYTZjZGNjNTg4NDJiZjM1YWY5YWNlMTQ4NjZlMTg0ZWEwMmNiOTQ2ZmQ0MDkwNmNjZjkifQ"
+        },
+        {
+          "resource": "repo://Nameplate.lua#L982-L1006",
+          "version": "repo-lines-v1:sha256:729adf016d38997b47c91d8ff8423eff0efebfba0f935e0152540af829a1f5dc:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE1ZGU4NmY1OWEyZTIwZmQ1NWRkNzU5ZjFlOTI1OWNhMjRjMTg3ZDUxNzE3Y2I0NzM1NzE3ODRmNmNjYWViYTUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQ0NDVmM2JkMzg3ZWQxODA0MzNjNTQ5MGRkZTQzNDQ3NzI1MzU4ZjkwNDA2N2I3MzY0OWIyNjc5MWJiNWQ0ZGMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjFhYTVjMjhmYjg2YjQ3NzllOTg4NzM2Y2I1NTJkNWI3MWU4NmFmMzU5NTMwYjQ1ZmU1N2U4MGVhYzg5OTBlMjAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_d7a5c8cc48034f1e8ea654771b0eb216",
+      "statement": "NAME_PLATE_UNIT_ADDED ignores the player, widget-only nameplates and game objects, runs HandlePlateUnitAdded and the unit frame anchoring, and schedules a revalidation after 0.5s for a token added twice or in PvP instances, or on the next frame if plate.UnitFrame is missing.",
+      "evidence": [
+        {
+          "resource": "repo://Nameplate.lua#L1679-L1715",
+          "version": "repo-lines-v1:sha256:252fd29e92ea89602963bfe903a64e61d0f1fb645bfc3a5e99487c7d5ad481d0:eyJzZWxlY3RlZExpbmVDb3VudCI6MzcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJjMDhjM2FmNGU3MGFkZDk5ZTcxMTRkNWUwYmFjNjMxNjE3NmQzNGI3NDdhN2JhYzEzOTQ3Y2FmNjI2MWRiMTkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIyNTk5NzZkOGU5OThlYmYwNTBhZjg0M2E4OWQ3Y2MyNDc0YTlmYjhmMzU1NGNiY2QyYTg1YmQ0MDJmMDMwNDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU1YjJiNWZjMTVlMWIxOGZkY2Y0NmRmZTIxY2YzOTAxZTFmMzcxNzc5MzE2MGY0ZDJlYzQ0OGU4NjYwMGI2MjgifQ"
+        },
+        {
+          "resource": "repo://Nameplate.lua#L856-L858",
+          "version": "repo-lines-v1:sha256:68a4089d7c022d069602c422b6f8bb24b5698981feadb398778a4046b7b66a59:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZjQ3ZmM2ZjE2MDFkMTUyOGQ2YThkYmEzNzBlZjA2ZDVlMDZiY2E2MzM0ZDkwYzdmYTkyZWRlODE4MDdlODg0NCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDgzMzJmZTY2N2JjNTFhYzRhNTFiYTBlZmU3MzQ0NDFjOTBkZWY1NWM2MGEyNmQ3ZGIyNzVlY2JiY2Y0MmYxNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNzk1MWExZGNkYzQ3NTZmMWM5YmJjOWU0OWU0YTUxM2M1N2MxZGIxNWY4Y2NhOWQ4NDMyMWJjNmMwZTFjNWE1ZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNGEzMzAxNzhjZTZjYWU3N2EzMGM4YTFkYjc1Y2UwOWJjMWEwMjQ4Y2QyMmRlNDNkMTYzYWUxYzU3OWNkMzQ2OCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_8e1dc828d1cd482998837d44ca863314",
+      "statement": "HandlePlateUnitAdded consists of RefreshUnitData (SetUnitAttributes, registry bookkeeping, threat attributes), UpdateTargetMetaUnitReferences and RefreshPlatePresentation (visibility, hit-test, widget container, style, elements, castbar).",
+      "evidence": [
+        {
+          "resource": "repo://Nameplate.lua#L1166-L1225",
+          "version": "repo-lines-v1:sha256:cc935b3e392eabf251d47ec8e42ffdb2cbe6e6ec36018e43b31ae4a5dbfceabd:eyJzZWxlY3RlZExpbmVDb3VudCI6NjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNmNmRjNDZkYWQ0ZDQ4NWRmMjVhYjk0YTI2MWI0MjIwYmEyOWY3YWNiOWQwZGFkZDczMGY1ODg1MGI3ZGM0NGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU2NmUwZWNhZDNhYmU2NDUxM2ZiMDljYjA2NTU2NWQ0ZTdjZTYxM2Y1MjdhOWE1NDEyNmIyMThjY2U2ZGQzMDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjhlNTdkM2UzMmNiODk1ZWIzZjA2MDhmYjhlMDg2NmQ1NjE5YjlmNDE2NGFkMDM1YjgyNmFlNDVmOWViMDE4MzYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_e744d643f68948e897749b5dc15f8742",
+      "statement": "ShowBlizzardNameplate sets tp_frame.Active to false when Blizzard's plate is shown and to true when Threat Plates is shown, based on the friendly/enemy Blizzard nameplate settings.",
+      "evidence": [
+        {
+          "resource": "repo://Nameplate.lua#L900-L930",
+          "version": "repo-lines-v1:sha256:740d6895ffe9666eacb4dda18d9303aeb5a8ac6bcecc6dfe007a10605e582028:eyJzZWxlY3RlZExpbmVDb3VudCI6MzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdlYmQ1MGEwNmYzMWYyOTQ2MzQ3MzNiOTFlNzkxNDg4ZWRkMTM0NTJmY2IyNDlmZDg2ZGFjZDkwYjJjZjJlMTciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU2NmUwZWNhZDNhYmU2NDUxM2ZiMDljYjA2NTU2NWQ0ZTdjZTYxM2Y1MjdhOWE1NDEyNmIyMThjY2U2ZGQzMDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjI5OWZiOWEyODhkMTI1ODUzYTMxNmQzNWY4MWY5MGQ3OTI4YTlmNWRiYmNkZjA1NWY5ZjBhYzhkMDk1YzdmZmYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_f1dd1cc66e3f46c9a01819d043700025",
+      "statement": "NAME_PLATE_UNIT_REMOVED clears the mouseover and target references before wiping the unit table, sets Active to false, removes the plate from PlatesByUnit (and PlatesByGUID only without HAS_MIDNIGHT_API), notifies widgets and resets stylename.",
+      "evidence": [
+        {
+          "resource": "repo://Nameplate.lua#L1731-L1766",
+          "version": "repo-lines-v1:sha256:4051575d73b8badfee53f3855fbea4dc181d91af714820aa0b4b8f0be33975a5:eyJzZWxlY3RlZExpbmVDb3VudCI6MzYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ0MDMxZDQ1MDk5NzRhYWVkN2QwNjliYjM1YzcwNmU3ZmM5NGI5YjQ2ZTAyZDMzMDcxYzI4ZWNhOTQyMzlkNTUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjlkMTM4OGVjYTRjMDkwYWYxNTk1NDY5NzlkMzRkZGI4MWI0YzgyZGE5YWFlNTlmMzI0ZGRmNDUwZDEzODNlM2IiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRmMjBlZjIzYmQwZDg3MWIwNjhmOTc4MDk0ZjVkMGNhNTY2NjhmNTJhMWNlODQyZmNkYWNmOTdiNmQ3YzZlNjEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_5096c9a880af417a90c0f647f7974cc7",
+      "statement": "Widget frames reference the plate's unit table directly.",
+      "evidence": [
+        {
+          "resource": "repo://Widgets/WidgetHandler.lua#L359-L370",
+          "version": "repo-lines-v1:sha256:b071939443627587da0c519935cc4c6702c64a6487ab62d4086bbc785822e471:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUzMmYyNzcyZGFhNjRmNTE0ZGY3MTFmMTJhOTM1NzU5MzI3ZTBhOTBlMTdjZjhjOTkyYjNiNGE1ZTQxMjEyYWUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc3OTgxMWM1ZmJlMjVjM2Q0ZTVmM2QxZmQzNWFiOWRhNmJjZjhhNjhjNWVkZjlkNmJhOTdmNjg2ODZjMzk2ODAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU0ODliZGQ0NzRiMTM0OTM4YjQ1Y2RhODUyYTVhZGQ2ZmJjOTE1MzRkMzhjNTg3MzYxZGFlMDExZDIwMWI1ODIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImYwZWZkNGUwYjNhZGIxYmY0OGI2ZWM2NTMxYWE2YTA2NmM3ZmEzMTBlOGMxMWEyMDRjZDM4NGYwZGYwOTJmNGIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_7cad73de2ac1405797f4998afc1d3c72",
+      "statement": "ScheduleNameplateRevalidation re-runs HandlePlateUnitAdded and the unit frame anchoring after a delay only if the plate still belongs to the same unit token.",
+      "evidence": [
+        {
+          "resource": "repo://Nameplate.lua#L1227-L1242",
+          "version": "repo-lines-v1:sha256:1b6a18539ea070f13f246ea9b3e9254cd865a8af6c43ae662e577920062c83fc:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE2ODdjZDAzZDA1OGZhOTFiMmM4ZTIyYThkYTc5NDRmMThhNzM0ZGMxNTM5MjNkYzNlODFhODZiOTBkMjAzNGYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA2M2QyZGM5MmJkNGZkZTdhZTY4NDAwYTFhNDg1NjgzNmQ5ZDc5Zjg0NjNiMDY3YTk2NzUyMTZmODBmYzEwYzUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU1YjUzNTk3M2QwNzA5NmY4OTExYjVlZmU5ZjZlMDQzNGJiZjBlZmY0YjU5N2MzYzAxMzRmNDZiZDEyYzlkNjYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_fb9507b25d834678a9d68526d9377589",
+      "statement": "UNIT_FLAGS only triggers a reaction update and revalidation when the reaction or attackability changed or the plate is not active, while UNIT_FACTION always does so and updates all plates for the player unit.",
+      "evidence": [
+        {
+          "resource": "repo://Nameplate.lua#L1942-L2017",
+          "version": "repo-lines-v1:sha256:c06aac7f121be0729ccfe77d88bc4ddc4548f0cd7b5197b0dcf0f9d0d7fbea62:eyJzZWxlY3RlZExpbmVDb3VudCI6NzYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE3NDBiYTQxNjAwOTA3OWNhY2I0NTNiZjdkZDI4YmYyNjVkZTYzMmVlNzE4NmIxYmViZmM1ZmE0MzEzMTVjNzYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkyZmE0M2FlMDcxZmY2NmJmMmNlZmIzMzRlODlhN2NkYTBiYjUwMmY5YjhiNzkyNjE5MmU0ZjZjNTgyMGJhNTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNhMTVkOWUwOWU0OGJkODc5ZmUyZWRiOTQxZTRlZDI1NjRhMzk2YjNiZDZjMjQ2NzNkMzQ4YzU0NDVjM2YzMzMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_5a15fccf9dfc49349198dad4830600e8",
+      "statement": "The AcquireUnitFrame hook anchors TPFrame to the current unit frame on every acquire, discards a saved original parent, and installs OnShow and (with HAS_MIDNIGHT_API) Show hooks only the first time a unit frame is seen.",
+      "evidence": [
+        {
+          "resource": "repo://Nameplate.lua#L1012-L1046",
+          "version": "repo-lines-v1:sha256:79d843f479ddda28c2ac2b4cb75c57e18130db914c8f42801e9e840759b94207:eyJzZWxlY3RlZExpbmVDb3VudCI6MzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVjZDUxOWNkYzE3ZjhkYzVmMDFlZmJhNzY2ZjQ4ZjNhYTAzYTlhYzBjNzBlYmZmNjQ5ODBkMjM4YmNhMGYwMWUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQxOTcwMmZhYmZlNWY3MjU1ZDQyODI0YmQ2MGEyMTJmYTY0YmYwMmFiMWU5YmFkMDg1NTgzOGVhODQ5MjRhN2QiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc5OTQ3OTA4M2Q3ODJhMmYxZjRhNmEzNjdhOWZiMWE4N2I0NTNiYTQyYWU1MDY3YWViNTVmMDE2NzQwNTlmZmEifQ"
+        },
+        {
+          "resource": "repo://Nameplate.lua#L1455-L1460",
+          "version": "repo-lines-v1:sha256:a2083915d169cb07bb12dd62c4ba7d87c9d8bcdb8fdd3dee337b13e699b7bc1e:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNDU0ODk4OGU0NmIyNzQzOGNmNjU5YzI3ODBhZDIxNjRlYTdjN2RkNjIwMTY5YzZkMmNkODE2NjFjYWNlYjM4YiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNzc5ODExYzVmYmUyNWMzZDRlNWYzZDFmZDM1YWI5ZGE2YmNmOGE2OGM1ZWRmOWQ2YmE5N2Y2ODY4NmMzOTY4MCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNDZiYzhiMzA0NTgwYWNhYjBhN2U4MTlkYjc5ZWNhZDcxMzk5MjM5YjFkM2I3YjFmNGY4MTA2ZDJlMWVhMDJjYyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTQ5MGZhNDA2YzYwYmQ4N2ZlYmNlYzE3MTY3YzA0Nzc1Nzk3NjY2MjZkNDFlN2NhMTc1Yzc0ZTI0ZjJkZWQxZiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_fcc03c4a24aa44908a1b40db07fce900",
+      "statement": "On HAS_MIDNIGHT_API clients a protected Blizzard unit frame is hidden by reparenting it to nil after saving its parent in a weak table, an unprotected one with Hide, and showing restores the parent and guards Show() with IsShown() to avoid recursion through the Show hook.",
+      "evidence": [
+        {
+          "resource": "repo://Nameplate.lua#L860-L898",
+          "version": "repo-lines-v1:sha256:4cd689a7418dd3ba4ba89f5e9030b24685a1dc936073b14e99cbe00e053c8499:eyJzZWxlY3RlZExpbmVDb3VudCI6MzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ0NGNmODYyZjA5OGZjOWVkMTNhMWM4MzVmYTQyMTE0MzE4ZDg1MDg2Y2UyOTNhZGNmNDQwYzEwYTZlMzM0NzEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImVlOWJlNGM0NjA2N2JmNThlNDRmYzRlYzVmM2FiNDU5OTBhNDY3MWUxZDVjNzE0N2UzZGFiNTFkMjExMjMwYmYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjEyN2Y3M2E2Zjk5NzBjZDA2NzI1MjljODVmM2JmZDNhYjVlNDA2MDAyMDIxNTZlOWU0YjQ3Yjg5MzVjYWNjM2QifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_0a834042e3fe4cafa9b7afd1fab21e75",
+      "statement": "ApplyPlateHitTest clears hit-test points for click-through reactions, uses the Blizzard unit frame when Threat Plates is inactive, and otherwise sizes the HitTestFrame from the frame settings and anchors it to plate.UnitFrame.",
+      "evidence": [
+        {
+          "resource": "repo://Nameplate.lua#L1124-L1164",
+          "version": "repo-lines-v1:sha256:d8fb01c819234821c37e047e6b432901fe05f5c6fb6c5e4799a92ea0bab59bd8:eyJzZWxlY3RlZExpbmVDb3VudCI6NDEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ5NjBjMDc4YmM0MTA3ZDk4N2Y1NDExNDY5YzM3NDY0YzgyYjczMTM4ZWQzNjk3ZGNlMjMwMzNjNGNlZDA1N2EiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZiYmFjN2RmZTc1MGY4YzZlYTMyYmM0ZTcyODIwMjJiOGJjZDQ2MGYzOTAwMGJlYzE4MDg4Y2IwMDQzM2I1NTgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijg1NTJmNzVhY2Y0M2VhODkxYmY3MTU3MGU5MDhmNjM4ZDhiY2MwODU1N2NiYjY4Njk0NzU5Y2U1NzZkNWE1ZGQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_5ef7f434f96f498e896295ee8fb3e450",
+      "statement": "SetBaseNamePlateSize derives the click frame size from the healthbar size when SyncWithHealthbar is on and then updates click-through for all active plates without calling C_NamePlate.SetNamePlateSize.",
+      "evidence": [
+        {
+          "resource": "repo://Addon.lua#L52-L78",
+          "version": "repo-lines-v1:sha256:4adcfc9a7c8965052b663b167f66de799eede5ed97e2c15e2b12a1d95f924f38:eyJzZWxlY3RlZExpbmVDb3VudCI6MjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEyM2RmNzIzYzM0MDQ4NzU2MGRhM2YzMmZjMWQ0ZWJjMmZlYTNhMzhmOGMxOGU1NDNkYTZkODlkMTg3YzNhNDEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkxYjcxZTg5Y2Y1Y2I4NDFmZjVjNmIyM2Q1NjQ5NGM4NDk3MTRmMzVjZDYwNGYxNTdjNDkzM2EyNzQ5YjBiMjMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFhM2I2ZTdiMzBjNDFmOWQwMjBjNTMxNWNmZmU2NDI5ZGM2MTFmMTJhMThlYzRlMDU5N2I5OTgzM2U3NmNiYzIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_417eeaec6aa146dea2ac98d7aec48c89",
+      "statement": "Settings changes refresh plates with RefreshPlatePresentation only, without re-reading unit data, except for the name, which also depends on settings.",
+      "evidence": [
+        {
+          "resource": "repo://Nameplate.lua#L1385-L1417",
+          "version": "repo-lines-v1:sha256:7961cc0ebda026b3f6c8036f3daeec8b3e2ce48e72c0feb05a42ec1dfbebeecb:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNjNmRiOTA1ODRlMGY4N2I2ZjU0NzRkNDc4YTM1YTQyOGViMjc3ODRiYzYwMDE2OTQ3YTY1ZTBkZGJhOTQ2NWQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU2NmUwZWNhZDNhYmU2NDUxM2ZiMDljYjA2NTU2NWQ0ZTdjZTYxM2Y1MjdhOWE1NDEyNmIyMThjY2U2ZGQzMDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijk5MmMxNTE2ZTljNWIwYTc2YjA1NjNlMTg3ZmViNjgxNjhiNWZmNDI1NWRhMjQ2ZGQ3ZTI0YTY2MDMwMDJhNDIifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-25T18:59:51.751Z"
+  }
+}
