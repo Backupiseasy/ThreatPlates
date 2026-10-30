@@ -63,6 +63,7 @@ local WOW_EVENTS = {
   UI_SCALE_CHANGED = true,
   UNIT_ABSORB_AMOUNT_CHANGED = Addon.WOW_FEATURE_ABSORBS, -- Absorbs (or at least absorbs functions) were added in Mists
   UNIT_AURA = true,
+  UNIT_CLASSIFICATION_CHANGED = true,
   UNIT_DISPLAYPOWER = true,
   UNIT_FACTION = true,
   UNIT_FLAGS = true,

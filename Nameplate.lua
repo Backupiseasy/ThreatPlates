@@ -2198,6 +2198,19 @@ function Addon:UNIT_LEVEL(unitid)
   end
 end
 
+-- A unit's classification (normal/elite/rare/...) feeds style selection (custom style triggers, unique styles) and
+-- several elements/widgets, so refresh the whole plate like on NAME_PLATE_UNIT_ADDED. The event is rare.
+function Addon:UNIT_CLASSIFICATION_CHANGED(unitid)
+  -- Skip special unitids (they are updated via their nameplate unitid) and personal nameplate
+  if IGNORED_UNITS[unitid] then return end
+  if RemoveStalePlateForUnit(unitid) then return end
+
+  local tp_frame = PlatesByUnit[unitid]
+  if tp_frame then
+    HandlePlateUnitAdded(tp_frame.Parent, unitid)
+  end
+end
+
 -- Update spell currently being cast
 local function UnitSpellcastMidway(event, unitid, cast_guid, spell_id, castbar_id)
   -- Special unitids (target, personal nameplate) are skipped as they are not added to PlatesByUnit in NAME_PLATE_UNIT_ADDED
@@ -2464,6 +2477,7 @@ local ENABLED_EVENTS = {
   "UNIT_FACTION",
   "UNIT_FLAGS",
   "UNIT_LEVEL",
+  "UNIT_CLASSIFICATION_CHANGED",
   
   -- The following events should not have worked before adjusting UnitSpellcastMidway
   "UNIT_SPELLCAST_START",

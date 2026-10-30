@@ -220,13 +220,13 @@ on Retail/Midnight.
   is allowed in Lua. No changelog bullet of its own (covered by the shared 13.4.0 entry). CLAUDE.md "Nameplate
   lifecycle" is updated.
 
-### P5: Handle `UNIT_CLASSIFICATION_CHANGED`
+### P5: Handle `UNIT_CLASSIFICATION_CHANGED` — IMPLEMENTED, functional test not easily possible
 
 - **Problem**: TP ignores it, so elite/rare/normal changes (e.g. rare timers, scripted encounter phases) keep
   the old style, custom style trigger and classification icon.
 - **Change**:
   1. `Compatibility.lua` `WOW_EVENTS`: `UNIT_CLASSIFICATION_CHANGED = true` (verify existence per flavor
-     with `wow-api` `get_event` and `/tptp debug Compatibility`, and gate if necessary).
+     with `wow-api` `get_event` and an in-game event registration check, and gate if necessary).
   2. `Nameplate.lua` `ENABLED_EVENTS`: add it.
   3. Handler:
      ```lua
@@ -239,10 +239,16 @@ on Retail/Midnight.
      end
      ```
      A full refresh like Plater, since the event is rare and classification feeds style selection.
-- **Test**: rare that turns elite/normal, target dummy with changing classification, `/tptp debug Compatibility`
+- **Test**: rare that turns elite/normal, target dummy with changing classification, in-game event registration check
   on all flavors.
 - **Changelog**: `Fixed a bug where nameplates did not update their style when a unit's classification (e.g.
   elite or rare) changed.`
+
+- **Implemented**: `UNIT_CLASSIFICATION_CHANGED = true` in `WOW_EVENTS` (the event exists in the UI source of live,
+  classic, classic_era, classic_anniversary and forever; Blizzard's own `Blizzard_NamePlateClassificationFrame` uses
+  it), added to `ENABLED_EVENTS`, and the handler as sketched (after `UNIT_LEVEL`). In addition, it calls
+  `RemoveStalePlateForUnit` (P4) first. Changelog: own bullet in the 13.4.0 block, `Fixed a bug where nameplates did
+  not update their style when a unit's classification (e.g., elite or rare) changed.`
 
 ### P8: Use `SetStackingBoundsFrame` — IMPLEMENTED, verified on Retail
 
@@ -596,11 +602,20 @@ hash once committed, and tick or remove them when done. "(old base)" marks check
       container "jumping" to another plate). Same scenario as the P8 widget-only check, one test covers both (2026-10-30).
 - [x] Soft-interact objects (e.g. fishing bobber, mailbox): no errors when they appear/disappear (2026-10-30).
 
-**P4 — missed `NAME_PLATE_UNIT_REMOVED`** (committed, hash added with the next commit) — Retail and Classic Era
+**P4 — missed `NAME_PLATE_UNIT_REMOVED`** (`b4383106`) — Retail and Classic Era
 - [ ] Open world: units leaving range at the edge of view distance, stealth (rogue/druid), feign death, mind control:
       no errors, no plates left behind showing an old unit.
 - [x] Changing your own faction/reaction (e.g. duel start/end, or anything that fires `UNIT_FACTION` for "player"):
       no errors, all plates update (2026-10-30).
+
+**P5 — `UNIT_CLASSIFICATION_CHANGED`** (committed, hash added with the next commit) — Retail and Classic Era
+- [x] In-game event registration check on Retail: 0 mismatches, `UNIT_CLASSIFICATION_CHANGED` and `CVAR_UPDATE`
+      register fine (2026-10-30).
+- [ ] Same check on Classic Era, Anniversary, Mists.
+- [ ] (Not easily testable, waive if no suitable unit is found.) A unit whose classification changes while its plate is visible (e.g. a rare that becomes normal, scripted
+      encounter phases, units that turn elite): style, custom style trigger and classification icon update without
+      leaving and re-entering range.
+- [ ] No errors / no noticeable hitches when the event fires (it causes a full plate refresh).
 
 **BG / arena (one PvP session covers checks from P1, P2, P3, P4 and P8)** — Retail and Classic Era
 - [ ] P2: Stale name/health stays fixed ([Comment #8228, #8363, #8408, #8433]). Right after entering, enemy plates
