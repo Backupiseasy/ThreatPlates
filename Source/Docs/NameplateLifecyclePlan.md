@@ -196,7 +196,7 @@ on Retail/Midnight.
   stale `tp_frame.WidgetContainer` (a pooled Blizzard frame from an earlier unit, possibly in use by another plate)
   to this plate, so skipping it is a fix, not just an optimization. CLAUDE.md "Nameplate lifecycle" is updated.
 
-### P4: Recover from a missed `NAME_PLATE_UNIT_REMOVED`
+### P4: Recover from a missed `NAME_PLATE_UNIT_REMOVED` — IMPLEMENTED, in-game test pending
 
 - **Problem**: In PvP, Blizzard can drop a plate without `REMOVED` (see the comment in `ShowBlizzardNameplate`).
   TP then keeps a stale `PlatesByUnit[unitid]`.
@@ -213,6 +213,12 @@ on Retail/Midnight.
 - **Test**: arena/BG, stealth/feign death, mind control, units leaving range at the edge of view distance.
 - **Changelog**: `Hopefully fixed a bug where a nameplate kept showing outdated information after its unit
   was no longer visible.`
+
+- **Implemented** (`Nameplate.lua`): helper `RemoveStalePlateForUnit(unitid)` (defined before `UNIT_FACTION`),
+  called at the start of `UNIT_FLAGS` and of the per-unit branch of `UNIT_FACTION`, and additionally for every
+  entry in the `UNIT_FACTION("player")` loop over `PlatesByUnit`. Clearing the current key during a `pairs` traversal
+  is allowed in Lua. No changelog bullet of its own (covered by the shared 13.4.0 entry). CLAUDE.md "Nameplate
+  lifecycle" is updated.
 
 ### P5: Handle `UNIT_CLASSIFICATION_CHANGED`
 
@@ -579,7 +585,7 @@ hash once committed, and tick or remove them when done. "(old base)" marks check
       scheduled/dropped/replaced/run, removed again afterwards).
 - [ ] Longer normal session: no new BugSack entries.
 
-**P3 — hardened `NAME_PLATE_UNIT_REMOVED`** (committed, hash added with the next commit) — Retail and Classic Era
+**P3 — hardened `NAME_PLATE_UNIT_REMOVED`** (`8f81e89a`) — Retail and Classic Era
 - [x] ~~Personal resource display on/off~~: not applicable. There is no nameplate for `"player"` anymore (verified
       in-game 2026-10-30, `C_NamePlate.GetNamePlateForUnit("player")` is `nil` with `nameplateShowSelf` = 1 on Retail
       and Classic Era). Retail shows the personal resource display as its own frame (`PersonalResourceDisplayFrame`,
@@ -590,7 +596,13 @@ hash once committed, and tick or remove them when done. "(old base)" marks check
       container "jumping" to another plate). Same scenario as the P8 widget-only check, one test covers both (2026-10-30).
 - [x] Soft-interact objects (e.g. fishing bobber, mailbox): no errors when they appear/disappear (2026-10-30).
 
-**BG / arena (one PvP session covers checks from P1, P2, P3 and P8)** — Retail and Classic Era
+**P4 — missed `NAME_PLATE_UNIT_REMOVED`** (committed, hash added with the next commit) — Retail and Classic Era
+- [ ] Open world: units leaving range at the edge of view distance, stealth (rogue/druid), feign death, mind control:
+      no errors, no plates left behind showing an old unit.
+- [x] Changing your own faction/reaction (e.g. duel start/end, or anything that fires `UNIT_FACTION` for "player"):
+      no errors, all plates update (2026-10-30).
+
+**BG / arena (one PvP session covers checks from P1, P2, P3, P4 and P8)** — Retail and Classic Era
 - [ ] P2: Stale name/health stays fixed ([Comment #8228, #8363, #8408, #8433]). Right after entering, enemy plates
       show the correct name and health, nothing frozen from the previous unit. Also check this in a raid.
 - [ ] P2: Reaction/attackability changes apply immediately (e.g. BG flag carrier), i.e. the next-frame slot is not
@@ -599,6 +611,8 @@ hash once committed, and tick or remove them when done. "(old base)" marks check
 - [ ] P3: many plates appearing/disappearing (incl. solo shuffle rounds): no errors, target/mouseover/focus
       highlights correct.
 - [ ] P8: no errors from secret sizes (`ApplyPlateStackingBounds`), stacking stays correct.
+- [ ] P4: no plates left behind after units vanish without a regular removal (stealth, death, leaving range,
+      arena opponents between solo shuffle rounds).
 - [ ] No `ADDON_ACTION_BLOCKED`/`ADDON_ACTION_FORBIDDEN` entries during the whole session.
 
 **General**
@@ -612,3 +626,12 @@ hash once committed, and tick or remove them when done. "(old base)" marks check
 - [ ] CLAUDE.md and this plan consistent with the final code (item statuses, verification results).
 - [ ] Follow-ups (section "Follow-ups collected during P1/P8") reviewed: either assigned to an item or consciously
       deferred.
+
+## 6. Before release: remove temporary debug code
+
+Temporary diagnostics added during testing. They only print in unpackaged/source builds (`Addon.Logging.Debug`,
+`Addon.DEBUG`), but must be removed before the branch is merged or released. Each is marked `TEMPORARY` in the code
+(`grep -n "TEMPORARY" *.lua`).
+
+- [ ] `Nameplate.lua`, `RemoveStalePlateForUnit` (P4): `Addon.Logging.Debug("Missed NAME_PLATE_UNIT_REMOVED caught up
+      for", ...)`. Shows whether missed `REMOVED` events actually occur. Note the result in P4 before removing it.

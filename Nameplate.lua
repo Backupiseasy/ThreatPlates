@@ -2108,6 +2108,20 @@ local function ApplyReactionUpdate(tp_frame, unitid)
   end
 end
 
+-- In PvP, Blizzard can drop a nameplate without firing NAME_PLATE_UNIT_REMOVED, leaving a stale
+-- PlatesByUnit entry. If TP still tracks the unit token but WoW has no nameplate for it anymore,
+-- catch up on the missed REMOVED (which works without a plate, see NAME_PLATE_UNIT_REMOVED).
+-- Returns true if the stale entry was removed.
+local function RemoveStalePlateForUnit(unitid)
+  if PlatesByUnit[unitid] and not GetNamePlateForUnit(unitid) then
+    -- TEMPORARY (feature/nameplate-lifecycle, P4): shows whether missed REMOVEDs actually occur. Remove before release.
+    Addon.Logging.Debug("Missed NAME_PLATE_UNIT_REMOVED caught up for", unitid, "-", PlatesByUnit[unitid]:GetName())
+    Addon:NAME_PLATE_UNIT_REMOVED(unitid)
+    return true
+  end
+  return false
+end
+
 -- Update all elements that depend on the unit's reaction towards the player
 function Addon:UNIT_FACTION(unitid)
   -- Skip special unitids (they are updated via their nameplate unitid) and personal nameplate
@@ -2117,13 +2131,18 @@ function Addon:UNIT_FACTION(unitid)
     -- We first need to check if TP is active or not on a nameplate. After a faction change, other nameplates might be active
     -- (friendly/hostile) than before. So, we need to update Active first (as GetActiveThreatPlates only iterates over active
     for plate_unitid, tp_frame in pairs(PlatesByUnit) do
-      ApplyReactionUpdate(tp_frame, plate_unitid)
+      -- Clearing the current key during the traversal (in NAME_PLATE_UNIT_REMOVED) is allowed in Lua
+      if not RemoveStalePlateForUnit(plate_unitid) then
+        ApplyReactionUpdate(tp_frame, plate_unitid)
+      end
     end
   else
     -- It seems that (at least) in solo shuffles, the UNIT_FACTION event is fired in between the events
     -- NAME_PLATE_UNIT_REMOVED and NAME_PLATE_UNIT_ADDED. As SetNameplateVisibility sets the TPFrame Active, this results
     -- in Lua errors, so basically we cannot use it here to check if the plate is active.
     -- local plate = self:GetThreatPlateForUnit(unitid)
+    if RemoveStalePlateForUnit(unitid) then return end
+
     local tp_frame = PlatesByUnit[unitid]
     if tp_frame then
       -- If Blizzard-style nameplates are used, we also need to check if TP plates are disabled/enabled now
@@ -2147,6 +2166,8 @@ end
 -- in-progress per-plate state (e.g. an interrupt hold, see Source/Docs/CastbarInterrupts.md) far
 -- more often than warranted.
 function Addon:UNIT_FLAGS(unitid)
+  if RemoveStalePlateForUnit(unitid) then return end
+
   local tp_frame = PlatesByUnit[unitid]
   if not tp_frame then return end
 

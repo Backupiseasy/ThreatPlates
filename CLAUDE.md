@@ -172,6 +172,9 @@ Central pub/sub for both real WoW events and internal TP events (`INTERNAL_EVENT
   return `nil`) and returns early if there is none. The unit-specific teardown (`PlatesByUnit`/`PlatesByGUID`,
   `Widgets:OnUnitRemoved`, `WidgetContainerReset`) only runs for plates `NAME_PLATE_UNIT_ADDED` actually handled
   (in `PlatesByUnit`), not for plates it skipped (`IgnoreUnitForThreatPlates`: personal, widget-only).
+  A *missed* `REMOVED` (Blizzard dropped the plate without firing it, seen in PvP) is caught up in `UNIT_FACTION` /
+  `UNIT_FLAGS` via `RemoveStalePlateForUnit`: if `PlatesByUnit[unitid]` is set but `GetNamePlateForUnit(unitid)` is
+  `nil`, `NAME_PLATE_UNIT_REMOVED` is called (also for every entry in the `UNIT_FACTION("player")` loop).
 - **Invariant**: `tp_frame.Active == true` ⟺ `tp_frame.unit.unitid ~= nil`. Code that reads `unit.unitid` outside
   the unit-added path must check `tp_frame.Active` first.
 - `PlayerTargetChanged(...)` is the shared handler for `PLAYER_TARGET_CHANGED`, `PLAYER_SOFT_FRIEND_CHANGED`,
