@@ -162,7 +162,7 @@ on Retail/Midnight.
   `CancelNameplateRevalidation` cancels and clears the two slots directly (no loop, no new table per
   `NAME_PLATE_UNIT_REMOVED`, no `wipe()`). CLAUDE.md "Stale unit data after nameplate recycling" is updated.
 
-### P3: Harden `NAME_PLATE_UNIT_REMOVED`
+### P3: Harden `NAME_PLATE_UNIT_REMOVED` — IMPLEMENTED, mostly verified (BG/arena pending)
 
 - **Problem**: `GetNamePlateForUnit(unitid)` is not nil-guarded. Teardown also runs for plates that `ADDED`
   deliberately skipped (personal plate, widget-only plates).
@@ -185,6 +185,16 @@ on Retail/Midnight.
   soft-interact objects, BG spam.
 - **Changelog**: `Fixed a Lua error that could occur when a nameplate was removed.` (only if a real error was
   reproduced or reported)
+
+- **Implemented** (`Nameplate.lua`): as sketched. The frame comes from `PlatesByUnit[unitid]` first, then
+  `GetNamePlateForUnit`, with an early return if neither exists. `was_added = PlatesByUnit[unitid] == tp_frame`.
+  Always run: mouseover/target meta-unit cleanup, `Active = false`, `CancelNameplateRevalidation`,
+  `wipe(tp_frame.unit)`, `stylename = nil`. Only if `was_added`: `PlatesByUnit`/`PlatesByGUID`,
+  `Widgets:OnUnitRemoved`, `WidgetContainerReset(tp_frame.Parent)`. `wipe()` stays as before (existing code; the
+  no-`wipe` rule applies to new tables). Check result: `Widgets:OnUnitRemoved` only acts on `unit.IsSoftTarget` /
+  `unit.IsFocus`, which are never set for skipped plates. `WidgetContainerReset` on a skipped plate could re-parent a
+  stale `tp_frame.WidgetContainer` (a pooled Blizzard frame from an earlier unit, possibly in use by another plate)
+  to this plate, so skipping it is a fix, not just an optimization. CLAUDE.md "Nameplate lifecycle" is updated.
 
 ### P4: Recover from a missed `NAME_PLATE_UNIT_REMOVED`
 
@@ -355,6 +365,23 @@ Classic Era; all clients share the same nameplate API).
   of these frames can inherit a secret size from Blizzard frames. If so, guard with `IsSecretValueTP`.
 - **"WoW Forever"**: P8 not tested with the current code (the method exists there and is real, checked in-game).
   Considered unnecessary for now.
+- **Remove dead personal-nameplate code**: there is no `"player"` nameplate anymore on Retail or Classic Era
+  (verified in-game 2026-10-30, see the P3 checks). TP code and options that only act on that plate can no longer
+  have any effect:
+  - The four filter locations in CLAUDE.md "Personal nameplate filtering" (`GetThreatPlateForUnit`,
+    `IgnoreUnitForThreatPlates`, `FrameOnShow`, `FrameOnUpdate`).
+  - The `PersonalNameplate.HideBuffs` option (`SettingsHideBuffsOnPersonalNameplate`, the personal-plate branch in
+    `FrameOnShow`) and its option UI/locale strings.
+  - The `nameplateResourceOnTarget` CVar handling (`PersonalNameplate.ShowResourceOnTarget`, `Addon.lua`,
+    `CVarsManager.lua`, options).
+  - Any remaining "personal nameplate" option texts and defaults (`Constants.lua`, `Database.lua`).
+  Plan: remove the options and their handling (keep SavedVariables compatible, defaults may simply stay unused or be
+  cleaned up with a profile migration if needed). For the `"player"` guards, decide per location. The cheap
+  `unitid == "player"` / `UnitIsUnitTP` checks also protect against `"player"` reaching code paths through other
+  unit tokens (e.g. target/mouseover being the player), so keep them where that is possible. Verify each removal
+  against the current Blizzard source (`Blizzard_NamePlates`, `Blizzard_PersonalResourceDisplay`) on all flavors.
+  Changelog bullet if options are removed (e.g. `Removed the options for the personal nameplate, which no longer
+  exists in WoW.`).
 - **Hit-test of Blizzard-shown plates** (whole plate instead of Blizzard's area, "only name" plates clickable) and
   re-binding blocked in combat: see P10.
 
@@ -508,42 +535,75 @@ Error console: BugSack/!BugGrabber, with no `ADDON_ACTION_BLOCKED`/`FORBIDDEN` e
 
 ## 5. Final verification before merge (open checks, kept up to date)
 
-Checks that are still open for items already committed. Everything here must pass (or be consciously waived) before
-the branch is merged. Add new entries as items are committed, and tick or remove them when done.
+Checks that are still open for implemented items (committed, or marked "not committed yet"). Everything here must
+pass (or be consciously waived) before the branch is merged. Add new entries as items are implemented, add the commit
+hash once committed, and tick or remove them when done. "(old base)" marks checks that passed before the rebase onto
+`develop` (2026-10-30) and are covered again by "Re-test after the rebase" under General.
 
-**P7 — hook marker table** (`47d61a38`)
+**P7 — hook marker table** (`54969ccb`)
 - [ ] OnShow/Show hooks attach exactly once per pooled `UnitFrame` instance (no duplicate hooks after long sessions;
       temporary debug counter or `/tptp debug`), Retail and Classic.
 
-**P1 — anchoring to `plate`** (`4b13beda`)
-- [ ] Retail and Classic (Era, Anniversary, Mists): plates at the same position as before. Nameplate size
-      Normal/Big, Headline View, mouseover/target scaling, custom styles with offsets.
+**P1 — anchoring to `plate`** (`db3241ed`)
+- [x] Retail: plates at the same position as before, no errors (tested before the P1 commit) (old base).
+- [x] Classic Era: re-anchoring 30+ live plates from `UnitFrame` to `plate` caused no visible change (A/B test
+      before the change) (old base).
+- [ ] Classic Anniversary / Mists: plates at the same position as before.
+- [ ] Retail and Classic Era in detail: Nameplate size Normal/Big, Headline View, mouseover/target scaling, custom
+      styles with offsets.
 - [ ] Clickable area and click-through (friendly/enemy), mixed mode (Blizzard plates for friendly units), reaction
       change (duel, mind control).
-- [ ] BG/arena/raid: no vanishing or misplaced plates.
 - [ ] `ConfigClickableArea` and `/tptp clickable-area` show the expected areas.
 - [ ] "WoW Forever" (optional, waived for now).
 
-**P8 — stacking bounds** (`0ad99326`)
+**P8 — stacking bounds** (`e8388865`)
 - [x] Retail: TP and Blizzard-shown plates stack like with TP disabled, Overlap H/V works with TP on, "only names"
-      on load and live toggle, `nameplateStyle` change, instance incl. end of combat (no secret-size error).
+      on load and live toggle, `nameplateStyle` change, instance incl. end of combat (no secret-size error)
+      (old base, re-test pending).
 - [ ] Classic Era with the current code: spacing TP on vs. off (same camera/CVars), Overlap H/V still works with
       stacking on, "only names" like without TP (no name-only branch there, since `UpdateHitTestArea` is missing).
 - [ ] Classic Anniversary / Mists: smoke test (stacking on/off, no errors).
 - [ ] Widget-only plates (quest objects, vehicles) stack like with TP disabled, also after the plate showed a TP
-      unit before (pooled plate reset).
+      unit before (pooled plate reset). Same scenario as the P3 widget-only check, one test covers both.
 - [ ] `CVAR_UPDATE` handlers on Classic: toggling `nameplateSize`/`nameplateStyle` causes no errors (CVars may not
       exist there; events for unknown CVars simply never fire).
-- [ ] BG/arena: no errors from secret sizes (`ApplyPlateStackingBounds`), stacking stays correct.
 - [ ] "WoW Forever" (optional, waived for now; the method exists there and is real).
 
-**P2 — revalidation timers**
-- [ ] Stale-name/health scenarios in BG/arena/raid stay fixed ([Comment #8228, #8363, #8408, #8433]).
-- [ ] Fewer `HandlePlateUnitAdded` runs when entering the world or zoning with many plates (temporary counter,
-      removed again afterwards).
-- [ ] No errors when plates are removed while a revalidation is pending (fast zoning, leaving range).
+**P2 — revalidation timers** (`685f9438`) — Retail and Classic Era
+- [ ] Reaction/attackability changes still apply immediately outside PvP (duel start/end, mind control), i.e. the
+      next-frame slot is not swallowed by a pending 0.5 s revalidation of the same unit (BG case: see "BG / arena").
+- [ ] Entering the world / zoning with many plates (city, portal): no errors, plates correct.
+- [ ] No errors when plates are removed while a revalidation is pending (fast zoning with loading screen, quickly
+      leaving range while plates appear).
+- [ ] Optional: fewer `HandlePlateUnitAdded` runs when entering the world or zoning (temporary counter for
+      scheduled/dropped/replaced/run, removed again afterwards).
+- [ ] Longer normal session: no new BugSack entries.
+
+**P3 — hardened `NAME_PLATE_UNIT_REMOVED`** (committed, hash added with the next commit) — Retail and Classic Era
+- [x] ~~Personal resource display on/off~~: not applicable. There is no nameplate for `"player"` anymore (verified
+      in-game 2026-10-30, `C_NamePlate.GetNamePlateForUnit("player")` is `nil` with `nameplateShowSelf` = 1 on Retail
+      and Classic Era). Retail shows the personal resource display as its own frame (`PersonalResourceDisplayFrame`,
+      parent `UIParent`, addon `Blizzard_PersonalResourceDisplay`). Classic doesn't load that addon at all
+      (`AllowLoadGameType: mainline`).
+- [x] Widget-only plates appear and disappear without errors (2026-10-30, rebased code).
+- [x] Widget-only plates (quest objects with progress bars, Dornogal/Oribos objects, vehicles): Blizzard's widgets stay in the right place on TP plates and on other plates (no widget
+      container "jumping" to another plate). Same scenario as the P8 widget-only check, one test covers both (2026-10-30).
+- [x] Soft-interact objects (e.g. fishing bobber, mailbox): no errors when they appear/disappear (2026-10-30).
+
+**BG / arena (one PvP session covers checks from P1, P2, P3 and P8)** — Retail and Classic Era
+- [ ] P2: Stale name/health stays fixed ([Comment #8228, #8363, #8408, #8433]). Right after entering, enemy plates
+      show the correct name and health, nothing frozen from the previous unit. Also check this in a raid.
+- [ ] P2: Reaction/attackability changes apply immediately (e.g. BG flag carrier), i.e. the next-frame slot is not
+      swallowed by the 0.5 s revalidation that every `NAME_PLATE_UNIT_ADDED` schedules in PvP instances.
+- [ ] P1: no vanishing or misplaced plates (also in a raid).
+- [ ] P3: many plates appearing/disappearing (incl. solo shuffle rounds): no errors, target/mouseover/focus
+      highlights correct.
+- [ ] P8: no errors from secret sizes (`ApplyPlateStackingBounds`), stacking stays correct.
+- [ ] No `ADDON_ACTION_BLOCKED`/`ADDON_ACTION_FORBIDDEN` entries during the whole session.
 
 **General**
+- [ ] Re-test after the rebase onto `develop` (2026-10-30): all checks above that were ticked against the old base
+      (e.g. P8 on Retail) once more against the rebased code, at least a smoke test on Retail and Classic Era.
 - [ ] `luacheck . --config .luacheckrc.ci` clean, and no new warnings in `luacheck . --config .luacheckrc` for touched files.
 - [ ] BugSack/!BugGrabber: no errors, no `ADDON_ACTION_BLOCKED`/`ADDON_ACTION_FORBIDDEN` entries over a longer
       session (open world, instance, BG) on Retail and Classic.

@@ -168,7 +168,10 @@ Central pub/sub for both real WoW events and internal TP events (`INTERNAL_EVENT
   `SetUnitAttributes(unit, unitid)` (sets `unit.unitid`), then `SetNameplateVisibility(plate, unitid)` (sets
   `tp_frame.Active`).
 - `NAME_PLATE_UNIT_REMOVED`: sets `tp_frame.Active = false` and `wipe(tp_frame.unit)` — the only place that
-  clears `unit.unitid`.
+  clears `unit.unitid`. It looks the frame up via `PlatesByUnit[unitid]` first (`GetNamePlateForUnit` may already
+  return `nil`) and returns early if there is none. The unit-specific teardown (`PlatesByUnit`/`PlatesByGUID`,
+  `Widgets:OnUnitRemoved`, `WidgetContainerReset`) only runs for plates `NAME_PLATE_UNIT_ADDED` actually handled
+  (in `PlatesByUnit`), not for plates it skipped (`IgnoreUnitForThreatPlates`: personal, widget-only).
 - **Invariant**: `tp_frame.Active == true` ⟺ `tp_frame.unit.unitid ~= nil`. Code that reads `unit.unitid` outside
   the unit-added path must check `tp_frame.Active` first.
 - `PlayerTargetChanged(...)` is the shared handler for `PLAYER_TARGET_CHANGED`, `PLAYER_SOFT_FRIEND_CHANGED`,
@@ -287,7 +290,12 @@ Central pub/sub for both real WoW events and internal TP events (`INTERNAL_EVENT
   subsequent event handler still finds valid unit data. (This is also why `NAME_PLATE_UNIT_REMOVED` clears the
   `PlatesByUnit["mouseover"]` stale reference before `wipe(unit)` — it used to nil-crash
   `Transparency.lua:GetTransparency` when `UPDATE_MOUSEOVER_UNIT` fired mid-recycling.)
-- **Personal nameplate filtering**: four locations filter the player's own nameplate; all must stay consistent:
+- **Personal nameplate filtering**: four locations filter the player's own nameplate; all must stay consistent.
+  Note (verified in-game 2026-10-30): current clients create no `"player"` nameplate at all
+  (`C_NamePlate.GetNamePlateForUnit("player")` is `nil` with `nameplateShowSelf` = 1 on Retail and Classic Era).
+  Retail's personal resource display is a separate frame (`PersonalResourceDisplayFrame`, parent `UIParent`), and
+  Classic doesn't load it. Removing the dead personal-nameplate code is a follow-up in
+  `Source/Docs/NameplateLifecyclePlan.md`. Until then:
   1. `GetThreatPlateForUnit`: `unitid == "player"` (literal string guard).
   2. `GetThreatPlateForUnit`: `Addon.UnitIsUnit("player", unitid)` — **not** redundant with #1:
      `UnitIsUnit("player", unitid)` can return a secret value even with `"player"` as the first argument (a

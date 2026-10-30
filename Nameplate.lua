@@ -1871,8 +1871,14 @@ local function RemoveMouseoverFromNameplate()
 end
 
 function Addon:NAME_PLATE_UNIT_REMOVED(unitid)
+  -- PlatesByUnit first: GetNamePlateForUnit can already return nil here (e.g. when called for a missed REMOVED).
+  -- Plates that NAME_PLATE_UNIT_ADDED skipped (IgnoreUnitForThreatPlates: personal, widget-only) are not in
+  -- PlatesByUnit and only need the generic cleanup below.
   local plate = GetNamePlateForUnit(unitid)
-  local tp_frame = plate.TPFrame
+  local tp_frame = PlatesByUnit[unitid] or (plate and plate.TPFrame)
+  if not tp_frame then return end
+
+  local was_added = PlatesByUnit[unitid] == tp_frame
 
   -- Clean up the mouseover reference before wiping unit data. If this plate is currently the
   -- mouseover plate, RemoveMouseoverFromNameplate must run while unit.style is still valid.
@@ -1888,17 +1894,19 @@ function Addon:NAME_PLATE_UNIT_REMOVED(unitid)
   tp_frame.Active = false
   CancelNameplateRevalidation(tp_frame)
 
-  PlatesByUnit[unitid] = nil
-  if not Addon.HAS_MIDNIGHT_API then
-    if tp_frame.unit.guid then -- maybe hide directly after create with unit added?
-      PlatesByGUID[tp_frame.unit.guid] = nil
+  if was_added then
+    PlatesByUnit[unitid] = nil
+    if not Addon.HAS_MIDNIGHT_API then
+      if tp_frame.unit.guid then -- maybe hide directly after create with unit added?
+        PlatesByGUID[tp_frame.unit.guid] = nil
+      end
     end
-  end
 
-  --ElementsPlateUnitRemoved(tp_frame)
-  Widgets:OnUnitRemoved(tp_frame, tp_frame.unit)
-  
-  WidgetContainerReset(plate)
+    --ElementsPlateUnitRemoved(tp_frame)
+    Widgets:OnUnitRemoved(tp_frame, tp_frame.unit)
+
+    WidgetContainerReset(tp_frame.Parent)
+  end
 
   wipe(tp_frame.unit)
 
