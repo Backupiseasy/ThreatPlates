@@ -24,6 +24,7 @@ local UnitIsUnitTP = Addon.UnitIsUnit
 local UnitPower, UnitPowerMax, GetComboPoints, GetRuneCooldown, GetRuneType = UnitPower, UnitPowerMax, GetComboPoints, GetRuneCooldown, GetRuneType
 local GetUnitChargedPowerPoints, GetPowerRegenForPowerType = GetUnitChargedPowerPoints, GetPowerRegenForPowerType
 local IsSpellUsable = C_Spell and C_Spell.IsSpellUsable
+local GetSpellInfo = C_Spell and C_Spell.GetSpellInfo
 local GetShapeshiftFormID = GetShapeshiftFormID
 local InCombatLockdown = InCombatLockdown
 local GetSpecialization = C_SpecializationInfo and C_SpecializationInfo.GetSpecialization or _G.GetSpecialization
@@ -33,6 +34,7 @@ local RGB = Addon.RGB
 local FontUpdateText = Addon.Font.UpdateText
 local PlayerClass = Addon.PlayerClass
 local IsPlayerSpellTP = Addon.IsPlayerSpell
+local IsSecretValueTP = Addon.IsSecretValue
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -596,12 +598,27 @@ local function OnUpdateWidgetEssence(cooldown_frame, elapsed)
   end
 end
 
+local SPELL_ID_RETURN = 361227 -- Return: Evoker resurrection spell, used here only for its haste-scaled cast time
+local EssenceRegenBonus = 1
+
 local function SetEssenceCooldownDuration(widget_frame, essence_no, essence_frame_off)
+  -- The Essence regeneration rate is secret in restricted contexts. The cast time of Return (10 s base cast
+  -- time, 5 s per Essence) follows haste, but not other regeneration bonuses, so calibrate it with the rate
+  -- whenever that is available
+  local spell_info = GetSpellInfo(SPELL_ID_RETURN)
+  local cast_time = spell_info and spell_info.castTime
+  local has_cast_time = cast_time and not IsSecretValueTP(cast_time) and cast_time > 0
+
   local pace, _ = GetPowerRegenForPowerType(Widget.PowerType)
-  if (pace == nil or pace == 0) then
-    pace = 0.2
+  local cooldown_duration = 5
+  if pace and not IsSecretValueTP(pace) and pace > 0 then
+    cooldown_duration = 1 / pace
+    if has_cast_time then
+      EssenceRegenBonus = pace * cast_time / 2000
+    end
+  elseif has_cast_time then
+    cooldown_duration = cast_time / (2000 * EssenceRegenBonus)
   end
-  local cooldown_duration = 1 / pace
 
   if ShowCooldownDuration then
     local current_time = GetTime()
