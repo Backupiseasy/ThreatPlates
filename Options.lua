@@ -6258,7 +6258,6 @@ local function CreateLocalizationSettings()
         order = 20,
         type = "group",
         inline = true,
-        hidden = Addon.HAS_MIDNIGHT_API,
         args = {
           MetricUnitSymbols = {
             name = L["Metric Unit Symbols"],
