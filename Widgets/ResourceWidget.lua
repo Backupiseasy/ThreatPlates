@@ -21,7 +21,6 @@ local ScaleTo100 = CurveConstants and CurveConstants.ScaleTo100
 -- ThreatPlates APIs
 local BackdropTemplate = Addon.BackdropTemplate
 local IsSecretValueTP = Addon.IsSecretValue
-local Truncate = Addon.Truncate
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -52,7 +51,7 @@ local function PowerMana()
   local absolute_value = UnitPower("target", SPELL_POWER_MANA)
   local percentage_value = UnitPowerPercent("target", SPELL_POWER_MANA, false, ScaleTo100)
   
-  return percentage_value, Truncate(absolute_value)
+  return percentage_value, Addon.Truncate(absolute_value)
 end
 
 local function PowerGeneric()  
