@@ -1,4 +1,9 @@
 ------------------------------------------------------
+13.3.5 (2026-10-31)
+------------------------------------------------------
+* Fixed a Lua error when spending or regenerating Essence as an Evoker with the combo points widget enabled, caused by secret value restrictions [GH-776].
+
+------------------------------------------------------
 13.3.4 (2026-10-28)
 ------------------------------------------------------
 * Fixed a bug where auras on friendly units kept the settings of their own area when "Swap Area By Reaction" was enabled [GH-770].
