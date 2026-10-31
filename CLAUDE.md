@@ -351,6 +351,8 @@ with `issecretvalue` / `Addon.IsSecretValue` before boolean tests, math, string 
   `SecretArguments = "AllowedWhenTainted"` and are safe display sinks for secret numeric values. There is no
   equivalent verified API metadata for Lua `string.format`, `string.match`, or `string.gsub`; do not assume
   a raw pattern-based string op on a secret value is safe without explicit documentation or runtime proof.
+  `Elements/StatusText.lua`'s `("%.f%%"):format(UnitHealthPercent(...))` works without problems in live use, so
+  it does not need to be replaced (e.g., with `C_Intl.FormatNumber`).
 - **Correction (was previously stated as needing a guard)**: plain `..` concatenation with a secret operand
   does **not** itself throw — it produces a secret *result* (taints it), the same as arithmetic would, but
   unlike arithmetic/comparison it does not error at the concatenation step itself. Confirmed live on a client
@@ -492,7 +494,11 @@ or a confirmed later trigger point) emerges.
 
 Do not re-enable without explicit request: off-tank detection, name abbreviation/transliteration
 (`Modules/Localization.lua` feature flags), `Widgets/HealerTrackerWidget.lua`, NPC-ID parsing from GUID
-structure.
+structure. `Addon.Truncate` always uses `AbbreviateNumbers` there: in western style with own breakpoints or, with
+the option "Metric Unit Symbols" on East Asian clients, in the client's locale. `locale = "enUS"` is no alternative, as that option only
+selects the breakpoints and the abbreviation text still comes from the client's global strings - in-game, a deDE
+client abbreviated 123456 with `locale = "zhCN"` to `12K`, and a koKR client with `locale = "enUS"` to `123만`
+(ten times too high).
 
 ### Known open issues / unverified findings
 
@@ -511,8 +517,7 @@ Point-in-time notes from past analysis passes — re-verify before relying on th
 - `Widgets/SocialWidget.lua`: name/fullname concatenation and table-key lookups may still consume secret
   values without a guard.
 - `Elements/StatusText.lua`: `UnitSubtitles[tooltip_name] = subtitle` still needs a secret-value guard on the
-  cache key; `UnitHealthPercent(...)` is passed directly into `:format("%.f%%")` — keep this path open until
-  `string.format` safety on a secret value is proven (see the `string.format` caveat above).
+  cache key.
 
 ## WoW API Reference
 
