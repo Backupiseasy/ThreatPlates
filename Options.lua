@@ -6234,8 +6234,6 @@ local function CreateLocalizationSettings()
     order = 135,
     type = "group",
     inline = false,
-    -- On clients with Midnight's API surface, only transliteration is available (if the client has the API for it)
-    hidden = not Addon.Localization.TransliterationIsSupported,
     args = {
       Texts = {
         name = L["Texts"],

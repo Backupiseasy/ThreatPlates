@@ -517,9 +517,9 @@ from that pass worth knowing:
 
 Do not re-enable without explicit request: off-tank detection, the Lua-based name/number abbreviation
 (`Addon.Truncate` is always `AbbreviateNumbers` there), `Widgets/HealerTrackerWidget.lua`, NPC-ID parsing from
-GUID structure. Cyrillic transliteration is **not** disabled: on `HAS_MIDNIGHT_API` clients
-`TransliterateCyrillicLetters` hands the (possibly secret) text to `C_Intl.Transliterate` where that API exists
-(Forever, Retail since 12.1.5; `LocalizationModule.TransliterationIsSupported`), without inspecting or caching it.
+GUID structure. Cyrillic transliteration is **not** disabled: `TransliterateCyrillicLetters` hands the (possibly
+secret) text to `C_Intl.Transliterate`, without inspecting or caching it. All clients with secret values have that
+API (Forever, Retail since 12.1.5); the Classic clients don't and use a Lua table instead.
 
 ### Known open issues / unverified findings
 

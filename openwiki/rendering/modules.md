@@ -159,7 +159,7 @@ Runtime text helpers (not the translation tables, see [Localization pipeline](..
 - the localized totem creature type (`Addon.TotemCreatureType`),
 - `Addon.Truncate` - `AbbreviateNumbers` by default and always on `HAS_MIDNIGHT_API`; otherwise a Western or
   East Asian (`万`/`億`) formatter,
-- `TransliterateCyrillicLetters(text)` - a Lua table-based transliteration with cache; on `HAS_MIDNIGHT_API`
-  `C_Intl.Transliterate` (if present, `TransliterationIsSupported`) without inspecting the text.
+- `TransliterateCyrillicLetters(text)` - `C_Intl.Transliterate` where that API exists, without inspecting the
+  text; otherwise (Classic clients) a Lua table-based transliteration with cache.
 
 Related: [Elements](elements.md), [Styles and custom styles](styles.md).

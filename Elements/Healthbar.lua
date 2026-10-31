@@ -270,7 +270,7 @@ local function ShowTargetUnit(healthbar, unitid)
       local target_of_target_name = GetUnitNameWithSurname(target_of_target_unit, SettingsShowSurname)
       if target_of_target_name then
         -- On HAS_MIDNIGHT_API clients, TransliterateCyrillicLetters only hands the string to
-        -- C_Intl.Transliterate (if available and enabled) and never inspects it in Lua; its result must be
+        -- C_Intl.Transliterate (if enabled) and never inspects it in Lua; its result must be
         -- treated as secret like the name itself. Plain ".." concatenation of a secret value just taints
         -- the result rather than erroring (confirmed via Nameplate.lua's UNIT_SPELLCAST_INTERRUPTED
         -- handler) - safe to pass straight into the SetText sink below without a secret-value guard here.

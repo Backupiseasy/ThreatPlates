@@ -99,7 +99,7 @@ the number formatters `AbbreviateNumbers`/`AbbreviateLargeNumbers`/`BreakUpLarge
 - Number text: `Addon.Truncate` is `AbbreviateNumbers` on these clients; the Western/East Asian Lua formatters
   are only installed when `HAS_MIDNIGHT_API` is false.
 - Transliteration: on these clients `TransliterateCyrillicLetters` hands the text to `C_Intl.Transliterate`
-  (if present) and never inspects or caches it.
+  and never inspects or caches it.
 - Raid markers: with `HAS_MIDNIGHT_API`, `unit.TargetMarkerIcon` is the raw (possibly secret) index, passed to
   `SetRaidTargetIconTexture`; `RAID_TARGET_UPDATE` then publishes `TargetMarkerUpdate` without comparing.
 
@@ -139,7 +139,7 @@ Do not re-enable these without an explicit decision:
   `AurasWidgetMidnight.lua`.
 - `COMBAT_LOG_EVENT_UNFILTERED` is not registered; interrupts use `UNIT_SPELLCAST_INTERRUPTED`.
 - The Lua-based number abbreviation is replaced by `AbbreviateNumbers`. Cyrillic transliteration still works,
-  but only through `C_Intl.Transliterate` where that API exists (`TransliterationIsSupported`).
+  but only through `C_Intl.Transliterate`.
 
 The arena healer detection cannot simply come back: since Patch 12.1.5, `GetArenaOpponentSpec` always returns
 secrets, so the spec id cannot be a table key.
