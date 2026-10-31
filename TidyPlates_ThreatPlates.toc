@@ -15,6 +15,15 @@
 ## IconTexture: Interface\Addons\TidyPlates_ThreatPlates\Artwork\Logo.tga
 ## Category: Unit Frames
 ## Category-deDE: Einheitenfenster
+## Category-esES: Marcos de unidades
+## Category-esMX: Marcos de unidades
+## Category-frFR: Portraits d'unités
+## Category-itIT: Riquadri delle unità
+## Category-koKR: 유닛프레임
+## Category-ptBR: Quadros de unidade
+## Category-ruRU: Рамки юнитов
+## Category-zhCN: 单位框体
+## Category-zhTW: 單位框架
 
 ## X-Category: Unit Frames
 ## X-Website: https://wow.curseforge.com/projects/tidy-plates-threat-plates
