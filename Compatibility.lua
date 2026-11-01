@@ -28,6 +28,7 @@ local WOW_EVENTS = {
   BN_FRIEND_ACCOUNT_OFFLINE = true,
   BN_FRIEND_ACCOUNT_ONLINE = true,
   COMBAT_LOG_EVENT_UNFILTERED = not Addon.HAS_MIDNIGHT_API, -- Removed in Midnight; also ADDON_ACTION_FORBIDDEN on other clients with Midnight's API surface
+  CVAR_UPDATE = true,
   FRIENDLIST_UPDATE = true,
   GUILD_ROSTER_UPDATE = true,
   GROUP_LEFT = true,
@@ -102,6 +103,7 @@ local WOW_EVENTS = {
   UPDATE_MOUSEOVER_UNIT = true,
   UPDATE_SHAPESHIFT_FORM = true,  
   UPDATE_UI_WIDGET = true, -- Added in 8.0.1 / 1.13.2
+  VARIABLES_LOADED = true,
 }
 
 function Addon:ExpansionSupportsEvent(event, register_for_current_expansion)

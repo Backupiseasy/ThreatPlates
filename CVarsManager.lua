@@ -124,6 +124,21 @@ local MONITORED_CVARS = {
   nameplateSelectedAlpha = true,
 }
 
+local function UpdateTransparencySettings()
+  Addon.Transparency.UpdateSettings()
+end
+
+-- Reactions to CVar changes via the CVAR_UPDATE event (CVarUpdateHook below). Unlike MONITORED_CVARS (SetCVarHook,
+-- which only sees changes made via C_CVar.SetCVar/ConsoleExec), it covers every change of the CVar.
+local CVAR_UPDATE_HANDLERS = {
+  -- Occlusion detection caches the result of checking these CVars (Transparency.lua)
+  nameplateMinAlpha = UpdateTransparencySettings,
+  nameplateMaxAlpha = UpdateTransparencySettings,
+  nameplateOccludedAlphaMult = UpdateTransparencySettings,
+  nameplateSelectedAlpha = UpdateTransparencySettings,
+  nameplateNotSelectedAlpha = UpdateTransparencySettings,
+}
+
 local function SetConsoleVariable(cvar, value)
   -- Store in settings to be able to restore it later, but don't overwrite an existing value unless the current value
   -- is different from the backup value and the new value TP wants to set. In that case, the CVars was changed since
@@ -295,7 +310,17 @@ local function SetCVarHook(name, value, c)
   end
 end
 
+local function CVarUpdateHook(cvar_name, value)
+  local handler = CVAR_UPDATE_HANDLERS[cvar_name]
+  if handler then handler(value) end
+end
+
 function CVars.RegisterCVarHook()
+  Addon.EventService.Subscribe(CVars, "CVAR_UPDATE", CVarUpdateHook)
+  -- After a client start, CVars still have their default values at ADDON_LOADED (verified in-game), so settings
+  -- derived from them in OnInitialize must be read again once the saved values are loaded
+  Addon.EventService.Subscribe(CVars, "VARIABLES_LOADED", UpdateTransparencySettings)
+
   -- Tracking of CVars based on code from AdvancedInterfaceOptions
   --hooksecurefunc("SetCVar", SetCVarHook) -- /script SetCVar(cvar, value)
   if C_CVar and C_CVar.SetCVar then
