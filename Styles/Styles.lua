@@ -335,8 +335,11 @@ function StyleModule.AuraTriggerUpdateStyle(unit)
   -- Set the style if a aura trigger for a custom nameplate was found or the aura trigger
   -- is no longer there
   if Addon.ActiveAuraTriggers and (unit.CustomStyleAura or unit.PreviousCustomStyleAura) then 
+    -- nil if the nameplate is shown by Blizzard (auras are still scanned for its hidden TP frame)
     local tp_frame = Addon:GetThreatPlateForUnit(unit.unitid)
-    StyleModule.Update(tp_frame)
+    if tp_frame then
+      StyleModule.Update(tp_frame)
+    end
   end
 end
 

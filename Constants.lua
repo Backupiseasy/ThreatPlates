@@ -1730,7 +1730,6 @@ Addon.DEFAULT_SETTINGS = {
     },
     BlizzardSettings = {
       Names = {
-        ShowOnlyNames = false,
         Enabled = false,
         ShowPlayersInInstances = false,
         Font = {
