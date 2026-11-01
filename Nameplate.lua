@@ -130,7 +130,6 @@ local PlatesByGUID = Addon.PlatesByGUID
 -- Cached configuration settings (for performance reasons)
 ---------------------------------------------------------------------------------------------------
 local SettingsShowEnemyBlizzardNameplates, SettingsShowFriendlyBlizzardNameplates
-local SettingsShowOnlyNames
 local TargetStyleForEnemy, TargetStyleForFriend, TargetStyleForInteract
 local ShowCastBars
 local ShowInterruptSource
@@ -941,10 +940,6 @@ local function ThreatPlatesIsActive(unitid)
   end
 end
 
-local function ClassicBlizzardNameplatesSetAlpha(UnitFrame, alpha)
-  UnitFrame.ClassificationFrame:SetAlpha(alpha)
-end
-
 -- Hide ThreatPlates nameplates if Blizzard nameplates should be shown for friendly/enemy units
 local function SetVisibilityOfBlizzardNameplate(UnitFrame, unitid)
   -- Not sure if unit.reaction will always be correctly set here, so:
@@ -974,10 +969,6 @@ local function FrameOnShow(UnitFrame)
       UnitFrame:GetParent().TPFrame:Hide()
     end
     return
-  end
-
-  if SettingsShowOnlyNames then
-    ClassicBlizzardNameplatesSetAlpha(UnitFrame, 0)
   end
 
   SetVisibilityOfBlizzardNameplate(UnitFrame, unitid)
@@ -1351,7 +1342,6 @@ function Addon:UpdateSettings()
 
   SettingsShowFriendlyBlizzardNameplates = db.ShowFriendlyBlizzardNameplates
   SettingsShowEnemyBlizzardNameplates = db.ShowEnemyBlizzardNameplates
-  SettingsShowOnlyNames = CVars:GetAsBool("nameplateShowOnlyNames") and Addon.db.profile.BlizzardSettings.Names.Enabled
   SettingsShowSurname = Addon.WOW_FEATURE_REGIONAL_SURNAMES and db.Name.HealthbarMode.ShowSurname
 
   TargetStyleForEnemy = db.targetWidget.SoftTarget.TargetStyleForEnemy
@@ -1418,13 +1408,6 @@ end
 
 function Addon:ForceUpdateOnNameplate(tp_frame)
   RefreshPlatePresentation(tp_frame, tp_frame.Parent, tp_frame.unit.unitid)
-end
-
-function Addon:ForceUpdateFrameOnShow()
-  SettingsShowOnlyNames = CVars:GetAsBool("nameplateShowOnlyNames") and Addon.db.profile.BlizzardSettings.Names.Enabled
-  for _, tp_frame in Addon:GetActiveThreatPlates() do
-    ClassicBlizzardNameplatesSetAlpha(tp_frame.Parent.UnitFrame, SettingsShowOnlyNames and 0 or 1)
-  end
 end
 
 --------------------------------------------------------------------------------------------------------------

@@ -49,7 +49,6 @@ local COMBAT_PROTECTED = {
   nameplateShowFriendlyPlayerMinions = true,
   nameplateShowFriendlyPlayerPets = true,
   nameplateShowFriendlyPlayerTotems = true,
-  nameplateShowOnlyNames = true,
   nameplateShowOnlyNameForFriendlyPlayerUnits = true,
   -- Soft Target CVars
   SoftTargetForce = true,
@@ -77,18 +76,6 @@ local COMBAT_PROTECTED = {
 
 -- Set these CVars after login/reloading the UI
 function CVars:Initialize(cvar, value)
-  -- Fix for: Friendly Nameplates Name Only Mode in Raids and Dungeons for Patch 10.0.5
-  -- https://www.wowhead.com/de/news/update-solution-to-friendly-nameplates-name-only-mode-in-raids-and-dungeons-for-331178
-  -- /script C_CVar.RegisterCVar("nameplateShowOnlyNames")
-  -- Registering only has to be done once, but the value seems to be reset to 0 after every reload 
-  if C_CVar.GetCVar("nameplateShowOnlyNames") == nil then
-    C_CVar.RegisterCVar("nameplateShowOnlyNames")
-  end
-
-  -- ! The CVar nameplateShowOnlyNames is not persistently stored by WoW, so we have to restore its value
-  -- ! after every login/reloading the UI.
-  self:SetBool("nameplateShowOnlyNames", Addon.db.profile.BlizzardSettings.Names.ShowOnlyNames)
-
   -- Sync internal settings with Blizzard CVars
   -- SetCVar("ShowClassColorInNameplate", 1)
 
@@ -256,7 +243,6 @@ end
 local RESET_TO_DEFAULT = {
   "nameplateOverlapH", "nameplateOverlapV",
   "nameplateMaxDistance", "nameplateTargetBehindMaxDistance",
-  "nameplateShowOnlyNames",
   -- "nameplateGlobalScale" -- Reset it to 1, if it get's somehow corrupted
   -- Action Target
   "SoftTargetEnemy", "SoftTargetNameplateEnemy", "SoftTargetIconEnemy",

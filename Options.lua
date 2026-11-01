@@ -6298,11 +6298,6 @@ local function CreateBlizzardSettings()
     end,
   }
 
-  func_handler.SetValueEnable = function(self, info, val)
-    func_handler.SetValue(self, info, val)
-    Addon:ForceUpdateFrameOnShow()
-  end
-
   local entry = {
     name = L["Blizzard Settings"],
     order = 140,
@@ -6416,21 +6411,6 @@ local function CreateBlizzardSettings()
             type = "group",
             inline = true,
             args = {
-              ShowOnlyNames = {
-                name = L["Only Names"],
-                order = 30,
-                type = "toggle",
-                width = "double",
-                set = function(info, val)
-                  Addon.db.profile.BlizzardSettings.Names.ShowOnlyNames = val
-                  SetValueCVarBool(info, val)
-                  ReloadUI()
-                end,
-                get = GetValueCVarBool,
-                desc = L["Show only unit names and hide healthbars (requires /reload). Note that the clickable area of friendly nameplates will also be set to zero so that they don't interfere with enemy nameplates stacking (not in Classic or TBC Classic)."],
-                arg = "nameplateShowOnlyNames",
-                hidden = Addon.HAS_MIDNIGHT_API,
-              },
               ShowOnlyNameForFriendlyPlayerUnits = {
                 name = L["Only Names for Friendly Players"],
                 order = 35,
@@ -6439,8 +6419,8 @@ local function CreateBlizzardSettings()
                 set = SetValueCVarBool,
                 get = GetValueCVarBool,
                 desc = L["Hide healthbars of friendly units"],
-                arg = "nameplateShowOnlyNameForFriendlyPlayerUnits",    
-                hidden = not Addon.HAS_MIDNIGHT_API,        
+                arg = "nameplateShowOnlyNameForFriendlyPlayerUnits",
+                hidden = CVarIsUnavailable,
               },                    
               DebuffsOnFriendly = {
                 name = L["Debuffs on Friendly"],
@@ -6727,7 +6707,7 @@ local function CreateBlizzardSettings()
     order = 2,
     type = "toggle",
     width = "full",
-    set = "SetValueEnable",
+    set = "SetValue",
     arg = { "BlizzardSettings", "Names", "Enabled" },
   }
 
