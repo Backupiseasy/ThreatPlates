@@ -2,6 +2,7 @@
 13.3.6 (2026-11-01)
 ------------------------------------------------------
 * Fixed a bug where names on Blizzard's nameplates did not go back to Blizzard's font after disabling the custom font.
+* Fixed a Lua error when switching from a profile with disabled auras to one with enabled auras.
 
 ------------------------------------------------------
 13.3.5 (2026-11-01)
