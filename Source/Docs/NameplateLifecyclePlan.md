@@ -475,7 +475,7 @@ Conclusions: the bound `HitTestFrame` can be resized at any time (also in combat
 combat except on the `ADDED` tick. The clickable area is clamped to `plate`'s bounds, and `C_NamePlate.SetNamePlateSize` is
 no option (global, distorts Blizzard's plates, which also exist in pure TP mode).
 
-### P10: Clamp the clickable area to the plate size and make the limit visible
+### P10: Clamp the clickable area to the plate size and make the limit visible — IN PROGRESS (branch `feature/nameplate-clickable-area`)
 
 - **Problem**: with a wide healthbar (or large manual click area), `HitTestFrame` exceeds `plate` and the clickable
   area is silently cut off. `ConfigClickableArea` shows an area that is partly not clickable.
@@ -495,6 +495,33 @@ no option (global, distorts Blizzard's plates, which also exist in pure TP mode)
   `ApplyPlateHitTest` binds the hit-test to `plate.UnitFrame`, i.e. the whole plate instead of Blizzard's exact area.
   In "only name" mode, it also overrides Blizzard's cleared hit-test, so friendly names become clickable. Option:
   bind to a frame anchored via `AnchorToBlizzardHitTestArea`, and in "only name" mode leave the hit-test alone.
+
+- **Implemented so far** (branch `feature/nameplate-clickable-area`, created from `feature/nameplate-lifecycle` @
+  `44425c72`):
+  1. `ApplyPlateHitTest`: width/height of `HitTestFrame` are clamped to `plate:GetSize()`. Guarded with
+     `IsSecretValueTP` (sizes of nameplate frames can be secret in restricted contexts), so no clamping then.
+     `HitTestFrame` has no own scale yet, so both sizes are in the same coordinate space. Revisit with P9.
+  2. Options: an always visible description at the top of the "Clickable Area" group (`GetDescriptionEntry`):
+     `The clickable area cannot be larger than Blizzard's nameplate. Its size is set with Blizzard's nameplate size
+     options.` (new key in `Locales/enUS.lua`; other locales via the CurseForge sync). A first version put the text
+     into the tooltips of "Healthbar Sync" and the four sliders, which was hard to notice.
+  3. Re-apply on native size changes: no change. `SetCVarHook` → `SetBaseNamePlateSize` →
+     `SetNamePlateClickThrough` → `ApplyPlateHitTest` already runs for `RESYNC_NATIVE_SIZE_CVARS` (out of combat).
+     Open question for the test: does `plate:GetSize()` already return the new size at that point (the CVar update
+     is synchronous, the plate resize might only happen later)?
+  4. New option "Blizzard Nameplate Size" (range 1-5, CVar `nameplateSize`) in the "Clickable Area" group. Layout:
+     description, "Healthbar Sync", "Blizzard Nameplate Size", the four width/height sliders, then "Configuration
+     Mode" on its own line (full width). The option's tooltip only describes the CVar and its effect on Blizzard's
+     own plates; the clamp is explained by the group description (no overlap). Explicit `get = GetValueCVarNumber`, `set = SetValueCVar`, since
+     the group's `get` reads the profile. Hidden if the client doesn't know the CVar (`CVarIsUnavailable`).
+     `nameplateSize` added to `COMBAT_PROTECTED` (`CVarsManager.lua`), so a change in combat is applied after combat.
+     The clickable area follows via `SetCVarHook` → `SetBaseNamePlateSize`. Two new locale strings. Changelog:
+     `Added an option for the size of Blizzard's nameplates to the clickable area settings, as it limits the
+     clickable area of nameplates.`
+- **Still open in P10**: the "Also" item above (hit-test of Blizzard-shown plates: Blizzard's exact area instead of
+  the whole plate, leave "only name" plates unclickable).
+- Note: `localization_tool.py check` reports 7 keys missing from `Locales/enUS.lua` that came with `develop` (e.g.
+  `Bottom Inset`, motion speed). Not part of P10; fix separately on `develop`.
 
 ### P9: Let the clickable area scale with `TPFrame` (target/mouseover/threat scale, custom styles)
 
@@ -608,7 +635,7 @@ hash once committed, and tick or remove them when done. "(old base)" marks check
 - [x] Changing your own faction/reaction (e.g. duel start/end, or anything that fires `UNIT_FACTION` for "player"):
       no errors, all plates update (2026-10-30).
 
-**P5 — `UNIT_CLASSIFICATION_CHANGED`** (committed, hash added with the next commit) — Retail and Classic Era
+**P5 — `UNIT_CLASSIFICATION_CHANGED`** (`44425c72`) — Retail and Classic Era
 - [x] In-game event registration check on Retail: 0 mismatches, `UNIT_CLASSIFICATION_CHANGED` and `CVAR_UPDATE`
       register fine (2026-10-30).
 - [ ] Same check on Classic Era, Anniversary, Mists.
@@ -616,6 +643,16 @@ hash once committed, and tick or remove them when done. "(old base)" marks check
       encounter phases, units that turn elite): style, custom style trigger and classification icon update without
       leaving and re-entering range.
 - [ ] No errors / no noticeable hitches when the event fires (it causes a full plate refresh).
+
+**P10 — clamp clickable area** (committed, hash added with the next commit; branch `feature/nameplate-clickable-area`) — Retail and Classic Era
+- [x] Healthbar width 250 (or manual click area larger than the plate): configuration mode shows the clamped area,
+      and exactly that area is clickable (2026-11-01).
+- [x] Change Blizzard's nameplate size: the clamp follows (configuration mode after the change) (2026-11-01).
+- [x] Options: description at the top of the "Clickable Area" group, layout as described in P10 (2026-11-01).
+- [ ] Instance/BG: no errors from secret plate sizes in `ApplyPlateHitTest`.
+- [ ] "Blizzard Nameplate Size" option: shows the current value (also after changing it in Blizzard's options),
+      changing it resizes Blizzard's plates and the clamp follows; in combat the change is applied after combat.
+      Shown on Retail and Classic Era (both have the CVar).
 
 **BG / arena (one PvP session covers checks from P1, P2, P3, P4 and P8)** — Retail and Classic Era
 - [ ] P2: Stale name/health stays fixed ([Comment #8228, #8363, #8408, #8433]). Right after entering, enemy plates

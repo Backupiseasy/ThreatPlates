@@ -1254,6 +1254,16 @@ local function ApplyPlateHitTest(tp_frame)
     local width  = (is_friendly and db_frame.widthFriend)  or db_frame.width
     local height = (is_friendly and db_frame.heightFriend) or db_frame.height
 
+    -- Blizzard clamps the clickable area to plate's bounds anyway, so clamp HitTestFrame as well. Then it (and the
+    -- clickable area configuration mode, which shows HitTestFrame) matches the area that is actually clickable.
+    -- HitTestFrame is a child of plate without own scale, so both sizes are in the same coordinate space. Sizes of
+    -- nameplate frames can be secret in restricted contexts; skip clamping then.
+    local plate_width, plate_height = plate:GetSize()
+    if not IsSecretValueTP(plate_width) and not IsSecretValueTP(plate_height) and plate_width > 0 and plate_height > 0 then
+      width = math.min(width, plate_width)
+      height = math.min(height, plate_height)
+    end
+
     tp_frame.HitTestFrame:ClearAllPoints()
     tp_frame.HitTestFrame:SetSize(width, height)
     -- Anchor to plate (HitTestFrame's parent) rather than tp_frame or the pooled plate.UnitFrame.

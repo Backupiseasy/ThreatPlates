@@ -33,6 +33,7 @@ local COMBAT_PROTECTED = {
   nameplateOccludedAlphaMult = true,
   nameplateOverlapH = true,
   nameplateOverlapV = true,
+  nameplateSize = true,
   nameplateSelectedAlpha = true,
   nameplateNotSelectedAlpha = true,
   nameplateTargetBehindMaxDistance = true,

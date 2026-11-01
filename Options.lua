@@ -6454,6 +6454,7 @@ local function CreateBlizzardSettings()
             inline = true,
             get = GetValue,
             args = {
+              Description = GetDescriptionEntry(L["The clickable area cannot be larger than Blizzard's nameplate. Its size is set with Blizzard's nameplate size options."]),
               ToggleSync = {
                 name = L["Healthbar Sync"],
                 order = 10,
@@ -6468,10 +6469,25 @@ local function CreateBlizzardSettings()
                 end,
                 arg = { "settings", "frame", "SyncWithHealthbar"},
               },
+              BlizzardNameplateSize = {
+                name = L["Blizzard Nameplate Size"],
+                order = 15,
+                type = "range",
+                min = 1,
+                max = 5,
+                step = 1,
+                width = "double",
+                desc = L["Size of Blizzard's nameplates (1 = small, 5 = huge). This also changes the size of Blizzard's own nameplates (e.g., friendly units in instances)."],
+                get = GetValueCVarNumber,
+                set = SetValueCVar,
+                arg = "nameplateSize",
+                hidden = CVarIsUnavailable,
+              },
               ShowArea = {
                 name = L["Configuration Mode"],
                 type = "execute",
-                order = 15,
+                order = 40,
+                width = "full",
                 desc = "Toggle a background showing the area of the clicable area.",
                 func = function()
                   Addon:ConfigClickableArea(true)
