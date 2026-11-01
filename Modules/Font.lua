@@ -14,6 +14,7 @@ local SystemFont_NamePlate, SystemFont_NamePlateFixed = SystemFont_NamePlate, Sy
 local SystemFont_LargeNamePlate, SystemFont_LargeNamePlateFixed = SystemFont_LargeNamePlate, SystemFont_LargeNamePlateFixed
 local SystemFont_NamePlate_Outlined = _G.SystemFont_NamePlate_Outlined
 local C_Timer_After = C_Timer.After
+local C_NamePlate = C_NamePlate
 local CreateFontFamily = _G.CreateFontFamily
 
 -- ThreatPlates APIs
@@ -31,14 +32,51 @@ local FontModule = Addon.Font
 -- Backup system fonts for recovery if necessary
 ---------------------------------------------------------------------------------------------------
 
-local function BackupSystemFont(font_instance)
-  local font_name, font_height, font_flags = font_instance:GetFont()
+-- Blizzard's nameplate fonts are font families with one font per alphabet (see GameFonts.xml), and plain SetFont on
+-- them only changes the font that GetFont reports. So back up (and restore) every alphabet's font object, including
+-- its shadow, with the font file path as is (not via LibSharedMedia).
+local FONT_ALPHABETS = { "roman", "korean", "simplifiedchinese", "traditionalchinese", "russian" }
 
-  return {
-    Typeface = font_name,
-    Size = font_height,
-    flags = font_flags
-  }
+local function BackupFontObject(font_object)
+  local font, height, flags = font_object:GetFont()
+  local r, g, b, a = font_object:GetShadowColor()
+  local x, y = font_object:GetShadowOffset()
+  return { Font = font, Height = height, Flags = flags, ShadowColor = { r, g, b, a }, ShadowOffset = { x, y } }
+end
+
+local function RestoreFontObject(font_object, backup)
+  if not backup.Font then return end
+
+  font_object:SetFont(backup.Font, backup.Height, backup.Flags)
+  font_object:SetShadowColor(unpack(backup.ShadowColor))
+  font_object:SetShadowOffset(unpack(backup.ShadowOffset))
+end
+
+local function BackupSystemFont(font_instance)
+  if not font_instance then return end
+
+  local backup = { Base = BackupFontObject(font_instance), Alphabets = {} }
+  if font_instance.GetFontObjectForAlphabet then
+    for _, alphabet in ipairs(FONT_ALPHABETS) do
+      local font_object = font_instance:GetFontObjectForAlphabet(alphabet)
+      if font_object then
+        backup.Alphabets[alphabet] = BackupFontObject(font_object)
+      end
+    end
+  end
+  return backup
+end
+
+local function RestoreSystemFont(font_instance, backup)
+  if not font_instance or not backup then return end
+
+  RestoreFontObject(font_instance, backup.Base)
+  for alphabet, alphabet_backup in pairs(backup.Alphabets) do
+    local font_object = font_instance:GetFontObjectForAlphabet(alphabet)
+    if font_object then
+      RestoreFontObject(font_object, alphabet_backup)
+    end
+  end
 end
 
 local DefaultSystemFonts = {
@@ -46,7 +84,7 @@ local DefaultSystemFonts = {
   NamePlateFixed = BackupSystemFont(SystemFont_NamePlateFixed),
   LargeNamePlate = BackupSystemFont(SystemFont_LargeNamePlate),
   LargeNamePlateFixed = BackupSystemFont(SystemFont_LargeNamePlateFixed),
-  NamePlateOutlined = SystemFont_NamePlate_Outlined and BackupSystemFont(SystemFont_NamePlate_Outlined),
+  NamePlateOutlined = BackupSystemFont(SystemFont_NamePlate_Outlined),
 }
 
 ---------------------------------------------------------------------------------------------------
@@ -279,14 +317,40 @@ function FontModule.SetNamesFonts(skip_reapply)
   end
 end
 
-function FontModule.ResetNamesFonts()
-  UpdateSystemFont(SystemFont_NamePlate, DefaultSystemFonts.NamePlate)
-  UpdateSystemFont(SystemFont_NamePlateFixed, DefaultSystemFonts.NamePlateFixed)
-  UpdateSystemFont(SystemFont_LargeNamePlate, DefaultSystemFonts.LargeNamePlate)
-  UpdateSystemFont(SystemFont_LargeNamePlateFixed, DefaultSystemFonts.LargeNamePlateFixed)
-  if SystemFont_NamePlate_Outlined and DefaultSystemFonts.NamePlateOutlined then
-    UpdateSystemFont(SystemFont_NamePlate_Outlined, DefaultSystemFonts.NamePlateOutlined)
+-- Blizzard sets the text height of the name and health texts per font string (SetTextHeight in
+-- NamePlateUnitFrameMixin:ApplyFrameOptions), but only when a nameplate is set up. Changing the font objects (as
+-- SetNamesFonts does) overrides that height, so restore it on Blizzard's currently shown nameplates.
+local function RestoreBlizzardTextHeights()
+  local setup_options = _G.NamePlateSetupOptions
+  local text_height = setup_options and setup_options.healthBarFontHeight
+  if not text_height then return end
+
+  for _, plate in ipairs(C_NamePlate.GetNamePlates()) do
+    local unit_frame = plate.UnitFrame
+    if unit_frame and not unit_frame:IsForbidden() then
+      if unit_frame.name then
+        unit_frame.name:SetTextHeight(text_height)
+      end
+      local healthbar = unit_frame.HealthBarsContainer and unit_frame.HealthBarsContainer.healthBar
+      if healthbar then
+        for _, key in ipairs({ "Text", "LeftText", "RightText" }) do
+          if healthbar[key] then
+            healthbar[key]:SetTextHeight(text_height)
+          end
+        end
+      end
+    end
   end
+end
+
+function FontModule.ResetNamesFonts()
+  RestoreSystemFont(SystemFont_NamePlate, DefaultSystemFonts.NamePlate)
+  RestoreSystemFont(SystemFont_NamePlateFixed, DefaultSystemFonts.NamePlateFixed)
+  RestoreSystemFont(SystemFont_LargeNamePlate, DefaultSystemFonts.LargeNamePlate)
+  RestoreSystemFont(SystemFont_LargeNamePlateFixed, DefaultSystemFonts.LargeNamePlateFixed)
+  RestoreSystemFont(SystemFont_NamePlate_Outlined, DefaultSystemFonts.NamePlateOutlined)
+
+  RestoreBlizzardTextHeights()
 end
 
 ---------------------------------------------------------------------------------------------------

@@ -1,4 +1,9 @@
 ------------------------------------------------------
+13.3.6 (2026-11-01)
+------------------------------------------------------
+* Fixed a bug where names on Blizzard's nameplates did not go back to Blizzard's font after disabling the custom font.
+
+------------------------------------------------------
 13.3.5 (2026-11-01)
 ------------------------------------------------------
 * Fixed a Lua error when spending or regenerating Essence as an Evoker with the combo points widget enabled, caused by secret value restrictions [GH-776].
