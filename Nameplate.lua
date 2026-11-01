@@ -1164,8 +1164,15 @@ local function AnchorToBlizzardHitTestArea(frame, unit_frame)
   local setup_options = _G.NamePlateSetupOptions
   local offset_y = ((setup_options and setup_options.healthBarHeight) or 0) / 2
 
+  -- Name inside the healthbar (nameplate styles Modern and Block): the hit-test area is the healthbar only. The UI
+  -- source (2026-08) still checks unitNameInsideHealthBar, which is never set; the client evidently uses
+  -- unitNameAnchorStyle (verified in-game with style Block: Blizzard's area extends slightly beyond the healthbar).
+  local name_inside_healthbar = setup_options and (setup_options.unitNameInsideHealthBar or
+    (_G.NamePlateConstants and _G.NamePlateConstants.NAME_ANCHOR_STYLES and
+     setup_options.unitNameAnchorStyle == _G.NamePlateConstants.NAME_ANCHOR_STYLES.InsideHealthBar))
+
   frame:SetPoint("BOTTOMRIGHT", healthbar, "BOTTOMRIGHT", 10, -offset_y)
-  if (setup_options and setup_options.unitNameInsideHealthBar) or not unit_frame.name then
+  if name_inside_healthbar or not unit_frame.name then
     frame:SetPoint("TOPLEFT", healthbar, "TOPLEFT", -10, offset_y)
   else
     frame:SetPoint("TOPLEFT", unit_frame.name, "TOPLEFT", -14, 0)
@@ -1217,14 +1224,6 @@ local function ApplyPlateStackingBounds(tp_frame)
   plate:SetStackingBoundsFrame(frame)
 end
 
--- Re-applies the stacking bounds of all plates with a unit, incl. plates shown by Blizzard
--- (PlatesByUnit, unlike GetActiveThreatPlates).
-function Addon.UpdateStackingBoundsOfAllPlates()
-  for _, tp_frame in pairs(PlatesByUnit) do
-    ApplyPlateStackingBounds(tp_frame)
-  end
-end
-
 -- Applies the C++ hit-test link for a nameplate plate (and, sharing the same call sites, the
 -- stacking bounds - see ApplyPlateStackingBounds).
 -- Click-through (NamePlateFriendlyClickThrough/NamePlateEnemyClickThrough) is decided by the
@@ -1245,9 +1244,15 @@ local function ApplyPlateHitTest(tp_frame)
   if is_click_through then
     plate:ClearAllHitTestPoints()
   elseif not tp_frame.Active then
-    -- plate.UnitFrame can be nil (released without NAME_PLATE_UNIT_REMOVED, see ShowBlizzardNameplate)
-    if plate.UnitFrame then
-      plate:SetAllHitTestPoints(plate.UnitFrame)
+    -- Plate shown by Blizzard: TP must re-bind the hit-test, as the pooled plate may still be bound to TP's
+    -- HitTestFrame from a previous unit. Re-create Blizzard's own clickable area (UpdateHitTestArea) instead of the
+    -- whole plate: none in "only name" mode, otherwise the same area that Blizzard's stacking uses.
+    -- plate.UnitFrame can be nil (released without NAME_PLATE_UNIT_REMOVED, see ShowBlizzardNameplate).
+    local anchored, only_name = AnchorToBlizzardHitTestArea(tp_frame.HitTestFrame, plate.UnitFrame)
+    if not anchored or only_name then
+      plate:ClearAllHitTestPoints()
+    else
+      plate:SetAllHitTestPoints(tp_frame.HitTestFrame)
     end
   else
     local db_frame = db.settings.frame
@@ -1272,6 +1277,16 @@ local function ApplyPlateHitTest(tp_frame)
     -- call, which makes SetAllHitTestPoints briefly read incorrect bounds and fire UPDATE_MOUSEOVER_UNIT.
     tp_frame.HitTestFrame:SetPoint("CENTER", plate, "CENTER")
     plate:SetAllHitTestPoints(tp_frame.HitTestFrame)
+  end
+end
+
+-- Re-applies hit-test (incl. click-through) and stacking bounds of all plates with a unit, incl. plates shown by
+-- Blizzard (PlatesByUnit, unlike GetActiveThreatPlates). Used after CVar changes that make Blizzard re-run its own
+-- UpdateHitTestArea (e.g. "only name" mode, nameplate style), which overrides TP's hit-test - e.g. a cleared one for
+-- click-through. The hit-test part is skipped in combat (CanChangeHitTestPoints), the stacking part is not.
+function Addon.UpdateHitTestAndStackingOfAllPlates()
+  for _, tp_frame in pairs(PlatesByUnit) do
+    ApplyPlateHitTest(tp_frame)
   end
 end
 

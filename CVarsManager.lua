@@ -133,17 +133,18 @@ local MONITORED_CVARS = {
 -- fires synchronously inside C_CVar.SetCVar, only if the value actually changed, and after Blizzard's own
 -- CVAR_UPDATE handling (CVarCallbackRegistry) has updated its frames. Unlike MONITORED_CVARS (SetCVarHook,
 -- which only sees changes made via C_CVar.SetCVar/ConsoleExec), it covers every change of the CVar.
-local function UpdateStackingBoundsOfAllPlates()
-  Addon.UpdateStackingBoundsOfAllPlates()
+local function UpdateHitTestAndStackingOfAllPlates()
+  Addon.UpdateHitTestAndStackingOfAllPlates()
 end
 
 local CVAR_UPDATE_HANDLERS = {
-  -- Stacking bounds depend on Blizzard's plate layout (Nameplate.lua, AnchorToBlizzardHitTestArea):
+  -- Hit-test and stacking bounds depend on Blizzard's plate layout (Nameplate.lua, AnchorToBlizzardHitTestArea):
   -- "only name" mode switches live (no reload), nameplateStyle decides whether the name is inside or
-  -- above the healthbar, nameplateSize changes the healthbar size used for TP plates.
-  nameplateShowOnlyNameForFriendlyPlayerUnits = UpdateStackingBoundsOfAllPlates,
-  nameplateStyle = UpdateStackingBoundsOfAllPlates,
-  nameplateSize = UpdateStackingBoundsOfAllPlates,
+  -- above the healthbar, nameplateSize changes the healthbar size used for TP plates. Blizzard also re-runs its
+  -- UpdateHitTestArea for these, which overrides TP's hit-test (e.g. click-through), so re-apply it.
+  nameplateShowOnlyNameForFriendlyPlayerUnits = UpdateHitTestAndStackingOfAllPlates,
+  nameplateStyle = UpdateHitTestAndStackingOfAllPlates,
+  nameplateSize = UpdateHitTestAndStackingOfAllPlates,
 }
 
 local function SetConsoleVariable(cvar, value)

@@ -238,6 +238,11 @@ Central pub/sub for both real WoW events and internal TP events (`INTERNAL_EVENT
     `C_NamePlate.SetNamePlateSize` is deliberately not used to enlarge `plate`: it is a single global size and
     would also distort Blizzard's own plates (which TP shows in mixed mode and which exist even in pure TP mode,
     e.g. protected friendly plates in instances).
+  - TP plates: `HitTestFrame` is sized from the clickable-area settings, clamped to `plate:GetSize()` (unless secret),
+    centered on `plate`. Plates shown by Blizzard: TP re-binds the hit-test too (the pooled plate may still be bound
+    to TP's `HitTestFrame`), anchoring `HitTestFrame` to Blizzard's own area via `AnchorToBlizzardHitTestArea` (same
+    as `UpdateHitTestArea`), or clearing it in Retail's "only name" mode, like Blizzard. Click-through clears it for
+    both.
 - **Stacking bounds** (`ApplyPlateStackingBounds`, all clients that implement `plate:SetStackingBoundsFrame`, which
   is a real method on Retail, "WoW Forever" and Classic Era; verified in-game on Retail, 2026-09-25/26):
   - `plate:SetStackingBoundsFrame(frame)` replaces Blizzard's default stacking (overlap-avoidance) bounds with
@@ -261,6 +266,10 @@ Central pub/sub for both real WoW events and internal TP events (`INTERNAL_EVENT
   - Re-applied on `NAME_PLATE_UNIT_ADDED` (also for ignored units), reaction changes, and on `CVAR_UPDATE` for
     `nameplateShowOnlyNameForFriendlyPlayerUnits` / `nameplateStyle` / `nameplateSize` (`CVAR_UPDATE_HANDLERS` in
     `CVarsManager.lua`, next to `MONITORED_CVARS`/`SetCVarHook`; "only name" switches live, without a reload).
+    These CVar changes make Blizzard re-run `UpdateHitTestArea`, overriding TP's hit-test (e.g. click-through), so
+    the handlers re-apply the hit-test as well (`Addon.UpdateHitTestAndStackingOfAllPlates`). Blizzard's
+    `UpdateHitTestArea` (UI source 2026-08) checks `unitNameInsideHealthBar`, which is never set; the client
+    evidently uses `unitNameAnchorStyle` (`InsideHealthBar` for styles Modern/Block), and so does TP.
   - **`frame` must be shown and have visible content**: an empty frame (shown or hidden) makes Blizzard stop stacking
     that plate entirely. TP, Plater and Platynator all give it a fully transparent texture
     (`SetColorTexture(0, 0, 0, 0)` + `SetAllPoints`). This is unlike the hit-test frame, where a hidden, empty
