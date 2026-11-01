@@ -807,17 +807,22 @@ end
 ---------------------------------------------------------------------------------------------------------------------
 -- How TP and Blizzard's own nameplate (plate.UnitFrame) relate to each other, end to end:
 --
--- Anchoring: TP never removes or replaces plate.UnitFrame. plate.TPFrame is anchored to it
--- ("CENTER" to "CENTER", see NamePlateDriverFrame_AcquireUnitFrame below) and the two are shown
--- as mutual opposites - exactly one of them is visible for a given plate at a time, controlled
--- by ShowBlizzardNameplate/SetNameplateVisibility based on the friendly/enemy "Show Blizzard
+-- Anchoring: TP never removes or replaces plate.UnitFrame. plate.TPFrame (and TP's helper frames
+-- like HitTestFrame) are anchored to plate itself ("CENTER" to "CENTER", set once in
+-- HandlePlateCreated), never to plate.UnitFrame: Blizzard pools its UnitFrames and hands a plate a
+-- different instance on every NAME_PLATE_UNIT_ADDED (plate.UnitFrame is nil in between), and the
+-- protected hide path below reparents UnitFrame away. Anchoring to plate loses nothing, as
+-- NamePlateBaseMixin:AcquireUnitFrame always does UnitFrame:SetAllPoints(plate) (same code on
+-- Retail and all Classic clients). TPFrame and plate.UnitFrame are shown as mutual opposites -
+-- exactly one of them is visible for a given plate at a time, controlled by
+-- ShowBlizzardNameplate/SetNameplateVisibility based on the friendly/enemy "Show Blizzard
 -- Nameplates" settings.
 --
 -- Acquire: NamePlateDriverFrame_AcquireUnitFrame is hooksecurefunc'd onto Blizzard's own
 -- NamePlateDriverFrame:AcquireUnitFrame (registered further below), which Blizzard calls whenever
 -- it assigns/reuses a UnitFrame instance for a plate. First time for a given unit_frame, this is
--- where we: do the anchoring above, hook OnShow (see Hide/Show below), and - on Midnight only -
--- add the extra Show-method watchdog. It's also called a second time, manually, from
+-- where we: hook OnShow (see Hide/Show below), and - on Midnight only - add the extra Show-method
+-- watchdog. It's also called a second time, manually, from
 -- Addon:NAME_PLATE_UNIT_ADDED / ScheduleNameplateRevalidation, to cover the case where
 -- plate.UnitFrame was still nil on the first call (Blizzard's own ADDED handler, which sets it,
 -- hadn't necessarily run yet) - without that retry, this plate would never get the OnShow/Show
@@ -864,6 +869,11 @@ local SetShownBlizzardPlate
 
 -- Weak-keyed: the entry disappears on its own once Blizzard releases/GCs the frame.
 local BlizzardPlateOrigParent = setmetatable({}, { __mode = "k" })
+
+-- Blizzard UnitFrames (pooled) that already have TP's OnShow/Show hooks installed. Kept outside the
+-- frame itself so that no addon-owned key is written onto a (possibly secure) Blizzard frame.
+-- Weak-keyed like BlizzardPlateOrigParent.
+local HookedUnitFrames = setmetatable({}, { __mode = "k" })
 
 -- The protected-frame branch below (unit_frame:IsProtected()) exists because plain Show()/Hide()/
 -- SetShown() can be blocked by frame protection on the modern engine, not just on Midnight - see
@@ -1014,8 +1024,8 @@ local function NamePlateDriverFrame_AcquireUnitFrame(_, plate)
   end
 
   if unit_frame and not unit_frame:IsForbidden() then
-    if not unit_frame.ThreatPlates then
-      unit_frame.ThreatPlates = true
+    if not HookedUnitFrames[unit_frame] then
+      HookedUnitFrames[unit_frame] = true
       unit_frame:HookScript("OnShow", FrameOnShow)
 
       -- Companion to SetShownBlizzardPlate above - kept on the same condition.
@@ -1029,14 +1039,6 @@ local function NamePlateDriverFrame_AcquireUnitFrame(_, plate)
         end)
       end
     end
-
-    -- # Nameplate Hierarchy, Anchoring, and Scaling
-    -- Must run for every acquire, not only the first time a unit_frame is seen: Blizzard pools its
-    -- UnitFrames and can hand plate a different (already hooked) instance on each NAME_PLATE_UNIT_ADDED.
-    -- Otherwise TPFrame stays anchored to the instance plate used before, which is by now either
-    -- released (no anchor, so the plate is invisible) or in use by another plate (so it shows up there).
-    plate.TPFrame:SetPoint("CENTER", unit_frame, "CENTER")
-    --plate.Background:SetAllPoints(plate.TPFrame)
   end
 end
 
@@ -1072,19 +1074,110 @@ local function GetAnchorForThreatPlateExternal(self)
   end
 end
 
+-- Size and scale of HitTestFrame for plates shown by TP. HitTestFrame ignores plate's scale and uses the scale of
+-- tp_frame instead, so the clickable area follows TP's own scaling (target/mouseover/threat scale, animations) and
+-- the healthbar size of the active style (custom styles). Called on every tp_frame:SetScale (hook in
+-- HandlePlateCreated), which also covers style changes, as UpdateNameplateStyle calls ScalingModule.UpdateStyle.
+-- Resizing the bound HitTestFrame also works in combat (see "Hit-test (clickable) area" in CLAUDE.md).
+-- No layout queries here (GetSize, GetEffectiveScale, ...): this runs on every frame of a scale animation, and
+-- querying the layout mid-frame made the client re-evaluate the clickable area and fire UPDATE_MOUSEOVER_UNIT, so
+-- moused-over plates kept growing and shrinking (verified in-game). plate's metrics are cached by
+-- ApplyPlateHitTest, and the new scale is passed by the SetScale hook.
+local function UpdateHitTestFrameSize(tp_frame, new_scale)
+  local hit_test_frame = tp_frame.HitTestFrame
+  if not hit_test_frame.FollowsTPFrame then return end
+
+  local db_frame = Addon.db.profile.settings.frame
+  local unit = tp_frame.unit
+  local is_friendly = unit.reaction == "FRIENDLY"
+
+  -- With "Healthbar Sync", derive the size from the active style's healthbar (Blizzard's formula, see
+  -- Addon.SetBaseNamePlateSize). Headline View and plates without healthbar keep the configured size.
+  local style = tp_frame.style
+  local style_healthbar = db_frame.SyncWithHealthbar and tp_frame.PlateStyle == "HealthbarMode" and style and
+    style.healthbar and style.healthbar[unit.reaction]
+
+  local width, height
+  if style_healthbar then
+    width, height = style_healthbar.width + 20, style_healthbar.height * 2
+  elseif is_friendly then
+    width, height = db_frame.widthFriend, db_frame.heightFriend
+  else
+    width, height = db_frame.width, db_frame.height
+  end
+
+  -- Don't let the clickable area grow while the plate is moused over: the mouseover scale would make it cover
+  -- overlapping plates, which then get the mouseover instead, scale down again, and so on (flickering, verified
+  -- in-game). Shrinking is fine. Target/threat scales are applied as usual, as they don't depend on the mouse.
+  local scale = new_scale or tp_frame:GetScale()
+  if unit.isMouseover and hit_test_frame.CurrentScale then
+    scale = math.min(scale, hit_test_frame.CurrentScale)
+  end
+  hit_test_frame.CurrentScale = scale
+
+  -- Only touch the bound frame if something actually changed: every SetScale/SetSize on it can make the client
+  -- re-evaluate the clickable area (and fire UPDATE_MOUSEOVER_UNIT), and this runs on every animation frame.
+  if hit_test_frame.AppliedScale ~= scale then
+    hit_test_frame.AppliedScale = scale
+    hit_test_frame:SetIgnoreParentScale(true)
+    hit_test_frame:SetScale(scale)
+  end
+
+  -- Blizzard clamps the clickable area to plate's bounds anyway, so clamp HitTestFrame as well. Then it (and the
+  -- clickable area configuration mode, which shows HitTestFrame) matches the area that is actually clickable.
+  -- plate's size is converted into HitTestFrame's coordinate space. HitTestFrame ignores its parent's scale, so its
+  -- effective scale is its own scale. plate's metrics are nil if they were secret (no clamping then).
+  local plate_width, plate_height, plate_scale = hit_test_frame.PlateWidth, hit_test_frame.PlateHeight, hit_test_frame.PlateScale
+  if plate_width and scale > 0 then
+    local factor = plate_scale / scale
+    width = math.min(width, plate_width * factor)
+    height = math.min(height, plate_height * factor)
+  end
+
+  if hit_test_frame.CurrentWidth ~= width or hit_test_frame.CurrentHeight ~= height then
+    hit_test_frame.CurrentWidth, hit_test_frame.CurrentHeight = width, height
+    hit_test_frame:SetSize(width, height)
+  end
+end
+
 local	function HandlePlateCreated(plate)
   local tp_frame = _G.CreateFrame("Frame",  "ThreatPlatesFrame" .. GetNameForNameplate(plate), plate, BackdropTemplate)
   tp_frame:EnableMouse(false)
 
   tp_frame.Parent = plate
   plate.TPFrame = tp_frame
-  
+
+  -- # Nameplate Hierarchy, Anchoring, and Scaling
+  -- Anchor to plate itself, once: plate.UnitFrame is pooled (a different instance on every
+  -- NAME_PLATE_UNIT_ADDED, nil in between) and may be reparented away by SetShownBlizzardPlate,
+  -- while Blizzard's AcquireUnitFrame always does UnitFrame:SetAllPoints(plate), so both centers
+  -- are identical anyway. See "Anchoring" in the comment block above IgnoreUnitForThreatPlates.
+  tp_frame:SetPoint("CENTER", plate, "CENTER")
+
   -- # Nameplate Hierarchy, Anchoring, and Scaling
   -- Parent must be plate (not tp_frame) so that HitTestFrame does not inherit tp_frame's scale.
-  -- Anchor must also target plate.UnitFrame (not tp_frame) to avoid cross-hierarchy layout
+  -- Anchor must also target plate (not tp_frame) to avoid cross-hierarchy layout
   -- recalculations when tp_frame:SetScale() is called (e.g. during mouseover scale animation).
   tp_frame.HitTestFrame = _G.CreateFrame("Frame", nil, plate)
   tp_frame.HitTestFrame:Hide()
+  -- Keep the clickable area of TP plates in sync with tp_frame's scale (see UpdateHitTestFrameSize)
+  hooksecurefunc(tp_frame, "SetScale", UpdateHitTestFrameSize)
+
+  -- # Nameplate Hierarchy, Anchoring, and Scaling
+  -- Frame whose bounds Blizzard uses for stacking (overlap avoidance) of this plate, see
+  -- ApplyPlateStackingBounds. Same parent/anchor reasoning as HitTestFrame. plate:SetStackingBoundsFrame
+  -- is a real method on all current clients (Retail, "WoW Forever", Classic); the check is a safeguard.
+  -- Unlike HitTestFrame, this frame must be shown and have a (fully transparent) texture: without
+  -- one, Blizzard stops stacking the plate at all (Plater and Platynator use the same transparent
+  -- texture for their stacking frames).
+  if plate.SetStackingBoundsFrame then
+    local stacking_frame = _G.CreateFrame("Frame", nil, plate)
+    local texture = stacking_frame:CreateTexture()
+    texture:SetColorTexture(0, 0, 0, 0)
+    texture:SetAllPoints(stacking_frame)
+    tp_frame.StackingBoundsFrame = stacking_frame
+  end
+
   SetNameplateFrameProperties(tp_frame)
   -- Size is set in Styles.lua
 
@@ -1106,6 +1199,7 @@ local	function HandlePlateCreated(plate)
   tp_frame.visual = {}
   tp_frame.style = {}
   tp_frame.unit = {}
+  tp_frame.RevalidationTimers = {}
 
   local textframe = _G.CreateFrame("Frame", nil, tp_frame)
   textframe:SetAllPoints()
@@ -1116,13 +1210,98 @@ local	function HandlePlateCreated(plate)
   Widgets:OnPlateCreated(tp_frame)
 end
 
--- Applies the C++ hit-test link for a nameplate plate.
+-- Without a stacking bounds frame, Blizzard stacks a plate by its hit-test (clickable) area, as set
+-- by NamePlateUnitFrameMixin:UpdateHitTestArea (verified in-game: anchoring the stacking frame like
+-- this restores Blizzard's native spacing; the nameplateOverlapH/V CVars scale it on top).
+-- Anchors frame to that area of Blizzard's UnitFrame. Returns false if not possible, and as second
+-- value whether the plate is in "only name" mode (nameplateShowOnlyNameForFriendlyPlayerUnits): there
+-- Blizzard clears its hit-test area, but still stacks the plates, only tighter (verified in-game) -
+-- approximated by the name's bounds.
+local function AnchorToBlizzardHitTestArea(frame, unit_frame)
+  local healthbar = unit_frame and unit_frame.HealthBarsContainer and unit_frame.HealthBarsContainer.healthBar
+  if not healthbar then return false end
+
+  frame:ClearAllPoints()
+  -- Only where Blizzard actually clears the hit-test area in "only name" mode (UpdateHitTestArea, Retail).
+  -- Classic sets the same hit-test area in ApplyFrameOptions and keeps it in "only name" mode.
+  if unit_frame.name and unit_frame.UpdateHitTestArea and unit_frame:IsShowOnlyName() then
+    frame:SetAllPoints(unit_frame.name)
+    return true, true
+  end
+
+  local setup_options = _G.NamePlateSetupOptions
+  local offset_y = ((setup_options and setup_options.healthBarHeight) or 0) / 2
+
+  -- Name inside the healthbar (nameplate styles Modern and Block): the hit-test area is the healthbar only. The UI
+  -- source (2026-08) still checks unitNameInsideHealthBar, which is never set; the client evidently uses
+  -- unitNameAnchorStyle (verified in-game with style Block: Blizzard's area extends slightly beyond the healthbar).
+  local name_inside_healthbar = setup_options and (setup_options.unitNameInsideHealthBar or
+    (_G.NamePlateConstants and _G.NamePlateConstants.NAME_ANCHOR_STYLES and
+     setup_options.unitNameAnchorStyle == _G.NamePlateConstants.NAME_ANCHOR_STYLES.InsideHealthBar))
+
+  frame:SetPoint("BOTTOMRIGHT", healthbar, "BOTTOMRIGHT", 10, -offset_y)
+  if name_inside_healthbar or not unit_frame.name then
+    frame:SetPoint("TOPLEFT", healthbar, "TOPLEFT", -10, offset_y)
+  else
+    frame:SetPoint("TOPLEFT", unit_frame.name, "TOPLEFT", -14, 0)
+  end
+  return true, false
+end
+
+-- Size of Blizzard's hit-test area, measured on the (hidden) UnitFrame of a TP plate. Cached, as it
+-- cannot be measured while the UnitFrame is reparented away (see SetShownBlizzardPlate).
+local BlizzardHitTestAreaWidth, BlizzardHitTestAreaHeight
+
+-- Sets the frame Blizzard uses as this plate's bounds for stacking (overlap avoidance), so that the
+-- spacing matches Blizzard's own plates: plates shown by Blizzard use Blizzard's hit-test area
+-- directly; TP plates use the size of that area, centered on plate (measured, not anchored, as the
+-- hidden UnitFrame of a TP plate may be reparented away). The nameplateOverlapH/V CVars still scale
+-- the spacing on top, for both. Size reads are allowed although nameplate frames are restricted
+-- regions (see CLAUDE.md). Unlike the hit-test API, SetStackingBoundsFrame is not gated by
+-- CanChangeHitTestPoints.
+local function ApplyPlateStackingBounds(tp_frame)
+  local frame = tp_frame.StackingBoundsFrame
+  if not frame then return end
+
+  local plate = tp_frame.Parent
+  local anchored, only_name = AnchorToBlizzardHitTestArea(frame, plate.UnitFrame)
+
+  if tp_frame.Active then
+    -- TP plates always show a healthbar, so never take the size from an "only name" UnitFrame.
+    -- In restricted contexts (e.g. in instances), sizes of nameplate frames are secret values.
+    if anchored and not only_name then
+      local ok, width, height = pcall(frame.GetSize, frame)
+      if ok and not IsSecretValueTP(width) and not IsSecretValueTP(height) and width > 0 and height > 0 then
+        BlizzardHitTestAreaWidth, BlizzardHitTestAreaHeight = width, height
+      end
+    end
+
+    frame:ClearAllPoints()
+    if BlizzardHitTestAreaWidth then
+      frame:SetSize(BlizzardHitTestAreaWidth, BlizzardHitTestAreaHeight)
+      frame:SetPoint("CENTER", plate, "CENTER")
+    else
+      -- Not measured yet (only until the first measurable TP plate)
+      frame:SetAllPoints(plate)
+    end
+  elseif not anchored then
+    frame:ClearAllPoints()
+    frame:SetAllPoints(plate)
+  end
+
+  plate:SetStackingBoundsFrame(frame)
+end
+
+-- Applies the C++ hit-test link for a nameplate plate (and, sharing the same call sites, the
+-- stacking bounds - see ApplyPlateStackingBounds).
 -- Click-through (NamePlateFriendlyClickThrough/NamePlateEnemyClickThrough) is decided by the
 -- unit's reaction alone, so it applies the same whether TP or Blizzard's own plate is currently
 -- shown for this unit (Active toggles only which frame's bounds the non-click-through case uses).
 -- Guard: CanChangeHitTestPoints skips in restricted C++ contexts.
 local function ApplyPlateHitTest(tp_frame)
   local plate = tp_frame.Parent
+
+  ApplyPlateStackingBounds(tp_frame)
 
   if not plate:CanChangeHitTestPoints() then return end
 
@@ -1133,25 +1312,62 @@ local function ApplyPlateHitTest(tp_frame)
   if is_click_through then
     plate:ClearAllHitTestPoints()
   elseif not tp_frame.Active then
-    plate:SetAllHitTestPoints(plate.UnitFrame)
+    -- Plate shown by Blizzard: TP must re-bind the hit-test, as the pooled plate may still be bound to TP's
+    -- HitTestFrame from a previous unit. Re-create Blizzard's own clickable area (UpdateHitTestArea) instead of the
+    -- whole plate: none in "only name" mode, otherwise the same area that Blizzard's stacking uses.
+    -- plate.UnitFrame can be nil (released without NAME_PLATE_UNIT_REMOVED, see ShowBlizzardNameplate).
+    -- Use plate's scale again (TP plates use tp_frame's scale), as Blizzard's offsets are relative to it.
+    local hit_test_frame = tp_frame.HitTestFrame
+    hit_test_frame.FollowsTPFrame = false
+    hit_test_frame.AppliedScale, hit_test_frame.CurrentWidth, hit_test_frame.CurrentHeight = nil, nil, nil
+    hit_test_frame:SetIgnoreParentScale(false)
+    hit_test_frame:SetScale(1)
+    local anchored, only_name = AnchorToBlizzardHitTestArea(hit_test_frame, plate.UnitFrame)
+    if not anchored or only_name then
+      plate:ClearAllHitTestPoints()
+    else
+      plate:SetAllHitTestPoints(tp_frame.HitTestFrame)
+    end
   else
-    local db_frame = db.settings.frame
-    local width  = (is_friendly and db_frame.widthFriend)  or db_frame.width
-    local height = (is_friendly and db_frame.heightFriend) or db_frame.height
+    local hit_test_frame = tp_frame.HitTestFrame
+    hit_test_frame.FollowsTPFrame = true
 
-    tp_frame.HitTestFrame:ClearAllPoints()
-    tp_frame.HitTestFrame:SetSize(width, height)
-    -- Anchor to plate.UnitFrame (same hierarchy as HitTestFrame's parent) rather than tp_frame.
-    -- tp_frame may have a different scale (mouseover scaling), and a cross-hierarchy anchor to a
-    -- scaled frame causes WoW to re-evaluate HitTestFrame's layout bounds during each SetScale
-    -- call, which makes SetAllHitTestPoints briefly read incorrect bounds and fire UPDATE_MOUSEOVER_UNIT.
-    tp_frame.HitTestFrame:SetPoint("CENTER", plate.UnitFrame, "CENTER")
+    -- Cache plate's metrics for UpdateHitTestFrameSize (no layout queries there). Sizes and scales of nameplate
+    -- frames can be secret in restricted contexts; don't clamp then.
+    local plate_width, plate_height = plate:GetSize()
+    local plate_scale = plate:GetEffectiveScale()
+    if not IsSecretValueTP(plate_width) and not IsSecretValueTP(plate_height) and not IsSecretValueTP(plate_scale) and
+       plate_width > 0 and plate_height > 0 then
+      hit_test_frame.PlateWidth, hit_test_frame.PlateHeight, hit_test_frame.PlateScale = plate_width, plate_height, plate_scale
+    else
+      hit_test_frame.PlateWidth, hit_test_frame.PlateHeight, hit_test_frame.PlateScale = nil, nil, nil
+    end
+
+    hit_test_frame:ClearAllPoints()
+    UpdateHitTestFrameSize(tp_frame)
+    -- Anchor to plate (HitTestFrame's parent) rather than tp_frame or the pooled plate.UnitFrame.
+    -- A cross-hierarchy anchor to a scaled frame (tp_frame, mouseover scaling) makes WoW re-evaluate
+    -- HitTestFrame's layout bounds during each SetScale call, which made SetAllHitTestPoints briefly read
+    -- incorrect bounds and fire UPDATE_MOUSEOVER_UNIT. HitTestFrame's own scale follows tp_frame instead.
+    hit_test_frame:SetPoint("CENTER", plate, "CENTER")
     plate:SetAllHitTestPoints(tp_frame.HitTestFrame)
   end
 end
 
+-- Re-applies hit-test (incl. click-through) and stacking bounds of all plates with a unit, incl. plates shown by
+-- Blizzard (PlatesByUnit, unlike GetActiveThreatPlates). Used after CVar changes that make Blizzard re-run its own
+-- UpdateHitTestArea (e.g. "only name" mode, nameplate style), which overrides TP's hit-test - e.g. a cleared one for
+-- click-through. The hit-test part is skipped in combat (CanChangeHitTestPoints), the stacking part is not.
+function Addon.UpdateHitTestAndStackingOfAllPlates()
+  for _, tp_frame in pairs(PlatesByUnit) do
+    ApplyPlateHitTest(tp_frame)
+  end
+end
+
 -- Updates the click-through state for all active TP plates.
--- Per-plate C++ hit-test API, unrestricted — works in combat.
+-- Per-plate C++ hit-test API. Re-binding is blocked for tainted code in combat (plate:CanChangeHitTestPoints()
+-- is false except on the NAME_PLATE_UNIT_ADDED tick), so ApplyPlateHitTest silently skips plates in combat; a
+-- bound HitTestFrame can still be resized in combat (see "Hit-test (clickable) area" in CLAUDE.md).
 function Addon.SetNamePlateClickThrough()
   for unitid, tp_frame in Addon:GetActiveThreatPlates() do
     ApplyPlateHitTest(tp_frame)
@@ -1226,14 +1442,49 @@ end
 -- can still return the previous occupant's stale data, so re-apply once more after a short
 -- delay. Guarded against the plate having legitimately moved on (proper REMOVED/ADDED) in the
 -- meantime.
+-- At most one pending timer per plate and slot: the next-frame revalidation (UNIT_FACTION/UNIT_FLAGS)
+-- and the delayed one (double NAME_PLATE_UNIT_ADDED) serve different purposes and must not replace
+-- each other. A request for the same unit while a timer is pending is dropped (e.g. UNIT_FACTION
+-- firing for every visible unit at PLAYER_ENTERING_WORLD, or UNIT_FACTION + UNIT_FLAGS bursts); a
+-- request for a different unit replaces the pending one. Pending timers are cancelled in
+-- NAME_PLATE_UNIT_REMOVED (CancelNameplateRevalidation).
 local function ScheduleNameplateRevalidation(plate, unitid, delay)
-  C_Timer.After(delay or 0, function()
-    local tp_frame = plate.TPFrame
+  delay = delay or 0
+
+  local tp_frame = plate.TPFrame
+  local timers = tp_frame.RevalidationTimers
+  local slot = (delay > 0 and "delayed") or "immediate"
+
+  local pending_timer = timers[slot]
+  if pending_timer and not pending_timer:IsCancelled() then
+    if pending_timer.unitid == unitid then return end
+    pending_timer:Cancel()
+  end
+
+  -- C_Timer.NewTimer passes the timer itself to the callback (verified in-game)
+  local timer = C_Timer.NewTimer(delay, function(self)
+    if timers[slot] ~= self then return end
+    timers[slot] = nil
+
     if PlatesByUnit[unitid] == tp_frame and tp_frame.unit.unitid == unitid then
       HandlePlateUnitAdded(plate, unitid)
       NamePlateDriverFrame_AcquireUnitFrame(nil, plate)
     end
   end)
+  timer.unitid = unitid
+  timers[slot] = timer
+end
+
+local function CancelNameplateRevalidation(tp_frame)
+  local timers = tp_frame.RevalidationTimers
+  if timers.immediate then
+    timers.immediate:Cancel()
+    timers.immediate = nil
+  end
+  if timers.delayed then
+    timers.delayed:Cancel()
+    timers.delayed = nil
+  end
 end
 
 --------------------------------------------------------------------------------------------------------------
@@ -1289,8 +1540,6 @@ function Addon:ConfigClickableArea(toggle_show)
         })
         tp_frame.Background:SetBackdropColor(0,0,0,.3)
         tp_frame.Background:SetBackdropBorderColor(0, 0, 0, 0.8)
-        tp_frame.Background:SetPoint("CENTER", ConfigModePlate.UnitFrame, "CENTER")
-
         tp_frame.Background:ClearAllPoints()
         tp_frame.Background:SetAllPoints(ConfigModePlate.TPFrame.HitTestFrame)
 
@@ -1310,8 +1559,6 @@ function Addon:ConfigClickableArea(toggle_show)
     end
   elseif ConfigModePlate then
     local background = ConfigModePlate.TPFrame.Background
-    background:SetPoint("CENTER", ConfigModePlate.UnitFrame, "CENTER")
-
     background:ClearAllPoints()
     background:SetAllPoints(ConfigModePlate.TPFrame.HitTestFrame)
   end
@@ -1698,6 +1945,13 @@ function Addon:NAME_PLATE_UNIT_ADDED(unitid)
     elseif not plate.UnitFrame then
       ScheduleNameplateRevalidation(plate, unitid, 0)
     end
+  else
+    -- Not handled by TP, but the (pooled) plate may still have TP's stacking bounds from a previous
+    -- unit - reset them to Blizzard's (tp_frame.Active is false here, see NAME_PLATE_UNIT_REMOVED).
+    local plate = GetNamePlateForUnit(unitid)
+    if plate and plate.TPFrame then
+      ApplyPlateStackingBounds(plate.TPFrame)
+    end
   end
 end
 
@@ -1716,8 +1970,14 @@ local function RemoveMouseoverFromNameplate()
 end
 
 function Addon:NAME_PLATE_UNIT_REMOVED(unitid)
+  -- PlatesByUnit first: GetNamePlateForUnit can already return nil here (e.g. when called for a missed REMOVED).
+  -- Plates that NAME_PLATE_UNIT_ADDED skipped (IgnoreUnitForThreatPlates: personal, widget-only) are not in
+  -- PlatesByUnit and only need the generic cleanup below.
   local plate = GetNamePlateForUnit(unitid)
-  local tp_frame = plate.TPFrame
+  local tp_frame = PlatesByUnit[unitid] or (plate and plate.TPFrame)
+  if not tp_frame then return end
+
+  local was_added = PlatesByUnit[unitid] == tp_frame
 
   -- Clean up the mouseover reference before wiping unit data. If this plate is currently the
   -- mouseover plate, RemoveMouseoverFromNameplate must run while unit.style is still valid.
@@ -1731,18 +1991,21 @@ function Addon:NAME_PLATE_UNIT_REMOVED(unitid)
   UpdateTargetMetaUnitReferences(tp_frame, nil)
 
   tp_frame.Active = false
+  CancelNameplateRevalidation(tp_frame)
 
-  PlatesByUnit[unitid] = nil
-  if not Addon.HAS_MIDNIGHT_API then
-    if tp_frame.unit.guid then -- maybe hide directly after create with unit added?
-      PlatesByGUID[tp_frame.unit.guid] = nil
+  if was_added then
+    PlatesByUnit[unitid] = nil
+    if not Addon.HAS_MIDNIGHT_API then
+      if tp_frame.unit.guid then -- maybe hide directly after create with unit added?
+        PlatesByGUID[tp_frame.unit.guid] = nil
+      end
     end
-  end
 
-  --ElementsPlateUnitRemoved(tp_frame)
-  Widgets:OnUnitRemoved(tp_frame, tp_frame.unit)
-  
-  WidgetContainerReset(plate)
+    --ElementsPlateUnitRemoved(tp_frame)
+    Widgets:OnUnitRemoved(tp_frame, tp_frame.unit)
+
+    WidgetContainerReset(tp_frame.Parent)
+  end
 
   wipe(tp_frame.unit)
 
@@ -1944,6 +2207,20 @@ local function ApplyReactionUpdate(tp_frame, unitid)
   end
 end
 
+-- In PvP, Blizzard can drop a nameplate without firing NAME_PLATE_UNIT_REMOVED, leaving a stale
+-- PlatesByUnit entry. If TP still tracks the unit token but WoW has no nameplate for it anymore,
+-- catch up on the missed REMOVED (which works without a plate, see NAME_PLATE_UNIT_REMOVED).
+-- Returns true if the stale entry was removed.
+local function RemoveStalePlateForUnit(unitid)
+  if PlatesByUnit[unitid] and not GetNamePlateForUnit(unitid) then
+    -- TEMPORARY (feature/nameplate-lifecycle, P4): shows whether missed REMOVEDs actually occur. Remove before release.
+    Addon.Logging.Debug("Missed NAME_PLATE_UNIT_REMOVED caught up for", unitid, "-", PlatesByUnit[unitid]:GetName())
+    Addon:NAME_PLATE_UNIT_REMOVED(unitid)
+    return true
+  end
+  return false
+end
+
 -- Update all elements that depend on the unit's reaction towards the player
 function Addon:UNIT_FACTION(unitid)
   -- Skip special unitids (they are updated via their nameplate unitid) and personal nameplate
@@ -1953,13 +2230,18 @@ function Addon:UNIT_FACTION(unitid)
     -- We first need to check if TP is active or not on a nameplate. After a faction change, other nameplates might be active
     -- (friendly/hostile) than before. So, we need to update Active first (as GetActiveThreatPlates only iterates over active
     for plate_unitid, tp_frame in pairs(PlatesByUnit) do
-      ApplyReactionUpdate(tp_frame, plate_unitid)
+      -- Clearing the current key during the traversal (in NAME_PLATE_UNIT_REMOVED) is allowed in Lua
+      if not RemoveStalePlateForUnit(plate_unitid) then
+        ApplyReactionUpdate(tp_frame, plate_unitid)
+      end
     end
   else
     -- It seems that (at least) in solo shuffles, the UNIT_FACTION event is fired in between the events
     -- NAME_PLATE_UNIT_REMOVED and NAME_PLATE_UNIT_ADDED. As SetNameplateVisibility sets the TPFrame Active, this results
     -- in Lua errors, so basically we cannot use it here to check if the plate is active.
     -- local plate = self:GetThreatPlateForUnit(unitid)
+    if RemoveStalePlateForUnit(unitid) then return end
+
     local tp_frame = PlatesByUnit[unitid]
     if tp_frame then
       -- If Blizzard-style nameplates are used, we also need to check if TP plates are disabled/enabled now
@@ -1983,6 +2265,8 @@ end
 -- in-progress per-plate state (e.g. an interrupt hold, see Source/Docs/CastbarInterrupts.md) far
 -- more often than warranted.
 function Addon:UNIT_FLAGS(unitid)
+  if RemoveStalePlateForUnit(unitid) then return end
+
   local tp_frame = PlatesByUnit[unitid]
   if not tp_frame then return end
 
@@ -2010,6 +2294,19 @@ function Addon:UNIT_LEVEL(unitid)
   local tp_frame = self:GetThreatPlateForUnit(unitid)
   if tp_frame then
     SetUnitAttributeLevel(tp_frame.unit, unitid)
+  end
+end
+
+-- A unit's classification (normal/elite/rare/...) feeds style selection (custom style triggers, unique styles) and
+-- several elements/widgets, so refresh the whole plate like on NAME_PLATE_UNIT_ADDED. The event is rare.
+function Addon:UNIT_CLASSIFICATION_CHANGED(unitid)
+  -- Skip special unitids (they are updated via their nameplate unitid) and personal nameplate
+  if IGNORED_UNITS[unitid] then return end
+  if RemoveStalePlateForUnit(unitid) then return end
+
+  local tp_frame = PlatesByUnit[unitid]
+  if tp_frame then
+    HandlePlateUnitAdded(tp_frame.Parent, unitid)
   end
 end
 
@@ -2279,6 +2576,7 @@ local ENABLED_EVENTS = {
   "UNIT_FACTION",
   "UNIT_FLAGS",
   "UNIT_LEVEL",
+  "UNIT_CLASSIFICATION_CHANGED",
   
   -- The following events should not have worked before adjusting UnitSpellcastMidway
   "UNIT_SPELLCAST_START",

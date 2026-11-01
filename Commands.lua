@@ -383,7 +383,8 @@ function TidyPlatesThreat:ChatCommand(input)
 				
 			plate._TPBackground:ClearAllPoints()
 			plate._TPBackground:SetParent(plate)
-			plate._TPBackground:SetAllPoints(plate.UnitFrame)
+			-- plate's bounds: identical to plate.UnitFrame (SetAllPoints), and the limit of the clickable area
+			plate._TPBackground:SetAllPoints(plate)
 			plate._TPBackground:Show()
 		end	
 	

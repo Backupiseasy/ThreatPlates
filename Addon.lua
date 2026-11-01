@@ -63,13 +63,13 @@ Addon.SetBaseNamePlateSize = function(self)
     -- Mirrors Blizzard's SetHitTestPoints formula (Blizzard_NamePlateUnitFrame.lua):
     --   extraXOffset = 10 per side → total width + 20
     --   extraYOffset = healthBarHeight / 2 per side → total height * 2
-    -- For "Big", divide by plate_scale so the screen-space hit area equals healthbar.width + 6.
-    -- For "Normal", no division: visual is scaled down by plate_scale via UIScaleChanged.
-    local plate_scale = (Addon.db.profile.Appearance.NameplateSize == "BIG" and UIParent:GetEffectiveScale()) or 1
-    db_frame.width = (db_healthbar.width + 20) / plate_scale
-    db_frame.height = (db_healthbar.height * 2) / plate_scale
-    db_frame.widthFriend = (db_healthbar.widthFriend + 20) / plate_scale
-    db_frame.heightFriend = (db_healthbar.heightFriend * 2) / plate_scale
+    -- No scale correction needed: HitTestFrame uses tp_frame's scale (see UpdateHitTestFrameSize in Nameplate.lua),
+    -- so these values are in the same units as the healthbar. With sync, TP plates use the active style's healthbar
+    -- instead; these values remain for Headline View and plates without healthbar.
+    db_frame.width = db_healthbar.width + 20
+    db_frame.height = db_healthbar.height * 2
+    db_frame.widthFriend = db_healthbar.widthFriend + 20
+    db_frame.heightFriend = db_healthbar.heightFriend * 2
   end
 
   -- db_frame.width/height/widthFriend/heightFriend are used as-is by ApplyPlateHitTest for the

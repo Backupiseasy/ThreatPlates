@@ -33,6 +33,7 @@ local COMBAT_PROTECTED = {
   nameplateOccludedAlphaMult = true,
   nameplateOverlapH = true,
   nameplateOverlapV = true,
+  nameplateSize = true,
   nameplateSelectedAlpha = true,
   nameplateNotSelectedAlpha = true,
   nameplateTargetBehindMaxDistance = true,
@@ -100,7 +101,7 @@ end
 -- C_NamePlate.SetNamePlateSize whenever any of these CVars change (see UpdateNamePlateOptions /
 -- UpdateNamePlateSize in Blizzard_NamePlates.lua). TP's own hit-test region (ApplyPlateHitTest,
 -- Nameplate.lua) is independent of that native size, but its HitTestFrame is still anchored to
--- plate.UnitFrame, which Blizzard's resize can reposition/resize - so already-active plates can be
+-- plate, which Blizzard's resize can reposition/resize - so already-active plates can be
 -- left with a stale clickable area until TidyPlates re-asserts it (see SetCVarHook below).
 local RESYNC_NATIVE_SIZE_CVARS = {
   nameplateSize = true,
@@ -126,6 +127,24 @@ local MONITORED_CVARS = {
   nameplateMaxAlpha = true,
   nameplateOccludedAlphaMult = true,
   nameplateSelectedAlpha = true,
+}
+
+-- Reactions to CVar changes via the CVAR_UPDATE event (CVarUpdateHook below). Verified in-game: CVAR_UPDATE
+-- fires synchronously inside C_CVar.SetCVar, only if the value actually changed, and after Blizzard's own
+-- CVAR_UPDATE handling (CVarCallbackRegistry) has updated its frames. Unlike MONITORED_CVARS (SetCVarHook,
+-- which only sees changes made via C_CVar.SetCVar/ConsoleExec), it covers every change of the CVar.
+local function UpdateHitTestAndStackingOfAllPlates()
+  Addon.UpdateHitTestAndStackingOfAllPlates()
+end
+
+local CVAR_UPDATE_HANDLERS = {
+  -- Hit-test and stacking bounds depend on Blizzard's plate layout (Nameplate.lua, AnchorToBlizzardHitTestArea):
+  -- "only name" mode switches live (no reload), nameplateStyle decides whether the name is inside or
+  -- above the healthbar, nameplateSize changes the healthbar size used for TP plates. Blizzard also re-runs its
+  -- UpdateHitTestArea for these, which overrides TP's hit-test (e.g. click-through), so re-apply it.
+  nameplateShowOnlyNameForFriendlyPlayerUnits = UpdateHitTestAndStackingOfAllPlates,
+  nameplateStyle = UpdateHitTestAndStackingOfAllPlates,
+  nameplateSize = UpdateHitTestAndStackingOfAllPlates,
 }
 
 local function SetConsoleVariable(cvar, value)
@@ -300,7 +319,14 @@ local function SetCVarHook(name, value, c)
   end
 end
 
+local function CVarUpdateHook(cvar_name, value)
+  local handler = CVAR_UPDATE_HANDLERS[cvar_name]
+  if handler then handler(value) end
+end
+
 function CVars.RegisterCVarHook()
+  Addon.EventService.Subscribe(CVars, "CVAR_UPDATE", CVarUpdateHook)
+
   -- Tracking of CVars based on code from AdvancedInterfaceOptions
   --hooksecurefunc("SetCVar", SetCVarHook) -- /script SetCVar(cvar, value)
   if C_CVar and C_CVar.SetCVar then
