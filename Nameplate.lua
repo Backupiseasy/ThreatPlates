@@ -1074,6 +1074,72 @@ local function GetAnchorForThreatPlateExternal(self)
   end
 end
 
+-- Size and scale of HitTestFrame for plates shown by TP. HitTestFrame ignores plate's scale and uses the scale of
+-- tp_frame instead, so the clickable area follows TP's own scaling (target/mouseover/threat scale, animations) and
+-- the healthbar size of the active style (custom styles). Called on every tp_frame:SetScale (hook in
+-- HandlePlateCreated), which also covers style changes, as UpdateNameplateStyle calls ScalingModule.UpdateStyle.
+-- Resizing the bound HitTestFrame also works in combat (see "Hit-test (clickable) area" in CLAUDE.md).
+-- No layout queries here (GetSize, GetEffectiveScale, ...): this runs on every frame of a scale animation, and
+-- querying the layout mid-frame made the client re-evaluate the clickable area and fire UPDATE_MOUSEOVER_UNIT, so
+-- moused-over plates kept growing and shrinking (verified in-game). plate's metrics are cached by
+-- ApplyPlateHitTest, and the new scale is passed by the SetScale hook.
+local function UpdateHitTestFrameSize(tp_frame, new_scale)
+  local hit_test_frame = tp_frame.HitTestFrame
+  if not hit_test_frame.FollowsTPFrame then return end
+
+  local db_frame = Addon.db.profile.settings.frame
+  local unit = tp_frame.unit
+  local is_friendly = unit.reaction == "FRIENDLY"
+
+  -- With "Healthbar Sync", derive the size from the active style's healthbar (Blizzard's formula, see
+  -- Addon.SetBaseNamePlateSize). Headline View and plates without healthbar keep the configured size.
+  local style = tp_frame.style
+  local style_healthbar = db_frame.SyncWithHealthbar and tp_frame.PlateStyle == "HealthbarMode" and style and
+    style.healthbar and style.healthbar[unit.reaction]
+
+  local width, height
+  if style_healthbar then
+    width, height = style_healthbar.width + 20, style_healthbar.height * 2
+  elseif is_friendly then
+    width, height = db_frame.widthFriend, db_frame.heightFriend
+  else
+    width, height = db_frame.width, db_frame.height
+  end
+
+  -- Don't let the clickable area grow while the plate is moused over: the mouseover scale would make it cover
+  -- overlapping plates, which then get the mouseover instead, scale down again, and so on (flickering, verified
+  -- in-game). Shrinking is fine. Target/threat scales are applied as usual, as they don't depend on the mouse.
+  local scale = new_scale or tp_frame:GetScale()
+  if unit.isMouseover and hit_test_frame.CurrentScale then
+    scale = math.min(scale, hit_test_frame.CurrentScale)
+  end
+  hit_test_frame.CurrentScale = scale
+
+  -- Only touch the bound frame if something actually changed: every SetScale/SetSize on it can make the client
+  -- re-evaluate the clickable area (and fire UPDATE_MOUSEOVER_UNIT), and this runs on every animation frame.
+  if hit_test_frame.AppliedScale ~= scale then
+    hit_test_frame.AppliedScale = scale
+    hit_test_frame:SetIgnoreParentScale(true)
+    hit_test_frame:SetScale(scale)
+  end
+
+  -- Blizzard clamps the clickable area to plate's bounds anyway, so clamp HitTestFrame as well. Then it (and the
+  -- clickable area configuration mode, which shows HitTestFrame) matches the area that is actually clickable.
+  -- plate's size is converted into HitTestFrame's coordinate space. HitTestFrame ignores its parent's scale, so its
+  -- effective scale is its own scale. plate's metrics are nil if they were secret (no clamping then).
+  local plate_width, plate_height, plate_scale = hit_test_frame.PlateWidth, hit_test_frame.PlateHeight, hit_test_frame.PlateScale
+  if plate_width and scale > 0 then
+    local factor = plate_scale / scale
+    width = math.min(width, plate_width * factor)
+    height = math.min(height, plate_height * factor)
+  end
+
+  if hit_test_frame.CurrentWidth ~= width or hit_test_frame.CurrentHeight ~= height then
+    hit_test_frame.CurrentWidth, hit_test_frame.CurrentHeight = width, height
+    hit_test_frame:SetSize(width, height)
+  end
+end
+
 local	function HandlePlateCreated(plate)
   local tp_frame = _G.CreateFrame("Frame",  "ThreatPlatesFrame" .. GetNameForNameplate(plate), plate, BackdropTemplate)
   tp_frame:EnableMouse(false)
@@ -1094,6 +1160,8 @@ local	function HandlePlateCreated(plate)
   -- recalculations when tp_frame:SetScale() is called (e.g. during mouseover scale animation).
   tp_frame.HitTestFrame = _G.CreateFrame("Frame", nil, plate)
   tp_frame.HitTestFrame:Hide()
+  -- Keep the clickable area of TP plates in sync with tp_frame's scale (see UpdateHitTestFrameSize)
+  hooksecurefunc(tp_frame, "SetScale", UpdateHitTestFrameSize)
 
   -- # Nameplate Hierarchy, Anchoring, and Scaling
   -- Frame whose bounds Blizzard uses for stacking (overlap avoidance) of this plate, see
@@ -1248,34 +1316,40 @@ local function ApplyPlateHitTest(tp_frame)
     -- HitTestFrame from a previous unit. Re-create Blizzard's own clickable area (UpdateHitTestArea) instead of the
     -- whole plate: none in "only name" mode, otherwise the same area that Blizzard's stacking uses.
     -- plate.UnitFrame can be nil (released without NAME_PLATE_UNIT_REMOVED, see ShowBlizzardNameplate).
-    local anchored, only_name = AnchorToBlizzardHitTestArea(tp_frame.HitTestFrame, plate.UnitFrame)
+    -- Use plate's scale again (TP plates use tp_frame's scale), as Blizzard's offsets are relative to it.
+    local hit_test_frame = tp_frame.HitTestFrame
+    hit_test_frame.FollowsTPFrame = false
+    hit_test_frame.AppliedScale, hit_test_frame.CurrentWidth, hit_test_frame.CurrentHeight = nil, nil, nil
+    hit_test_frame:SetIgnoreParentScale(false)
+    hit_test_frame:SetScale(1)
+    local anchored, only_name = AnchorToBlizzardHitTestArea(hit_test_frame, plate.UnitFrame)
     if not anchored or only_name then
       plate:ClearAllHitTestPoints()
     else
       plate:SetAllHitTestPoints(tp_frame.HitTestFrame)
     end
   else
-    local db_frame = db.settings.frame
-    local width  = (is_friendly and db_frame.widthFriend)  or db_frame.width
-    local height = (is_friendly and db_frame.heightFriend) or db_frame.height
+    local hit_test_frame = tp_frame.HitTestFrame
+    hit_test_frame.FollowsTPFrame = true
 
-    -- Blizzard clamps the clickable area to plate's bounds anyway, so clamp HitTestFrame as well. Then it (and the
-    -- clickable area configuration mode, which shows HitTestFrame) matches the area that is actually clickable.
-    -- HitTestFrame is a child of plate without own scale, so both sizes are in the same coordinate space. Sizes of
-    -- nameplate frames can be secret in restricted contexts; skip clamping then.
+    -- Cache plate's metrics for UpdateHitTestFrameSize (no layout queries there). Sizes and scales of nameplate
+    -- frames can be secret in restricted contexts; don't clamp then.
     local plate_width, plate_height = plate:GetSize()
-    if not IsSecretValueTP(plate_width) and not IsSecretValueTP(plate_height) and plate_width > 0 and plate_height > 0 then
-      width = math.min(width, plate_width)
-      height = math.min(height, plate_height)
+    local plate_scale = plate:GetEffectiveScale()
+    if not IsSecretValueTP(plate_width) and not IsSecretValueTP(plate_height) and not IsSecretValueTP(plate_scale) and
+       plate_width > 0 and plate_height > 0 then
+      hit_test_frame.PlateWidth, hit_test_frame.PlateHeight, hit_test_frame.PlateScale = plate_width, plate_height, plate_scale
+    else
+      hit_test_frame.PlateWidth, hit_test_frame.PlateHeight, hit_test_frame.PlateScale = nil, nil, nil
     end
 
-    tp_frame.HitTestFrame:ClearAllPoints()
-    tp_frame.HitTestFrame:SetSize(width, height)
+    hit_test_frame:ClearAllPoints()
+    UpdateHitTestFrameSize(tp_frame)
     -- Anchor to plate (HitTestFrame's parent) rather than tp_frame or the pooled plate.UnitFrame.
-    -- tp_frame may have a different scale (mouseover scaling), and a cross-hierarchy anchor to a
-    -- scaled frame causes WoW to re-evaluate HitTestFrame's layout bounds during each SetScale
-    -- call, which makes SetAllHitTestPoints briefly read incorrect bounds and fire UPDATE_MOUSEOVER_UNIT.
-    tp_frame.HitTestFrame:SetPoint("CENTER", plate, "CENTER")
+    -- A cross-hierarchy anchor to a scaled frame (tp_frame, mouseover scaling) makes WoW re-evaluate
+    -- HitTestFrame's layout bounds during each SetScale call, which made SetAllHitTestPoints briefly read
+    -- incorrect bounds and fire UPDATE_MOUSEOVER_UNIT. HitTestFrame's own scale follows tp_frame instead.
+    hit_test_frame:SetPoint("CENTER", plate, "CENTER")
     plate:SetAllHitTestPoints(tp_frame.HitTestFrame)
   end
 end

@@ -238,8 +238,11 @@ Central pub/sub for both real WoW events and internal TP events (`INTERNAL_EVENT
     `C_NamePlate.SetNamePlateSize` is deliberately not used to enlarge `plate`: it is a single global size and
     would also distort Blizzard's own plates (which TP shows in mixed mode and which exist even in pure TP mode,
     e.g. protected friendly plates in instances).
-  - TP plates: `HitTestFrame` is sized from the clickable-area settings, clamped to `plate:GetSize()` (unless secret),
-    centered on `plate`. Plates shown by Blizzard: TP re-binds the hit-test too (the pooled plate may still be bound
+  - TP plates: `HitTestFrame` (child of `plate`, centered on it) ignores `plate`'s scale and uses `tp_frame`'s scale
+    (`hooksecurefunc(tp_frame, "SetScale", UpdateHitTestFrameSize)`), so the clickable area follows TP's own scaling
+    (target/mouseover/threat scale, animations). Size: with "Healthbar Sync", from the active style's healthbar
+    (width + 20, height × 2, so custom styles count); otherwise, and for Headline View, the configured values. Clamped
+    to `plate`'s size, converted via the effective scales (unless secret). Plates shown by Blizzard: TP re-binds the hit-test too (the pooled plate may still be bound
     to TP's `HitTestFrame`), anchoring `HitTestFrame` to Blizzard's own area via `AnchorToBlizzardHitTestArea` (same
     as `UpdateHitTestArea`), or clearing it in Retail's "only name" mode, like Blizzard. Click-through clears it for
     both.
@@ -253,7 +256,9 @@ Central pub/sub for both real WoW events and internal TP events (`INTERNAL_EVENT
     (name top to healthbar bottom, ±10 horizontally, half the healthbar height below), not the whole plate
     (172.5 x 60.3 includes aura space and stacks visibly wider). In "only name" mode
     (`nameplateShowOnlyNameForFriendlyPlayerUnits`, `UnitFrame:IsShowOnlyName()`), Blizzard clears the hit-test
-    area but still stacks those plates, only tighter.
+    area but still stacks those plates, only tighter. Classic Era has the same mode (`IsShowOnlyName()`), but no
+    `UpdateHitTestArea`: it keeps the normal hit-test area (name to the hidden healthbar), so "only name" plates
+    stack and click like normal ones there (UI source and in-game, 2026-11-01).
   - The `nameplateOverlapH/V` CVars scale the stacking spacing on top of the bounds, on Retail and Classic Era, with
     TP enabled and disabled, for Blizzard-shown and TP plates alike. They have no effect when stacking is off.
     TP's "Horizontal/Vertical Overlap" options set them. (An earlier note here claimed they had no effect on
