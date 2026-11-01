@@ -34,7 +34,7 @@ local CastbarCastingDirection = Enum.StatusBarTimerDirection and Enum.StatusBarT
 local CastbarChannelDirection = Enum.StatusBarTimerDirection and Enum.StatusBarTimerDirection.RemainingTime
 local WrapTextInColor = C_ColorUtil and C_ColorUtil.WrapTextInColor
 local GetClassColor = C_ClassColor and C_ClassColor.GetClassColor
-local UnitChannelDuration, UnitCastingDuration = UnitChannelDuration, UnitCastingDuration
+local UnitChannelDuration, UnitCastingDuration, UnitEmpoweredChannelDuration = UnitChannelDuration, UnitCastingDuration, UnitEmpoweredChannelDuration
 -- Constants.CharacterNameSeparatorConsts only exists on WoW Forever (confirmed: not present on live
 -- Retail/Midnight or any Classic flavor as of 2026-09-23) - fall back to the literal separators every
 -- other client hardcodes for realm names.
@@ -698,9 +698,13 @@ local function OnStartCasting(tp_frame, unitid, cast_guid, event_spell_id, castb
 
     -- Although Evoker's empowered casts are considered channeled, time (and therefore growth direction)
     -- is calculated like for normal casts. Therefore: castbar.IsCasting = true
-    castbar.IsCasting = not channeled --or (numStages and numStages > 0)
+    castbar.IsCasting = not channeled or is_empowered
 
-    if channeled then
+    if is_empowered then
+      -- Includes the time the cast can be held at its last stage
+      castbar.Duration = UnitEmpoweredChannelDuration(unitid, true)
+      castbar:SetTimerDuration(castbar.Duration, CastbarInterpolation, CastbarCastingDirection)
+    elseif channeled then
       castbar.Duration = UnitChannelDuration(unitid)
       castbar:SetTimerDuration(castbar.Duration, CastbarInterpolation, CastbarChannelDirection)
     else
