@@ -398,6 +398,8 @@ L["Glow"] = "Leuchten"
 L["Glow Color"] = "Leuchtfarbe"
 L["Glow Frame"] = "Leuchtrahmen"
 L["Glow Type"] = "Leuchttyp"
+--[[Machine translation --]]
+L["Greyed out types compare the threat values of several units. WoW keeps these values secret from addons, so this is not possible. If such a type is selected, no threat value is shown."] = "Ausgegraute Arten vergleichen die Bedrohungswerte mehrerer Einheiten. WoW hält diese Werte vor Addons geheim, daher ist das nicht möglich. Ist eine solche Art ausgewählt, wird kein Bedrohungswert angezeigt."
 L["Guardians"] = "Wächter"
 L["Hard locked target only"] = "Nur fest erfasstes Ziel"
 L["Headline View"] = "Headline-View"

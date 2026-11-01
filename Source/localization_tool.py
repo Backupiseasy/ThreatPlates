@@ -44,6 +44,9 @@ DEFAULT_EXPORT_FILE = "phrase_keys_export_file.txt"
 # L["key"] = "value" entry it adds to a locale file, so those entries can be told apart
 # from community translations pulled from CurseForge - see parse_mt_marked_keys().
 MT_MARKER_COMMENT = "--[[Machine translation --]]"
+# Comment CurseForge writes in front of an untranslated L["key"] = "key" entry - see
+# parse_untranslated_keys().
+MISSING_TRANSLATION_COMMENT = "--[[Translation missing --]]"
 
 
 # ---------------------------------------------------------------------------
@@ -194,16 +197,9 @@ def parse_locale_keys(locale_path):
     return set(parse_locale_entries(locale_path))
 
 
-def parse_mt_marked_keys(locale_path):
+def parse_keys_with_comment(locale_path, comment):
     """Keys in a Locales/<locale>.lua file whose L["key"] = "value" assignment is
-    immediately preceded (skipping blank lines) by MT_MARKER_COMMENT - i.e. entries
-    added by the local MT prompt (Source/mt_translate_prompt.md) that a human
-    translator hasn't reviewed on CurseForge yet.
-
-    This is self-cleaning: once a community translator supplies a real translation
-    on CurseForge, the next `pull` overwrites that line with CF's export (which never
-    carries this marker), so the key silently stops being MT-marked with no extra
-    bookkeeping required anywhere."""
+    immediately preceded (skipping blank lines) by the given comment line."""
     if not os.path.exists(locale_path):
         return set()
 
@@ -229,9 +225,27 @@ def parse_mt_marked_keys(locale_path):
         i = line - 2  # 0-indexed line immediately above the (1-indexed) assignment line
         while i >= 0 and lines[i].strip() == "":
             i -= 1
-        if i >= 0 and lines[i].strip() == MT_MARKER_COMMENT:
+        if i >= 0 and lines[i].strip() == comment:
             marked.add(key)
     return marked
+
+
+def parse_mt_marked_keys(locale_path):
+    """Keys of entries added by the local MT prompt (Source/mt_translate_prompt.md)
+    that a human translator hasn't reviewed on CurseForge yet.
+
+    This is self-cleaning: once a community translator supplies a real translation
+    on CurseForge, the next `pull` overwrites that line with CF's export (which never
+    carries this marker), so the key silently stops being MT-marked with no extra
+    bookkeeping required anywhere."""
+    return parse_keys_with_comment(locale_path, MT_MARKER_COMMENT)
+
+
+def parse_untranslated_keys(locale_path):
+    """Keys CurseForge marked as untranslated. A value identical to its key alone does
+    not mean that: without this comment, it is an intentional translation, like a
+    loanword kept in English (e.g. "Buffs" or "Tank")."""
+    return parse_keys_with_comment(locale_path, MISSING_TRANSLATION_COMMENT)
 
 
 def locale_translation_stats(root, enus_keys):
@@ -241,11 +255,10 @@ def locale_translation_stats(root, enus_keys):
     len(enus_keys) - a locale file can contain stale entries for keys no longer in
     enUS, which must not inflate its completion percentage.
 
-    An entry whose value is identical to its key is CurseForge's
-    `--[[Translation missing --]]` placeholder (English fallback, comment stripped
-    by the AST parser) rather than a real translation, and must not count as
-    translated - otherwise every locale always reports ~100%, since CurseForge
-    fills in every key regardless of whether it's actually translated.
+    An entry with CurseForge's `--[[Translation missing --]]` placeholder (English
+    fallback) is not a real translation and must not count as translated - otherwise
+    every locale always reports ~100%, since CurseForge fills in every key regardless
+    of whether it's actually translated. See parse_untranslated_keys().
 
     Returns a list of (locale, human_translated, mt_pending, total, missing,
     human_pct, total_pct) tuples."""
@@ -257,7 +270,8 @@ def locale_translation_stats(root, enus_keys):
     for locale in locales:
         locale_path = os.path.join(root, "Locales", f"{locale}.lua")
         entries = parse_locale_entries(locale_path)
-        translated_keys = {k for k, v in entries.items() if v is not None and v != k}
+        untranslated_keys = parse_untranslated_keys(locale_path)
+        translated_keys = {k for k, v in entries.items() if v is not None and k not in untranslated_keys}
         mt_marked = parse_mt_marked_keys(locale_path)
         human_keys = translated_keys - mt_marked
         pending_keys = translated_keys & mt_marked
@@ -564,7 +578,7 @@ def preserve_existing_translations(existing_lines, incoming_lines):
     i, n = 0, len(incoming_lines)
     while i < n:
         line = incoming_lines[i]
-        if line.strip() == "--[[Translation missing --]]" and i + 1 < n:
+        if line.strip() == MISSING_TRANSLATION_COMMENT and i + 1 < n:
             m = _LOCALE_ENTRY_RE.match(incoming_lines[i + 1].strip())
             # CurseForge exports an empty value instead of the key for a phrase
             # it only knows from a translation import (push-translation) and has

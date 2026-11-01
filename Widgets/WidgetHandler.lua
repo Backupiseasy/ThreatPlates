@@ -98,10 +98,12 @@ end
 -- Helper functions for widgets
 ---------------------------------------------------------------------------------------------------
 
+-- widget_frame could be nil if the widget was disabled and is enabled as part of a profile switch, as
+-- InitializeWidget updates the settings first and EnableWidget creates the missing frames afterwards
 local function UpdateAllFrames(widget)
   for _, tp_frame in Addon:GetActiveThreatPlates() do
     local widget_frame = tp_frame.widgets[widget.Name]
-    if widget_frame.Active then
+    if widget_frame and widget_frame.Active then
       widget:UpdateFrame(widget_frame, tp_frame.unit)
     end
   end
@@ -111,7 +113,7 @@ end
 local function UpdateAllFramesWithPublish(widget, event)
   for _, tp_frame in Addon:GetActiveThreatPlates() do
     local widget_frame = tp_frame.widgets[widget.Name]
-    if widget_frame.Active then
+    if widget_frame and widget_frame.Active then
       widget:UpdateFrame(widget_frame, tp_frame.unit)
     end
 

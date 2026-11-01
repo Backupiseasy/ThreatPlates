@@ -21,7 +21,6 @@ local ScaleTo100 = CurveConstants and CurveConstants.ScaleTo100
 -- ThreatPlates APIs
 local BackdropTemplate = Addon.BackdropTemplate
 local IsSecretValueTP = Addon.IsSecretValue
-local Truncate = Addon.Truncate
 
 local _G =_G
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
@@ -52,7 +51,7 @@ local function PowerMana()
   local absolute_value = UnitPower("target", SPELL_POWER_MANA)
   local percentage_value = UnitPowerPercent("target", SPELL_POWER_MANA, false, ScaleTo100)
   
-  return percentage_value, Truncate(absolute_value)
+  return percentage_value, Addon.Truncate(absolute_value)
 end
 
 local function PowerGeneric()  
@@ -110,7 +109,8 @@ function Widget:SetTargetPowerType(widget_frame, unit)
 
   local target_max_power = UnitPowerMax("target")
 
-  if IsSecretValueTP(target_max_power) or not target_max_power or target_max_power == 0 then return end
+  -- A secret value cannot be checked here, in that case the alpha value set in OnTargetUnitAdded hides the widget
+  if not IsSecretValueTP(target_max_power) and (not target_max_power or target_max_power == 0) then return end
 
   -- The code to determine the power type could be moved to OnUnitAdded, but then code is necessary to determine when
   -- the power type on the unit changes (e.g., a druid that shapeshifts). Mabe there's even bosses that do that?!?
@@ -285,6 +285,10 @@ function Widget:OnTargetUnitAdded(tp_frame, unit)
       widget_frame.Border:SetBackdropBorderColor(color.r, color.g, color.b, color.a)
     end
   end
+
+  -- Alpha is clamped by WoW, so with a secret maximum value the widget is only visible if the unit has this resource
+  local target_max_power = UnitPowerMax("target")
+  widget_frame:SetAlpha(IsSecretValueTP(target_max_power) and target_max_power or 1)
 
   self:UpdateResourceBar()
   widget_frame:Show()

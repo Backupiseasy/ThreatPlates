@@ -6255,7 +6255,6 @@ local function CreateLocalizationSettings()
         order = 20,
         type = "group",
         inline = true,
-        hidden = Addon.HAS_MIDNIGHT_API,
         args = {
           MetricUnitSymbols = {
             name = L["Metric Unit Symbols"],
@@ -8450,6 +8449,20 @@ local function CreateSpecRolesClassic()
   return result
 end
 
+-- A select with style radio cannot disable single values, so the value types are toggles that work like one
+local function GetThreatValueTypeEntry(value_type, pos)
+  return {
+    name = Addon.THREAT_VALUE_TYPE[value_type],
+    order = pos,
+    type = "toggle",
+    desc = L["Show the player's threat percentage (scaled or raw) or threat delta to the second player on the threat table (percentage or threat value) against the enemy unit."],
+    get = function() return db.threat.ThreatPercentage.Type == value_type end,
+    set = function(info) SetValue(info, value_type) end,
+    disabled = Addon.HAS_MIDNIGHT_API and Addon.THREAT_VALUE_TYPE_COMPARES_UNITS[value_type],
+    arg = { "threat", "ThreatPercentage", "Type" },
+  }
+end
+
 local function CreateThreatPercentageOptions()
   local entry = {
     name = L["Value"],
@@ -8505,11 +8518,23 @@ local function CreateThreatPercentageOptions()
       ValueType = {
         name = L["Value Type"],
         order = 20,
-        type = "select",
-        values = Addon.THREAT_VALUE_TYPE,
-        style = "radio",
-        desc = L["Show the player's threat percentage (scaled or raw) or threat delta to the second player on the threat table (percentage or threat value) against the enemy unit."],
-        arg = { "threat", "ThreatPercentage", "Type" },
+        type = "group",
+        inline = true,
+        args = {
+          RawPercentage = GetThreatValueTypeEntry("RAW_PERCENTAGE", 10),
+          ScaledPercentage = GetThreatValueTypeEntry("SCALED_PERCENTAGE", 20),
+          TankPercentage = GetThreatValueTypeEntry("TANK_PERCENTAGE", 30),
+          TankValue = GetThreatValueTypeEntry("TANK_VALUE", 40),
+          ThreatPercentageDelta = GetThreatValueTypeEntry("THREAT_PERCENTAGE_DELTA", 50),
+          ThreatValueDelta = GetThreatValueTypeEntry("THREAT_VALUE_DELTA", 60),
+          DisabledTypesInfo = {
+            name = L["Greyed out types compare the threat values of several units. WoW keeps these values secret from addons, so this is not possible. If such a type is selected, no threat value is shown."],
+            order = 70,
+            type = "description",
+            width = "full",
+            hidden = not Addon.HAS_MIDNIGHT_API,
+          },
+        },
       },
       ValueFormat = {
         name = L["Value Format"],
@@ -8523,6 +8548,7 @@ local function CreateThreatPercentageOptions()
             order = 10,
             width = "double",
             desc = L["In delta mode, show the name of the player who is second in the enemy unit's threat table."],
+            disabled = Addon.HAS_MIDNIGHT_API,
             arg = { "threat", "ThreatPercentage", "SecondPlayersName" },
           },
         },

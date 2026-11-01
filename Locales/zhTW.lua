@@ -410,6 +410,8 @@ L["Glow"] = "發光"
 L["Glow Color"] = "發光顏色"
 L["Glow Frame"] = "發光框架"
 L["Glow Type"] = "發光類型"
+--[[Translation missing --]]
+L["Greyed out types compare the threat values of several units. WoW keeps these values secret from addons, so this is not possible. If such a type is selected, no threat value is shown."] = "Greyed out types compare the threat values of several units. WoW keeps these values secret from addons, so this is not possible. If such a type is selected, no threat value is shown."
 L["Guardians"] = "守護者"
 L["Hard locked target only"] = "只有硬鎖定的目標"
 L["Headline View"] = "名字檢視"

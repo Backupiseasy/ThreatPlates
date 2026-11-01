@@ -678,26 +678,31 @@ local function CreateAuraContainer(aura_type)
   return container
 end
 
--- AuraContainers cannot be created during combat, so the pools are built once up front (called from
--- Widget:OnEnable, which runs at login/reload - effectively always out of combat - and retried from
--- Widget:PLAYER_REGEN_ENABLED/DISABLED in case the widget was first enabled mid-combat) rather than
--- lazily per-plate like the rest of this widget's frames.
+-- AuraContainers cannot be created during combat, so the pools are built once up front rather than
+-- lazily per-plate like the rest of this widget's frames: from Widget:Create (WidgetHandler:EnableWidget
+-- creates the frames of existing plates before Widget:OnEnable, e.g., when a profile change enables
+-- the widget at runtime) and Widget:OnEnable, retried from Widget:PLAYER_REGEN_ENABLED/DISABLED in case
+-- the widget was first enabled mid-combat. Returns true if pools were created by this call.
 local function PreallocateAuraContainers()
-  if not HasAuraContainers then return end
+  if not HasAuraContainers then return false end
 
   if _G.InCombatLockdown() then
     Addon.Logging.Debug("    Auras: could not pre-allocate AuraContainer pools - in combat, will retry after combat ends.")
-    return
+    return false
   end
 
+  local pools_created = false
   for _, aura_type in ipairs(AURA_CONTAINER_TYPES) do
     local pool = AuraContainerPool[aura_type]
     if #pool == 0 then
       for i = 1, AURA_CONTAINER_POOL_SIZE do
         pool[i] = CreateAuraContainer(aura_type)
       end
+      pools_created = true
     end
   end
+
+  return pools_created
 end
 
 local function AcquireAuraContainer(aura_type)
@@ -706,11 +711,26 @@ local function AcquireAuraContainer(aura_type)
   local container = pool[index]
   if container then
     NextAuraContainerIndex[aura_type] = index + 1
-  else
+  elseif #pool > 0 then
+    -- An empty pool is not an error: it was not created yet because of combat
     Addon.Logging.Error("|cffFF8800[AuraDebug]|r", aura_type, "pool exhausted at index", index, "- this plate will show no", aura_type)
   end
 
   return container
+end
+
+local function AttachAuraContainers(widget_frame)
+  for _, aura_type in ipairs(AURA_CONTAINER_TYPES) do
+    local container_key = aura_type .. "AuraContainer"
+    if not widget_frame[container_key] then
+      local container = AcquireAuraContainer(aura_type)
+      if container then
+        container:SetParent(widget_frame)
+        container:SetEnabled(false)
+        widget_frame[container_key] = container
+      end
+    end
+  end
 end
 
 -- Composes the AuraFilters string/candidateFilters for each type/reaction combination from today's
@@ -1192,14 +1212,8 @@ function Widget:Create(tp_frame)
   --------------------------------------
   widget_frame:SetAllPoints(tp_frame)
 
-  for _, aura_type in ipairs(AURA_CONTAINER_TYPES) do
-    local container = AcquireAuraContainer(aura_type)
-    if container then
-      container:SetParent(widget_frame)
-      container:SetEnabled(false)
-      widget_frame[aura_type .. "AuraContainer"] = container
-    end
-  end
+  PreallocateAuraContainers()
+  AttachAuraContainers(widget_frame)
 
   widget_frame.Widget = self
 
@@ -1215,12 +1229,26 @@ function Widget:IsEnabled()
   return self.db.ON or self.db.ShowInHeadlineView
 end
 
+-- Plates whose widget frame was created in combat have no containers yet, so hand them out as soon as
+-- the pools exist.
+function Widget:CreateMissingAuraContainers()
+  if PreallocateAuraContainers() then
+    for _, tp_frame in pairs(Addon.PlatesCreated) do
+      local widget_frame = tp_frame.widgets.Auras
+      AttachAuraContainers(widget_frame)
+      self:UpdateLayout(widget_frame)
+    end
+
+    self:UpdateAllFrames()
+  end
+end
+
 function Widget:OnEnable()
   self:SubscribeEvent("PLAYER_TARGET_CHANGED")
   self:SubscribeEvent("PLAYER_REGEN_ENABLED")
   self:SubscribeEvent("PLAYER_REGEN_DISABLED")
 
-  PreallocateAuraContainers()
+  self:CreateMissingAuraContainers()
 end
 
 function Widget:EnabledForStyle(style, unit)
@@ -1275,7 +1303,7 @@ function Widget:PLAYER_REGEN_ENABLED()
   -- Retries pool creation if the widget was first enabled mid-combat (e.g. /reload during a fight),
   -- so the AuraContainer pools never got a chance to be created. No-op once the pools already exist.
   -- Also fires (harmlessly, InCombatLockdown() guards it) on the aliased PLAYER_REGEN_DISABLED.
-  PreallocateAuraContainers()
+  self:CreateMissingAuraContainers()
 end
 
 Widget.PLAYER_REGEN_DISABLED = Widget.PLAYER_REGEN_ENABLED

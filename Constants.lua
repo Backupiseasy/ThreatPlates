@@ -256,6 +256,14 @@ Addon.THREAT_VALUE_TYPE = {
   THREAT_PERCENTAGE_DELTA = L["Delta Percentage"],
 }
 
+-- These types compare the threat values of several units, which is not possible with secret values
+Addon.THREAT_VALUE_TYPE_COMPARES_UNITS = {
+  TANK_PERCENTAGE = true,
+  TANK_VALUE = true,
+  THREAT_VALUE_DELTA = true,
+  THREAT_PERCENTAGE_DELTA = true,
+}
+
 Addon.NAME_ABBREVIATION = {
     FULL = L["Full Name"],
     INITIALS = L["Initials"],

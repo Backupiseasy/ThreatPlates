@@ -426,6 +426,8 @@ L["Glow"] = "Brillo"
 L["Glow Color"] = "Color de Brillo"
 L["Glow Frame"] = "Marco resplandor"
 L["Glow Type"] = "Tipo de Brillo"
+--[[Translation missing --]]
+L["Greyed out types compare the threat values of several units. WoW keeps these values secret from addons, so this is not possible. If such a type is selected, no threat value is shown."] = "Greyed out types compare the threat values of several units. WoW keeps these values secret from addons, so this is not possible. If such a type is selected, no threat value is shown."
 L["Guardians"] = "Guardianes"
 L["Hard locked target only"] = "Objetivo constante solamente"
 L["Headline View"] = "Vista de Título"

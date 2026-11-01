@@ -361,6 +361,8 @@ with `issecretvalue` / `Addon.IsSecretValue` before boolean tests, math, string 
   `SecretArguments = "AllowedWhenTainted"` and are safe display sinks for secret numeric values. There is no
   equivalent verified API metadata for Lua `string.format`, `string.match`, or `string.gsub`; do not assume
   a raw pattern-based string op on a secret value is safe without explicit documentation or runtime proof.
+  `Elements/StatusText.lua`'s `("%.f%%"):format(UnitHealthPercent(...))` works without problems in live use, so
+  it does not need to be replaced (e.g., with `C_Intl.FormatNumber`).
 - **Correction (was previously stated as needing a guard)**: plain `..` concatenation with a secret operand
   does **not** itself throw — it produces a secret *result* (taints it), the same as arithmetic would, but
   unlike arithmetic/comparison it does not error at the concatenation step itself. Confirmed live on a client
@@ -515,9 +517,13 @@ from that pass worth knowing:
 
 ### Features intentionally disabled on Midnight
 
-Do not re-enable without explicit request: off-tank detection, the Lua-based name/number abbreviation
-(`Addon.Truncate` is always `AbbreviateNumbers` there), `Widgets/HealerTrackerWidget.lua`, NPC-ID parsing from
-GUID structure. Cyrillic transliteration is **not** disabled: `TransliterateCyrillicLetters` hands the (possibly
+Do not re-enable without explicit request: off-tank detection, the Lua-based name/number abbreviation,
+`Widgets/HealerTrackerWidget.lua`, NPC-ID parsing from GUID structure. `Addon.Truncate` always uses
+`AbbreviateNumbers` there: in western style with own breakpoints or, with the option "Metric Unit Symbols" on East
+Asian clients, in the client's locale. `locale = "enUS"` is no alternative, as that option only selects the
+breakpoints and the abbreviation text still comes from the client's global strings - in-game, a deDE client
+abbreviated 123456 with `locale = "zhCN"` to `12K`, and a koKR client with `locale = "enUS"` to `123만` (ten times
+too high). Cyrillic transliteration is **not** disabled: `TransliterateCyrillicLetters` hands the (possibly
 secret) text to `C_Intl.Transliterate`, without inspecting or caching it. All clients with secret values have that
 API (Forever, Retail since 12.1.5); the Classic clients don't and use a Lua table instead.
 
@@ -543,8 +549,7 @@ Point-in-time notes from past analysis passes — re-verify before relying on th
 - `Nameplate.lua`: `UnitHealth`/`UnitHealthMax` results still get `or` fallbacks before later arithmetic in a
   few call sites — worth a guard-pattern audit pass.
 - `Elements/StatusText.lua`: `UnitSubtitles[tooltip_name] = subtitle` still needs a secret-value guard on the
-  cache key; `UnitHealthPercent(...)` is passed directly into `:format("%.f%%")` — keep this path open until
-  `string.format` safety on a secret value is proven (see the `string.format` caveat above).
+  cache key.
 - `Widgets/ExperienceWidget.lua` is not loaded on "WoW Forever" at all (`Addon.ExpansionIsAtLeastBfA` is false
   there), so the Experience row in `Source/Plans/WoWForeverCompatibility.md` does not apply to Forever.
 

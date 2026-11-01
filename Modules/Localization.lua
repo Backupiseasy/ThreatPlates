@@ -130,6 +130,26 @@ if MAP_LOCALE_TO_UNIT_SYMBOL[client_locale] then
   end
 end
 
+-- Western style for AbbreviateNumbers, independent of the client's locale. The option locale = "enUS" cannot be
+-- used for this: it only selects the breakpoints, but the abbreviation is still the client's global string. In-game,
+-- a deDE client abbreviated 123456 with locale = "zhCN" to 12K, and a koKR client with locale = "enUS" to 123만,
+-- which is a value ten times too high. Therefore, the abbreviations are not looked up as global strings here.
+local ABBREVIATE_NUMBERS_WESTERN_OPTIONS = {
+  breakpointData = {
+    -- Same breakpoints as TruncateWestern, plus billions as values on these clients can reach them
+    { breakpoint = 1e9, abbreviation = "b", significandDivisor = 1e8, fractionDivisor = 10, abbreviationIsGlobal = false },
+    { breakpoint = 1e6, abbreviation = "m", significandDivisor = 1e5, fractionDivisor = 10, abbreviationIsGlobal = false },
+    { breakpoint = 1e4, abbreviation = "k", significandDivisor = 1e2, fractionDivisor = 10, abbreviationIsGlobal = false },
+  },
+}
+
+-- value can be a secret value here, so it must only be passed on to AbbreviateNumbers. Other than TruncateWestern,
+-- AbbreviateNumbers cuts off digits (12999 is 12.9k) and omits a trailing zero (12000 is 12k). This cannot be changed
+-- for secret values, and formatting only other values differently would make the text inconsistent.
+local function AbbreviateNumbersWestern(value)
+  return AbbreviateNumbers(value, ABBREVIATE_NUMBERS_WESTERN_OPTIONS)
+end
+
 Addon.Truncate = AbbreviateNumbers
 
 ---------------------------------------------------------------------------------------------------
@@ -203,8 +223,13 @@ end
 ---------------------------------------------------------------------------------------------------
 
 function LocalizationModule.UpdateSettings()
-  if not Addon.HAS_MIDNIGHT_API then
-    Addon.Truncate = (Addon.db.profile.text.LocalizedUnitSymbol and TruncateEastAsian) or TruncateWestern
+  local localized_unit_symbol = Addon.db.profile.text.LocalizedUnitSymbol
+
+  if Addon.HAS_MIDNIGHT_API then
+    -- As with TruncateEastAsian, only East Asian locales have unit symbols of their own
+    Addon.Truncate = (localized_unit_symbol and MAP_LOCALE_TO_UNIT_SYMBOL[client_locale] and AbbreviateNumbers) or AbbreviateNumbersWestern
+  else
+    Addon.Truncate = (localized_unit_symbol and TruncateEastAsian) or TruncateWestern
   end
 
   -- Clear cache for texts as e.g., abbreviation mode might have changed

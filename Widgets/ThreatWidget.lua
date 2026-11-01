@@ -325,6 +325,8 @@ local THREAT_DETAILS_FUNCTIONS = {
   THREAT_PERCENTAGE_DELTA = GetThreatPercentageDelta,
 }
 
+local function NoThreatDetails() end
+
 function Widget:UpdateFrame(widget_frame, unit)
   if ThreatShowFeedback(unit) then
     -- Show threat art (textures)
@@ -419,5 +421,7 @@ function Widget:UpdateSettings()
 
   ShowSecondPlayersName = Settings.ThreatPercentage.SecondPlayersName
 
-  ThreatDetailsFunction = THREAT_DETAILS_FUNCTIONS[Settings.ThreatPercentage.Type]
+  -- A type comparing units can still be saved from an earlier version or a profile shared with a Classic client
+  local threat_value_type = Settings.ThreatPercentage.Type
+  ThreatDetailsFunction = (Addon.HAS_MIDNIGHT_API and Addon.THREAT_VALUE_TYPE_COMPARES_UNITS[threat_value_type] and NoThreatDetails) or THREAT_DETAILS_FUNCTIONS[threat_value_type]
 end
