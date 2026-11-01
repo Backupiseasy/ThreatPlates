@@ -1,7 +1,7 @@
 # Nameplate lifecycle: implementation plan
 
 Branch: `feature/nameplate-lifecycle` (created from `release/13.3` @ `cc69d850`, rebased onto `develop` @ `5c347f60`
-on 2026-10-30 and onto `develop` @ `edfaf80b` on 2026-11-01). Target version: 13.4.0.
+on 2026-10-30 and onto `develop` @ `7c64abea` on 2026-11-01). Target version: 13.4.0.
 
 Background: comparison of how Plater and Platynator handle `NAME_PLATE_CREATED` / `NAME_PLATE_UNIT_ADDED` /
 `NAME_PLATE_UNIT_REMOVED`, anchor their own frames and hide Blizzard's `plate.UnitFrame`, versus TP's
@@ -75,7 +75,7 @@ on Retail/Midnight.
 
 ## 2. Items
 
-### P7: Keep hook marker out of Blizzard's frame (trivial, do first) — DONE (`5720b566`)
+### P7: Keep hook marker out of Blizzard's frame (trivial, do first) — DONE (`0350c1f2`)
 
 - **Problem**: `unit_frame.ThreatPlates = true` (`Nameplate.lua`, `NamePlateDriverFrame_AcquireUnitFrame`)
   writes an addon key onto a (possibly secure) Blizzard frame.
@@ -499,7 +499,7 @@ no option (global, distorts Blizzard's plates, which also exist in pure TP mode)
   bind to a frame anchored via `AnchorToBlizzardHitTestArea`, and in "only name" mode leave the hit-test alone.
 
 - **Implemented so far** (branch `feature/nameplate-clickable-area`, created from `feature/nameplate-lifecycle` @
-  `0dbcb950`):
+  `2b0e616d`):
   1. `ApplyPlateHitTest`: width/height of `HitTestFrame` are clamped to `plate:GetSize()`. Guarded with
      `IsSecretValueTP` (sizes of nameplate frames can be secret in restricted contexts), so no clamping then.
      `HitTestFrame` has no own scale yet, so both sizes are in the same coordinate space. Revisit with P9.
@@ -628,11 +628,11 @@ pass (or be consciously waived) before the branch is merged. Add new entries as 
 hash once committed, and tick or remove them when done. "(old base)" marks checks that passed before the rebase onto
 `develop` (2026-10-30) and are covered again by "Re-test after the rebase" under General.
 
-**P7 — hook marker table** (`5720b566`)
+**P7 — hook marker table** (`0350c1f2`)
 - [ ] OnShow/Show hooks attach exactly once per pooled `UnitFrame` instance (no duplicate hooks after long sessions;
       temporary debug counter or `/tptp debug`), Retail and Classic.
 
-**P1 — anchoring to `plate`** (`c74c1228`)
+**P1 — anchoring to `plate`** (`86990aa1`)
 - [x] Retail: plates at the same position as before, no errors (tested before the P1 commit) (old base).
 - [x] Classic Era: re-anchoring 30+ live plates from `UnitFrame` to `plate` caused no visible change (A/B test
       before the change) (old base).
@@ -644,7 +644,7 @@ hash once committed, and tick or remove them when done. "(old base)" marks check
 - [ ] `ConfigClickableArea` and `/tptp clickable-area` show the expected areas.
 - [ ] "WoW Forever" (optional, waived for now).
 
-**P8 — stacking bounds** (`6fe8de43`)
+**P8 — stacking bounds** (`194c9ba7`)
 - [x] Retail: TP and Blizzard-shown plates stack like with TP disabled, Overlap H/V works with TP on, "only names"
       on load and live toggle, `nameplateStyle` change, instance incl. end of combat (no secret-size error)
       (old base, re-test pending).
@@ -660,7 +660,7 @@ hash once committed, and tick or remove them when done. "(old base)" marks check
       exist there; events for unknown CVars simply never fire).
 - [ ] "WoW Forever" (optional, waived for now; the method exists there and is real).
 
-**P2 — revalidation timers** (`1f31d220`) — Retail and Classic Era
+**P2 — revalidation timers** (`199fc5cd`) — Retail and Classic Era
 - [ ] Reaction/attackability changes still apply immediately outside PvP (duel start/end, mind control), i.e. the
       next-frame slot is not swallowed by a pending 0.5 s revalidation of the same unit (BG case: see "BG / arena").
 - [ ] Entering the world / zoning with many plates (city, portal): no errors, plates correct.
@@ -670,7 +670,7 @@ hash once committed, and tick or remove them when done. "(old base)" marks check
       scheduled/dropped/replaced/run, removed again afterwards).
 - [ ] Longer normal session: no new BugSack entries.
 
-**P3 — hardened `NAME_PLATE_UNIT_REMOVED`** (`87487109`) — Retail and Classic Era
+**P3 — hardened `NAME_PLATE_UNIT_REMOVED`** (`a1c206ec`) — Retail and Classic Era
 - [x] ~~Personal resource display on/off~~: not applicable. There is no nameplate for `"player"` anymore (verified
       in-game 2026-10-30, `C_NamePlate.GetNamePlateForUnit("player")` is `nil` with `nameplateShowSelf` = 1 on Retail
       and Classic Era). Retail shows the personal resource display as its own frame (`PersonalResourceDisplayFrame`,
@@ -681,13 +681,13 @@ hash once committed, and tick or remove them when done. "(old base)" marks check
       container "jumping" to another plate). Same scenario as the P8 widget-only check, one test covers both (2026-10-30).
 - [x] Soft-interact objects (e.g. fishing bobber, mailbox): no errors when they appear/disappear (2026-10-30).
 
-**P4 — missed `NAME_PLATE_UNIT_REMOVED`** (`de8910d2`) — Retail and Classic Era
+**P4 — missed `NAME_PLATE_UNIT_REMOVED`** (`636804f1`) — Retail and Classic Era
 - [ ] Open world: units leaving range at the edge of view distance, stealth (rogue/druid), feign death, mind control:
       no errors, no plates left behind showing an old unit.
 - [x] Changing your own faction/reaction (e.g. duel start/end, or anything that fires `UNIT_FACTION` for "player"):
       no errors, all plates update (2026-10-30).
 
-**P5 — `UNIT_CLASSIFICATION_CHANGED`** (`0dbcb950`) — Retail and Classic Era
+**P5 — `UNIT_CLASSIFICATION_CHANGED`** (`2b0e616d`) — Retail and Classic Era
 - [x] In-game event registration check on Retail: 0 mismatches, `UNIT_CLASSIFICATION_CHANGED` and `CVAR_UPDATE`
       register fine (2026-10-30).
 - [x] Same check on Classic Era: 0 mismatches, both events register fine (2026-11-01).
@@ -697,7 +697,7 @@ hash once committed, and tick or remove them when done. "(old base)" marks check
       leaving and re-entering range.
 - [ ] No errors / no noticeable hitches when the event fires (it causes a full plate refresh).
 
-**P10 — clickable area** (part 1 `c2a78c80`, part 2 `2bc0286e`; branch `feature/nameplate-clickable-area`) — Retail and Classic Era
+**P10 — clickable area** (part 1 `8aef48cc`, part 2 `40d33557`; branch `feature/nameplate-clickable-area`) — Retail and Classic Era
 - [x] Healthbar width 250 (or manual click area larger than the plate): configuration mode shows the clamped area,
       and exactly that area is clickable (2026-11-01).
 - [x] Change Blizzard's nameplate size: the clamp follows (configuration mode after the change) (2026-11-01).
@@ -719,7 +719,7 @@ hash once committed, and tick or remove them when done. "(old base)" marks check
       (fix for the bug found 2026-11-01) (verified 2026-11-01).
 - [ ] Classic Era: Blizzard-shown plates clickable as with TP disabled ("only name" keeps the normal area there).
 
-**P9 — clickable area scales with `TPFrame`** (committed `091a55ea`; branch `feature/nameplate-clickable-area`) — Retail and Classic Era
+**P9 — clickable area scales with `TPFrame`** (committed `9b8ffc9f`; branch `feature/nameplate-clickable-area`) — Retail and Classic Era
 - [x] Target scale > 1: the clickable area of the target grows with the plate (up to the clamp); configuration mode
       on the target shows it (2026-11-01).
 - [x] Mouseover scale animation: no flicker / no repeated mouseover enter/leave at the plate edges while the
