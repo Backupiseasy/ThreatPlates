@@ -3226,7 +3226,9 @@ local function CreateTargetArtWidgetOptions()
                 name = L["Target"],
                 order = 1,
                 type = "toggle",
+                -- Not a CVar like the other entries of this group, so overwrite the group's CVar getter and setter
                 get = GetValue,
+                set = SetValue,
                 arg =  { "targetWidget", "SoftTarget", "Icon", "SoftTargetIconTarget" },
               },
               SoftTargetIconEnemy = {
