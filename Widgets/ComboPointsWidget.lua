@@ -299,8 +299,11 @@ end
 if not Addon.ExpansionIsAtLeastWoD then
   -- This should not be necessary as in Classic only Rogues and Druids had combo points
   if PlayerClass == "ROGUE" or PlayerClass == "DRUID" then
+    -- Read the points on the unit the widget is shown on (see GetCurrentTargetUnitID below), like Blizzard's own
+    -- combo point frames do with "target". "anyenemy" can resolve to the soft-enemy target, which is not
+    -- necessarily the unit holding the combo points.
     UnitPower = function(unitToken , powerType)
-      return GetComboPoints("player", "anyenemy")
+      return GetComboPoints("player", (UnitCanAttack("player", "target") and "target") or "softenemy")
     end
   end
 end
@@ -829,9 +832,8 @@ end
 
 -- This event handler only watches for events of unit == "player"
 local function EventHandler(event, unitid, power_type)
-  if event == "UNIT_POWER_UPDATE" and not WATCH_POWER_TYPES[power_type] then return end
-  -- UNIT_POWER_FREQUENT is only registred for Evoker, so no need to check here
-  -- if event == "UNIT_POWER_FREQUENT" and not WATCH_POWER_TYPES[power_type] then return end
+  if (event == "UNIT_POWER_UPDATE" or event == "UNIT_POWER_FREQUENT") and not WATCH_POWER_TYPES[power_type] then return end
+  -- UNIT_POWER_FREQUENT is registered here only on "WoW Forever"; it also fires for Energy, so filter it too
 
   local widget_frame = WidgetFrame
   if widget_frame:IsShown() then
@@ -951,6 +953,8 @@ function Widget:PLAYER_TARGET_CHANGED()
 end
 
 Widget.PLAYER_SOFT_ENEMY_CHANGED = Widget.PLAYER_TARGET_CHANGED
+-- "WoW Forever": combo points moved to another target; the count did not change, so no power event fires
+Widget.COMBO_TARGET_CHANGED = Widget.PLAYER_TARGET_CHANGED
 
 function Widget:PLAYER_ENTERING_WORLD()
   -- From KuiNameplates: Update icons after zoning to workaround UnitPowerMax returning 0 when
@@ -1018,6 +1022,17 @@ function Widget:OnEnable()
     -- Using UNIT_POWER_FREQUENT seems to reduce some lags with essence updates that are 
     -- otherwise happening compared to Blizzard essences (Blizzard_ClassNameplateBar uses this also)
     self:SubscribeUnitEvent("UNIT_POWER_FREQUENT", "player", EventHandlerEvoker)
+  elseif Addon.IS_FOREVER then
+    -- Blizzard's own Forever combo point bar (TargetBoundComboPointBar) updates on UNIT_POWER_FREQUENT, and
+    -- listens to COMBO_TARGET_CHANGED for points that move to a new target
+    self:SubscribeUnitEvent("UNIT_POWER_FREQUENT", "player", EventHandler)
+    self:SubscribeUnitEvent("UNIT_DISPLAYPOWER", "player", EventHandler)
+    self:SubscribeEvent("COMBO_TARGET_CHANGED")
+
+    if PlayerClass == "DRUID" then
+      self:SubscribeEvent("UPDATE_SHAPESHIFT_FORM")
+      self.ShowInShapeshiftForm = (GetShapeshiftFormID() == 1)
+    end
   else
     self:SubscribeUnitEvent("UNIT_POWER_UPDATE", "player", EventHandler)
     self:SubscribeUnitEvent("UNIT_DISPLAYPOWER", "player", EventHandler)
@@ -1047,7 +1062,8 @@ function Widget:OnDisable()
   self:UnsubscribeEvent("UNIT_POWER_UPDATE")
   self:UnsubscribeEvent("UNIT_DISPLAYPOWER")
   self:UnsubscribeEvent("UNIT_POWER_POINT_CHARGE")
-  
+  self:UnsubscribeEvent("COMBO_TARGET_CHANGED")
+
   self:UnsubscribeEvent("UPDATE_SHAPESHIFT_FORM")
   self:UnsubscribeEvent("RUNE_POWER_UPDATE")
   self:UnsubscribeEvent("RUNE_TYPE_UPDATE")
