@@ -1,4 +1,9 @@
 ------------------------------------------------------
+13.3.7 (2026-11-07)
+------------------------------------------------------
+* Fixed a Lua error when enabling or disabling the interact icon for the target in the options.
+
+------------------------------------------------------
 13.3.6 (2026-11-06)
 ------------------------------------------------------
 * Fixed a bug where names on Blizzard's nameplates did not go back to Blizzard's font after disabling the custom font.
