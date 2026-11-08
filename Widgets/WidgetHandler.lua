@@ -352,10 +352,22 @@ function WidgetHandler:OnUnitAdded(tp_frame, unit)
     for _, widget in pairs(self.EnabledTargetWidgets) do
       widget:OnTargetUnitAdded(tp_frame, unit)
     end
+  else
+    -- A nameplate can be re-used for another unit (e.g., after a loading screen) while a target widget is still
+    -- attached to it from the previous unit. Target widgets only hide their frame in OnTargetUnitRemoved if it
+    -- is attached to this nameplate, so this is safe for all nameplates.
+    for _, widget in pairs(self.EnabledTargetWidgets) do
+      widget:OnTargetUnitRemoved(tp_frame, unit)
+    end
   end
 
-  if unit.IsFocus and self.EnabledFocusWidget then
-    self.EnabledFocusWidget:OnFocusUnitAdded(tp_frame, unit)
+  if self.EnabledFocusWidget then
+    if unit.IsFocus then
+      self.EnabledFocusWidget:OnFocusUnitAdded(tp_frame, unit)
+    else
+      -- Same as for target widgets: remove a focus highlight still attached from a previous unit
+      self.EnabledFocusWidget:OnFocusUnitRemoved(tp_frame, unit)
+    end
   end
 
   for widget_name, widget in pairs(self.EnabledWidgets) do
@@ -383,14 +395,14 @@ function WidgetHandler:OnUnitRemoved(tp_frame, unit)
   --    end
   --  end
 
-  if unit.IsSoftTarget then
-    for _, widget in pairs(self.EnabledTargetWidgets) do
-      widget:OnTargetUnitRemoved(tp_frame, unit)
-    end
+  -- Not only for (soft) targets: a target widget might still be attached to this nameplate from a previous unit.
+  -- Target widgets only hide their frame if it is attached to this nameplate.
+  for _, widget in pairs(self.EnabledTargetWidgets) do
+    widget:OnTargetUnitRemoved(tp_frame, unit)
   end
 
-  if unit.IsFocus and self.EnabledFocusWidget then
-    self.EnabledFocusWidget:OnFocusUnitRemoved()
+  if self.EnabledFocusWidget then
+    self.EnabledFocusWidget:OnFocusUnitRemoved(tp_frame, unit)
   end
 
   local plate_widgets = tp_frame.widgets

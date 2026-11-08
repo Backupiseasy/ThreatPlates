@@ -443,13 +443,20 @@ function Widget:OnTargetUnitAdded(tp_frame, unit)
   -- but also when initially initializing the unit or when there is a style update
   -- This function is only called when the current unit is also the current target
   -- After login/reload, SOFT_TARGET events are fired, but GetNamePlateForUnit may not yet return a nameplate
-  if unit.isTarget then    
+  -- A unit can be several (soft) targets at once (e.g., soft friend and soft interact target), so every
+  -- highlight frame must be updated, not only the first one. Otherwise, after a style change (e.g., from
+  -- healthbar view to headline view), the remaining frames keep the layout of the previous style. Frames
+  -- still attached to this nameplate are updated as well, PlayerTargetChanged re-attaches or hides them.
+  if unit.isTarget or TargetHighlightFrames.target:GetParent() == tp_frame then
     PlayerTargetChanged("target")
-  elseif unit.IsSoftInteractTarget then
+  end
+  if unit.IsSoftInteractTarget or TargetHighlightFrames.softinteract:GetParent() == tp_frame then
     PlayerTargetChanged("softinteract")
-  elseif unit.IsSoftEnemyTarget then        
+  end
+  if unit.IsSoftEnemyTarget or TargetHighlightFrames.softenemy:GetParent() == tp_frame then
     PlayerTargetChanged("softenemy")
-  elseif unit.IsSoftFriendTarget then    
+  end
+  if unit.IsSoftFriendTarget or TargetHighlightFrames.softfriend:GetParent() == tp_frame then
     PlayerTargetChanged("softfriend")
   end
 end
@@ -613,8 +620,12 @@ function FocusWidget:OnFocusUnitAdded(tp_frame, unit)
   end
 end
 
-function FocusWidget:OnFocusUnitRemoved()
-  HideWidgetFrame(FocusWidgetFrame)
+function FocusWidget:OnFocusUnitRemoved(tp_frame)
+  -- Without a nameplate (widget is disabled), always hide the frame. Otherwise, only hide it if it is attached
+  -- to this nameplate, as this is also called for nameplates that do not show the focus highlight.
+  if not tp_frame or FocusWidgetFrame:GetParent() == tp_frame then
+    HideWidgetFrame(FocusWidgetFrame)
+  end
 end
 
 function FocusWidget:UpdateLayout()
