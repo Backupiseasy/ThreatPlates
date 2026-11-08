@@ -181,7 +181,12 @@ function EventService.SubscribeUnitEvent(subscriber, event, unitid, func, regist
   if not subscribers_for_event then
     subscribers_for_event = {}
     event_handler_frame.Events[event] = subscribers_for_event
+  end
 
+  -- Register at WoW if there is no subscriber (anymore): Unsubscribe unregisters the event from the frame when
+  -- the last subscriber is removed, but keeps the (now empty) subscriber table. Without this check, the event
+  -- would never be registered again after a widget was disabled and enabled again (e.g., after a profile change).
+  if next(subscribers_for_event) == nil then
     Addon:RegisterUnitEvent(event_handler_frame, event, unitid, register_for_current_expansion)
   end
 
