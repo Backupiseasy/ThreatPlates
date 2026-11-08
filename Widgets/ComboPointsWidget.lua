@@ -295,12 +295,27 @@ else
   end
 end
 
+  -- The combo points widget can only be shown once and can only be shown on either the target or on the soft-enemy target unit.
+  -- So, the widget will be shown on
+  --   - on the current target (if attackable) or
+  --   - on the soft-enemy target (if attackable) and the current target cannot be attacked
+local function GetCurrentTargetUnitID()
+  -- UnitCanAttack is false if there is no target or softenemy target
+  return (UnitCanAttack("player", "target") and "target") or (UnitCanAttack("player", "softenemy") and "softenemy") or nil
+end
+
 -- WoD Patch 6.0.2 (2014-10-14): Combo Points for Feral Druids and Rogues are now shared across all targets, and are no longer lost when switching targets.
 if not Addon.ExpansionIsAtLeastWoD then
   -- This should not be necessary as in Classic only Rogues and Druids had combo points
   if PlayerClass == "ROGUE" or PlayerClass == "DRUID" then
+    -- Combo points are stored on a unit, so read them from the unit the widget is shown on. "anyenemy" is resolved
+    -- by the client and may be a different unit than the one the widget is shown on.
     UnitPower = function(unitToken , powerType)
-      return GetComboPoints("player", "anyenemy")
+      local target_unitid = GetCurrentTargetUnitID()
+      if target_unitid then
+        return GetComboPoints("player", target_unitid)
+      end
+      return 0
     end
   end
 end
@@ -814,15 +829,6 @@ local function HideWidgetFrame(widget_frame)
   widget_frame:SetParent(nil)
 end
 
-  -- The combo points widget can only be shown once and can only be shown on either the target or on the soft-enemy target unit. 
-  -- So, the widget will be shown on
-  --   - on the current target (if attackable) or
-  --   - on the soft-enemy target (if attackable) and the current target cannot be attacked
-local function GetCurrentTargetUnitID()
-  -- UnitCanAttack is false if there is no target or softenemy target
-  return (UnitCanAttack("player", "target") and "target") or (UnitCanAttack("player", "softenemy") and "softenemy") or nil
-end
-
 ---------------------------------------------------------------------------------------------------
 -- Event Handling
 ---------------------------------------------------------------------------------------------------
@@ -951,6 +957,8 @@ function Widget:PLAYER_TARGET_CHANGED()
 end
 
 Widget.PLAYER_SOFT_ENEMY_CHANGED = Widget.PLAYER_TARGET_CHANGED
+-- WoW Forever only: combo points moved to another unit with the same count, so no power event fires
+Widget.COMBO_TARGET_CHANGED = Widget.PLAYER_TARGET_CHANGED
 
 function Widget:PLAYER_ENTERING_WORLD()
   -- From KuiNameplates: Update icons after zoning to workaround UnitPowerMax returning 0 when
@@ -1022,6 +1030,8 @@ function Widget:OnEnable()
     self:SubscribeUnitEvent("UNIT_POWER_UPDATE", "player", EventHandler)
     self:SubscribeUnitEvent("UNIT_DISPLAYPOWER", "player", EventHandler)
     self:SubscribeUnitEvent("UNIT_POWER_POINT_CHARGE", "player", EventHandler)
+    -- Only registered on WoW Forever (see Compatibility.lua)
+    self:SubscribeEvent("COMBO_TARGET_CHANGED")
 
     if PlayerClass == "DRUID" then
       self:SubscribeEvent("UPDATE_SHAPESHIFT_FORM")
@@ -1047,7 +1057,8 @@ function Widget:OnDisable()
   self:UnsubscribeEvent("UNIT_POWER_UPDATE")
   self:UnsubscribeEvent("UNIT_DISPLAYPOWER")
   self:UnsubscribeEvent("UNIT_POWER_POINT_CHARGE")
-  
+  self:UnsubscribeEvent("COMBO_TARGET_CHANGED")
+
   self:UnsubscribeEvent("UPDATE_SHAPESHIFT_FORM")
   self:UnsubscribeEvent("RUNE_POWER_UPDATE")
   self:UnsubscribeEvent("RUNE_TYPE_UPDATE")
