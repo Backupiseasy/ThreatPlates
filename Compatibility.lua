@@ -27,6 +27,7 @@ local WOW_EVENTS = {
   BN_CONNECTED = true,
   BN_FRIEND_ACCOUNT_OFFLINE = true,
   BN_FRIEND_ACCOUNT_ONLINE = true,
+  COMBO_TARGET_CHANGED = Addon.IS_FOREVER, -- Only on "WoW Forever": combo points moved to another target with the same count
   COMBAT_LOG_EVENT_UNFILTERED = not Addon.HAS_MIDNIGHT_API, -- Removed in Midnight; also ADDON_ACTION_FORBIDDEN on other clients with Midnight's API surface
   CVAR_UPDATE = true,
   FRIENDLIST_UPDATE = true,
