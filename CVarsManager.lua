@@ -124,20 +124,31 @@ local MONITORED_CVARS = {
   nameplateSelectedAlpha = true,
 }
 
-local function UpdateTransparencySettings()
-  Addon.Transparency.UpdateSettings()
+-- Settings derived from CVars that are cached (e.g., read in UpdateSettings) must be read again whenever one of these
+-- CVars changes, but also once WoW has loaded the saved CVar values: after a client start, CVars still have their
+-- default values at ADDON_LOADED (verified in-game), when Threat Plates reads its settings for the first time. The
+-- saved values are only available with VARIABLES_LOADED. Otherwise, the cached settings are wrong until they are
+-- read again, e.g., when opening the options dialog [GH-780].
+-- Every file that caches a CVar value must therefore register a handler with CVars:RegisterCVarChangedHandler.
+-- Unlike MONITORED_CVARS (SetCVarHook, which only sees changes made via C_CVar.SetCVar/ConsoleExec), CVAR_UPDATE
+-- covers every change of the CVar.
+local CVarChangedHandlers = {}
+
+-- handler is called without arguments after VARIABLES_LOADED (once, even if registered for several CVars) and with
+-- (cvar_name, value) after CVAR_UPDATE for one of the cvars
+function CVars:RegisterCVarChangedHandler(cvars, handler)
+  for _, cvar in ipairs(cvars) do
+    local handlers = CVarChangedHandlers[cvar] or {}
+    handlers[#handlers + 1] = handler
+    CVarChangedHandlers[cvar] = handlers
+  end
 end
 
--- Reactions to CVar changes via the CVAR_UPDATE event (CVarUpdateHook below). Unlike MONITORED_CVARS (SetCVarHook,
--- which only sees changes made via C_CVar.SetCVar/ConsoleExec), it covers every change of the CVar.
-local CVAR_UPDATE_HANDLERS = {
-  -- Occlusion detection caches the result of checking these CVars (Transparency.lua)
-  nameplateMinAlpha = UpdateTransparencySettings,
-  nameplateMaxAlpha = UpdateTransparencySettings,
-  nameplateOccludedAlphaMult = UpdateTransparencySettings,
-  nameplateSelectedAlpha = UpdateTransparencySettings,
-  nameplateNotSelectedAlpha = UpdateTransparencySettings,
-}
+-- Occlusion detection caches the result of checking these CVars (Transparency.lua)
+CVars:RegisterCVarChangedHandler(
+  { "nameplateMinAlpha", "nameplateMaxAlpha", "nameplateOccludedAlphaMult", "nameplateSelectedAlpha", "nameplateNotSelectedAlpha" },
+  function() Addon.Transparency.UpdateSettings() end
+)
 
 local function SetConsoleVariable(cvar, value)
   -- Store in settings to be able to restore it later, but don't overwrite an existing value unless the current value
@@ -311,15 +322,31 @@ local function SetCVarHook(name, value, c)
 end
 
 local function CVarUpdateHook(cvar_name, value)
-  local handler = CVAR_UPDATE_HANDLERS[cvar_name]
-  if handler then handler(value) end
+  local handlers = CVarChangedHandlers[cvar_name]
+  if handlers then
+    for i = 1, #handlers do
+      handlers[i](cvar_name, value)
+    end
+  end
+end
+
+-- Re-read all settings derived from CVars once the saved CVar values are loaded (see CVarChangedHandlers)
+local function VariablesLoadedHook()
+  local handlers_called = {}
+  for _, handlers in pairs(CVarChangedHandlers) do
+    for i = 1, #handlers do
+      local handler = handlers[i]
+      if not handlers_called[handler] then
+        handlers_called[handler] = true
+        handler()
+      end
+    end
+  end
 end
 
 function CVars.RegisterCVarHook()
   Addon.EventService.Subscribe(CVars, "CVAR_UPDATE", CVarUpdateHook)
-  -- After a client start, CVars still have their default values at ADDON_LOADED (verified in-game), so settings
-  -- derived from them in OnInitialize must be read again once the saved values are loaded
-  Addon.EventService.Subscribe(CVars, "VARIABLES_LOADED", UpdateTransparencySettings)
+  Addon.EventService.Subscribe(CVars, "VARIABLES_LOADED", VariablesLoadedHook)
 
   -- Tracking of CVars based on code from AdvancedInterfaceOptions
   --hooksecurefunc("SetCVar", SetCVarHook) -- /script SetCVar(cvar, value)

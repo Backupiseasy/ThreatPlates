@@ -34,6 +34,13 @@ local _G =_G
 
 local LineNoOfNPCRole
 
+-- With colorblind mode, the tooltip has an additional line before the NPC role
+local function UpdateLineNoOfNPCRole()
+  LineNoOfNPCRole = (Addon.CVars:GetAsBool("colorblindMode") and 3) or 2
+end
+
+Addon.CVars:RegisterCVarChangedHandler({ "colorblindMode" }, UpdateLineNoOfNPCRole)
+
 local COLOR_ROLE = RGB(255, 255, 255, .7)
 local COLOR_GUILD = RGB(178, 178, 229, .7)
 
@@ -503,7 +510,7 @@ function Element.UpdateSettings()
   end
   ShowHealth = Settings.amount or Settings.percent
 
-  LineNoOfNPCRole = (Addon.CVars:GetAsBool("colorblindMode") and 3) or 2
+  UpdateLineNoOfNPCRole()
 
   StatusTextFunc["HealthbarMode"]["FRIENDLY"] = STATUS_TEXT_REFERENCE[SettingsStatusText.HealthbarMode.FriendlySubtext]
   StatusTextFunc["HealthbarMode"]["HOSTILE"] = STATUS_TEXT_REFERENCE[SettingsStatusText.HealthbarMode.EnemySubtext]

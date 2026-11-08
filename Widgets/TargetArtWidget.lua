@@ -321,6 +321,16 @@ function Widget:PLAYER_SOFT_INTERACT_CHANGED(oldTarget, newTarget)
   PlayerTargetChanged("softinteract")
 end
 
+-- The soft target icon CVars are cached in UpdateSettings
+CVars:RegisterCVarChangedHandler(
+  { "SoftTargetIconEnemy", "SoftTargetIconFriend", "SoftTargetIconInteract", "SoftTargetIconGameObject" },
+  function()
+    if Widget:IsEnabled() then
+      Addon.Widgets:UpdateSettings(Widget.Name)
+    end
+  end
+)
+
 ---------------------------------------------------------------------------------------------------
 -- Widget functions for creation and update
 ---------------------------------------------------------------------------------------------------

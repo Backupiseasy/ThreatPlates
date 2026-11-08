@@ -280,6 +280,23 @@ per button (measured in-game 2026-10); a border color change still costs 200-300
 picker fires continuously while dragging. Not a relevant cost: the per-nameplate update at the end of
 `Widget:UpdateSettings` (`UpdateAllFrames`), about 5 ms for 40 nameplates.
 
+### CVars (`CVarsManager.lua`)
+
+- **Cached CVar values must be registered with `CVars:RegisterCVarChangedHandler(cvars, handler)`**: after a client
+  start, CVars still have their default values at `ADDON_LOADED` (verified in-game), but `OnInitialize` already
+  reads all settings there (`Addon:ReloadTheme()`). The saved values are only available with `VARIABLES_LOADED`.
+  A value read once in `UpdateSettings` and stored in a file-local variable therefore stays wrong until the
+  settings are read again - typically when the options dialog is opened for the first time (`CreateOptionsTable` →
+  `CreateCustomNameplatesGroup` → `UpdateSpecial` → `InitializeAllWidgets` + `ForceUpdate`), so the symptom is
+  "X is wrong after login/reload and correct after opening `/tptp`". The handler is called once after
+  `VARIABLES_LOADED` and after `CVAR_UPDATE` for one of the registered CVars, so it also covers changes made via
+  Blizzard's settings or other addons. Register at file load time (as `Modules/Transparency.lua`'s occlusion CVars
+  in `CVarsManager.lua`, `Widgets/TargetArtWidget.lua` and `Elements/StatusText.lua` do); do not subscribe to
+  `VARIABLES_LOADED`/`CVAR_UPDATE` per file. Historical bugs: occlusion transparency [GH-780], interact icon shown
+  although `SoftTargetIconInteract` was off, NPC role read from the wrong tooltip line with `colorblindMode` (all
+  fixed 13.3.6/13.3.8). Not needed for values that are read live on every use (e.g. `Addon.GetUnitVisibility`,
+  option getters).
+
 ### Database / profiles (`Database.lua`, `Addon.lua`)
 
 AceDB-3.0 based: `Addon.db.profile` (per-character: frame/healthbar/castbar/color/nameplate/totemSettings/custom

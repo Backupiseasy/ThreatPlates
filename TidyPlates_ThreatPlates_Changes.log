@@ -1,4 +1,9 @@
 ------------------------------------------------------
+13.3.8 (2026-11-08)
+------------------------------------------------------
+* Fixed a bug where some settings based on WoW's settings were wrong after login until the options dialog was opened, e.g., the interact icon was shown although it was disabled, caused by CVars not yet being loaded.
+
+------------------------------------------------------
 13.3.7 (2026-11-08)
 ------------------------------------------------------
 * Fixed a Lua error when enabling or disabling the interact icon for the target in the options.
