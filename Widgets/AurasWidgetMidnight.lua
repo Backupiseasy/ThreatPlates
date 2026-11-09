@@ -62,8 +62,8 @@ local EnabledForStyle = {}
 --   with). Buffs (both reactions) additionally supports MaxDuration as an AND-restriction on top of
 --   whichever OR-condition(s) are active - filters out permanent/long-duration passive buffs (flasks,
 --   food, Well Fed, ...); not offered on Debuffs, where a duration cap is rarely useful. CrowdControl
---   (either reaction) is still single-condition
---   only (All vs. Dispellable, a plain "elseif") - not converted to the multi-group pattern.
+--   is still single-condition only - not converted to the multi-group pattern: All vs. Dispellable
+--   (a plain "elseif") on friendly units, always all crowd control auras on enemy units.
 -- - A crowd-control-classified aura is strictly exclusive to the CrowdControl grid (filtered out of
 --   Debuffs via "!CROWD_CONTROL"); the old per-aura fallback (show as a normal debuff if the
 --   CC-specific filter rejects it) is not replicated.
@@ -905,12 +905,16 @@ local function GetFriendlyDebuffsGroupConfigs(db)
   return BuildGroupConfigsFromConditions(conditions, { "HARMFUL", "!CROWD_CONTROL", NAMEPLATE_ONLY }, dispel_types, has_dispel_type)
 end
 
+-- Blizzard's CROWD_CONTROL filter is the only crowd control classification available here, so the
+-- classic widget's "All" (its own spell list) and "Blizzard" settings both map to it. Enemy units
+-- have no narrower option, so only ShowEnemy matters for them: neither ShowAllEnemy nor
+-- ShowBlizzardForEnemy is read, as a combination copied from a classic profile could otherwise hide
+-- all crowd control auras without an option to change it. Debuffs always exclude CROWD_CONTROL, so
+-- returning nil here hides these auras everywhere (e.g., Mind Soothe) [GH-769].
 local function GetCrowdControlFilterString(db, is_friendly)
-  if db.ShowAllFriendly or db.ShowAllEnemy then
+  if not is_friendly or db.ShowAllFriendly or db.ShowBlizzardForFriendly then
     return "HARMFUL|CROWD_CONTROL|" .. NAMEPLATE_ONLY
-  elseif is_friendly and db.ShowDispellable then
-    -- ShowDispellable only has a Friendly Options entry (Enemy Midnight panel exposes no such
-    -- toggle) - gate on is_friendly to keep it from also gating on a Boolean the enemy UI can't set.
+  elseif db.ShowDispellable then
     return "HARMFUL|CROWD_CONTROL|DISPELLABLE|" .. NAMEPLATE_ONLY
   end
 

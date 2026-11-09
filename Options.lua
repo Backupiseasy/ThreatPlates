@@ -5801,14 +5801,24 @@ local function CreateAurasWidgetOptions()
                     order = 20,
                     type = "toggle",
                     desc = L["Show all crowd control auras on friendly units."],
-                    set = function(info, val)
-                      local db = db.AuraWidget.CrowdControl
-                      if db.ShowDispellable then
-                        db.ShowDispellable = false
-                        SetValue(info, val)
-                      end
+                    -- Blizzard's crowd control filter covers both "All" and "Blizzard" of the classic widget,
+                    -- so either one (e.g., from a profile copied from Classic) enables it here.
+                    -- "All" and "Dispellable" work like radio buttons: as on Classic, one of them is always
+                    -- selected (hiding all crowd control auras is done with "Show Crowd Control"), so that
+                    -- the settings stay valid for the classic widget.
+                    get = function()
+                      local cc_db = db.AuraWidget.CrowdControl
+                      return cc_db.ShowAllFriendly or cc_db.ShowBlizzardForFriendly
                     end,
-                    arg = { "AuraWidget", "CrowdControl", "ShowAllFriendly" },
+                    set = function(info, val)
+                      local cc_db = db.AuraWidget.CrowdControl
+                      cc_db.ShowAllFriendly = false
+                      if not val then
+                        cc_db.ShowDispellable = true
+                      end
+                      SetValue(info, val)
+                    end,
+                    arg = { "AuraWidget", "CrowdControl", "ShowBlizzardForFriendly" },
                     disabled = function() return not db.AuraWidget.CrowdControl.ShowFriendly end
                   },
                   Dispellable = {
@@ -5816,9 +5826,15 @@ local function CreateAurasWidgetOptions()
                     order = 40,
                     type = "toggle",
                     desc = L["Show crowd control auras that you can dispell."],
+                    -- Only shown as selected if it is in effect, i.e., if "All" is not selected.
+                    get = function()
+                      local cc_db = db.AuraWidget.CrowdControl
+                      return cc_db.ShowDispellable and not (cc_db.ShowAllFriendly or cc_db.ShowBlizzardForFriendly)
+                    end,
                     set = function(info, val)
-                      local db = db.AuraWidget.CrowdControl
-                      db.ShowAllFriendly = not (val)
+                      local cc_db = db.AuraWidget.CrowdControl
+                      cc_db.ShowAllFriendly = false
+                      cc_db.ShowBlizzardForFriendly = not val
                       SetValue(info, val)
                     end,
                     arg = { "AuraWidget", "CrowdControl", "ShowDispellable" },
@@ -5886,17 +5902,6 @@ local function CreateAurasWidgetOptions()
                     desc = L["Enable or disable showing crowd control auras on enemy units altogether."],
                     arg = { "AuraWidget", "CrowdControl", "ShowEnemy" }
                   },
-                  ShowAll = {
-                    name = L["All"],
-                    order = 20,
-                    type = "toggle",
-                    desc = L["Show all crowd control auras on enemy units."],
-                    set = function(info, val)
-                      SetValue(info, val)
-                    end,
-                    arg = { "AuraWidget", "CrowdControl", "ShowAllEnemy" },
-                    disabled = function() return not db.AuraWidget.CrowdControl.ShowEnemy end,
-                  }
                 },
               },              
               SpellFilter = {
