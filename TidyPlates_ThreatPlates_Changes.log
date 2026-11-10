@@ -1,4 +1,9 @@
 ------------------------------------------------------
+13.3.9 (2026-11-10)
+------------------------------------------------------
+* Removed the chat message that auras can only be shown after combat has ended, as it was shown too often.
+
+------------------------------------------------------
 13.3.8 (2026-11-09)
 ------------------------------------------------------
 * Fixed a bug where some settings based on WoW's settings were wrong after login until the options dialog was opened, e.g., the interact icon was shown although it was disabled, caused by CVars not yet being loaded.

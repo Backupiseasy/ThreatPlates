@@ -1,4 +1,3 @@
 # @project-version@ (@build-time@)
 
-* Fixed a bug where some settings based on WoW's settings were wrong after login until the options dialog was opened, e.g., the interact icon was shown although it was disabled, caused by CVars not yet being loaded.
-* Fixed a bug where crowd control auras (e.g., Mind Soothe) were not shown on nameplates on Retail and WoW Forever, caused by the crowd control settings being applied incorrectly [GH-769].
+* Removed the chat message that auras can only be shown after combat has ended, as it was shown too often.

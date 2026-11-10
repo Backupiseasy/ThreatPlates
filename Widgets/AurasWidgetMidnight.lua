@@ -18,7 +18,6 @@ local Widget = Addon.Widgets:NewWidget("Auras")
 local min = min
 
 -- ThreatPlates APIs
-local L = Addon.L
 local FontUpdateText = Addon.Font.UpdateText
 local AuraTriggerInitialize, AuraTriggerUpdateStyle = Addon.Style.AuraTriggerInitialize, Addon.Style.AuraTriggerUpdateStyle
 local MODE_FOR_STYLE, AnchorFrameTo = Addon.MODE_FOR_STYLE, Addon.AnchorFrameTo
@@ -687,8 +686,6 @@ end
 -- creates the frames of existing plates before Widget:OnEnable, e.g., when a profile change enables
 -- the widget at runtime) and Widget:OnEnable, retried from Widget:PLAYER_REGEN_ENABLED/DISABLED in case
 -- the widget was first enabled mid-combat. Returns true if pools were created by this call.
-local AuraContainerCombatInfoShown = false
-
 local function PreallocateAuraContainers()
   if not HasAuraContainers then return false end
 
@@ -697,10 +694,9 @@ local function PreallocateAuraContainers()
     local pool = AuraContainerPool[aura_type]
     if #pool == 0 then
       if _G.InCombatLockdown() then
-        if not AuraContainerCombatInfoShown then
-          AuraContainerCombatInfoShown = true
-          Addon.Logging.Info(L["Auras can only be shown on nameplates after combat has ended, as the aura display could not be created during combat."])
-        end
+        -- An info message ("Auras can only be shown on nameplates after combat has ended, ...") was
+        -- printed to the chat here, so that users knew why no auras were shown until combat ended.
+        -- Removed, as users complained about it spamming the chat.
         return false
       end
 
