@@ -1938,6 +1938,8 @@ local function CreateRaidMarksOptions()
             order = 4,
             type = "toggle",
             width = "double",
+            -- Target markers are secret on clients with Midnight's API, so coloring by them is disabled in Modules/Color.lua
+            hidden = Addon.HAS_MIDNIGHT_API,
             arg = { "Healthbar", "UseRaidMarkColoring" },
           },
           EnableHeadlineView = {
@@ -1945,6 +1947,7 @@ local function CreateRaidMarksOptions()
             order = 5,
             type = "toggle",
             width = "double",
+            hidden = Addon.HAS_MIDNIGHT_API,
             arg = { "Name", "NameMode", "UseRaidMarkColoring" },
           },
         },
@@ -7483,6 +7486,7 @@ local function CreateHealthbarOptions()
                 order = 40,
                 type = "toggle",
                 width = "full",
+                hidden = Addon.HAS_MIDNIGHT_API,
                 arg = { "Healthbar", "UseRaidMarkColoring" },
               },
             },
@@ -8226,6 +8230,7 @@ local function CreateNameOptions()
                 type = "toggle",
                 width = "full",
                 descStyle = "inline",
+                hidden = Addon.HAS_MIDNIGHT_API,
                 arg = { "Name", "HealthbarMode", "UseRaidMarkColoring" },
               },
             },
@@ -8294,6 +8299,7 @@ local function CreateNameOptions()
                 type = "toggle",
                 width = "full",
                 descStyle = "inline",
+                hidden = Addon.HAS_MIDNIGHT_API,
                 arg = { "Name", "NameMode", "UseRaidMarkColoring" },
               },
             },
@@ -9230,6 +9236,7 @@ CreateCustomNameplateEntry = function(index)
                 type = "toggle",
                 width = "double",
                 desc = L["Additionally color the nameplate's healthbar or name based on the target mark if the unit is marked."],
+                hidden = Addon.HAS_MIDNIGHT_API,
                 disabled = function()
                   return not db.uniqueSettings[index].useColor
                 end,
