@@ -10158,7 +10158,8 @@ local function CreateOptionsTable()
                   inline = true,
                   args = {
                     ModeCNA = {
-                      name = L["On Enemy Units You Cannot Attack"],
+                      name = L["On Enemy and Neutral Units You Cannot Attack"],
+                      desc = L["Shows enemy and neutral units that you cannot attack (e.g., neutral townsfolk) in headline view, regardless of their unit type settings."],
                       order = 3,
                       type = "toggle",
                       width = "double",
