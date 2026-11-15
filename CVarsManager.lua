@@ -286,7 +286,8 @@ function CVars:ResetToDefaults()
 end
 
 local function SetCVarHook(name, value, c)
-  if not MONITORED_CVARS[name] then return end
+  -- See CVarUpdateHook: CVar changes by other addons during logout must be ignored, as settings are no longer available
+  if Addon.IsShuttingDown or not MONITORED_CVARS[name] then return end
 
   -- Re-assert Threat Plates' own nameplate size/hit-test for all active plates; otherwise Blizzard's
   -- resize leaves already-active plates with a stale clickable area until the next reload.
@@ -322,6 +323,11 @@ local function SetCVarHook(name, value, c)
 end
 
 local function CVarUpdateHook(cvar_name, value)
+  -- Other addons can change CVars in their PLAYER_LOGOUT handler (CVAR_UPDATE fires synchronously inside SetCVar).
+  -- At that point, AceDB has already stripped the defaults from the profile (OnDatabaseShutdown), so handlers that
+  -- read settings (e.g., Addon.db.profile.targetWidget) would fail with a Lua error.
+  if Addon.IsShuttingDown then return end
+
   local handlers = CVarChangedHandlers[cvar_name]
   if handlers then
     for i = 1, #handlers do
