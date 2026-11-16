@@ -28,6 +28,7 @@ local GetQuestObjectives, GetQuestInfo = C_QuestLog.GetQuestObjectives, C_QuestL
 local RequestLoadQuestByID = C_QuestLog.RequestLoadQuestByID
 local GetLogIndexForQuestID = C_QuestLog and C_QuestLog.GetLogIndexForQuestID or GetQuestLogIndexByID
 local GetNumQuestLogEntries = C_QuestLog and C_QuestLog.GetNumQuestLogEntries or GetNumQuestLogEntries
+local UnitIsRelatedToActiveQuest = C_QuestLog and C_QuestLog.UnitIsRelatedToActiveQuest
 local C_TooltipInfo_GetUnit = C_TooltipInfo and C_TooltipInfo.GetUnit -- Added in 10.0.2
 
 -- ThreatPlates APIs
@@ -222,6 +223,16 @@ local function ParseObjectiveFromTooltipLine(quest_title, text)
   -- returns nil if nothing was found or only completed quests were found
 end
 
+-- Only true for open objectives of the player's own quests (false for completed objectives and units without quest)
+local function IsUnitRelatedToActiveQuest(unitid)
+  if not UnitIsRelatedToActiveQuest then return false end
+
+  local is_related = UnitIsRelatedToActiveQuest(unitid)
+  if IsSecretValueTP(is_related) then return false end
+
+  return is_related == true
+end
+
 local function IsQuestUnit(unit)
   -- Tooltip data can be nil here as it seems - there was a bug with this when a player left a battleground
   local tooltip_data = unit.unitid and C_TooltipInfo_GetUnit(unit.unitid)
@@ -232,11 +243,16 @@ local function IsQuestUnit(unit)
 
   for i = 3, #tooltip_data.lines do
     local line = tooltip_data.lines[i]
+    local text = line.leftText
 
     -- At list in Mists, tooltips are not guaranteed to have 5 lines min.
-    if IsSecretValueTP(line.leftText) or not line.leftText then break end
+    if not text then break end
 
-    local text = line.leftText
+    -- In restricted contexts (e.g., instances), all tooltip texts are secret. Fall back to the quest log, which
+    -- only tells if the unit is a quest unit for the player, but not the progress
+    if IsSecretValueTP(text) then
+      return IsUnitRelatedToActiveQuest(unit.unitid), 1
+    end
 
     -- Addon.C_TooltipInfo_GetUnit_Quest returns real C_TooltipInfo.GetUnit() line data (with .type) on
     -- Midnight and on clients with Midnight's API surface (Addon.HAS_MIDNIGHT_API) - the .leftColor-based
@@ -893,8 +909,12 @@ local function DebugQuestDetection(unitid)
   for i = 3, #tooltip_data.lines do
     local line = tooltip_data.lines[i]
 
-    if IsSecretValueTP(line.leftText) or not line.leftText then
-      Addon.Logging.Debug(i .. ": " .. (line.leftText and "<secret>" or "<no text>") .. " => STOP (not shown)")
+    if not line.leftText then
+      Addon.Logging.Debug(i .. ": <no text> => STOP (not shown)")
+      return
+    elseif IsSecretValueTP(line.leftText) then
+      Addon.Logging.Debug(i .. ": <secret> => fallback to quest log: shown = " ..
+        tostring(IsUnitRelatedToActiveQuest(unitid)) .. " (without progress)")
       return
     end
 
@@ -1016,6 +1036,9 @@ local function DebugPrintQuestUnit(unitid)
   Addon.Logging.Debug("Result IsQuestUnit: show = " .. tostring(show) .. ", quest type = " .. tostring(quest_type) ..
     (quest_objective and (", progress = " .. tostring(quest_objective.numFulfilled) .. "/" .. tostring(quest_objective.numRequired) ..
       " [" .. tostring(quest_objective.type) .. "]") or ""))
+  -- Fallback for restricted contexts (e.g., instances), where all tooltip texts are secret
+  local is_related = UnitIsRelatedToActiveQuest and UnitIsRelatedToActiveQuest(unitid)
+  Addon.Logging.Debug("C_QuestLog.UnitIsRelatedToActiveQuest = " .. DebugValue(is_related))
   Addon.Logging.Debug("ShowQuestUnit (combat/instance) = " .. tostring(ShowQuestUnit(unit)) ..
     ", quest color for healthbar = " .. tostring(Addon.ShowQuestUnit(unit)))
 
