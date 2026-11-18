@@ -20,18 +20,20 @@ local string_match = string.match
 -- WoW APIs
 local InCombatLockdown = InCombatLockdown
 local UnitName, UnitExists = UnitName, UnitExists
+local GetLocale = GetLocale
+local GetCVarValue = C_CVar and C_CVar.GetCVar or GetCVar
 local IsInRaid, IsInGroup, GetNumGroupMembers, GetNumSubgroupMembers = IsInRaid, IsInGroup, GetNumGroupMembers, GetNumSubgroupMembers
-local wipe = wipe
 
 local GetQuestObjectives, GetQuestInfo = C_QuestLog.GetQuestObjectives, C_QuestLog.GetInfo
 local RequestLoadQuestByID = C_QuestLog.RequestLoadQuestByID
 local GetLogIndexForQuestID = C_QuestLog and C_QuestLog.GetLogIndexForQuestID or GetQuestLogIndexByID
 local GetNumQuestLogEntries = C_QuestLog and C_QuestLog.GetNumQuestLogEntries or GetNumQuestLogEntries
+local UnitIsRelatedToActiveQuest = C_QuestLog and C_QuestLog.UnitIsRelatedToActiveQuest
 local C_TooltipInfo_GetUnit = C_TooltipInfo and C_TooltipInfo.GetUnit -- Added in 10.0.2
 
 -- ThreatPlates APIs
 local PlayerName = Addon.PlayerName
--- Quest tooltip lines only contain UnitName's first return; on WoW Forever, Addon.PlayerName also has the surname appended
+-- On WoW Forever, Addon.PlayerName has the surname appended; quest tooltips may show either form, so both are checked
 local PlayerFirstName = UnitName("player")
 local RGB_P = Addon.RGB_P
 local UnitDetailedThreatSituationWrapper = Addon.UnitDetailedThreatSituationWrapper
@@ -62,9 +64,12 @@ local QuestByTitle, QuestByID, QuestsToUpdate = {}, {}, {}
 local QuestUnitsToUpdate = {}
 local GroupMembers = {}
 
+-- Legacy tooltip scanner (only on clients without C_TooltipInfo), also used by the debug output
+local ScannerName, TooltipScanner
+
 if Addon.ExpansionIsBetween(LE_EXPANSION_MISTS_OF_PANDARIA, LE_EXPANSION_DRAGONFLIGHT) then
-  local ScannerName = "ThreatPlates_Tooltip_Subtext"
-  local TooltipScanner = CreateFrame( "GameTooltip", ScannerName , nil, "GameTooltipTemplate" ) -- Tooltip name cannot be nil
+  ScannerName = "ThreatPlates_Tooltip_Subtext"
+  TooltipScanner = CreateFrame( "GameTooltip", ScannerName , nil, "GameTooltipTemplate" ) -- Tooltip name cannot be nil
   TooltipScanner:SetOwner( WorldFrame, "ANCHOR_NONE" )
 
   local TooltipScannerData = {
@@ -218,6 +223,16 @@ local function ParseObjectiveFromTooltipLine(quest_title, text)
   -- returns nil if nothing was found or only completed quests were found
 end
 
+-- Only true for open objectives of the player's own quests (false for completed objectives and units without quest)
+local function IsUnitRelatedToActiveQuest(unitid)
+  if not UnitIsRelatedToActiveQuest then return false end
+
+  local is_related = UnitIsRelatedToActiveQuest(unitid)
+  if IsSecretValueTP(is_related) then return false end
+
+  return is_related == true
+end
+
 local function IsQuestUnit(unit)
   -- Tooltip data can be nil here as it seems - there was a bug with this when a player left a battleground
   local tooltip_data = unit.unitid and C_TooltipInfo_GetUnit(unit.unitid)
@@ -228,11 +243,16 @@ local function IsQuestUnit(unit)
 
   for i = 3, #tooltip_data.lines do
     local line = tooltip_data.lines[i]
+    local text = line.leftText
 
     -- At list in Mists, tooltips are not guaranteed to have 5 lines min.
-    if IsSecretValueTP(line.leftText) or not line.leftText then break end
+    if not text then break end
 
-    local text = line.leftText
+    -- In restricted contexts (e.g., instances), all tooltip texts are secret. Fall back to the quest log, which
+    -- only tells if the unit is a quest unit for the player, but not the progress
+    if IsSecretValueTP(text) then
+      return IsUnitRelatedToActiveQuest(unit.unitid), 1
+    end
 
     -- Addon.C_TooltipInfo_GetUnit_Quest returns real C_TooltipInfo.GetUnit() line data (with .type) on
     -- Midnight and on clients with Midnight's API surface (Addon.HAS_MIDNIGHT_API) - the .leftColor-based
@@ -240,7 +260,7 @@ local function IsQuestUnit(unit)
     if Addon.HAS_MIDNIGHT_API then
       if line.type == Enum.TooltipDataLineType.QuestPlayer then
         -- Skip the objectives of other group members
-        quest_progress_player = (text == PlayerFirstName) or not GroupMembers[text]
+        quest_progress_player = (text == PlayerFirstName) or (text == PlayerName) or not GroupMembers[text]
       elseif line.type == Enum.TooltipDataLineType.QuestTitle then
         quest_progress_player = true
         quest_title = text
@@ -563,18 +583,24 @@ function Widget:GROUP_ROSTER_UPDATE()
 --  local is_in_raid = IsInRaid()
 --  local is_in_group = is_in_raid or IsInGroup()
 
-  wipe(GroupMembers)
+  GroupMembers = {}
 
   if group_size > 0 then
     local group_type = (IsInRaid() and "raid") or IsInGroup() and "party" or "solo"
 
     for i = 1, group_size do
-      --local unit_name = UnitName(group_type .. i)
-      if UnitExists(group_type .. i) then
-        --print("Adding member:", UnitName(group_type .. i))
-        local unit_name = UnitName(group_type .. i)
+      local unitid = group_type .. i
+      if UnitExists(unitid) then
+        local unit_name = UnitName(unitid)
         if unit_name and not IsSecretValueTP(unit_name) then
           GroupMembers[unit_name] = true
+        end
+        -- On WoW Forever, quest tooltips show group members with their surname ("First Last")
+        if Addon.WOW_FEATURE_REGIONAL_SURNAMES then
+          local full_name = Addon.GetUnitNameWithSurname(unitid, true)
+          if full_name and not IsSecretValueTP(full_name) then
+            GroupMembers[full_name] = true
+          end
         end
       end
     end
@@ -594,7 +620,7 @@ function Widget:GROUP_ROSTER_UPDATE()
 end
 
 function Widget:GROUP_LEFT()
-  wipe(GroupMembers)
+  GroupMembers = {}
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -666,19 +692,15 @@ function Widget:OnEnable()
   -- Also use ThreatUpdate Threatas new mobs may enter the combat mid-fight (PLAYER_REGEN_DISABLED already triggered)
   self:SubscribeEvent("ThreatUpdate")
 
-  if not Addon.HAS_MIDNIGHT_API then
-    -- To handle objectives correctly when quest objectives of group memebers are shown in the tooltip, we need to keep a
-    -- list of all players in the group
-    self:SubscribeEvent("GROUP_ROSTER_UPDATE")
-    self:SubscribeEvent("GROUP_LEFT")
-  end
+  -- To handle objectives correctly when quest objectives of group members are shown in the tooltip, we need to keep a
+  -- list of all players in the group (also with Midnight's API: QuestPlayer lines are shown for group members, too)
+  self:SubscribeEvent("GROUP_ROSTER_UPDATE")
+  self:SubscribeEvent("GROUP_LEFT")
 
   Addon.CVars:Overwrite("showQuestTrackingTooltips", 1)
 
   InCombat = InCombatLockdown()
-  if not Addon.HAS_MIDNIGHT_API then
-    self:GROUP_ROSTER_UPDATE()
-  end
+  self:GROUP_ROSTER_UPDATE()
 end
 
 -- function Widget:OnDisable()
@@ -782,6 +804,40 @@ local function tablelength(T)
   return count
 end
 
+
+-- Secret values are printed as placeholder, as they would turn the whole chat line into "???"
+local function DebugValue(value)
+  if IsSecretValueTP(value) then
+    return "<secret>"
+  end
+  return tostring(value)
+end
+
+local function DebugColor(color)
+  if not color then return "-" end
+  -- In restricted contexts (e.g., instances), the color table itself can be secret
+  if IsSecretValueTP(color) then return "<secret>" end
+
+  local r, g, b = color.r, color.g, color.b
+  if IsSecretValueTP(r) or IsSecretValueTP(g) or IsSecretValueTP(b) then
+    return "<secret>"
+  elseif not r or not g or not b then
+    return "-"
+  end
+  return ("%.2f %.2f %.2f"):format(r, g, b)
+end
+
+local function GetLineTypeName(line_type)
+  if line_type == nil then return "-" end
+  if IsSecretValueTP(line_type) then return "<secret>" end
+
+  for name, value in pairs(Enum.TooltipDataLineType) do
+    if value == line_type then return name end
+  end
+  return tostring(line_type)
+end
+
+-- Same as ParseObjectiveFromTooltipLine, but logs every step
 local function ParseObjectiveFromTooltipLineDebug(quest_title, text)
   local objective_name, current, goal
   local objective_type = false
@@ -794,38 +850,214 @@ local function ParseObjectiveFromTooltipLineDebug(quest_title, text)
     objective_name, current, goal = QuestObjectiveParser(text)
   end
 
-  if objective_name then
-    current = tonumber(current)
+  Addon.Logging.Debug("      parsed (" .. RegexpAlignment .. "): name = '" .. tostring(objective_name) .. "', current = " ..
+    tostring(current) .. ", goal = " .. tostring(goal) .. ", type = " .. tostring(objective_type))
 
-    if objective_type then
-      goal = 100
-    else
-      goal = tonumber(goal)
-    end
+  if not objective_name then
+    Addon.Logging.Debug("      => no objective (pattern did not match), next line")
+    return
   end
 
-  local show, quest_type, quest_objective
-  if objective_name then
-    -- Note: "progressbar" type quest (area quest) progress cannot get via the API, so for this tooltips
-    -- must be used. That's also the reason why their progress is not cached.
-    local quest = QuestByTitle[quest_title]
-    if quest then
-      quest_objective = quest.Objectives[objective_name]
+  current = tonumber(current)
+
+  if objective_type then
+    goal = 100
+  else
+    goal = tonumber(goal)
+  end
+
+  local quest = QuestByTitle[quest_title]
+  local quest_objective
+  if quest then
+    quest_objective = quest.Objectives[objective_name]
+  end
+
+  if not quest then
+    Addon.Logging.Debug("      quest log: no cached quest with title '" .. tostring(quest_title) .. "'")
+  elseif quest_objective then
+    Addon.Logging.Debug("      quest log: " .. tostring(quest_objective.numFulfilled) .. "/" .. tostring(quest_objective.numRequired) ..
+      " [" .. tostring(quest_objective.type) .. "], finished = " .. tostring(quest_objective.finished))
+  else
+    Addon.Logging.Debug("      quest log: quest cached, but no objective '" .. tostring(objective_name) .. "'")
+  end
+
+  if current and goal then
+    if (current ~= goal) then
+      Addon.Logging.Debug("      => not completed: SHOW")
+      return true, 1, quest_objective or { numFulfilled = current, numRequired = goal, type = objective_type }
+    end
+    Addon.Logging.Debug("      => completed, next line")
+  else
+    Addon.Logging.Debug("      => no progress information: STOP (not shown)")
+    return false
+  end
+end
+
+-- Same line evaluation as IsQuestUnit, but logs every line and the decision made for it
+local function DebugQuestDetection(unitid)
+  Addon.Logging.Debug("--- Quest detection (line by line, from line 3) ---")
+
+  local tooltip_data = C_TooltipInfo_GetUnit(unitid)
+  if not tooltip_data or not tooltip_data.lines then
+    Addon.Logging.Debug("No tooltip data => not shown")
+    return
+  end
+
+  local quest_title
+  local quest_progress_player = false
+
+  for i = 3, #tooltip_data.lines do
+    local line = tooltip_data.lines[i]
+
+    if not line.leftText then
+      Addon.Logging.Debug(i .. ": <no text> => STOP (not shown)")
+      return
+    elseif IsSecretValueTP(line.leftText) then
+      Addon.Logging.Debug(i .. ": <secret> => fallback to quest log: shown = " ..
+        tostring(IsUnitRelatedToActiveQuest(unitid)) .. " (without progress)")
+      return
     end
 
-    -- A unit may be target of more than one quest, the quest indicator should be show if at least one quest is not completed.
-    if current and goal then
-      if (current ~= goal) then
-        show, quest_type, quest_objective = true, 1, quest_objective or { numFulfilled = current, numRequired = goal, type = objective_type }
+    local text = line.leftText
+
+    if Addon.HAS_MIDNIGHT_API then
+      Addon.Logging.Debug(i .. ": [" .. GetLineTypeName(line.type) .. "] '" .. text .. "'")
+
+      if line.type == Enum.TooltipDataLineType.QuestPlayer then
+        local is_player = (text == PlayerFirstName) or (text == PlayerName)
+        quest_progress_player = is_player or not GroupMembers[text]
+        Addon.Logging.Debug("      => player: " .. (is_player and "own name" or
+          (GroupMembers[text] and "group member, objectives skipped" or "not a known group member, treated as own")))
+      elseif line.type == Enum.TooltipDataLineType.QuestTitle then
+        quest_progress_player = true
+        quest_title = text
+        Addon.Logging.Debug("      => quest title")
+      elseif quest_progress_player and line.type == Enum.TooltipDataLineType.QuestObjective then
+        if ParseObjectiveFromTooltipLineDebug(quest_title, text) ~= nil then return end
+      else
+        quest_progress_player = false
+        Addon.Logging.Debug(line.type == Enum.TooltipDataLineType.QuestObjective and "      => objective of a group member, skipped" or
+          "      => ignored")
       end
     else
-      -- Line after quest title with quest information, so we can stop here
-      show = false
+      local text_r, text_g, text_b = line.leftColor.r, line.leftColor.g, line.leftColor.b
+      Addon.Logging.Debug(("%d: [%.2f %.2f %.2f] '%s'"):format(i, text_r, text_g, text_b, text))
+
+      if text_r > 0.99 and text_g > 0.8 and text_b == 0 then
+        if text == PlayerName then
+          quest_progress_player = true
+          Addon.Logging.Debug("      => player: own name")
+        elseif not GroupMembers[text] then
+          quest_progress_player = true
+          quest_title = text
+          Addon.Logging.Debug("      => quest title")
+        else
+          quest_progress_player = false
+          Addon.Logging.Debug("      => player: group member, objectives skipped")
+        end
+      elseif quest_progress_player then
+        if ParseObjectiveFromTooltipLineDebug(quest_title, text) ~= nil then return end
+      else
+        Addon.Logging.Debug("      => ignored (no quest title or own player name before)")
+      end
     end
   end
 
-  -- Debug helper returns parsing details in addition to normal result tuple.
-  return show, quest_type, quest_objective, objective_name, current, goal, objective_type
+  Addon.Logging.Debug("End of tooltip => not shown")
+end
+
+local function DebugPrintRawTooltip(unitid)
+  Addon.Logging.Debug("--- Raw tooltip (all lines, as shown by WoW) ---")
+
+  if TooltipScanner then
+    -- Legacy tooltip scanner: the quest detection only uses lines 3 to 5 of it
+    TooltipScanner:ClearLines()
+    TooltipScanner:SetUnit(unitid)
+    for i = 1, TooltipScanner:NumLines() do
+      local left, right = _G[ScannerName .. "TextLeft" .. i], _G[ScannerName .. "TextRight" .. i]
+      local right_text = right and right:IsShown() and right:GetText()
+      Addon.Logging.Debug(i .. ": [" .. DebugColor(RGB_P(left:GetTextColor())) .. "] '" .. DebugValue(left:GetText()) .. "'" ..
+        (right_text and (" right: '" .. DebugValue(right_text) .. "'") or ""))
+    end
+    Addon.Logging.Debug("Note: the quest detection only checks lines 3 to 5 on this client")
+  else
+    local tooltip_data = C_TooltipInfo_GetUnit(unitid)
+    if not tooltip_data or not tooltip_data.lines then
+      Addon.Logging.Debug("No tooltip data")
+      return
+    end
+
+    for i, line in ipairs(tooltip_data.lines) do
+      Addon.Logging.Debug(i .. ": [" .. GetLineTypeName(line.type) .. "] [" .. DebugColor(line.leftColor) .. "] '" ..
+        DebugValue(line.leftText) .. "'" .. (line.rightText and (" right: '" .. DebugValue(line.rightText) .. "'") or ""))
+    end
+  end
+end
+
+local function DebugPrintQuestUnit(unitid)
+  local db = Addon.db.profile.questWidget
+
+  Addon.Logging.Debug("=== Quest widget: " .. unitid .. " = '" .. DebugValue(UnitName(unitid)) .. "' ===")
+
+  Addon.Logging.Debug("--- Client & settings ---")
+  Addon.Logging.Debug("Client: HAS_MIDNIGHT_API = " .. tostring(Addon.HAS_MIDNIGHT_API) .. ", IS_FOREVER = " .. tostring(Addon.IS_FOREVER) ..
+    ", Surnames = " .. tostring(Addon.WOW_FEATURE_REGIONAL_SURNAMES) .. ", Locale = " .. GetLocale() ..
+    ", Tooltip scanner = " .. tostring(TooltipScanner ~= nil))
+  Addon.Logging.Debug("Parser: " .. RegexpAlignment .. " - LEFT = " .. RegexpForExpansion.LEFT .. " - RIGHT = " .. RegexpForExpansion.RIGHT)
+  Addon.Logging.Debug("CVar showQuestTrackingTooltips = " .. tostring(GetCVarValue("showQuestTrackingTooltips")))
+  Addon.Logging.Debug("Settings: ON = " .. tostring(db.ON) .. ", ModeIcon = " .. tostring(db.ModeIcon) ..
+    ", ModeHPBar = " .. tostring(db.ModeHPBar) .. ", ShowProgress = " .. tostring(db.ShowProgress) ..
+    ", ShowInHeadlineView = " .. tostring(db.ShowInHeadlineView))
+  Addon.Logging.Debug("Combat: InCombat = " .. tostring(InCombat) .. ", InCombatLockdown = " .. tostring(InCombatLockdown()) ..
+    ", HideInCombat = " .. tostring(HideInCombat) .. ", HideInCombatAttacked = " .. tostring(db.HideInCombatAttacked) ..
+    ", HideInInstance = " .. tostring(db.HideInInstance))
+  local is_in_instance, instance_type = IsInInstance()
+  local _, threat_status = UnitDetailedThreatSituationWrapper("player", unitid)
+  Addon.Logging.Debug("Instance: IsInPvEInstance = " .. tostring(Addon.IsInPvEInstance) .. ", IsInInstance = " ..
+    tostring(is_in_instance) .. ", instance type = " .. tostring(instance_type) ..
+    " - Threat status (player on unit) = " .. DebugValue(threat_status))
+
+  Addon.Logging.Debug("--- Player & group ---")
+  Addon.Logging.Debug("Player: first name = '" .. DebugValue(PlayerFirstName) .. "', full name = '" .. DebugValue(PlayerName) .. "'")
+  local group_members = {}
+  for name in pairs(GroupMembers) do
+    group_members[#group_members + 1] = "'" .. name .. "'"
+  end
+  Addon.Logging.Debug("Group: IsInGroup = " .. tostring(IsInGroup()) .. ", IsInRaid = " .. tostring(IsInRaid()) ..
+    ", GroupMembers (" .. #group_members .. ") = " .. table.concat(group_members, ", "))
+
+  DebugPrintRawTooltip(unitid)
+
+  DebugQuestDetection(unitid)
+
+  -- Result of the actual detection, should match the line-by-line output above
+  local unit = { unitid = unitid }
+  local show, quest_type, quest_objective = IsQuestUnit(unit)
+  Addon.Logging.Debug("Result IsQuestUnit: show = " .. tostring(show) .. ", quest type = " .. tostring(quest_type) ..
+    (quest_objective and (", progress = " .. tostring(quest_objective.numFulfilled) .. "/" .. tostring(quest_objective.numRequired) ..
+      " [" .. tostring(quest_objective.type) .. "]") or ""))
+  -- Fallback for restricted contexts (e.g., instances), where all tooltip texts are secret
+  local is_related = UnitIsRelatedToActiveQuest and UnitIsRelatedToActiveQuest(unitid)
+  Addon.Logging.Debug("C_QuestLog.UnitIsRelatedToActiveQuest = " .. DebugValue(is_related))
+  Addon.Logging.Debug("ShowQuestUnit (combat/instance) = " .. tostring(ShowQuestUnit(unit)) ..
+    ", quest color for healthbar = " .. tostring(Addon.ShowQuestUnit(unit)))
+
+  Addon.Logging.Debug("--- Nameplate ---")
+  local tp_frame = Addon:GetThreatPlateForUnit(unitid)
+  if not tp_frame then
+    Addon.Logging.Debug("No active Threat Plates nameplate for " .. unitid)
+    return
+  end
+
+  local widget_frame = tp_frame.widgets.Quest
+  Addon.Logging.Debug("Style = " .. tostring(tp_frame.unit.style) .. ", EnabledForStyle = " .. tostring(Widget:EnabledForStyle(tp_frame.unit.style, tp_frame.unit)))
+  if widget_frame then
+    Addon.Logging.Debug("Widget frame: Active = " .. tostring(widget_frame.Active) .. ", IsQuestUnit = " .. tostring(widget_frame.IsQuestUnit) ..
+      ", IsShown = " .. tostring(widget_frame:IsShown()) .. ", Text = '" .. DebugValue(widget_frame.Text:GetText()) ..
+      "', Text shown = " .. tostring(widget_frame.Text:IsShown()))
+  else
+    Addon.Logging.Debug("No quest widget frame on this nameplate")
+  end
 end
 
 function Widget:PrintDebug(command)
@@ -842,76 +1074,15 @@ function Widget:PrintDebug(command)
         Addon.Debug.PrintTable(objectives)
       end
     end
-  elseif command == "tooltip" then
-    if not UnitExists("target") then return end
-
-    local quest_title
-    local quest_progress_player = false
-
-    local tooltip_data = C_TooltipInfo_GetUnit("target")
-    if not tooltip_data or not tooltip_data.lines then return end
-
-    for i = 3, #tooltip_data.lines do
-      local line = tooltip_data.lines[i]
-
-      if IsSecretValueTP(line.leftText) or not line.leftText then break end
-
-      local text = line.leftText
-
-      Addon.Logging.Debug("=== Line:", text)
-      if Addon.HAS_MIDNIGHT_API then
-        if line.type == Enum.TooltipDataLineType.QuestPlayer then
-          quest_progress_player = (text == PlayerFirstName) or not GroupMembers[text]
-          Addon.Logging.Debug("  Player:", text, quest_progress_player and "(own)" or "(group member, skipped)")
-        elseif line.type == Enum.TooltipDataLineType.QuestTitle then
-          quest_progress_player = true
-          quest_title = text
-          Addon.Logging.Debug("Quest:", text)
-        elseif quest_progress_player and line.type == Enum.TooltipDataLineType.QuestObjective then
-          local show, _, quest_objective, objective_name, current, goal = ParseObjectiveFromTooltipLineDebug(quest_title, text)
-
-          Addon.Logging.Debug("    => Objective:", text)
-          if show then
-            Addon.Logging.Debug("    => Quest:", objective_name, "- Current:", current, "- Goal:", goal, "- Type:", quest_objective.type)
-          elseif current and goal then
-            Addon.Logging.Debug("    => Finished!")
-          end
-        else
-          quest_progress_player = false
-        end
-      else
-        local text_r, text_g, text_b = line.leftColor.r, line.leftColor.g, line.leftColor.b
-
-        if text_r > 0.99 and text_g > 0.8 and text_b == 0 then
-          if text == PlayerName then
-            quest_progress_player = true
-            Addon.Logging.Debug("  Player:", text)
-          elseif not GroupMembers[text] then
-            Addon.Logging.Debug("Quest:", text)
-            quest_progress_player = true
-            quest_title = text
-          else
-            quest_progress_player = false
-            Addon.Logging.Debug("  Character:", text)
-          end
-        elseif quest_progress_player then
-          local show, _, quest_objective, objective_name, current, goal, objective_type = ParseObjectiveFromTooltipLineDebug(quest_title, text)
-
-          Addon.Logging.Debug("    => Objective:", text)
-          if show then
-            Addon.Logging.Debug("    => Quest:", objective_name, "- Current:", current, "- Goal:", goal, "- Type:", quest_objective.type)
-          elseif current and goal then
-            Addon.Logging.Debug("    => Finished!")
-          elseif objective_type == "area" then
-            Addon.Logging.Debug("    => Area: <" .. text .. ">", objective_name, current, goal)
-          elseif objective_name then
-            Addon.Logging.Debug("    => Standard: <" .. text .. ">", objective_name, current, goal)
-          end
-        else
-          quest_progress_player = false
-        end
-      end
+  elseif command == "unit" or command == "tooltip" then
+    -- Target, or mouseover if there is no target
+    local unitid = (UnitExists("target") and "target") or (UnitExists("mouseover") and "mouseover")
+    if not unitid then
+      Addon.Logging.Debug("Quest: no target or mouseover unit")
+      return
     end
+
+    DebugPrintQuestUnit(unitid)
   else
     Addon.Logging.Debug("Quests List:", tablelength(QuestByID))
     for quest_id, title in pairs(QuestByID) do
@@ -920,7 +1091,7 @@ function Widget:PrintDebug(command)
         if quest then --and tablelength(quest.objectives) > 0 then
           Addon.Logging.Debug("*", title .. " [ID:" .. tostring(quest_id) .. "]")
           for name, val in pairs (quest.Objectives) do
-            Addon.Logging.Debug("  - |" .. name .."| :", val.numFulfilled, "/", val.numRequired, "[" .. val.type .. "]")
+            Addon.Logging.Debug("  - '" .. name .."' :", val.numFulfilled, "/", val.numRequired, "[" .. val.type .. "]")
           end
         end
       end
