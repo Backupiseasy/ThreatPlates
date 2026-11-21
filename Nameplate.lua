@@ -508,6 +508,10 @@ local function SetUnitAttributeReaction(unit, unitid)
   end
 
   unit.IsTapDenied = _G.UnitIsTapDenied(unitid)
+
+  -- Initialized here so that Addon:UNIT_FLAGS also detects the first change of attackability after the
+  -- nameplate was added (e.g., a unit that becomes attackable when leaving stealth and attacking)
+  unit.CanAttack = UnitCanAttack("player", unitid)
 end
 
 local function SetUnitAttributeLevel(unit, unitid)
@@ -1703,11 +1707,10 @@ function Addon:NAME_PLATE_UNIT_ADDED(unitid)
     if was_already_added or Addon.IsInPvPInstance then
       -- Unlike was_already_added, this also covers the very first ADDED for a unit - needed in
       -- arenas/battlegrounds because Addon:UNIT_FLAGS only revalidates on a detected change
-      -- (reaction_changed/attackable_changed), and neither can be true on a freshly-added hostile
-      -- enemy player's first UNIT_FLAGS firing (unit.reaction is already "HOSTILE" from
-      -- SetUnitAttributeReaction moments earlier, and unit.CanAttack starts nil, not a prior
-      -- value to differ from) - so that path can't catch this unit's client/server data lag on
-      -- its own. The lag itself is the same one Plater's Plater.ScheduleUpdateForNameplate
+      -- (reaction_changed/attackable_changed), and neither is true on a freshly-added hostile
+      -- enemy player's first UNIT_FLAGS firing if the client still has the stale data (unit.reaction
+      -- and unit.CanAttack were read from that same data by SetUnitAttributeReaction moments
+      -- earlier) - so that path can't catch this unit's client/server data lag on its own. The lag itself is the same one Plater's Plater.ScheduleUpdateForNameplate
       -- documents for faction/flag changes generally (client received the server update but
       -- hasn't applied it to this token yet) - see the guard-pattern catalogue.
       ScheduleNameplateRevalidation(plate, unitid, 0.5)
