@@ -1034,6 +1034,29 @@ local function GetFlowLayoutForAlignment(alignment_h, alignment_v)
   return anchor_point, horizontal_direction, vertical_direction
 end
 
+-- AnchorTo can reference "Healthbar" (this widget's own frame) or another aura type's name
+-- ("Buffs"/"Debuffs"/"CrowdControl"). As before Midnight, the container is anchored directly to
+-- that sibling AuraContainer with its own anchor/offset settings. The sibling resizes itself to the
+-- auras it currently shows (CustomAuraContainerFlowLayoutMixin:OnLayoutComplete), and the client's
+-- layout engine moves everything anchored to it along, so no size tracking is needed (verified
+-- in-game). Cyclic anchoring (e.g., from an old or imported profile) falls back to the healthbar, as
+-- anchoring a region to a region that depends on it is a Lua error.
+local function GetAuraContainerAnchorFrame(db, widget_frame, aura_type)
+  local anchor_to_db = db[aura_type].AnchorTo
+
+  local area = anchor_to_db
+  for _ = 1, #AURA_CONTAINER_TYPES do
+    if area == aura_type then
+      return widget_frame
+    elseif not db[area] or area == "Healthbar" then
+      break
+    end
+    area = db[area].AnchorTo
+  end
+
+  return widget_frame[anchor_to_db .. "AuraContainer"] or widget_frame
+end
+
 -- Configures the plate's pooled AuraContainer for aura_type ("Buffs"/"Debuffs"/"CrowdControl") for
 -- the current settings/unit and assigns the unit to it. Returns true if the container was enabled
 -- for this unit - the container manages its own aura-level visibility internally and
@@ -1047,14 +1070,19 @@ function Widget:UpdateAuraContainer(widget_frame, aura_type, group_configs, unit
   local container = widget_frame[aura_type .. "AuraContainer"]
   if not container then return false end
 
+  -- The layout always comes from aura_type, also with SwitchAreaByReaction: only the filters (i.e.,
+  -- the auras shown) are swapped, see Widget:UpdateAurasGrids.
+  local db = self.db[aura_type]
+
+  -- Also position disabled containers, as other aura areas may be anchored to them. A container
+  -- without auras (also a disabled one) has a size of 1x1 (AnchorUtil.ApplyFlowLayout).
+  AnchorFrameTo(db[MODE_FOR_STYLE[unit.style]], container, GetAuraContainerAnchorFrame(self.db, widget_frame, aura_type))
+
   if not group_configs or not next(group_configs) then
     container:SetEnabled(false)
     return false
   end
 
-  -- The layout always comes from aura_type, also with SwitchAreaByReaction: only the filters (i.e.,
-  -- the auras shown) are swapped, see Widget:UpdateAurasGrids.
-  local db = self.db[aura_type]
   local db_icon = db.ModeIcon
   local max_auras = min(db_icon.MaxAuras, db_icon.Rows * db_icon.Columns)
   local anchor_point, horizontal_direction, vertical_direction = GetFlowLayoutForAlignment(db.AlignmentH, db.AlignmentV)
@@ -1087,38 +1115,6 @@ function Widget:UpdateAuraContainer(widget_frame, aura_type, group_configs, unit
 
   container:SetUnit(unit.unitid)
   container:SetEnabled(true)
-
-  -- AnchorTo can reference "Healthbar" (this widget's own frame) or another aura type's name
-  -- ("Buffs"/"Debuffs"/"CrowdControl", meaning "stack above/below that grid"). We cannot anchor
-  -- directly to that sibling AuraContainer's live edge: its size changes dynamically as auras are
-  -- added/removed, and addons have no OnSizeChanged access to react to that (Forbidden Aspects
-  -- block it) - the anchor would only ever reflect whatever the sibling's size happened to be at our
-  -- last update, causing overlap as it grows afterwards. Instead, anchor to Healthbar like the
-  -- sibling itself does, and add the sibling's *configured* (not live) max height to the offset, so
-  -- there's always enough room regardless of how many auras it's currently showing.
-  --
-  -- Dynamic sizing was attempted (candidateFilters-free counter via
-  -- CustomAuraContainerSharedMixin:GetAuraGroupFrameCount) but reverted: that counter reflects the
-  -- group's frame *pool* size (grows in batches, never shrinks), not the currently-displayed aura
-  -- count, so it made the reserved height "stuck at historical peak" instead of "always max" - a
-  -- different bug, not a fix. No safely addon-exposed "currently active aura count" API was found;
-  -- revisit if Blizzard ever exposes one.
-  local anchor_to_db = db.AnchorTo
-  local anchor_config = db[MODE_FOR_STYLE[unit.style]]
-  local anchor_to = widget_frame
-
-  if anchor_to_db ~= "Healthbar" then
-    local sibling_icon = self.db[anchor_to_db].ModeIcon
-    local sibling_height = sibling_icon.Rows * sibling_icon.IconHeight + (sibling_icon.Rows - 1) * sibling_icon.RowSpacing
-    anchor_config = {
-      Anchor = anchor_config.Anchor,
-      InsideAnchor = anchor_config.InsideAnchor,
-      HorizontalOffset = anchor_config.HorizontalOffset,
-      VerticalOffset = (anchor_config.VerticalOffset or 0) + sibling_height,
-    }
-  end
-
-  AnchorFrameTo(anchor_config, container, anchor_to)
 
   return true
 end

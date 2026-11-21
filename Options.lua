@@ -4168,10 +4168,21 @@ local function CreateAuraAreaLayoutOptions(pos, widget_info)
       return values
     end,
     set = function(info, val)
-      local call_ok, return_value = pcall(SetValue, info, val)
-      if not call_ok then
-        Addon.Logging.Error(L["Cyclic anchoring of aura areas to each other is not possible."], string.format(L["%s already anchored to %s."], val, widget_info))
+      -- Follow the anchoring chain starting at the new anchor: if it leads back to this aura area,
+      -- the anchoring would be cyclic (also over all three aura areas)
+      local db_auras = Addon.db.profile.AuraWidget
+      local area = val
+      for _ = 1, 3 do
+        if area == widget_info then
+          Addon.Logging.Error(L["Cyclic anchoring of aura areas to each other is not possible."], string.format(L["%s already anchored to %s."], val, widget_info))
+          return
+        elseif not db_auras[area] then
+          break
+        end
+        area = db_auras[area].AnchorTo
       end
+
+      SetValue(info, val)
     end,
     arg = { "AuraWidget", widget_info, "AnchorTo" }
   }

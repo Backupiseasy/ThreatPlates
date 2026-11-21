@@ -5,3 +5,5 @@
 * Fixed Lua errors when logging out or reloading the UI while another addon changes WoW settings (CVars) during logout.
 * Fixed a bug where the quest widget showed quest objectives of group members as the player's own, e.g., still showing the quest indicator after completing the quest.
 * Fixed a bug where the quest widget did not show quest indicators in instances on WoW Forever (now without the quest progress there).
+* Fixed a bug where an aura area anchored to another aura area was not positioned at its edge on Retail and WoW Forever, e.g., buffs overlapping debuffs.
+* Fixed Lua errors after anchoring buffs, debuffs and crowd control to each other in a circle, as the options did not prevent this.
