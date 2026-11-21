@@ -111,6 +111,8 @@ L["Aura Flashing"] = "光環閃爍"
 L["Aura: "] = "光環: "
 L["Auras"] = "光環"
 L["Auras (Name or ID)"] = "光環 (名稱或 ID)"
+--[[Translation missing --]]
+L["Auras can only be shown on nameplates after combat has ended, as the aura display could not be created during combat."] = "Auras can only be shown on nameplates after combat has ended, as the aura display could not be created during combat."
 L["Auras, Healthbar"] = "光環, 血條"
 L["Auto Sizing"] = "自動調整大小"
 L["Auto-Cast"] = "自動施放"

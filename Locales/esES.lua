@@ -125,6 +125,8 @@ L["Aura Flashing"] = "Aura Flashing"
 L["Aura: "] = "Aura:"
 L["Auras"] = "Auras"
 L["Auras (Name or ID)"] = "Auras (Nombre o ID)"
+--[[Translation missing --]]
+L["Auras can only be shown on nameplates after combat has ended, as the aura display could not be created during combat."] = "Auras can only be shown on nameplates after combat has ended, as the aura display could not be created during combat."
 L["Auras, Healthbar"] = "Auras, Barra de Salud"
 L["Auto Sizing"] = "Tamaño automático"
 L["Auto-Cast"] = "Autolanzarse"
