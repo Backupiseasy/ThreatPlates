@@ -114,8 +114,9 @@ Translate new/untranslated deDE strings for the TidyPlates_ThreatPlates WoW addo
      untouched; mention the split in the summary of step 9.
    - Fix entries written in this run directly. Do not change a marked entry from an
      earlier run on your own: list the proposed correction in step 9 and apply it only
-     after confirmation, because that text is already on CurseForge (see "Correcting a
-     machine translation that is already on CurseForge" below).
+     after confirmation, because that text may already have been reviewed in-game.
+     Once committed, a correction reaches CurseForge with the upload after the merge -
+     no separate upload needed.
 8. Run `python Source/localization_tool.py check` again to confirm no regressions, and
    that the new keys show up under "machine-translated pending review" rather than lumped
    into the human-translated count.
@@ -139,8 +140,8 @@ Translate new/untranslated deDE strings for the TidyPlates_ThreatPlates WoW addo
     conflict with a future run.
 
 Do not touch any other locale file. Do not modify human-reviewed (unmarked,
-non-placeholder) deDE entries under any circumstances - only fill genuine gaps, and
-correct marker-tagged entries as described in step 7.
+non-placeholder) deDE entries unless the user explicitly asks for it - only fill genuine
+gaps, and correct marker-tagged entries as described in step 7.
 ```
 
 ## What happens to these entries afterward
@@ -148,41 +149,16 @@ correct marker-tagged entries as described in step 7.
 - `.github/workflows/check_localization.yml` re-runs on the PR after this step's push and
   shows the marker-tagged keys as "machine-translated pending review" in its sticky
   comment, distinct from human-reviewed translations.
-- Once the PR merges and that change reaches `main`,
-  `.github/workflows/publish_localization_to_curseforge.yml` uploads exactly the
-  marker-tagged deDE keys to CurseForge via `python Source/localization_tool.py
-  push-translation --locale deDE --token "$CF_API_KEY"` - see that workflow and
-  `select_mt_keys_for_push()` in `Source/localization_tool.py`.
-- If a community translator supplies a real translation for a marker-tagged key on
-  CurseForge before the next `pull`, that `pull` overwrites the marker-tagged line with
-  CurseForge's export (which never carries the marker) - the key silently becomes
-  human-reviewed with no extra bookkeeping needed.
-- As long as CurseForge's text for a marker-tagged key is still exactly the machine
-  translation, `pull` keeps the marker (see `preserve_existing_translations()`). To accept
-  such a translation unchanged, delete its `--[[Machine translation --]]` line by hand.
-
-## Correcting a machine translation that is already on CurseForge
-
-`pull` cannot tell a local correction from a community correction: whenever CurseForge's
-text for a key differs from the local one, CurseForge wins and the marker is dropped. A
-marker-tagged entry that was already uploaded and is then reworded locally (e.g. by the
-consistency check in step 7) is therefore reverted to the old text by the next `pull` -
-both the one in the sync workflow and the one the publish workflow runs before
-`push-translation`.
-
-Upload the corrected text before the change reaches a branch that triggers the sync
-workflow:
-
-```
-python Source/localization_tool.py push-translation --locale deDE --token <CF_API_KEY>
-```
-
-This uploads exactly the marker-tagged deDE entries with their local text. Afterwards
-CurseForge and the repository agree again, so `pull` keeps both the text and the marker.
-An entry whose key is new (CurseForge has never seen it) is not affected.
-
-Side effect to expect: `push-translation` also creates the phrase on CurseForge for any
-marker-tagged key it has never seen. Until the publish workflow uploads the enUS source
-text from `main`, CurseForge exports such a phrase for the other locales as a
-`--[[Translation missing --]]` placeholder with an empty value. `pull` replaces that
-empty value with the key, so no blank text reaches a locale file.
+- enUS and deDE are maintained in this repository and never edited on CurseForge. Once the
+  sync PR is merged into `main`, `.github/workflows/publish_localization_to_curseforge.yml`
+  uploads the enUS phrases and then **every** deDE translation (reviewed, machine-translated
+  and loanwords; not CurseForge's `--[[Translation missing --]]` placeholders and not keys
+  that are no longer in `Locales/enUS.lua`) via `python Source/localization_tool.py
+  push-translation --locale deDE --token "$CF_API_KEY"` - see `select_keys_for_push()` in
+  `Source/localization_tool.py`. Corrections of texts already on CurseForge reach it the
+  same way, no separate upload needed. For a sync PR merged into a `release/*` branch, run
+  that workflow manually (`workflow_dispatch`) once the change has reached `main`.
+- `pull` never replaces a local deDE text with CurseForge's and never adds or removes a
+  deDE marker (`REPO_AUTHORITATIVE_LOCALES` / `preserve_existing_translations()`).
+- The `--[[Machine translation --]]` marker only means "not reviewed yet". To accept a
+  translation, correct it if needed and delete its marker line by hand.
