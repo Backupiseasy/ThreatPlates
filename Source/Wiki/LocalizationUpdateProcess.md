@@ -72,6 +72,14 @@ to the release/main one; a hotfix's new strings are picked up once it is merged 
 4. Opens (or updates, if one is already open) a PR titled **"Update localization files from
    CurseForge"** on branch `localization-sync-<ref>`.
 
+   **Updating recreates the branch**: `peter-evans/create-pull-request` builds
+   `localization-sync-<ref>` anew from `<ref>` and force-pushes it. Commits added to the PR by
+   hand - Step 3's machine translations - are gone after every new run (push to `<ref>`, the
+   weekly run, a manual run). Merge the PR soon after Step 3. If a run overwrote it anyway,
+   cherry-pick the lost commit onto the new branch (it still exists locally or via the PR's
+   commit list) or run Step 3 again; resolve conflicts in `Locales/deDE.lua` by keeping only keys
+   still in `Locales/enUS.lua`.
+
 Checkout and PR creation use a personal access token (the `PAT_TOKEN` repo secret), not the
 default `GITHUB_TOKEN`. A PR opened under `GITHUB_TOKEN` is attributed to
 `github-actions[bot]`, and GitHub then requires a maintainer to manually click "Approve and
@@ -152,14 +160,48 @@ branch.
    (`DoNothing`: never deletes anything on CF). Corrections of texts already on CF reach it the
    same way. No `pull` beforehand - it would replace the local texts with CF's older ones.
 
-Nothing to do here — this is the only step in the whole pipeline that actually writes to CurseForge,
-and it's fully automatic once the change reaches `main`.
+This is the only step in the whole pipeline that actually writes to CurseForge, and it's fully
+automatic once a change of `Locales/enUS.lua` or `Locales/deDE.lua` reaches `main`. Start it
+manually (`gh workflow run publish_localization_to_curseforge.yml --ref main`) when CF has to be
+updated without such a change:
+
+- after a change of `Source/localization_tool.py` that affects what `extract`, `upload` or
+  `push-translation` send (e.g. the upload of override texts, 2026-11);
+- after a failed run (the run log shows `Upload FAILED: HTTP ...`);
+- after a check (see below) found a deviation on CF.
+
+A changed override in `Source/LocalizationSpecialPhraseKeys.lua` needs no manual run: it changes
+`Locales/enUS.lua` in the next sync PR, and merging that PR triggers this workflow.
 
 ## Reviewing machine translations
 
 A `--[[Machine translation --]]` marker only means "not reviewed yet" - it does not change what is
 uploaded. To sign off a machine translation, correct it if needed and delete its marker line in
 `Locales/deDE.lua` by hand; `pull` never adds or removes a deDE marker.
+
+## Checking CurseForge against the repository
+
+A sync PR **cannot** show whether CF has the repository's deDE texts: `pull` keeps every local
+deDE text over CF's (Step 1), so a deDE file without diff says nothing about CF. To check CF,
+download the raw export and compare it with the locale files:
+
+- Export: `GET https://legacy.curseforge.com/api/projects/21217/localization/export?lang=<locale>`
+  with the header `X-Api-Token: <token>` (an API token of a CF account with access to the
+  project; it's stored as the `CF_API_KEY` repo secret, there is no anonymous access - HTTP
+  401). The export starts with a line `L = L or {}`; parse the rest with `parse_locale_entries` /
+  `parse_untranslated_keys` from `Source/localization_tool.py`.
+- Expected result:
+  - enUS: exactly the keys of `Locales/enUS.lua`, each with its value there (key = value, except
+    the overrides from `Source/LocalizationSpecialPhraseKeys.lua`).
+  - deDE: every key `select_keys_for_push()` selects from `Locales/deDE.lua`, with exactly the
+    same text, and no `--[[Translation missing --]]` placeholder for any of them.
+  - Every other locale in `Locales.xml`: exactly the keys of `Locales/enUS.lua` (texts and
+    placeholders are the community's).
+
+Never write such an export into `Locales/*.lua` directly (as the removed
+`Source/export_localization_translations.sh` did): it would replace the repository's enUS and
+deDE texts with CF's and drop the machine-translation markers. Changes from CF reach the
+repository only through `pull` in a sync PR.
 
 ---
 
@@ -185,3 +227,15 @@ uploaded. To sign off a machine translation, correct it if needed and delete its
   that branch never uploaded it itself. `pull`'s preserve logic (Step 1) handles this
   correctly, but only once every branch has that logic - if in doubt, verify an unexpected
   `pull` diff on a locale file rather than trusting it at face value.
+- **Changing the tooling itself.** The sync workflow runs `Source/localization_tool.py` of the
+  branch it runs on. After a change to `pull` (e.g. how locale files are aligned to
+  `Locales/enUS.lua`), an already open sync PR still has the old tool's result: merge the tool
+  change first, then regenerate the PR with a manual sync run
+  (`gh workflow run sync_localization_translations.yml --ref main`) - mind that this drops hand-made
+  commits on the PR branch (Step 1). After a change to `extract`/`upload`/`push-translation`,
+  start Step 5 manually.
+- **Locales commented out in `Locales/Locales.xml`** (currently frFR, koKR, ruRU, itIT, ptBR)
+  are not loaded in-game and neither pulled nor checked - their files keep their old state with
+  stale and missing keys. Enabling one there includes it in the next sync PR.
+- **Secrets.** `CF_API_KEY` (CF API token: export, import) and `PAT_TOKEN` (checkout and PR
+  creation, Step 1). If one expires, the workflows fail with HTTP 401/403.

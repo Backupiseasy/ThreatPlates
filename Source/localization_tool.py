@@ -4,6 +4,8 @@
 Replaces:
   - Source/ExtractPhraseKeysForLocalization.lua (regex-based extraction)
   - Source/import_localization_phrase_keys.sh (CurseForge upload)
+  - Source/export_localization_translations.sh (CurseForge download, overwrote every
+    locale file - enUS and deDE included - with CurseForge's export)
   - the inline bash extract/pull-back logic in
     .github/workflows/sync_localization_translations.yml
 
