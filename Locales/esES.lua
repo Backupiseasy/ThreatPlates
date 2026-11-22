@@ -685,6 +685,8 @@ L["Off-Tank"] = "Tanque Secundario"
 L["OmniCC"] = "OmniCC"
 L["On & Off"] = "Habilitar y Deshabilitar"
 L["On Bosses & Rares"] = "En Jefes y Raros"
+--[[Translation missing --]]
+L["On Enemy and Neutral Units You Cannot Attack"] = "On Enemy and Neutral Units You Cannot Attack"
 L["On Target"] = "En objetivo"
 L["On the left"] = "En la izquierda"
 L["One"] = "Uno"
@@ -904,6 +906,8 @@ L["Shows a glow based on threat level around the nameplate's healthbar (in comba
 L["Shows a glow effect on auras that you can steal or purge."] = "Muestra un efecto de brillo en las auras que puedes robar o purgar."
 L["Shows a glow effect on this custom nameplate."] = "Muestra un efecto de brillo en esta placa identificativa personalizada."
 L["Shows an icon for friends and guild members next to the nameplate of players."] = "Mostrar un icono para amigos y miembros de la hermandad junto a la placa identificativa de los jugadores."
+--[[Translation missing --]]
+L["Shows enemy and neutral units that you cannot attack (e.g., neutral townsfolk) in headline view, regardless of their unit type settings."] = "Shows enemy and neutral units that you cannot attack (e.g., neutral townsfolk) in headline view, regardless of their unit type settings."
 L["Shows resource information for bosses and rares."] = "Muestra información de recursos para jefes y raros."
 --[[Translation missing --]]
 L["Shows resource information only for alternative power (of bosses or rares, mostly)."] = "Shows resource information only for alternative power (of bosses or rares, mostly)."
@@ -1210,7 +1214,3 @@ L["You can access the "] = "Puedes acceder las "
 L["You cannot delete General Settings, only custom nameplates entries."] = "No puede eliminar la Configuración general, solo las entradas de placas identificativas personalizadas."
 L["You currently have two nameplate addons enabled: |cff89F559Threat Plates|r and |cff89F559%s|r. Please disable one of these, otherwise two overlapping nameplates will be shown for units."] = "Actualmente tiene habilitados dos addons de placa identificativa: |cff89F559Threat Plates|r y |cff89F559%s|r. Deshabilite uno de estos, de lo contrario, se mostrarán dos placas superpuestas para las unidades."
 L["Your version of LibDogTag-Unit-3.0 does not support nameplates. You need to install at least v90000.3 of LibDogTag-Unit-3.0."] = "Tu versión de LibDogTag-Unit-3.0 no admite placas identificativas. Necesitas instalar al menos v90000.3 de LibDogTag-Unit-3.0."
---[[Translation missing --]]
-L["On Enemy and Neutral Units You Cannot Attack"] = "On Enemy and Neutral Units You Cannot Attack"
---[[Translation missing --]]
-L["Shows enemy and neutral units that you cannot attack (e.g., neutral townsfolk) in headline view, regardless of their unit type settings."] = "Shows enemy and neutral units that you cannot attack (e.g., neutral townsfolk) in headline view, regardless of their unit type settings."
