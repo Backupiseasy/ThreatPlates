@@ -156,8 +156,9 @@ gaps, and correct marker-tagged entries as described in step 7.
   that are no longer in `Locales/enUS.lua`) via `python Source/localization_tool.py
   push-translation --locale deDE --token "$CF_API_KEY"` - see `select_keys_for_push()` in
   `Source/localization_tool.py`. Corrections of texts already on CurseForge reach it the
-  same way, no separate upload needed. For a sync PR merged into a `release/*` branch, run
-  that workflow manually (`workflow_dispatch`) once the change has reached `main`.
+  same way, no separate upload needed. The workflow runs on every push to `main` that
+  changes `Locales/enUS.lua` or `Locales/deDE.lua`, so a sync PR merged into a `release/*`
+  branch is uploaded once that release is merged into `main`.
 - `pull` never replaces a local deDE text with CurseForge's and never adds or removes a
   deDE marker (`REPO_AUTHORITATIVE_LOCALES` / `preserve_existing_translations()`).
 - The `--[[Machine translation --]]` marker only means "not reviewed yet". To accept a

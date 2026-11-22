@@ -13,20 +13,24 @@ name: Publish localization to CurseForge
 #      CurseForge's older ones.
 #
 # Triggers:
-#   - a merged PR from a localization-sync-* branch into main (the PR that
-#     sync_localization_translations.yml opens).
-#   - workflow_dispatch: manual run, e.g. after a deDE change that reached main without
-#     a sync PR. Idempotent - this workflow makes no commits.
+#   - push to main changing Locales/enUS.lua or Locales/deDE.lua: the merge of the sync
+#     PR into main, the later merge of a release/* branch a sync PR was merged into, or a
+#     direct change of these files on main. Never on release/* itself: CurseForge is shared
+#     by all branches, and `upload` (DeletePhrase) would delete the phrases of strings that
+#     exist on main but not on the release branch.
+#   - workflow_dispatch: manual run. Idempotent - this workflow makes no commits.
 #
-# The sync workflow also runs on the push of that merge and may pull deDE before this
-# workflow has uploaded it - `pull` keeps the local deDE texts (REPO_AUTHORITATIVE_LOCALES
-# in Source/localization_tool.py), so its PR does not revert them.
+# The sync workflow may also run on such a push and pull deDE before this workflow has
+# uploaded it - `pull` keeps the local deDE texts (REPO_AUTHORITATIVE_LOCALES in
+# Source/localization_tool.py), so its PR does not revert them.
 
 on:
   workflow_dispatch:
-  pull_request:
-    types: [closed]
+  push:
     branches: [main]
+    paths:
+      - "Locales/enUS.lua"
+      - "Locales/deDE.lua"
 
 concurrency:
   group: ${{ github.workflow }}
@@ -37,10 +41,6 @@ permissions:
 
 jobs:
   publish:
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      (github.event.pull_request.merged &&
-       startsWith(github.event.pull_request.head.ref, 'localization-sync-'))
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -49,8 +49,6 @@ jobs:
     steps:
       - name: Clone project
         uses: actions/checkout@v7
-        with:
-          ref: main
 
       - name: Install Python
         uses: actions/setup-python@v6

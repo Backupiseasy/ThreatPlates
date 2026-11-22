@@ -555,8 +555,9 @@ Point-in-time notes from past analysis passes — re-verify before relying on th
   translations from CurseForge and opens a pull request with the result. A commit that touches the locale
   files only adds noise and merge conflicts with that pull request.
 - **enUS and deDE are maintained in the repository, never on CurseForge**: deDE gaps are filled on the
-  sync PR's branch with `Source/mt_translate_prompt.md`; merging that PR into `main` triggers
-  `publish_localization_to_curseforge.yml`, which uploads the enUS phrases and *all* deDE translations.
+  sync PR's branch with `Source/mt_translate_prompt.md`; every push to `main` changing `enUS.lua` or
+  `deDE.lua` (sync PR merge, release merge) triggers `publish_localization_to_curseforge.yml`, which
+  uploads the enUS phrases and *all* deDE translations.
   `pull` never replaces a local deDE text with CurseForge's (`REPO_AUTHORITATIVE_LOCALES` in
   `Source/localization_tool.py`). All other locales are translated on CurseForge and only pulled.
 - Until that pull request is merged, new keys are missing from `enUS.lua`. That is harmless in-game - `enUS`

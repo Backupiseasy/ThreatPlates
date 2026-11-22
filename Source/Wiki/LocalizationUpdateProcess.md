@@ -16,52 +16,47 @@ into.
 
 ```mermaid
 flowchart TD
-    code["New, changed or removed L[&quot;...&quot;] in code"]
-    weekly["Weekly schedule / workflow_dispatch"]
-    cfEdit["Community translators edit<br/>other locales on CF"]
+    codeChange["New, changed or removed strings in code"]
+    weekly["Weekly schedule or manual run"]
+    cfEdit["Community translators edit other locales on CF"]
 
-    subgraph sync ["[Automatic] sync_localization_translations.yml"]
-        direction TB
-        s1["extract<br/>(scan L[&quot;...&quot;] calls)"]
-        s2["generate-enus --prune<br/>(rewrite Locales/enUS.lua)"]
-        s3["pull<br/>(all enabled locales from CF)"]
-        s4["open / update PR<br/>branch localization-sync-&lt;ref&gt;"]
+    subgraph syncWf ["Automatic: sync_localization_translations.yml"]
+        s1["extract: scan L strings in code"]
+        s2["generate-enus --prune: rewrite enUS.lua"]
+        s3["pull: all enabled locales from CF"]
+        s4["open or update sync PR"]
         s1 --> s2 --> s3 --> s4
     end
 
-    subgraph pr ["Sync PR: Update localization files from CurseForge"]
-        direction TB
-        p1["[Automatic] check_localization.yml<br/>sticky comment: missing keys,<br/>completeness per locale"]
+    subgraph syncPr ["Sync PR: Update localization files from CurseForge"]
+        p1["Automatic: check_localization.yml comment with missing keys and completeness"]
         p2{"deDE gaps?"}
-        p3["[Manual] run mt_translate_prompt.md locally<br/>commit to the PR branch"]
-        p4["[Manual] review, squash-merge"]
+        p3["Manual: run mt_translate_prompt.md, commit to PR branch"]
+        p4["Manual: review and squash-merge"]
         p1 --> p2
         p2 -- yes --> p3 --> p4
         p2 -- no --> p4
     end
 
-    target{"Merged into"}
+    mainPush{"enUS.lua or deDE.lua changed on main?"}
 
-    subgraph publish ["[Automatic] publish_localization_to_curseforge.yml"]
-        direction TB
+    subgraph publishWf ["Automatic: publish_localization_to_curseforge.yml"]
         u1["extract"]
-        u2["upload enUS phrases<br/>(DeletePhrase)"]
-        u3["push-translation --locale deDE<br/>(all deDE translations, DoNothing)"]
+        u2["upload enUS phrases, DeletePhrase"]
+        u3["push-translation: all deDE translations, DoNothing"]
         u1 --> u2 --> u3
     end
 
-    manual["[Manual] workflow_dispatch<br/>once the release reaches main"]
-    cf[("CurseForge project<br/>enUS + deDE = repository<br/>other locales = community")]
+    cf[("CurseForge: enUS and deDE as in repository, other locales by community")]
 
-    code -- "push to main / release/*" --> s1
+    codeChange -- "push to main or release" --> s1
     weekly --> s1
     s4 --> p1
-    p4 --> target
-    target -- main --> u1
-    target -- "release/*" --> manual --> u1
+    p4 -- "merge into main, or release merged into main later" --> mainPush
+    mainPush -- yes --> u1
     u3 --> cf
     cfEdit --> cf
-    cf -. "export (pull)" .-> s3
+    cf -. "export via pull" .-> s3
 ```
 
 CF never reads the source code: it only knows the phrases the publish workflow `upload`s (from its
@@ -169,9 +164,12 @@ uselessly) re-runs.
 
 ## Step 5 — [Automatic, main only] `publish_localization_to_curseforge.yml`
 
-Triggers when a PR from a `localization-sync-*` branch is merged into `main` (the sync PR from
-Step 4), or manually via `workflow_dispatch` - e.g. for a sync PR merged into a `release/*` branch,
-whose changes reach `main` later with the release merge, which does not trigger this workflow.
+Triggers on every push to `main` that changes `Locales/enUS.lua` or `Locales/deDE.lua`: the
+merge of the sync PR from Step 4 into `main`, the later merge of a `release/*` branch that a sync
+PR was merged into, or a direct change of these files on `main`. Also runs manually via
+`workflow_dispatch`. Never on `release/*` itself: CF is shared by all branches, and `upload` with
+`DeletePhrase` would delete the phrases of strings that exist on `main` but not on the release
+branch.
 
 1. `extract` (fresh scan of `main`).
 2. `upload` — pushes new/changed enUS phrases to CF (`DeletePhrase`: a phrase no longer present is
@@ -183,7 +181,7 @@ whose changes reach `main` later with the release merge, which does not trigger 
    same way. No `pull` beforehand - it would replace the local texts with CF's older ones.
 
 Nothing to do here — this is the only step in the whole pipeline that actually writes to CurseForge,
-and it's fully automatic once the sync PR is merged into `main`.
+and it's fully automatic once the change reaches `main`.
 
 ## Reviewing machine translations
 
