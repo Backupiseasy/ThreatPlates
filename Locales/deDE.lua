@@ -579,7 +579,6 @@ L["Off-Tank"] = "Off-Tank"
 L["OmniCC"] = "OmniCC"
 L["On & Off"] = "Aktive & Inaktive"
 L["On Bosses & Rares"] = "Auf Boss- & Rare-Mobs"
---[[Machine translation --]]
 L["On Enemy and Neutral Units You Cannot Attack"] = "Bei gegnerischen und neutralen Einheiten, die du nicht angreifen kannst"
 L["On Target"] = "Auf dem Ziel"
 L["On the left"] = "Links"
@@ -766,7 +765,6 @@ L["Shows a glow based on threat level around the nameplate's healthbar (in comba
 L["Shows a glow effect on auras that you can steal or purge."] = "Zeigt einen Leuchteffekt bei Auren an, die du stehlen oder reinigen kannst"
 L["Shows a glow effect on this custom nameplate."] = "Zeigt einen Leuchteffekt an dieser benutzerdefinierten Namensplakette an."
 L["Shows an icon for friends and guild members next to the nameplate of players."] = "Zeigt ein Symbol für Freunde und Gildenmitglieder an den Namensplaketten von Spielern an."
---[[Machine translation --]]
 L["Shows enemy and neutral units that you cannot attack (e.g., neutral townsfolk) in headline view, regardless of their unit type settings."] = "Zeigt gegnerische und neutrale Einheiten, die du nicht angreifen kannst (z. B. neutrale Stadtbewohner), im Headline-View an, unabhängig von den Einstellungen ihres Einheitentyps."
 L["Shows resource information for bosses and rares."] = "Ressourceninformation an Bossen und Rares anzeigen"
 L["Shows resource information only for alternative power (of bosses or rares, mostly)."] = "Ressourceninformation nur für alternative Energie anzeigen (hauptsächlich bei Bossen und Rares)"
