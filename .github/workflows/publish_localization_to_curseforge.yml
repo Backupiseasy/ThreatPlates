@@ -1,33 +1,36 @@
 name: Publish localization to CurseForge
 
 # Merge-gated counterpart to sync_localization_translations.yml, which only ever pulls
-# translations down. This workflow pushes:
-#   1. New/changed enUS source phrases -> CurseForge (so community translators have
-#      something to translate), via the same `upload` (DeletePhrase) already used before
-#      this workflow existed.
-#   2. Machine-translated deDE entries still pending human review -> CurseForge, via the
-#      new `push-translation` subcommand (DoNothing, only MT_MARKER_COMMENT-tagged keys -
-#      see Source/localization_tool.py and Source/mt_translate_prompt.md). Never uploads
-#      the whole deDE file, so a community translation for a key outside that subset is
-#      never touched.
+# translations down. enUS and deDE are maintained in this repository and never edited on
+# CurseForge, so after the sync PR (with the deDE gaps filled locally via
+# Source/mt_translate_prompt.md) is merged into main, this workflow pushes both:
+#   1. The enUS source phrases -> CurseForge (so community translators have something to
+#      translate), via `upload` (DeletePhrase, also purges phrases no longer used).
+#   2. Every deDE translation -> CurseForge, machine translations included, via
+#      `push-translation` (DoNothing - see select_keys_for_push() in
+#      Source/localization_tool.py). Local corrections of already uploaded texts reach
+#      CurseForge the same way. No `pull` beforehand: it would replace local texts with
+#      CurseForge's older ones.
 #
-# Trigger: push to main touching Locales/enUS.lua only. No commit-message gating needed -
-# this workflow makes no commits itself, so re-running it is always idempotent, and a
-# plain path filter also correctly covers a human editing enUS.lua/deDE.lua directly on
-# main without going through the bot PR.
+# Triggers:
+#   - push to main changing Locales/enUS.lua or Locales/deDE.lua: the merge of the sync
+#     PR into main, the later merge of a release/* branch a sync PR was merged into, or a
+#     direct change of these files on main. Never on release/* itself: CurseForge is shared
+#     by all branches, and `upload` (DeletePhrase) would delete the phrases of strings that
+#     exist on main but not on the release branch.
+#   - workflow_dispatch: manual run. Idempotent - this workflow makes no commits.
 #
-# Race mitigation: `pull` (step below) runs before `push-translation` and is never
-# committed - it only refreshes the runner's local Locales/deDE.lua so `push-translation`
-# recomputes which keys are still MT-marked against the latest CurseForge state. This
-# narrows (does not eliminate) the window where a community translation landing between
-# the local MT step and this run could get overwritten - see Conflicts §6 in the
-# localization-update-process plan.
+# The sync workflow may also run on such a push and pull deDE before this workflow has
+# uploaded it - `pull` keeps the local deDE texts (REPO_AUTHORITATIVE_LOCALES in
+# Source/localization_tool.py), so its PR does not revert them.
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
     paths:
       - "Locales/enUS.lua"
+      - "Locales/deDE.lua"
 
 concurrency:
   group: ${{ github.workflow }}
@@ -61,8 +64,5 @@ jobs:
       - name: Upload new phrase keys to CurseForge
         run: python Source/localization_tool.py upload --token "$CF_API_KEY"
 
-      - name: Refresh local deDE.lua from CurseForge (not committed - narrows the MT/community race window)
-        run: python Source/localization_tool.py pull --token "$CF_API_KEY" --locale deDE
-
-      - name: Push machine-translated deDE entries still pending review to CurseForge
+      - name: Upload all deDE translations to CurseForge
         run: python Source/localization_tool.py push-translation --locale deDE --token "$CF_API_KEY"

@@ -21,7 +21,7 @@ from localization_tool import (
     parse_mt_marked_keys,
     preserve_existing_translations,
     scan_repository,
-    select_mt_keys_for_push,
+    select_keys_for_push,
 )
 
 
@@ -355,18 +355,22 @@ def test_cmd_check_output_splits_human_vs_mt_pending(tmp_path, capsys):
     assert "+1 machine-translated pending review" in out
 
 
-def test_select_mt_keys_for_push_returns_only_marked_and_translated_keys(tmp_path):
+def test_select_keys_for_push_returns_every_translation_except_placeholders_and_stale_keys(tmp_path):
     p = write(str(tmp_path / "Locales" / "deDE.lua"),
-              # Bar: MT-marked and translated -> selected.
+              # Bar: machine translation -> selected.
               f'{MT_MARKER_COMMENT}\nL["Bar"] = "Bar-de"\n'
-              # Foo: translated but not MT-marked (human/community translation) -> skipped.
+              # Foo: reviewed translation -> selected.
               'L["Foo"] = "Foo-de"\n'
-              # Baz: MT-marked but still a placeholder (value == key) -> skipped.
-              f'{MT_MARKER_COMMENT}\nL["Baz"] = "Baz"\n')
+              # Buffs: loanword kept in English on purpose -> selected.
+              'L["Buffs"] = "Buffs"\n'
+              # Baz: CurseForge placeholder -> skipped.
+              '--[[Translation missing --]]\nL["Baz"] = "Baz"\n'
+              # Old: no longer in enUS.lua -> skipped.
+              'L["Old"] = "Alt"\n')
 
-    keys, entries = select_mt_keys_for_push(p)
+    keys, entries = select_keys_for_push(p, {"Bar", "Foo", "Buffs", "Baz"})
 
-    assert keys == ["Bar"]
+    assert keys == ["Bar", "Buffs", "Foo"]
     assert entries["Bar"] == "Bar-de"
 
 
@@ -455,6 +459,62 @@ def test_preserve_existing_translations_drops_mt_marker_when_curseforge_translat
 
     assert merged == ['L["Foo"] = "Foo-de, verbessert"']
     assert kept_markers == 0
+
+
+def test_preserve_existing_translations_local_wins_keeps_local_text_and_marker():
+    # deDE is maintained in the repository: an older text on CurseForge (e.g. before
+    # the upload after the merge of the sync PR) must not revert the local one.
+    existing = ['L["Foo"] = "Foo-de, korrigiert"', MT_MARKER_COMMENT, 'L["Bar"] = "Bar-de, korrigiert"']
+    incoming = ['L["Foo"] = "Foo-de"', 'L["Bar"] = "Bar-de"']
+
+    merged, preserved, carried_over, kept_markers = preserve_existing_translations(
+        existing, incoming, local_wins=True)
+
+    assert merged == ['L["Foo"] = "Foo-de, korrigiert"', MT_MARKER_COMMENT, 'L["Bar"] = "Bar-de, korrigiert"']
+    assert kept_markers == 1
+    assert carried_over == 0
+
+
+def test_preserve_existing_translations_local_wins_still_takes_new_keys_and_placeholders():
+    existing = ['L["Foo"] = "Foo-de"']
+    incoming = ['L["Foo"] = "Foo-de"', '--[[Translation missing --]]', 'L["New"] = "New"',
+                'L["Other"] = "Andere"']
+
+    merged, preserved, carried_over, kept_markers = preserve_existing_translations(
+        existing, incoming, local_wins=True)
+
+    assert merged == ['L["Foo"] = "Foo-de"', '--[[Translation missing --]]', 'L["New"] = "New"',
+                      'L["Other"] = "Andere"']
+
+
+def test_preserve_existing_translations_drops_keys_no_longer_in_enus():
+    # "Old" was removed from the code: CurseForge still exports it (it is deleted there
+    # only by the enUS upload after the merge) and it exists locally - it must go anyway.
+    existing = ['L["Foo"] = "Foo-de"', 'L["Gone"] = "Weg"']
+    incoming = ['L["Foo"] = "Foo-de"', 'L["Old"] = "Alt"',
+                '--[[Translation missing --]]', 'L["Older"] = "Older"']
+
+    merged, preserved, carried_over, kept_markers = preserve_existing_translations(
+        existing, incoming, valid_keys={"Foo"})
+
+    assert merged == ['L["Foo"] = "Foo-de"']
+    assert carried_over == 0
+
+
+def test_preserve_existing_translations_adds_placeholder_for_new_enus_key():
+    existing = ['L["Foo"] = "Foo-de"']
+    # Long-bracket keys/values count as present - a second placeholder assignment
+    # would replace their translation in-game.
+    incoming = ['L["Foo"] = "Foo-de"', 'L["Multi"] = [=[Zeile 1', 'Zeile 2]=]',
+                'L[ [=[Key 1', 'Key 2]=] ] = [=[Wert 1', 'Wert 2]=]']
+
+    merged, preserved, carried_over, kept_markers = preserve_existing_translations(
+        existing, incoming, valid_keys={"Foo", "Multi", "Key 1\nKey 2", 'New "quoted" \\ key'})
+
+    assert merged == ['L["Foo"] = "Foo-de"', 'L["Multi"] = [=[Zeile 1', 'Zeile 2]=]',
+                      'L[ [=[Key 1', 'Key 2]=] ] = [=[Wert 1', 'Wert 2]=]',
+                      '--[[Translation missing --]]',
+                      'L["New \\"quoted\\" \\\\ key"] = "New \\"quoted\\" \\\\ key"']
 
 
 def test_preserve_existing_translations_does_not_add_mt_marker_to_unmarked_entry():

@@ -2,7 +2,7 @@
 
 This page documents the end-to-end flow for keeping `Locales/*.lua` in sync with the code and with
 CurseForge (CF) community translations — from a new `L["..."]` string appearing in code to it
-showing up translated in-game. Two GitHub Actions workflows and one locally-run AI-assistant prompt
+showing up translated in-game. Three GitHub Actions workflows and one locally-run AI-assistant prompt
 make up the pipeline; each step below is marked **Automatic** (CI, no action needed) or **Manual**
 (a human has to do something).
 
@@ -14,31 +14,30 @@ into.
 
 ## Overview
 
+```mermaid
+flowchart TD
+    trigger["Push to main or release, weekly, manual"]
+    sync["sync workflow: extract, generate-enus, pull"]
+    pr["Sync PR"]
+    mt["Manual: mt_translate_prompt.md for deDE gaps"]
+    merge["Manual: squash-merge"]
+    publish["publish workflow: upload enUS, push-translation deDE"]
+    cf[("CurseForge")]
+
+    trigger --> sync --> pr --> mt --> merge
+    merge -- "enUS or deDE changed on main" --> publish --> cf
+    cf -. "other locales via pull" .-> sync
 ```
-new L["..."] in code
-        │
-        ▼
-[Automatic] sync_localization_translations.yml   (push to main/release/*, weekly, or manual)
-        │  extract → generate-enus --prune → pull → open/update PR
-        ▼
-"Update localization files from CurseForge" PR
-        │
-        ├─ [Automatic] check_localization.yml posts a sticky comment: missing keys +
-        │              per-locale completeness (human-reviewed vs. machine-translated pending review)
-        │
-        ├─ [Manual, only if deDE gaps are listed] run mt_translate_prompt.md locally
-        │
-        └─ [Manual] review diff, merge PR (squash-merge — see "Merge method" below)
-                │
-                ▼
-        target branch (main/release/*) updated
-                │
-                ▼ (only if the branch merges into `main`)
-[Automatic] publish_localization_to_curseforge.yml   (push to main, path: Locales/enUS.lua)
-        │  extract → upload (enUS → CF) → pull deDE → push-translation (MT deDE → CF)
-        ▼
-CurseForge project updated (new enUS phrases + MT deDE translations)
-```
+
+CF never reads the source code: it only knows the phrases the publish workflow `upload`s (from its
+own `extract` of `main`), and the deDE translations `push-translation` sends. Everything that
+changes on CF reaches the repository only through a sync PR - other locales' community
+translations included - and only once that PR is merged.
+
+**enUS and deDE are maintained in this repository** and never edited on CF. CF only receives them
+(Step 5); `pull` never replaces a local deDE text with CF's (`REPO_AUTHORITATIVE_LOCALES` in
+`Source/localization_tool.py`). All other locales are translated by the community on CF and pulled
+from there.
 
 ---
 
@@ -61,9 +60,14 @@ to the release/main one; a hotfix's new strings are picked up once it is merged 
    `--[[Machine translation --]]` marker, if any) is kept instead of the placeholder; if CF
    doesn't know the key at all yet (its enUS phrase hasn't reached CF via Step 5's `upload` -
    see the note below on that), the existing local translation is carried over unchanged
-   rather than silently dropped. If CF sends back a real translation whose text is still
-   exactly a local `--[[Machine translation --]]`-marked entry (i.e. Step 5's
-   `push-translation` uploaded it and nobody changed it since), the marker is kept too.
+   rather than silently dropped. For deDE, a local translation also wins over a different text
+   on CF (e.g. an older one, before Step 5 uploaded the correction), marker included. For the
+   other locales, CF's translation wins; the marker is only kept while CF's text is still exactly
+   the local machine translation.
+   The locale files are also aligned to the `enUS.lua` regenerated in step 2: entries for keys
+   no longer in it are dropped (CF still exports them until Step 5's `upload` deletes the
+   phrase), and a key new in it gets a `--[[Translation missing --]]` placeholder (CF doesn't
+   know it before Step 5). So the PR already shows removed and new strings for every locale.
    See `preserve_existing_translations()` in `Source/localization_tool.py`.
 4. Opens (or updates, if one is already open) a PR titled **"Update localization files from
    CurseForge"** on branch `localization-sync-<ref>`.
@@ -104,9 +108,8 @@ It:
   new entry with `--[[Machine translation --]]`.
 - Checks the terminology of all `--[[Machine translation --]]`-marked entries against the
   human-reviewed ones and reports deviations (e.g. "apply" rendered as "wirken" where the rest of
-  the file uses "anwenden"). A correction to an entry that is already on CF has to be uploaded with
-  `push-translation` before the next `pull`, otherwise CF's old text overwrites it - see
-  "Correcting a machine translation that is already on CurseForge" in the prompt file.
+  the file uses "anwenden"). Corrections, also of entries already on CF, are simply committed -
+  Step 5 uploads them after the merge.
 - Shows the full diff and an English → German overview table, and waits for explicit confirmation
   before committing/pushing anything.
 - Commits and pushes onto the *same* PR branch (adds a commit to the existing sync PR, never opens
@@ -131,33 +134,30 @@ uselessly) re-runs.
 
 ## Step 5 — [Automatic, main only] `publish_localization_to_curseforge.yml`
 
-Triggers on push to `main` touching `Locales/enUS.lua` — i.e. only once the merged change from Step 4
-reaches `main` (directly, or via a later `release/*` → `main` merge as part of the normal release
-process; that later merge is outside this pipeline's scope).
+Triggers on every push to `main` that changes `Locales/enUS.lua` or `Locales/deDE.lua`: the
+merge of the sync PR from Step 4 into `main`, the later merge of a `release/*` branch that a sync
+PR was merged into, or a direct change of these files on `main`. Also runs manually via
+`workflow_dispatch`. Never on `release/*` itself: CF is shared by all branches, and `upload` with
+`DeletePhrase` would delete the phrases of strings that exist on `main` but not on the release
+branch.
 
 1. `extract` (fresh scan of `main`).
 2. `upload` — pushes new/changed enUS phrases to CF (`DeletePhrase`: a phrase no longer present is
    removed from CF too, e.g. after a wording fix).
-3. `pull --locale deDE` — refreshes the runner's local `deDE.lua` from CF (not committed) so the
-   next step only pushes keys still genuinely MT-pending, narrowing the window where a community
-   translation landing in between could get overwritten.
-4. `push-translation --locale deDE` — uploads *only* the still-`--[[Machine translation --]]`-marked
-   deDE entries to CF (`DoNothing`: never deletes a community translation for a key outside that
-   narrow set).
+3. `push-translation --locale deDE` — uploads *every* deDE translation to CF: reviewed entries,
+   `--[[Machine translation --]]`-marked entries and loanwords kept in English; only CF's
+   `--[[Translation missing --]]` placeholders and keys no longer in `enUS.lua` are left out
+   (`DoNothing`: never deletes anything on CF). Corrections of texts already on CF reach it the
+   same way. No `pull` beforehand - it would replace the local texts with CF's older ones.
 
 Nothing to do here — this is the only step in the whole pipeline that actually writes to CurseForge,
-and it's fully automatic once code reaches `main`.
+and it's fully automatic once the change reaches `main`.
 
-## After CF is updated
+## Reviewing machine translations
 
-Once a community translator edits a marker-tagged key on CF, the next Step 1 `pull` overwrites that
-line with CF's export (which never carries the marker) — the key silently becomes human-reviewed,
-no manual bookkeeping needed anywhere in this pipeline.
-
-A marker-tagged key whose text on CF is still exactly the machine translation keeps its marker
-across pulls (CF merely echoing back what Step 5 uploaded is not a review). To sign off such a
-translation as-is, delete its `--[[Machine translation --]]` line in `Locales/deDE.lua` by hand —
-`pull` never adds a marker to an unmarked entry.
+A `--[[Machine translation --]]` marker only means "not reviewed yet" - it does not change what is
+uploaded. To sign off a machine translation, correct it if needed and delete its marker line in
+`Locales/deDE.lua` by hand; `pull` never adds or removes a deDE marker.
 
 ---
 
