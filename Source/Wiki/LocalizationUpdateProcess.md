@@ -2,7 +2,7 @@
 
 This page documents the end-to-end flow for keeping `Locales/*.lua` in sync with the code and with
 CurseForge (CF) community translations — from a new `L["..."]` string appearing in code to it
-showing up translated in-game. Two GitHub Actions workflows and one locally-run AI-assistant prompt
+showing up translated in-game. Three GitHub Actions workflows and one locally-run AI-assistant prompt
 make up the pipeline; each step below is marked **Automatic** (CI, no action needed) or **Manual**
 (a human has to do something).
 
@@ -14,31 +14,60 @@ into.
 
 ## Overview
 
+```mermaid
+flowchart TD
+    code["New, changed or removed L[&quot;...&quot;] in code"]
+    weekly["Weekly schedule / workflow_dispatch"]
+    cfEdit["Community translators edit<br/>other locales on CF"]
+
+    subgraph sync ["[Automatic] sync_localization_translations.yml"]
+        direction TB
+        s1["extract<br/>(scan L[&quot;...&quot;] calls)"]
+        s2["generate-enus --prune<br/>(rewrite Locales/enUS.lua)"]
+        s3["pull<br/>(all enabled locales from CF)"]
+        s4["open / update PR<br/>branch localization-sync-&lt;ref&gt;"]
+        s1 --> s2 --> s3 --> s4
+    end
+
+    subgraph pr ["Sync PR: Update localization files from CurseForge"]
+        direction TB
+        p1["[Automatic] check_localization.yml<br/>sticky comment: missing keys,<br/>completeness per locale"]
+        p2{"deDE gaps?"}
+        p3["[Manual] run mt_translate_prompt.md locally<br/>commit to the PR branch"]
+        p4["[Manual] review, squash-merge"]
+        p1 --> p2
+        p2 -- yes --> p3 --> p4
+        p2 -- no --> p4
+    end
+
+    target{"Merged into"}
+
+    subgraph publish ["[Automatic] publish_localization_to_curseforge.yml"]
+        direction TB
+        u1["extract"]
+        u2["upload enUS phrases<br/>(DeletePhrase)"]
+        u3["push-translation --locale deDE<br/>(all deDE translations, DoNothing)"]
+        u1 --> u2 --> u3
+    end
+
+    manual["[Manual] workflow_dispatch<br/>once the release reaches main"]
+    cf[("CurseForge project<br/>enUS + deDE = repository<br/>other locales = community")]
+
+    code -- "push to main / release/*" --> s1
+    weekly --> s1
+    s4 --> p1
+    p4 --> target
+    target -- main --> u1
+    target -- "release/*" --> manual --> u1
+    u3 --> cf
+    cfEdit --> cf
+    cf -. "export (pull)" .-> s3
 ```
-new L["..."] in code
-        │
-        ▼
-[Automatic] sync_localization_translations.yml   (push to main/release/*, weekly, or manual)
-        │  extract → generate-enus --prune → pull → open/update PR
-        ▼
-"Update localization files from CurseForge" PR
-        │
-        ├─ [Automatic] check_localization.yml posts a sticky comment: missing keys +
-        │              per-locale completeness (human-reviewed vs. machine-translated pending review)
-        │
-        ├─ [Manual, only if deDE gaps are listed] run mt_translate_prompt.md locally
-        │
-        └─ [Manual] review diff, merge PR (squash-merge — see "Merge method" below)
-                │
-                ▼
-        target branch (main/release/*) updated
-                │
-                ▼ (only if the sync PR is merged into `main`)
-[Automatic] publish_localization_to_curseforge.yml   (merged localization-sync-* PR into main, or manual)
-        │  extract → upload (enUS → CF) → push-translation (all deDE → CF)
-        ▼
-CurseForge project updated (enUS phrases + all deDE translations)
-```
+
+CF never reads the source code: it only knows the phrases the publish workflow `upload`s (from its
+own `extract` of `main`), and the deDE translations `push-translation` sends. Everything that
+changes on CF reaches the repository only through a sync PR - other locales' community
+translations included - and only once that PR is merged.
 
 **enUS and deDE are maintained in this repository** and never edited on CF. CF only receives them
 (Step 5); `pull` never replaces a local deDE text with CF's (`REPO_AUTHORITATIVE_LOCALES` in
