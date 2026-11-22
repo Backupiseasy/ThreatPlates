@@ -165,9 +165,16 @@ def cmd_extract(args):
 
     combined = sorted(set(static_keys) | set(registry_keys))
 
+    # A string value in the registry (e.g. L["Minuss"] = "Minors") is the English text
+    # of that key - upload it as such, as cmd_generate_enus writes it into enUS.lua.
+    # With `= true`, CurseForge shows the key itself as the English source text.
+    registry_entries = parse_locale_entries(reg_path) if os.path.exists(reg_path) else {}
+    overrides = {k: v for k, v in registry_entries.items() if v is not None}
+
     with open(args.out, "w", encoding="utf-8") as f:
         for key in combined:
-            f.write(f'L["{lua_quote(key)}"] = true\n')
+            value = f'"{lua_quote(overrides[key])}"' if key in overrides else "true"
+            f.write(f'L["{lua_quote(key)}"] = {value}\n')
 
     print(f"Wrote {len(combined)} phrase keys to {args.out}")
     return 0
