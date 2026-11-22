@@ -599,6 +599,8 @@ L["Off-Tank"] = "副坦克"
 L["OmniCC"] = "OmniCC"
 L["On & Off"] = "顯示所有點數"
 L["On Bosses & Rares"] = "首領 & 稀有怪"
+--[[Translation missing --]]
+L["On Enemy and Neutral Units You Cannot Attack"] = "On Enemy and Neutral Units You Cannot Attack"
 L["On Target"] = "當前目標"
 L["On the left"] = "左側"
 L["One"] = "一"
@@ -801,6 +803,8 @@ L["Shows a glow based on threat level around the nameplate's healthbar (in comba
 L["Shows a glow effect on auras that you can steal or purge."] = "你可以竊取或淨化的光環顯示發光效果。"
 L["Shows a glow effect on this custom nameplate."] = "在這個自訂血條上顯示發光效果。"
 L["Shows an icon for friends and guild members next to the nameplate of players."] = "在玩家血條旁顯示好友和公會成員圖示。"
+--[[Translation missing --]]
+L["Shows enemy and neutral units that you cannot attack (e.g., neutral townsfolk) in headline view, regardless of their unit type settings."] = "Shows enemy and neutral units that you cannot attack (e.g., neutral townsfolk) in headline view, regardless of their unit type settings."
 L["Shows resource information for bosses and rares."] = "顯示首領和稀有怪的資源。"
 L["Shows resource information only for alternative power (of bosses or rares, mostly)."] = "僅顯示額外能量資源資訊（主要用於首領或稀有怪物）。"
 L["Shows the name of the player that interrupted the spell."] = "顯示打斷該法術的玩家名稱。"
@@ -1080,7 +1084,3 @@ L["You can access the "] = "要使用 "
 L["You cannot delete General Settings, only custom nameplates entries."] = "無法刪除一般設定，只能刪除自訂血條。"
 L["You currently have two nameplate addons enabled: |cff89F559Threat Plates|r and |cff89F559%s|r. Please disable one of these, otherwise two overlapping nameplates will be shown for units."] = "目前啟用了兩個血條插件: |cff89F559威力血條 (Threat Plates)|r 和 |cff89F559%s|r。請停用其中一個血條插件，否則會重複出現兩個疊在一起的血條。"
 L["Your version of LibDogTag-Unit-3.0 does not support nameplates. You need to install at least v90000.3 of LibDogTag-Unit-3.0."] = "你所使用的 LibDogTag-Unit-3.0 版本不支援名條，請安裝  v90000.3 或更新的版本。"
---[[Translation missing --]]
-L["On Enemy and Neutral Units You Cannot Attack"] = "On Enemy and Neutral Units You Cannot Attack"
---[[Translation missing --]]
-L["Shows enemy and neutral units that you cannot attack (e.g., neutral townsfolk) in headline view, regardless of their unit type settings."] = "Shows enemy and neutral units that you cannot attack (e.g., neutral townsfolk) in headline view, regardless of their unit type settings."
