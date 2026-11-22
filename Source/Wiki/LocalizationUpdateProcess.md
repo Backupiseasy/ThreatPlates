@@ -143,7 +143,9 @@ branch.
 
 1. `extract` (fresh scan of `main`).
 2. `upload` — pushes new/changed enUS phrases to CF (`DeletePhrase`: a phrase no longer present is
-   removed from CF too, e.g. after a wording fix).
+   removed from CF too, e.g. after a wording fix). A key with an English text of its own in
+   `Source/LocalizationSpecialPhraseKeys.lua` (e.g. `L["Minuss"] = "Minors"`) is uploaded with
+   that text; all others with `= true`, so CF shows the key itself as English text.
 3. `push-translation --locale deDE` — uploads *every* deDE translation to CF: reviewed entries,
    `--[[Machine translation --]]`-marked entries and loanwords kept in English; only CF's
    `--[[Translation missing --]]` placeholders and keys no longer in `enUS.lua` are left out

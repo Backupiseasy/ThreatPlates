@@ -160,6 +160,25 @@ def test_extract_output_is_valid_lua_and_includes_registry_keys(tmp_path):
     assert "Hello\\nWorld via long-bracket" in content
 
 
+def test_extract_uploads_registry_override_as_english_text(tmp_path):
+    write(str(tmp_path / "Options.lua"), 'x = L["Plain"]\n')
+    write(str(tmp_path / "Source" / "LocalizationSpecialPhraseKeys.lua"),
+          'L["Dynamic"] = true\nL["Minuss"] = "Minors"\n')
+
+    out_file = str(tmp_path / "out.txt")
+
+    class Args:
+        root = str(tmp_path)
+        out = out_file
+
+    assert cmd_extract(Args()) == 0
+
+    lines = open(out_file, encoding="utf-8").read().splitlines()
+    assert 'L["Minuss"] = "Minors"' in lines
+    assert 'L["Dynamic"] = true' in lines
+    assert 'L["Plain"] = true' in lines
+
+
 # ---------------------------------------------------------------------------
 # check: the actual regression this tool exists to prevent
 # ---------------------------------------------------------------------------
