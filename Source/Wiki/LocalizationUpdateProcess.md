@@ -70,6 +70,10 @@ to the release/main one; a hotfix's new strings are picked up once it is merged 
    on CF (e.g. an older one, before Step 5 uploaded the correction), marker included. For the
    other locales, CF's translation wins; the marker is only kept while CF's text is still exactly
    the local machine translation.
+   The locale files are also aligned to the `enUS.lua` regenerated in step 2: entries for keys
+   no longer in it are dropped (CF still exports them until Step 5's `upload` deletes the
+   phrase), and a key new in it gets a `--[[Translation missing --]]` placeholder (CF doesn't
+   know it before Step 5). So the PR already shows removed and new strings for every locale.
    See `preserve_existing_translations()` in `Source/localization_tool.py`.
 4. Opens (or updates, if one is already open) a PR titled **"Update localization files from
    CurseForge"** on branch `localization-sync-<ref>`.

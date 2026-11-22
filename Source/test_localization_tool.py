@@ -487,6 +487,36 @@ def test_preserve_existing_translations_local_wins_still_takes_new_keys_and_plac
                       'L["Other"] = "Andere"']
 
 
+def test_preserve_existing_translations_drops_keys_no_longer_in_enus():
+    # "Old" was removed from the code: CurseForge still exports it (it is deleted there
+    # only by the enUS upload after the merge) and it exists locally - it must go anyway.
+    existing = ['L["Foo"] = "Foo-de"', 'L["Gone"] = "Weg"']
+    incoming = ['L["Foo"] = "Foo-de"', 'L["Old"] = "Alt"',
+                '--[[Translation missing --]]', 'L["Older"] = "Older"']
+
+    merged, preserved, carried_over, kept_markers = preserve_existing_translations(
+        existing, incoming, valid_keys={"Foo"})
+
+    assert merged == ['L["Foo"] = "Foo-de"']
+    assert carried_over == 0
+
+
+def test_preserve_existing_translations_adds_placeholder_for_new_enus_key():
+    existing = ['L["Foo"] = "Foo-de"']
+    # Long-bracket keys/values count as present - a second placeholder assignment
+    # would replace their translation in-game.
+    incoming = ['L["Foo"] = "Foo-de"', 'L["Multi"] = [=[Zeile 1', 'Zeile 2]=]',
+                'L[ [=[Key 1', 'Key 2]=] ] = [=[Wert 1', 'Wert 2]=]']
+
+    merged, preserved, carried_over, kept_markers = preserve_existing_translations(
+        existing, incoming, valid_keys={"Foo", "Multi", "Key 1\nKey 2", 'New "quoted" \\ key'})
+
+    assert merged == ['L["Foo"] = "Foo-de"', 'L["Multi"] = [=[Zeile 1', 'Zeile 2]=]',
+                      'L[ [=[Key 1', 'Key 2]=] ] = [=[Wert 1', 'Wert 2]=]',
+                      '--[[Translation missing --]]',
+                      'L["New \\"quoted\\" \\\\ key"] = "New \\"quoted\\" \\\\ key"']
+
+
 def test_preserve_existing_translations_does_not_add_mt_marker_to_unmarked_entry():
     # Removing the marker locally is how a maintainer signs off an unchanged machine
     # translation - a later pull echoing the same value must not bring it back.

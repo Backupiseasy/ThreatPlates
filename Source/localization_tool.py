@@ -181,8 +181,11 @@ def parse_locale_entries(locale_path):
     """Every L["key"] = ... assignment in a Locales/<locale>.lua file, as a
     key -> value dict (value is None for a non-string RHS, e.g. a variable).
     Works for any locale, not just enUS - the AceLocale file format is the same."""
+    return _entries_of_tree(parse_lua_file(locale_path))
+
+
+def _entries_of_tree(tree):
     entries = {}
-    tree = parse_lua_file(locale_path)
     for node in ast.walk(tree):
         if not isinstance(node, ast.Assign):
             continue
@@ -559,7 +562,18 @@ def _index_translated_entries(lines):
     return index
 
 
-def preserve_existing_translations(existing_lines, incoming_lines, local_wins=False):
+_LUA_ESCAPE_RE = re.compile(r'\\(.)', re.S)
+_LUA_ESCAPES = {"n": "\n", "t": "\t", "r": "\r"}
+
+
+def _unquote_lua_literal(literal):
+    """Value of a double-quoted Lua string literal as written by lua_quote() or
+    CurseForge's export (only backslash escapes of single characters occur there)."""
+    body = literal[1:-1] if len(literal) >= 2 and literal[0] == literal[-1] == '"' else literal
+    return _LUA_ESCAPE_RE.sub(lambda m: _LUA_ESCAPES.get(m.group(1), m.group(1)), body)
+
+
+def preserve_existing_translations(existing_lines, incoming_lines, local_wins=False, valid_keys=None):
     """CurseForge marks an untranslated key with a `--[[Translation missing --]]`
     comment followed by `L["key"] = "key"` (value identical to key). Blindly
     overwriting the locale file with that placeholder would regress an already
@@ -587,8 +601,17 @@ def preserve_existing_translations(existing_lines, incoming_lines, local_wins=Fa
     MT_MARKER_COMMENT. Without it, CurseForge's translation wins and the marker is
     dropped (a community translator changed it - that is the review).
 
+    With valid_keys (the keys of Locales/enUS.lua), entries for any other key are
+    dropped - both from CurseForge's export (CurseForge only deletes a phrase with the
+    enUS `upload` after the merge) and from the carry-over - so a key removed from the
+    code also disappears from every locale file in the same sync PR.
+
     Returns (merged_lines, preserved_count, carried_over_count, kept_marker_count)."""
     existing_by_key = _index_translated_entries(existing_lines)
+
+    def is_valid(literal):
+        return valid_keys is None or _unquote_lua_literal(literal) in valid_keys
+
     result = []
     preserved = 0
     kept_markers = 0
@@ -598,6 +621,9 @@ def preserve_existing_translations(existing_lines, incoming_lines, local_wins=Fa
         line = incoming_lines[i]
         if line.strip() == MISSING_TRANSLATION_COMMENT and i + 1 < n:
             m = _LOCALE_ENTRY_RE.match(incoming_lines[i + 1].strip())
+            if m and not is_valid(m.group(1)):
+                i += 2
+                continue
             # CurseForge exports an empty value instead of the key for a phrase
             # it only knows from a translation import (push-translation) and has
             # no enUS source text for yet - upload is merge-gated, so that state
@@ -618,6 +644,9 @@ def preserve_existing_translations(existing_lines, incoming_lines, local_wins=Fa
                     i += 2
                     continue
         m2 = _LOCALE_ENTRY_RE.match(line.strip())
+        if m2 and not is_valid(m2.group(1)):
+            i += 1
+            continue
         if m2:
             seen_keys.add(m2.group(1))
             existing = existing_by_key.get(m2.group(1))
@@ -647,12 +676,30 @@ def preserve_existing_translations(existing_lines, incoming_lines, local_wins=Fa
 
     carried_over = 0
     for key, (existing_line, mt_marked) in existing_by_key.items():
-        if key in seen_keys:
+        if key in seen_keys or not is_valid(key):
             continue
         if mt_marked:
             result.append(MT_MARKER_COMMENT)
         result.append(existing_line)
         carried_over += 1
+
+    # A key new in enUS.lua is unknown to CurseForge until the enUS `upload` after the
+    # merge - add the same placeholder CurseForge would send, so the sync PR shows it
+    # as untranslated in every locale. The keys present are taken from the parsed
+    # result, not the line regex: keys and values in long-bracket syntax ([=[...]=],
+    # multi-line) exist too, and a second, later placeholder assignment would replace
+    # their translation in-game.
+    if valid_keys is not None:
+        try:
+            present = set(_entries_of_tree(ast.parse("\n".join(result))))
+        except Exception as e:
+            print(f"  WARNING: could not parse merged locale, no placeholders added: {e}",
+                  file=sys.stderr)
+            present = valid_keys
+        for key in sorted(valid_keys - present):
+            quoted = f'"{lua_quote(key)}"'
+            result.append(MISSING_TRANSLATION_COMMENT)
+            result.append(f"L[{quoted}] = {quoted}")
 
     return result, preserved, carried_over, kept_markers
 
@@ -666,6 +713,12 @@ def cmd_pull(args):
     if not locales:
         print("No locales to pull (enUS excluded, none enabled, or --locale filtered all out).")
         return 0
+
+    # Keys of the enUS.lua regenerated by generate-enus --prune just before this pull in
+    # the sync workflow - entries for other keys are dropped, see
+    # preserve_existing_translations.
+    enus_path = os.path.join(args.root, "Locales", "enUS.lua")
+    enus_keys = parse_locale_keys(enus_path) if os.path.exists(enus_path) else None
 
     failures = []
     for locale in locales:
@@ -704,7 +757,7 @@ def cmd_pull(args):
                 existing_lines = f.read().splitlines()
         local_wins = locale in REPO_AUTHORITATIVE_LOCALES
         body_lines, preserved, carried_over, kept_markers = preserve_existing_translations(
-            existing_lines, body_lines, local_wins=local_wins)
+            existing_lines, body_lines, local_wins=local_wins, valid_keys=enus_keys)
         if local_wins:
             print(f"  {locale} is maintained in the repository - local translations kept over CurseForge's.")
         if kept_markers:
