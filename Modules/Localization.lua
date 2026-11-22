@@ -83,7 +83,7 @@ local TruncateWestern = function(value)
 
   if abs_value >= 1e6 then
     return format("%.1fm", value / 1e6)
-  elseif abs_value >= 1e4 then
+  elseif abs_value >= 1e3 then
     return format("%.1fk", value / 1e3)
   else
     return format("%i", value)
@@ -139,7 +139,7 @@ local ABBREVIATE_NUMBERS_WESTERN_OPTIONS = {
     -- Same breakpoints as TruncateWestern, plus billions as values on these clients can reach them
     { breakpoint = 1e9, abbreviation = "b", significandDivisor = 1e8, fractionDivisor = 10, abbreviationIsGlobal = false },
     { breakpoint = 1e6, abbreviation = "m", significandDivisor = 1e5, fractionDivisor = 10, abbreviationIsGlobal = false },
-    { breakpoint = 1e4, abbreviation = "k", significandDivisor = 1e2, fractionDivisor = 10, abbreviationIsGlobal = false },
+    { breakpoint = 1e3, abbreviation = "k", significandDivisor = 1e2, fractionDivisor = 10, abbreviationIsGlobal = false },
   },
 }
 

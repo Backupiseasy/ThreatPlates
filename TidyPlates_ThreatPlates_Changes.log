@@ -1,4 +1,9 @@
 ------------------------------------------------------
+13.3.10 (2026-11-22)
+------------------------------------------------------
+* Changed shortened numbers in texts (e.g., health, absorbs, threat value) to be shortened from 1k on instead of from 10k on, e.g., 5400 is now shown as 5.4k [GH-367, Comment #8755251].
+
+------------------------------------------------------
 13.3.9 (2026-11-22)
 ------------------------------------------------------
 * Removed the chat message that auras can only be shown after combat has ended, as it was shown too often.
