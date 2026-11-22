@@ -16,47 +16,17 @@ into.
 
 ```mermaid
 flowchart TD
-    codeChange["New, changed or removed strings in code"]
-    weekly["Weekly schedule or manual run"]
-    cfEdit["Community translators edit other locales on CF"]
+    trigger["Push to main or release, weekly, manual"]
+    sync["sync workflow: extract, generate-enus, pull"]
+    pr["Sync PR"]
+    mt["Manual: mt_translate_prompt.md for deDE gaps"]
+    merge["Manual: squash-merge"]
+    publish["publish workflow: upload enUS, push-translation deDE"]
+    cf[("CurseForge")]
 
-    subgraph syncWf ["Automatic: sync_localization_translations.yml"]
-        s1["extract: scan L strings in code"]
-        s2["generate-enus --prune: rewrite enUS.lua"]
-        s3["pull: all enabled locales from CF"]
-        s4["open or update sync PR"]
-        s1 --> s2 --> s3 --> s4
-    end
-
-    subgraph syncPr ["Sync PR: Update localization files from CurseForge"]
-        p1["Automatic: check_localization.yml comment with missing keys and completeness"]
-        p2{"deDE gaps?"}
-        p3["Manual: run mt_translate_prompt.md, commit to PR branch"]
-        p4["Manual: review and squash-merge"]
-        p1 --> p2
-        p2 -- yes --> p3 --> p4
-        p2 -- no --> p4
-    end
-
-    mainPush{"enUS.lua or deDE.lua changed on main?"}
-
-    subgraph publishWf ["Automatic: publish_localization_to_curseforge.yml"]
-        u1["extract"]
-        u2["upload enUS phrases, DeletePhrase"]
-        u3["push-translation: all deDE translations, DoNothing"]
-        u1 --> u2 --> u3
-    end
-
-    cf[("CurseForge: enUS and deDE as in repository, other locales by community")]
-
-    codeChange -- "push to main or release" --> s1
-    weekly --> s1
-    s4 --> p1
-    p4 -- "merge into main, or release merged into main later" --> mainPush
-    mainPush -- yes --> u1
-    u3 --> cf
-    cfEdit --> cf
-    cf -. "export via pull" .-> s3
+    trigger --> sync --> pr --> mt --> merge
+    merge -- "enUS or deDE changed on main" --> publish --> cf
+    cf -. "other locales via pull" .-> sync
 ```
 
 CF never reads the source code: it only knows the phrases the publish workflow `upload`s (from its
