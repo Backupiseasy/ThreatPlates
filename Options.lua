@@ -11118,7 +11118,6 @@ local function CreateOptionsTable()
                   type = "group",
                   order = 10,
                   inline = true,
-                  hidden = Addon.HAS_MIDNIGHT_API,
                   args = {
                     OffTank = {
                       type = "toggle",

@@ -1,3 +1,4 @@
 # @project-version@ (@build-time@)
 
 * Changed shortened numbers in texts (e.g., health, absorbs, threat value) to be shortened from 1k on instead of from 10k on, e.g., 5400 is now shown as 5.4k [GH-367, Comment #8755251].
+* Added the highlighting of mobs tanked by another tank (off-tank) on Retail and WoW Forever again and changed how off-tanks are detected in all WoW versions: other players count as off-tanks if they have the tank role or are main tank in a raid, and pets of all group members count as well.
