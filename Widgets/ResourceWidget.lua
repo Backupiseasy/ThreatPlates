@@ -350,6 +350,13 @@ end
 
 function Widget:UpdateSettings()
   self.db = Addon.db.profile.ResourceWidget
+
+  -- Target-only widgets skip the usual plate layout pass, so width, height,
+  -- and anchor changes never reached the bar until the next reload.
+  if WidgetFrame then
+    self:UpdateLayout()
+    self:PLAYER_TARGET_CHANGED()
+  end
 end
 
 --function Widget:UpdateAllFramesAfterSettingsUpdate()

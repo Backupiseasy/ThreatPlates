@@ -62,7 +62,17 @@ local function SetIconTexture(self, texture)
     icon_texture:SetTexCoord(0, 1, 0, 1)
   end
 
+  -- Masque sizes the skin from the button size at skinning time. On reload the
+  -- button still reports the ActionButton template size until it is set
+  -- explicitly, so the class icon stays huge until something re-skins it.
   if UseMasque then
+    local parent = self:GetParent()
+    if parent and self.SetSize then
+      local width, height = parent:GetSize()
+      if width and width > 0 and height and height > 0 then
+        self:SetSize(width, height)
+      end
+    end
     self.MasqueGroup:ReSkin(self)
   end
 end
