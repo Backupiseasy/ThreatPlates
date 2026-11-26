@@ -326,8 +326,14 @@ client (warcraft.wiki.gg, confirmed in-game: the target was lost before a far-aw
   touched yet (`UnitThreatSituation("pet")` without mob still returns 3). Such a mob gets no off-tank (or any threat)
   color until the player is on its threat list (verified in-game 2026-11, Retail). In groups this rarely matters, as
   group members in combat are usually on the threat list anyway.
-- The player's own tank role (`Addon.GetPlayerRole`) is unrelated: it is derived from spec/stance/form/auras only,
-  never from the assigned group role.
+- The player's own tank role (`Addon.GetPlayerRole`, automatic role detection) is determined separately: from
+  Mists on (`ExpansionIsAtLeastMists`) by the active spec only, never by the assigned group role. Before Mists
+  (Classic Era, TBC, and "WoW Forever", which has no specs like Mists+): assigned group role TANK or raid main tank
+  first (players can
+  tank there without a tank stance/form/aura, e.g. warriors in Battle Stance); with any other role (DAMAGER, HEALER,
+  NONE, or secret) stance/form/auras (`UnitHasEffectivelyTankAura` on Forever). The player's role is cached
+  (`Nameplate.lua`, `UpdatePlayerTankRole`), updated one frame after `GROUP_ROSTER_UPDATE`/`PLAYER_ROLES_ASSIGNED`/
+  `PLAYER_ENTERING_WORLD`, and active plates are restyled only if the player's own tank role changed.
 - Debug output (`Addon.DEBUG`): duration of each rebuild plus average, and the cache content whenever it changes.
 
 ### Database / profiles (`Database.lua`, `Addon.lua`)

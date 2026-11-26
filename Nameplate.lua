@@ -2407,12 +2407,55 @@ else
     return not IsSecretValueTP(has_tank_aura) and has_tank_aura == true
   end or PLAYER_IS_TANK_BY_CLASS["DEFAULT"]
 
+  -- The player's assigned group role TANK or main tank in a raid comes first, as players can tank without a tank
+  -- stance, form or aura in these versions (e.g., warriors in Battle Stance). With any other role (DAMAGER, HEALER,
+  -- NONE), stance, form and auras are checked. The role is cached and only updated after group or role changes;
+  -- plates are only updated if the player's own tank role changed. If the role should ever be secret, the player has
+  -- no tank role.
+  local UnitGroupRolesAssigned, GetPartyAssignment = UnitGroupRolesAssigned, GetPartyAssignment
+  local PlayerHasTankRole = false
+  local PlayerTankRoleUpdateScheduled = false
+  local PlayerTankRoleTracker = {} -- Separate subscriber for EventService (one handler per subscriber and event)
+
+  local function UpdatePlayerTankRole()
+    PlayerTankRoleUpdateScheduled = false
+
+    local has_tank_role = GetPartyAssignment("MAINTANK", "player") and true or false
+    if not has_tank_role then
+      local role = UnitGroupRolesAssigned("player")
+      has_tank_role = not IsSecretValueTP(role) and role == "TANK"
+    end
+
+    if has_tank_role ~= PlayerHasTankRole then
+      PlayerHasTankRole = has_tank_role
+      Addon.Logging.Debug("Player tank role changed:", has_tank_role)
+
+      if Addon.db.profile.optionRoleDetectionAutomatic then
+        for _, tp_frame in Addon:GetActiveThreatPlates() do
+          StyleModule.Update(tp_frame)
+        end
+      end
+    end
+  end
+
+  -- Bursts of these events (e.g., when joining a group) cause only one update in the next frame
+  local function SchedulePlayerTankRoleUpdate()
+    if not PlayerTankRoleUpdateScheduled then
+      PlayerTankRoleUpdateScheduled = true
+      C_Timer.After(0, UpdatePlayerTankRole)
+    end
+  end
+
+  Addon.EventService.Subscribe(PlayerTankRoleTracker, "GROUP_ROSTER_UPDATE", SchedulePlayerTankRoleUpdate)
+  Addon.EventService.Subscribe(PlayerTankRoleTracker, "PLAYER_ROLES_ASSIGNED", SchedulePlayerTankRoleUpdate)
+  Addon.EventService.Subscribe(PlayerTankRoleTracker, "PLAYER_ENTERING_WORLD", SchedulePlayerTankRoleUpdate)
+
   function Addon.GetPlayerRole()
     local db = Addon.db
 
     local role
     if db.profile.optionRoleDetectionAutomatic then
-      role = PlayerHasTankAura() or PlayerIsTankByClassFunction()
+      role = PlayerHasTankRole or PlayerHasTankAura() or PlayerIsTankByClassFunction()
     else
       role = db.char.spec[1]
     end
