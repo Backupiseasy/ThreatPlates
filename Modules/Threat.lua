@@ -53,7 +53,7 @@ local ThreatModule = Addon.Threat
 local CreatureCache = {}
 
 local Settings
-local ShowOffTank, ShowInstancesOnly, UseThreatTable, UseHeuristicInInstances
+local ShowOffTank, ShowOffTankPets, ShowInstancesOnly, UseThreatTable, UseHeuristicInInstances
 
 ---------------------------------------------------------------------------------------------------
 -- Off-tank guardians: guardians that can tank, but don't have a pet unit token (so they are not part of the off-tank
@@ -107,6 +107,7 @@ local OffTankCache = {}
 local OffTankUnits = {}       -- Unit tokens of group members with role TANK or main tank (e.g. "party2", "raid17")
 local OffTankPetUnits = {}    -- Unit tokens of existing pets of the group (e.g. "pet", "partypet1", "raidpet12")
 local OffTankCacheEnabled = false
+local OffTankCachePetsEnabled = false -- Option "Pets as Off-Tanks": without it, no pets are cached and UNIT_PET is not needed
 local OffTankCacheDirty = true
 local OffTankCacheRebuildScheduled = false
 local OffTankCacheSignature
@@ -160,12 +161,12 @@ local function RebuildOffTankCache()
       tank_units[#tank_units + 1] = unitid
     end
 
-    if UnitExists(pet_unitid) then
+    if OffTankCachePetsEnabled and UnitExists(pet_unitid) then
       pet_units[#pet_units + 1] = pet_unitid
     end
   end
 
-  if UnitExists("pet") then
+  if OffTankCachePetsEnabled and UnitExists("pet") then
     pet_units[#pet_units + 1] = "pet"
   end
 
@@ -241,7 +242,7 @@ end
 local function EnableOffTankCache()
   SubscribeEvent(OffTankCache, "GROUP_ROSTER_UPDATE", InvalidateOffTankCache)
   SubscribeEvent(OffTankCache, "PLAYER_ROLES_ASSIGNED", InvalidateOffTankCache)
-  SubscribeEvent(OffTankCache, "UNIT_PET", InvalidateOffTankCache)
+  -- UNIT_PET is (un)subscribed in UpdateSettings, depending on the option "Pets as Off-Tanks"
   SubscribeEvent(OffTankCache, "PLAYER_ENTERING_WORLD", OffTankCacheEnteringWorld)
   -- Safety net on entering combat, in case a group or role change was missed by the events above
   SubscribeEvent(OffTankCache, "PLAYER_REGEN_DISABLED", InvalidateOffTankCache)
@@ -307,7 +308,7 @@ local function UnitHoldsAggro(unitid, mob_unitid)
   return threat_situation ~= nil and not IsSecretValue(threat_situation) and threat_situation >= 2
 end
 
--- Returns true if one of the other tanks or a pet of the group is tanking the mob
+-- Returns true if one of the other tanks or a pet of the group (if enabled) is tanking the mob
 local function IsUnitOfftankedByGroup(mob_unitid)
   local tank_units, pet_units = ThreatModule.GetOffTankUnits()
 
@@ -317,6 +318,7 @@ local function IsUnitOfftankedByGroup(mob_unitid)
     end
   end
 
+  -- Empty if the option "Pets as Off-Tanks" is disabled
   for i = 1, #pet_units do
     if UnitHoldsAggro(pet_units[i], mob_unitid) then
       return true
@@ -337,7 +339,8 @@ end
 -- Off-tank state is calculated anew every time, so it never sticks after another tank lost aggro.
 local function CheckIfUnitIsOfftanked(unit, threat_level, other_player_has_aggro)
   unit.IsOfftanked = (other_player_has_aggro and ShowOffTank and Addon.GetPlayerRole() == "tank" and
-    (IsUnitOfftankedByGroup(unit.unitid) or (not Addon.HAS_MIDNIGHT_API and IsUnitOfftankedByGuardian(unit.unitid)))) or false
+    (IsUnitOfftankedByGroup(unit.unitid) or
+      (ShowOffTankPets and not Addon.HAS_MIDNIGHT_API and IsUnitOfftankedByGuardian(unit.unitid)))) or false
 
   return (unit.IsOfftanked and "OFFTANK") or threat_level
 end
@@ -489,6 +492,7 @@ function ThreatModule.UpdateSettings()
   UseThreatTable = Settings.UseThreatTable or Addon.HAS_MIDNIGHT_API
   UseHeuristicInInstances = Settings.UseHeuristicInInstances and not Addon.HAS_MIDNIGHT_API
   ShowOffTank = Settings.toggle.OffTank
+  ShowOffTankPets = Settings.toggle.OffTankPets
   ShowInstancesOnly = Settings.toggle.InstancesOnly
 
   -- "OFFTANK" is only valid while the player is in tank role; recalculate when the role changes.
@@ -504,6 +508,21 @@ function ThreatModule.UpdateSettings()
   -- Off-tank cache for the off-tank detection. UpdateSettings is called several times in a row for unrelated
   -- changes, so only enable/disable it when the setting actually changed.
   local use_off_tank_cache = ShowOffTank and true or false
+  local use_off_tank_pets = use_off_tank_cache and ShowOffTankPets and true or false
+
+  if use_off_tank_pets ~= OffTankCachePetsEnabled then
+    OffTankCachePetsEnabled = use_off_tank_pets
+    if use_off_tank_pets then
+      SubscribeEvent(OffTankCache, "UNIT_PET", InvalidateOffTankCache)
+    else
+      UnsubscribeEvent(OffTankCache, "UNIT_PET")
+    end
+    -- Add or remove the pets (only if the cache stays enabled, otherwise it's (re)built or cleared below anyway)
+    if use_off_tank_cache == OffTankCacheEnabled and use_off_tank_cache then
+      InvalidateOffTankCache()
+    end
+  end
+
   if use_off_tank_cache ~= OffTankCacheEnabled then
     OffTankCacheEnabled = use_off_tank_cache
     if use_off_tank_cache then

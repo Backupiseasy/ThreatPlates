@@ -321,6 +321,9 @@ client (warcraft.wiki.gg, confirmed in-game: the target was lost before a far-aw
   (`Addon.IsInPvPInstance`) the cache is cleared and not rebuilt.
 - **Guardians without a pet token** (`OFFTANK_PETS`: Black Ox Statue, Treants, Earth Elemental) are still found via
   the mob's target and their NPC ID, only on clients without `Addon.HAS_MIDNIGHT_API`.
+- Pets and guardians count as off-tanks only with the option "Pets as Off-Tanks" (`threat.toggle.OffTankPets`,
+  default on). Without it, no pets are cached, `UNIT_PET` is unsubscribed (both handled in
+  `ThreatModule.UpdateSettings`), and guardians are not checked.
 - **Limitation**: the client only receives a mob's threat list while the player is on it. Before that,
   `UnitThreatSituation(<any unit>, <mob>)` is `nil` - e.g. for the player's own pet tanking a mob the player has not
   touched yet (`UnitThreatSituation("pet")` without mob still returns 3). Such a mob gets no off-tank (or any threat)

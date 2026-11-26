@@ -2109,6 +2109,7 @@ Addon.DEFAULT_SETTINGS = {
         ["Minus"] 	= true,
         ["Tapped"] 	= true,
         ["OffTank"] = true,
+        ["OffTankPets"] = true,
         ["InstancesOnly"] = false,
       },
       dps = {

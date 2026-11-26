@@ -183,7 +183,7 @@ APIs, like `CastIsNotInterruptible`) has **not** been done - reactive, as new cr
 | --- | --- |
 | Castbar (nameplates), castbar config mode | ✅ confirmed (fixes #24, #25) |
 | Threat / tanking | ✅ confirmed (fix #26) |
-| Off-tank detection (group role/main tank, group pets) | ⏳ to verify (13.3.10) |
+| Off-tank detection (group role/main tank, group pets) | ✅ confirmed for group role and group pets, incl. option "Pets as Off-Tanks" (party, instance trash, 2026-11-27); ⏳ main tank (raid), boss encounter |
 | Names, NPC subtitles, status text | ✅ confirmed |
 | Raid target markers | ✅ confirmed |
 | Healthbar colors (also in combat), healthbar config mode | ✅ confirmed |

@@ -11129,6 +11129,16 @@ local function CreateOptionsTable()
                       descStyle = "inline",
                       arg = { "threat", "toggle", "OffTank" },
                     },
+                    OffTankPets = {
+                      type = "toggle",
+                      name = L["Pets as Off-Tanks"],
+                      order = 20,
+                      width = "full",
+                      desc = L["If checked, pets and guardians of your group tanking a mob also count as off-tanks."],
+                      descStyle = "inline",
+                      arg = { "threat", "toggle", "OffTankPets" },
+                      disabled = function() return not db.threat.toggle.OffTank end,
+                    },
                   },
                 },
                 ThreatHeuristic = {
