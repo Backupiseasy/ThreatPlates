@@ -8381,6 +8381,7 @@ local function CreateSpecRolesClassic()
       type = "group",
       inline = true,
       order = 3,
+      disabled = function() return Addon.db.profile.optionRoleDetectionAutomatic end,
       args = {
         Tank = {
           name = L["Tank"],
