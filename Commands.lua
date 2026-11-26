@@ -5,7 +5,7 @@
 ---------------------------------------------------------------------------------------------------
 local L = Addon.L
 
-Addon.DEBUG = Addon.Meta("version") == "@project-version@"
+Addon.DEBUG = false
 
 local function toggleDPS()
   if Addon.db.profile.optionRoleDetectionAutomatic then
