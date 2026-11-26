@@ -676,7 +676,7 @@ local function OnStartCasting(tp_frame, unitid, cast_guid, event_spell_id, castb
   -- unit.CustomStyleCast/.PreviousCustomStyleCast state that was never set on this client.
   if not Addon.HAS_MIDNIGHT_API then
     if StyleModule.CastTriggerUpdateStyle(unit) then
-      StyleModule:Update(tp_frame)
+      StyleModule.Update(tp_frame)
     end
   end
 
