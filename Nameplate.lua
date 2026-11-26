@@ -2428,7 +2428,6 @@ else
 
     if has_tank_role ~= PlayerHasTankRole then
       PlayerHasTankRole = has_tank_role
-      Addon.Logging.Debug("Player tank role changed:", has_tank_role)
 
       if Addon.db.profile.optionRoleDetectionAutomatic then
         for _, tp_frame in Addon:GetActiveThreatPlates() do

@@ -337,7 +337,6 @@ client (warcraft.wiki.gg, confirmed in-game: the target was lost before a far-aw
   NONE, or secret) stance/form/auras (`UnitHasEffectivelyTankAura` on Forever). The player's role is cached
   (`Nameplate.lua`, `UpdatePlayerTankRole`), updated one frame after `GROUP_ROSTER_UPDATE`/`PLAYER_ROLES_ASSIGNED`/
   `PLAYER_ENTERING_WORLD`, and active plates are restyled only if the player's own tank role changed.
-- Debug output (`Addon.DEBUG`): duration of each rebuild plus average, and the cache content whenever it changes.
 
 ### Database / profiles (`Database.lua`, `Addon.lua`)
 

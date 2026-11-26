@@ -16,9 +16,7 @@ local UnitThreatSituation, UnitIsUnit, UnitExists = UnitThreatSituation, UnitIsU
 local UnitGroupRolesAssigned, GetPartyAssignment = UnitGroupRolesAssigned, GetPartyAssignment
 local IsInInstance = IsInInstance
 local IsInRaid, GetNumGroupMembers, GetNumSubgroupMembers = IsInRaid, GetNumGroupMembers, GetNumSubgroupMembers
-local UnitName = UnitName
 local C_Timer_After = C_Timer.After
-local debugprofilestop = debugprofilestop
 
 -- ThreatPlates APIs
 local THREAT_REFERENCE = Addon.THREAT_REFERENCE
@@ -110,8 +108,6 @@ local OffTankCacheEnabled = false
 local OffTankCachePetsEnabled = false -- Option "Pets as Off-Tanks": without it, no pets are cached and UNIT_PET is not needed
 local OffTankCacheDirty = true
 local OffTankCacheRebuildScheduled = false
-local OffTankCacheSignature
-local OffTankCacheRebuildCount, OffTankCacheRebuildTotalTime = 0, 0 -- Debug only: time measurement of rebuilds
 
 -- The assigned role was readable in instances, encounters and Mythic+ (tested on Retail). If it should ever be secret,
 -- the group member simply does not count as tank.
@@ -124,36 +120,7 @@ local function UnitIsAssignedTank(unitid)
   return not IsSecretValue(role) and role == "TANK"
 end
 
-local function GetUnitNameForDebug(unitid)
-  local name = UnitName(unitid)
-  if IsSecretValue(name) then
-    return "<secret>"
-  end
-
-  return name or "?"
-end
-
-local function PrintOffTankCache()
-  local tanks = {}
-  for i = 1, #OffTankUnits do
-    local unitid = OffTankUnits[i]
-    tanks[i] = unitid .. " (" .. GetUnitNameForDebug(unitid) .. ")"
-  end
-
-  local pets = {}
-  for i = 1, #OffTankPetUnits do
-    local unitid = OffTankPetUnits[i]
-    pets[i] = unitid .. " (" .. GetUnitNameForDebug(unitid) .. ")"
-  end
-
-  Addon.Logging.Debug("Off-tank cache changed:")
-  Addon.Logging.Debug("  Tanks:", (#tanks > 0 and table.concat(tanks, ", ")) or "none")
-  Addon.Logging.Debug("  Pets:", (#pets > 0 and table.concat(pets, ", ")) or "none")
-end
-
 local function RebuildOffTankCache()
-  local start_time = Addon.DEBUG and debugprofilestop()
-
   local tank_units, pet_units = {}, {}
 
   local function AddGroupMember(unitid, pet_unitid)
@@ -188,21 +155,6 @@ local function RebuildOffTankCache()
 
   OffTankUnits, OffTankPetUnits = tank_units, pet_units
   OffTankCacheDirty = false
-
-  if Addon.DEBUG then
-    -- Measured without the debug output below
-    local duration = debugprofilestop() - start_time
-    OffTankCacheRebuildCount = OffTankCacheRebuildCount + 1
-    OffTankCacheRebuildTotalTime = OffTankCacheRebuildTotalTime + duration
-    Addon.Logging.Debug(("Off-tank cache rebuilt in %.3f ms (average %.3f ms over %d rebuilds)"):format(
-      duration, OffTankCacheRebuildTotalTime / OffTankCacheRebuildCount, OffTankCacheRebuildCount))
-
-    local signature = table.concat(tank_units, ",") .. "|" .. table.concat(pet_units, ",")
-    if signature ~= OffTankCacheSignature then
-      OffTankCacheSignature = signature
-      PrintOffTankCache()
-    end
-  end
 end
 
 local function RebuildOffTankCacheIfDirty()
@@ -225,7 +177,6 @@ end
 local function ClearOffTankCache()
   OffTankUnits, OffTankPetUnits = {}, {}
   OffTankCacheDirty = true
-  OffTankCacheSignature = nil
 end
 
 -- Addon.IsInPvPInstance is already updated here, as Addon:PLAYER_ENTERING_WORLD is the main subscriber of this event
@@ -233,7 +184,6 @@ end
 local function OffTankCacheEnteringWorld()
   if Addon.IsInPvPInstance then
     ClearOffTankCache()
-    Addon.Logging.Debug("Off-tank cache cleared and disabled in PvP instance.")
   else
     InvalidateOffTankCache()
   end
