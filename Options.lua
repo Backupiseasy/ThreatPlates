@@ -8372,7 +8372,7 @@ local function CreateSpecRolesClassic()
   -- Create a list of specs for the player's class
   local result = {
     Automatic_Spec_Detection = {
-      name = L["Determine your role (tank/dps/healing) automatically based on current stance, form, aura, presence, or rune."],
+      name = L["Determine your role (tank/dps/healing) automatically: tank if your assigned group role is tank, otherwise based on current stance, form, aura, presence, or rune."],
       type = "toggle",
       width = "full",
       order = 1,
@@ -8383,6 +8383,7 @@ local function CreateSpecRolesClassic()
       type = "group",
       inline = true,
       order = 3,
+      disabled = function() return Addon.db.profile.optionRoleDetectionAutomatic end,
       args = {
         Tank = {
           name = L["Tank"],
@@ -11120,7 +11121,6 @@ local function CreateOptionsTable()
                   type = "group",
                   order = 10,
                   inline = true,
-                  hidden = Addon.HAS_MIDNIGHT_API,
                   args = {
                     OffTank = {
                       type = "toggle",
@@ -11130,6 +11130,16 @@ local function CreateOptionsTable()
                       desc = L["If checked, nameplates of mobs attacking another tank can be shown with different color, scale, and transparency."],
                       descStyle = "inline",
                       arg = { "threat", "toggle", "OffTank" },
+                    },
+                    OffTankPets = {
+                      type = "toggle",
+                      name = L["Pets as Off-Tanks"],
+                      order = 20,
+                      width = "full",
+                      desc = L["If checked, pets and guardians of your group tanking a mob also count as off-tanks."],
+                      descStyle = "inline",
+                      arg = { "threat", "toggle", "OffTankPets" },
+                      disabled = function() return not db.threat.toggle.OffTank end,
                     },
                   },
                 },

@@ -297,6 +297,47 @@ picker fires continuously while dragging. Not a relevant cost: the per-nameplate
   fixed 13.3.6/13.3.8). Not needed for values that are read live on every use (e.g. `Addon.GetUnitVisibility`,
   option getters).
 
+### Off-tank detection (`Modules/Threat.lua`)
+
+Same mechanism on all clients. The former detection via the mob's target (`<nameplate>target` + `UnitIsUnit`) was
+removed, as the comparison returns secret values on clients with Midnight's API surface. Instead: does another tank
+or a pet of the group hold aggro on the mob - `UnitThreatSituation(<tank/pet>, <mob>) >= 2`. No `UnitExists`/`UnitIsVisible` check
+before it: it returns `nil` for an empty unit token (tested in-game), and group members are always visible to the
+client (warcraft.wiki.gg, confirmed in-game: the target was lost before a far-away party member became invisible).
+
+- **Off-tank cache** (own EventService subscriber `OffTankCache`, only while the option `OffTank` is on): unit tokens
+  of the other tanks (`OffTankUnits`) and of all existing group pets (`OffTankPetUnits`: `pet`, `partypetN`,
+  `raidpetN`). A group member is a tank only by assignment: raid main tank (`GetPartyAssignment("MAINTANK", unit)`)
+  or role `UnitGroupRolesAssigned(unit) == "TANK"`. Spec, stance/form or tank auras of other players are
+  deliberately ignored (role DAMAGER in a tank stance counts as damage). `GetPartyAssignment` exists on all clients
+  (Blizzard uses it on live and Forever, e.g. in the raid unit popup) and never returns secret values;
+  `UnitGroupRolesAssigned` is documented `SecretWhenUnitIdentityRestricted`, but was readable in instances,
+  encounters and Mythic+ (tested 2026-11 on Retail, Forever behaves the same); if it is ever secret, the member
+  simply does not count as tank (no fallback to an older value). `UnitExists` is never secret (only `SecretArguments`), so
+  it needs no guard or wrapper.
+- **Updates**: `GROUP_ROSTER_UPDATE`, `PLAYER_ROLES_ASSIGNED`, `UNIT_PET`, `PLAYER_ENTERING_WORLD` and
+  `PLAYER_REGEN_DISABLED` (safety net) mark the cache dirty and schedule one coalesced rebuild via
+  `C_Timer.After(0)`; `ThreatModule.GetOffTankUnits()` also rebuilds a dirty cache. In PvP instances
+  (`Addon.IsInPvPInstance`) the cache is cleared and not rebuilt.
+- **Guardians without a pet token** (`OFFTANK_PETS`: Black Ox Statue, Treants, Earth Elemental) are still found via
+  the mob's target and their NPC ID, only on clients without `Addon.HAS_MIDNIGHT_API`.
+- Pets and guardians count as off-tanks only with the option "Pets as Off-Tanks" (`threat.toggle.OffTankPets`,
+  default on). Without it, no pets are cached, `UNIT_PET` is unsubscribed (both handled in
+  `ThreatModule.UpdateSettings`), and guardians are not checked.
+- **Limitation**: the client only receives a mob's threat list while the player is on it. Before that,
+  `UnitThreatSituation(<any unit>, <mob>)` is `nil` - e.g. for the player's own pet tanking a mob the player has not
+  touched yet (`UnitThreatSituation("pet")` without mob still returns 3). Such a mob gets no off-tank (or any threat)
+  color until the player is on its threat list (verified in-game 2026-11, Retail). In groups this rarely matters, as
+  group members in combat are usually on the threat list anyway.
+- The player's own tank role (`Addon.GetPlayerRole`, automatic role detection) is determined separately: from
+  Mists on (`ExpansionIsAtLeastMists`) by the active spec only, never by the assigned group role. Before Mists
+  (Classic Era, TBC, and "WoW Forever", which has no specs like Mists+): assigned group role TANK or raid main tank
+  first (players can
+  tank there without a tank stance/form/aura, e.g. warriors in Battle Stance); with any other role (DAMAGER, HEALER,
+  NONE, or secret) stance/form/auras (`UnitHasEffectivelyTankAura` on Forever). The player's role is cached
+  (`Nameplate.lua`, `UpdatePlayerTankRole`), updated one frame after `GROUP_ROSTER_UPDATE`/`PLAYER_ROLES_ASSIGNED`/
+  `PLAYER_ENTERING_WORLD`, and active plates are restyled only if the player's own tank role changed.
+
 ### Database / profiles (`Database.lua`, `Addon.lua`)
 
 AceDB-3.0 based: `Addon.db.profile` (per-character: frame/healthbar/castbar/color/nameplate/totemSettings/custom
@@ -509,7 +550,7 @@ or a confirmed later trigger point) emerges.
 
 ### Features intentionally disabled on `feature/midnight`
 
-Do not re-enable without explicit request: off-tank detection, name abbreviation/transliteration
+Do not re-enable without explicit request: name abbreviation/transliteration
 (`Modules/Localization.lua` feature flags), `Widgets/HealerTrackerWidget.lua`, NPC-ID parsing from GUID
 structure. `Addon.Truncate` always uses `AbbreviateNumbers` there: in western style with own breakpoints or, with
 the option "Metric Unit Symbols" on East Asian clients, in the client's locale. `locale = "enUS"` is no alternative, as that option only
