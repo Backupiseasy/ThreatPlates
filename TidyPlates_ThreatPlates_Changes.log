@@ -1,4 +1,9 @@
 ------------------------------------------------------
+13.3.12 (2026-11-28)
+------------------------------------------------------
+* Changed the automatic role detection on WoW Forever to detect Shamans with Rockbiter Weapon and the talent Spirit Weapons as tanks [Comment #100002517].
+
+------------------------------------------------------
 13.3.11 (2026-11-28)
 ------------------------------------------------------
 * Fixed a Lua error when opening Blizzard's settings from Threat Plates' options, caused by a change of Blizzard's settings API. The button now opens Blizzard's nameplate settings directly.

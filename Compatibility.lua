@@ -61,6 +61,7 @@ local WOW_EVENTS = {
   RUNE_POWER_UPDATE = Addon.ExpansionIsAtLeastWrath,
   RUNE_TYPE_UPDATE = Addon.ExpansionIsBetween(LE_EXPANSION_WRATH_OF_THE_LICH_KING, LE_EXPANSION_LEGION),
   RUNE_UPDATED = Addon.IS_CLASSIC_SOD, -- Only needed for Rogue rune detection in SoD Classic
+  SPELLS_CHANGED = Addon.IS_FOREVER, -- Only needed for Shaman tank detection (Spirit Weapons) on "WoW Forever"
   TRAIT_CONFIG_UPDATED = Addon.ExpansionIsAtLeastCata, 
   UI_SCALE_CHANGED = true,
   UNIT_ABSORB_AMOUNT_CHANGED = Addon.WOW_FEATURE_ABSORBS, -- Absorbs (or at least absorbs functions) were added in Mists
@@ -107,6 +108,7 @@ local WOW_EVENTS = {
   UPDATE_SHAPESHIFT_FORM = true,  
   UPDATE_UI_WIDGET = true, -- Added in 8.0.1 / 1.13.2
   VARIABLES_LOADED = true,
+  WEAPON_ENCHANT_CHANGED = Addon.IS_FOREVER, -- Only needed for Shaman tank detection (Rockbiter Weapon) on "WoW Forever"
 }
 
 function Addon:ExpansionSupportsEvent(event, register_for_current_expansion)

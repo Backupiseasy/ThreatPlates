@@ -2448,7 +2448,7 @@ else
     end,
     -- Tanks in WoW Classic Season of Discovery:
     SHAMAN = function()
-      return Addon.PlayerIsTank
+      return Addon.PlayerIsTank -- Set in UNIT_AURA (Season of Discovery) or WEAPON_ENCHANT_CHANGED (WoW Forever)
     end,
     WARLOCK = function()
       return Addon.PlayerIsTank
@@ -2566,7 +2566,47 @@ else
     RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
     -- As these events don't fire after login, call them directly to initialize Addon.PlayerIsTank
     Addon:RUNE_UPDATED()
-  end  
+  end
+
+  -- "WoW Forever": Shamans tank with Rockbiter Weapon, which is a temporary weapon enchant, not an aura. Its
+  -- (hidden) passive aura only increases threat with the talent Spirit Weapons (+30% with Rockbiter, -30% without
+  -- it), so both are required. Enchant IDs of all Rockbiter Weapon ranks (spells 8017, 8018, 8019, 10399, 16314,
+  -- 16315, 16316) according to Wowhead's Forever database (2026-11). Forever has no dual wield, so only the main
+  -- hand is checked.
+  if Addon.IS_FOREVER and Addon.PlayerClass == "SHAMAN" then
+    local GetTemporaryEnchantmentInfo = C_PaperDollInfo.GetTemporaryEnchantmentInfo
+    local IsPlayerSpellTP = Addon.IsPlayerSpell
+    local INVSLOT_MAINHAND = INVSLOT_MAINHAND or 16
+    local SPIRIT_WEAPONS_SPELL_ID = 16268
+    local ROCKBITER_WEAPON_ENCHANT_IDS = {
+      [29] = true, [6] = true, [1] = true, [503] = true, [1663] = true, [683] = true, [1664] = true,
+    }
+
+    function Addon:WEAPON_ENCHANT_CHANGED()
+      -- Forever's talents are traits (C_Traits), but learned passive talents are reported as known spells
+      -- (verified in-game 2026-11 with a Warrior talent)
+      if not IsPlayerSpellTP(SPIRIT_WEAPONS_SPELL_ID) then
+        Addon.PlayerIsTank = false
+        return
+      end
+
+      local enchant_info = GetTemporaryEnchantmentInfo(INVSLOT_MAINHAND)
+      local enchant_id = enchant_info and enchant_info.enchantID
+      -- Not documented as secret and not secret in combat (verified in-game 2026-11), but if it ever is, keep the
+      -- previous value. Note: C_Item.GetWeaponEnchantInfo returned no enchant for Rockbiter Weapon (hasEnchant = false).
+      if IsSecretValueTP(enchant_id) then return end
+
+      Addon.PlayerIsTank = ROCKBITER_WEAPON_ENCHANT_IDS[enchant_id] == true
+    end
+
+    -- SPELLS_CHANGED fires after login/reload and when talents are learned or reset. It also covers unequipping
+    -- and re-equipping the enchanted weapon, as WEAPON_ENCHANT_CHANGED does not fire then (verified in-game 2026-11)
+    Addon.SPELLS_CHANGED = Addon.WEAPON_ENCHANT_CHANGED
+
+    RegisterEvent("WEAPON_ENCHANT_CHANGED")
+    RegisterEvent("SPELLS_CHANGED")
+    Addon:WEAPON_ENCHANT_CHANGED()
+  end
 
   -- No need to check here for (Addon.IS_WRATH_CLASSIC and Addon.PlayerClass == "DEATHKNIGHT") as deathknights
   -- are only available in Wrath Classic
