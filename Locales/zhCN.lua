@@ -267,7 +267,6 @@ L["Delete"] = "删除"
 L["Delta Percentage"] = "增量百分比"
 L["Delta Threat Value"] = "增量仇恨值"
 L["Determine your role (tank/dps/healing) automatically based on current spec."] = "根据当前天赋自动切换你的角色(坦克/输出/治疗)"
-L["Determine your role (tank/dps/healing) automatically based on current stance, form, aura, presence, or rune."] = "根据当前的姿态、形态、光环、姿态或符文自动确定你的角色（坦克/输出/治疗）。"
 L["Disable"] = "停用"
 L["Disable threat scale for target marked, mouseover or casting units."] = "停用被标记图示、鼠标指向或正在施法单位的仇恨值缩放大小变化。"
 L["Disable threat transparency for target marked, mouseover or casting units."] = "停用被标记图示、鼠标指向或正在施法单位的仇恨值透明度变化。"
@@ -1190,3 +1189,9 @@ L["You can access the "] = "你可以进入"
 L["You cannot delete General Settings, only custom nameplates entries."] = "你不能删除常规设置，只能删除自定义血条。"
 L["You currently have two nameplate addons enabled: |cff89F559Threat Plates|r and |cff89F559%s|r. Please disable one of these, otherwise two overlapping nameplates will be shown for units."] = "目前启用了两个血条插件: |cff89F559Threat Plates|r和|cff89F559%s|r。请停用其中一个血条插件，否则会重复出现两个叠在一起的血条。"
 L["Your version of LibDogTag-Unit-3.0 does not support nameplates. You need to install at least v90000.3 of LibDogTag-Unit-3.0."] = "你所使用的 LibDogTag-Unit-3.0 版本不支持血条，请安装  v90000.3 或更新的版本。"
+--[[Translation missing --]]
+L["Determine your role (tank/dps/healing) automatically: tank if your assigned group role is tank, otherwise based on current stance, form, aura, presence, or rune."] = "Determine your role (tank/dps/healing) automatically: tank if your assigned group role is tank, otherwise based on current stance, form, aura, presence, or rune."
+--[[Translation missing --]]
+L["If checked, pets and guardians of your group tanking a mob also count as off-tanks."] = "If checked, pets and guardians of your group tanking a mob also count as off-tanks."
+--[[Translation missing --]]
+L["Pets as Off-Tanks"] = "Pets as Off-Tanks"

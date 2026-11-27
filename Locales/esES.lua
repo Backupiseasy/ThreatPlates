@@ -274,8 +274,6 @@ L["Delta Percentage"] = "Delta Percentage"
 --[[Translation missing --]]
 L["Delta Threat Value"] = "Delta Threat Value"
 L["Determine your role (tank/dps/healing) automatically based on current spec."] = "Determina automáticamente tu rol (tanque/dps/sanación) en función de tus talentos actuales."
---[[Translation missing --]]
-L["Determine your role (tank/dps/healing) automatically based on current stance, form, aura, presence, or rune."] = "Determine your role (tank/dps/healing) automatically based on current stance, form, aura, presence, or rune."
 L["Disable"] = "Desactivar"
 L["Disable threat scale for target marked, mouseover or casting units."] = "Desactiva el tamaño por amenaza para el objetivo marcado, la unidad sobre la que pases el ratón o las unidades que estén casteando."
 L["Disable threat transparency for target marked, mouseover or casting units."] = "Desactiva la transparencia por amenaza para el objetivo marcado, la unidad sobre la que pases el ratón o las unidades que estén casteando."
@@ -1214,3 +1212,9 @@ L["You can access the "] = "Puedes acceder las "
 L["You cannot delete General Settings, only custom nameplates entries."] = "No puede eliminar la Configuración general, solo las entradas de placas identificativas personalizadas."
 L["You currently have two nameplate addons enabled: |cff89F559Threat Plates|r and |cff89F559%s|r. Please disable one of these, otherwise two overlapping nameplates will be shown for units."] = "Actualmente tiene habilitados dos addons de placa identificativa: |cff89F559Threat Plates|r y |cff89F559%s|r. Deshabilite uno de estos, de lo contrario, se mostrarán dos placas superpuestas para las unidades."
 L["Your version of LibDogTag-Unit-3.0 does not support nameplates. You need to install at least v90000.3 of LibDogTag-Unit-3.0."] = "Tu versión de LibDogTag-Unit-3.0 no admite placas identificativas. Necesitas instalar al menos v90000.3 de LibDogTag-Unit-3.0."
+--[[Translation missing --]]
+L["Determine your role (tank/dps/healing) automatically: tank if your assigned group role is tank, otherwise based on current stance, form, aura, presence, or rune."] = "Determine your role (tank/dps/healing) automatically: tank if your assigned group role is tank, otherwise based on current stance, form, aura, presence, or rune."
+--[[Translation missing --]]
+L["If checked, pets and guardians of your group tanking a mob also count as off-tanks."] = "If checked, pets and guardians of your group tanking a mob also count as off-tanks."
+--[[Translation missing --]]
+L["Pets as Off-Tanks"] = "Pets as Off-Tanks"
