@@ -1031,9 +1031,6 @@ L["You can access the "] = "Die Einstellungen können für "
 L["You cannot delete General Settings, only custom nameplates entries."] = "Du kannst die allgemeinen Einstellungen nicht löschen, nur Einträge für benutzerdefinierte Namensplaketten."
 L["You currently have two nameplate addons enabled: |cff89F559Threat Plates|r and |cff89F559%s|r. Please disable one of these, otherwise two overlapping nameplates will be shown for units."] = "Du hast aktuell zwei Nameplate-Addons aktiviert: |cff89F559Threat Plates|r und |cff89F559%s|r. Bitte deaktiviere eines dieser beiden Addons, da ansonsten zwei überlappende Namensplaketten bei Einheiten angezeigt werden."
 L["Your version of LibDogTag-Unit-3.0 does not support nameplates. You need to install at least v90000.3 of LibDogTag-Unit-3.0."] = "Die installierte Version von LibDogTag-Unit-3.0 unterstützt keine Namensplaketten. Du musst zumindest v90000.3 von LibDogTag-Unit-3.0 installieren."
---[[Translation missing --]]
-L["Determine your role (tank/dps/healing) automatically: tank if your assigned group role is tank, otherwise based on current stance, form, aura, presence, or rune."] = "Determine your role (tank/dps/healing) automatically: tank if your assigned group role is tank, otherwise based on current stance, form, aura, presence, or rune."
---[[Translation missing --]]
-L["If checked, pets and guardians of your group tanking a mob also count as off-tanks."] = "If checked, pets and guardians of your group tanking a mob also count as off-tanks."
---[[Translation missing --]]
-L["Pets as Off-Tanks"] = "Pets as Off-Tanks"
+L["Determine your role (tank/dps/healing) automatically: tank if your assigned group role is tank, otherwise based on current stance, form, aura, presence, or rune."] = "Ermittelt deine Rolle (Tank/DPS/Heiler) automatisch: Tank, wenn dir in der Gruppe die Rolle Tank zugewiesen ist, ansonsten basierend auf deiner aktuellen Haltung, Gestalt, Aura, Präsenz oder Rune."
+L["If checked, pets and guardians of your group tanking a mob also count as off-tanks."] = "Wenn aktiviert, zählen Begleiter und Wächter deiner Gruppe, die einen Gegner tanken, ebenfalls als Off-Tanks."
+L["Pets as Off-Tanks"] = "Begleiter als Off-Tanks"
