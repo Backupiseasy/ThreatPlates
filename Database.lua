@@ -30,9 +30,13 @@ Addon.GetUnitVisibility = function(full_unit_type)
 
   -- assert (Addon.db.profile.Visibility[full_unit_type], "missing unit type: ".. full_unit_type)
 
-  local show = unit_visibility.Show
-  if type(show) ~= "boolean" then
-    show = (GetCVar(show) == "1")
+  -- For unit types with a CVar, WoW decides with it whether a nameplate is shown, which can differ from the player's
+  -- setting while an automation (e.g., hiding friendly nameplates in combat) is active
+  local show
+  if unit_visibility.CVar then
+    show = (GetCVar(unit_visibility.CVar) == "1")
+  else
+    show = unit_visibility.Show
   end
 
   return show, unit_visibility.UseHeadlineView

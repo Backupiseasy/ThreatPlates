@@ -892,24 +892,26 @@ end
 ---------------------------------------------------------------------------------------------------
 
 local function GetUnitVisibilitySetting(info)
-  local unit_type = info.arg
-  local show_unit = Addon.db.profile.Visibility[unit_type].Show
-
-  if type(show_unit) == "string" then
-    show_unit = GetCVarBool(show_unit)
-  end
-
-  return show_unit
+  return Addon.db.profile.Visibility[info.arg].Show
 end
 
 local function SetUnitVisibilitySetting(info, value)
   local unit_type = info.arg
   local unit_visibility = Addon.db.profile.Visibility[unit_type]
 
-  if type(unit_visibility.Show) == "string" then
-    CVars:Overwrite(unit_visibility.Show, (value and 1) or 0)
+  unit_visibility.Show = value
+  if unit_visibility.CVar then
+    local cvar = unit_visibility.CVar
+    -- While the combat automation hides these nameplates, it applies the new setting when it shows them again
+    if not Addon.UnitVisibilityIsControlledByCombatAutomation(unit_type) then
+      CVars:OverwriteBool(cvar, value)
+    end
+    -- The instance automation restores the CVar from this backup when leaving the instance
+    local cvars_backup = Addon.db.profile.CVarsBackup
+    if cvars_backup[cvar] then
+      cvars_backup[cvar] = (value and "1") or "0"
+    end
   else
-    unit_visibility.Show = value
     Addon:ForceUpdate()
   end
 end
@@ -6130,12 +6132,12 @@ local function CreateVisibilityTab()
             type = "toggle",
             width = "full",
             set = function(info, value)
-              CVars:OverwriteBool("nameplateShowFriendlyPlayers", value)
-              CVars:OverwriteBool("nameplateShowFriendlyNpcs", value)
+              SetUnitVisibilitySetting({ arg = "FriendlyPlayer" }, value)
+              SetUnitVisibilitySetting({ arg = "FriendlyNPC" }, value)
               CVars:OverwriteBool("nameplateShowEnemies", value)
             end,
             get = function(info)
-              return GetCVarBool("nameplateShowFriendlyPlayers") and GetCVarBool("nameplateShowFriendlyNpcs") and GetCVarBool("nameplateShowEnemies")
+              return GetUnitVisibilitySetting({ arg = "FriendlyPlayer" }) and GetUnitVisibilitySetting({ arg = "FriendlyNPC" }) and GetCVarBool("nameplateShowEnemies")
             end,
           },
           AllHostile = {
@@ -11730,6 +11732,9 @@ end
 
 function Addon:ProfChange()
   db = Addon.db.profile
+
+  -- The new profile takes over the current visibility CVars, instead of changing them
+  Addon.SyncUnitVisibilityWithCVars()
 
   Addon:ReloadTheme()
 

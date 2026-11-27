@@ -1501,12 +1501,81 @@ local function RestoreFriendlyNameplatesShown()
   CVars:RestoreFromProfile("nameplateShowFriendlyNpcs")
 end
 
+-- Unit types whose CVars are changed by the automation for friendly nameplates (in combat, in instances)
+local FRIENDLY_AUTOMATION_UNIT_TYPES = { FriendlyPlayer = true, FriendlyNPC = true }
+
+local function CombatAutomationForFriendlyUnitsIsEnabled()
+  local db = Addon.db.profile.Automation
+  -- Dont't use automation for friendly nameplates if in an instance and Hide Friendly Nameplates is enabled
+  return db.FriendlyUnits ~= "NONE" and not (Addon.IsInInstance and db.HideFriendlyUnitsInInstances)
+end
+
+-- Returns true if the combat automation currently hides friendly nameplates
+local function FriendlyNameplatesAreHiddenByCombatAutomation()
+  if not CombatAutomationForFriendlyUnitsIsEnabled() then return false end
+
+  local friendly_units = Addon.db.profile.Automation.FriendlyUnits
+  -- Addon.PlayerIsInCombat is already updated when PLAYER_REGEN_ENABLED/DISABLED change the CVars (and with that
+  -- fire CVAR_UPDATE), InCombatLockdown() is still false in PLAYER_REGEN_DISABLED. InCombatLockdown() covers logging
+  -- in or reloading the UI in combat.
+  local in_combat = Addon.PlayerIsInCombat or InCombatLockdown()
+  return (friendly_units == "SHOW_COMBAT" and not in_combat) or (friendly_units == "HIDE_COMBAT" and in_combat)
+end
+
+-- Returns true if the CVar of the unit type is currently set by the combat automation, i.e., if it may differ from
+-- the player's setting. Changes of this setting are applied when the automation shows the nameplates again.
+function Addon.UnitVisibilityIsControlledByCombatAutomation(unit_type)
+  return FRIENDLY_AUTOMATION_UNIT_TYPES[unit_type] and FriendlyNameplatesAreHiddenByCombatAutomation()
+end
+
 -- Same as SetFriendlyNameplatesShown, but sets the CVar(s) directly, bypassing the combat-protection queue in
 -- CVars:Set. Used exactly at the PLAYER_REGEN_ENABLED/DISABLED combat boundary, where the change is safe to
 -- apply immediately.
-local function RawSetFriendlyNameplatesShown(value)
-  _G.SetCVar("nameplateShowFriendlyPlayers", value)
-  _G.SetCVar("nameplateShowFriendlyNpcs", value)
+-- When showing friendly nameplates, only those enabled in the visibility settings are shown (e.g., no friendly NPCs
+-- if the player disabled them), unless friendly nameplates should always be shown in instances.
+local function RawSetFriendlyNameplatesShown(show)
+  local visibility = Addon.db.profile.Visibility
+  local show_all = Addon.IsInPvEInstance and Addon.db.profile.Automation.ShowFriendlyUnitsInInstances
+
+  for unit_type in pairs(FRIENDLY_AUTOMATION_UNIT_TYPES) do
+    local unit_visibility = visibility[unit_type]
+    local value = show and (show_all or unit_visibility.Show)
+    _G.SetCVar(unit_visibility.CVar, (value and 1) or 0)
+  end
+end
+
+-- Takes over the visibility CVars (all or only cvar_name) into the visibility settings, as they can be changed without
+-- Threat Plates (e.g., with Blizzard's settings, key bindings or other addons). CVars set by an automation are skipped
+-- as they do not reflect the player's setting then.
+function Addon.SyncUnitVisibilityWithCVars(cvar_name)
+  local db = Addon.db.profile
+  local _, instance_type = IsInInstance()
+  local controlled_by_instance_automation = PVE_INSTANCE_TYPES[instance_type] and
+    (db.Automation.ShowFriendlyUnitsInInstances or db.Automation.HideFriendlyUnitsInInstances)
+
+  for unit_type in pairs(Addon.DEFAULT_SETTINGS.profile.Visibility) do
+    local unit_visibility = db.Visibility[unit_type]
+    if type(unit_visibility) == "table" and unit_visibility.CVar and (cvar_name == nil or unit_visibility.CVar == cvar_name) and
+       CVars:IsAvailable(unit_visibility.CVar) and
+       not (FRIENDLY_AUTOMATION_UNIT_TYPES[unit_type] and controlled_by_instance_automation) and
+       not Addon.UnitVisibilityIsControlledByCombatAutomation(unit_type) then
+      unit_visibility.Show = CVars:GetAsBool(unit_visibility.CVar)
+    end
+  end
+end
+
+do
+  local visibility_cvars = {}
+  for _, unit_visibility in pairs(Addon.DEFAULT_SETTINGS.profile.Visibility) do
+    if type(unit_visibility) == "table" and unit_visibility.CVar then
+      visibility_cvars[#visibility_cvars + 1] = unit_visibility.CVar
+    end
+  end
+
+  -- Once WoW has loaded the saved CVar values (called without arguments) and after every change of one of these CVars
+  CVars:RegisterCVarChangedHandler(visibility_cvars, function(cvar_name)
+    Addon.SyncUnitVisibilityWithCVars(cvar_name)
+  end)
 end
 
 -- Fired when the player enters the world, reloads the UI, enters/leaves an instance or battleground, or respawns at a graveyard.
@@ -1638,9 +1707,8 @@ function Addon:PLAYER_REGEN_ENABLED()
 
   local db = Addon.db.profile.Automation
 
-  -- Dont't use automation for friendly nameplates if in an instance and Hide Friendly Nameplates is enabled
-  if db.FriendlyUnits ~= "NONE" and not (Addon.IsInInstance and db.HideFriendlyUnitsInInstances) then
-    RawSetFriendlyNameplatesShown((db.FriendlyUnits == "SHOW_COMBAT" and 0) or 1)
+  if CombatAutomationForFriendlyUnitsIsEnabled() then
+    RawSetFriendlyNameplatesShown(db.FriendlyUnits ~= "SHOW_COMBAT")
   end
   if db.EnemyUnits ~= "NONE" then
     _G.SetCVar("nameplateShowEnemies", (db.EnemyUnits == "SHOW_COMBAT" and 0) or 1)
@@ -1656,11 +1724,9 @@ function Addon:PLAYER_REGEN_DISABLED()
 
   local db = Addon.db.profile.Automation
 
-  -- Dont't use automation for friendly nameplates if in an instance and Hide Friendly Nameplates is enabled
-  if db.FriendlyUnits ~= "NONE" and not (Addon.IsInInstance and db.HideFriendlyUnitsInInstances) then
-    RawSetFriendlyNameplatesShown((db.FriendlyUnits == "SHOW_COMBAT" and 1) or 0)
+  if CombatAutomationForFriendlyUnitsIsEnabled() then
+    RawSetFriendlyNameplatesShown(db.FriendlyUnits == "SHOW_COMBAT")
   end
-
   if db.EnemyUnits ~= "NONE" then
     _G.SetCVar("nameplateShowEnemies", (db.EnemyUnits == "SHOW_COMBAT" and 1) or 0)
   end
