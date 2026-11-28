@@ -1,4 +1,9 @@
 ------------------------------------------------------
+13.3.11 (2026-11-28)
+------------------------------------------------------
+* Fixed a Lua error when opening Blizzard's settings from Threat Plates' options, caused by a change of Blizzard's settings API. The button now opens Blizzard's nameplate settings directly.
+
+------------------------------------------------------
 13.3.10 (2026-11-27)
 ------------------------------------------------------
 * Changed shortened numbers in texts (e.g., health, absorbs, threat value) to be shortened from 1k on instead of from 10k on, e.g., 5400 is now shown as 5.4k [GH-367, Comment #8755251].

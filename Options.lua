@@ -6361,7 +6361,9 @@ local function CreateBlizzardSettings()
             type = "execute",
             width = "double",
             func = function()
-              Settings.OpenToCategory(_G["SettingsPanel"])
+              -- Settings.OpenToCategory only accepts a numeric category ID (C_SettingsUtil.OpenSettingsPanel);
+              -- if the ID is not available, nil just opens the settings panel.
+              Settings.OpenToCategory(Settings.NAMEPLATE_OPTIONS_CATEGORY_ID)
               Addon.LibAceConfigDialog:Close("Threat Plates")
             end,
           },
