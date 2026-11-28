@@ -1057,6 +1057,34 @@ local function GetAuraContainerAnchorFrame(db, widget_frame, aura_type)
   return widget_frame[anchor_to_db .. "AuraContainer"] or widget_frame
 end
 
+-- Same size and padding as the aura grids of the legacy widget (AurasWidget.lua,
+-- UpdatePositionAuraGrid/UpdateAuraFramePosition). Without it, an AuraContainer is exactly as large as
+-- its auras, and the anchor settings (defaults as well as custom or imported profiles, which are the
+-- same for all WoW versions) placed the aura areas 10 px (with default settings) closer to the
+-- healthbar and to each other than before Midnight - debuffs overlapped the name, buffs anchored to
+-- debuffs overlapped them.
+-- A legacy grid has RowSpacing + border offset as padding on the side of its alignment (AlignmentV),
+-- also if it is empty, and the same padding on the opposite side only if auras are shown. The
+-- container's padding always counts towards its size (AnchorUtil.ApplyFlowLayout), so it is only set
+-- on the side of the alignment. The padding on the opposite side is part of the space reserved for
+-- each aura button instead (layout option elementHeight, only used by the layout - the button keeps
+-- its own size and is anchored to the aligned edge of that space), and lineSpacing is reduced by it,
+-- so that the rows of auras still have a distance of RowSpacing. Not exactly the same: the legacy grid
+-- adds the border offset once more per additional row of auras (1-2 px).
+local function GetAuraContainerPadding(db, aura_type)
+  return db[aura_type].ModeIcon.RowSpacing + ((db.ShowAuraType and 2) or 1)
+end
+
+local function SetAuraContainerPadding(container, db, aura_type)
+  local border_offset = (db.ShowAuraType and 2) or 1
+  local padding = GetAuraContainerPadding(db, aura_type)
+  if db[aura_type].AlignmentV == "BOTTOM" then
+    container:SetFlowLayoutPadding(border_offset, border_offset, 0, padding)
+  else
+    container:SetFlowLayoutPadding(border_offset, border_offset, padding, 0)
+  end
+end
+
 -- Configures the plate's pooled AuraContainer for aura_type ("Buffs"/"Debuffs"/"CrowdControl") for
 -- the current settings/unit and assigns the unit to it. Returns true if the container was enabled
 -- for this unit - the container manages its own aura-level visibility internally and
@@ -1075,8 +1103,9 @@ function Widget:UpdateAuraContainer(widget_frame, aura_type, group_configs, unit
   local db = self.db[aura_type]
 
   -- Also position disabled containers, as other aura areas may be anchored to them. A container
-  -- without auras (also a disabled one) has a size of 1x1 (AnchorUtil.ApplyFlowLayout).
+  -- without auras (also a disabled one) has the size of its padding (AnchorUtil.ApplyFlowLayout).
   AnchorFrameTo(db[MODE_FOR_STYLE[unit.style]], container, GetAuraContainerAnchorFrame(self.db, widget_frame, aura_type))
+  SetAuraContainerPadding(container, self.db, aura_type)
 
   if not group_configs or not next(group_configs) then
     container:SetEnabled(false)
@@ -1088,11 +1117,13 @@ function Widget:UpdateAuraContainer(widget_frame, aura_type, group_configs, unit
   local anchor_point, horizontal_direction, vertical_direction = GetFlowLayoutForAlignment(db.AlignmentH, db.AlignmentV)
   local sort_method = GetSortMethod(self.db.SortOrder)
   local sort_direction = GetSortDirection(self.db.SortReverse)
+  -- Padding on the side opposite to the alignment, only if auras are shown, see SetAuraContainerPadding.
+  local padding = GetAuraContainerPadding(self.db, aura_type)
   local layout = {
     elementWidth = db_icon.IconWidth,
-    elementHeight = db_icon.IconHeight,
+    elementHeight = db_icon.IconHeight + padding,
     elementSpacing = db_icon.ColumnSpacing,
-    lineSpacing = db_icon.RowSpacing,
+    lineSpacing = db_icon.RowSpacing - padding,
   }
 
   for _, group_key in ipairs(AURA_GROUP_KEYS[aura_type]) do
